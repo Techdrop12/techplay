@@ -1,9 +1,8 @@
-// 📁 /src/app/page.js
 'use client'
 import { useEffect, useState, useRef } from 'react'
 import { useTranslations } from 'next-intl'
-import HeroCarousel from '@/components/HeroCarousel'
-import ProductCard from '@/components/ProductCard'
+import HeroCarousel from 'components/HeroCarousel'
+import ProductCard from 'components/ProductCard'
 
 export default function HomePage() {
   const t = useTranslations('home')

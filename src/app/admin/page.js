@@ -1,6 +1,5 @@
-
 'use client'
-import { useCart } from '@/context/cartContext'
+import { useCart } from 'context/cartContext'
 import Image from 'next/image'
 
 export default function ProductCard({ product }) {
