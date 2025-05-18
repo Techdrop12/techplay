@@ -1,4 +1,3 @@
-
 'use client'
 import { useCart } from '@/context/cartContext'
 import Image from 'next/image'
