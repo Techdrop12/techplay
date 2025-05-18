@@ -1,0 +1,10 @@
+{
+  "home": {
+    "search": "Rechercher...",
+    "sort": {
+      "none": "Trier par",
+      "priceAsc": "Prix croissant",
+      "priceDesc": "Prix décroissant"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "home": {
+    "search": "Search...",
+    "sort": {
+      "none": "Sort by",
+      "priceAsc": "Price: Low to High",
+      "priceDesc": "Price: High to Low"
+    }
+  }
+}
