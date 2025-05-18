@@ -1,42 +1,27 @@
-// 📁 /context/cartContext.js
 'use client'
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState } from 'react'
 
 const CartContext = createContext()
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([])
 
-  useEffect(() => {
-    const saved = localStorage.getItem('cart')
-    if (saved) setCart(JSON.parse(saved))
-  }, [])
-
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart))
-  }, [cart])
-
   const addToCart = (product) => {
-    setCart(prev => {
-      const existing = prev.find(p => p._id === product._id)
-      if (existing) {
-        return prev.map(p => p._id === product._id ? { ...p, quantity: p.quantity + 1 } : p)
-      } else {
-        return [...prev, { ...product, quantity: 1 }]
-      }
-    })
+    const exists = cart.find(item => item._id === product._id)
+    if (exists) {
+      setCart(cart.map(item => item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item))
+    } else {
+      setCart([...cart, { ...product, quantity: 1 }])
+    }
   }
 
   const removeFromCart = (product) => {
-    setCart(prev => {
-      const existing = prev.find(p => p._id === product._id)
-      if (!existing) return prev
-      if (existing.quantity === 1) {
-        return prev.filter(p => p._id !== product._id)
-      } else {
-        return prev.map(p => p._id === product._id ? { ...p, quantity: p.quantity - 1 } : p)
-      }
-    })
+    const existing = cart.find(item => item._id === product._id)
+    if (existing.quantity === 1) {
+      setCart(cart.filter(item => item._id !== product._id))
+    } else {
+      setCart(cart.map(item => item._id === product._id ? { ...item, quantity: item.quantity - 1 } : item))
+    }
   }
 
   return (
