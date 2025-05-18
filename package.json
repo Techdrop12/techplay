@@ -7,25 +7,29 @@
     "start": "next start"
   },
   "dependencies": {
-    "@auth/mongodb-adapter": "^1.1.1",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@headlessui/react": "^1.7.15",
     "@mui/material": "^5.15.0",
-    "@next-auth/mongodb-adapter": "^1.0.1",
+    "@next-auth/mongodb-adapter": "^1.1.0",
     "clsx": "^2.1.0",
     "framer-motion": "^10.16.4",
     "lucide-react": "^0.308.0",
     "mongoose": "^8.3.2",
     "next": "13.5.6",
-    "next-auth": "4.24.5",
-    "next-intl": "3.7.1",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
+    "next-auth": "^4.24.5",
+    "next-intl": "^3.2.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-icons": "^4.12.0",
     "react-toastify": "^9.2.2",
-    "stripe": "^12.1.0",
-    "tailwind-merge": "^2.2.1",
-    "zustand": "^4.4.1"
+    "stripe": "^12.5.0",
+    "tailwind-merge": "^2.2.2",
+    "zustand": "^4.4.7"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.4.1"
   }
 }
