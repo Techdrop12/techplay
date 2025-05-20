@@ -5,7 +5,6 @@ import { useTranslations } from 'next-intl'
 import { useEffect, useState, useRef } from 'react'
 import HeroCarousel from '../../components/HeroCarousel'
 import ProductCard from '../../components/ProductCard'
-import CategoryFilter from '../../components/CategoryFilter'
 import MotionWrapper from '@/components/MotionWrapper'
 
 export default function HomePage() {
@@ -57,11 +56,7 @@ export default function HomePage() {
       />
       <MotionWrapper>
         <HeroCarousel />
-        <CategoryFilter
-          categories={categories}
-          selected={selectedCategory}
-          setSelected={setSelectedCategory}
-        />
+        {/* Suppression de CategoryFilter ici */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
           {visibleProducts.map((p) => (
             <ProductCard key={p._id} product={p} />
