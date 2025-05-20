@@ -1,6 +1,10 @@
-// 📁 /middleware.js
-export { default } from 'next-auth/middleware'
+import createMiddleware from 'next-intl/middleware'
+
+export default createMiddleware({
+  locales: ['fr', 'en'],
+  defaultLocale: 'fr'
+})
 
 export const config = {
-  matcher: ['/admin/:path*'],
-};
+  matcher: ['/((?!api|_next|.*\\..*).*)']
+}

@@ -7,18 +7,13 @@ let client
 let clientPromise
 
 if (!process.env.MONGODB_URI) {
-  throw new Error('MONGODB_URI manquant dans .env.local')
+  throw new Error('Ajoute MONGODB_URI dans ton fichier .env.local')
 }
 
-if (process.env.NODE_ENV === 'development') {
-  if (!global._mongoClientPromise) {
-    client = new MongoClient(uri, options)
-    global._mongoClientPromise = client.connect()
-  }
-  clientPromise = global._mongoClientPromise
-} else {
+if (!global._mongoClientPromise) {
   client = new MongoClient(uri, options)
-  clientPromise = client.connect()
+  global._mongoClientPromise = client.connect()
 }
+clientPromise = global._mongoClientPromise
 
 export default clientPromise

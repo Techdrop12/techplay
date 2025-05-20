@@ -1,10 +1,41 @@
 {
   "home": {
-    "search": "Search...",
-    "sort": {
-      "none": "Sort by",
-      "priceAsc": "Price: Low to High",
-      "priceDesc": "Price: High to Low"
-    }
+    "title": "Welcome to TechPlay",
+    "description": "Discover the best high-tech gadgets and accessories delivered to your door.",
+    "categories": "Categories",
+    "all": "All",
+    "add_to_cart": "Add to cart",
+    "continue_shopping": "← Continue shopping",
+    "your_cart": "Your cart",
+    "empty_cart": "Your cart is empty",
+    "total": "Total",
+    "checkout": "Proceed to checkout",
+    "redirecting": "Redirecting...",
+    "payment_error": "Payment error"
+  },
+  "admin": {
+    "add_product": "Add a product",
+    "title": "Title",
+    "description": "Description",
+    "price": "Price",
+    "category": "Category",
+    "image": "Image",
+    "submit": "Submit",
+    "success": "Product added successfully",
+    "error": "Error adding product",
+    "dashboard": "Admin Dashboard",
+    "total_sales": "Total Sales",
+    "total_orders": "Total Orders",
+    "latest_order": "Latest Order"
+  },
+  "login": {
+    "admin_login": "Admin login",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Login",
+    "failed": "Login failed"
+  },
+  "product": {
+    "added_to_cart": "{title} added to cart"
   }
 }
