@@ -1,7 +1,13 @@
 'use client'
 
-import { SessionProvider } from 'next-auth/react'
+import { Toaster } from 'react-hot-toast'
+import { CartProvider } from '../context/cartContext'
 
 export default function ClientWrapper({ children }) {
-  return <SessionProvider>{children}</SessionProvider>
+  return (
+    <CartProvider>
+      {children}
+      <Toaster position="top-right" />
+    </CartProvider>
+  )
 }
