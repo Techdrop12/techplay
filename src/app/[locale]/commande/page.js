@@ -1,6 +1,6 @@
 'use client'
 
-import { useCart } from '@/app/context/cartContext'
+import { useCart } from '@/context/cartContext'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { toast } from 'react-hot-toast'

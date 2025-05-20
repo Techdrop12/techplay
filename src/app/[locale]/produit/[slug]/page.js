@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { useCart } from '@/app/context/cartContext'
+import { useCart } from '@/context/cartContext'
 import { motion } from 'framer-motion'
 import { toast } from 'react-hot-toast'
 import FAQBlock from '@/components/FAQBlock'
