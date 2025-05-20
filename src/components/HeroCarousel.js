@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import '../../styles/hero-carousel.css'
+import '@/styles/hero-carousel.css'
 
 const slides = [
   { title: 'Casques Gaming', img: '/carousel1.jpg' },
