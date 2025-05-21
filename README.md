@@ -1,19 +1,26 @@
-# TechPlay
+# TechPlay — E-commerce multilingue
 
-Projet e-commerce complet avec Next.js, Tailwind, Stripe, MongoDB.
+Plateforme e-commerce moderne, performante, et 100% administrable.  
+Construite avec **Next.js 13 App Router**, **Stripe**, **MongoDB**, **NextAuth**, **next-intl**, etc.
 
-## Lancer :
-1. `npm install`
-2. `npm run dev`
+---
 
-## Pages :
-- Accueil
-- Produits
-- Panier
-- Paiement
-- Contact
+## 🛠️ Stack technique
 
-## Composants :
-- Header / Footer / ProductCard
+- **Next.js 13 (App Router)**
+- **MongoDB + Mongoose**
+- **Stripe Checkout**
+- **NextAuth (login admin sécurisé)**
+- **next-intl** (i18n FR/EN dynamique)
+- **TailwindCSS**
+- **Headless UI / Framer Motion**
+- **Dashboard admin intégré**
 
-Projet prêt à déployer sur Vercel.
+---
+
+## 🚀 Démarrage local
+
+### 1. Installation
+
+```bash
+npm install

@@ -49,14 +49,12 @@ export default function HomePage() {
   return (
     <>
       <SEOHead
-        title="TechPlay - Produits tech et gadgets innovants"
-        description="Découvrez les meilleurs gadgets et accessoires high-tech livrés chez vous. TechPlay : prix imbattables, livraison rapide, paiement sécurisé."
-        image="https://www.techplay.com/banner.jpg"
-        url="https://www.techplay.com"
+        titleKey="seo.homepage_title"
+        descriptionKey="seo.homepage_description"
       />
+
       <MotionWrapper>
         <HeroCarousel />
-        {/* Suppression de CategoryFilter ici */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
           {visibleProducts.map((p) => (
             <ProductCard key={p._id} product={p} />
