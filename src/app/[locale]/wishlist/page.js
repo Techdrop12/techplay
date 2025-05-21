@@ -1,9 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
+import { useTranslations } from 'next-intl'
+import SEOHead from '@/components/SEOHead'
+import LocalizedLink from '@/components/LocalizedLink'
 
 export default function WishlistPage() {
+  const t = useTranslations('wishlist')
   const [wishlist, setWishlist] = useState([])
   const [products, setProducts] = useState([])
 
@@ -23,23 +26,34 @@ export default function WishlistPage() {
   }, [wishlist])
 
   return (
-    <div className="p-4 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Ma liste de souhaits</h1>
-      {products.length === 0 ? (
-        <p>Aucun produit dans votre wishlist.</p>
-      ) : (
-        <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {products.map(product => (
-            <li key={product._id} className="border p-4 rounded">
-              <h2 className="font-semibold">{product.title}</h2>
-              <p className="text-sm">{product.price} €</p>
-              <Link href={`/produit/${product.slug}`} className="text-blue-500 text-sm underline">
-                Voir le produit
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    <>
+      <SEOHead
+        titleKey="seo.wishlist_title"
+        descriptionKey="seo.wishlist_description"
+      />
+
+      <div className="p-4 max-w-4xl mx-auto">
+        <h1 className="text-2xl font-bold mb-4">{t('title')}</h1>
+
+        {products.length === 0 ? (
+          <p>{t('empty')}</p>
+        ) : (
+          <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {products.map(product => (
+              <li key={product._id} className="border p-4 rounded">
+                <h2 className="font-semibold">{product.title}</h2>
+                <p className="text-sm">{product.price} €</p>
+                <LocalizedLink
+                  href={`/produit/${product.slug}`}
+                  className="text-blue-500 text-sm underline"
+                >
+                  {t('view')}
+                </LocalizedLink>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </>
   )
 }

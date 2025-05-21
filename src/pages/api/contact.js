@@ -7,12 +7,17 @@ export default function handler(req, res) {
     }
 
     try {
-      // Tu pourrais ici envoyer un email avec nodemailer ou enregistrer dans une base
+      // 💡 Ici tu peux envoyer un email avec Brevo, Nodemailer ou enregistrer en DB
       console.log('📨 Nouveau message de contact :', { name, email, message })
 
-      return res.status(200).json({ success: true, message: 'Message reçu avec succès.' })
+      return res.status(200).json({
+        success: true,
+        message: 'Message reçu avec succès.'
+      })
     } catch (error) {
-      return res.status(500).json({ error: 'Erreur serveur lors de la réception du message.' })
+      return res.status(500).json({
+        error: 'Erreur serveur lors de la réception du message.'
+      })
     }
   }
 

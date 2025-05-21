@@ -1,20 +1,28 @@
-'use client'
+'use client';
 
-import Link from 'next/link'
-import { useCart } from '../context/cartContext'
+import Link from 'next/link';
+import { useCart } from '../context/cartContext';
+import LanguageSwitcher from './LanguageSwitcher';
+import { useTranslations } from 'next-intl';
 
 export default function Header() {
-  const { cart } = useCart()
-  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0)
+  const { cart } = useCart();
+  const t = useTranslations(); // Par défaut, on peut utiliser les clés globales
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <header className="flex justify-between items-center px-6 py-4 bg-black text-white">
-      <Link href="/">
-        <img src="/logo.png" alt="TechPlay logo" className="h-10" />
-      </Link>
+    <header className="flex flex-col sm:flex-row justify-between items-center px-6 py-4 bg-black text-white">
+      <div className="flex items-center justify-between w-full sm:w-auto">
+        <Link href="/">
+          <img src="/logo.png" alt="TechPlay logo" className="h-10" />
+        </Link>
+        <div className="sm:hidden mt-2">
+          <LanguageSwitcher />
+        </div>
+      </div>
 
-      <nav className="flex items-center space-x-4">
-        {/* Lien panier avec compteur */}
+      <nav className="flex items-center space-x-4 mt-4 sm:mt-0">
+        {/* Panier */}
         <Link href="/panier" className="relative">
           🛒
           {totalItems > 0 && (
@@ -24,16 +32,21 @@ export default function Header() {
           )}
         </Link>
 
-        {/* Lien vers la wishlist */}
+        {/* Wishlist */}
         <Link href="/wishlist" className="hover:underline text-sm text-white">
-          💖 Wishlist
+          💖 {t('home.your_cart')}
         </Link>
 
-        {/* Lien admin (corrigé) */}
+        {/* Admin */}
         <Link href="/admin" className="text-sm text-white hover:underline">
-          Admin
+          {t('admin.dashboard')}
         </Link>
+
+        {/* Langue */}
+        <div className="hidden sm:block">
+          <LanguageSwitcher />
+        </div>
       </nav>
     </header>
-  )
+  );
 }
