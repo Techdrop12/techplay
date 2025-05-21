@@ -1,4 +1,4 @@
-import { connectToDatabase } from '../lib/mongo'
+import { connectToDatabase } from '../../lib/mongo'
 import Product from '@/models/Product'
 
 export default async function handler(req, res) {
