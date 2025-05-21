@@ -1,4 +1,4 @@
-import { connectToDatabase } from '@/lib/mongo'
+import { connectToDatabase } from '../lib/mongo'
 import Product from '@/models/Product'
 
 let FAKE_ORDERS = [

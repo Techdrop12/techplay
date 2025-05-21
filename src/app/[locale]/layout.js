@@ -3,7 +3,7 @@ import '@/styles/globals.css'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import ClientWrapper from '../ClientWrapper'
-import useAnalytics from '@/lib/useAnalytics'
+import useAnalytics from '../../lib/useAnalytics'
 import PromoBanner from '@/components/PromoBanner'
 import LiveChat from '@/components/LiveChat'
 import EmailCapturePopup from '@/components/EmailCapturePopup' // ✅ modifié ici
