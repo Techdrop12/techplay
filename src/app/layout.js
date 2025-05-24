@@ -1,11 +1,8 @@
+
 import '../styles/globals.css'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import ClientWrapper from './ClientWrapper'
-import CartReminder from '@/components/CartReminder'
-import EmailCapturePopup from '@/components/EmailCapturePopup'
-import LiveChat from '@/components/LiveChat'
-import StickyCartButton from '@/components/StickyCartButton'
 
 export default function RootLayout({ children }) {
   return (
@@ -21,10 +18,6 @@ export default function RootLayout({ children }) {
           <Header />
           {children}
           <Footer />
-          <CartReminder />
-          <EmailCapturePopup />
-          <LiveChat />
-          <StickyCartButton />
         </ClientWrapper>
       </body>
     </html>
