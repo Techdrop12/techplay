@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useCart } from '../context/cartContext'
 import LanguageSwitcher from './LanguageSwitcher'
 import { useTranslations } from 'next-intl'
-import { useTheme } from '@/context/context/themeContext' // ✅ Correction chemin
+import { useTheme } from '@/context/themeContext' // ✅ Correction chemin
 
 export default function Header() {
   const { cart } = useCart()
