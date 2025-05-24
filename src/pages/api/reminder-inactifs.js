@@ -1,6 +1,6 @@
 import dbConnect from '@/lib/dbConnect'
 import Order from '@/models/Order'
-import { sendBrevoEmail } from '@/lib/sendBrevoEmail'
+import sendBrevoEmail from '@/lib/sendBrevoEmail'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
