@@ -1,18 +1,9 @@
-// lib/email/sendBrevo.ts
 import axios from 'axios';
 
-const BREVO_API_KEY = process.env.BREVO_API_KEY!;
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
 
-export const sendBrevoEmail = async ({
-  to,
-  subject,
-  htmlContent,
-}: {
-  to: string;
-  subject: string;
-  htmlContent: string;
-}) => {
+export const sendBrevoEmail = async ({ to, subject, htmlContent }) => {
   try {
     const res = await axios.post(
       BREVO_API_URL,
@@ -30,7 +21,7 @@ export const sendBrevoEmail = async ({
       }
     );
     return res.data;
-  } catch (err: any) {
+  } catch (err) {
     console.error('Brevo Error:', err.response?.data || err.message);
     throw new Error('Brevo send failed');
   }
