@@ -3,8 +3,8 @@
 import SEOHead from '@/components/SEOHead'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState, useRef } from 'react'
-import HeroCarousel from '../../components/HeroCarousel'
-import ProductCard from '../../components/ProductCard'
+import HeroCarousel from '@/components/HeroCarousel'
+import ProductCard from '@/components/ProductCard'
 import MotionWrapper from '@/components/MotionWrapper'
 
 export default function HomePage() {

@@ -10,7 +10,13 @@ const OrderSchema = new mongoose.Schema({
       quantity: Number,
     }
   ],
-  total: Number
+  total: Number,
+  stripeSessionId: String,
+  status: {
+    type: String,
+    enum: ['en attente', 'payée'],
+    default: 'en attente'
+  }
 }, { timestamps: true })
 
 export default mongoose.models.Order || mongoose.model('Order', OrderSchema)

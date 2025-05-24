@@ -1,26 +1,45 @@
-export default function handler(req, res) {
-  if (req.method === 'POST') {
-    const { name, email, message } = req.body
+import { rateLimit } from '@/lib/rateLimit'
+import { z } from 'zod'
+import { validateBody } from '@/lib/validateBody'
+import sendBrevoEmail from '@/lib/sendBrevoEmail'
 
-    if (!name || !email || !message) {
-      return res.status(400).json({ error: 'Tous les champs sont requis.' })
-    }
+// 🌐 Anti-spam : max 10 requêtes par minute
+const limiter = rateLimit({ limit: 10, interval: 60_000 })
 
-    try {
-      // 💡 Ici tu peux envoyer un email avec Brevo, Nodemailer ou enregistrer en DB
-      console.log('📨 Nouveau message de contact :', { name, email, message })
+const contactSchema = z.object({
+  name: z.string().min(2).max(50),
+  email: z.string().email(),
+  message: z.string().min(5).max(500),
+})
 
-      return res.status(200).json({
-        success: true,
-        message: 'Message reçu avec succès.'
-      })
-    } catch (error) {
-      return res.status(500).json({
-        error: 'Erreur serveur lors de la réception du message.'
-      })
-    }
+export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).end()
+
+  // ⛔ Anti-abus IP
+  if (!limiter(req, res)) return
+
+  // ✅ Validation zod
+  const result = validateBody(contactSchema, req)
+  if (!result.success) {
+    return res.status(400).json({ error: 'Champs invalides', details: result.error })
   }
 
-  res.setHeader('Allow', ['POST'])
-  return res.status(405).end(`Méthode ${req.method} non autorisée`)
+  const { name, email, message } = result.data
+
+  try {
+    await sendBrevoEmail({
+      to: 'support@techplay.com',
+      subject: `Message de ${name}`,
+      html: `
+        <p><strong>Nom :</strong> ${name}</p>
+        <p><strong>Email :</strong> ${email}</p>
+        <p><strong>Message :</strong><br/>${message}</p>
+      `,
+    })
+
+    res.status(200).json({ success: true })
+  } catch (err) {
+    console.error('Erreur Brevo contact:', err.message)
+    res.status(500).json({ error: 'Erreur envoi email' })
+  }
 }

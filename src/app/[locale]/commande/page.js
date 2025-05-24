@@ -4,6 +4,7 @@ import { useCart } from '@/context/cartContext'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { toast } from 'react-hot-toast'
+import SEOHead from '@/components/SEOHead'
 
 export default function CheckoutPage() {
   const { cart } = useCart()
@@ -35,34 +36,37 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="max-w-xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Validation de commande</h1>
+    <>
+      <SEOHead overrideTitle="Validation de commande" overrideDescription="Finalisez votre achat sur TechPlay" />
+      <div className="max-w-xl mx-auto p-4">
+        <h1 className="text-2xl font-bold mb-4">Validation de commande</h1>
 
-      <input
-        type="email"
-        placeholder="Votre email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="border p-2 rounded w-full mb-4"
-      />
+        <input
+          type="email"
+          placeholder="Votre email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="border p-2 rounded w-full mb-4"
+        />
 
-      <ul className="mb-4">
-        {cart.map((item) => (
-          <li key={item._id}>
-            {item.title} - {item.price}€ x {item.quantity}
-          </li>
-        ))}
-      </ul>
+        <ul className="mb-4">
+          {cart.map((item) => (
+            <li key={item._id}>
+              {item.title} - {item.price}€ x {item.quantity}
+            </li>
+          ))}
+        </ul>
 
-      <p className="mb-4">Total : <strong>{total} €</strong></p>
+        <p className="mb-4">Total : <strong>{total} €</strong></p>
 
-      <button
-        onClick={handleSubmit}
-        className="bg-black text-white px-4 py-2 rounded w-full"
-        disabled={isLoading}
-      >
-        {isLoading ? 'Traitement...' : 'Valider et payer'}
-      </button>
-    </div>
+        <button
+          onClick={handleSubmit}
+          className="bg-black text-white px-4 py-2 rounded w-full"
+          disabled={isLoading}
+        >
+          {isLoading ? 'Traitement...' : 'Valider et payer'}
+        </button>
+      </div>
+    </>
   )
 }

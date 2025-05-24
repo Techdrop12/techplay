@@ -1,0 +1,17 @@
+[
+  {
+    "slug": "casque-bluetooth",
+    "stock": 12,
+    "price": 79.99
+  },
+  {
+    "slug": "souris-gamer",
+    "stock": 0,
+    "price": 39.95
+  },
+  {
+    "slug": "chargeur-usb-c",
+    "stock": 5,
+    "price": 14.50
+  }
+]

@@ -8,14 +8,20 @@
     "check-env": "node scripts/env-check.js"
   },
   "dependencies": {
+    "@google-analytics/data": "^5.1.0",
+    "@portabletext/react": "^3.2.1",
     "autoprefixer": "^10.4.14",
     "axios": "^1.6.2",
     "dotenv": "^16.5.0",
+    "formidable": "^3.5.4",
     "framer-motion": "^12.12.1",
     "mongoose": "^8.1.1",
     "next": "13.4.19",
     "next-auth": "^4.24.6",
     "next-intl": "^4.1.0",
+    "next-pwa": "^5.6.0",
+    "next-sitemap": "^4.2.3",
+    "node-cron": "^4.0.7",
     "postcss": "^8.4.21",
     "prop-types": "^15.8.1",
     "react": "18.2.0",
@@ -24,6 +30,8 @@
     "react-hot-toast": "^2.4.1",
     "react-rating-stars-component": "^2.2.0",
     "sib-api-v3-sdk": "^8.5.0",
+    "sitemap": "^8.0.0",
+    "slugify": "^1.6.6",
     "stripe": "^12.3.0",
     "tailwindcss": "^3.3.2"
   }

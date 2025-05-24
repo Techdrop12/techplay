@@ -1,12 +1,19 @@
-import dbConnect from '../../../lib/dbConnect'
+import dbConnect from '@/lib/dbConnect'
 import Product from '@/models/Product'
 
 export default async function handler(req, res) {
-  const { slug } = req.query
   await dbConnect()
+  const { slug } = req.query
 
-  const product = await Product.findOne({ slug })
-  if (!product) return res.status(404).json({ message: 'Produit introuvable' })
+  try {
+    const product = await Product.findOne({ slug })
+      .populate('relatedProducts')
+      .populate('alsoBought') // ✅ Ajouté
 
-  res.status(200).json(product)
+    if (!product) return res.status(404).json({ error: 'Produit non trouvé' })
+
+    res.status(200).json(product)
+  } catch (err) {
+    res.status(500).json({ error: 'Erreur serveur' })
+  }
 }

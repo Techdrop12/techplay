@@ -17,8 +17,14 @@ export const authOptions = {
           credentials?.email === adminEmail &&
           credentials?.password === adminPassword
         ) {
-          return { id: 'admin', name: 'Admin', email: adminEmail }
+          return {
+            id: 'admin',
+            name: 'Admin',
+            email: adminEmail,
+            role: 'admin', // ✅ rôle explicitement ajouté
+          }
         }
+
         return null
       },
     }),
@@ -35,6 +41,7 @@ export const authOptions = {
       if (user) {
         token.id = user.id
         token.email = user.email
+        token.role = user.role // ✅ inclure le rôle dans le token
       }
       return token
     },
@@ -42,6 +49,7 @@ export const authOptions = {
       if (token) {
         session.user.id = token.id
         session.user.email = token.email
+        session.user.role = token.role // ✅ inclure le rôle côté session
       }
       return session
     },
