@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export async function sendBrevoEmail({ to, subject, html }) {
+const sendBrevoEmail = async ({ to, subject, html }) => {
   const key = process.env.BREVO_API_KEY
 
   if (!key) throw new Error('Clé API Brevo manquante')
@@ -22,3 +22,5 @@ export async function sendBrevoEmail({ to, subject, html }) {
     }
   )
 }
+
+export default sendBrevoEmail
