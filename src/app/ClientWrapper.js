@@ -6,7 +6,7 @@ import Script from 'next/script'
 import { Toaster } from 'react-hot-toast'
 
 import { CartProvider } from '@/context/cartContext'
-import { ThemeProvider } from '@/context/themeContext'
+import { ThemeProvider } from '../context/themeContext'
 import { UpsellProvider } from '@/context/upsellContext'
 import PushPermission from '@/components/PushPermission'
 
