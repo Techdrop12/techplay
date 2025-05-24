@@ -1,7 +1,7 @@
 'use client'
 
 import LocaleProvider from '../../../i18n'
-import '@styles/globals.css'
+import '../../styles/globals.css'
 import LayoutWithAnalytics from './LayoutWithAnalytics'
 import FreeShippingBadge from '@/components/FreeShippingBadge'
 import AnalyticsScripts from '@/components/AnalyticsScripts'
