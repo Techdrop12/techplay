@@ -24,7 +24,51 @@ export default function AdminDashboard() {
       </div>
 
       <div className="mb-6">
-        <Link href="/admin/ajouter" className="text-white bg-green-600 px-4 py-2 rounded text-sm">➕ Ajouter un produit</Link>
+        <Link href="/admin/ajouter" className="text-white bg-green-600 px-4 py-2 rounded text-sm">
+          ➕ Ajouter un produit
+        </Link>
+      </div>
+
+      {/* ✅ Lien d’export CSV des produits */}
+      <div className="mb-2">
+        <a
+          href="/api/admin/export-products"
+          target="_blank"
+          className="text-sm text-blue-600 underline"
+        >
+          📤 Exporter les produits (CSV)
+        </a>
+      </div>
+
+      {/* ✅ Lien d’export CSV des commandes */}
+      <div className="mb-6">
+        <a
+          href="/api/admin/export-orders"
+          target="_blank"
+          className="text-sm text-blue-600 underline"
+        >
+          🧾 Exporter les commandes (CSV)
+        </a>
+      </div>
+
+      {/* ✅ Synchronisation des stocks fournisseur */}
+      <div className="mb-6">
+        <button
+          onClick={async () => {
+            const confirmSync = confirm('Tu veux synchroniser les stocks ?')
+            if (!confirmSync) return
+
+            const res = await fetch('/api/admin/sync-stock', {
+              method: 'POST',
+            })
+            const data = await res.json()
+            alert(`✅ ${data.updated} produits mis à jour.`)
+            window.location.reload()
+          }}
+          className="bg-blue-600 text-white px-4 py-2 rounded"
+        >
+          🔄 Synchroniser les stocks fournisseur
+        </button>
       </div>
 
       <section className="mb-8">

@@ -1,77 +1,120 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import { useCart } from '@/context/cartContext'
-import { motion } from 'framer-motion'
+import ProductCard from '@/components/ProductCard'
 import { toast } from 'react-hot-toast'
-import FAQBlock from '@/components/FAQBlock'
-import AvisBlock from '@/components/AvisBlock'
-import FreeShippingBadge from '@/components/FreeShippingBadge'
+import JsonLd from '@/components/JsonLd'
+import RecentProducts from '@/components/RecentProducts'
+import { addRecentProduct } from '@/lib/recentProducts'
+import { getBreadcrumbJsonLd } from '@/lib/breadcrumbJsonLd'
 import SEOHead from '@/components/SEOHead'
 
 export default function ProductPage() {
   const { slug } = useParams()
-  const { addToCart } = useCart()
   const [product, setProduct] = useState(null)
+  const [variant, setVariant] = useState('A')
+  const [recommendations, setRecommendations] = useState([])
 
   useEffect(() => {
-    async function fetchProduct() {
-      const res = await fetch(`/api/products/${slug}`)
-      const data = await res.json()
-      setProduct(data)
-    }
-    fetchProduct()
+    fetch(`/api/products/${slug}`)
+      .then(res => {
+        if (!res.ok) throw new Error('Produit introuvable')
+        return res.json()
+      })
+      .then(data => setProduct(data))
+      .catch(() => toast.error('Erreur chargement produit'))
   }, [slug])
 
-  const handleAddToCart = () => {
-    addToCart(product)
-    toast.success(`${product.title} ajouté au panier`)
+  useEffect(() => {
+    setVariant(Math.random() < 0.5 ? 'A' : 'B')
+  }, [])
+
+  useEffect(() => {
+    if (!product) return
+
+    fetch(`/api/recommendations?category=${encodeURIComponent(product.category)}&excludeIds=${product._id}`)
+      .then(res => {
+        if (!res.ok) throw new Error('Erreur recommandations')
+        return res.json()
+      })
+      .then(data => setRecommendations(data))
+      .catch(() => toast.error('Erreur chargement recommandations'))
+
+    addRecentProduct({
+      slug: product.slug,
+      name: product.title,
+      price: product.price,
+      image: product.image,
+    })
+  }, [product])
+
+  if (!product) return <p>Chargement...</p>
+
+  const baseUrl = typeof window !== 'undefined'
+    ? window.location.origin
+    : process.env.NEXT_PUBLIC_BASE_URL || ''
+
+  const productJsonLd = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": product.title,
+    "image": [product.image],
+    "description": product.description,
+    "sku": product._id.toString(),
+    "offers": {
+      "@type": "Offer",
+      "url": `${baseUrl}/produit/${product.slug}`,
+      "priceCurrency": "EUR",
+      "price": product.price.toFixed(2),
+      "availability": product.stock > 0
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+      "itemCondition": "https://schema.org/NewCondition"
+    }
   }
 
-  if (!product) return <p className="p-4">Chargement...</p>
+  const breadcrumb = getBreadcrumbJsonLd([
+    { label: 'Accueil', url: 'https://techplay.com/' },
+    { label: product.category, url: `https://techplay.com/categorie/${product.category}` },
+    { label: product.title, url: `https://techplay.com/produit/${product.slug}` }
+  ])
 
   return (
-    <>
+    <div className="max-w-3xl mx-auto p-6">
       <SEOHead
-        titleKey={null}
-        descriptionKey={null}
+        overrideTitle={product.title}
+        product={product}
+        image={product.image}
+        url={`${baseUrl}/produit/${product.slug}`}
       />
-      <title>{product.title} | TechPlay</title>
-      <meta name="description" content={product.description} />
+      <JsonLd data={productJsonLd} />
+      <JsonLd data={breadcrumb} />
 
-      <div className="p-4 max-w-5xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <motion.img
-            src={product.image}
-            alt={product.title}
-            className="w-full rounded-lg"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          />
-          <div>
-            <h1 className="text-2xl font-bold mb-2">{product.title}</h1>
-            <p className="text-xl text-gray-700 mb-4">{product.price} €</p>
-            <p className="text-gray-600 mb-4">{product.description}</p>
-            <FreeShippingBadge />
-            <button
-              onClick={handleAddToCart}
-              className="mt-4 bg-black text-white px-4 py-2 rounded hover:opacity-90"
-            >
-              Ajouter au panier
-            </button>
+      <h1 className="text-3xl font-bold mb-4">
+        {variant === 'A' ? product.title : `${product.title} - Nouvelle version`}
+      </h1>
+
+      <ProductCard product={product} variant={variant} />
+
+      {variant === 'B' && (
+        <p className="mt-4 text-sm text-green-600 font-semibold">
+          Offre spéciale variante B !
+        </p>
+      )}
+
+      {recommendations.length > 0 && (
+        <section className="mt-12">
+          <h2 className="text-2xl font-semibold mb-4">Produits recommandés</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {recommendations.map(rec => (
+              <ProductCard key={rec._id} product={rec} />
+            ))}
           </div>
-        </div>
+        </section>
+      )}
 
-        <div className="mt-10">
-          <AvisBlock productId={product._id} />
-        </div>
-
-        <div className="mt-10">
-          <FAQBlock productId={product._id} />
-        </div>
-      </div>
-    </>
+      <RecentProducts />
+    </div>
   )
 }

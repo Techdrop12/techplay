@@ -1,12 +1,15 @@
 import mongoose from 'mongoose'
 
 const FAQSchema = new mongoose.Schema({
-  productId: {
-    type: String,
-    required: true,
+  product: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product',
+    required: true
   },
-  question: String,
-  answer: String
+  question: { type: String, required: true },
+  answer: { type: String, required: true }
+}, {
+  timestamps: true
 })
 
 export default mongoose.models.FAQ || mongoose.model('FAQ', FAQSchema)

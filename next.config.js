@@ -1,4 +1,10 @@
-// next.config.js
+const withPWA = require('next-pwa')({
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === 'development',
+})
+
 const nextConfig = {
   i18n: {
     locales: ['fr', 'en'],
@@ -6,6 +12,6 @@ const nextConfig = {
     localeDetection: false,
   },
   reactStrictMode: true,
-};
+}
 
-module.exports = nextConfig;
+module.exports = withPWA(nextConfig)

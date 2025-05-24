@@ -9,7 +9,7 @@ export default function EmailCapturePopup() {
   useEffect(() => {
     const savedEmail = localStorage.getItem('user_email')
     if (!savedEmail) {
-      const timeout = setTimeout(() => setVisible(true), 15000)
+      const timeout = setTimeout(() => setVisible(true), 15000) // apparait après 15 secondes
       return () => clearTimeout(timeout)
     }
   }, [])
@@ -40,7 +40,9 @@ export default function EmailCapturePopup() {
 
   return (
     <div className="fixed bottom-6 right-6 bg-white border shadow-lg p-4 rounded-md z-50 max-w-sm">
-      <p className="mb-2 font-semibold">Laissez votre email pour recevoir une relance si vous quittez sans commander :</p>
+      <p className="mb-2 font-semibold">
+        Laissez votre email pour recevoir une relance si vous quittez sans commander :
+      </p>
       <input
         type="email"
         value={email}

@@ -5,11 +5,35 @@ import { useCart } from '@/context/cartContext'
 import SEOHead from '@/components/SEOHead'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import ProductCard from '@/components/ProductCard'
+import { useRecommendations } from '@/hooks/useRecommendations' // Hook optionnel si tu veux custom
 
 export default function PanierPage() {
   const t = useTranslations('cart')
   const { cart, total } = useCart()
   const router = useRouter()
+
+  const FREE_SHIPPING_THRESHOLD = 60
+  const progressPercent = Math.min((total / FREE_SHIPPING_THRESHOLD) * 100, 100)
+  const missing = Math.max(0, FREE_SHIPPING_THRESHOLD - total).toFixed(2)
+
+  // Calcul catégorie pour recommandations
+  const categoriesInCart = [...new Set(cart.map(p => p.category))]
+  const categoryForRecs = categoriesInCart.length > 0 ? categoriesInCart[0] : null
+  const excludeIds = cart.map(p => p._id)
+
+  // Tu peux utiliser le hook useRecommendations si tu veux
+  // const { recommendations, loading, error } = useRecommendations(categoryForRecs, excludeIds, 4)
+  // Sinon tu peux utiliser UpsellContext directement
+
+  const [products, setProducts] = useState([])
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => setProducts(data))
+  }, [])
 
   const handleCheckout = async () => {
     try {
@@ -20,9 +44,7 @@ export default function PanierPage() {
       })
 
       const data = await res.json()
-      if (data.url) {
-        router.push(data.url)
-      }
+      if (data.url) router.push(data.url)
     } catch (err) {
       alert(t('error'))
     }
@@ -42,6 +64,21 @@ export default function PanierPage() {
           <p>{t('empty')}</p>
         ) : (
           <>
+            {/* Barre de progression vers livraison gratuite */}
+            <div className="mb-4">
+              <p className="text-sm mb-1">
+                {progressPercent >= 100
+                  ? "✅ Livraison gratuite atteinte !"
+                  : `Encore ${missing} € pour la livraison gratuite !`}
+              </p>
+              <div className="w-full h-3 bg-gray-200 rounded">
+                <div
+                  className="h-3 bg-green-500 rounded transition-all duration-300"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+            </div>
+
             <ul className="divide-y border rounded mb-6">
               {cart.map((item, i) => (
                 <li key={i} className="p-4 flex justify-between items-center">
@@ -73,6 +110,9 @@ export default function PanierPage() {
             >
               {t('continue')}
             </Link>
+
+            {/* Affichage Upsell / recommandations dynamiques */}
+            <UpsellBlock />
           </>
         )}
       </div>
