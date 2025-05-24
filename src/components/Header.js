@@ -4,13 +4,13 @@ import Link from 'next/link'
 import { useCart } from '../context/cartContext'
 import LanguageSwitcher from './LanguageSwitcher'
 import { useTranslations } from 'next-intl'
-import { useTheme } from '@/context/themeContext' // ✅ Ajout
+import { useTheme } from '@/context/context/themeContext' // ✅ Correction chemin
 
 export default function Header() {
   const { cart } = useCart()
   const t = useTranslations()
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0)
-  const { theme, toggleTheme } = useTheme() // ✅ Ajout
+  const { theme, toggleTheme } = useTheme()
 
   return (
     <header className="flex flex-col sm:flex-row justify-between items-center px-4 py-3 sm:px-6 sm:py-4 bg-black text-white dark:bg-zinc-900">
@@ -32,28 +32,12 @@ export default function Header() {
             </span>
           )}
         </Link>
+        <Link href="/wishlist" className="hover:underline text-white">💖 Wishlist</Link>
+        <Link href="/blog" className="hover:underline text-white">📰 Blog</Link>
+        <Link href="/mes-commandes" className="hover:underline text-white">📦 Mes commandes</Link>
+        <Link href="/admin" className="hover:underline text-white">{t('admin.dashboard')}</Link>
+        <div className="hidden sm:block"><LanguageSwitcher /></div>
 
-        <Link href="/wishlist" className="hover:underline text-white">
-          💖 Wishlist
-        </Link>
-
-        <Link href="/blog" className="hover:underline text-white">
-          📰 Blog
-        </Link>
-
-        <Link href="/mes-commandes" className="hover:underline text-white">
-          📦 Mes commandes
-        </Link>
-
-        <Link href="/admin" className="hover:underline text-white">
-          {t('admin.dashboard')}
-        </Link>
-
-        <div className="hidden sm:block">
-          <LanguageSwitcher />
-        </div>
-
-        {/* ✅ Switch dark mode */}
         <button
           onClick={toggleTheme}
           className="border rounded px-2 py-1 bg-white text-black dark:bg-gray-800 dark:text-white"

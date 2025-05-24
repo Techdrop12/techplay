@@ -1,4 +1,4 @@
-import '@/styles/globals.css' // assure-toi que le fichier est bien ici
+import '@/styles/globals.css'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import ClientWrapper from './ClientWrapper'
@@ -6,7 +6,6 @@ import CartReminder from '@/components/CartReminder'
 import EmailCapturePopup from '@/components/EmailCapturePopup'
 import LiveChat from '@/components/LiveChat'
 import StickyCartButton from '@/components/StickyCartButton'
-import { CartProvider } from '@/context/cartContext'
 
 export default function RootLayout({ children }) {
   return (
@@ -18,17 +17,15 @@ export default function RootLayout({ children }) {
         <meta name="theme-color" content="#000000" />
       </head>
       <body className="bg-white text-black dark:bg-zinc-900 dark:text-white">
-        <CartProvider>
-          <ClientWrapper>
-            <Header />
-            {children}
-            <Footer />
-            <CartReminder />
-            <EmailCapturePopup />
-            <LiveChat />
-            <StickyCartButton />
-          </ClientWrapper>
-        </CartProvider>
+        <ClientWrapper>
+          <Header />
+          {children}
+          <Footer />
+          <CartReminder />
+          <EmailCapturePopup />
+          <LiveChat />
+          <StickyCartButton />
+        </ClientWrapper>
       </body>
     </html>
   )
