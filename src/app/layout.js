@@ -1,14 +1,12 @@
-'use client'
-
-import './globals.css'
+import '@/styles/globals.css' // assure-toi que le fichier est bien ici
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import ClientWrapper from './ClientWrapper'
 import CartReminder from '@/components/CartReminder'
 import EmailCapturePopup from '@/components/EmailCapturePopup'
 import LiveChat from '@/components/LiveChat'
-import { CartProvider } from '@/context/cartContext'
 import StickyCartButton from '@/components/StickyCartButton'
+import { CartProvider } from '@/context/cartContext'
 
 export default function RootLayout({ children }) {
   return (
