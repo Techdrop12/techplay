@@ -1,4 +1,4 @@
-import { sendBrevoEmail } from '@/lib/sendBrevoEmail'
+import sendBrevoEmail from '@/lib/sendBrevoEmail'
 import isAdmin from '@/lib/isAdmin'
 
 export default async function handler(req, res) {
