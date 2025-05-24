@@ -1,8 +1,5 @@
 {
-  "ignoreCommand": "echo studio-only",
-  "build": {
-    "env": {
-      "NODE_ENV": "production"
-    }
-  }
+  "ignoreCommand": "echo studio",
+  "buildCommand": "npm run build",
+  "outputDirectory": "out"
 }
