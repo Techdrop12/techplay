@@ -1,5 +1,4 @@
-// 📁 i18n.config.js
-module.exports = {
+export default {
   locales: ['fr', 'en'],
   defaultLocale: 'fr',
 }
