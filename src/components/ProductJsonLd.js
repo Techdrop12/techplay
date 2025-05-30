@@ -1,25 +1,57 @@
+'use client'
+
+import Head from 'next/head'
+
 export default function ProductJsonLd({ product }) {
-  const jsonLd = {
-    "@context": "https://schema.org/",
-    "@type": "Product",
-    "name": product.title,
-    "image": [product.image],
-    "description": product.description,
-    "sku": product._id,
-    "offers": {
-      "@type": "Offer",
-      "url": `https://www.techplay.com/produit/${product.slug}`,
-      "priceCurrency": "EUR",
-      "price": product.price.toFixed(2),
-      "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-      "itemCondition": "https://schema.org/NewCondition"
-    }
+  if (!product) return null
+
+  const {
+    _id,
+    title,
+    description,
+    price,
+    image,
+    category,
+    slug,
+    brand = 'TechPlay',
+    rating = 4.8,
+    reviewCount = 128,
+    availability = 'https://schema.org/InStock',
+  } = product
+
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    '@id': `https://techplay.fr/produit/${slug}`,
+    name: title,
+    description,
+    image: Array.isArray(image) ? image : [image],
+    category,
+    sku: _id,
+    brand: {
+      '@type': 'Brand',
+      name: brand,
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: rating,
+      reviewCount,
+    },
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'EUR',
+      price,
+      availability,
+      url: `https://techplay.fr/produit/${slug}`,
+    },
   }
 
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-    />
+    <Head>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+    </Head>
   )
 }

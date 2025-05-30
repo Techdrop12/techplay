@@ -1,44 +1,79 @@
-import dbConnect from '@/lib/dbConnect'
-import Product from '@/models/Product'
+'use client'
 
-export default async function handler(req, res) {
-  const { slug } = req.query
-  await dbConnect()
+import { useState, useEffect } from 'react'
+import { toast } from 'react-hot-toast'
 
-  if (req.method === 'POST') {
-    const { name, rating, comment } = req.body
+export default function ReviewForm({ slug }) {
+  const [reviews, setReviews] = useState([])
+  const [author, setAuthor] = useState('')
+  const [comment, setComment] = useState('')
+  const [loading, setLoading] = useState(false)
 
-    if (
-      !name?.trim() ||
-      !comment?.trim() ||
-      typeof rating !== 'number' ||
-      rating < 1 ||
-      rating > 5
-    ) {
-      return res.status(400).json({ error: 'Champs invalides' })
+  useEffect(() => {
+    fetch(`/api/products/${slug}/review`)
+      .then((res) => res.json())
+      .then(setReviews)
+      .catch(() => toast.error("Erreur chargement avis"))
+  }, [slug])
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!author || !comment) return toast.error('Nom et commentaire requis')
+
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/products/${slug}/review`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ author, comment }),
+      })
+      if (!res.ok) throw new Error()
+      const newReview = await res.json()
+      setReviews([newReview, ...reviews])
+      setAuthor('')
+      setComment('')
+      toast.success('Avis ajouté')
+    } catch {
+      toast.error("Erreur lors de l'envoi")
+    } finally {
+      setLoading(false)
     }
-
-    const product = await Product.findOne({ slug })
-    if (!product) return res.status(404).json({ error: 'Produit introuvable' })
-
-    product.reviews = product.reviews || []
-    product.reviews.push({
-      name: name.trim().substring(0, 50),
-      rating,
-      comment: comment.trim().substring(0, 300),
-      date: new Date(),
-    })
-    await product.save()
-
-    return res.status(200).json({ success: true })
   }
 
-  if (req.method === 'GET') {
-    const product = await Product.findOne({ slug })
-    if (!product) return res.status(404).json({ error: 'Produit introuvable' })
-    return res.status(200).json(product.reviews || [])
-  }
+  return (
+    <div className="mt-12">
+      <h2 className="text-xl font-semibold mb-4">Avis clients</h2>
+      <form onSubmit={handleSubmit} className="mb-6">
+        <input
+          type="text"
+          placeholder="Votre nom"
+          value={author}
+          onChange={(e) => setAuthor(e.target.value)}
+          className="border p-2 rounded w-full mb-2"
+        />
+        <textarea
+          placeholder="Votre commentaire"
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          className="border p-2 rounded w-full mb-2"
+        />
+        <button
+          type="submit"
+          className="bg-black text-white px-4 py-2 rounded"
+          disabled={loading}
+        >
+          {loading ? 'Envoi en cours...' : 'Envoyer'}
+        </button>
+      </form>
 
-  res.status(405).end()
+      <ul>
+        {reviews.map((r, i) => (
+          <li key={i} className="mb-4 border-b pb-2">
+            <p className="font-semibold">{r.author}</p>
+            <p className="text-sm text-gray-600">{r.comment}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
 }
-

@@ -1,38 +1,30 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Heart } from 'lucide-react'
+import { toggleWishlistItem, isInWishlist } from '@/lib/wishlist'
+import { motion } from 'framer-motion'
 
-export default function WishlistButton({ productId }) {
-  const [isInWishlist, setIsInWishlist] = useState(false)
+export default function WishlistButton({ product }) {
+  const [active, setActive] = useState(false)
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('wishlist') || '[]')
-    setIsInWishlist(saved.includes(productId))
-  }, [productId])
+    setActive(isInWishlist(product._id))
+  }, [product._id])
 
-  const toggleWishlist = () => {
-    const saved = JSON.parse(localStorage.getItem('wishlist') || '[]')
-    let updated
-
-    if (saved.includes(productId)) {
-      updated = saved.filter(id => id !== productId)
-      setIsInWishlist(false)
-    } else {
-      updated = [...saved, productId]
-      setIsInWishlist(true)
-    }
-
-    localStorage.setItem('wishlist', JSON.stringify(updated))
+  const handleToggle = () => {
+    toggleWishlistItem(product)
+    setActive(!active)
   }
 
   return (
-    <button
-      onClick={toggleWishlist}
-      className={`flex items-center gap-1 text-sm ${isInWishlist ? 'text-red-500' : 'text-gray-500'}`}
+    <motion.button
+      onClick={handleToggle}
+      aria-label="Ajouter aux favoris"
+      className={`text-xl transition ${active ? 'text-red-500' : 'text-gray-400'}`}
+      whileTap={{ scale: 1.4 }}
+      whileHover={{ scale: 1.1 }}
     >
-      <Heart size={16} fill={isInWishlist ? 'currentColor' : 'none'} />
-      {isInWishlist ? 'Retirer de la liste' : 'Ajouter à ma liste'}
-    </button>
+      {active ? '❤️' : '🤍'}
+    </motion.button>
   )
 }

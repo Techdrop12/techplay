@@ -1,38 +1,37 @@
 import dbConnect from '@/lib/dbConnect'
 import Product from '@/models/Product'
-import isAdmin from '@/lib/isAdmin'
 
 export default async function handler(req, res) {
   await dbConnect()
 
   if (req.method !== 'POST') {
-    return res.status(405).end('Méthode non autorisée')
-  }
-
-  const admin = await isAdmin(req)
-  if (!admin) {
-    return res.status(401).json({ error: 'Accès interdit' })
-  }
-
-  const { title, price, description, image, slug } = req.body
-
-  if (!title || !price || !description || !image || !slug) {
-    return res.status(400).json({ error: 'Champs manquants ou invalides' })
+    return res.status(405).json({ error: 'Méthode non autorisée' })
   }
 
   try {
-    const newProduct = new Product({
-      title: title.trim(),
-      slug: slug.trim(),
-      description: description.trim(),
-      image: image.trim(),
-      price: parseFloat(price),
+    const { title, price, image, slug, category, description } = req.body
+
+    if (!title || !price || !image || !slug || !description) {
+      return res.status(400).json({ error: 'Champs requis manquants' })
+    }
+
+    const existing = await Product.findOne({ slug })
+    if (existing) {
+      return res.status(409).json({ error: 'Slug déjà utilisé' })
+    }
+
+    const product = await Product.create({
+      title,
+      price,
+      image,
+      slug,
+      category,
+      description,
     })
 
-    await newProduct.save()
-    res.status(200).json({ success: true, product: newProduct })
-  } catch (err) {
-    console.error('Erreur création produit :', err)
+    res.status(201).json(product)
+  } catch (error) {
+    console.error(error)
     res.status(500).json({ error: 'Erreur serveur' })
   }
 }

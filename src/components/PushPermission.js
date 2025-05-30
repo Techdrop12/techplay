@@ -2,9 +2,8 @@
 
 import { useEffect } from 'react'
 import { initializeApp } from 'firebase/app'
-import { getMessaging, getToken } from 'firebase/messaging'
+import { getMessaging, getToken, onMessage } from 'firebase/messaging'
 
-// ✅ Config Firebase (coté client)
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -37,8 +36,13 @@ export default function PushPermission() {
             body: JSON.stringify({ token }),
           })
         }
+
+        onMessage(messaging, (payload) => {
+          console.log('🔔 Notification reçue:', payload)
+          alert(payload.notification?.title || 'Nouvelle notification')
+        })
       } catch (err) {
-        console.error('Erreur push permission:', err)
+        console.error('❌ Erreur push permission:', err)
       }
     })
   }, [])

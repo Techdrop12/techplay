@@ -1,16 +1,42 @@
 'use client'
 
-export default function ReviewList({ reviews }) {
-  if (!reviews?.length) return <p className="text-gray-500">Aucun avis pour ce produit.</p>
+import { useEffect, useState } from 'react'
+import ReactStars from 'react-rating-stars-component'
+
+export default function ReviewList({ productId }) {
+  const [reviews, setReviews] = useState([])
+
+  useEffect(() => {
+    fetch(`/api/reviews/${productId}`)
+      .then(res => res.json())
+      .then(setReviews)
+      .catch(() => {})
+  }, [productId])
+
+  if (!reviews.length) return <p className="text-sm text-gray-500 mt-4">Aucun avis pour l’instant.</p>
 
   return (
-    <ul className="space-y-3 text-sm">
+    <div className="space-y-4 mt-4">
       {reviews.map((r, i) => (
-        <li key={i} className="border rounded p-3 bg-white dark:bg-zinc-800">
-          <p className="font-semibold">{r.name} – {r.rating} ⭐</p>
-          <p className="text-gray-600 dark:text-gray-300 mt-1">{r.comment}</p>
-        </li>
+        <div key={i} className="border p-3 rounded shadow-sm">
+          <ReactStars
+            count={5}
+            value={r.rating}
+            size={20}
+            edit={false}
+            isHalf={false}
+            activeColor="#facc15"
+          />
+          <p className="text-sm mt-1">{r.comment}</p>
+          {r.image && (
+            <img
+              src={r.image}
+              alt="photo client"
+              className="mt-2 w-24 h-24 object-cover rounded"
+            />
+          )}
+        </div>
       ))}
-    </ul>
+    </div>
   )
 }

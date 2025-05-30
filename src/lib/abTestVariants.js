@@ -1,14 +1,14 @@
-const VARIANTS = ['A', 'B', 'C']
-const STORAGE_KEY = 'ab_test_combined'
+// src/lib/abTestVariants.js
+'use client'
 
-export function getUserVariant() {
+export const getUserVariant = () => {
   if (typeof window === 'undefined') return 'A'
 
-  let variant = localStorage.getItem(STORAGE_KEY)
-  if (!variant || !VARIANTS.includes(variant)) {
-    variant = VARIANTS[Math.floor(Math.random() * VARIANTS.length)]
-    localStorage.setItem(STORAGE_KEY, variant)
-  }
+  const cached = localStorage.getItem('ab_variant')
+  if (cached) return cached
 
-  return variant
+  const variants = ['A', 'B', 'C']
+  const assigned = variants[Math.floor(Math.random() * variants.length)]
+  localStorage.setItem('ab_variant', assigned)
+  return assigned
 }

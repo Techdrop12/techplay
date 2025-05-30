@@ -1,4 +1,3 @@
-// src/context/upsellContext.js
 'use client'
 
 import { createContext, useContext, useState, useEffect } from 'react'
@@ -19,33 +18,25 @@ export const UpsellProvider = ({ children }) => {
     }
 
     const controller = new AbortController()
+
     const fetchRecommendations = async () => {
       setLoading(true)
       setError(null)
-
       try {
         const categories = [...new Set(cart.map(p => p.category))]
-        if (categories.length === 0) {
-          setRecommended([])
-          setLoading(false)
-          return
-        }
-
         const excludeIds = cart.map(p => p._id).join(',')
-        const query = new URLSearchParams({
-          categories: categories.join(','),
-          excludeIds,
-          limit: 8,
-        })
-
-        const res = await fetch(`/api/recommendations?${query.toString()}`, {
+        const res = await fetch(`/api/recommendations?categories=${categories.join(',')}&excludeIds=${excludeIds}&limit=8`, {
           signal: controller.signal
         })
+
         if (!res.ok) throw new Error('Erreur chargement recommandations')
+
         const data = await res.json()
         setRecommended(data)
       } catch (err) {
-        if (err.name !== 'AbortError') setError(err.message)
+        if (err.name !== 'AbortError') {
+          setError(err.message)
+        }
       } finally {
         setLoading(false)
       }
