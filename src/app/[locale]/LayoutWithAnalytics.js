@@ -1,6 +1,6 @@
 'use client'
 
-import ClientWrapper from '../ClientWrapper'
+import ClientWrapper from '@/components/ClientWrapper'
 import PromoBanner from '@/components/PromoBanner'
 import EmailCapturePopup from '@/components/EmailCapturePopup'
 import CartReminder from '@/components/CartReminder'

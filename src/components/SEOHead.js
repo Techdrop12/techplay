@@ -1,12 +1,12 @@
 'use client'
 
 import Head from 'next/head'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
+import { usePathname } from 'next/navigation'
 import { getFallbackDescription } from '@/lib/metaFallback'
-import { useRouter } from 'next/router'
 import ProductJsonLd from './ProductJsonLd'
-import OrganizationJsonLd from './OrganizationJsonLd'
-import BreadcrumbJsonLd from './BreadcrumbJsonLd'
+import OrganizationJsonLd from './JsonLd/OrganizationJsonLd'
+import BreadcrumbJsonLd from './JsonLd/BreadcrumbJsonLd'
 
 export default function SEOHead({
   titleKey,
@@ -20,8 +20,9 @@ export default function SEOHead({
   breadcrumbSegments
 }) {
   const t = useTranslations('seo')
-  const { asPath, locale } = useRouter()
-  const fullUrl = url || `${process.env.NEXT_PUBLIC_SITE_URL}${asPath}`
+  const pathname = usePathname()
+  const locale = useLocale()
+  const fullUrl = url || `${process.env.NEXT_PUBLIC_SITE_URL}${pathname}`
   const fallbackImage = `${process.env.NEXT_PUBLIC_SITE_URL}/logo.png`
 
   const title = overrideTitle || (titleKey ? t(titleKey) : product?.title || 'TechPlay')

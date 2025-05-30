@@ -1,11 +1,12 @@
-'use client'
-
-import './globals.css'
+import '../styles/globals.css'
 import { Inter } from 'next/font/google'
 import { NextIntlClientProvider, useMessages } from 'next-intl'
 import Script from 'next/script'
-import ClientWrapper from '@/components/ClientWrapper'
-import OrganizationJsonLd from '@/components/jsonld/OrganizationJsonLd'
+import dynamic from 'next/dynamic'
+import OrganizationJsonLd from '@/components/JsonLd/OrganizationJsonLd'
+
+// ❗ import dynamique pour éviter les hooks client côté serveur
+const ClientWrapper = dynamic(() => import('@/components/ClientWrapper'), { ssr: false })
 
 const inter = Inter({ subsets: ['latin'] })
 

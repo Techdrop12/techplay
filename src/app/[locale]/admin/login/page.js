@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 'use client'
 
 import { signIn } from 'next-auth/react'
@@ -11,17 +12,22 @@ export default function AdminLoginPage() {
   const router = useRouter()
 
   const handleLogin = async () => {
-    const res = await signIn('credentials', {
-      redirect: false,
-      username,
-      password,
-    })
+    try {
+      const res = await signIn('credentials', {
+        redirect: false,
+        username,
+        password,
+      })
 
-    if (res.ok) {
-      toast.success('Connexion réussie')
-      router.push('/admin')
-    } else {
-      toast.error('Identifiants invalides')
+      if (res.ok) {
+        toast.success('Connexion réussie')
+        router.push('/admin')
+      } else {
+        toast.error('Identifiants invalides')
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error("Erreur lors de la tentative de connexion")
     }
   }
 

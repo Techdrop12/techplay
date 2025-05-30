@@ -1,11 +1,10 @@
-// 📁 i18n.js
+'use client'
 
 import { NextIntlClientProvider, useMessages } from 'next-intl'
 import { notFound } from 'next/navigation'
 
 export default function LocaleProvider({ children, locale }) {
   const messages = useMessages()
-
   if (!messages) notFound()
 
   return (

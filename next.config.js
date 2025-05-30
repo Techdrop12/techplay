@@ -1,11 +1,12 @@
-const path = require('path');
+const path = require('path')
+
 const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
-  buildExclusions: [/middleware-manifest\.json$/],
-});
+  exclude: [/middleware-manifest\.json$/], // ✅ Correction ici
+})
 
 const nextConfig = {
   reactStrictMode: true,
@@ -38,9 +39,9 @@ const nextConfig = {
   },
 
   webpack: (config) => {
-    config.resolve.alias['@'] = path.resolve(__dirname, 'src');
-    return config;
+    config.resolve.alias['@'] = path.resolve(__dirname, 'src')
+    return config
   },
-};
+}
 
-module.exports = withPWA(nextConfig);
+module.exports = withPWA(nextConfig)

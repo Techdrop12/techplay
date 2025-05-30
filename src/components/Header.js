@@ -25,7 +25,9 @@ export default function Header() {
         <Link href="/blog" className="hover:underline text-white">📰 Blog</Link>
         <Link href="/mes-commandes" className="hover:underline text-white">📦 Mes commandes</Link>
         <Link href="/admin" className="hover:underline text-white">Admin</Link>
-        <div className="hidden sm:block"><LanguageSwitcher /></div>
+        <div className="hidden sm:block">
+          <LanguageSwitcher />
+        </div>
         <ThemeToggle />
       </nav>
     </header>
