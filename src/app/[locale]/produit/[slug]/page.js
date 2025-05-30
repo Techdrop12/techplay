@@ -7,7 +7,7 @@ import { toast } from 'react-hot-toast'
 import { motion } from 'framer-motion'
 
 import ProductJsonLd from '@/components/ProductJsonLd'
-import BreadcrumbJsonLd from '@/components/BreadcrumbJsonLd'
+import BreadcrumbJsonLd from '@/components/JsonLd/BreadcrumbJsonLd'
 import RecentProducts from '@/components/RecentProducts'
 import ReviewForm from '@/components/ReviewForm'
 import SEOHead from '@/components/SEOHead'

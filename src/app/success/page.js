@@ -1,4 +1,4 @@
-// 📁 /src/app/success/page.js
+export const dynamic = 'force-dynamic'
 export default function SuccessPage() {
   return (
     <div className="p-8 text-center">

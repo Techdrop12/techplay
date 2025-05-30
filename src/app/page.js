@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import HomeJsonLd from '@/components/HomeJsonLd'
 
 export default function HomePage() {

@@ -17,4 +17,5 @@ const serviceAccount = {
 const app =
   getApps().length === 0 ? initializeApp({ credential: cert(serviceAccount) }) : getApps()[0]
 
-export const messagingAdmin = getMessaging(app)
+// ✅ On exporte directement le messaging
+export const messaging = getMessaging(app)

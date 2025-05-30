@@ -1,6 +1,6 @@
 'use client'
 
-import LocaleProvider from '../../../i18n'
+import LocaleProvider from '@/components/LocaleProvider'
 import '../../styles/globals.css'
 import LayoutWithAnalytics from './LayoutWithAnalytics'
 import AnalyticsScripts from '@/components/AnalyticsScripts'

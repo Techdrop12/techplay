@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 export default function Maintenance() {
   return (
     <div className="h-screen flex items-center justify-center text-center p-4">
