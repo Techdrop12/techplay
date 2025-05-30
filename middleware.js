@@ -1,10 +1,9 @@
+import createMiddleware from 'next-intl/middleware'
+import i18nConfig from '../i18n.config'
 import { getToken } from 'next-auth/jwt'
 import { NextResponse } from 'next/server'
 import { middleware as secureHeaders } from './middleware-security'
-import { createMiddleware } from 'next-intl/middleware'
-import i18nConfig from './i18n.config.js'
 
-// 🌍 Middleware de langue next-intl
 const intlMiddleware = createMiddleware(i18nConfig)
 
 export async function middleware(request) {
@@ -39,7 +38,7 @@ export async function middleware(request) {
     }
   }
 
-  // 🌍 Middleware next-intl + headers sécurité
+  // ✅ Détection automatique de la langue + application des headers sécurité
   const response = intlMiddleware(request)
   return secureHeaders(request, response)
 }
