@@ -1,11 +1,14 @@
 import { getToken } from 'next-auth/jwt'
 import { NextResponse } from 'next/server'
 import { middleware as secureHeaders } from './middleware-security'
+import { createMiddleware } from 'next-intl/middleware'
+import i18nConfig from './i18n.config.js'
+
+// 🌍 Middleware de langue next-intl
+const intlMiddleware = createMiddleware(i18nConfig)
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl
-  const locales = ['fr', 'en']
-  const pathnameParts = pathname.split('/')
 
   // ✅ Ne pas bloquer les chemins techniques
   if (
@@ -36,18 +39,9 @@ export async function middleware(request) {
     }
   }
 
-  // ✅ Locale déjà présente → on laisse passer
-  if (locales.includes(pathnameParts[1])) {
-    return secureHeaders(request)
-  }
-
-  // ✅ Sinon : redirection vers langue détectée
-  const acceptLang = request.headers.get('accept-language') || ''
-  const preferredLocale = acceptLang.startsWith('fr') ? 'fr' : 'en'
-
-  const url = request.nextUrl.clone()
-  url.pathname = `/${preferredLocale}${pathname}`
-  return NextResponse.redirect(url)
+  // 🌍 Middleware next-intl + headers sécurité
+  const response = intlMiddleware(request)
+  return secureHeaders(request, response)
 }
 
 export const config = {
