@@ -24,3 +24,4 @@ Construite avec **Next.js 13 App Router**, **Stripe**, **MongoDB**, **NextAuth**
 
 ```bash
 npm install
+# Trigger redeploy - 30 mai 2025
