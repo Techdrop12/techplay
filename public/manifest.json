@@ -1,21 +1,32 @@
 {
-  "name": "TechPlay",
+  "name": "TechPlay - Boutique Tech Premium",
   "short_name": "TechPlay",
-  "start_url": "/",
+  "description": "La boutique ultime pour les passionnés de tech et de gadgets innovants.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#000000",
+  "background_color": "#ffffff",
   "theme_color": "#000000",
-  "description": "TechPlay 🛒 Boutique high-tech",
+  "orientation": "portrait-primary",
+  "lang": "fr-FR",
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

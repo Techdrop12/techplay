@@ -18,7 +18,6 @@ export default function ProductCard({ product }) {
   useEffect(() => {
     const v = getUserVariant()
     setVariant(v)
-
     logEvent('ab_variant_view', {
       variant: v,
       item_name: product.title,
@@ -48,18 +47,18 @@ export default function ProductCard({ product }) {
   const rating = useMemo(() => (Math.random() * 1 + 4).toFixed(1), [])
   const reviews = useMemo(() => Math.floor(Math.random() * 50) + 5, [])
 
-  // 🔄 A/B combiné : image, titre, prix, CTA
+  // A/B Test
   const displayImage = variant === 'B' && product.imageAlt ? product.imageAlt : product.image
-  const displayTitle = variant === 'C' ? `${product.title} - Édition spéciale` : product.title
+  const displayTitle = variant === 'C' ? `${product.title} - Édition limitée` : product.title
   const displayPrice = variant === 'B'
     ? `${(product.price * 0.95).toFixed(2)} €`
-    : `${product.price} €`
-  const ctaText = variant === 'C' ? 'Je le prends !' : variant === 'B' ? 'Je le veux !' : 'Ajouter au panier'
+    : `${product.price.toFixed(2)} €`
+  const ctaText = variant === 'C' ? 'Je le veux !' : variant === 'B' ? 'Top deal !' : 'Ajouter au panier'
   const ctaColor = variant === 'B' ? 'bg-indigo-600' : variant === 'C' ? 'bg-orange-600' : 'bg-black'
 
   return (
     <motion.div
-      className="border rounded-lg p-4 flex flex-col justify-between shadow-sm"
+      className="border rounded-lg p-4 flex flex-col justify-between shadow-md hover:shadow-xl transition"
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       transition={{ duration: 0.2 }}
@@ -91,7 +90,7 @@ export default function ProductCard({ product }) {
         onClick={handleAdd}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className={`mt-2 px-4 py-1 ${ctaColor} text-white rounded text-sm`}
+        className={`mt-2 px-4 py-2 ${ctaColor} text-white rounded text-sm`}
       >
         {ctaText}
       </motion.button>
@@ -100,7 +99,7 @@ export default function ProductCard({ product }) {
         onClick={handleQuickBuy}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="mt-2 px-4 py-1 bg-green-600 text-white rounded text-sm"
+        className="mt-2 px-4 py-2 bg-green-600 text-white rounded text-sm"
       >
         Acheter maintenant
       </motion.button>

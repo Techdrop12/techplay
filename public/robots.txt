@@ -1,6 +1,10 @@
 User-agent: *
 Allow: /
-Disallow: /fr/admin
-Disallow: /en/admin
 
-Sitemap: /api/sitemap
+# Sécurisation des back-offices
+Disallow: /fr/admin/
+Disallow: /en/admin/
+Disallow: /api/
+
+# Sitemap auto-généré (si disponible)
+Sitemap: https://techplay.vercel.app/api/sitemap

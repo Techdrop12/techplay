@@ -1,57 +1,23 @@
-'use client'
+import mongoose from 'mongoose'
 
-import { useState } from 'react'
+const productSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  slug: { type: String, required: true, unique: true },
+  description: { type: String, required: true },
+  price: { type: Number, required: true },
+  image: { type: String, required: true }, // image principale
+  images: [{ type: String }], // galerie d’images
+  category: { type: String },
+  tags: [{ type: String }],
+  stock: { type: Number, default: 0 },
+  views: { type: Number, default: 0 },
+  sold: { type: Number, default: 0 },
+  featured: { type: Boolean, default: false },
+  relatedProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
+  alsoBought: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
+  createdAt: { type: Date, default: Date.now },
+}, {
+  timestamps: true
+})
 
-export default function ChatBot() {
-  const [messages, setMessages] = useState([])
-  const [input, setInput] = useState('')
-
-  const sendMessage = async () => {
-    if (!input.trim()) return
-    setMessages([...messages, { sender: 'user', text: input }])
-    setInput('')
-
-    // Envoi au backend IA (ex: /api/ai/chat)
-    const res = await fetch('/api/ai/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: input }),
-    })
-
-    const data = await res.json()
-    if (data.reply) {
-      setMessages((msgs) => [...msgs, { sender: 'bot', text: data.reply }])
-    }
-  }
-
-  return (
-    <div className="fixed bottom-4 right-4 w-80 bg-white shadow rounded p-4 flex flex-col">
-      <div className="flex-grow overflow-auto mb-2 max-h-64">
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`mb-1 p-2 rounded ${
-              msg.sender === 'user' ? 'bg-gray-200 self-end' : 'bg-blue-200 self-start'
-            }`}
-          >
-            {msg.text}
-          </div>
-        ))}
-      </div>
-      <input
-        type="text"
-        className="border p-2 rounded mb-2"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={e => e.key === 'Enter' && sendMessage()}
-        placeholder="Pose ta question..."
-      />
-      <button
-        className="bg-black text-white py-2 rounded"
-        onClick={sendMessage}
-      >
-        Envoyer
-      </button>
-    </div>
-  )
-}
+export default mongoose.models.Product || mongoose.model('Product', productSchema)

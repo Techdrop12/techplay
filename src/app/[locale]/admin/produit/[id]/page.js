@@ -1,52 +1,39 @@
-'use client'
+import dbConnect from '@/lib/dbConnect'
+import Product from '@/models/Product'
 
-import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { toast } from 'react-hot-toast'
+export default async function handler(req, res) {
+  const { id } = req.query
+  await dbConnect()
 
-export default function EditProduit() {
-  const { id } = useParams()
-  const router = useRouter()
-  const [form, setForm] = useState(null)
-
-  useEffect(() => {
-    fetch(`/api/admin/product/${id}`)
-      .then(res => res.json())
-      .then(setForm)
-  }, [id])
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    const res = await fetch(`/api/admin/product/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
-    })
-    if (res.ok) {
-      toast.success('Produit modifié')
-      router.push('/admin')
-    } else {
-      toast.error('Erreur lors de la modification')
+  if (req.method === 'GET') {
+    try {
+      const product = await Product.findById(id)
+      if (!product) return res.status(404).json({ error: 'Produit non trouvé' })
+      return res.status(200).json(product)
+    } catch (err) {
+      return res.status(500).json({ error: 'Erreur lors de la récupération du produit' })
     }
   }
 
-  if (!form) return <p className="p-6">Chargement...</p>
+  if (req.method === 'PUT') {
+    try {
+      const updated = await Product.findByIdAndUpdate(id, req.body, { new: true })
+      if (!updated) return res.status(404).json({ error: 'Produit non trouvé' })
+      return res.status(200).json(updated)
+    } catch (err) {
+      return res.status(500).json({ error: 'Erreur lors de la mise à jour du produit' })
+    }
+  }
 
-  return (
-    <div className="p-6 max-w-xl mx-auto">
-      <h1 className="text-xl font-bold mb-4">Modifier le produit</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input name="title" value={form.title} onChange={handleChange} className="border p-2 w-full" required />
-        <input name="price" type="number" value={form.price} onChange={handleChange} className="border p-2 w-full" required />
-        <input name="image" value={form.image} onChange={handleChange} className="border p-2 w-full" required />
-        <input name="slug" value={form.slug} onChange={handleChange} className="border p-2 w-full" required />
-        <textarea name="description" value={form.description} onChange={handleChange} className="border p-2 w-full" required />
-        <button type="submit" className="bg-black text-white px-4 py-2 rounded">Enregistrer</button>
-      </form>
-    </div>
-  )
+  if (req.method === 'DELETE') {
+    try {
+      const deleted = await Product.findByIdAndDelete(id)
+      if (!deleted) return res.status(404).json({ error: 'Produit non trouvé' })
+      return res.status(200).json({ success: true })
+    } catch (err) {
+      return res.status(500).json({ error: 'Erreur lors de la suppression du produit' })
+    }
+  }
+
+  return res.status(405).json({ error: 'Méthode non autorisée' })
 }
