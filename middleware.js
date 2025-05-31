@@ -1,10 +1,13 @@
 import createMiddleware from 'next-intl/middleware'
-import { i18nConfig } from './i18n-config'
 import { getToken } from 'next-auth/jwt'
 import { NextResponse } from 'next/server'
 import { middleware as secureHeaders } from './middleware-security'
 
-const intlMiddleware = createMiddleware(i18nConfig)
+// ✅ Configuration langue directement ici (sans import)
+const intlMiddleware = createMiddleware({
+  locales: ['fr', 'en'],
+  defaultLocale: 'fr',
+})
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl
