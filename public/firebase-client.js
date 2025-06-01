@@ -1,4 +1,4 @@
-// src/lib/firebase-client.js
+// ✅ src/lib/firebase-client.js
 'use client'
 
 import { initializeApp, getApps } from 'firebase/app'
@@ -31,7 +31,6 @@ if (typeof window !== 'undefined') {
   }
 }
 
-// ✅ Requête de permission + enregistrement du token
 export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messaging-sw.js') {
   if (typeof window === 'undefined' || !('Notification' in window)) return null
 
@@ -66,7 +65,6 @@ export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messagi
   }
 }
 
-// ✅ Optionnel : écoute des messages push pendant que le site est ouvert
 export function listenToMessages() {
   if (typeof window !== 'undefined' && messaging) {
     onMessage(messaging, (payload) => {
