@@ -3,10 +3,10 @@ import { getToken } from 'next-auth/jwt'
 import { NextResponse } from 'next/server'
 import { middleware as secureHeaders } from './middleware-security'
 
-// ✅ config directe ici
+// ✅ Configuration inline (sans fichier externe)
 const intlMiddleware = createMiddleware({
   locales: ['fr', 'en'],
-  defaultLocale: 'fr',
+  defaultLocale: 'fr'
 })
 
 export async function middleware(request) {
