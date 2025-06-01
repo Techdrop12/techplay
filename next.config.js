@@ -1,15 +1,13 @@
 // next.config.js
-const path = require('path');
-
+const path = require('path')
 const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
   exclude: [/middleware-manifest\.json$/],
-});
-
-const nextIntl = require('next-intl/plugin')('./next-intl.config.js');
+})
+const nextIntl = require('next-intl/plugin')('./next-intl.config.js')
 
 const nextConfig = {
   reactStrictMode: true,
@@ -36,22 +34,31 @@ const nextConfig = {
   },
 
   webpack: (config) => {
-    config.resolve.alias['@'] = path.resolve(__dirname, 'src');
-    return config;
+    config.resolve.alias['@'] = path.resolve(__dirname, 'src')
+    return config
   },
 
   headers: async () => [
     {
-      // 👇 Cache et rend les fichiers PWA accessibles publiquement
-      source: '/(manifest.json|logo.png|firebase-messaging-sw.js|icons/.*)',
+      // ✅ Accès public complet aux ressources critiques PWA
+      source: '/(manifest.json|firebase-messaging-sw.js|icons/.*)',
       headers: [
         {
           key: 'Cache-Control',
-          value: 'public, max-age=3600',
+          value: 'public, max-age=3600, immutable',
+        },
+        {
+          key: 'Access-Control-Allow-Origin',
+          value: '*',
         },
       ],
     },
   ],
-};
 
-module.exports = nextIntl(withPWA(nextConfig));
+  // ✅ Corrige le warning metadataBase pour les réseaux sociaux
+  experimental: {
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.vercel.app'),
+  },
+}
+
+module.exports = nextIntl(withPWA(nextConfig))

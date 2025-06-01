@@ -1,3 +1,5 @@
+// src/pages/api/notifications/send.js
+
 import { messaging } from '@/lib/firebase-admin'
 import { getAllTokens, deleteToken } from './save-token'
 
@@ -22,7 +24,7 @@ export default async function handler(req, res) {
   try {
     const result = await messaging.sendMulticast(message)
 
-    // ✅ Supprimer les tokens invalides
+    // ✅ Suppression des tokens invalides
     result.responses.forEach((resp, index) => {
       if (!resp.success) {
         const errCode = resp.error?.code || ''
