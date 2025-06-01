@@ -12,7 +12,6 @@ import { useEffect } from 'react'
 export default function LocaleLayout({ children, params: { locale } }) {
   useHotjar()
 
-  // Ajout tracking GA par page
   useEffect(() => {
     if (typeof window !== 'undefined' && window.gtag) {
       window.gtag('event', 'page_view', {
@@ -31,11 +30,7 @@ export default function LocaleLayout({ children, params: { locale } }) {
         <LocaleProvider locale={locale}>
           <LayoutWithAnalytics>{children}</LayoutWithAnalytics>
         </LocaleProvider>
-
-        {/* Scripts tracking */}
         <AnalyticsScripts />
-
-        {/* Popups conversion */}
         <EmailCapturePopup />
         <ExitPopup />
       </body>

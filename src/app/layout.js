@@ -5,7 +5,6 @@ import Script from 'next/script'
 import dynamic from 'next/dynamic'
 import OrganizationJsonLd from '@/components/JsonLd/OrganizationJsonLd'
 
-// ❗ import dynamique pour éviter les hooks client côté serveur
 const ClientWrapper = dynamic(() => import('@/components/ClientWrapper'), { ssr: false })
 
 const inter = Inter({ subsets: ['latin'] })
@@ -50,8 +49,6 @@ export default function RootLayout({ children, params: { locale } }) {
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ClientWrapper>{children}</ClientWrapper>
         </NextIntlClientProvider>
-
-        {/* Meta Pixel fallback */}
         <noscript>
           <img
             height="1"

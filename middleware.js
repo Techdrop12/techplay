@@ -2,9 +2,8 @@ import createMiddleware from 'next-intl/middleware'
 import { getToken } from 'next-auth/jwt'
 import { NextResponse } from 'next/server'
 import { middleware as secureHeaders } from './middleware-security'
-import { i18n } from './i18n'
 
-// ✅ Configuration langue directement ici (sans import)
+// ✅ config directe ici
 const intlMiddleware = createMiddleware({
   locales: ['fr', 'en'],
   defaultLocale: 'fr',
@@ -13,7 +12,6 @@ const intlMiddleware = createMiddleware({
 export async function middleware(request) {
   const { pathname } = request.nextUrl
 
-  // ✅ Ne pas bloquer les chemins techniques
   if (
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
@@ -23,7 +21,6 @@ export async function middleware(request) {
     return secureHeaders(request)
   }
 
-  // ✅ Maintenance activée (sauf admin, API et /maintenance)
   const maintenance = process.env.MAINTENANCE === 'true'
   const isMaintenancePage = pathname === '/maintenance'
   const isAdminPath = pathname.startsWith('/admin')
@@ -34,7 +31,6 @@ export async function middleware(request) {
     return NextResponse.redirect(maintenanceUrl)
   }
 
-  // ✅ Sécurité admin
   if (isAdminPath) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
     if (!token || token.role !== 'admin') {
@@ -42,7 +38,6 @@ export async function middleware(request) {
     }
   }
 
-  // ✅ Détection automatique de la langue + application des headers sécurité
   const response = intlMiddleware(request)
   return secureHeaders(request, response)
 }
