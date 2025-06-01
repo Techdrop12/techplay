@@ -10,6 +10,14 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState(null)
   const [notifStatus, setNotifStatus] = useState(null)
 
+  // Blog IA
+  const [topic, setTopic] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [preview, setPreview] = useState('')
+  const [title, setTitle] = useState('')
+  const [image, setImage] = useState('')
+  const [success, setSuccess] = useState(false)
+
   useEffect(() => {
     fetch('/api/admin/dashboard')
       .then((res) => res.json())
@@ -34,10 +42,46 @@ export default function AdminDashboard() {
       }),
     })
 
-    if (res.ok) {
-      setNotifStatus('✅ Notification envoyée avec succès !')
-    } else {
-      setNotifStatus('❌ Erreur lors de l’envoi de la notification')
+    setNotifStatus(res.ok
+      ? '✅ Notification envoyée avec succès !'
+      : '❌ Erreur lors de l’envoi de la notification')
+  }
+
+  const handleGenerate = async () => {
+    setLoading(true)
+    setSuccess(false)
+    setPreview('')
+    try {
+      const res = await fetch('/api/blog/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic }),
+      })
+      const { content } = await res.json()
+      setPreview(content.html || content)
+      setTitle(content.title || topic)
+      setImage(content.image || '')
+    } catch (err) {
+      console.error('Erreur génération IA:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSave = async () => {
+    try {
+      const res = await fetch('/api/blog/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          content: preview,
+          image,
+        }),
+      })
+      if (res.ok) setSuccess(true)
+    } catch (err) {
+      console.error('Erreur sauvegarde blog:', err)
     }
   }
 
@@ -53,6 +97,7 @@ export default function AdminDashboard() {
     <div className="p-6 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">{t('dashboard')}</h1>
 
+      {/* Statistiques */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -88,6 +133,7 @@ export default function AdminDashboard() {
         </motion.div>
       </div>
 
+      {/* Notification Test */}
       <div className="mt-10">
         <h2 className="text-lg font-semibold mb-2">🔔 Tester les notifications</h2>
         <button
@@ -98,6 +144,57 @@ export default function AdminDashboard() {
         </button>
         {notifStatus && (
           <p className="mt-3 text-sm text-gray-800 dark:text-gray-300">{notifStatus}</p>
+        )}
+      </div>
+
+      {/* Blog IA */}
+      <div className="mt-12 border-t pt-10">
+        <h2 className="text-xl font-bold mb-4">🧠 Générer un article IA</h2>
+        <input
+          value={topic}
+          onChange={(e) => setTopic(e.target.value)}
+          placeholder="Sujet de l'article (ex: Top gadgets 2025)"
+          className="w-full border rounded px-4 py-2 mb-4"
+        />
+        <button
+          onClick={handleGenerate}
+          disabled={loading}
+          className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800"
+        >
+          {loading ? 'Génération...' : 'Générer'}
+        </button>
+
+        {preview && (
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-2">Aperçu généré</h3>
+            <textarea
+              value={preview}
+              onChange={(e) => setPreview(e.target.value)}
+              rows={15}
+              className="w-full border rounded px-4 py-2 mb-4 font-mono"
+            />
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Titre personnalisé"
+              className="w-full border rounded px-4 py-2 mb-4"
+            />
+            <input
+              type="text"
+              value={image}
+              onChange={(e) => setImage(e.target.value)}
+              placeholder="Lien de l’image (Unsplash)"
+              className="w-full border rounded px-4 py-2 mb-4"
+            />
+            <button
+              onClick={handleSave}
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            >
+              Sauvegarder l’article
+            </button>
+            {success && <p className="mt-2 text-green-600">✅ Article enregistré</p>}
+          </div>
         )}
       </div>
     </div>

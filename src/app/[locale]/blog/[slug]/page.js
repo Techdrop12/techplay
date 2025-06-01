@@ -1,40 +1,52 @@
-'use client';
+'use client'
 
-import { sanity } from '@/lib/sanity';
-import { notFound } from 'next/navigation';
-import Image from 'next/image';
-import { PortableText } from '@portabletext/react'; // Permet de lire du contenu riche Sanity
+import { useEffect, useState } from 'react'
+import { useLocale, useParams } from 'next-intl'
+import Image from 'next/image'
+import SEOHead from '@/components/SEOHead'
+import ArticleJsonLd from '@/components/JsonLd/ArticleJsonLd'
 
-export default async function BlogPost({ params }) {
-    const { slug } = params;
-    const post = await sanity.fetch(`*[_type == "post" && slug.current == $slug][0]{
-        title,
-        mainImage {
-            asset->{
-                url
-            }
-        },
-        ...
-    }`, { slug });
+export default function BlogPostPage() {
+  const { slug } = useParams()
+  const locale = useLocale()
+  const [post, setPost] = useState(null)
 
-    if (!post) {
-        notFound();
-    }
+  useEffect(() => {
+    fetch(`/api/blog/one?slug=${slug}`)
+      .then((res) => res.json())
+      .then((data) => {
+        const translatedContent = locale === 'en' && data.en ? data.en : data.content
+        setPost({ ...data, content: translatedContent })
+      })
+      .catch(console.error)
+  }, [slug, locale])
 
-    return (
-        <article>
-            <h1>{post.title}</h1>
-            {post.mainImage?.asset?.url && (
-                <Image
-                    src={post.mainImage.asset.url}
-                    alt={post.title}
-                    width={800}
-                    height={600}
-                />
-            )}
-            {post.content && (
-                <PortableText value={post.content} />
-            )}
-        </article>
-    );
+  if (!post) return <p className="p-6 text-center text-gray-600">Chargement...</p>
+
+  return (
+    <>
+      <SEOHead
+        overrideTitle={post.title}
+        overrideDescription={post.content?.slice(0, 150)}
+        image={post.image}
+      />
+      <ArticleJsonLd post={post} />
+      <article className="max-w-3xl mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-4">{post.title}</h1>
+        {post.image && (
+          <Image
+            src={post.image}
+            alt={post.title}
+            width={800}
+            height={400}
+            className="rounded mb-4"
+          />
+        )}
+        <div
+          className="prose prose-lg"
+          dangerouslySetInnerHTML={{ __html: post.content }}
+        />
+      </article>
+    </>
+  )
 }
