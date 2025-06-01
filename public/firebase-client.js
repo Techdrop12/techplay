@@ -1,8 +1,14 @@
-// ✅ src/lib/firebase-client.js
 'use client'
 
 import { initializeApp, getApps } from 'firebase/app'
 import { getMessaging, getToken, onMessage } from 'firebase/messaging'
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4)
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+  const rawData = atob(base64)
+  return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)))
+}
 
 let messaging
 let firebaseApp
@@ -44,7 +50,7 @@ export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messagi
     const registration = await navigator.serviceWorker.register(serviceWorkerPath)
 
     const token = await getToken(messaging, {
-      vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+      vapidKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY),
       serviceWorkerRegistration: registration,
     })
 
