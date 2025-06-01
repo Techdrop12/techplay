@@ -4,7 +4,6 @@
 import { initializeApp, getApps } from 'firebase/app'
 import { getMessaging, getToken, onMessage } from 'firebase/messaging'
 
-// ✅ Initialise Firebase uniquement si côté client
 let messaging
 let firebaseApp
 
@@ -19,11 +18,16 @@ if (typeof window !== 'undefined') {
     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
   }
 
-  firebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
-  messaging = getMessaging(firebaseApp)
+  console.log('✅ Config Firebase utilisée :', firebaseConfig)
+
+  try {
+    firebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+    messaging = getMessaging(firebaseApp)
+  } catch (e) {
+    console.error('❌ Erreur d’initialisation Firebase (client) :', e)
+  }
 }
 
-// ✅ Requête de permission + enregistrement du token
 export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messaging-sw.js') {
   if (typeof window === 'undefined' || !('Notification' in window)) return null
 
@@ -56,7 +60,6 @@ export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messagi
   }
 }
 
-// ✅ Optionnel : écoute des messages push pendant que le site est ouvert
 export function listenToMessages() {
   if (typeof window !== 'undefined' && messaging) {
     onMessage(messaging, (payload) => {
