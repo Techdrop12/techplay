@@ -1,5 +1,6 @@
 // ✅ src/pages/api/notifications/save-token.js
 
+// 📦 Stockage en mémoire (Set pour éviter les doublons)
 let tokenStore = new Set()
 
 export default async function handler(req, res) {
@@ -9,12 +10,12 @@ export default async function handler(req, res) {
 
   try {
     const { token } = req.body
-    if (!token) {
-      return res.status(400).json({ message: 'Token manquant' })
+
+    if (!token || typeof token !== 'string') {
+      return res.status(400).json({ message: 'Token invalide ou manquant' })
     }
 
     tokenStore.add(token)
-
     return res.status(200).json({ success: true })
   } catch (error) {
     console.error('❌ Erreur enregistrement token Firebase :', error)
@@ -22,12 +23,12 @@ export default async function handler(req, res) {
   }
 }
 
-// ✅ Permet d'accéder à tous les tokens enregistrés
+// ✅ Récupérer tous les tokens enregistrés (format tableau)
 export function getAllTokens() {
   return Array.from(tokenStore)
 }
 
-// ✅ Permet de supprimer un token invalide
+// ✅ Supprimer un token (ex: token expiré ou invalide)
 export function deleteToken(token) {
   tokenStore.delete(token)
 }

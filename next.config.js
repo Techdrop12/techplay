@@ -54,11 +54,6 @@ const nextConfig = {
       ],
     },
   ],
-
-  // ✅ Corrige le warning metadataBase pour les réseaux sociaux
-  experimental: {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.vercel.app'),
-  },
 }
 
 module.exports = nextIntl(withPWA(nextConfig))

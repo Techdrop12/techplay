@@ -5,10 +5,10 @@ import dynamic from 'next/dynamic'
 import OrganizationJsonLd from '@/components/JsonLd/OrganizationJsonLd'
 
 const ClientWrapper = dynamic(() => import('@/components/ClientWrapper'), { ssr: false })
-
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.vercel.app'),
   title: 'TechPlay',
   description: 'La boutique ultime pour les passionnés de tech.',
   icons: { icon: '/favicon.ico' },
