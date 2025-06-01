@@ -9,12 +9,14 @@ export default function EmailCapturePopup() {
   const [submitted, setSubmitted] = useState(false)
 
   useEffect(() => {
-    const savedEmail = localStorage.getItem('user_email')
-    const alreadyClosed = localStorage.getItem('email_popup_closed')
+    if (typeof window !== 'undefined') {
+      const savedEmail = localStorage.getItem('user_email')
+      const alreadyClosed = localStorage.getItem('email_popup_closed')
 
-    if (!savedEmail && !alreadyClosed) {
-      const timeout = setTimeout(() => setVisible(true), 15000)
-      return () => clearTimeout(timeout)
+      if (!savedEmail && !alreadyClosed) {
+        const timeout = setTimeout(() => setVisible(true), 15000)
+        return () => clearTimeout(timeout)
+      }
     }
   }, [])
 
@@ -33,7 +35,9 @@ export default function EmailCapturePopup() {
 
       if (res.ok) {
         toast.success('Merci ! Vous recevrez nos offres par email.')
-        localStorage.setItem('user_email', email)
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('user_email', email)
+        }
         setSubmitted(true)
         setTimeout(() => setVisible(false), 2000)
       } else {
@@ -46,7 +50,9 @@ export default function EmailCapturePopup() {
 
   const handleClose = () => {
     setVisible(false)
-    localStorage.setItem('email_popup_closed', 'true')
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('email_popup_closed', 'true')
+    }
   }
 
   if (!visible || submitted) return null
