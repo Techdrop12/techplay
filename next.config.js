@@ -15,12 +15,6 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
 
-  i18n: {
-    locales: ['fr', 'en'],
-    defaultLocale: 'fr',
-    localeDetection: false,
-  },
-
   images: {
     domains: [
       'images.unsplash.com',
@@ -47,5 +41,5 @@ const nextConfig = {
   },
 };
 
-// ✅ Export final avec next-intl
+// ✅ Export final avec next-intl et PWA
 module.exports = nextIntl(withPWA(nextConfig));
