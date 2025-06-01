@@ -40,10 +40,10 @@ const nextConfig = {
     return config;
   },
 
-  // ✅ Rend manifest.json et SW accessibles publiquement
   headers: async () => [
     {
-      source: '/(manifest.json|logo.png|firebase-messaging-sw.js)',
+      // 👇 Cache et rend les fichiers PWA accessibles publiquement
+      source: '/(manifest.json|logo.png|firebase-messaging-sw.js|icons/.*)',
       headers: [
         {
           key: 'Cache-Control',

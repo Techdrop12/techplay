@@ -18,22 +18,26 @@ if (typeof window !== 'undefined') {
     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
   }
 
-  console.log('✅ Config Firebase utilisée :', firebaseConfig)
-
-  try {
-    firebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
-    messaging = getMessaging(firebaseApp)
-  } catch (e) {
-    console.error('❌ Erreur d’initialisation Firebase (client) :', e)
+  if (!firebaseConfig.projectId) {
+    console.error('❌ Firebase config invalide : projectId manquant.')
+  } else {
+    try {
+      firebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+      messaging = getMessaging(firebaseApp)
+      console.log('✅ Firebase initialisé côté client')
+    } catch (e) {
+      console.error('❌ Erreur d’initialisation Firebase (client) :', e)
+    }
   }
 }
 
+// ✅ Requête de permission + enregistrement du token
 export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messaging-sw.js') {
   if (typeof window === 'undefined' || !('Notification' in window)) return null
 
   const permission = await Notification.requestPermission()
   if (permission !== 'granted') {
-    console.warn('Permission de notification refusée')
+    console.warn('❌ Permission de notification refusée')
     return null
   }
 
@@ -46,6 +50,8 @@ export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messagi
     })
 
     if (token) {
+      console.log('✅ Token Firebase obtenu :', token)
+
       await fetch('/api/notifications/save-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -60,6 +66,7 @@ export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messagi
   }
 }
 
+// ✅ Optionnel : écoute des messages push pendant que le site est ouvert
 export function listenToMessages() {
   if (typeof window !== 'undefined' && messaging) {
     onMessage(messaging, (payload) => {
