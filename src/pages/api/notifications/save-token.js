@@ -1,4 +1,4 @@
-// src/pages/api/notifications/save-token.js
+// ✅ src/pages/api/notifications/save-token.js
 
 let tokenStore = new Set()
 
@@ -13,7 +13,6 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: 'Token manquant' })
     }
 
-    // Stocke en mémoire (optionnel : à remplacer par une base de données dans le futur)
     tokenStore.add(token)
 
     return res.status(200).json({ success: true })
@@ -23,7 +22,12 @@ export default async function handler(req, res) {
   }
 }
 
-// Permet d'accéder à tous les tokens enregistrés
+// ✅ Permet d'accéder à tous les tokens enregistrés
 export function getAllTokens() {
   return Array.from(tokenStore)
+}
+
+// ✅ Permet de supprimer un token invalide
+export function deleteToken(token) {
+  tokenStore.delete(token)
 }
