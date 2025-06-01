@@ -3,15 +3,16 @@ import { getToken } from 'next-auth/jwt'
 import { NextResponse } from 'next/server'
 import { middleware as secureHeaders } from './middleware-security'
 
-// ✅ Configuration inline (sans fichier externe)
+// ✅ Inline i18n config ici directement
 const intlMiddleware = createMiddleware({
   locales: ['fr', 'en'],
-  defaultLocale: 'fr'
+  defaultLocale: 'fr',
 })
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl
 
+  // ⛔ Exclure fichiers techniques
   if (
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
@@ -21,6 +22,7 @@ export async function middleware(request) {
     return secureHeaders(request)
   }
 
+  // 🔧 Maintenance (hors admin/api/maintenance)
   const maintenance = process.env.MAINTENANCE === 'true'
   const isMaintenancePage = pathname === '/maintenance'
   const isAdminPath = pathname.startsWith('/admin')
@@ -31,6 +33,7 @@ export async function middleware(request) {
     return NextResponse.redirect(maintenanceUrl)
   }
 
+  // 🔐 Protection admin
   if (isAdminPath) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
     if (!token || token.role !== 'admin') {
@@ -38,6 +41,7 @@ export async function middleware(request) {
     }
   }
 
+  // 🌍 i18n + headers sécurisés
   const response = intlMiddleware(request)
   return secureHeaders(request, response)
 }
