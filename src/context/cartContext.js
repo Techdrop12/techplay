@@ -8,14 +8,18 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([])
 
   useEffect(() => {
-    const stored = localStorage.getItem('cart')
-    if (stored) {
-      setCart(JSON.parse(stored))
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('cart')
+      if (stored) {
+        setCart(JSON.parse(stored))
+      }
     }
   }, [])
 
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart))
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cart', JSON.stringify(cart))
+    }
   }, [cart])
 
   const addToCart = (product) => {
