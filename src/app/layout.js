@@ -36,7 +36,7 @@ export default function RootLayout({ children }) {
       <head>
         <meta name="theme-color" content="#ffffff" />
         <meta name="robots" content="index, follow" />
-        <link rel="manifest" href="/manifest.json" />
+        <link rel="manifest" href="https://techplay.vercel.app/manifest.json" />
         <OrganizationJsonLd />
       </head>
       <body className={inter.className}>

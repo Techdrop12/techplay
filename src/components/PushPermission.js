@@ -12,9 +12,21 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 }
 
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4)
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+  const rawData = atob(base64)
+  return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)))
+}
+
 export default function PushPermission() {
   useEffect(() => {
-    if (!('Notification' in window) || !('serviceWorker' in navigator)) return
+    if (
+      typeof window === 'undefined' ||
+      !('Notification' in window) ||
+      !('serviceWorker' in navigator)
+    )
+      return
 
     Notification.requestPermission().then(async (permission) => {
       if (permission !== 'granted') return
@@ -23,9 +35,9 @@ export default function PushPermission() {
         const app = initializeApp(firebaseConfig)
         const messaging = getMessaging(app)
 
-        const reg = await navigator.serviceWorker.register('/serviceWorker.js')
+        const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js')
         const token = await getToken(messaging, {
-          vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+          vapidKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY),
           serviceWorkerRegistration: reg,
         })
 

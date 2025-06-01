@@ -8,10 +8,12 @@ export default function CartReminder() {
   const [show, setShow] = useState(false)
 
   useEffect(() => {
-    const storedCart = localStorage.getItem('cart')
-    if (storedCart && JSON.parse(storedCart).length > 0) {
-      const timer = setTimeout(() => setShow(true), 7000) // 7 secondes
-      return () => clearTimeout(timer)
+    if (typeof window !== 'undefined') {
+      const storedCart = localStorage.getItem('cart')
+      if (storedCart && JSON.parse(storedCart).length > 0) {
+        const timer = setTimeout(() => setShow(true), 7000)
+        return () => clearTimeout(timer)
+      }
     }
   }, [])
 
