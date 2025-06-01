@@ -1,3 +1,4 @@
+// next.config.js
 const path = require('path');
 
 const withPWA = require('next-pwa')({
@@ -8,7 +9,6 @@ const withPWA = require('next-pwa')({
   exclude: [/middleware-manifest\.json$/],
 });
 
-// ✅ Ajout du plugin next-intl
 const nextIntl = require('next-intl/plugin')('./next-intl.config.js');
 
 const nextConfig = {
@@ -39,7 +39,19 @@ const nextConfig = {
     config.resolve.alias['@'] = path.resolve(__dirname, 'src');
     return config;
   },
+
+  // ✅ Rend manifest.json et SW accessibles publiquement
+  headers: async () => [
+    {
+      source: '/(manifest.json|logo.png|firebase-messaging-sw.js)',
+      headers: [
+        {
+          key: 'Cache-Control',
+          value: 'public, max-age=3600',
+        },
+      ],
+    },
+  ],
 };
 
-// ✅ Export final avec next-intl et PWA
 module.exports = nextIntl(withPWA(nextConfig));

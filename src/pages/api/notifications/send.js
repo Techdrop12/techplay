@@ -1,5 +1,5 @@
 import { messaging } from '@/lib/firebase-admin'
-import { getAllTokens } from './save-token'
+import { getAllTokens, deleteToken } from './save-token'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
@@ -7,7 +7,9 @@ export default async function handler(req, res) {
   const { title, body, url } = req.body
   const tokens = getAllTokens()
 
-  if (!tokens.length) return res.status(400).json({ error: 'Aucun token enregistré' })
+  if (!tokens.length) {
+    return res.status(400).json({ error: 'Aucun token enregistré' })
+  }
 
   const message = {
     notification: { title, body },
@@ -19,9 +21,27 @@ export default async function handler(req, res) {
 
   try {
     const result = await messaging.sendMulticast(message)
-    res.status(200).json({ success: true, result })
+
+    // ✅ Supprimer les tokens invalides
+    result.responses.forEach((resp, index) => {
+      if (!resp.success) {
+        const errCode = resp.error?.code || ''
+        if (
+          errCode.includes('messaging/invalid-registration-token') ||
+          errCode.includes('messaging/registration-token-not-registered')
+        ) {
+          deleteToken(tokens[index])
+        }
+      }
+    })
+
+    res.status(200).json({
+      success: true,
+      successCount: result.successCount,
+      failureCount: result.failureCount,
+    })
   } catch (err) {
-    console.error('Push error:', err)
+    console.error('❌ Push error:', err)
     res.status(500).json({ error: 'Erreur envoi push' })
   }
 }
