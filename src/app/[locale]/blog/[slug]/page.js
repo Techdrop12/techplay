@@ -1,17 +1,20 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useLocale, useParams } from 'next-intl'
+import { usePathname } from 'next/navigation'
+import { useLocale } from 'next-intl'
 import Image from 'next/image'
 import SEOHead from '@/components/SEOHead'
 import ArticleJsonLd from '@/components/JsonLd/ArticleJsonLd'
 
 export default function BlogPostPage() {
-  const { slug } = useParams()
+  const pathname = usePathname()
+  const slug = pathname?.split('/').pop()
   const locale = useLocale()
   const [post, setPost] = useState(null)
 
   useEffect(() => {
+    if (!slug) return
     fetch(`/api/blog/one?slug=${slug}`)
       .then((res) => res.json())
       .then((data) => {
