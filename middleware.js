@@ -3,7 +3,6 @@ import { getToken } from 'next-auth/jwt'
 import { NextResponse } from 'next/server'
 import { middleware as secureHeaders } from './middleware-security'
 
-// ✅ Inline i18n config ici directement
 const intlMiddleware = createMiddleware({
   locales: ['fr', 'en'],
   defaultLocale: 'fr',
@@ -12,12 +11,14 @@ const intlMiddleware = createMiddleware({
 export async function middleware(request) {
   const { pathname } = request.nextUrl
 
-  // ⛔ Exclure fichiers techniques
+  // ⛔ Exclure fichiers techniques + manifest PWA
   if (
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
-    pathname.includes('.') ||
-    pathname.startsWith('/favicon.ico')
+    pathname.startsWith('/favicon.ico') ||
+    pathname === '/manifest.json' ||
+    pathname === '/firebase-messaging-sw.js' ||
+    pathname.startsWith('/icons')
   ) {
     return secureHeaders(request)
   }

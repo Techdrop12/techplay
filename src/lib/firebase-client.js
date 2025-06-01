@@ -1,9 +1,6 @@
-// ✅ src/lib/firebase-client.js
-
 import { initializeApp } from 'firebase/app'
 import { getMessaging, getToken, onMessage, isSupported } from 'firebase/messaging'
 
-// Config Firebase (client)
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -12,10 +9,15 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 }
 
-// Initialisation Firebase
 const app = initializeApp(firebaseConfig)
 
-// Vérifie la compatibilité du navigateur avec les notifications
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4)
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+  const rawData = atob(base64)
+  return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)))
+}
+
 let messaging = null
 isSupported().then((supported) => {
   if (supported) {
@@ -25,33 +27,18 @@ isSupported().then((supported) => {
   }
 })
 
-// ✅ Demande permission et envoie le token au backend
-export async function requestNotificationPermission() {
+export async function requestPermission() {
   try {
     const permission = await Notification.requestPermission()
-    if (permission !== 'granted') throw new Error('Permission refusée par l’utilisateur.')
-
-    if (!messaging) throw new Error('Firebase Messaging non initialisé')
-
-    const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY
-    const token = await getToken(messaging, {
-      vapidKey,
-    })
-
-    if (!token) throw new Error('Aucun token généré')
-
-    await fetch('/api/notifications/save-token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token }),
-    })
-
-    return token
+    if (permission === 'granted' && messaging) {
+      const token = await getToken(messaging, {
+        vapidKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY),
+      })
+      return token
+    }
   } catch (err) {
-    console.error('❌ Erreur lors de la permission ou de l’enregistrement du token :', err)
-    return null
+    console.error('❌ Erreur push permission:', err)
   }
 }
 
-// Export messaging & listener
 export { messaging, onMessage }
