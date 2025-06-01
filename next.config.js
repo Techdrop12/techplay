@@ -1,4 +1,4 @@
-const path = require('path')
+const path = require('path');
 
 const withPWA = require('next-pwa')({
   dest: 'public',
@@ -6,7 +6,10 @@ const withPWA = require('next-pwa')({
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
   exclude: [/middleware-manifest\.json$/],
-})
+});
+
+// ✅ Ajout du plugin next-intl
+const nextIntl = require('next-intl/plugin')('./next-intl.config.js');
 
 const nextConfig = {
   reactStrictMode: true,
@@ -39,9 +42,10 @@ const nextConfig = {
   },
 
   webpack: (config) => {
-    config.resolve.alias['@'] = path.resolve(__dirname, 'src')
-    return config
+    config.resolve.alias['@'] = path.resolve(__dirname, 'src');
+    return config;
   },
-}
+};
 
-module.exports = withPWA(nextConfig)
+// ✅ Export final avec next-intl
+module.exports = nextIntl(withPWA(nextConfig));
