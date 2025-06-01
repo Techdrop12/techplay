@@ -2,6 +2,7 @@ import createMiddleware from 'next-intl/middleware'
 import { getToken } from 'next-auth/jwt'
 import { NextResponse } from 'next/server'
 import { middleware as secureHeaders } from './middleware-security'
+import { i18n } from './i18n'
 
 // ✅ Configuration langue directement ici (sans import)
 const intlMiddleware = createMiddleware({
