@@ -1,3 +1,4 @@
+// ✅ middleware.js corrigé
 import createMiddleware from 'next-intl/middleware'
 import { getToken } from 'next-auth/jwt'
 import { NextResponse } from 'next/server'
@@ -11,14 +12,15 @@ const intlMiddleware = createMiddleware({
 export async function middleware(request) {
   const { pathname } = request.nextUrl
 
-  // ⛔ Exclure fichiers techniques + manifest PWA
+  // ⛔ Exclure fichiers techniques + manifest PWA + robots.txt
   if (
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon.ico') ||
     pathname === '/manifest.json' ||
     pathname === '/firebase-messaging-sw.js' ||
-    pathname.startsWith('/icons')
+    pathname.startsWith('/icons') ||
+    pathname === '/robots.txt'
   ) {
     return secureHeaders(request)
   }
@@ -49,6 +51,6 @@ export async function middleware(request) {
 
 export const config = {
   matcher: [
-    '/((?!_next|api|favicon.ico|manifest.json|firebase-messaging-sw.js|icons|.*\\..*).*)',
+    '/((?!_next|api|favicon.ico|manifest.json|firebase-messaging-sw.js|icons|robots.txt|.*\..*).*)',
   ],
 }

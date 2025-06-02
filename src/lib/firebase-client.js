@@ -3,15 +3,8 @@
 import { initializeApp, getApps } from 'firebase/app'
 import { getMessaging, getToken, onMessage, isSupported } from 'firebase/messaging'
 
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4)
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
-  const rawData = atob(base64)
-  return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)))
-}
-
-let messaging
-let firebaseApp
+let messaging = null
+let firebaseApp = null
 
 if (typeof window !== 'undefined') {
   const firebaseConfig = {
@@ -44,7 +37,7 @@ if (typeof window !== 'undefined') {
 }
 
 export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messaging-sw.js') {
-  if (typeof window === 'undefined' || !('Notification' in window)) return null
+  if (typeof window === 'undefined' || !('Notification' in window) || !messaging) return null
 
   const permission = await Notification.requestPermission()
   if (permission !== 'granted') {
@@ -54,8 +47,12 @@ export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messagi
 
   try {
     const registration = await navigator.serviceWorker.register(serviceWorkerPath)
-
     const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY
+
+    if (!vapidKey || vapidKey.length < 10) {
+      throw new Error('❌ VAPID_KEY mal définie')
+    }
+
     const token = await getToken(messaging, {
       vapidKey,
       serviceWorkerRegistration: registration,
