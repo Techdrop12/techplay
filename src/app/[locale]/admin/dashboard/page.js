@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { requestAndSaveToken } from '../../../../../public/firebase-client'
+import { requestAndSaveToken } from '@/lib/firebase-client'
 
 export default function AdminDashboard() {
   const t = useTranslations('admin')
