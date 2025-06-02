@@ -6,14 +6,22 @@ import { getMessaging, getToken, onMessage, isSupported } from 'firebase/messagi
 
 export default function PushPermission() {
   useEffect(() => {
-    if (typeof window === 'undefined') return
-    if (!('Notification' in window) || !('serviceWorker' in navigator)) return
+    if (
+      typeof window === 'undefined' ||
+      !('Notification' in window) ||
+      !('serviceWorker' in navigator)
+    ) {
+      return
+    }
 
-    const init = async () => {
-      const permission = await Notification.requestPermission()
-      if (permission !== 'granted') return
-
+    const initPush = async () => {
       try {
+        const permission = await Notification.requestPermission()
+        if (permission !== 'granted') {
+          console.warn('❌ Permission de notification refusée')
+          return
+        }
+
         const firebaseConfig = {
           apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
           authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -24,16 +32,21 @@ export default function PushPermission() {
 
         const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
         const supported = await isSupported()
-        if (!supported) return
+        if (!supported) {
+          console.warn('❌ Firebase messaging non supporté')
+          return
+        }
 
         const messaging = getMessaging(app)
         const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js')
+
         const token = await getToken(messaging, {
           vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
           serviceWorkerRegistration: reg,
         })
 
         if (token) {
+          console.log('✅ Token Firebase obtenu :', token)
           await fetch('/api/notifications/save-token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -45,12 +58,12 @@ export default function PushPermission() {
           console.log('🔔 Notification reçue :', payload)
           alert(payload.notification?.title || 'Nouvelle notification')
         })
-      } catch (err) {
-        console.error('❌ Erreur permission push :', err)
+      } catch (error) {
+        console.error('❌ Erreur permission push :', error)
       }
     }
 
-    init()
+    initPush()
   }, [])
 
   return null
