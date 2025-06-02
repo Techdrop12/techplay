@@ -10,9 +10,11 @@ import ProductJsonLd from '@/components/ProductJsonLd'
 import BreadcrumbJsonLd from '@/components/JsonLd/BreadcrumbJsonLd'
 import RecentProducts from '@/components/RecentProducts'
 import ReviewForm from '@/components/ReviewForm'
+import ReviewList from '@/components/ReviewList'
 import SEOHead from '@/components/SEOHead'
 import ScoreTracker from '@/components/ScoreTracker'
 import FreeShippingBadge from '@/components/FreeShippingBadge'
+import WishlistButton from '@/components/WishlistButton'
 import { addRecentProduct } from '@/lib/recentProducts'
 
 export default function ProductPage() {
@@ -90,9 +92,12 @@ export default function ProductPage() {
         ]}
       />
 
-      <h1 className="text-3xl font-bold mb-4">
-        {variant === 'A' ? product.title : `${product.title} - Édition Limitée`}
-      </h1>
+      <div className="flex items-start justify-between gap-2 mb-4">
+        <h1 className="text-3xl font-bold">
+          {variant === 'A' ? product.title : `${product.title} - Édition Limitée`}
+        </h1>
+        <WishlistButton product={product} />
+      </div>
 
       <ProductCard product={product} variant={variant} />
       <FreeShippingBadge price={product.price} />
@@ -102,6 +107,11 @@ export default function ProductPage() {
           🎁 Offre spéciale sur cette version !
         </p>
       )}
+
+      <div className="mt-8">
+        <ReviewForm productId={product._id} />
+        <ReviewList productId={product._id} />
+      </div>
 
       {recommendations.length > 0 && (
         <section className="mt-12">
@@ -114,7 +124,6 @@ export default function ProductPage() {
         </section>
       )}
 
-      <ReviewForm slug={slug} />
       <RecentProducts />
     </motion.div>
   )

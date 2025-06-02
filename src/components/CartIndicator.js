@@ -1,10 +1,11 @@
+// ✅ components/CartIndicator.js
 'use client'
 import { useCart } from '@/context/cartContext'
 
 export default function CartIndicator() {
   const { cart } = useCart()
   return (
-    <span className="relative inline-block">
+    <span className="relative inline-block" aria-label="Panier">
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path d="M3 3h2l.4 2M7 13h10l4-8H5.4" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
       </svg>

@@ -1,44 +1,30 @@
-import { useState, useEffect } from 'react'
+import dbConnect from '@/lib/dbConnect'
+import Product from '@/models/Product'
 
-/**
- * Hook pour récupérer les recommandations produit
- * @param {string} category - catégorie produit pour filtrer
- * @param {string[]} excludeIds - liste des _id à exclure (ex: produits déjà en panier)
- * @param {number} limit - nombre max de recommandations (défaut 4)
- * @returns {Object} { recommendations, loading, error }
- */
-export function useRecommendations(category, excludeIds = [], limit = 4) {
-  const [recommendations, setRecommendations] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+export default async function handler(req, res) {
+  await dbConnect()
 
-  useEffect(() => {
-    if (!category) {
-      setRecommendations([])
-      setError('Catégorie manquante')
-      return
-    }
+  if (req.method !== 'GET') return res.status(405).end()
 
-    setLoading(true)
-    setError(null)
+  const { category, excludeIds = '', limit = 4 } = req.query
 
-    const params = new URLSearchParams()
-    params.append('category', category)
-    if (excludeIds.length > 0) params.append('excludeIds', excludeIds.join(','))
-    params.append('limit', limit.toString())
+  if (!category) {
+    return res.status(400).json({ error: 'Catégorie manquante' })
+  }
 
-    fetch(`/api/recommendations?${params.toString()}`)
-      .then(async (res) => {
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}))
-          throw new Error(data.error || 'Erreur lors du chargement des recommandations')
-        }
-        return res.json()
-      })
-      .then(data => setRecommendations(data))
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false))
-  }, [category, excludeIds.join(','), limit])
+  try {
+    const excludeArray = excludeIds.split(',').filter(Boolean)
 
-  return { recommendations, loading, error }
+    const products = await Product.find({
+      category,
+      _id: { $nin: excludeArray },
+    })
+      .limit(Number(limit))
+      .lean()
+
+    return res.status(200).json(products)
+  } catch (error) {
+    console.error('Erreur recommandations produits :', error)
+    return res.status(500).json({ error: 'Erreur serveur' })
+  }
 }

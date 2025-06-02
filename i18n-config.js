@@ -1,5 +1,5 @@
-// next-intl.config.js
+// i18n-config.js
 module.exports = {
   locales: ['fr', 'en'],
-  defaultLocale: 'fr',
+  defaultLocale: 'fr'
 }

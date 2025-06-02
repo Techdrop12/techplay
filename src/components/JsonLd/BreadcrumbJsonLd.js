@@ -1,3 +1,4 @@
+// ✅ BreadcrumbJsonLd.js
 'use client'
 
 import Head from 'next/head'

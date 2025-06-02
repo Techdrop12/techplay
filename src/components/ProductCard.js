@@ -12,7 +12,6 @@ import { getUserVariant } from '@/lib/abTestVariants'
 export default function ProductCard({ product }) {
   const { addToCart } = useCart()
   const router = useRouter()
-
   const [variant, setVariant] = useState('A')
 
   useEffect(() => {
@@ -53,7 +52,7 @@ export default function ProductCard({ product }) {
   const displayPrice = variant === 'B'
     ? `${(product.price * 0.95).toFixed(2)} €`
     : `${product.price.toFixed(2)} €`
-  const ctaText = variant === 'C' ? 'Je le veux !' : variant === 'B' ? 'Top deal !' : 'Ajouter au panier'
+  const ctaText = variant === 'C' ? '🔥 Je le veux !' : variant === 'B' ? 'Top deal !' : 'Ajouter au panier'
   const ctaColor = variant === 'B' ? 'bg-indigo-600' : variant === 'C' ? 'bg-orange-600' : 'bg-black'
 
   return (

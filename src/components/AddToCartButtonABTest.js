@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { logEvent } from '@/lib/logEvent'
 
 export default function AddToCartButtonABTest({ onClick, product, userEmail }) {
   const [variant, setVariant] = useState('A')
@@ -25,10 +26,17 @@ export default function AddToCartButtonABTest({ onClick, product, userEmail }) {
       localStorage.setItem('cartEmail', userEmail)
     }
 
+    // 🔁 Backend tracking (MongoDB)
     fetch('/api/track-ab', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ variant }),
+    })
+
+    // 📊 GA4 + Meta tracking (frontend)
+    logEvent('add_to_cart_ab_test', {
+      variant,
+      productId: product?._id || product?.id || null,
     })
 
     onClick()
@@ -47,4 +55,3 @@ export default function AddToCartButtonABTest({ onClick, product, userEmail }) {
     </button>
   )
 }
-

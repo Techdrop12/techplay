@@ -1,11 +1,11 @@
 import '../styles/globals.css'
 import { Inter } from 'next/font/google'
-import Script from 'next/script'
 import dynamic from 'next/dynamic'
+import Script from 'next/script'
 import OrganizationJsonLd from '@/components/JsonLd/OrganizationJsonLd'
 
-const ClientWrapper = dynamic(() => import('@/components/ClientWrapper'), { ssr: false })
 const inter = Inter({ subsets: ['latin'] })
+const ClientWrapper = dynamic(() => import('@/components/ClientWrapper'), { ssr: false })
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.vercel.app'),
@@ -15,7 +15,7 @@ export const metadata = {
   openGraph: {
     title: 'TechPlay',
     description: 'La boutique ultime pour les passionnés de tech.',
-    url: 'https://techplay.com',
+    url: 'https://techplay.vercel.app',
     siteName: 'TechPlay',
     images: [
       {
@@ -36,11 +36,12 @@ export default function RootLayout({ children }) {
       <head>
         <meta name="theme-color" content="#ffffff" />
         <meta name="robots" content="index, follow" />
-        <link rel="manifest" href="https://techplay.vercel.app/manifest.json" />
+        <link rel="manifest" href="/manifest.json" />
         <OrganizationJsonLd />
       </head>
       <body className={inter.className}>
         <ClientWrapper>{children}</ClientWrapper>
+
         <noscript>
           <img
             height="1"

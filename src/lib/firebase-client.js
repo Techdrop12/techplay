@@ -1,7 +1,7 @@
 'use client'
 
 import { initializeApp, getApps } from 'firebase/app'
-import { getMessaging, getToken, onMessage } from 'firebase/messaging'
+import { getMessaging, getToken, onMessage, isSupported } from 'firebase/messaging'
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4)
@@ -29,8 +29,14 @@ if (typeof window !== 'undefined') {
   } else {
     try {
       firebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
-      messaging = getMessaging(firebaseApp)
-      console.log('✅ Firebase initialisé côté client')
+      isSupported().then((supported) => {
+        if (supported) {
+          messaging = getMessaging(firebaseApp)
+          console.log('✅ Firebase Messaging initialisé')
+        } else {
+          console.warn('❌ Notifications push non supportées dans ce navigateur.')
+        }
+      })
     } catch (e) {
       console.error('❌ Erreur d’initialisation Firebase (client) :', e)
     }
@@ -49,14 +55,14 @@ export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messagi
   try {
     const registration = await navigator.serviceWorker.register(serviceWorkerPath)
 
+    const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY
     const token = await getToken(messaging, {
-      vapidKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY),
+      vapidKey,
       serviceWorkerRegistration: registration,
     })
 
     if (token) {
       console.log('✅ Token Firebase obtenu :', token)
-
       await fetch('/api/notifications/save-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

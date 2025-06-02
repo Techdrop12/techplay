@@ -1,9 +1,9 @@
+export const metadataBase = new URL('https://techplay.vercel.app')
 'use client'
 
 import { NextIntlClientProvider } from 'next-intl'
 import { useMessages } from 'next-intl'
 import LocaleProvider from '@/components/LocaleProvider'
-import '../../styles/globals.css'
 import LayoutWithAnalytics from './LayoutWithAnalytics'
 import AnalyticsScripts from '@/components/AnalyticsScripts'
 import EmailCapturePopup from '@/components/EmailCapturePopup'
@@ -27,9 +27,11 @@ export default function LocaleLayout({ children, params: { locale } }) {
     <html lang={locale} suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta charSet="UTF-8" />
+        <meta charSet="utf-8" />
+        <meta name="robots" content="index, follow" />
+        <meta name="theme-color" content="#ffffff" />
       </head>
-      <body className="bg-white text-black dark:bg-zinc-900 dark:text-white antialiased">
+      <body className="bg-white text-black dark:bg-zinc-900 dark:text-white antialiased" suppressHydrationWarning>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <LocaleProvider locale={locale}>
             <LayoutWithAnalytics>{children}</LayoutWithAnalytics>

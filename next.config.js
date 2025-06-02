@@ -7,7 +7,7 @@ const withPWA = require('next-pwa')({
   disable: process.env.NODE_ENV === 'development',
   exclude: [/middleware-manifest\.json$/],
 })
-const nextIntl = require('next-intl/plugin')('./next-intl.config.js')
+const nextIntl = require('next-intl/plugin')('./src/i18n/request.ts')
 
 const nextConfig = {
   reactStrictMode: true,
@@ -40,7 +40,6 @@ const nextConfig = {
 
   headers: async () => [
     {
-      // ✅ Accès public complet aux ressources critiques PWA
       source: '/(manifest.json|firebase-messaging-sw.js|icons/.*)',
       headers: [
         {

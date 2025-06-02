@@ -8,6 +8,8 @@ import LiveChat from '@/components/LiveChat'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import useAnalytics from '@/lib/useAnalytics'
+import AnalyticsScripts from '@/components/AnalyticsScripts'
+// Optionnel : import ScrollToTopButton from '@/components/ScrollToTopButton'
 
 export default function LayoutWithAnalytics({ children }) {
   useAnalytics()
@@ -15,12 +17,14 @@ export default function LayoutWithAnalytics({ children }) {
   return (
     <ClientWrapper>
       <PromoBanner />
-      <EmailCapturePopup />
-      <CartReminder />
-      <LiveChat />
       <Header />
       {children}
       <Footer />
+      <CartReminder />
+      <EmailCapturePopup />
+      <LiveChat />
+      <AnalyticsScripts />
+      {/* <ScrollToTopButton /> */}
     </ClientWrapper>
   )
 }

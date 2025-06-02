@@ -9,8 +9,17 @@ export default function ScoreTracker() {
     let localScore = Number(localStorage.getItem('user_score')) || 0
     setScore(localScore)
 
-    let scrollDepth = 0
+    const currentPath = window.location.pathname
+    const visited = JSON.parse(localStorage.getItem('visited_paths') || '[]')
+    if (!visited.includes(currentPath)) {
+      visited.push(currentPath)
+      localStorage.setItem('visited_paths', JSON.stringify(visited))
+      localScore += 1
+      localStorage.setItem('user_score', localScore)
+      setScore(localScore)
+    }
 
+    let scrollDepth = 0
     const handleScroll = () => {
       const scrolled = Math.floor(
         (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100
@@ -33,18 +42,7 @@ export default function ScoreTracker() {
       }
     }, 15000)
 
-    const currentPath = window.location.pathname
-    const visited = JSON.parse(localStorage.getItem('visited_paths') || '[]')
-    if (!visited.includes(currentPath)) {
-      visited.push(currentPath)
-      localStorage.setItem('visited_paths', JSON.stringify(visited))
-      localScore += 1
-      localStorage.setItem('user_score', localScore)
-      setScore(localScore)
-    }
-
     window.addEventListener('scroll', handleScroll)
-
     return () => {
       clearTimeout(timer)
       window.removeEventListener('scroll', handleScroll)

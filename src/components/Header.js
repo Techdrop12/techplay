@@ -1,3 +1,4 @@
+// ✅ components/Header.js
 'use client'
 
 import Link from 'next/link'
@@ -12,7 +13,7 @@ export default function Header() {
     <header className="flex flex-col sm:flex-row justify-between items-center px-4 py-3 sm:px-6 sm:py-4 bg-black text-white dark:bg-zinc-900">
       <div className="flex items-center justify-between w-full sm:w-auto">
         <Link href="/">
-          <img src="/logo.png" alt="TechPlay logo" className="h-10" />
+          <img src="/logo.png" alt="TechPlay logo" className="h-10" loading="lazy" />
         </Link>
         <div className="sm:hidden mt-2">
           <LanguageSwitcher />
