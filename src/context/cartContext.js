@@ -8,17 +8,25 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([])
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('cart')
-      if (stored) {
-        setCart(JSON.parse(stored))
+    try {
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('cart')
+        if (stored) {
+          setCart(JSON.parse(stored))
+        }
       }
+    } catch (error) {
+      console.warn('Erreur lecture localStorage (cart):', error)
     }
   }, [])
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('cart', JSON.stringify(cart))
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('cart', JSON.stringify(cart))
+      }
+    } catch (error) {
+      console.warn('Erreur sauvegarde localStorage (cart):', error)
     }
   }, [cart])
 

@@ -13,14 +13,14 @@ import PushPermission from '@/components/PushPermission'
 import ScoreTracker from '@/components/ScoreTracker'
 import useHotjar from '@/lib/hotjar'
 
-const GA_ID = process.env.NEXT_PUBLIC_GA_ID || ''
-const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID || ''
+const isClient = typeof window !== 'undefined'
+const GA_ID = isClient ? process.env.NEXT_PUBLIC_GA_ID : ''
+const META_PIXEL_ID = isClient ? process.env.NEXT_PUBLIC_META_PIXEL_ID : ''
 
 export default function ClientWrapper({ children }) {
   const pathname = usePathname()
   useHotjar()
 
-  // 🔁 Google Analytics page view
   useEffect(() => {
     if (typeof window !== 'undefined' && GA_ID) {
       window.gtag?.('event', 'page_view', {
@@ -74,6 +74,7 @@ export default function ClientWrapper({ children }) {
                   width="1"
                   style={{ display: 'none' }}
                   src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+                  alt=""
                 />
               </noscript>
             </>
@@ -85,10 +86,8 @@ export default function ClientWrapper({ children }) {
           {/* 🧠 Score utilisateur comportemental */}
           <ScoreTracker />
 
-          {/* 🌐 App content */}
           {children}
 
-          {/* ✅ Toast messages */}
           <Toaster position="top-right" />
         </UpsellProvider>
       </CartProvider>

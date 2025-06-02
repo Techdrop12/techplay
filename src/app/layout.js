@@ -1,7 +1,6 @@
 import '../styles/globals.css'
 import { Inter } from 'next/font/google'
 import dynamic from 'next/dynamic'
-import Script from 'next/script'
 import OrganizationJsonLd from '@/components/JsonLd/OrganizationJsonLd'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -41,15 +40,6 @@ export default function RootLayout({ children }) {
       </head>
       <body className={inter.className}>
         <ClientWrapper>{children}</ClientWrapper>
-
-        <noscript>
-          <img
-            height="1"
-            width="1"
-            style={{ display: 'none' }}
-            src={`https://www.facebook.com/tr?id=${process.env.NEXT_PUBLIC_META_PIXEL_ID}&ev=PageView&noscript=1`}
-          />
-        </noscript>
       </body>
     </html>
   )

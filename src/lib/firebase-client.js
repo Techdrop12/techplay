@@ -18,39 +18,47 @@ if (typeof window !== 'undefined') {
   }
 
   if (!firebaseConfig.projectId) {
-    console.error('❌ Firebase config invalide : projectId manquant.')
+    console.warn('❌ Firebase config invalide : projectId manquant.')
   } else {
     try {
       firebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
-      isSupported().then((supported) => {
-        if (supported) {
-          messaging = getMessaging(firebaseApp)
-          console.log('✅ Firebase Messaging initialisé')
-        } else {
-          console.warn('❌ Notifications push non supportées dans ce navigateur.')
-        }
-      })
+
+      isSupported()
+        .then((supported) => {
+          if (supported) {
+            messaging = getMessaging(firebaseApp)
+            console.log('✅ Firebase Messaging initialisé (client)')
+          } else {
+            console.warn('❌ Notifications push non supportées dans ce navigateur.')
+          }
+        })
+        .catch((e) => {
+          console.warn('❌ Erreur vérification support messaging :', e)
+        })
     } catch (e) {
-      console.error('❌ Erreur d’initialisation Firebase (client) :', e)
+      console.error('❌ Erreur init Firebase (client) :', e)
     }
   }
 }
 
 export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messaging-sw.js') {
-  if (typeof window === 'undefined' || !('Notification' in window) || !messaging) return null
-
-  const permission = await Notification.requestPermission()
-  if (permission !== 'granted') {
-    console.warn('❌ Permission de notification refusée')
+  if (typeof window === 'undefined' || !('Notification' in window) || !messaging) {
+    console.warn('⛔ Notifications non supportées dans ce contexte.')
     return null
   }
 
   try {
+    const permission = await Notification.requestPermission()
+    if (permission !== 'granted') {
+      console.warn('❌ Permission de notification refusée')
+      return null
+    }
+
     const registration = await navigator.serviceWorker.register(serviceWorkerPath)
     const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY
 
     if (!vapidKey || vapidKey.length < 10) {
-      throw new Error('❌ VAPID_KEY mal définie')
+      throw new Error('❌ VAPID_KEY non valide ou absente')
     }
 
     const token = await getToken(messaging, {
@@ -69,7 +77,7 @@ export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messagi
 
     return token
   } catch (error) {
-    console.error('❌ Erreur lors de la génération du token Firebase :', error)
+    console.error('❌ Erreur récupération token Firebase :', error)
     return null
   }
 }
