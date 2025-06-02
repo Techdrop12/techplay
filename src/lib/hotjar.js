@@ -7,22 +7,23 @@ const HOTJAR_SV = process.env.NEXT_PUBLIC_HOTJAR_SV || 6
 
 export default function useHotjar() {
   useEffect(() => {
-    if (!HOTJAR_ID || typeof window === 'undefined') return
-    if (window.hj) return // éviter double init
+    if (typeof window === 'undefined') return
+    if (!HOTJAR_ID || window.hj) return
 
-    ;(function(h, o, t, j, a, r) {
-      h.hj = h.hj || function() {
-        (h.hj.q = h.hj.q || []).push(arguments)
-      }
-      h._hjSettings = { hjid: HOTJAR_ID, hjsv: HOTJAR_SV }
-      a = o.getElementsByTagName('head')[0]
-      r = o.createElement('script')
-      r.async = 1
-      r.src = `https://static.hotjar.com/c/hotjar-${HOTJAR_ID}.js?sv=${HOTJAR_SV}`
-      a.appendChild(r)
-    })(window, document, 'script', 0, 0, 0)
+    try {
+      ;(function(h, o, t, j, a, r) {
+        h.hj = h.hj || function() { (h.hj.q = h.hj.q || []).push(arguments) }
+        h._hjSettings = { hjid: HOTJAR_ID, hjsv: HOTJAR_SV }
+        a = o.getElementsByTagName('head')[0]
+        r = o.createElement('script')
+        r.async = 1
+        r.src = `https://static.hotjar.com/c/hotjar-${HOTJAR_ID}.js?sv=${HOTJAR_SV}`
+        a.appendChild(r)
+      })(window, document, 'script', 0, 0, 0)
 
-    // ✅ Event personnalisé (ex : suivi page vue)
-    window.hj('trigger', 'page_loaded')
+      window.hj('trigger', 'page_loaded')
+    } catch (error) {
+      console.warn('❌ Erreur Hotjar :', error)
+    }
   }, [])
 }

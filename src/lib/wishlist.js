@@ -1,12 +1,12 @@
-// src/lib/wishlist.js
-
+// ✅ src/lib/wishlist.js corrigé
 const STORAGE_KEY = 'wishlist'
 
 export function getWishlist() {
   if (typeof window === 'undefined') return []
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []
-  } catch {
+  } catch (e) {
+    console.warn('Erreur lecture wishlist:', e)
     return []
   }
 }
@@ -20,7 +20,9 @@ export function toggleWishlistItem(product) {
       ? current.filter(p => p._id !== product._id)
       : [product, ...current]
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
-  } catch {}
+  } catch (e) {
+    console.warn('Erreur sauvegarde wishlist:', e)
+  }
 }
 
 export function isInWishlist(productId) {
@@ -28,7 +30,7 @@ export function isInWishlist(productId) {
   try {
     const current = getWishlist()
     return current.some(p => p._id === productId)
-  } catch {
+  } catch (e) {
     return false
   }
 }

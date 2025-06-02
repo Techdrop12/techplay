@@ -9,7 +9,7 @@ export const CartProvider = ({ children }) => {
 
   useEffect(() => {
     try {
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && window.localStorage) {
         const stored = localStorage.getItem('cart')
         if (stored) {
           setCart(JSON.parse(stored))
@@ -22,7 +22,7 @@ export const CartProvider = ({ children }) => {
 
   useEffect(() => {
     try {
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && window.localStorage) {
         localStorage.setItem('cart', JSON.stringify(cart))
       }
     } catch (error) {
