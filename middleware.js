@@ -1,4 +1,4 @@
-// ✅ middleware.js corrigé et optimisé
+// ✅ middleware.js final optimisé
 import createMiddleware from 'next-intl/middleware'
 import { getToken } from 'next-auth/jwt'
 import { NextResponse } from 'next/server'
@@ -12,7 +12,7 @@ const intlMiddleware = createMiddleware({
 export async function middleware(request) {
   const { pathname } = request.nextUrl
 
-  // ⛔ Exclusions (fichiers statiques, manifest, icons, robots.txt, etc.)
+  // ⛔ Fichiers statiques, manifest, PWA, robots.txt
   const excludedPaths = [
     '/manifest.json',
     '/favicon.ico',
@@ -24,12 +24,13 @@ export async function middleware(request) {
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/icons') ||
-    excludedPaths.includes(pathname)
+    excludedPaths.includes(pathname) ||
+    pathname.match(/\.[\w]+$/) // fichiers .js, .css, .png etc.
   ) {
     return secureHeaders(request)
   }
 
-  // 🔧 Maintenance activée ?
+  // 🔧 Maintenance (hors admin/maintenance)
   const maintenance = process.env.MAINTENANCE === 'true'
   const isAdminPath = pathname.startsWith('/admin')
   const isMaintenancePage = pathname === '/maintenance'
@@ -40,8 +41,8 @@ export async function middleware(request) {
     return NextResponse.redirect(redirectUrl)
   }
 
-  // 🔐 Auth admin sauf si fichier manifest ou autre
-  if (isAdminPath && !excludedPaths.includes(pathname)) {
+  // 🔐 Protection admin
+  if (isAdminPath) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
     if (!token || token.role !== 'admin') {
       return NextResponse.redirect(new URL('/login', request.url))
@@ -53,6 +54,7 @@ export async function middleware(request) {
   return secureHeaders(request, response)
 }
 
+// ✅ Matcher clair pour ne jamais bloquer manifest.json, icons, etc.
 export const config = {
   matcher: [
     '/((?!_next|api|favicon.ico|manifest.json|firebase-messaging-sw.js|robots.txt|icons|.*\\..*).*)',
