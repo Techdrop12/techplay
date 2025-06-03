@@ -1,9 +1,11 @@
+// next.config.js
+
 const path = require('path')
 const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development', // Désactive le PWA en dev
+  disable: process.env.NODE_ENV === 'development', // désactive la PWA en dev
   exclude: [/middleware-manifest\.json$/],
 })
 
@@ -39,6 +41,9 @@ const nextConfig = {
     return config
   },
 
+  // ───────────────────────────────────────────────────────────
+  //  Headers HTTP pour autoriser les fichiers publics (manifest, SW, icons)
+  // ───────────────────────────────────────────────────────────
   headers: async () => [
     {
       source: '/(manifest.json|firebase-messaging-sw.js|icons/.*)',
@@ -50,6 +55,19 @@ const nextConfig = {
         {
           key: 'Access-Control-Allow-Origin',
           value: '*',
+        },
+        {
+          key: 'Content-Type',
+          value: 'application/json; charset=UTF-8',
+        },
+      ],
+    },
+    {
+      source: '/firebase-messaging-sw.js',
+      headers: [
+        {
+          key: 'Content-Type',
+          value: 'application/javascript',
         },
       ],
     },
