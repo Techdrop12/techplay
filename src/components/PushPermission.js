@@ -1,4 +1,3 @@
-// ✅ PushPermission.js corrigé
 'use client'
 
 import { useEffect } from 'react'
@@ -28,8 +27,9 @@ export default function PushPermission() {
         if (!supported) return
 
         const messaging = getMessaging(app)
+
         const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js')
-        await navigator.serviceWorker.ready // 🟢 correction ici
+        await navigator.serviceWorker.ready
 
         const token = await getToken(messaging, {
           vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,

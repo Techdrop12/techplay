@@ -1,4 +1,3 @@
-// ✅ middleware.js
 import createMiddleware from 'next-intl/middleware'
 import { getToken } from 'next-auth/jwt'
 import { NextResponse } from 'next/server'
