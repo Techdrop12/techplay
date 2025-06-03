@@ -29,7 +29,7 @@ export default function PushPermission() {
         const messaging = getMessaging(app)
 
         const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js')
-        await navigator.serviceWorker.ready // 🔧 Correction ici
+        await navigator.serviceWorker.ready // ✅ Ajout essentiel ici
 
         const token = await getToken(messaging, {
           vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
