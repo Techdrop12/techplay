@@ -1,4 +1,4 @@
-// ✅ middleware.js corrigé – évite 401 sur fichiers publics comme manifest.json
+// ✅ middleware.js – Version finale PWA désactivée + fix manifest.json 401
 import createMiddleware from 'next-intl/middleware'
 import { getToken } from 'next-auth/jwt'
 import { NextResponse } from 'next/server'
@@ -16,12 +16,14 @@ const excludedPaths = [
   '/firebase-messaging-sw.js',
   '/sitemap.xml',
   '/sitemap-0.xml',
+  '/sw.js',
+  '/serviceWorker.js'
 ]
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl
 
-  // ✅ Laisse passer fichiers publics et assets
+  // ✅ Autoriser statiques sans traitement
   if (
     excludedPaths.includes(pathname) ||
     pathname.startsWith('/api') ||
@@ -34,7 +36,7 @@ export async function middleware(request) {
     return secureHeaders(request)
   }
 
-  // ✅ Redirection maintenance sauf admin
+  // ✅ Maintenance : redirige sauf admin
   const maintenance = process.env.MAINTENANCE === 'true'
   const isAdminPath = pathname.startsWith('/admin')
   const isMaintenancePage = pathname === '/maintenance'
@@ -45,7 +47,7 @@ export async function middleware(request) {
     return NextResponse.redirect(redirectUrl)
   }
 
-  // ✅ Authentification admin uniquement sur pages dynamiques
+  // ✅ Auth admin uniquement sur pages non exclues
   if (isAdminPath && !pathname.match(/\.(json|xml|ico)$/)) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
     if (!token || token.role !== 'admin') {
@@ -57,9 +59,8 @@ export async function middleware(request) {
   return secureHeaders(request, response)
 }
 
-// ✅ Matcher propre : laisse passer fichiers statiques sans middleware
 export const config = {
   matcher: [
-    '/((?!_next|api|favicon.ico|manifest.json|firebase-messaging-sw.js|robots.txt|sitemap.xml|sitemap-0.xml|icons|images|fonts|.*\\..*).*)',
+    '/((?!_next|api|favicon.ico|manifest.json|firebase-messaging-sw.js|robots.txt|sitemap.xml|sitemap-0.xml|sw.js|serviceWorker.js|icons|images|fonts|.*\\..*).*)'
   ],
 } 
