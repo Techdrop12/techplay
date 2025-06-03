@@ -1,12 +1,12 @@
-// ✅ next.config.js
 const path = require('path')
 const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  disable: true, // ✅ Désactive la PWA temporairement pour corriger manifest.json
+  disable: process.env.NODE_ENV === 'development',
   exclude: [/middleware-manifest\.json$/],
 })
+
 const nextIntl = require('next-intl/plugin')('./src/i18n/request.ts')
 
 const nextConfig = {
@@ -49,6 +49,10 @@ const nextConfig = {
         {
           key: 'Access-Control-Allow-Origin',
           value: '*',
+        },
+        {
+          key: 'Content-Type',
+          value: 'application/json; charset=UTF-8',
         },
       ],
     },

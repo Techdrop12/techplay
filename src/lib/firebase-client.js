@@ -1,3 +1,4 @@
+// ✅ src/lib/firebase-client.js corrigé et complet
 'use client'
 
 import { initializeApp, getApps } from 'firebase/app'
@@ -57,7 +58,7 @@ export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messagi
     const registration = await navigator.serviceWorker.register(serviceWorkerPath)
     const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY
 
-    if (!vapidKey || vapidKey.length < 10) {
+    if (!vapidKey || vapidKey.length < 80 || !vapidKey.startsWith('B')) {
       throw new Error('❌ VAPID_KEY non valide ou absente')
     }
 

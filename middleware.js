@@ -1,4 +1,3 @@
-// ✅ middleware.js – Version finale PWA désactivée + fix manifest.json 401
 import createMiddleware from 'next-intl/middleware'
 import { getToken } from 'next-auth/jwt'
 import { NextResponse } from 'next/server'
@@ -14,29 +13,25 @@ const excludedPaths = [
   '/favicon.ico',
   '/robots.txt',
   '/firebase-messaging-sw.js',
-  '/sitemap.xml',
-  '/sitemap-0.xml',
-  '/sw.js',
-  '/serviceWorker.js'
 ]
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl
 
-  // ✅ Autoriser statiques sans traitement
+  // 🔒 Autoriser accès libre pour fichiers publics et Next internals
   if (
-    excludedPaths.includes(pathname) ||
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/icons') ||
     pathname.startsWith('/images') ||
     pathname.startsWith('/fonts') ||
-    pathname.match(/\.(js|css|png|jpg|jpeg|svg|webp|ico|json|xml|txt)$/)
+    excludedPaths.includes(pathname) ||
+    pathname.match(/\.(js|css|png|jpg|jpeg|svg|webp|ico|json|txt)$/)
   ) {
     return secureHeaders(request)
   }
 
-  // ✅ Maintenance : redirige sauf admin
+  // 🛠️ Mode maintenance (sauf pour admin et page maintenance)
   const maintenance = process.env.MAINTENANCE === 'true'
   const isAdminPath = pathname.startsWith('/admin')
   const isMaintenancePage = pathname === '/maintenance'
@@ -47,20 +42,21 @@ export async function middleware(request) {
     return NextResponse.redirect(redirectUrl)
   }
 
-  // ✅ Auth admin uniquement sur pages non exclues
-  if (isAdminPath && !pathname.match(/\.(json|xml|ico)$/)) {
+  // 🔐 Protection des routes admin
+  if (isAdminPath && !excludedPaths.includes(pathname)) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
     if (!token || token.role !== 'admin') {
       return NextResponse.redirect(new URL('/login', request.url))
     }
   }
 
+  // 🌍 Middleware internationalisation + sécurité
   const response = intlMiddleware(request)
   return secureHeaders(request, response)
 }
 
 export const config = {
   matcher: [
-    '/((?!_next|api|favicon.ico|manifest.json|firebase-messaging-sw.js|robots.txt|sitemap.xml|sitemap-0.xml|sw.js|serviceWorker.js|icons|images|fonts|.*\\..*).*)'
+    '/((?!_next|api|favicon.ico|manifest.json|firebase-messaging-sw.js|robots.txt|icons|images|fonts|.*\\..*).*)',
   ],
-} 
+}
