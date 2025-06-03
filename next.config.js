@@ -1,10 +1,10 @@
-// next.config.js
+// ✅ next.config.js
 const path = require('path')
 const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development',
+  disable: process.env.NODE_ENV === 'production', // ✅ Désactive temporairement en prod pour éviter conflits manifest
   exclude: [/middleware-manifest\.json$/],
 })
 const nextIntl = require('next-intl/plugin')('./src/i18n/request.ts')
