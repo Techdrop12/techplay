@@ -22,13 +22,17 @@ const excludedPaths = [
 export async function middleware(request) {
   const { pathname } = request.nextUrl
 
+  if (excludedPaths.includes(pathname)) {
+    console.log('⏭️ Manifest exclu du middleware :', pathname)
+    return NextResponse.next()
+  }
+
   if (
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/icons') ||
     pathname.startsWith('/images') ||
     pathname.startsWith('/fonts') ||
-    excludedPaths.includes(pathname) ||
     pathname.match(/\.(js|css|png|jpg|jpeg|svg|webp|ico|json|xml|txt)$/)
   ) {
     return secureHeaders(request)
@@ -44,7 +48,7 @@ export async function middleware(request) {
     return NextResponse.redirect(redirectUrl)
   }
 
-  if (isAdminPath && !excludedPaths.includes(pathname)) {
+  if (isAdminPath) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
     if (!token || token.role !== 'admin') {
       return NextResponse.redirect(new URL('/login', request.url))

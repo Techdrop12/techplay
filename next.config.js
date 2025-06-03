@@ -4,7 +4,7 @@ const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === 'production', // ✅ Désactive temporairement en prod pour éviter conflits manifest
+  disable: true, // ✅ Désactive la PWA temporairement pour corriger manifest.json
   exclude: [/middleware-manifest\.json$/],
 })
 const nextIntl = require('next-intl/plugin')('./src/i18n/request.ts')
