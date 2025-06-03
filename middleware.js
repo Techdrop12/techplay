@@ -8,7 +8,7 @@ const intlMiddleware = createMiddleware({
   defaultLocale: 'fr',
 })
 
-// Fichiers et chemins qui ne doivent jamais être interceptés
+// Fichiers et chemins à exclure de toute interception
 const excludedPaths = [
   '/manifest.json',
   '/favicon.ico',
@@ -19,7 +19,7 @@ const excludedPaths = [
 export async function middleware(request) {
   const { pathname } = request.nextUrl
 
-  // Autorise les fichiers publics, les assets statiques et les exclusions
+  // Fichiers statiques + exclus → autorisés sans traitement
   if (
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
@@ -32,7 +32,7 @@ export async function middleware(request) {
     return secureHeaders(request)
   }
 
-  // Mode maintenance (redirige vers /maintenance sauf admin)
+  // Redirection maintenance
   const maintenance = process.env.MAINTENANCE === 'true'
   const isAdminPath = pathname.startsWith('/admin')
   const isMaintenancePage = pathname === '/maintenance'
@@ -43,7 +43,7 @@ export async function middleware(request) {
     return NextResponse.redirect(redirectUrl)
   }
 
-  // Auth admin (protège /admin)
+  // Authentification admin
   if (isAdminPath && !excludedPaths.includes(pathname)) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
     if (!token || token.role !== 'admin') {
@@ -51,12 +51,12 @@ export async function middleware(request) {
     }
   }
 
-  // Ajout headers de sécurité
+  // Traductions + sécurité
   const response = intlMiddleware(request)
   return secureHeaders(request, response)
 }
 
-// ✅ Matcher corrigé : laisse passer manifest.json, assets, fichiers publics
+// ✅ Matcher corrigé pour autoriser tous les fichiers publics
 export const config = {
   matcher: [
     '/((?!_next|api|favicon.ico|manifest.json|firebase-messaging-sw.js|robots.txt|icons|images|fonts|.*\\..*).*)',
