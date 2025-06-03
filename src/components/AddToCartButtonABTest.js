@@ -1,3 +1,4 @@
+// src/components/AddToCartButtonABTest.js
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -7,23 +8,27 @@ export default function AddToCartButtonABTest({ onClick, product, userEmail }) {
   const [variant, setVariant] = useState('A')
 
   useEffect(() => {
-    const stored = localStorage.getItem('ab_variant')
+    if (typeof window === 'undefined') return
+
+    const stored = window.localStorage.getItem('ab_variant')
     if (stored) {
       setVariant(stored)
     } else {
       const random = Math.random() < 0.5 ? 'A' : 'B'
-      localStorage.setItem('ab_variant', random)
+      window.localStorage.setItem('ab_variant', random)
       setVariant(random)
     }
   }, [])
 
   const handleClick = () => {
-    const currentCart = JSON.parse(localStorage.getItem('cartItems') || '[]')
-    const updatedCart = [...currentCart, product]
-    localStorage.setItem('cartItems', JSON.stringify(updatedCart))
+    if (typeof window !== 'undefined') {
+      const currentCart = JSON.parse(window.localStorage.getItem('cartItems') || '[]')
+      const updatedCart = [...currentCart, product]
+      window.localStorage.setItem('cartItems', JSON.stringify(updatedCart))
 
-    if (userEmail) {
-      localStorage.setItem('cartEmail', userEmail)
+      if (userEmail) {
+        window.localStorage.setItem('cartEmail', userEmail)
+      }
     }
 
     // 🔁 Backend tracking (MongoDB)
