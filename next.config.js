@@ -3,12 +3,13 @@ const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development',
+  disable: process.env.NODE_ENV === 'development', // Désactive le PWA en dev
   exclude: [/middleware-manifest\.json$/],
 })
 
 const nextIntl = require('next-intl/plugin')('./src/i18n/request.ts')
 
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
@@ -49,10 +50,6 @@ const nextConfig = {
         {
           key: 'Access-Control-Allow-Origin',
           value: '*',
-        },
-        {
-          key: 'Content-Type',
-          value: 'application/json; charset=UTF-8',
         },
       ],
     },
