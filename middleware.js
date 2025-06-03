@@ -1,4 +1,4 @@
-// ✅ middleware.js
+// ✅ middleware.js corrigé – évite 401 sur fichiers publics comme manifest.json
 import createMiddleware from 'next-intl/middleware'
 import { getToken } from 'next-auth/jwt'
 import { NextResponse } from 'next/server'
@@ -9,7 +9,6 @@ const intlMiddleware = createMiddleware({
   defaultLocale: 'fr',
 })
 
-// ✅ Fichiers publics à ne jamais intercepter
 const excludedPaths = [
   '/manifest.json',
   '/favicon.ico',
@@ -22,12 +21,9 @@ const excludedPaths = [
 export async function middleware(request) {
   const { pathname } = request.nextUrl
 
-  if (excludedPaths.includes(pathname)) {
-    console.log('⏭️ Manifest exclu du middleware :', pathname)
-    return NextResponse.next()
-  }
-
+  // ✅ Laisse passer fichiers publics et assets
   if (
+    excludedPaths.includes(pathname) ||
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/icons') ||
@@ -38,6 +34,7 @@ export async function middleware(request) {
     return secureHeaders(request)
   }
 
+  // ✅ Redirection maintenance sauf admin
   const maintenance = process.env.MAINTENANCE === 'true'
   const isAdminPath = pathname.startsWith('/admin')
   const isMaintenancePage = pathname === '/maintenance'
@@ -48,7 +45,8 @@ export async function middleware(request) {
     return NextResponse.redirect(redirectUrl)
   }
 
-  if (isAdminPath) {
+  // ✅ Authentification admin uniquement sur pages dynamiques
+  if (isAdminPath && !pathname.match(/\.(json|xml|ico)$/)) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
     if (!token || token.role !== 'admin') {
       return NextResponse.redirect(new URL('/login', request.url))
@@ -59,8 +57,9 @@ export async function middleware(request) {
   return secureHeaders(request, response)
 }
 
+// ✅ Matcher propre : laisse passer fichiers statiques sans middleware
 export const config = {
   matcher: [
-    '/((?!_next|api|favicon.ico|manifest.json|robots.txt|sitemap.xml|sitemap-0.xml|firebase-messaging-sw.js|icons|images|fonts|.*\\..*).*)',
+    '/((?!_next|api|favicon.ico|manifest.json|firebase-messaging-sw.js|robots.txt|sitemap.xml|sitemap-0.xml|icons|images|fonts|.*\\..*).*)',
   ],
-}
+} 
