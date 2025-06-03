@@ -1,3 +1,4 @@
+// ✅ middleware.js
 import createMiddleware from 'next-intl/middleware'
 import { getToken } from 'next-auth/jwt'
 import { NextResponse } from 'next/server'
@@ -8,15 +9,15 @@ const intlMiddleware = createMiddleware({
   defaultLocale: 'fr',
 })
 
+const excludedPaths = [
+  '/manifest.json',
+  '/favicon.ico',
+  '/robots.txt',
+  '/firebase-messaging-sw.js',
+]
+
 export async function middleware(request) {
   const { pathname } = request.nextUrl
-
-  const excludedPaths = [
-    '/manifest.json',
-    '/favicon.ico',
-    '/robots.txt',
-    '/firebase-messaging-sw.js',
-  ]
 
   if (
     pathname.startsWith('/api') ||
@@ -37,7 +38,7 @@ export async function middleware(request) {
     return NextResponse.redirect(redirectUrl)
   }
 
-  if (isAdminPath) {
+  if (isAdminPath && !excludedPaths.includes(pathname)) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
     if (!token || token.role !== 'admin') {
       return NextResponse.redirect(new URL('/login', request.url))
