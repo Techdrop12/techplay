@@ -1,9 +1,10 @@
-// ✅ middleware.js final optimisé
+// ✅ middleware.js corrigé et optimisé
 import createMiddleware from 'next-intl/middleware'
 import { getToken } from 'next-auth/jwt'
 import { NextResponse } from 'next/server'
 import { middleware as secureHeaders } from './middleware-security'
 
+// 🌍 Middleware internationalisation
 const intlMiddleware = createMiddleware({
   locales: ['fr', 'en'],
   defaultLocale: 'fr',
@@ -12,7 +13,7 @@ const intlMiddleware = createMiddleware({
 export async function middleware(request) {
   const { pathname } = request.nextUrl
 
-  // ⛔ Fichiers statiques, manifest, PWA, robots.txt
+  // 🛡️ Exclusions (fichiers publics)
   const excludedPaths = [
     '/manifest.json',
     '/favicon.ico',
@@ -24,13 +25,12 @@ export async function middleware(request) {
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/icons') ||
-    excludedPaths.includes(pathname) ||
-    pathname.match(/\.[\w]+$/) // fichiers .js, .css, .png etc.
+    excludedPaths.includes(pathname)
   ) {
     return secureHeaders(request)
   }
 
-  // 🔧 Maintenance (hors admin/maintenance)
+  // 🚧 Maintenance activée ?
   const maintenance = process.env.MAINTENANCE === 'true'
   const isAdminPath = pathname.startsWith('/admin')
   const isMaintenancePage = pathname === '/maintenance'
@@ -41,20 +41,19 @@ export async function middleware(request) {
     return NextResponse.redirect(redirectUrl)
   }
 
-  // 🔐 Protection admin
-  if (isAdminPath) {
+  // 🔐 Auth admin protégée
+  if (isAdminPath && !excludedPaths.includes(pathname)) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
     if (!token || token.role !== 'admin') {
       return NextResponse.redirect(new URL('/login', request.url))
     }
   }
 
-  // 🌍 I18n + secure headers
+  // ✅ Middleware I18n + sécurisation
   const response = intlMiddleware(request)
   return secureHeaders(request, response)
 }
 
-// ✅ Matcher clair pour ne jamais bloquer manifest.json, icons, etc.
 export const config = {
   matcher: [
     '/((?!_next|api|favicon.ico|manifest.json|firebase-messaging-sw.js|robots.txt|icons|.*\\..*).*)',
