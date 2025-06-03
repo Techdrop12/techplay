@@ -1,53 +1,47 @@
 // middleware.js
-
 import createMiddleware from 'next-intl/middleware'
 import { getToken } from 'next-auth/jwt'
 import { NextResponse } from 'next/server'
 import { middleware as secureHeaders } from './middleware-security'
 
-// 1) Middleware i18n (Next-Intl)
+// 1) Configuration pour next-intl (i18n)
 const intlMiddleware = createMiddleware({
   locales: ['fr', 'en'],
   defaultLocale: 'fr',
 })
 
-// 2) Liste des fichiers publics qu’on ignore complètement
+// 2) Chemins à exclure complètement du middleware
 const excludedPaths = [
   '/manifest.json',
-  '/firebase-messaging-sw.js',
   '/favicon.ico',
   '/robots.txt',
+  '/firebase-messaging-sw.js',
+  // Ajoutez ici d’autres noms de fichiers si nécessaire (ex. '/robots.txt')
 ]
 
+/**
+ * Fonction middleware principale.
+ * Elle va :
+ *  - laisser passer (avec seulement les headers de sécurité) les fichiers statiques listés dans excludedPaths
+ *    ou toute URL qui contient une extension (.js, .css, .png, .json, etc.)
+ *  - faire la maintenance / auth / i18n pour toutes les autres routes “dynamiques”.
+ */
 export async function middleware(request) {
   const { pathname } = request.nextUrl
 
-  // ──────────────────────────────────────────────────────────────
-  // A) SI on demande "manifest.json" ou "firebase-messaging-sw.js"
-  //    on fait juste NextResponse.next(), sans exécuter le reste.
-  // ──────────────────────────────────────────────────────────────
-  if (excludedPaths.includes(pathname)) {
-    // Exit immédiat : le navigateur reçoit le fichier sans 401
-    return NextResponse.next()
-  }
-
-  // ──────────────────────────────────────────────────────────────
-  // B) SI on demande un asset statique (images, fonts, icônes, .js/.css/.json/.xml, etc.)
-  //    on ajoute juste les headers de sécurité, puis "NextResponse.next()".
-  // ──────────────────────────────────────────────────────────────
+  // 3) Si c’est une requête API ou vers _next, on ne fait que poser les headers de sécurité
   if (
+    pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
-    pathname.startsWith('/icons') ||
-    pathname.startsWith('/images') ||
-    pathname.startsWith('/fonts') ||
-    pathname.match(/\.(js|css|png|jpg|jpeg|svg|webp|ico|json|xml|txt)$/)
+    excludedPaths.includes(pathname) ||
+    // Toute URL qui se termine par une extension statique (JS, CSS, images, JSON…)
+    /\.(js|css|png|jpg|jpeg|svg|webp|ico|json|txt)$/.test(pathname)
   ) {
+    // On ne fait que poser les headers essentiels et on laisse passer
     return secureHeaders(request)
   }
 
-  // ──────────────────────────────────────────────────────────────
-  // C) MODE MAINTENANCE (redirection vers "/maintenance" si activé)
-  // ──────────────────────────────────────────────────────────────
+  // 4) Mode maintenance : redirige vers /maintenance si activé et qu’on n’est pas admin
   const maintenance = process.env.MAINTENANCE === 'true'
   const isAdminPath = pathname.startsWith('/admin')
   const isMaintenancePage = pathname === '/maintenance'
@@ -58,33 +52,30 @@ export async function middleware(request) {
     return NextResponse.redirect(redirectUrl)
   }
 
-  // ──────────────────────────────────────────────────────────────
-  // D) PROTECTION DES ROUTES /admin (NextAuth)
-  // ──────────────────────────────────────────────────────────────
-  if (isAdminPath) {
-    const token = await getToken({
-      req: request,
-      secret: process.env.NEXTAUTH_SECRET,
-    })
+  // 5) Protection des routes /admin/* : vérifie le token NextAuth
+  if (isAdminPath && !excludedPaths.includes(pathname)) {
+    const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
     if (!token || token.role !== 'admin') {
-      // Pas admin → on redirige sur /login
       return NextResponse.redirect(new URL('/login', request.url))
     }
   }
 
-  // ──────────────────────────────────────────────────────────────
-  // E) POUR TOUT LE RESTE : i18n + headers de sécurité
-  // ──────────────────────────────────────────────────────────────
+  // 6) Pour les autres routes (pages “dynamiques”), on applique :
+  //    – le middleware i18n (intlMiddleware)
+  //    – puis on pose les headers de sécurité
   const response = intlMiddleware(request)
   return secureHeaders(request, response)
 }
 
-// ─────────────────────────────────────────────────────────────────
-// Matcher : on exclut explicitement tout ce qui commence par /_next, /api, /icons, etc.
-// ainsi que /manifest.json et /firebase-messaging-sw.js.
-// ─────────────────────────────────────────────────────────────────
+/**
+ * 7) Matcher :
+ *    – Seuls les chemins qui ne commencent pas par "_next", "api", ni par un nom de fichier statique (manifest.json, etc.)
+ *      déclenchent réellement ce middleware.
+ *    – Les « excludedPaths » (manifest.json, firebase-messaging-sw.js, etc.) et tous les fichiers avec extension
+ *      (.js, .css, .png, .json…) sont exclus du middleware.
+ */
 export const config = {
   matcher: [
-    '/((?!_next|api|favicon.ico|manifest.json|firebase-messaging-sw.js|robots.txt|icons|images|fonts|.*\\..*).*)',
+    '/((?!_next|api|favicon\\.ico|manifest\\.json|firebase-messaging-sw\\.js|robots\\.txt|.*\\..*).*)',
   ],
 }
