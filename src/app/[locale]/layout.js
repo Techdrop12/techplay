@@ -36,6 +36,7 @@ export default function LocaleLayout({ children, params: { locale } }) {
         <meta charSet="utf-8" />
         <meta name="robots" content="index, follow" />
         <meta name="theme-color" content="#ffffff" />
+        <link rel="manifest" href="/manifest.json" />
       </head>
       <body
         className="bg-white text-black dark:bg-zinc-900 dark:text-white antialiased"

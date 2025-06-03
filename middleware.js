@@ -22,6 +22,7 @@ export async function middleware(request) {
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/icons') ||
+    pathname.startsWith('/images') ||
     excludedPaths.includes(pathname)
   ) {
     return secureHeaders(request)
@@ -44,12 +45,4 @@ export async function middleware(request) {
     }
   }
 
-  const response = intlMiddleware(request)
-  return secureHeaders(request, response)
-}
-
-export const config = {
-  matcher: [
-    '/((?!_next|api|favicon.ico|manifest.json|firebase-messaging-sw.js|robots.txt|icons|.*\\..*).*)',
-  ],
-}
+  const response = intlMiddleware(reques
