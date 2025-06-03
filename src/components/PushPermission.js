@@ -10,10 +10,10 @@ export default function PushPermission() {
     if (!('Notification' in window) || !('serviceWorker' in navigator)) return
 
     const init = async () => {
-      const permission = await Notification.requestPermission()
-      if (permission !== 'granted') return
-
       try {
+        const permission = await Notification.requestPermission()
+        if (permission !== 'granted') return
+
         const firebaseConfig = {
           apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
           authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -28,11 +28,17 @@ export default function PushPermission() {
 
         const messaging = getMessaging(app)
 
+        // ✅ Enregistrement et attente que le Service Worker soit actif
         const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js')
-        await navigator.serviceWorker.ready // ✅ Ajout essentiel ici
+        await navigator.serviceWorker.ready
+
+        const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY
+        if (!vapidKey || vapidKey.length < 10) {
+          throw new Error('❌ VAPID_KEY mal définie')
+        }
 
         const token = await getToken(messaging, {
-          vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+          vapidKey,
           serviceWorkerRegistration: reg,
         })
 
