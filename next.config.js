@@ -3,8 +3,11 @@
 const path = require('path');
 const withPWA = require('next-pwa')({
   dest: 'public',
-  register: false,            // Désactive l’enregistrement auto de sw.js
-  skipWaiting: false,
+
+  // 🔹 on ACTIVE l’enregistrement automatique du SW
+  register: true,
+  skipWaiting: true,
+
   disable: process.env.NODE_ENV === 'development',
   exclude: [/middleware-manifest\.json$/],
 });
@@ -42,19 +45,28 @@ const nextConfig = {
   },
 
   // ───────────────────────────────────────────────────────────
-  //  HEADERS HTTP POUR LES FICHIERS PUBLICS
+  //  HEADERS HTTP POUR LES FICHIERS PUBLICS (manifest + SW)
   // ───────────────────────────────────────────────────────────
   headers: async () => [
-    // 1) manifest.json + /icons/…
+    // 1) manifest.json + icônes → cache + CORS
     {
-      source: '/(manifest.json|icons/.*)',
+      source: '/(manifest\\.json|icons/.*)',
       headers: [
         { key: 'Cache-Control', value: 'public, max-age=3600, immutable' },
         { key: 'Access-Control-Allow-Origin', value: '*' },
         { key: 'Content-Type', value: 'application/json; charset=UTF-8' },
       ],
     },
-    // 2) firebase-messaging-sw.js (service worker FCM)
+    // 2) SW PWA (sw.js) → cache + CORS + JS
+    {
+      source: '/sw.js',
+      headers: [
+        { key: 'Cache-Control', value: 'public, max-age=3600, immutable' },
+        { key: 'Access-Control-Allow-Origin', value: '*' },
+        { key: 'Content-Type', value: 'application/javascript' },
+      ],
+    },
+    // 3) SW Firebase Messaging → cache + CORS + JS
     {
       source: '/firebase-messaging-sw.js',
       headers: [

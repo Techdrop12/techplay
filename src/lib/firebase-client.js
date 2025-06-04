@@ -23,8 +23,8 @@ if (typeof window !== 'undefined') {
   } else {
     try {
       firebaseApp = getApps().length === 0
-          ? initializeApp(firebaseConfig)
-          : getApps()[0];
+        ? initializeApp(firebaseConfig)
+        : getApps()[0];
 
       isSupported()
         .then((supported) => {
@@ -44,26 +44,27 @@ if (typeof window !== 'undefined') {
   }
 }
 
+// Attendre que `messaging` soit défini (max 2 s)
+function waitForMessaging() {
+  return new Promise((resolve, reject) => {
+    const interval = setInterval(() => {
+      if (messaging) {
+        clearInterval(interval);
+        resolve();
+      }
+    }, 50);
+    setTimeout(() => {
+      clearInterval(interval);
+      reject(new Error('messaging non initialisé à temps'));
+    }, 2000);
+  });
+}
+
 export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messaging-sw.js') {
   if (typeof window === 'undefined' || !('Notification' in window)) {
     console.warn('⛔ Notifications non supportées dans ce contexte.');
     return null;
   }
-
-  const waitForMessaging = () => {
-    return new Promise((resolve, reject) => {
-      const interval = setInterval(() => {
-        if (messaging) {
-          clearInterval(interval);
-          resolve();
-        }
-      }, 50);
-      setTimeout(() => {
-        clearInterval(interval);
-        reject(new Error('messaging non initialisé à temps'));
-      }, 2000);
-    });
-  };
 
   try {
     await waitForMessaging();
@@ -79,6 +80,7 @@ export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messagi
       return null;
     }
 
+    // Enregistre le Service Worker Firebase (firebase-messaging-sw.js)
     const registration = await navigator.serviceWorker.register(serviceWorkerPath);
 
     const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;

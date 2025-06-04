@@ -23,7 +23,7 @@ const META_PIXEL_ID = isClient ? process.env.NEXT_PUBLIC_META_PIXEL_ID : '';
 export default function ClientWrapper({ children }) {
   const pathname = usePathname();
 
-  // 🔥 Hotjar (client-side)
+  // 🔥 Hotjar (uniquement côté client)
   useHotjar();
 
   // 🔍 Google Analytics – déclenché à chaque changement de route
@@ -37,14 +37,11 @@ export default function ClientWrapper({ children }) {
 
   // 📳 Firebase Messaging
   useEffect(() => {
-    // 1) Demande de permission et récupération du token FCM
     requestAndSaveToken().then((token) => {
       if (token) {
         console.log('[ClientWrapper] Token FCM stocké avec succès :', token);
       }
     });
-
-    // 2) Mise en place de l’écoute "foreground"
     listenToMessages();
   }, []);
 
@@ -99,15 +96,13 @@ export default function ClientWrapper({ children }) {
             </>
           )}
 
-          {/* → Composant local pour demander la permission de push navigateur */}
+          {/* → Composant local pour push permission */}
           <PushPermission />
 
-          {/* → Score Tracker (ou autre comportement tracker) */}
+          {/* → Score Tracker */}
           <ScoreTracker />
 
           {children}
-
-          {/* → Toaster pour notifications toast */}
           <Toaster position="top-right" />
         </UpsellProvider>
       </CartProvider>
