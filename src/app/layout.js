@@ -1,13 +1,14 @@
-import '../styles/globals.css'
-import { Inter } from 'next/font/google'
-import dynamic from 'next/dynamic'
-import OrganizationJsonLd from '@/components/JsonLd/OrganizationJsonLd'
+// src/app/layout.js
+import '../styles/globals.css';
+import { Inter } from 'next/font/google';
+import dynamic from 'next/dynamic';
+import OrganizationJsonLd from '@/components/JsonLd/OrganizationJsonLd';
 
-const inter = Inter({ subsets: ['latin'] })
-const ClientWrapper = dynamic(() => import('@/components/ClientWrapper'), { ssr: false })
+const inter = Inter({ subsets: ['latin'] });
+const ClientWrapper = dynamic(() => import('@/components/ClientWrapper'), { ssr: false });
 
 export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.vercel.app'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://techplay.vercel.app'),
   title: 'TechPlay',
   description: 'La boutique ultime pour les passionnés de tech.',
   icons: { icon: '/favicon.ico' },
@@ -27,7 +28,7 @@ export const metadata = {
     locale: 'fr_FR',
     type: 'website',
   },
-}
+};
 
 export default function RootLayout({ children }) {
   return (
@@ -42,5 +43,5 @@ export default function RootLayout({ children }) {
         <ClientWrapper>{children}</ClientWrapper>
       </body>
     </html>
-  )
+  );
 }
