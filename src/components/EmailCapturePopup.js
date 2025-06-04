@@ -13,15 +13,17 @@ export default function EmailCapturePopup() {
     if (typeof window === 'undefined') return
 
     try {
+      // On lit correctement dans localStorage
       const savedEmail = window.localStorage.getItem('user_email')
       const alreadyClosed = window.localStorage.getItem('email_popup_closed')
 
       if (!savedEmail && !alreadyClosed) {
+        // Au bout de 15 secondes, on affiche le popup
         const timeout = setTimeout(() => setVisible(true), 15000)
         return () => clearTimeout(timeout)
       }
     } catch (e) {
-      console.warn('Erreur accès localStorage (popup) :', e)
+      console.warn('Erreur accès  (popup) :', e)
     }
   }, [])
 
@@ -42,7 +44,9 @@ export default function EmailCapturePopup() {
         toast.success('Merci ! Vous recevrez nos offres par email.')
         try {
           window.localStorage.setItem('user_email', email)
-        } catch {}
+        } catch (e) {
+          console.warn('Impossible de sauvegarder user_email :', e)
+        }
 
         setSubmitted(true)
         setTimeout(() => setVisible(false), 2000)
@@ -58,7 +62,9 @@ export default function EmailCapturePopup() {
     setVisible(false)
     try {
       window.localStorage.setItem('email_popup_closed', 'true')
-    } catch {}
+    } catch (e) {
+      console.warn('Impossible de sauvegarder email_popup_closed :', e)
+    }
   }
 
   if (!visible || submitted) return null

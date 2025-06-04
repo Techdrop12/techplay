@@ -1,7 +1,8 @@
 // src/app/page.js
+export const dynamic = 'force-dynamic';
+
 import { redirect } from 'next/navigation';
 
 export default function HomePage() {
-  // Redirige la racine vers la locale par défaut (/fr)
   redirect('/fr');
 }

@@ -33,6 +33,15 @@ const PUBLIC_PREFIXES = [
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
+  // ───────────────────────────────────────────────────
+  // 0) Si c’est exactement "/", on redirige directement vers "/fr"
+  // ───────────────────────────────────────────────────
+  if (pathname === '/') {
+    const url = request.nextUrl.clone();
+    url.pathname = '/fr';
+    return NextResponse.redirect(url);
+  }
+
   // 1) Si c’est exactement un chemin public (manifest, SW, favicon, robots)
   if (PUBLIC_PATHS.includes(pathname)) {
     return secureHeaders(request);
