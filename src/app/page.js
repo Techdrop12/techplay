@@ -1,13 +1,7 @@
-export const dynamic = 'force-dynamic'
-import HomeJsonLd from '@/components/HomeJsonLd'
+// src/app/page.js
+import { redirect } from 'next/navigation';
 
 export default function HomePage() {
-  return (
-    <>
-      <HomeJsonLd />
-      <main>
-        {/* contenu principal de la home */}
-      </main>
-    </>
-  )
+  // Redirige la racine vers la locale par défaut (/fr)
+  redirect('/fr');
 }
