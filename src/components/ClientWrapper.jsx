@@ -12,7 +12,7 @@ import { UpsellProvider } from '@/context/upsellContext';
 
 import PushPermission from '@/components/PushPermission';
 import ScoreTracker from '@/components/ScoreTracker';
-import useHotjar from '@/lib/useHotjar';
+import useHotjar from '@/lib/hotjar';
 
 import { requestAndSaveToken, listenToMessages } from '@/lib/firebase-client';
 
@@ -23,7 +23,7 @@ const META_PIXEL_ID = isClient ? process.env.NEXT_PUBLIC_META_PIXEL_ID : '';
 export default function ClientWrapper({ children }) {
   const pathname = usePathname();
 
-  // 🔥 Hotjar (client‐side)
+  // 🔥 Hotjar (client-side)
   useHotjar();
 
   // 🔍 Google Analytics – déclenché à chaque changement de route

@@ -1,4 +1,4 @@
-// app/[locale]/layout.js
+// src/app/[locale]/layout.js
 
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider } from 'next-intl';
@@ -8,8 +8,9 @@ import LayoutWithAnalytics from './LayoutWithAnalytics';
 import AnalyticsScripts from '@/components/AnalyticsScripts';
 import EmailCapturePopup from '@/components/EmailCapturePopup';
 import ExitPopup from '@/components/ExitPopup';
+import useHotjar from '@/lib/hotjar';
 
-// 1) Génère /fr et /en au build
+// 1) Génère statiquement /fr et /en au build
 export async function generateStaticParams() {
   return [
     { locale: 'fr' },
@@ -17,40 +18,38 @@ export async function generateStaticParams() {
   ];
 }
 
-// 2) Désactive toute locale dynamique non listée
+// 2) Empêche la génération dynamique d’autres locales
 export const dynamicParams = false;
 
-// 3) Server Component : charge le JSON de traduction côté serveur
-export default async function LocaleLayout({ children, params: { locale } }) {
+// 3) Charge les messages de traduction côté serveur
+export default async function LocaleLayout({ params: { locale }, children }) {
   let messages;
   try {
-    // → On importe le fichier JSON depuis /messages (dossier à la racine du projet)
-    messages = (await import(`../../../messages/${locale}.json`)).default;
+    // On importe le JSON de traduction depuis src/messages/<locale>.json
+    messages = (await import(`@/messages/${locale}.json`)).default;
   } catch (e) {
-    // Si la locale n’existe pas, on renvoie une 404
-    notFound();
+    // Si le fichier n'existe pas, on renvoie un 404
+    return notFound();
   }
 
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
-        {/* Métas communes à toutes les locales */}
+        {/* Métadonnées communes */}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta charSet="utf-8" />
-        <meta name="theme-color" content="#ffffff" />
         <meta name="robots" content="index, follow" />
+        <meta name="theme-color" content="#ffffff" />
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body
         className="bg-white text-black dark:bg-zinc-900 dark:text-white antialiased"
         suppressHydrationWarning
       >
-        {/* 4) On fournit le provider de traduction au client */}
+        {/* 4) Provider next-intl pour la traduction */}
         <NextIntlClientProvider locale={locale} messages={messages}>
           <LocaleProvider locale={locale}>
-            <LayoutWithAnalytics>
-              {children}
-            </LayoutWithAnalytics>
+            <LayoutWithAnalytics>{children}</LayoutWithAnalytics>
           </LocaleProvider>
           <AnalyticsScripts />
           <EmailCapturePopup />

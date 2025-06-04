@@ -54,7 +54,8 @@
   },
   "error": {
     "404_title": "Page non trouvée",
-    "404_message": "La page que vous cherchez n'existe pas."
+    "404_message": "La page que vous cherchez n'existe pas.",
+    "back_home": "Retour à l’accueil"
   },
   "a_propos": {
     "title": "À propos",

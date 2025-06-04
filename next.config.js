@@ -45,7 +45,7 @@ const nextConfig = {
   //  HEADERS HTTP POUR LES FICHIERS PUBLICS
   // ───────────────────────────────────────────────────────────
   headers: async () => [
-    // 1) Manifest + Icons → Cache-Control & CORS
+    // 1) manifest.json + /icons/…
     {
       source: '/(manifest.json|icons/.*)',
       headers: [
@@ -54,7 +54,7 @@ const nextConfig = {
         { key: 'Content-Type', value: 'application/json; charset=UTF-8' },
       ],
     },
-    // 2) Service Worker FCM → content-type JS & CORS
+    // 2) firebase-messaging-sw.js (service worker FCM)
     {
       source: '/firebase-messaging-sw.js',
       headers: [

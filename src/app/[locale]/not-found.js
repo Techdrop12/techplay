@@ -2,14 +2,16 @@ import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 
 export default function NotFound() {
-  const t = useTranslations('error')
+  const t = useTranslations()
 
   return (
-    <div className="h-screen flex flex-col justify-center items-center text-center p-6">
-      <h1 className="text-4xl font-bold mb-2">{t('404_title')}</h1>
-      <p className="text-gray-600 mb-4">{t('404_message')}</p>
-      <Link href="/" className="text-blue-600 underline">
-        ⬅ {t('back_home') || 'Retour à l’accueil'}
+    <div className="min-h-screen flex flex-col items-center justify-center">
+      <h1 className="text-4xl font-bold">{t('error.404_title')}</h1>
+      <p className="mt-4 text-gray-600">{t('error.404_message')}</p>
+      <Link href="/">
+        <a className="mt-8 px-4 py-2 bg-black text-white rounded">
+          {t('error.back_home')}
+        </a>
       </Link>
     </div>
   )
