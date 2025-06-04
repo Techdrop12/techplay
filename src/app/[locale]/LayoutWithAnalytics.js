@@ -12,7 +12,6 @@ import useAnalytics from '@/lib/useAnalytics';
 import AnalyticsScripts from '@/components/AnalyticsScripts';
 
 export default function LayoutWithAnalytics({ children }) {
-  // Hook Analytics (client‐side)
   useAnalytics();
 
   return (

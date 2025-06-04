@@ -3,9 +3,9 @@
 const path = require('path');
 const withPWA = require('next-pwa')({
   dest: 'public',
-  register: false,            // Désactive l’enregistrement automatique de sw.js
-  skipWaiting: false,         // Laisse le SW en attente (optionnel)
-  disable: process.env.NODE_ENV === 'development', // PWA désactivée en dev
+  register: false,            // Désactive l’enregistrement auto de sw.js
+  skipWaiting: false,
+  disable: process.env.NODE_ENV === 'development',
   exclude: [/middleware-manifest\.json$/],
 });
 
@@ -45,40 +45,22 @@ const nextConfig = {
   //  HEADERS HTTP POUR LES FICHIERS PUBLICS
   // ───────────────────────────────────────────────────────────
   headers: async () => [
-    // 1) /manifest.json et tout fichier sous /icons/…
+    // 1) Manifest + Icons → Cache-Control & CORS
     {
       source: '/(manifest.json|icons/.*)',
       headers: [
-        {
-          key: 'Cache-Control',
-          value: 'public, max-age=3600, immutable',
-        },
-        {
-          key: 'Access-Control-Allow-Origin',
-          value: '*',
-        },
-        {
-          key: 'Content-Type',
-          value: 'application/json; charset=UTF-8',
-        },
+        { key: 'Cache-Control', value: 'public, max-age=3600, immutable' },
+        { key: 'Access-Control-Allow-Origin', value: '*' },
+        { key: 'Content-Type', value: 'application/json; charset=UTF-8' },
       ],
     },
-    // 2) /firebase-messaging-sw.js → content-type correct
+    // 2) Service Worker FCM → content-type JS & CORS
     {
       source: '/firebase-messaging-sw.js',
       headers: [
-        {
-          key: 'Cache-Control',
-          value: 'public, max-age=3600, immutable',
-        },
-        {
-          key: 'Access-Control-Allow-Origin',
-          value: '*',
-        },
-        {
-          key: 'Content-Type',
-          value: 'application/javascript',
-        },
+        { key: 'Cache-Control', value: 'public, max-age=3600, immutable' },
+        { key: 'Access-Control-Allow-Origin', value: '*' },
+        { key: 'Content-Type', value: 'application/javascript' },
       ],
     },
   ],

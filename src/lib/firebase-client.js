@@ -7,7 +7,6 @@ import { getMessaging, getToken, onMessage, isSupported } from 'firebase/messagi
 let messaging = null;
 let firebaseApp = null;
 
-// S’exécute uniquement côté client
 if (typeof window !== 'undefined') {
   const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -23,12 +22,10 @@ if (typeof window !== 'undefined') {
     console.warn('❌ Firebase config invalide : projectId manquant.');
   } else {
     try {
-      // Initialise Firebase si ce n’est pas déjà fait
       firebaseApp = getApps().length === 0
-        ? initializeApp(firebaseConfig)
-        : getApps()[0];
+          ? initializeApp(firebaseConfig)
+          : getApps()[0];
 
-      // Vérifie le support de Firebase Messaging dans ce navigateur
       isSupported()
         .then((supported) => {
           if (supported) {
@@ -47,14 +44,12 @@ if (typeof window !== 'undefined') {
   }
 }
 
-// Fonction pour demander la permission, enregistrer le SW et récupérer le token
 export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messaging-sw.js') {
   if (typeof window === 'undefined' || !('Notification' in window)) {
     console.warn('⛔ Notifications non supportées dans ce contexte.');
     return null;
   }
 
-  // Attendre que messaging soit initialisé (max 2 secondes)
   const waitForMessaging = () => {
     return new Promise((resolve, reject) => {
       const interval = setInterval(() => {
@@ -84,7 +79,6 @@ export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messagi
       return null;
     }
 
-    // Enregistre le Service Worker define dans /public/firebase-messaging-sw.js
     const registration = await navigator.serviceWorker.register(serviceWorkerPath);
 
     const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
@@ -92,7 +86,6 @@ export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messagi
       throw new Error('❌ VAPID_KEY non valide ou absente');
     }
 
-    // Récupère le token FCM
     const token = await getToken(messaging, {
       vapidKey,
       serviceWorkerRegistration: registration,
@@ -100,7 +93,6 @@ export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messagi
 
     if (token) {
       console.log('✅ Token Firebase obtenu :', token);
-      // Envoie le token à votre endpoint (API) pour l’enregistrer en base
       await fetch('/api/notifications/save-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -115,12 +107,10 @@ export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messagi
   }
 }
 
-// Écoute les notifications lorsqu’un message arrive en foreground
 export function listenToMessages() {
   if (typeof window !== 'undefined' && messaging) {
     onMessage(messaging, (payload) => {
       console.log('🔔 Notification reçue (foreground) :', payload);
-      // Ici, vous pouvez déclencher un toast/snackbar dans l’UI si besoin.
     });
   }
 }

@@ -12,7 +12,7 @@ import { UpsellProvider } from '@/context/upsellContext';
 
 import PushPermission from '@/components/PushPermission';
 import ScoreTracker from '@/components/ScoreTracker';
-import useHotjar from '@/lib/hotjar';
+import useHotjar from '@/lib/useHotjar';
 
 import { requestAndSaveToken, listenToMessages } from '@/lib/firebase-client';
 
@@ -23,7 +23,7 @@ const META_PIXEL_ID = isClient ? process.env.NEXT_PUBLIC_META_PIXEL_ID : '';
 export default function ClientWrapper({ children }) {
   const pathname = usePathname();
 
-  // 🔥 Hotjar (client-side)
+  // 🔥 Hotjar (client‐side)
   useHotjar();
 
   // 🔍 Google Analytics – déclenché à chaque changement de route
@@ -35,7 +35,7 @@ export default function ClientWrapper({ children }) {
     }
   }, [pathname]);
 
-  // 📳 Firebase Messaging (client-side)
+  // 📳 Firebase Messaging
   useEffect(() => {
     // 1) Demande de permission et récupération du token FCM
     requestAndSaveToken().then((token) => {
@@ -102,12 +102,12 @@ export default function ClientWrapper({ children }) {
           {/* → Composant local pour demander la permission de push navigateur */}
           <PushPermission />
 
-          {/* → Score Tracker (ou autre comportement trackers) */}
+          {/* → Score Tracker (ou autre comportement tracker) */}
           <ScoreTracker />
 
           {children}
 
-          {/* → Toaster pour les notifications toast */}
+          {/* → Toaster pour notifications toast */}
           <Toaster position="top-right" />
         </UpsellProvider>
       </CartProvider>

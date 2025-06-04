@@ -9,7 +9,7 @@ import AnalyticsScripts from '@/components/AnalyticsScripts';
 import EmailCapturePopup from '@/components/EmailCapturePopup';
 import ExitPopup from '@/components/ExitPopup';
 
-// 1) Génère au build les deux routes statiques : /fr et /en
+// 1) Génère /fr et /en au build
 export async function generateStaticParams() {
   return [
     { locale: 'fr' },
@@ -17,15 +17,15 @@ export async function generateStaticParams() {
   ];
 }
 
-// 2) Désactive toute locale dynamique non listée ici
+// 2) Désactive toute locale dynamique non listée
 export const dynamicParams = false;
 
-// 3) Server Component : charge le JSON de traduction avant rendu
+// 3) Server Component : charge le JSON de traduction côté serveur
 export default async function LocaleLayout({ children, params: { locale } }) {
   let messages;
   try {
-    // On importe dynamiquement src/messages/fr.json ou src/messages/en.json
-    messages = (await import(`../../../src/messages/${locale}.json`)).default;
+    // → On importe le fichier JSON depuis /messages (dossier à la racine du projet)
+    messages = (await import(`../../../messages/${locale}.json`)).default;
   } catch (e) {
     // Si la locale n’existe pas, on renvoie une 404
     notFound();
@@ -34,7 +34,7 @@ export default async function LocaleLayout({ children, params: { locale } }) {
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
-        {/* Metas communes à toutes les locales */}
+        {/* Métas communes à toutes les locales */}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta charSet="utf-8" />
         <meta name="theme-color" content="#ffffff" />

@@ -12,7 +12,7 @@ const intlMiddleware = createMiddleware({
 });
 
 // ----------------------------------------------------------------------------
-// Liste des chemins statiques à autoriser UID (pas de redirect / 401)
+// Chemins / préfixes statiques à laisser passer sans authentification/redirect
 // ----------------------------------------------------------------------------
 const PUBLIC_PATHS = [
   '/favicon.ico',
@@ -26,24 +26,24 @@ const PUBLIC_PREFIXES = [
   '/images/',
   '/fonts/',
   '/static/',
-  '/api/', // tous vos endpoints API (dont save-token, send-push, test‐admin, etc.)
+  '/api/', // tous vos endpoints API (save-token, send-push, test-admin, ...)
 ];
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // 1) Si c’est un fichier “pur” (manifest, SW, favicon, robots, etc.), on ne touche pas à l’auth ni i18n
+  // 1) Fichiers purement statiques (manifest, SW, etc.)
   if (PUBLIC_PATHS.includes(pathname)) {
     return secureHeaders(request);
   }
-  // 2) Si l’URL commence par un préfixe public (/_next/, /icons/, /api/, etc.), idem
+  // 2) URL commençant par un préfixe public (/_next/, /icons/, /api/, etc.)
   for (const prefix of PUBLIC_PREFIXES) {
     if (pathname.startsWith(prefix)) {
       return secureHeaders(request);
     }
   }
 
-  // 3) Mode “maintenance” : si activé, on redirige tout (sauf /admin et /maintenance) vers /maintenance
+  // 3) Mode “maintenance”
   const maintenanceOn = process.env.MAINTENANCE === 'true';
   const isAdminPath = pathname.startsWith('/admin');
   const isMaintenancePage = pathname === '/maintenance';
@@ -53,45 +53,31 @@ export async function middleware(request) {
     return NextResponse.redirect(url);
   }
 
-  // 4) Protection des routes `/admin/*` avec NextAuth
+  // 4) Protection des routes /admin/*
   if (isAdminPath) {
     const token = await getToken({
       req: request,
       secret: process.env.NEXTAUTH_SECRET,
     });
     if (!token || token.role !== 'admin') {
-      // redirige vers /login si pas admin
       const url = request.nextUrl.clone();
       url.pathname = '/login';
       return NextResponse.redirect(url);
     }
-    // Si admin, on continue (avec headers sécurisés)
+    // Admin authentifié → on autorise avec headers sécurisés
     return secureHeaders(request);
   }
 
-  // 5) Pour toutes les autres routes “client” (non /api, non /admin, non PJ statiques) :
-  //    on applique d’abord l’internationalisation, puis les headers de sécurité.
+  // 5) Toutes les autres routes client (non /api, non /admin, non statiques)
   const responseIntl = await intlMiddleware(request);
   return secureHeaders(request, responseIntl);
 }
 
-// ───────────────────────────────────────────────────────────────────
-// matcher : applique ce middleware à toutes les routes sauf celles
-// explicitement autorisées (/_next/, /api/, manifest, SW, etc.)
-// ───────────────────────────────────────────────────────────────────
+// -----------------------------------------
+// matcher : toutes les routes sauf celles listées
+// -----------------------------------------
 export const config = {
   matcher: [
-    /*
-      “Pour toutes les routes qui ne sont pas :
-       - /_next/*
-       - /api/*
-       - /favicon.ico
-       - /robots.txt
-       - /manifest.json
-       - /firebase-messaging-sw.js
-       - tout ce qui commence par /icons/, /images/, /fonts/, /static/
-      appliquez ce middleware.”
-    */
     '/((?!_next/|api/|favicon\\.ico$|robots\\.txt$|manifest\\.json$|firebase-messaging-sw\\.js$|icons/|images/|fonts/|static/).*)',
   ],
 };
