@@ -25,7 +25,9 @@
     "total": "Total",
     "checkout": "Proceed to checkout",
     "redirecting": "Redirecting...",
-    "payment_error": "Payment error"
+    "payment_error": "Payment error",
+    "error_loading_products": "Error loading products.",
+    "no_products_available": "No products available."
   },
   "admin": {
     "add_product": "Add a product",
@@ -59,7 +61,13 @@
   },
   "a_propos": {
     "title": "About",
-    "description": "TechPlay is a store specialized in quality tech and gaming products."
+    "description": "TechPlay is a store specialized in quality tech and gaming products.",
+    "our_mission_title": "Our mission",
+    "our_mission_text": "Our mission is to bring the latest tech innovations to enthusiasts everywhere.",
+    "our_team_title": "Our team",
+    "our_team_text": "We are a team of developers, marketers and tech fans committed to giving you the best experience.",
+    "our_values_title": "Our values",
+    "our_values_text": "Quality, transparency, and passion are our guiding principles."
   },
   "contact": {
     "title": "Contact",

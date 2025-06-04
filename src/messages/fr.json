@@ -25,7 +25,9 @@
     "total": "Total",
     "checkout": "Passer au paiement",
     "redirecting": "Redirection...",
-    "payment_error": "Erreur de paiement"
+    "payment_error": "Erreur de paiement",
+    "error_loading_products": "Erreur lors du chargement des produits.",
+    "no_products_available": "Aucun produit disponible."
   },
   "admin": {
     "add_product": "Ajouter un produit",
@@ -59,7 +61,13 @@
   },
   "a_propos": {
     "title": "À propos",
-    "description": "TechPlay est une boutique spécialisée dans la vente de produits tech et gaming de qualité."
+    "description": "TechPlay est une boutique spécialisée dans la vente de produits tech et gaming de qualité.",
+    "our_mission_title": "Notre mission",
+    "our_mission_text": "Notre mission est de rendre accessibles aux passionnés les dernières innovations technologiques.",
+    "our_team_title": "Notre équipe",
+    "our_team_text": "Nous sommes une équipe de développeurs, marketeurs et fans de tech déterminés à vous offrir la meilleure expérience.",
+    "our_values_title": "Nos valeurs",
+    "our_values_text": "Qualité, transparence et passion sont nos mots d’ordre."
   },
   "contact": {
     "title": "Contact",
