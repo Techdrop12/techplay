@@ -1,3 +1,4 @@
+// src/lib/firebase-client.js
 'use client';
 
 import { initializeApp, getApps } from 'firebase/app';
@@ -6,6 +7,7 @@ import { getMessaging, getToken, onMessage, isSupported } from 'firebase/messagi
 let messaging = null;
 let firebaseApp = null;
 
+// S’exécute uniquement côté client
 if (typeof window !== 'undefined') {
   const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -21,12 +23,12 @@ if (typeof window !== 'undefined') {
     console.warn('❌ Firebase config invalide : projectId manquant.');
   } else {
     try {
-      // Initialise Firebase une seule fois
+      // Initialise Firebase si ce n’est pas déjà fait
       firebaseApp = getApps().length === 0
         ? initializeApp(firebaseConfig)
         : getApps()[0];
 
-      // Vérifie si Firebase Messaging est supporté par ce navigateur
+      // Vérifie le support de Firebase Messaging dans ce navigateur
       isSupported()
         .then((supported) => {
           if (supported) {
@@ -82,7 +84,7 @@ export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messagi
       return null;
     }
 
-    // Enregistre le Service Worker
+    // Enregistre le Service Worker define dans /public/firebase-messaging-sw.js
     const registration = await navigator.serviceWorker.register(serviceWorkerPath);
 
     const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
@@ -98,7 +100,7 @@ export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messagi
 
     if (token) {
       console.log('✅ Token Firebase obtenu :', token);
-      // Envoie le token à votre propre endpoint pour l’enregistrer en base
+      // Envoie le token à votre endpoint (API) pour l’enregistrer en base
       await fetch('/api/notifications/save-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -113,12 +115,12 @@ export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messagi
   }
 }
 
-// Fonction d’écoute pour recevoir les notifications au premier plan (foreground)
+// Écoute les notifications lorsqu’un message arrive en foreground
 export function listenToMessages() {
   if (typeof window !== 'undefined' && messaging) {
     onMessage(messaging, (payload) => {
       console.log('🔔 Notification reçue (foreground) :', payload);
-      // Ici, vous pouvez déclencher un toast/snackbar dans l’UI si nécessaire
+      // Ici, vous pouvez déclencher un toast/snackbar dans l’UI si besoin.
     });
   }
 }

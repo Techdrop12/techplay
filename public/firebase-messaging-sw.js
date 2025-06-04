@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
-// Service Worker Firebase Messaging (FCM) – v10.12.0 « compat »
+// public/firebase-messaging-sw.js
 
-// Importe les librairies « compat » pour pouvoir utiliser firebase.messaging() dans un SW.
+// Importe les librairies “compat” pour pouvoir utiliser firebase.messaging() dans un SW.
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
@@ -11,7 +11,7 @@ firebase.initializeApp({
   authDomain: "techplay-7f25c.firebaseapp.com",
   projectId: "techplay-7f25c",
   messagingSenderId: "835420975485",
-  appId: "1:835420975485:web:f97ae250aeaf2de44bdc14",
+  appId: "1:835420975485:web:f97ae250aeaf2de44bdc14"
   // (optionnel) measurementId: "G-5GBPGDN49Q"
 });
 

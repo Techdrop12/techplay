@@ -3,9 +3,9 @@
 const path = require('path');
 const withPWA = require('next-pwa')({
   dest: 'public',
-  register: false,            // ← Désactive l’enregistrement automatique de sw.js
-  skipWaiting: false,         // facultatif, mais on peut le laisser à false
-  disable: process.env.NODE_ENV === 'development', // désactive la PWA en dev
+  register: false,            // Désactive l’enregistrement automatique de sw.js
+  skipWaiting: false,         // Laisse le SW en attente (optionnel)
+  disable: process.env.NODE_ENV === 'development', // PWA désactivée en dev
   exclude: [/middleware-manifest\.json$/],
 });
 
@@ -45,7 +45,7 @@ const nextConfig = {
   //  HEADERS HTTP POUR LES FICHIERS PUBLICS
   // ───────────────────────────────────────────────────────────
   headers: async () => [
-    // 1) manifest.json et tout ce qui est dans /icons/...
+    // 1) /manifest.json et tout fichier sous /icons/…
     {
       source: '/(manifest.json|icons/.*)',
       headers: [
@@ -63,7 +63,7 @@ const nextConfig = {
         },
       ],
     },
-    // 2) firebase-messaging-sw.js → on s’assure d’un content-type correct
+    // 2) /firebase-messaging-sw.js → content-type correct
     {
       source: '/firebase-messaging-sw.js',
       headers: [
