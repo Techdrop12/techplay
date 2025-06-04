@@ -1,8 +1,10 @@
 // src/app/page.js
-export const dynamic = 'force-dynamic';
 
 import { redirect } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 export default function HomePage() {
+  // Cette ligne redirige **immédiatement** "/" → "/fr"
   redirect('/fr');
 }

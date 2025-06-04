@@ -8,7 +8,9 @@ const inter = Inter({ subsets: ['latin'] });
 const ClientWrapper = dynamic(() => import('@/components/ClientWrapper'), { ssr: false });
 
 export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://techplay.vercel.app'),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_BASE_URL || 'https://techplay.vercel.app'
+  ),
   title: 'TechPlay',
   description: 'La boutique ultime pour les passionnés de tech.',
   icons: { icon: '/favicon.ico' },
@@ -34,6 +36,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="fr">
       <head>
+        {/* On pointe vers le manifest à la racine ("/manifest.json"), pas "/fr/manifest.json" */}
         <meta name="theme-color" content="#ffffff" />
         <meta name="robots" content="index, follow" />
         <link rel="manifest" href="/manifest.json" />

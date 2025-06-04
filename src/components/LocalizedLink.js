@@ -1,8 +1,22 @@
+// src/components/LocalizedLink.js
 'use client'
-import Link from 'next/link'
-import { useParams } from 'next/navigation'
 
-export default function LocalizedLink({ href, ...props }) {
-  const { locale } = useParams()
-  return <Link href={`/${locale}${href}`} {...props} />
+import { useLocale } from 'next-intl'
+import Link from 'next/link'
+
+export default function LocalizedLink({ href, children, ...props }) {
+  // Récupère la locale courante ("fr" ou "en")
+  const locale = useLocale()
+
+  // S’assurer que href commence par "/"
+  const cleaned = href.startsWith('/') ? href : '/' + href
+
+  // On préfixe par la locale
+  const localizedHref = `/${locale}${cleaned}`
+
+  return (
+    <Link href={localizedHref} {...props}>
+      {children}
+    </Link>
+  )
 }

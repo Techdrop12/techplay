@@ -1,36 +1,34 @@
 // src/components/EmailCapturePopup.js
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
-import { toast } from 'react-hot-toast'
+import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 export default function EmailCapturePopup() {
-  const [email, setEmail] = useState('')
-  const [visible, setVisible] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
+  const [email, setEmail] = useState('');
+  const [visible, setVisible] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (typeof window === 'undefined') return;
 
     try {
-      // On lit correctement dans localStorage
-      const savedEmail = window.localStorage.getItem('user_email')
-      const alreadyClosed = window.localStorage.getItem('email_popup_closed')
+      const savedEmail = window.localStorage.getItem('user_email');
+      const alreadyClosed = window.localStorage.getItem('email_popup_closed');
 
       if (!savedEmail && !alreadyClosed) {
-        // Au bout de 15 secondes, on affiche le popup
-        const timeout = setTimeout(() => setVisible(true), 15000)
-        return () => clearTimeout(timeout)
+        const timeout = setTimeout(() => setVisible(true), 15000);
+        return () => clearTimeout(timeout);
       }
     } catch (e) {
-      console.warn('Erreur accès  (popup) :', e)
+      console.warn('Erreur accès localStorage (popup) :', e);
     }
-  }, [])
+  }, []);
 
   const handleSubmit = async () => {
     if (!email || !email.includes('@')) {
-      toast.error('Adresse email invalide')
-      return
+      toast.error('Adresse email invalide');
+      return;
     }
 
     try {
@@ -38,36 +36,32 @@ export default function EmailCapturePopup() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
-      })
+      });
 
       if (res.ok) {
-        toast.success('Merci ! Vous recevrez nos offres par email.')
+        toast.success('Merci ! Vous recevrez nos offres par email.');
         try {
-          window.localStorage.setItem('user_email', email)
-        } catch (e) {
-          console.warn('Impossible de sauvegarder user_email :', e)
-        }
+          window.localStorage.setItem('user_email', email);
+        } catch {}
 
-        setSubmitted(true)
-        setTimeout(() => setVisible(false), 2000)
+        setSubmitted(true);
+        setTimeout(() => setVisible(false), 2000);
       } else {
-        throw new Error()
+        throw new Error();
       }
     } catch (err) {
-      toast.error("Erreur lors de l'enregistrement")
+      toast.error("Erreur lors de l'enregistrement");
     }
-  }
+  };
 
   const handleClose = () => {
-    setVisible(false)
+    setVisible(false);
     try {
-      window.localStorage.setItem('email_popup_closed', 'true')
-    } catch (e) {
-      console.warn('Impossible de sauvegarder email_popup_closed :', e)
-    }
-  }
+      window.localStorage.setItem('email_popup_closed', 'true');
+    } catch {}
+  };
 
-  if (!visible || submitted) return null
+  if (!visible || submitted) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
@@ -97,5 +91,5 @@ export default function EmailCapturePopup() {
         </button>
       </div>
     </div>
-  )
+  );
 }

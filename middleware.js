@@ -12,52 +12,47 @@ const intlMiddleware = createMiddleware({
 });
 
 // ───────────────────────────────────────────────────
-// Chemins et préfixes à exclure du contrôle d’authentification et d’i18n
+// Chemins / préfixes EXCLUS du contrôle admin / i18n
 // ───────────────────────────────────────────────────
 const PUBLIC_PATHS = [
   '/favicon.ico',
   '/robots.txt',
-  '/manifest.json',       // ← Accès libre
-  '/fr/manifest.json',    // ← Variante française
-  '/en/manifest.json',    // ← Variante anglaise
-  '/sw.js',               // ← SW Next-PWA
-  '/firebase-messaging-sw.js', // ← SW Firebase
+  '/manifest.json',
+  '/sw.js',
+  '/firebase-messaging-sw.js',
 ];
-
 const PUBLIC_PREFIXES = [
-  '/_next/',  // ressources du build Next.js
+  '/_next/',
   '/icons/',
   '/images/',
   '/fonts/',
   '/static/',
-  '/api/',    // vos endpoints API publics
+  '/api/',
+  '/carousel', // permet à /carousel1.jpg, /carousel2.jpg, /carousel3.jpg d’être servis en public
 ];
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // ───────────────────────────────────────────────────
-  // 0) Si c’est exactement "/", on redirige directement vers "/fr"
-  // ───────────────────────────────────────────────────
+  // 1) Si c’est un “chemin public” (manifest, SW, favicon, robots) → on laisse passer
+  if (PUBLIC_PATHS.includes(pathname)) {
+    return NextResponse.next();
+  }
+  // 1b) Si l’URL commence par l’un des préfixes publics → on laisse passer
+  for (const prefix of PUBLIC_PREFIXES) {
+    if (pathname.startsWith(prefix)) {
+      return NextResponse.next();
+    }
+  }
+
+  // 2) Rediriger “/” vers “/fr”
   if (pathname === '/') {
     const url = request.nextUrl.clone();
     url.pathname = '/fr';
     return NextResponse.redirect(url);
   }
 
-  // 1) Si c’est exactement un chemin public (manifest, SW, favicon, robots)
-  if (PUBLIC_PATHS.includes(pathname)) {
-    return secureHeaders(request);
-  }
-
-  // 2) Si l’URL commence par l’un des préfixes publics → on laisse passer
-  for (const prefix of PUBLIC_PREFIXES) {
-    if (pathname.startsWith(prefix)) {
-      return secureHeaders(request);
-    }
-  }
-
-  // 3) Mode “maintenance”: on redirige vers /maintenance, sauf les accès /admin et /maintenance eux-mêmes
+  // 3) Mode “maintenance” (si activé via .env) → redirige vers /maintenance sauf /admin et /maintenance
   const maintenanceOn = process.env.MAINTENANCE === 'true';
   const isAdminPath = pathname.startsWith('/admin');
   const isMaintenancePage = pathname === '/maintenance';
@@ -67,7 +62,7 @@ export async function middleware(request) {
     return NextResponse.redirect(url);
   }
 
-  // 4) Protection des routes admin → vérifie le token NextAuth et le rôle “admin”
+  // 4) Protection des routes /admin → vérifie token NextAuth + rôle “admin”
   if (isAdminPath) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
     if (!token || token.role !== 'admin') {
@@ -75,12 +70,11 @@ export async function middleware(request) {
       url.pathname = '/login';
       return NextResponse.redirect(url);
     }
-    // Si l’utilisateur est admin, on applique simplement les headers
+    // Si l’utilisateur est admin → on applique juste les headers de sécurité
     return secureHeaders(request);
   }
 
-  // 5) Pour toutes les autres pages “client” (non `/api`, non fichiers publics):
-  //    on applique d’abord l’i18n (next-intl), puis les headers de sécurité
+  // 5) Toutes les autres pages “client” → on applique d’abord i18n, puis secureHeaders
   const responseIntl = await intlMiddleware(request);
   return secureHeaders(request, responseIntl);
 }
@@ -88,18 +82,16 @@ export async function middleware(request) {
 export const config = {
   matcher: [
     /*
-      Applique ce middleware à toutes les routes, à l’exception des :
+      Applique ce middleware à toutes les routes, sauf :
         - /_next/*
         - /api/*
         - /favicon.ico
         - /robots.txt
         - /manifest.json
-        - /fr/manifest.json
-        - /en/manifest.json
         - /sw.js
         - /firebase-messaging-sw.js
         - dossiers /icons/, /images/, /fonts/, /static/
     */
-    '/((?!_next/|api/|favicon\\.ico$|robots\\.txt$|manifest\\.json$|fr/manifest\\.json$|en/manifest\\.json$|sw\\.js$|firebase-messaging-sw\\.js$|icons/|images/|fonts/|static/).*)',
+    '/((?!_next/|api/|favicon\\.ico$|robots\\.txt$|manifest\\.json$|sw\\.js$|firebase-messaging-sw\\.js$|icons/|images/|fonts/|static/).*)',
   ],
 };

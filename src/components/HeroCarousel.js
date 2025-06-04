@@ -1,14 +1,13 @@
 // src/components/HeroCarousel.js
-
 'use client';
 
 import { useEffect, useState } from 'react';
 import '@/styles/hero-carousel.css';
 
 const slides = [
-  { title: 'Casques Gaming', img: '/images/carousel1.jpg' },
-  { title: 'Souris RGB', img: '/images/carousel2.jpg' },
-  { title: 'Claviers Mécaniques', img: '/images/carousel3.jpg' },
+  { title: 'Casques Gaming',     img: '/carousel1.jpg' },
+  { title: 'Souris RGB',          img: '/carousel2.jpg' },
+  { title: 'Claviers Mécaniques', img: '/carousel3.jpg' },
 ];
 
 export default function HeroCarousel() {
