@@ -1,3 +1,5 @@
+// src/components/AnalyticsScripts.js
+
 'use client'
 
 import Script from 'next/script'
@@ -24,7 +26,7 @@ export default function AnalyticsScripts() {
       )}
 
       {/* Meta Pixel Facebook */}
-      {process.env.NEXT_PUBLIC_META_PIXEL_ID && (
+      {process.env.NEXT_PUBLIC_META_PIXEL_ID ? (
         <Script id="meta-pixel" strategy="afterInteractive">
           {`
             !function(f,b,e,v,n,t,s)
@@ -39,7 +41,7 @@ export default function AnalyticsScripts() {
             fbq('track','PageView');
           `}
         </Script>
-      )}
+      ) : null}
     </>
   )
 }

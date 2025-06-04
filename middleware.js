@@ -17,10 +17,13 @@ const intlMiddleware = createMiddleware({
 const PUBLIC_PATHS = [
   '/favicon.ico',
   '/robots.txt',
-  '/manifest.json',            // ← Accès libre
-  '/sw.js',                     // ← SW Next-PWA
-  '/firebase-messaging-sw.js',  // ← SW Firebase
+  '/manifest.json',       // ← Accès libre
+  '/fr/manifest.json',    // ← Variante française
+  '/en/manifest.json',    // ← Variante anglaise
+  '/sw.js',               // ← SW Next-PWA
+  '/firebase-messaging-sw.js', // ← SW Firebase
 ];
+
 const PUBLIC_PREFIXES = [
   '/_next/',  // ressources du build Next.js
   '/icons/',
@@ -46,6 +49,7 @@ export async function middleware(request) {
   if (PUBLIC_PATHS.includes(pathname)) {
     return secureHeaders(request);
   }
+
   // 2) Si l’URL commence par l’un des préfixes publics → on laisse passer
   for (const prefix of PUBLIC_PREFIXES) {
     if (pathname.startsWith(prefix)) {
@@ -75,7 +79,7 @@ export async function middleware(request) {
     return secureHeaders(request);
   }
 
-  // 5) Pour toutes les autres pages “client” (non `/api`, non fichiers publics): 
+  // 5) Pour toutes les autres pages “client” (non `/api`, non fichiers publics):
   //    on applique d’abord l’i18n (next-intl), puis les headers de sécurité
   const responseIntl = await intlMiddleware(request);
   return secureHeaders(request, responseIntl);
@@ -90,10 +94,12 @@ export const config = {
         - /favicon.ico
         - /robots.txt
         - /manifest.json
+        - /fr/manifest.json
+        - /en/manifest.json
         - /sw.js
         - /firebase-messaging-sw.js
         - dossiers /icons/, /images/, /fonts/, /static/
     */
-    '/((?!_next/|api/|favicon\\.ico$|robots\\.txt$|manifest\\.json$|sw\\.js$|firebase-messaging-sw\\.js$|icons/|images/|fonts/|static/).*)',
+    '/((?!_next/|api/|favicon\\.ico$|robots\\.txt$|manifest\\.json$|fr/manifest\\.json$|en/manifest\\.json$|sw\\.js$|firebase-messaging-sw\\.js$|icons/|images/|fonts/|static/).*)',
   ],
 };

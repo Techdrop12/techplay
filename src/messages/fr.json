@@ -1,17 +1,19 @@
 {
   "seo": {
-    "homepage_title": "Bienvenue sur TechPlay",
-    "homepage_description": "Découvrez les meilleurs gadgets high-tech et accessoires livrés chez vous.",
-    "a_propos_title": "À propos de TechPlay",
-    "a_propos_description": "En savoir plus sur notre mission, notre équipe et nos valeurs.",
-    "contact_title": "Contact",
-    "contact_description": "Une question ? Contactez TechPlay directement par email.",
-    "wishlist_title": "Ma wishlist",
-    "wishlist_description": "Retrouvez ici vos produits favoris enregistrés sur TechPlay.",
-    "cart_title": "Mon panier",
-    "cart_description": "Retrouvez ici les produits que vous souhaitez commander sur TechPlay.",
-    "success_title": "Commande réussie",
-    "success_description": "Confirmation de commande chez TechPlay."
+    "seo": {
+      "homepage_title": "Bienvenue sur TechPlay",
+      "homepage_description": "Découvrez les meilleurs gadgets high-tech et accessoires livrés chez vous.",
+      "a_propos_title": "À propos de TechPlay",
+      "a_propos_description": "En savoir plus sur notre mission, notre équipe et nos valeurs.",
+      "contact_title": "Contact",
+      "contact_description": "Une question ? Contactez TechPlay directement par email.",
+      "wishlist_title": "Ma wishlist",
+      "wishlist_description": "Retrouvez ici vos produits favoris enregistrés sur TechPlay.",
+      "cart_title": "Mon panier",
+      "cart_description": "Retrouvez ici les produits que vous souhaitez commander sur TechPlay.",
+      "success_title": "Commande réussie",
+      "success_description": "Confirmation de commande chez TechPlay."
+    }
   },
   "home": {
     "title": "Accueil",
