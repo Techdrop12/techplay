@@ -1,15 +1,15 @@
 // next.config.js
 
-const path = require('path')
+const path = require('path');
 const withPWA = require('next-pwa')({
   dest: 'public',
-  register: true,
-  skipWaiting: true,
+  register: false,            // ← Désactive l’enregistrement automatique de sw.js
+  skipWaiting: false,         // facultatif, mais on peut le laisser à false
   disable: process.env.NODE_ENV === 'development', // désactive la PWA en dev
   exclude: [/middleware-manifest\.json$/],
-})
+});
 
-const nextIntl = require('next-intl/plugin')('./src/i18n/request.ts')
+const nextIntl = require('next-intl/plugin')('./src/i18n/request.ts');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -37,8 +37,8 @@ const nextConfig = {
   },
 
   webpack: (config) => {
-    config.resolve.alias['@'] = path.resolve(__dirname, 'src')
-    return config
+    config.resolve.alias['@'] = path.resolve(__dirname, 'src');
+    return config;
   },
 
   // ───────────────────────────────────────────────────────────
@@ -82,6 +82,6 @@ const nextConfig = {
       ],
     },
   ],
-}
+};
 
-module.exports = nextIntl(withPWA(nextConfig))
+module.exports = nextIntl(withPWA(nextConfig));
