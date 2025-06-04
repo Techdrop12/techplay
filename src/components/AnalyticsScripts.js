@@ -1,8 +1,8 @@
 // src/components/AnalyticsScripts.js
 
-'use client'
+'use client';
 
-import Script from 'next/script'
+import Script from 'next/script';
 
 export default function AnalyticsScripts() {
   return (
@@ -43,5 +43,5 @@ export default function AnalyticsScripts() {
         </Script>
       ) : null}
     </>
-  )
+  );
 }

@@ -1,26 +1,25 @@
 // src/components/HeroCarousel.js
 
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
-import '@/styles/hero-carousel.css'
+import { useEffect, useState } from 'react';
+import '@/styles/hero-carousel.css';
 
-// Si vous mettez vos images sous public/images/
 const slides = [
   { title: 'Casques Gaming', img: '/images/carousel1.jpg' },
   { title: 'Souris RGB', img: '/images/carousel2.jpg' },
   { title: 'Claviers Mécaniques', img: '/images/carousel3.jpg' },
-]
+];
 
 export default function HeroCarousel() {
-  const [index, setIndex] = useState(0)
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setIndex((prev) => (prev + 1) % slides.length)
-    }, 3000)
-    return () => clearInterval(interval)
-  }, [])
+      setIndex((prev) => (prev + 1) % slides.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="carousel">
@@ -36,5 +35,5 @@ export default function HeroCarousel() {
         </div>
       ))}
     </div>
-  )
+  );
 }
