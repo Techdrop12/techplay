@@ -42,11 +42,12 @@ const nextConfig = {
   },
 
   // ───────────────────────────────────────────────────────────
-  //  Headers HTTP pour autoriser les fichiers publics (manifest, SW, icons)
+  //  HEADERS HTTP POUR LES FICHIERS PUBLICS
   // ───────────────────────────────────────────────────────────
   headers: async () => [
+    // 1) manifest.json et tout ce qui est dans /icons/...
     {
-      source: '/(manifest.json|firebase-messaging-sw.js|icons/.*)',
+      source: '/(manifest.json|icons/.*)',
       headers: [
         {
           key: 'Cache-Control',
@@ -62,9 +63,18 @@ const nextConfig = {
         },
       ],
     },
+    // 2) firebase-messaging-sw.js → on s’assure d’un content-type correct
     {
       source: '/firebase-messaging-sw.js',
       headers: [
+        {
+          key: 'Cache-Control',
+          value: 'public, max-age=3600, immutable',
+        },
+        {
+          key: 'Access-Control-Allow-Origin',
+          value: '*',
+        },
         {
           key: 'Content-Type',
           value: 'application/javascript',

@@ -33,7 +33,7 @@ export default function ClientWrapper({ children }) {
     <ThemeProvider>
       <CartProvider>
         <UpsellProvider>
-          {/* ✅ Google Analytics */}
+          {/* → Google Analytics */}
           {GA_ID && (
             <>
               <Script
@@ -51,7 +51,7 @@ export default function ClientWrapper({ children }) {
             </>
           )}
 
-          {/* ✅ Meta Pixel */}
+          {/* → Meta Pixel */}
           {META_PIXEL_ID && (
             <>
               <Script id="meta-pixel" strategy="afterInteractive">
@@ -65,7 +65,7 @@ export default function ClientWrapper({ children }) {
                   s.parentNode.insertBefore(t,s)}(window, document,'script',
                   'https://connect.facebook.net/en_US/fbevents.js');
                   fbq('init', '${META_PIXEL_ID}');
-                  fbq('track', 'PageView');
+                  fbq('track','PageView');
                 `}
               </Script>
               <noscript>
@@ -80,14 +80,13 @@ export default function ClientWrapper({ children }) {
             </>
           )}
 
-          {/* 🔔 Push notifications */}
+          {/* → Push notifications (le composant affiche un bouton “Autoriser” etc.) */}
           <PushPermission />
 
-          {/* 🧠 Score utilisateur comportemental */}
+          {/* → Score utilisateur comportemental */}
           <ScoreTracker />
 
           {children}
-
           <Toaster position="top-right" />
         </UpsellProvider>
       </CartProvider>

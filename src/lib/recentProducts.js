@@ -1,9 +1,10 @@
+// src/lib/recentProducts.js
 const STORAGE_KEY = 'recentProducts'
 
 export function getRecentProducts() {
   if (typeof window === 'undefined') return []
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = window.localStorage.getItem(STORAGE_KEY)
     return raw ? JSON.parse(raw) : []
   } catch (err) {
     console.warn('❌ Erreur lecture recentProducts:', err)
@@ -16,9 +17,9 @@ export function addRecentProduct(product) {
 
   try {
     const current = getRecentProducts()
-    const filtered = current.filter(p => p.slug !== product.slug)
+    const filtered = current.filter((p) => p.slug !== product.slug)
     const updated = [product, ...filtered].slice(0, 6)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
   } catch (err) {
     console.warn('❌ Erreur écriture recentProducts:', err)
   }

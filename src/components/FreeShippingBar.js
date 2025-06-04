@@ -1,4 +1,5 @@
 'use client'
+
 import { useEffect, useState } from 'react'
 
 export default function FreeShippingBar({ threshold = 50 }) {
@@ -6,15 +7,17 @@ export default function FreeShippingBar({ threshold = 50 }) {
   const [show, setShow] = useState(false)
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+
     try {
-      const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]')
+      const cartItems = JSON.parse(window.localStorage.getItem('cartItems') || '[]')
       const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
       setAmount(total)
       setShow(total < threshold)
     } catch {
       setShow(false)
     }
-  }, [])
+  }, [threshold])
 
   if (!show) return null
 

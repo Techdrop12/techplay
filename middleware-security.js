@@ -1,4 +1,4 @@
-// ✅ middleware-security.js – headers HTTP essentiels
+// middleware-security.js – headers HTTP essentiels
 import { NextResponse } from 'next/server'
 
 export function middleware(request, response = NextResponse.next()) {

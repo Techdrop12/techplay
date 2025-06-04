@@ -8,12 +8,11 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([])
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
     try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        const stored = localStorage.getItem('cart')
-        if (stored) {
-          setCart(JSON.parse(stored))
-        }
+      const stored = window.localStorage.getItem('cart')
+      if (stored) {
+        setCart(JSON.parse(stored))
       }
     } catch (error) {
       console.warn('Erreur lecture localStorage (cart):', error)
@@ -21,10 +20,9 @@ export const CartProvider = ({ children }) => {
   }, [])
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
     try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        localStorage.setItem('cart', JSON.stringify(cart))
-      }
+      window.localStorage.setItem('cart', JSON.stringify(cart))
     } catch (error) {
       console.warn('Erreur sauvegarde localStorage (cart):', error)
     }

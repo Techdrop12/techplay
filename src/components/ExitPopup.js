@@ -8,7 +8,7 @@ export default function ExitPopup() {
 
     const handleBeforeUnload = (e) => {
       try {
-        const cart = localStorage.getItem('cart')
+        const cart = window.localStorage.getItem('cart')
         if (cart && JSON.parse(cart).length > 0) {
           e.preventDefault()
           e.returnValue = ''

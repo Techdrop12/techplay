@@ -9,10 +9,14 @@ export default function CartReminder() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const storedCart = localStorage.getItem('cart')
-      if (storedCart && JSON.parse(storedCart).length > 0) {
-        const timer = setTimeout(() => setShow(true), 7000)
-        return () => clearTimeout(timer)
+      try {
+        const storedCart = window.localStorage.getItem('cart')
+        if (storedCart && JSON.parse(storedCart).length > 0) {
+          const timer = setTimeout(() => setShow(true), 7000)
+          return () => clearTimeout(timer)
+        }
+      } catch (e) {
+        console.warn('Erreur CartReminder (localStorage) :', e)
       }
     }
   }, [])

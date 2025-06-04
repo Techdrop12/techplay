@@ -1,4 +1,4 @@
-// ✅ src/components/EmailCapturePopup.js corrigé
+// src/components/EmailCapturePopup.js
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -10,18 +10,18 @@ export default function EmailCapturePopup() {
   const [submitted, setSubmitted] = useState(false)
 
   useEffect(() => {
-    try {
-      if (typeof window !== 'undefined') {
-        const savedEmail = localStorage.getItem('user_email')
-        const alreadyClosed = localStorage.getItem('email_popup_closed')
+    if (typeof window === 'undefined') return
 
-        if (!savedEmail && !alreadyClosed) {
-          const timeout = setTimeout(() => setVisible(true), 15000)
-          return () => clearTimeout(timeout)
-        }
+    try {
+      const savedEmail = window.localStorage.getItem('user_email')
+      const alreadyClosed = window.localStorage.getItem('email_popup_closed')
+
+      if (!savedEmail && !alreadyClosed) {
+        const timeout = setTimeout(() => setVisible(true), 15000)
+        return () => clearTimeout(timeout)
       }
     } catch (e) {
-      console.warn('Erreur accès localStorage (popup):', e)
+      console.warn('Erreur accès localStorage (popup) :', e)
     }
   }, [])
 
@@ -41,8 +41,9 @@ export default function EmailCapturePopup() {
       if (res.ok) {
         toast.success('Merci ! Vous recevrez nos offres par email.')
         try {
-          localStorage.setItem('user_email', email)
+          window.localStorage.setItem('user_email', email)
         } catch {}
+
         setSubmitted(true)
         setTimeout(() => setVisible(false), 2000)
       } else {
@@ -56,7 +57,7 @@ export default function EmailCapturePopup() {
   const handleClose = () => {
     setVisible(false)
     try {
-      localStorage.setItem('email_popup_closed', 'true')
+      window.localStorage.setItem('email_popup_closed', 'true')
     } catch {}
   }
 
@@ -65,14 +66,14 @@ export default function EmailCapturePopup() {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
       <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-xl text-center">
-        <h2 className="text-lg font-semibold mb-2">🎁 -10% sur votre 1ère commande</h2>
+        <h2 className="text-lg font-semibold mb-2">🎁 -10 % sur votre 1ʳᵉ commande</h2>
         <p className="text-sm mb-4">
           Recevez une réduction exclusive en vous inscrivant à notre newsletter !
         </p>
         <input
           type="email"
           value={email}
-          onChange={e => setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.target.value)}
           placeholder="Votre email"
           className="border w-full p-2 mb-3 rounded text-sm"
         />

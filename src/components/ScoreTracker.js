@@ -9,16 +9,16 @@ export default function ScoreTracker() {
     if (typeof window === 'undefined') return
 
     try {
-      let localScore = Number(localStorage.getItem('user_score')) || 0
+      let localScore = Number(window.localStorage.getItem('user_score')) || 0
       setScore(localScore)
 
       const currentPath = window.location.pathname
-      const visited = JSON.parse(localStorage.getItem('visited_paths') || '[]')
+      const visited = JSON.parse(window.localStorage.getItem('visited_paths') || '[]')
       if (!visited.includes(currentPath)) {
         visited.push(currentPath)
-        localStorage.setItem('visited_paths', JSON.stringify(visited))
+        window.localStorage.setItem('visited_paths', JSON.stringify(visited))
         localScore += 1
-        localStorage.setItem('user_score', localScore)
+        window.localStorage.setItem('user_score', localScore)
         setScore(localScore)
       }
 
@@ -31,7 +31,7 @@ export default function ScoreTracker() {
           scrollDepth = scrolled
           if (scrollDepth > 30 && localScore < 10) {
             localScore += 1
-            localStorage.setItem('user_score', localScore)
+            window.localStorage.setItem('user_score', localScore)
             setScore(localScore)
           }
         }
@@ -40,7 +40,7 @@ export default function ScoreTracker() {
       const timer = setTimeout(() => {
         if (localScore < 10) {
           localScore += 2
-          localStorage.setItem('user_score', localScore)
+          window.localStorage.setItem('user_score', localScore)
           setScore(localScore)
         }
       }, 15000)

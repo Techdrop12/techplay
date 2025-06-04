@@ -6,29 +6,42 @@ export default function DynamicPromoBanner() {
   const [promo, setPromo] = useState(null)
 
   useEffect(() => {
-    const now = new Date()
+    if (typeof window === 'undefined') return
 
-    // Exemple de logique promo dynamique
-    const promos = [
-      {
-        id: 'low-stock',
-        condition: () => localStorage.getItem('user_score') >= 6,
-        message: '🔥 Stock bientôt épuisé ! Commandez maintenant.',
-      },
-      {
-        id: 'tech-week',
-        condition: () => now.getMonth() === 10, // Novembre
-        message: '💥 TechWeek : -20% sur tout le site jusqu\'à dimanche !',
-      },
-      {
-        id: 'free-shipping',
-        condition: () => now.getHours() >= 18,
-        message: '🚚 Livraison gratuite pour toute commande passée avant minuit !',
-      },
-    ]
+    try {
+      const now = new Date()
 
-    const active = promos.find(p => p.condition())
-    if (active) setPromo(active)
+      // Exemple de logic promo dynamique
+      const promos = [
+        {
+          id: 'low-stock',
+          condition: () => Number(window.localStorage.getItem('user_score')) >= 6,
+          message: '🔥 Stock bientôt épuisé ! Commandez maintenant.',
+        },
+        {
+          id: 'tech-week',
+          condition: () => now.getMonth() === 10, // Novembre
+          message: "💥 TechWeek : -20 % sur tout le site jusqu’à dimanche !",
+        },
+        {
+          id: 'free-shipping',
+          condition: () => now.getHours() >= 18,
+          message: '🚚 Livraison gratuite pour toute commande passée avant minuit !',
+        },
+      ]
+
+      const active = promos.find((p) => {
+        try {
+          return p.condition()
+        } catch {
+          return false
+        }
+      })
+
+      if (active) setPromo(active)
+    } catch (e) {
+      console.warn('Erreur DynamicPromoBanner :', e)
+    }
   }, [])
 
   if (!promo) return null

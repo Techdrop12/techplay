@@ -1,3 +1,4 @@
+// src/lib/hotjar.js
 'use client'
 
 import { useEffect } from 'react'
@@ -11,8 +12,10 @@ export default function useHotjar() {
     if (!HOTJAR_ID || window.hj) return
 
     try {
-      ;(function(h, o, t, j, a, r) {
-        h.hj = h.hj || function() { (h.hj.q = h.hj.q || []).push(arguments) }
+      ;(function (h, o, t, j, a, r) {
+        h.hj = h.hj || function () {
+          (h.hj.q = h.hj.q || []).push(arguments)
+        }
         h._hjSettings = { hjid: HOTJAR_ID, hjsv: HOTJAR_SV }
         a = o.getElementsByTagName('head')[0]
         r = o.createElement('script')

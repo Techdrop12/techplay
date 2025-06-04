@@ -1,4 +1,3 @@
-// src/components/AddToCartButtonABTest.js
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -10,24 +9,32 @@ export default function AddToCartButtonABTest({ onClick, product, userEmail }) {
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    const stored = window.localStorage.getItem('ab_variant')
-    if (stored) {
-      setVariant(stored)
-    } else {
-      const random = Math.random() < 0.5 ? 'A' : 'B'
-      window.localStorage.setItem('ab_variant', random)
-      setVariant(random)
+    try {
+      const stored = window.localStorage.getItem('ab_variant')
+      if (stored) {
+        setVariant(stored)
+      } else {
+        const random = Math.random() < 0.5 ? 'A' : 'B'
+        window.localStorage.setItem('ab_variant', random)
+        setVariant(random)
+      }
+    } catch (e) {
+      console.warn('Erreur AddToCartButtonABTest (localStorage) :', e)
     }
   }, [])
 
   const handleClick = () => {
     if (typeof window !== 'undefined') {
-      const currentCart = JSON.parse(window.localStorage.getItem('cartItems') || '[]')
-      const updatedCart = [...currentCart, product]
-      window.localStorage.setItem('cartItems', JSON.stringify(updatedCart))
+      try {
+        const currentCart = JSON.parse(window.localStorage.getItem('cartItems') || '[]')
+        const updatedCart = [...currentCart, product]
+        window.localStorage.setItem('cartItems', JSON.stringify(updatedCart))
 
-      if (userEmail) {
-        window.localStorage.setItem('cartEmail', userEmail)
+        if (userEmail) {
+          window.localStorage.setItem('cartEmail', userEmail)
+        }
+      } catch (e) {
+        console.warn('Erreur stockage produit (AB Test) :', e)
       }
     }
 
