@@ -22,10 +22,12 @@ if (typeof window !== 'undefined') {
     console.warn('❌ Firebase config invalide : projectId manquant.');
   } else {
     try {
+      // Initialisation unique de Firebase
       firebaseApp = getApps().length === 0
         ? initializeApp(firebaseConfig)
         : getApps()[0];
 
+      // Vérification du support de Firebase Messaging
       isSupported()
         .then((supported) => {
           if (supported) {
@@ -44,7 +46,7 @@ if (typeof window !== 'undefined') {
   }
 }
 
-// Attendre que `messaging` soit défini (max 2 s)
+// Fonction utilitaire pour attendre que “messaging” soit défini (max 2 s)
 function waitForMessaging() {
   return new Promise((resolve, reject) => {
     const interval = setInterval(() => {
@@ -60,6 +62,7 @@ function waitForMessaging() {
   });
 }
 
+// Demande de permission Notification + enregistrement du token FCM
 export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messaging-sw.js') {
   if (typeof window === 'undefined' || !('Notification' in window)) {
     console.warn('⛔ Notifications non supportées dans ce contexte.');
@@ -88,6 +91,7 @@ export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messagi
       throw new Error('❌ VAPID_KEY non valide ou absente');
     }
 
+    // Récupère le token FCM
     const token = await getToken(messaging, {
       vapidKey,
       serviceWorkerRegistration: registration,
@@ -109,6 +113,7 @@ export async function requestAndSaveToken(serviceWorkerPath = '/firebase-messagi
   }
 }
 
+// Écoute des notifications en premier plan (foreground)
 export function listenToMessages() {
   if (typeof window !== 'undefined' && messaging) {
     onMessage(messaging, (payload) => {

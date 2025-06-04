@@ -23,10 +23,10 @@ const META_PIXEL_ID = isClient ? process.env.NEXT_PUBLIC_META_PIXEL_ID : '';
 export default function ClientWrapper({ children }) {
   const pathname = usePathname();
 
-  // 🔥 Hotjar (uniquement côté client)
+  // Hotjar (uniquement côté client)
   useHotjar();
 
-  // 🔍 Google Analytics – déclenché à chaque changement de route
+  // Google Analytics – déclenché à chaque changement de route
   useEffect(() => {
     if (isClient && GA_ID) {
       window.gtag?.('event', 'page_view', {
@@ -35,7 +35,7 @@ export default function ClientWrapper({ children }) {
     }
   }, [pathname]);
 
-  // 📳 Firebase Messaging
+  // Firebase Messaging
   useEffect(() => {
     requestAndSaveToken().then((token) => {
       if (token) {
@@ -49,7 +49,7 @@ export default function ClientWrapper({ children }) {
     <ThemeProvider>
       <CartProvider>
         <UpsellProvider>
-          {/* → Google Analytics */}
+          {/* Google Analytics */}
           {GA_ID && (
             <>
               <Script
@@ -67,7 +67,7 @@ export default function ClientWrapper({ children }) {
             </>
           )}
 
-          {/* → Meta Pixel */}
+          {/* Meta Pixel */}
           {META_PIXEL_ID && (
             <>
               <Script id="meta-pixel" strategy="afterInteractive">
@@ -96,10 +96,10 @@ export default function ClientWrapper({ children }) {
             </>
           )}
 
-          {/* → Composant local pour push permission */}
+          {/* Composant pour demander la permission de push */}
           <PushPermission />
 
-          {/* → Score Tracker */}
+          {/* ScoreTracker (ou autre) */}
           <ScoreTracker />
 
           {children}

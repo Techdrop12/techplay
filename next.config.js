@@ -4,10 +4,12 @@ const path = require('path');
 const withPWA = require('next-pwa')({
   dest: 'public',
 
-  // 🔹 on ACTIVE l’enregistrement automatique du SW
+  // ───────────────────────────────────────────────────
+  // → On ACTIVE l’enregistrement automatique du SW (sw.js) dès le chargement
+  //   pour éviter “no active Service Worker” lorsque Firebase demande un token.
+  // ───────────────────────────────────────────────────
   register: true,
   skipWaiting: true,
-
   disable: process.env.NODE_ENV === 'development',
   exclude: [/middleware-manifest\.json$/],
 });
@@ -40,24 +42,26 @@ const nextConfig = {
   },
 
   webpack: (config) => {
+    // Alias “@” vers “src/” pour les imports
     config.resolve.alias['@'] = path.resolve(__dirname, 'src');
     return config;
   },
 
-  // ───────────────────────────────────────────────────────────
-  //  HEADERS HTTP POUR LES FICHIERS PUBLICS (manifest + SW)
-  // ───────────────────────────────────────────────────────────
+  // ───────────────────────────────────────────────────────────────────────
+  // HEADERS HTTP POUR LES FICHIERS PUBLICS (manifest.json, sw.js, firebase-messaging-sw.js)
+  // ───────────────────────────────────────────────────────────────────────
   headers: async () => [
-    // 1) manifest.json + icônes → cache + CORS
+    // 1) manifest.json + icônes → on force un cache long + CORS
     {
       source: '/(manifest\\.json|icons/.*)',
       headers: [
         { key: 'Cache-Control', value: 'public, max-age=3600, immutable' },
         { key: 'Access-Control-Allow-Origin', value: '*' },
+        // manifest.json est un JSON
         { key: 'Content-Type', value: 'application/json; charset=UTF-8' },
       ],
     },
-    // 2) SW PWA (sw.js) → cache + CORS + JS
+    // 2) sw.js (Next-PWA) → JS + CORS + cache
     {
       source: '/sw.js',
       headers: [
@@ -66,7 +70,7 @@ const nextConfig = {
         { key: 'Content-Type', value: 'application/javascript' },
       ],
     },
-    // 3) SW Firebase Messaging → cache + CORS + JS
+    // 3) firebase-messaging-sw.js (Firebase Messaging) → JS + CORS + cache
     {
       source: '/firebase-messaging-sw.js',
       headers: [
