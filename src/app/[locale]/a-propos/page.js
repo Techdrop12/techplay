@@ -29,7 +29,7 @@ export default async function AboutPage({ params: { locale } }) {
     return notFound();
   }
 
-  // 2) Extraire le namespace "a_propos" :
+  // 2) Extraire le namespace "a_propos"
   const namespace = allMessages['a_propos'];
   if (!namespace) {
     // Si le namespace "a_propos" n’existe pas, 404
