@@ -26,14 +26,14 @@ const META_PIXEL_ID = isClient ? process.env.NEXT_PUBLIC_META_PIXEL_ID : '';
 export default function RootLayoutClient({ children }) {
   const pathname = usePathname();
 
-  // Initialize Hotjar (client only)
+  // Initialiser Hotjar (client seulement)
   useHotjar();
 
   // Google Analytics – déclenché à chaque changement de route
   useEffect(() => {
     if (isClient && GA_ID) {
       window.gtag?.('event', 'page_view', {
-        page_path: pathname,
+        page_path: pathname
       });
     }
   }, [pathname]);

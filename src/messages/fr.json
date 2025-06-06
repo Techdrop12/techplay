@@ -11,7 +11,15 @@
     "cart_title": "Mon panier",
     "cart_description": "Retrouvez ici les produits que vous souhaitez commander sur TechPlay.",
     "success_title": "Commande réussie",
-    "success_description": "Confirmation de commande chez TechPlay."
+    "success_description": "Confirmation de commande chez TechPlay.",
+    "orders_title": "Mes commandes",
+    "orders_description": "Liste de vos commandes chez TechPlay",
+    "cgv_title": "Conditions Générales de Vente",
+    "cgv_description": "Toutes les conditions générales de vente de TechPlay.",
+    "blog_title": "Blog TechPlay",
+    "blog_description": "Toutes les actualités et articles de TechPlay.",
+    "product_not_found_title": "Produit introuvable",
+    "product_not_found_description": "Le produit que vous cherchez n'existe pas ou plus."
   },
   "home": {
     "title": "Accueil",
@@ -42,7 +50,9 @@
     "dashboard": "Tableau de bord",
     "total_sales": "Ventes totales",
     "total_orders": "Commandes totales",
-    "latest_order": "Dernière commande"
+    "latest_order": "Dernière commande",
+    "manage_products": "Gestion des produits",
+    "delete_confirmation": "Voulez-vous vraiment supprimer ce produit ?"
   },
   "login": {
     "admin_login": "Connexion admin",
@@ -52,12 +62,17 @@
     "failed": "Échec de la connexion"
   },
   "product": {
-    "added_to_cart": "{title} ajouté au panier"
+    "added_to_cart": "{title} ajouté au panier",
+    "out_of_stock": "Rupture de stock",
+    "quantity": "Quantité",
+    "reviews_title": "Avis des clients",
+    "write_review": "Écrire un avis"
   },
   "error": {
     "404_title": "Page non trouvée",
     "404_message": "La page que vous cherchez n'existe pas.",
-    "back_home": "Retour à l’accueil"
+    "back_home": "Retour à l’accueil",
+    "generic": "Une erreur est survenue."
   },
   "a_propos": {
     "title": "À propos",
@@ -76,7 +91,8 @@
   "wishlist": {
     "title": "Ma liste de souhaits",
     "empty": "Aucun produit dans votre wishlist.",
-    "view": "Voir le produit"
+    "view": "Voir le produit",
+    "remove": "Supprimer de la wishlist"
   },
   "cart": {
     "your_cart": "Votre panier",
@@ -84,11 +100,48 @@
     "total": "Total",
     "checkout": "Passer au paiement",
     "continue": "← Continuer vos achats",
-    "error": "Erreur de paiement"
+    "error": "Erreur lors du paiement",
+    "free_shipping_reached": "Frais de port offerts !",
+    "add_x_more": "Ajoutez {missing} € pour la livraison gratuite"
   },
   "success": {
     "title": "Merci pour votre commande 🎉",
     "message": "Votre paiement a été confirmé. Vous recevrez un email de confirmation sous peu.",
     "back": "Retour à l'accueil"
+  },
+  "orders": {
+    "my_orders": "Mes commandes",
+    "no_orders_found": "Vous n'avez pas encore de commande.",
+    "view_details": "Voir détails",
+    "order_id": "Commande n° {orderId}",
+    "date": "Date",
+    "subtotal": "Sous-total",
+    "shipping": "Frais de livraison",
+    "total": "Total",
+    "status": "Statut",
+    "customer_info": "Informations client",
+    "items_ordered": "Articles commandés",
+    "order_summary": "Résumé de la commande",
+    "order_not_found": "Commande introuvable",
+    "error_loading_order": "Erreur lors du chargement de la commande."
+  },
+  "cgv": {
+    "title": "Conditions Générales de Vente",
+    "intro": "Les présentes conditions s'appliquent à toutes les commandes effectuées sur le site TechPlay.",
+    "section1_title": "Article 1 : Objet",
+    "section1_text": "Les présentes conditions régissent les ventes de produits TechPlay.",
+    "section2_title": "Article 2 : Commande",
+    "section2_text": "La commande devient ferme dès paiement validé."
+  },
+  "blog": {
+    "title": "Blog TechPlay",
+    "no_posts": "Aucun article pour le moment.",
+    "read_more": "Lire la suite",
+    "author": "Auteur : {author}",
+    "published_on": "Publié le {date}"
+  },
+  "category": {
+    "title": "Catégorie : {category}",
+    "no_products": "Aucun produit trouvé pour cette catégorie."
   }
 }

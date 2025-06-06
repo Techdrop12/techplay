@@ -20,12 +20,12 @@ import BreadcrumbJsonLd from './JsonLd/BreadcrumbJsonLd';
  *  — titleKey           : clé de traduction dans namespace “seo” (ex: "homepage_title")
  *  — descriptionKey     : clé de traduction dans namespace “seo” (ex: "homepage_description")
  *  — overrideTitle      : (optionnel) texte brut pour le <title> (remplace titleKey)
- *  — overrideDescription: (optionnel) texte brut pour la <meta name="description"> (remplace descriptionKey/fallback)
- *  — product            : (optionnel) objet produit { title, description?, ... } 
+ *  — overrideDescription: (optionnel) texte brut pour <meta name="description"> (remplace descriptionKey/fallback)
+ *  — product            : (optionnel) objet produit { title, description?, … }
  *  — image              : (optionnel) URL de l’image Open Graph
- *  — url                : (optionnel) URL canonique (sinon utilisera NEXT_PUBLIC_SITE_URL + pathname)
- *  — noIndex            : (optionnel, booléen) si true ajoute `<meta name="robots" content="noindex, nofollow" />`
- *  — breadcrumbSegments : (optionnel) tableau de segments `{ label, url }` pour injecter BreadcrumbJsonLd
+ *  — url                : (optionnel) URL canonique (sinon utilise NEXT_PUBLIC_SITE_URL + pathname)
+ *  — noIndex            : (optionnel, booléen) si true ajoute <meta name="robots" content="noindex, nofollow" />
+ *  — breadcrumbSegments : (optionnel) tableau de segments { label, url } pour injecter BreadcrumbJsonLd
  */
 export default function SEOHead({
   titleKey,
@@ -38,41 +38,34 @@ export default function SEOHead({
   noIndex = false,
   breadcrumbSegments
 }) {
-  const t = useTranslations('seo');
-  const pathname = usePathname();
+  // pour les traductions SEO (namespace 'seo')
+  const tSeo = useTranslations('seo');
   const locale = useLocale();
+  const pathname = usePathname();
 
-  // Construction de l’URL complète : on prend la prop url si fournie, sinon on compose
+  // Construction de l’URL complète
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || '';
-  const fullUrl = url
-    ? url
-    : `${siteUrl}${pathname || ''}`;
+  const fullUrl = url ? url : `${siteUrl}${pathname || ''}`;
 
   // Image par défaut si pas d’image produit
   const fallbackImage = `${siteUrl}/logo.png`;
 
   // Calcul du titre :
-  // — Si overrideTitle est fourni, on le prend.
-  // — Sinon, si titleKey existe, on fait t(titleKey).
-  // — Sinon, si un produit est passé, on prend product.title (pour les pages produit).
-  // — Sinon, on met “TechPlay” par défaut.
+  // 1) overrideTitle, 2) titleKey via tSeo, 3) product.title, 4) “TechPlay”
   const title = overrideTitle
     ? overrideTitle
     : titleKey
-      ? t(titleKey)
+      ? tSeo(titleKey)
       : product?.title
         ? product.title
         : 'TechPlay';
 
   // Calcul de la description :
-  // — Si overrideDescription est fourni, on le prend.
-  // — Sinon, si descriptionKey existe, on fait t(descriptionKey).
-  // — Sinon, on utilise getFallbackDescription(product) si le produit est fourni.
-  // — Sinon, on met “TechPlay – boutique tech” par défaut.
+  // 1) overrideDescription, 2) descriptionKey via tSeo, 3) getFallbackDescription(product), 4) fallback générique
   const description = overrideDescription
     ? overrideDescription
     : descriptionKey
-      ? t(descriptionKey)
+      ? tSeo(descriptionKey)
       : product
         ? getFallbackDescription(product)
         : 'TechPlay – boutique tech';
@@ -85,7 +78,7 @@ export default function SEOHead({
         <meta name="description" content={description} />
         {noIndex && <meta name="robots" content="noindex, nofollow" />}
 
-        {/* Métas viewport et charset */}
+        {/* Viewport & Charset */}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta charSet="utf-8" />
 
@@ -109,7 +102,7 @@ export default function SEOHead({
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      {/* Injection JSON-LD */}
+      {/* JSON-LD */}
       <OrganizationJsonLd />
       {product && <ProductJsonLd product={product} />}
       {breadcrumbSegments && (

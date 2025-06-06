@@ -1,32 +1,37 @@
-// File: src/app/[locale]/mes-commandes/page.js
+// src/app/[locale]/mes-commandes/page.js
 
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/authOptions';
 import { redirect } from 'next/navigation';
-import { getTranslator } from 'next-intl/server';    // ← au lieu de createTranslator
+import { createTranslator } from 'next-intl/server';
 import SEOHead from '@/components/SEOHead';
 import Link from 'next/link';
 
 /**
- * Page “Mes commandes” (Server Component). On charge les commandes
- * côté serveur, puis on utilise getTranslator() pour i18n.
+ * Page “Mes commandes” (Server Component).
+ * 1) Récupérer la session côté serveur.
+ * 2) Si non connecté, rediriger vers /[locale]/connexion.
+ * 3) Fetcher les commandes de l’utilisateur.
+ * 4) Charger les messages i18n + créer un traducteur pour le namespace “orders”.
+ * 5) Renvoyer le rendu complet avec SEOHead + breadcrumbs JSON-LD.
  */
 export default async function MesCommandesPage({ params: { locale } }) {
   // 1) Récupérer la session côté serveur
   const session = await getServerSession(authOptions);
 
-  // 2) Si pas de session, rediriger vers /[locale]/connexion
+  // 2) Si non connecté, rediriger vers /[locale]/connexion
   if (!session) {
     redirect(`/${locale}/connexion`);
   }
 
-  // 3) Fetch des commandes de l’utilisateur
+  // 3) Récupérer les commandes de l’utilisateur (API interne)
   let orders = [];
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') || 'http://localhost:3000';
+    const baseUrl =
+      process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') || 'http://localhost:3000';
     const res = await fetch(`${baseUrl}/api/user/orders`, {
       headers: {
-        // Transmettre le cookie pour que l’API authentifie
+        // Transmettre le cookie pour authentifier l’API
         cookie: `next-auth.session-token=${session.user.id || ''}`,
       },
       cache: 'no-store',
@@ -38,21 +43,42 @@ export default async function MesCommandesPage({ params: { locale } }) {
     orders = [];
   }
 
-  // 4) Traductions côté serveur avec getTranslator
+  // 4) Charger le JSON global (fr.json ou en.json)
+  let allMessages = {};
+  try {
+    allMessages = (await import(`@/messages/${locale}.json`)).default;
+  } catch {
+    // On poursuit avec un objet vide si le fichier n’existe pas
+    allMessages = {};
+  }
+
+  // 5) Créer le traducteur pour le namespace “orders”
   let t;
   try {
-    t = await getTranslator(locale, 'orders');
+    t = createTranslator({
+      locale,
+      messages: allMessages,
+      namespace: 'orders',
+    });
   } catch {
-    // Si le namespace “orders” n’existe pas pour cette locale,
-    // on peut choisir de fallback sur une simple fonction renvoyant la clé brute.
+    // Si le namespace “orders” est manquant, on renvoie simplement la clé
     t = (key) => key;
   }
+
+  // 6) Construire les breadcrumbSegments (JSON-LD)
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || '';
+  const basePath = `${siteUrl}/${locale}`;
+  const breadcrumbSegments = [
+    { label: t('my_orders'), url: `${basePath}` },
+    { label: t('my_orders'), url: `${basePath}/mes-commandes` },
+  ];
 
   return (
     <>
       <SEOHead
         titleKey="orders_title"
         descriptionKey="orders_description"
+        breadcrumbSegments={breadcrumbSegments}
       />
 
       <div className="p-6 max-w-3xl mx-auto">
