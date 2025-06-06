@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 import SEOHead from '@/components/SEOHead';
 
 /**
- * Cette route est 100% dynamique, on ne pré-génère rien
+ * Cette route est 100% dynamique, on ne pré-génère pas d’IDs.
  */
 export async function generateStaticParams() {
   return [];
@@ -16,16 +16,16 @@ export default async function OrderDetailPage({ params }) {
   const { locale, id } = params;
   const session = await getServerSession(authOptions);
 
-  // Si non connecté : rediriger vers /[locale]/connexion
+  // Si non connecté, rediriger vers la page de connexion locale.
   if (!session) {
     redirect(`/${locale}/connexion`);
   }
 
-  // Construire l’URL de base pour appeler notre API interne
+  // Construire l’URL de base pour appeler notre API interne.
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') || 'http://localhost:3000';
 
-  // On passe le cookie pour que l’API authentifie la session
+  // Monter l’en-tête « cookie » pour que l’API authentifie la session.
   const res = await fetch(`${baseUrl}/api/user/orders/${id}`, {
     headers: {
       cookie: `next-auth.session-token=${session.user.id || ''}`,
@@ -34,7 +34,7 @@ export default async function OrderDetailPage({ params }) {
   });
 
   if (!res.ok) {
-    // En cas d’erreur (commande introuvable, etc.), on affiche un message 404 minimal
+    // En cas d’erreur (commande introuvable, etc.), on affiche un message 404 minimal.
     return (
       <div className="p-6 max-w-3xl mx-auto text-center">
         <SEOHead
@@ -57,32 +57,27 @@ export default async function OrderDetailPage({ params }) {
 
   const order = await res.json();
 
-  // Formater la date selon la locale passée
+  // Formater la date selon la locale passée.
   const dateString = new Date(order.createdAt).toLocaleDateString(locale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   });
 
-  // Titre et description dynamiques pour SEOHead
-  const pageTitle =
-    locale === 'fr' ? `Commande #${order._id}` : `Order #${order._id}`;
-  const pageDesc =
-    locale === 'fr'
-      ? `Détails de la commande ${order._id} passée le ${dateString}.`
-      : `Details for order ${order._id} placed on ${dateString}.`;
+  // Titre et description dynamiques pour SEOHead.
+  const pageTitle = locale === 'fr'
+    ? `Commande #${order._id}`
+    : `Order #${order._id}`;
 
-  // Breadcrumb JSON-LD
+  const pageDesc = locale === 'fr'
+    ? `Détails de la commande ${order._id} passée le ${dateString}.`
+    : `Details for order ${order._id} placed on ${dateString}.`;
+
+  // Breadcrumb JSON-LD.
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || '';
   const breadcrumbSegments = [
-    {
-      label: locale === 'fr' ? 'Mes commandes' : 'My Orders',
-      url: `${siteUrl}/${locale}/mes-commandes`,
-    },
-    {
-      label: pageTitle,
-      url: `${siteUrl}/${locale}/commande/${order._id}`,
-    },
+    { label: locale === 'fr' ? 'Mes commandes' : 'My Orders', url: `${siteUrl}/${locale}/mes-commandes` },
+    { label: pageTitle, url: `${siteUrl}/${locale}/commande/${order._id}` },
   ];
 
   return (

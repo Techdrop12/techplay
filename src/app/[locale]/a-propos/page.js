@@ -1,10 +1,10 @@
 // src/app/[locale]/a-propos/page.js
+
 import { notFound } from 'next/navigation';
-import { createTranslator } from 'next-intl/server';
 import SEOHead from '@/components/SEOHead';
 
 /**
- * Pour pré-générer /fr/a-propos et /en/a-propos (SSG)
+ * Pour pré-générer /fr/a-propos et /en/a-propos
  */
 export async function generateStaticParams() {
   return [
@@ -14,47 +14,40 @@ export async function generateStaticParams() {
 }
 
 /**
- * Composant serveur “À propos”.
- * On importe le JSON global (fr.json ou en.json), puis on crée un traducteur
- * pour le namespace “a_propos” via createTranslator({ namespace: 'a_propos' }).
+ * Composant serveur « À propos ».
+ * 1) On importe le JSON global (fr.json ou en.json) de messages ;
+ * 2) On crée manuellement un traducteur pour le namespace "a_propos" ;
+ * 3) On passe à SEOHead + on affiche le contenu.
  */
 export default async function AboutPage({ params: { locale } }) {
-  // 1) Charger l’ensemble des messages i18n pour la locale (ex. "@/messages/fr.json")
+  // 1) Charger l’ensemble des messages i18n pour la locale
   let allMessages;
   try {
     allMessages = (await import(`@/messages/${locale}.json`)).default;
-  } catch {
-    // Si le fichier de messages n’existe pas, on renvoie un 404
+  } catch (e) {
+    // Si le fichier de messages n'existe pas, on renvoie un 404
     return notFound();
   }
 
-  // 2) Créer un traducteur pour le namespace “a_propos”
-  let t;
-  try {
-    t = createTranslator({
-      locale,
-      messages: allMessages,
-      namespace: 'a_propos'
-    });
-  } catch {
-    // Si le namespace “a_propos” n’existe pas dedans, on 404
+  // 2) Extraire le namespace "a_propos" :
+  const namespace = allMessages['a_propos'];
+  if (!namespace) {
+    // Si le namespace "a_propos" n’existe pas, 404
     return notFound();
   }
 
-  // 3) Définir les segments de breadcrumb (pour JSON-LD)
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || '';
-  const basePath = `${siteUrl}/${locale}`;
-  const breadcrumbSegments = [
-    { label: t('title'), url: `${basePath}` },
-    { label: t('title'), url: `${basePath}/a-propos` }
-  ];
+  // 3) Création manuelle d'une fonction t(key) pour lire namespace[key]
+  const t = (key) => {
+    // si la clé n'existe pas, on renvoie la clé brute en fallback
+    return namespace[key] ?? key;
+  };
 
   return (
     <>
+      {/* SEOHead full-option */}
       <SEOHead
         titleKey="a_propos_title"
         descriptionKey="a_propos_description"
-        breadcrumbSegments={breadcrumbSegments}
       />
 
       <main className="max-w-3xl mx-auto px-4 py-12">

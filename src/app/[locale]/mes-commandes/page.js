@@ -3,17 +3,16 @@
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/authOptions';
 import { redirect } from 'next/navigation';
-import { createTranslator } from 'next-intl/server';
 import SEOHead from '@/components/SEOHead';
 import Link from 'next/link';
 
 /**
- * Page “Mes commandes” (Server Component).
- * 1) Récupérer la session côté serveur.
- * 2) Si non connecté, rediriger vers /[locale]/connexion.
- * 3) Fetcher les commandes de l’utilisateur.
- * 4) Charger les messages i18n + créer un traducteur pour le namespace “orders”.
- * 5) Renvoyer le rendu complet avec SEOHead + breadcrumbs JSON-LD.
+ * Page « Mes commandes » (Server Component).
+ * 1) Récupérer la session côté serveur ;
+ * 2) Si pas de session, rediriger vers /[locale]/connexion ;
+ * 3) Récupérer les commandes depuis l’API interne ;
+ * 4) Charger manuellement le namespace "orders" ;
+ * 5) Passer à SEOHead + afficher la liste.
  */
 export default async function MesCommandesPage({ params: { locale } }) {
   // 1) Récupérer la session côté serveur
@@ -44,28 +43,21 @@ export default async function MesCommandesPage({ params: { locale } }) {
   }
 
   // 4) Charger le JSON global (fr.json ou en.json)
-  let allMessages = {};
+  let allMessages;
   try {
     allMessages = (await import(`@/messages/${locale}.json`)).default;
   } catch {
-    // On poursuit avec un objet vide si le fichier n’existe pas
     allMessages = {};
   }
 
-  // 5) Créer le traducteur pour le namespace “orders”
-  let t;
-  try {
-    t = createTranslator({
-      locale,
-      messages: allMessages,
-      namespace: 'orders',
-    });
-  } catch {
-    // Si le namespace “orders” est manquant, on renvoie simplement la clé
-    t = (key) => key;
-  }
+  // 5) Extraire le namespace "orders"
+  const namespace = allMessages['orders'] ?? {};
+  // Si vraiment il n’existe pas, namespace sera {} et t(key) retournera key brute.
+  const t = (key) => {
+    return namespace[key] ?? key;
+  };
 
-  // 6) Construire les breadcrumbSegments (JSON-LD)
+  // 6) Breadcrumb JSON-LD
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || '';
   const basePath = `${siteUrl}/${locale}`;
   const breadcrumbSegments = [

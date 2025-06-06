@@ -10,11 +10,10 @@ import SEOHead from '@/components/SEOHead';
  */
 export default function CGVPage() {
   const locale = useLocale();
-  const tSeo = useTranslations('seo'); // pour clés “seo.cgv_title” / “seo.cgv_description”
-  const tCgv = useTranslations('cgv'); // pour clés “cgv.title”, “cgv.intro”, sections, etc.
+  const tSeo = useTranslations('seo'); // pour « seo.cgv_title » / « seo.cgv_description »
+  const tCgv = useTranslations('cgv'); // pour « cgv.title », « cgv.intro », etc.
 
-  // Si le namespace “cgv” n’existe pas, on peut afficher un fallback minimal :
-  // Ici on suppose qu’il existe dans votre messages/fr.json et messages/en.json.
+  // Titre / intro extraits du namespace "cgv"
   const title = tCgv('title');
   const intro = tCgv('intro');
 
@@ -45,11 +44,7 @@ export default function CGVPage() {
           <h2>{tCgv('section2_title')}</h2>
           <p>{tCgv('section2_text')}</p>
 
-          {/* Si vous avez d’autres sections dans “cgv”, vous faites par ex. : */}
-          {/* 
-            <h2>{tCgv('section3_title')}</h2>
-            <p>{tCgv('section3_text')}</p>
-          */}
+          {/* Si besoin : d’autres sections… */}
         </section>
       </div>
     </>
