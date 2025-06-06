@@ -49,9 +49,9 @@ export default async function LocaleLayout({ params, children }) {
     <html lang={locale}>
       <head />
       <body className={inter.className}>
-        {/* 
-          LocaleProvider reçoit la locale et les messages chargés, puis fournit un contexte i18n 
-          à tous les enfants via next-intl. 
+        {/*
+          LocaleProvider reçoit la locale et les messages chargés,
+          puis fournit un contexte i18n à tous les enfants via next-intl.
         */}
         <LocaleProvider locale={locale} messages={messages}>
           <LayoutWithAnalytics locale={locale}>

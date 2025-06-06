@@ -10,8 +10,7 @@ const intlMiddleware = createMiddleware({
   defaultLocale: 'fr'
 });
 
-// On inclut maintenant également "/fr/manifest.json" et "/en/manifest.json".
-// De même pour "/fr/icons/" et "/en/icons/".
+// → On inclut ici les chemins “public” même sous /fr/ ou /en/
 const PUBLIC_PATHS = [
   '/favicon.ico',
   '/robots.txt',
@@ -19,7 +18,7 @@ const PUBLIC_PATHS = [
   '/sw.js',
   '/firebase-messaging-sw.js',
 
-  // On autorise explicitement ces mêmes fichiers quand on est sous /fr/ ou /en/
+  // Les mêmes ressources lorsqu’elles sont demandées depuis /fr/ ou /en/
   '/fr/manifest.json',
   '/en/manifest.json',
   '/fr/sw.js',
@@ -39,12 +38,12 @@ const PUBLIC_PREFIXES = [
   '/static/',
   '/api/',
 
-  // Icônes dans public/icons : on autorise aussi les versions préfixées par la locale
+  // Dossier public "icons" et ses versions préfixées
   '/icons/',
   '/fr/icons/',
   '/en/icons/',
 
-  // Si vous avez d’autres dossiers publics (par ex. /carousel), vous pouvez également ajouter
+  // Exemple pour d’autres dossiers publics
   '/carousel',
   '/fr/carousel',
   '/en/carousel'
@@ -53,54 +52,54 @@ const PUBLIC_PREFIXES = [
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // 1) Si c’est exactement un chemin public (ex: "/fr/manifest.json") → on laisse passer
+  // 1) Si c’est exactement l’un des chemins publics → on laisse passer
   if (PUBLIC_PATHS.includes(pathname)) {
     return NextResponse.next();
   }
 
-  // 1b) Si l’URL commence par un prefixe public (ex: "/fr/icons/…") → on laisse passer
+  // 1b) Si l’URL commence par un des préfixes publics → on laisse passer
   for (const prefix of PUBLIC_PREFIXES) {
     if (pathname.startsWith(prefix)) {
       return NextResponse.next();
     }
   }
 
-  // 2) Redirige "/" → "/fr"
+  // 2) Redirige "/" vers "/fr"
   if (pathname === '/') {
     const url = request.nextUrl.clone();
     url.pathname = '/fr';
     return NextResponse.redirect(url);
   }
 
-  // 3) Maintenance (sauf /admin et /maintenance)
+  // 3) Mode “maintenance” (sauf pour /admin et /maintenance)
   const maintenanceOn = process.env.MAINTENANCE === 'true';
   const isAdminPath = pathname.startsWith('/admin');
-  const isMaintenancePage = pathname === '/maintenance' || pathname === '/fr/maintenance' || pathname === '/en/maintenance';
+  const isMaintenancePage =
+    pathname === '/maintenance' ||
+    pathname === '/fr/maintenance' ||
+    pathname === '/en/maintenance';
   if (maintenanceOn && !isAdminPath && !isMaintenancePage) {
     const url = request.nextUrl.clone();
     url.pathname = '/maintenance';
     return NextResponse.redirect(url);
   }
 
-  // 4) Protection des routes /admin
+  // 4) Protection des routes “/admin” → on vérifie le token NextAuth + rôle “admin”
   if (isAdminPath) {
     const token = await getToken({
       req: request,
       secret: process.env.NEXTAUTH_SECRET
     });
     if (!token || token.role !== 'admin') {
-      // Si l’utilisateur n’est pas admin, on le redirige vers "/fr/connexion"
-      // (ou "/en/connexion" si vous souhaitez gérer la locale dynamiquement).
-      // Ici on redirige toujours vers "/fr/connexion" par défaut.
       const url = request.nextUrl.clone();
       url.pathname = '/fr/connexion';
       return NextResponse.redirect(url);
     }
-    // Si admin, on applique juste les headers sécurisés
+    // Si l’utilisateur est admin, on applique simplement les headers de sécurité
     return secureHeaders(request);
   }
 
-  // 5) Pour toutes les autres pages, appliquer d’abord i18n, puis sécuriser les headers
+  // 5) Toutes les autres pages “client” → on applique d’abord i18n, puis secureHeaders
   const responseIntl = await intlMiddleware(request);
   return secureHeaders(request, responseIntl);
 }
