@@ -3,10 +3,14 @@
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/authOptions';
 import { redirect } from 'next/navigation';
-import { createTranslator } from 'next-intl/server';
+import { getTranslator } from 'next-intl/server';    // ← au lieu de createTranslator
 import SEOHead from '@/components/SEOHead';
 import Link from 'next/link';
 
+/**
+ * Page “Mes commandes” (Server Component). On charge les commandes
+ * côté serveur, puis on utilise getTranslator() pour i18n.
+ */
 export default async function MesCommandesPage({ params: { locale } }) {
   // 1) Récupérer la session côté serveur
   const session = await getServerSession(authOptions);
@@ -16,33 +20,31 @@ export default async function MesCommandesPage({ params: { locale } }) {
     redirect(`/${locale}/connexion`);
   }
 
-  // 3) Récupérer les commandes de l’utilisateur
+  // 3) Fetch des commandes de l’utilisateur
   let orders = [];
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') || 'http://localhost:3000';
     const res = await fetch(`${baseUrl}/api/user/orders`, {
       headers: {
-        // Transmettre le cookie de session pour que l’API puisse authentifier
+        // Transmettre le cookie pour que l’API authentifie
         cookie: `next-auth.session-token=${session.user.id || ''}`,
       },
       cache: 'no-store',
     });
-    if (!res.ok) {
-      throw new Error('Erreur lors du chargement des commandes');
-    }
+    if (!res.ok) throw new Error('Erreur lors du chargement des commandes');
     orders = await res.json();
   } catch (err) {
     console.error('fetch orders error:', err);
     orders = [];
   }
 
-  // 4) Traductions côté serveur
+  // 4) Traductions côté serveur avec getTranslator
   let t;
   try {
-    t = createTranslator(locale, 'orders');
+    t = await getTranslator(locale, 'orders');
   } catch {
-    // Si le namespace “orders” manque pour cette locale, on peut afficher un fallback minimal
-    // ou 404, mais ici on continue avec un traducteur “vide” qui affichera uniquement clés brutes.
+    // Si le namespace “orders” n’existe pas pour cette locale,
+    // on peut choisir de fallback sur une simple fonction renvoyant la clé brute.
     t = (key) => key;
   }
 

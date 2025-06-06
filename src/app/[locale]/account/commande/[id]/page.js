@@ -5,8 +5,10 @@ import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
 import SEOHead from "@/components/SEOHead";
 
+/**
+ * Cette route est 100% dynamique, on ne pré-génère aucune commande.
+ */
 export async function generateStaticParams() {
-  // Cette route est 100% dynamique (pas de pré-génération).
   return [];
 }
 
@@ -14,17 +16,14 @@ export default async function OrderDetailPage({ params }) {
   const { locale, id } = params;
   const session = await getServerSession(authOptions);
 
-  // Si non connecté : rediriger vers la page de connexion locale.
   if (!session) {
     redirect(`/${locale}/connexion`);
   }
 
-  // Construire l’URL de base pour appeler notre API interne.
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "") ||
     "http://localhost:3000";
 
-  // On monte l’en‐tête “cookie” pour que l’API authentifie la session
   const res = await fetch(`${baseUrl}/api/user/orders/${id}`, {
     headers: {
       cookie: `next-auth.session-token=${session.user.id || ""}`,
@@ -33,7 +32,6 @@ export default async function OrderDetailPage({ params }) {
   });
 
   if (!res.ok) {
-    // En cas d’erreur (commande introuvable, etc.), on affiche un message basique.
     return (
       <div className="p-6 max-w-3xl mx-auto text-center">
         <SEOHead
@@ -57,14 +55,12 @@ export default async function OrderDetailPage({ params }) {
 
   const order = await res.json();
 
-  // Formater la date selon la locale passée en paramètre
   const dateString = new Date(order.createdAt).toLocaleDateString(locale, {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
 
-  // Titre et description dynamiques
   const pageTitle =
     locale === "fr" ? `Commande #${order._id}` : `Order #${order._id}`;
   const pageDesc =
@@ -74,14 +70,11 @@ export default async function OrderDetailPage({ params }) {
 
   return (
     <>
-      {/* SEOHead “full‐option” avec overrideTitle/overrideDescription */}
       <SEOHead overrideTitle={pageTitle} overrideDescription={pageDesc} />
 
       <div className="p-6 max-w-3xl mx-auto space-y-6">
         <h1 className="text-2xl font-bold">
-          {locale === "fr"
-            ? `Commande #${order._id}`
-            : `Order #${order._id}`}
+          {locale === "fr" ? `Commande #${order._id}` : `Order #${order._id}`}
         </h1>
 
         <section className="border rounded p-4">

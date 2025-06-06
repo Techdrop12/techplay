@@ -1,9 +1,12 @@
 // File: src/app/[locale]/a-propos/page.js
 
 import { notFound } from 'next/navigation';
-import { createTranslator } from 'next-intl/server';
+import { getTranslator } from 'next-intl/server';    // ← au lieu de createTranslator
 import SEOHead from '@/components/SEOHead';
 
+/**
+ * Afin de pré-générer /fr/a-propos et /en/a-propos, on exporte generateStaticParams.
+ */
 export async function generateStaticParams() {
   return [
     { locale: 'fr' },
@@ -11,14 +14,17 @@ export async function generateStaticParams() {
   ];
 }
 
+/**
+ * Ce composant est un Server Component. On utilise getTranslator()
+ * pour récupérer la fonction t('clé') côté serveur.
+ */
 export default async function AboutPage({ params: { locale } }) {
-  // “createTranslator” looks up the messages loaded by LayoutWithAnalytics → LocaleProvider
-  // and returns a `t` function for the given locale + namespace.
   let t;
   try {
-    t = createTranslator(locale, 'a_propos');
+    // getTranslator(lng, namespace) renvoie un t() côté serveur
+    t = await getTranslator(locale, 'a_propos');
   } catch {
-    // If the “a_propos” namespace doesn’t exist for this locale, show a 404
+    // Si la clé de messages “a_propos” n’existe pas pour cette locale, on 404
     return notFound();
   }
 
