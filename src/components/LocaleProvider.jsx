@@ -1,7 +1,12 @@
-// src/components/LocaleProvider.jsx
+// File: src/components/LocaleProvider.jsx
 'use client';
 
-export default function LocaleProvider({ locale, children }) {
-  // Vous pouvez enrichir ce composant plus tard
-  return <>{children}</>;
+import { NextIntlClientProvider } from 'next-intl';
+
+export default function LocaleProvider({ locale, messages, children }) {
+  return (
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      {children}
+    </NextIntlClientProvider>
+  );
 }

@@ -2,9 +2,7 @@
 
 import { redirect } from 'next/navigation';
 
-export const dynamic = 'force-dynamic';
-
 export default function HomePage() {
-  // Cette ligne redirige **immédiatement** "/" → "/fr"
+  // Redirige automatiquement “/” → “/fr”
   redirect('/fr');
 }

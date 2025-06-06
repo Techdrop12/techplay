@@ -1,4 +1,5 @@
-export const dynamic = 'force-dynamic'
+// src/app/maintenance/page.js
+
 export default function Maintenance() {
   return (
     <div className="h-screen flex items-center justify-center text-center p-4">
@@ -7,5 +8,5 @@ export default function Maintenance() {
         <p className="text-gray-600">TechPlay revient très bientôt !</p>
       </div>
     </div>
-  )
+  );
 }

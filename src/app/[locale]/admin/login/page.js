@@ -1,15 +1,14 @@
-export const dynamic = 'force-dynamic'
-'use client'
+'use client';
 
-import { signIn } from 'next-auth/react'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { toast } from 'react-hot-toast'
+import { signIn } from 'next-auth/react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-hot-toast';
 
 export default function AdminLoginPage() {
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const router = useRouter()
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const router = useRouter();
 
   const handleLogin = async () => {
     try {
@@ -17,19 +16,19 @@ export default function AdminLoginPage() {
         redirect: false,
         username,
         password,
-      })
+      });
 
       if (res.ok) {
-        toast.success('Connexion réussie')
-        router.push('/admin')
+        toast.success('Connexion réussie');
+        router.push('/fr/admin');
       } else {
-        toast.error('Identifiants invalides')
+        toast.error('Identifiants invalides');
       }
     } catch (err) {
-      console.error(err)
-      toast.error("Erreur lors de la tentative de connexion")
+      console.error(err);
+      toast.error('Erreur lors de la tentative de connexion');
     }
-  }
+  };
 
   return (
     <div className="max-w-sm mx-auto mt-20 p-4 border rounded shadow">
@@ -47,12 +46,9 @@ export default function AdminLoginPage() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-      <button
-        className="bg-black text-white w-full py-2 rounded"
-        onClick={handleLogin}
-      >
+      <button className="bg-black text-white w-full py-2 rounded" onClick={handleLogin}>
         Se connecter
       </button>
     </div>
-  )
+  );
 }

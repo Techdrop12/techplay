@@ -1,35 +1,35 @@
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
-import { requestAndSaveToken } from '@/lib/firebase-client'
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { requestAndSaveToken } from '@/lib/firebase-client';
 
 export default function AdminDashboard() {
-  const t = useTranslations('admin')
-  const [stats, setStats] = useState(null)
-  const [notifStatus, setNotifStatus] = useState(null)
+  const t = useTranslations('admin');
+  const [stats, setStats] = useState(null);
+  const [notifStatus, setNotifStatus] = useState(null);
 
   // Blog IA
-  const [topic, setTopic] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [preview, setPreview] = useState('')
-  const [title, setTitle] = useState('')
-  const [image, setImage] = useState('')
-  const [success, setSuccess] = useState(false)
+  const [topic, setTopic] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [preview, setPreview] = useState('');
+  const [title, setTitle] = useState('');
+  const [image, setImage] = useState('');
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     fetch('/api/admin/dashboard')
       .then((res) => res.json())
       .then((data) => setStats(data))
-      .catch(() => setStats(null))
-  }, [])
+      .catch(() => setStats(null));
+  }, []);
 
   const handleTestNotification = async () => {
-    const token = await requestAndSaveToken()
+    const token = await requestAndSaveToken();
     if (!token) {
-      setNotifStatus('❌ Échec : Permission refusée ou token non généré')
-      return
+      setNotifStatus('❌ Échec : Permission refusée ou token non généré');
+      return;
     }
 
     const res = await fetch('/api/notifications/send', {
@@ -40,33 +40,35 @@ export default function AdminDashboard() {
         body: 'Ceci est une notification test depuis l’admin.',
         token,
       }),
-    })
+    });
 
-    setNotifStatus(res.ok
-      ? '✅ Notification envoyée avec succès !'
-      : '❌ Erreur lors de l’envoi de la notification')
-  }
+    setNotifStatus(
+      res.ok
+        ? '✅ Notification envoyée avec succès !'
+        : '❌ Erreur lors de l’envoi de la notification'
+    );
+  };
 
   const handleGenerate = async () => {
-    setLoading(true)
-    setSuccess(false)
-    setPreview('')
+    setLoading(true);
+    setSuccess(false);
+    setPreview('');
     try {
       const res = await fetch('/api/blog/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ topic }),
-      })
-      const { content } = await res.json()
-      setPreview(content.html || content)
-      setTitle(content.title || topic)
-      setImage(content.image || '')
+      });
+      const { content } = await res.json();
+      setPreview(content.html || content);
+      setTitle(content.title || topic);
+      setImage(content.image || '');
     } catch (err) {
-      console.error('Erreur génération IA:', err)
+      console.error('Erreur génération IA :', err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleSave = async () => {
     try {
@@ -78,19 +80,19 @@ export default function AdminDashboard() {
           content: preview,
           image,
         }),
-      })
-      if (res.ok) setSuccess(true)
+      });
+      if (res.ok) setSuccess(true);
     } catch (err) {
-      console.error('Erreur sauvegarde blog:', err)
+      console.error('Erreur sauvegarde blog :', err);
     }
-  }
+  };
 
   if (!stats) {
     return (
       <div className="p-6 text-center text-gray-500 animate-pulse">
         <p className="text-sm">Chargement des statistiques...</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -153,7 +155,7 @@ export default function AdminDashboard() {
         <input
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
-          placeholder="Sujet de l'article (ex: Top gadgets 2025)"
+          placeholder="Sujet de l'article (ex : Top gadgets 2025)"
           className="w-full border rounded px-4 py-2 mb-4"
         />
         <button
@@ -198,5 +200,5 @@ export default function AdminDashboard() {
         )}
       </div>
     </div>
-  )
+  );
 }

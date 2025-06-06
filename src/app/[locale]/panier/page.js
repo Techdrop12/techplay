@@ -1,51 +1,52 @@
-export const dynamic = 'force-dynamic'
-'use client'
+// src/app/[locale]/panier/page.js
+'use client';
 
-import { useTranslations } from 'next-intl'
-import { useCart } from '@/context/cartContext'
-import SEOHead from '@/components/SEOHead'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { toast } from 'react-hot-toast'
-
-// ⚠️ À activer uniquement si tu l’utilises
-// import UpsellBlock from '@/components/UpsellBlock'
+import { useTranslations } from 'next-intl';
+import { useCart } from '@/context/cartContext';
+import SEOHead from '@/components/SEOHead';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'react-hot-toast';
 
 export default function PanierPage() {
-  const t = useTranslations('cart')
-  const { cart, total } = useCart()
-  const router = useRouter()
+  const t = useTranslations('cart');
+  const { cart, total } = useCart();
+  const router = useRouter();
 
-  const FREE_SHIPPING_THRESHOLD = 60
-  const progressPercent = Math.min((total / FREE_SHIPPING_THRESHOLD) * 100, 100)
-  const missing = Math.max(0, FREE_SHIPPING_THRESHOLD - total).toFixed(2)
+  const FREE_SHIPPING_THRESHOLD = 60;
+  const progressPercent = Math.min((total / FREE_SHIPPING_THRESHOLD) * 100, 100);
+  const missing = Math.max(0, FREE_SHIPPING_THRESHOLD - total).toFixed(2);
 
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   const handleCheckout = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cart })
-      })
+        body: JSON.stringify({ cart }),
+      });
 
-      const data = await res.json()
-      if (data.url) router.push(data.url)
-      else throw new Error()
+      const data = await res.json();
+      if (data.url) router.push(data.url);
+      else throw new Error();
     } catch (err) {
-      toast.error(t('error'))
+      toast.error(t('payment_error') || 'Erreur de paiement');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <>
-      <SEOHead titleKey="seo.cart_title" descriptionKey="seo.cart_description" />
+      {/* SEOHead pour panier */}
+      <SEOHead
+        titleKey="cart_title"
+        descriptionKey="cart_description"
+      />
 
       <div className="p-6 max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold mb-4">{t('your_cart')}</h1>
@@ -58,14 +59,14 @@ export default function PanierPage() {
               exit={{ opacity: 0 }}
               className="text-sm text-gray-500"
             >
-              {t('empty')}
+              {t('empty_cart') || 'Votre panier est vide'}
             </motion.p>
           ) : (
             <>
               <div className="mb-4">
                 <p className="text-sm mb-1">
                   {progressPercent >= 100
-                    ? "✅ Livraison gratuite atteinte !"
+                    ? '✅ Livraison gratuite atteinte !'
                     : `Ajoutez encore ${missing} € pour obtenir la livraison offerte.`}
                 </p>
                 <div className="w-full h-3 bg-gray-200 rounded">
@@ -86,7 +87,9 @@ export default function PanierPage() {
                   <li key={i} className="p-4 flex justify-between items-center">
                     <div>
                       <p className="font-semibold">{item.title}</p>
-                      <p className="text-sm text-gray-600">{item.price} € x {item.quantity}</p>
+                      <p className="text-sm text-gray-600">
+                        {item.price} € × {item.quantity}
+                      </p>
                     </div>
                     <p className="text-right font-medium">
                       {(item.price * item.quantity).toFixed(2)} €
@@ -96,7 +99,9 @@ export default function PanierPage() {
               </motion.ul>
 
               <div className="text-right mb-6">
-                <p className="text-lg font-bold">{t('total')}: {total.toFixed(2)} €</p>
+                <p className="text-lg font-bold">
+                  {t('total')}: {total.toFixed(2)} €
+                </p>
               </div>
 
               <button
@@ -108,18 +113,15 @@ export default function PanierPage() {
               </button>
 
               <Link
-                href="/"
+                href="/fr"
                 className="block mt-4 text-sm text-center text-blue-600 underline"
               >
-                {t('continue')}
+                {t('continue_shopping') || '← Continuer vos achats'}
               </Link>
-
-              {/* ❌ Commenté si pas utilisé */}
-              {/* <UpsellBlock /> */}
             </>
           )}
         </AnimatePresence>
       </div>
     </>
-  )
+  );
 }

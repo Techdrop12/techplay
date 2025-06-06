@@ -1,57 +1,61 @@
-'use client'
+// File: src/app/[locale]/categorie/[category]/page.js
+'use client';
 
-import SEOHead from '@/components/SEOHead'
-import { useTranslations } from 'next-intl'
-import { useEffect, useState, useRef } from 'react'
-import ProductCard from '@/components/ProductCard'
-import MotionWrapper from '@/components/MotionWrapper'
-import { useParams } from 'next/navigation'
-import { toast } from 'react-hot-toast'
+import SEOHead from '@/components/SEOHead';
+import { useEffect, useState, useRef } from 'react';
+import { useParams } from 'next/navigation';
+import { toast } from 'react-hot-toast';
+import ProductCard from '@/components/ProductCard';
+import MotionWrapper from '@/components/MotionWrapper';
+import { useLocale } from 'next-intl';
 
 export default function CategoryPage() {
-  const { category } = useParams()
-  const t = useTranslations('category')
-  const [products, setProducts] = useState([])
-  const [displayCount, setDisplayCount] = useState(12)
-  const sentinelRef = useRef(null)
+  const { category } = useParams();
+  const locale = useLocale();
+  const [products, setProducts] = useState([]);
+  const [displayCount, setDisplayCount] = useState(12);
+  const sentinelRef = useRef(null);
 
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const res = await fetch(`/api/categories/${category}`)
-        if (!res.ok) throw new Error()
-        const data = await res.json()
-        setProducts(data)
+        const res = await fetch(`/api/categories/${category}`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        setProducts(data);
       } catch {
-        toast.error("Erreur lors du chargement des produits")
+        toast.error('Erreur lors du chargement des produits');
       }
     }
+    fetchProducts();
+  }, [category]);
 
-    fetchProducts()
-  }, [category])
-
-  const visibleProducts = products.slice(0, displayCount)
+  const visibleProducts = products.slice(0, displayCount);
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting && displayCount < products.length) {
-        setDisplayCount((prev) => prev + 12)
+        setDisplayCount((prev) => prev + 12);
       }
-    })
-    if (sentinelRef.current) observer.observe(sentinelRef.current)
-    return () => observer.disconnect()
-  }, [displayCount, products])
+    });
+    if (sentinelRef.current) observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [displayCount, products]);
 
   return (
     <>
+      {/*
+        Ici on n’a pas de clés “seo.category_title” ou “seo.category_description” dans votre JSON. 
+        On utilise donc overrideTitle / overrideDescription.
+      */}
       <SEOHead
-        title={`Catégorie : ${category}`}
-        description={`Tous les produits dans la catégorie ${category}`}
+        overrideTitle={`Catégorie : ${category}`}
+        overrideDescription={`Tous les produits dans la catégorie “${category}” sur TechPlay.`}
       />
 
       <MotionWrapper>
         <h1 className="text-xl font-bold px-4 mt-6 mb-4 capitalize">
-          {t('title', { category })}
+          Catégorie : {category}
         </h1>
 
         {products.length > 0 ? (
@@ -69,5 +73,5 @@ export default function CategoryPage() {
         <div ref={sentinelRef} className="h-8" />
       </MotionWrapper>
     </>
-  )
+  );
 }

@@ -1,39 +1,49 @@
 // File: src/app/[locale]/a-propos/page.js
 
-import { notFound } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { notFound } from 'next/navigation';
+import { createTranslator } from 'next-intl/server';
+import SEOHead from '@/components/SEOHead';
 
-// Génère /fr/a-propos et /en/a-propos au build
 export async function generateStaticParams() {
   return [
     { locale: 'fr' },
     { locale: 'en' }
-  ]
+  ];
 }
 
-// Composant server-side pour “À propos”
-export default function AboutPage({ params: { locale } }) {
-  const t = useTranslations('a_propos')
-
-  if (!t) {
-    return notFound()
+export default async function AboutPage({ params: { locale } }) {
+  // “createTranslator” looks up the messages loaded by LayoutWithAnalytics → LocaleProvider
+  // and returns a `t` function for the given locale + namespace.
+  let t;
+  try {
+    t = createTranslator(locale, 'a_propos');
+  } catch {
+    // If the “a_propos” namespace doesn’t exist for this locale, show a 404
+    return notFound();
   }
 
   return (
-    <main className="max-w-3xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-4">{t('title')}</h1>
-      <p className="text-lg text-gray-700 mb-8">{t('description')}</p>
+    <>
+      <SEOHead
+        titleKey="a_propos_title"
+        descriptionKey="a_propos_description"
+      />
 
-      <section className="prose dark:prose-invert">
-        <h2>{t('our_mission_title')}</h2>
-        <p>{t('our_mission_text')}</p>
+      <main className="max-w-3xl mx-auto px-4 py-12">
+        <h1 className="text-3xl font-bold mb-4">{t('title')}</h1>
+        <p className="text-lg text-gray-700 mb-8">{t('description')}</p>
 
-        <h2>{t('our_team_title')}</h2>
-        <p>{t('our_team_text')}</p>
+        <section className="prose dark:prose-invert">
+          <h2>{t('our_mission_title')}</h2>
+          <p>{t('our_mission_text')}</p>
 
-        <h2>{t('our_values_title')}</h2>
-        <p>{t('our_values_text')}</p>
-      </section>
-    </main>
-  )
+          <h2>{t('our_team_title')}</h2>
+          <p>{t('our_team_text')}</p>
+
+          <h2>{t('our_values_title')}</h2>
+          <p>{t('our_values_text')}</p>
+        </section>
+      </main>
+    </>
+  );
 }

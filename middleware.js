@@ -8,7 +8,7 @@ import { middleware as secureHeaders } from './middleware-security';
 // → Configuration i18n (next-intl)
 const intlMiddleware = createMiddleware({
   locales: ['fr', 'en'],
-  defaultLocale: 'fr',
+  defaultLocale: 'fr'
 });
 
 // ───────────────────────────────────────────────────
@@ -19,7 +19,7 @@ const PUBLIC_PATHS = [
   '/robots.txt',
   '/manifest.json',
   '/sw.js',
-  '/firebase-messaging-sw.js',
+  '/firebase-messaging-sw.js'
 ];
 const PUBLIC_PREFIXES = [
   '/_next/',
@@ -28,31 +28,31 @@ const PUBLIC_PREFIXES = [
   '/fonts/',
   '/static/',
   '/api/',
-  '/carousel', // permet à /carousel1.jpg, /carousel2.jpg, /carousel3.jpg d’être servis en public
+  '/carousel' // On autorise /carousel1.jpg, /carousel2.jpg, /carousel3.jpg
 ];
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // 1) Si c’est un “chemin public” (manifest, SW, favicon, robots) → on laisse passer
+  // 1) Si c’est un chemin public (manifest, SW, favicon, robots) → on laisse passer
   if (PUBLIC_PATHS.includes(pathname)) {
     return NextResponse.next();
   }
-  // 1b) Si l’URL commence par l’un des préfixes publics → on laisse passer
+  // 1b) Si l’URL commence par un des préfixes publics → on laisse passer
   for (const prefix of PUBLIC_PREFIXES) {
     if (pathname.startsWith(prefix)) {
       return NextResponse.next();
     }
   }
 
-  // 2) Rediriger “/” vers “/fr”
+  // 2) Redirige "/" → "/fr"
   if (pathname === '/') {
     const url = request.nextUrl.clone();
     url.pathname = '/fr';
     return NextResponse.redirect(url);
   }
 
-  // 3) Mode “maintenance” (si activé via .env) → redirige vers /maintenance sauf /admin et /maintenance
+  // 3) Mode “maintenance” (si activé via .env), sauf pour /admin et /maintenance
   const maintenanceOn = process.env.MAINTENANCE === 'true';
   const isAdminPath = pathname.startsWith('/admin');
   const isMaintenancePage = pathname === '/maintenance';
@@ -62,12 +62,15 @@ export async function middleware(request) {
     return NextResponse.redirect(url);
   }
 
-  // 4) Protection des routes /admin → vérifie token NextAuth + rôle “admin”
+  // 4) Protection des routes /admin → on vérifie le token NextAuth + rôle “admin”
   if (isAdminPath) {
-    const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+    const token = await getToken({
+      req: request,
+      secret: process.env.NEXTAUTH_SECRET
+    });
     if (!token || token.role !== 'admin') {
       const url = request.nextUrl.clone();
-      url.pathname = '/login';
+      url.pathname = '/fr/connexion';
       return NextResponse.redirect(url);
     }
     // Si l’utilisateur est admin → on applique juste les headers de sécurité
@@ -92,6 +95,6 @@ export const config = {
         - /firebase-messaging-sw.js
         - dossiers /icons/, /images/, /fonts/, /static/
     */
-    '/((?!_next/|api/|favicon\\.ico$|robots\\.txt$|manifest\\.json$|sw\\.js$|firebase-messaging-sw\\.js$|icons/|images/|fonts/|static/).*)',
-  ],
+    '/((?!_next/|api/|favicon\\.ico$|robots\\.txt$|manifest\\.json$|sw\\.js$|firebase-messaging-sw\\.js$|icons/|images/|fonts/|static/).*)'
+  ]
 };
