@@ -1,48 +1,65 @@
-// src/app/layout.js
+// ✅ src/app/layout.js
 
-import '../styles/globals.css';
+import '../styles/globals.css'; // ✅ Correction du chemin
 import { Inter } from 'next/font/google';
-import OrganizationJsonLd from '@/components/JsonLd/OrganizationJsonLd';
-import RootLayoutClient from '@/components/RootLayoutClient';
+import Script from 'next/script';
+import { headers } from 'next/headers';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+
+// Script anti-flash dark/light mode
+const themeInitScript = `
+  try {
+    const mode = localStorage.getItem('theme');
+    if (mode === 'dark' || (!mode && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  } catch(e) {}
+`;
 
 export const metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_BASE_URL || 'https://techplay.vercel.app'
-  ),
-  title: 'TechPlay',
-  description: 'La boutique ultime pour les passionnés de tech.',
-  icons: { icon: '/favicon.ico' },
+  title: {
+    default: 'TechPlay - Boutique Tech Premium',
+    template: '%s | TechPlay',
+  },
+  description: 'La boutique ultime pour les passionnés de tech et de gadgets innovants.',
+  metadataBase: new URL('https://techplay.fr'),
   openGraph: {
     title: 'TechPlay',
-    description: 'La boutique ultime pour les passionnés de tech.',
-    url: 'https://techplay.vercel.app',
+    description: 'Découvrez les meilleurs produits tech du moment, livrés gratuitement.',
     siteName: 'TechPlay',
-    images: [
-      {
-        url: '/opengraph-image.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'TechPlay'
-      }
-    ],
     locale: 'fr_FR',
-    type: 'website'
-  }
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'TechPlay',
+    description: 'La boutique ultime pour les passionnés de tech.',
+  },
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({ children }) {
+  const headerList = headers();
+  const userAgent = headerList.get('user-agent') || '';
+  const isBot = /bot|crawl|slurp|spider/i.test(userAgent);
+
   return (
-    <html lang="fr">
+    <html lang="fr" className={inter.variable} suppressHydrationWarning>
       <head>
-        <meta name="theme-color" content="#ffffff" />
-        <meta name="robots" content="index, follow" />
-        <link rel="manifest" href="/manifest.json" />
-        <OrganizationJsonLd />
+        <meta name="theme-color" content="#000000" />
+        <Script id="init-theme" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
-      <body className={inter.className}>
-        <RootLayoutClient>{children}</RootLayoutClient>
+      <body className="bg-white text-black dark:bg-zinc-900 dark:text-white transition-colors duration-300">
+        {!isBot && <Analytics />}
+        {!isBot && <SpeedInsights />}
+        {children}
       </body>
     </html>
   );

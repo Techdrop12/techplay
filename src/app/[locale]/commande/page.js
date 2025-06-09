@@ -1,95 +1,53 @@
-// src/app/[locale]/commande/page.js
-'use client';
+// File: src/app/[locale]/commande/page.js
 
-import { useCart } from '@/context/cartContext';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { toast } from 'react-hot-toast';
+import { notFound } from 'next/navigation';
 import SEOHead from '@/components/SEOHead';
-import { motion } from 'framer-motion';
-import { useTranslations } from 'next-intl';
+import CheckoutFormClient from '@/components/CheckoutFormClient';
 
-export default function CheckoutPage() {
-  const t = useTranslations('cart'); // on utilise namespace “cart” pour checkout (pas de “checkout” dans messages)
-  const { cart } = useCart();
-  const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+export async function generateStaticParams() {
+  return [
+    { locale: 'fr' },
+    { locale: 'en' }
+  ];
+}
 
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2);
+// On force le rendu dynamique parce que le panier/checkout évolue en temps réel
+export const dynamic = 'force-dynamic';
 
-  const validateEmail = (value) =>
-    /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value);
+export default async function CheckoutPage({ params: { locale } }) {
+  // 1) Si la locale n’est pas "fr" ni "en", on renvoie 404
+  if (!['fr', 'en'].includes(locale)) {
+    return notFound();
+  }
 
-  const handleSubmit = async () => {
-    if (!email || !validateEmail(email)) {
-      return toast.error(t('payment_error') || 'Adresse email invalide');
-    }
+  // 2) Charger dynamiquement le fichier de traductions correspondant
+  let messages;
+  try {
+    messages = (await import(`@/messages/${locale}.json`)).default;
+  } catch {
+    return notFound();
+  }
 
-    localStorage.setItem('user_email', email);
-    setIsLoading(true);
-
-    try {
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, cart }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        router.push(data.url);
-      } else {
-        throw new Error();
-      }
-    } catch (error) {
-      toast.error(t('payment_error') || 'Erreur lors du paiement');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // 3) Extraire le namespace "commande"
+  const namespace = messages['commande'] || {};
+  const t = (key) => namespace[key] ?? key;
 
   return (
     <>
+      {/* SEOHead utilisera le namespace "seo" + "checkout_title"/"checkout_description" */}
       <SEOHead
         titleKey="checkout_title"
         descriptionKey="checkout_description"
       />
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="max-w-xl mx-auto p-4"
-      >
-        <h1 className="text-2xl font-bold mb-4">{t('checkout') || 'Validation de commande'}</h1>
 
-        <input
-          type="email"
-          placeholder={t('email_placeholder') || 'Votre email'}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="border p-2 rounded w-full mb-4 text-sm"
-        />
+      <div className="max-w-3xl mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-4">
+          {t('title')}
+        </h1>
 
-        <ul className="mb-4 text-sm space-y-1">
-          {cart.map((item) => (
-            <li key={item._id}>
-              {item.title} — {item.price} € × {item.quantity}
-            </li>
-          ))}
-        </ul>
-
-        <p className="mb-4 font-medium">
-          {t('total')} : <strong>{total} €</strong>
-        </p>
-
-        <button
-          onClick={handleSubmit}
-          disabled={isLoading}
-          className="bg-black text-white px-4 py-2 rounded w-full"
-        >
-          {isLoading ? t('redirecting') || 'Traitement...' : t('checkout') || 'Valider et payer'}
-        </button>
-      </motion.div>
+        {/* Le composant client où toute la logique "panier + Stripe" se fera */}
+        <CheckoutFormClient locale={locale} t={t} />
+      </div>
     </>
   );
 }

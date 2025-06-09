@@ -1,67 +1,93 @@
 // src/app/[locale]/blog/page.js
-'use client';
 
-import { useEffect, useState } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import SEOHead from '@/components/SEOHead';
-import BlogCard from '@/components/BlogCard';
-import BlogListJsonLd from '@/components/BlogListJsonLd';
 
 /**
- * Composant client “Blog” :
- * – Chargement des posts depuis /api/blog/all
- * – Affichage via BlogCard
- * – SEOHead + JSON-LD via BlogListJsonLd
+ * Page “Blog Listing” (Server Component).
+ * 1) Vérifier que la locale existe (import minimal du JSON)
+ * 2) Appeler l’API pour récupérer la liste des posts
+ * 3) Charger le namespace "blog"
+ * 4) Passer à SEOHead + afficher la liste
  */
-export default function BlogPage() {
-  const [posts, setPosts] = useState([]);
-  const locale = useLocale();
-  const tSeo = useTranslations('seo');   // pour la partie meta
-  const tBlog = useTranslations('blog'); // pour traductions spécifiques (blog)
+export default async function BlogListingPage({ params }) {
+  // A) Extraire locale directement
+  const { locale } = params;
 
-  useEffect(() => {
-    fetch('/api/blog/all')
-      .then((res) => res.json())
-      .then(setPosts)
-      .catch(console.error);
-  }, []);
+  // B) Vérifier que le JSON de la locale existe
+  try {
+    await import(`@/messages/${locale}.json`);
+  } catch {
+    return notFound();
+  }
 
-  // Titre & description SEO
-  const blogTitle = tSeo('blog_title');
-  const blogDescription = tSeo('blog_description');
+  // C) Récupérer la liste des posts depuis l’API interne
+  let posts = [];
+  try {
+    const baseUrl =
+      process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') || 'http://localhost:3000';
+    const res = await fetch(`${baseUrl}/api/blog/all`, { cache: 'no-store' });
+    if (!res.ok) throw new Error('Erreur lors du chargement du blog');
+    posts = await res.json();
+  } catch (err) {
+    console.error('fetch blog error:', err);
+    posts = [];
+  }
 
-  // Breadcrumb JSON-LD
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || '';
-  const basePath = `${siteUrl}/${locale}`;
-  const breadcrumbSegments = [
-    { label: tSeo('homepage_title'), url: `${basePath}` },
-    { label: blogTitle,             url: `${basePath}/blog` },
-  ];
+  // D) Charger le JSON global (fr.json ou en.json)
+  let allMessages;
+  try {
+    allMessages = (await import(`@/messages/${locale}.json`)).default;
+  } catch {
+    allMessages = {};
+  }
+
+  // E) Extraire le namespace "blog"
+  const namespace = allMessages['blog'] ?? {};
+  const t = (key, opts) => {
+    const value = namespace[key] ?? key;
+    if (!opts) return value;
+    return value.replace(/\{(\w+)\}/g, (_, k) => opts[k] ?? `{${k}}`);
+  };
 
   return (
-    <div>
-      <SEOHead
-        overrideTitle={blogTitle}
-        overrideDescription={blogDescription}
-        breadcrumbSegments={breadcrumbSegments}
-      />
+    <>
+      <SEOHead titleKey="blog_title" descriptionKey="blog_description" />
 
-      <div className="p-6 max-w-4xl mx-auto">
-        <BlogListJsonLd posts={posts} />
-
-        <h1 className="text-2xl font-bold mb-6">{blogTitle}</h1>
+      <main className="max-w-3xl mx-auto px-4 py-12">
+        <h1 className="text-3xl font-bold mb-8">{t('title')}</h1>
 
         {posts.length === 0 ? (
-          <p className="text-gray-500">{tBlog('no_posts')}</p>
+          <p className="text-gray-500">{t('no_posts')}</p>
         ) : (
-          <div className="grid gap-6">
-            {posts.map((post) => {
-              const content = locale === 'en' && post.en ? post.en : post.content;
-              return <BlogCard key={post._id} post={{ ...post, content }} />;
-            })}
-          </div>
+          <ul className="divide-y border rounded">
+            {posts.map((post) => (
+              <li key={post._id} className="p-4">
+                <Link
+                  href={`/${locale}/blog/${post.slug}`}
+                  className="text-blue-600 underline text-xl"
+                >
+                  {post.title}
+                </Link>
+                <p className="text-sm text-gray-600 mt-1">
+                  {t('author', { author: post.author })} &bull;{' '}
+                  {new Date(post.createdAt).toLocaleDateString(locale)}
+                </p>
+                <p className="mt-2 text-gray-700">
+                  {post.content.slice(0, 150)}…
+                </p>
+                <Link
+                  href={`/${locale}/blog/${post.slug}`}
+                  className="text-blue-600 hover:underline mt-2 inline-block"
+                >
+                  {t('read_more')}
+                </Link>
+              </li>
+            ))}
+          </ul>
         )}
-      </div>
-    </div>
+      </main>
+    </>
   );
 }

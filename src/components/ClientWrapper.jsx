@@ -1,4 +1,4 @@
-// src/components/ClientWrapper.jsx
+// ✅ src/components/ClientWrapper.jsx
 'use client';
 
 import { useEffect } from 'react';
@@ -17,8 +17,8 @@ import useHotjar from '@/lib/hotjar';
 import { requestAndSaveToken, listenToMessages } from '@/lib/firebase-client';
 
 const isClient = typeof window !== 'undefined';
-const GA_ID = isClient ? process.env.NEXT_PUBLIC_GA_ID : '';
-const META_PIXEL_ID = isClient ? process.env.NEXT_PUBLIC_META_PIXEL_ID : '';
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
 export default function ClientWrapper({ children }) {
   const pathname = usePathname();
@@ -96,12 +96,9 @@ export default function ClientWrapper({ children }) {
             </>
           )}
 
-          {/* Composant pour demander la permission de push */}
+          {/* Permission push + suivi score + toasts */}
           <PushPermission />
-
-          {/* ScoreTracker (ou autre) */}
           <ScoreTracker />
-
           {children}
           <Toaster position="top-right" />
         </UpsellProvider>

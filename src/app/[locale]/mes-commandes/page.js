@@ -7,23 +7,27 @@ import SEOHead from '@/components/SEOHead';
 import Link from 'next/link';
 
 /**
- * Page « Mes commandes » (Server Component).
- * 1) Récupérer la session côté serveur ;
- * 2) Si pas de session, rediriger vers /[locale]/connexion ;
- * 3) Récupérer les commandes depuis l’API interne ;
- * 4) Charger manuellement le namespace "orders" ;
- * 5) Passer à SEOHead + afficher la liste.
+ * Page “Mes commandes” (Server Component).
+ * 1) Extraire locale de params
+ * 2) Récupérer la session côté serveur
+ * 3) Si pas de session, rediriger vers /[locale]/connexion
+ * 4) Récupérer les commandes depuis l’API interne
+ * 5) Charger le namespace "orders"
+ * 6) Passer à SEOHead + afficher la liste
  */
-export default async function MesCommandesPage({ params: { locale } }) {
-  // 1) Récupérer la session côté serveur
+export default async function MesCommandesPage({ params }) {
+  // 1) Extraire locale directement
+  const { locale } = params;
+
+  // 2) Récupérer la session côté serveur
   const session = await getServerSession(authOptions);
 
-  // 2) Si non connecté, rediriger vers /[locale]/connexion
+  // 3) Si pas de session, rediriger vers /[locale]/connexion
   if (!session) {
     redirect(`/${locale}/connexion`);
   }
 
-  // 3) Récupérer les commandes de l’utilisateur (API interne)
+  // 4) Charger les commandes de l’utilisateur (API interne)
   let orders = [];
   try {
     const baseUrl =
@@ -42,7 +46,7 @@ export default async function MesCommandesPage({ params: { locale } }) {
     orders = [];
   }
 
-  // 4) Charger le JSON global (fr.json ou en.json)
+  // 5) Charger le JSON global (fr.json ou en.json)
   let allMessages;
   try {
     allMessages = (await import(`@/messages/${locale}.json`)).default;
@@ -50,14 +54,11 @@ export default async function MesCommandesPage({ params: { locale } }) {
     allMessages = {};
   }
 
-  // 5) Extraire le namespace "orders"
+  // 6) Extraire le namespace "orders"
   const namespace = allMessages['orders'] ?? {};
-  // Si vraiment il n’existe pas, namespace sera {} et t(key) retournera key brute.
-  const t = (key) => {
-    return namespace[key] ?? key;
-  };
+  const t = (key) => namespace[key] ?? key;
 
-  // 6) Breadcrumb JSON-LD
+  // 7) Construire les segments de breadcrumb pour JSON-LD
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || '';
   const basePath = `${siteUrl}/${locale}`;
   const breadcrumbSegments = [

@@ -1,4 +1,3 @@
-// src/app/[locale]/LayoutWithAnalytics.js
 'use client';
 
 import ClientWrapper from '@/components/ClientWrapper';
@@ -9,7 +8,6 @@ import CartReminder from '@/components/CartReminder';
 import EmailCapturePopup from '@/components/EmailCapturePopup';
 import LiveChat from '@/components/LiveChat';
 import useAnalytics from '@/lib/useAnalytics';
-import AnalyticsScripts from '@/components/AnalyticsScripts';
 
 export default function LayoutWithAnalytics({ children }) {
   useAnalytics();
@@ -23,7 +21,6 @@ export default function LayoutWithAnalytics({ children }) {
       <CartReminder />
       <EmailCapturePopup />
       <LiveChat />
-      <AnalyticsScripts />
     </ClientWrapper>
   );
 }

@@ -143,5 +143,16 @@
   "category": {
     "title": "Category: {category}",
     "no_products": "No products found in this category."
+  },
+  "commande": {
+    "title": "Checkout",
+    "checkout_title": "Payment",
+    "checkout_description": "Complete your purchase on TechPlay.",
+    "your_cart": "Your cart",
+    "cart_empty": "Your cart is empty",
+    "payment_details": "Payment details",
+    "pay_now": "Pay now",
+    "processing": "Processing…",
+    "payment_error": "An error occurred during payment."
   }
 }
