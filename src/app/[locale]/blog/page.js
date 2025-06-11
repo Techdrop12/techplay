@@ -1,4 +1,4 @@
-// src/app/[locale]/blog/page.js
+// ✅ src/app/[locale]/blog/page.js
 
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -6,36 +6,30 @@ import SEOHead from '@/components/SEOHead';
 
 /**
  * Page “Blog Listing” (Server Component).
- * 1) Vérifier que la locale existe (import minimal du JSON)
- * 2) Appeler l’API pour récupérer la liste des posts
- * 3) Charger le namespace "blog"
- * 4) Passer à SEOHead + afficher la liste
  */
 export default async function BlogListingPage({ params }) {
-  // A) Extraire locale directement
   const { locale } = params;
 
-  // B) Vérifier que le JSON de la locale existe
+  // A. Vérifier que la locale existe
   try {
     await import(`@/messages/${locale}.json`);
   } catch {
     return notFound();
   }
 
-  // C) Récupérer la liste des posts depuis l’API interne
+  // B. Récupération des articles
   let posts = [];
   try {
     const baseUrl =
       process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') || 'http://localhost:3000';
     const res = await fetch(`${baseUrl}/api/blog/all`, { cache: 'no-store' });
-    if (!res.ok) throw new Error('Erreur lors du chargement du blog');
+    if (!res.ok) throw new Error('Erreur API blog');
     posts = await res.json();
   } catch (err) {
     console.error('fetch blog error:', err);
-    posts = [];
   }
 
-  // D) Charger le JSON global (fr.json ou en.json)
+  // C. Traductions blog
   let allMessages;
   try {
     allMessages = (await import(`@/messages/${locale}.json`)).default;
@@ -43,13 +37,18 @@ export default async function BlogListingPage({ params }) {
     allMessages = {};
   }
 
-  // E) Extraire le namespace "blog"
   const namespace = allMessages['blog'] ?? {};
   const t = (key, opts) => {
     const value = namespace[key] ?? key;
     if (!opts) return value;
     return value.replace(/\{(\w+)\}/g, (_, k) => opts[k] ?? `{${k}}`);
   };
+
+  // ✅ D. Conversion de date sans erreur ENVIRONMENT_FALLBACK
+  const dateFormatter = new Intl.DateTimeFormat(
+    locale === 'fr' ? 'fr-FR' : 'en-US',
+    { dateStyle: 'medium' }
+  );
 
   return (
     <>
@@ -72,7 +71,7 @@ export default async function BlogListingPage({ params }) {
                 </Link>
                 <p className="text-sm text-gray-600 mt-1">
                   {t('author', { author: post.author })} &bull;{' '}
-                  {new Date(post.createdAt).toLocaleDateString(locale)}
+                  {dateFormatter.format(new Date(post.createdAt))}
                 </p>
                 <p className="mt-2 text-gray-700">
                   {post.content.slice(0, 150)}…

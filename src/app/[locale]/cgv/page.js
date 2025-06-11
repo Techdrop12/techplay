@@ -1,28 +1,22 @@
-// src/app/[locale]/cgv/page.js
-'use client';
-
-import { useLocale, useTranslations } from 'next-intl';
+// ✅ src/app/[locale]/cgv/page.js
+import { getTranslations } from 'next-intl/server';
 import SEOHead from '@/components/SEOHead';
 
-/**
- * Page “Conditions Générales de Vente” (CGV).
- * Composant client statique avec SEOHead complet et JSON-LD de breadcrumbs.
- */
-export default function CGVPage() {
-  const locale = useLocale();
-  const tSeo = useTranslations('seo'); // pour « seo.cgv_title » / « seo.cgv_description »
-  const tCgv = useTranslations('cgv'); // pour « cgv.title », « cgv.intro », etc.
+export const dynamic = 'force-dynamic';
 
-  // Titre / intro extraits du namespace "cgv"
+export default async function CGVPage({ params }) {
+  const locale = params.locale;
+  const tSeo = await getTranslations({ locale, namespace: 'seo' });
+  const tCgv = await getTranslations({ locale, namespace: 'cgv' });
+
   const title = tCgv('title');
   const intro = tCgv('intro');
 
-  // Breadcrumb JSON-LD
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || '';
   const basePath = `${siteUrl}/${locale}`;
   const breadcrumbSegments = [
     { label: tSeo('homepage_title'), url: `${basePath}` },
-    { label: title,                          url: `${basePath}/cgv` },
+    { label: title, url: `${basePath}/cgv` },
   ];
 
   return (
@@ -43,8 +37,6 @@ export default function CGVPage() {
 
           <h2>{tCgv('section2_title')}</h2>
           <p>{tCgv('section2_text')}</p>
-
-          {/* Si besoin : d’autres sections… */}
         </section>
       </div>
     </>

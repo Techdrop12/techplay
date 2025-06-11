@@ -4,11 +4,10 @@ import { NextResponse } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 import { getToken } from 'next-auth/jwt';
 import { middleware as secureHeaders } from './middleware-security';
+import intlConfig from './next-intl.config'; // ✅ Import config complète
 
 const intlMiddleware = createMiddleware({
-  locales: ['fr', 'en'],
-  defaultLocale: 'fr',
-  localePrefix: 'as-needed'
+  ...intlConfig // ✅ Utilise locales, defaultLocale, timeZone directement
 });
 
 const STATIC_FILES = [
@@ -71,10 +70,10 @@ export async function middleware(request) {
       url.pathname = '/fr/connexion';
       return NextResponse.redirect(url);
     }
-    return secureHeaders(request); // Headers sécurité admin
+    return secureHeaders(request);
   }
 
-  // G. Middleware i18n + headers sécurité (par défaut)
+  // G. Middleware i18n + headers sécurité
   const response = await intlMiddleware(request);
   return secureHeaders(request, response);
 }

@@ -1,7 +1,7 @@
-// File: src/app/[locale]/contact/page.js
+// ✅ src/app/[locale]/contact/page.js
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import SEOHead from '@/components/SEOHead';
 import { useTranslations } from 'next-intl';
 
@@ -10,6 +10,17 @@ export default function ContactPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+
+  // ✅ Solution au bug ENVIRONMENT_FALLBACK (Next 15 + next-intl)
+  useEffect(() => {
+    try {
+      Intl.DateTimeFormat(undefined, {
+        timeZone: 'Europe/Paris',
+      }).format(new Date());
+    } catch (e) {
+      console.error('Erreur de timeZone fallback', e);
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,10 +49,6 @@ export default function ContactPage() {
 
   return (
     <>
-      {/* 
-        On passe titleKey / descriptionKey uniquement, 
-        car “seo.contact_title” et “seo.contact_description” existent dans vos JSON. 
-      */}
       <SEOHead
         titleKey="contact_title"
         descriptionKey="contact_description"
