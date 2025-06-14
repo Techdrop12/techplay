@@ -1,35 +1,29 @@
-// ✅ src/app/[locale]/layout.js
-
 import { notFound } from 'next/navigation';
-import { Inter } from 'next/font/google';
-import LocaleProvider from '@/components/LocaleProvider';
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
 import LayoutWithAnalytics from './LayoutWithAnalytics';
 
-const inter = Inter({ subsets: ['latin'] });
+const locales = ['fr', 'en'];
 
-export function generateStaticParams() {
-  return [{ locale: 'fr' }, { locale: 'en' }];
+export async function generateStaticParams() {
+  return locales.map((locale) => ({ locale }));
 }
 
-export const dynamic = 'force-dynamic';
+export default async function LocaleLayout({ children, params: rawParams }) {
+  const params = await rawParams; // ✅ Nouvelle syntaxe Next 15
+  const locale = params?.locale;
 
-export default async function LocaleLayout({ params, children }) {
-  const { locale } = params;
+  if (!locales.includes(locale)) return notFound();
 
-  if (!['fr', 'en'].includes(locale)) return notFound();
-
-  let messages;
-  try {
-    messages = (await import(`@/messages/${locale}.json`)).default;
-  } catch (e) {
-    return notFound();
-  }
+  const messages = await getMessages();
 
   return (
-    <LocaleProvider locale={locale} messages={messages}>
-      <LayoutWithAnalytics locale={locale}>
-        {children}
-      </LayoutWithAnalytics>
-    </LocaleProvider>
+    <html lang={locale}>
+      <body>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <LayoutWithAnalytics>{children}</LayoutWithAnalytics>
+        </NextIntlClientProvider>
+      </body>
+    </html>
   );
 }

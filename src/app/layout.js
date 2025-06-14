@@ -1,6 +1,5 @@
-// ✅ src/app/layout.js
-
-import '../styles/globals.css'; // ✅ Correction du chemin
+// src/app/layout.js
+import '../styles/globals.css';
 import { Inter } from 'next/font/google';
 import Script from 'next/script';
 import { headers } from 'next/headers';
@@ -9,7 +8,6 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
-// Script anti-flash dark/light mode
 const themeInitScript = `
   try {
     const mode = localStorage.getItem('theme');
@@ -45,8 +43,8 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({ children }) {
-  const headerList = headers();
+export default async function RootLayout({ children }) {
+  const headerList = await headers(); // ✅ correction ici
   const userAgent = headerList.get('user-agent') || '';
   const isBot = /bot|crawl|slurp|spider/i.test(userAgent);
 

@@ -6,20 +6,21 @@ export default function ScoreTracker() {
   const [score, setScore] = useState(0)
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (typeof window === 'undefined' || !window.localStorage) return
 
     try {
-      let localScore = Number(window.localStorage.getItem('user_score')) || 0
+      let localScore = Number(localStorage.getItem('user_score')) || 0
       setScore(localScore)
 
       const currentPath = window.location.pathname
-      const visited = JSON.parse(window.localStorage.getItem('visited_paths') || '[]')
+      const visited = JSON.parse(localStorage.getItem('visited_paths') || '[]')
       if (!visited.includes(currentPath)) {
         visited.push(currentPath)
-        window.localStorage.setItem('visited_paths', JSON.stringify(visited))
+        localStorage.setItem('visited_paths', JSON.stringify(visited))
         localScore += 1
-        window.localStorage.setItem('user_score', localScore)
+        localStorage.setItem('user_score', localScore)
         setScore(localScore)
+        window.dispatchEvent(new CustomEvent('user_score_updated', { detail: localScore }))
       }
 
       let scrollDepth = 0
@@ -31,8 +32,9 @@ export default function ScoreTracker() {
           scrollDepth = scrolled
           if (scrollDepth > 30 && localScore < 10) {
             localScore += 1
-            window.localStorage.setItem('user_score', localScore)
+            localStorage.setItem('user_score', localScore)
             setScore(localScore)
+            window.dispatchEvent(new CustomEvent('user_score_updated', { detail: localScore }))
           }
         }
       }
@@ -40,8 +42,9 @@ export default function ScoreTracker() {
       const timer = setTimeout(() => {
         if (localScore < 10) {
           localScore += 2
-          window.localStorage.setItem('user_score', localScore)
+          localStorage.setItem('user_score', localScore)
           setScore(localScore)
+          window.dispatchEvent(new CustomEvent('user_score_updated', { detail: localScore }))
         }
       }, 15000)
 
@@ -51,13 +54,20 @@ export default function ScoreTracker() {
         window.removeEventListener('scroll', handleScroll)
       }
     } catch (error) {
-      console.warn('Erreur ScoreTracker (localStorage inaccessible) :', error)
+      console.warn('Erreur ScoreTracker (localStorage) :', error)
     }
   }, [])
 
   return (
-    <div className="fixed bottom-4 right-4 bg-white border p-3 rounded-lg shadow-lg text-sm z-50">
-      <p>🎮 Score : <strong>{score}</strong></p>
+    <div className="fixed bottom-4 right-4 bg-white border border-gray-200 p-4 rounded-xl shadow-xl text-sm z-50 w-56">
+      <p className="mb-1 font-semibold">🎮 Score utilisateur</p>
+      <div className="w-full bg-gray-100 rounded-full h-2">
+        <div
+          className="bg-green-500 h-2 rounded-full transition-all duration-300"
+          style={{ width: `${Math.min(score * 10, 100)}%` }}
+        />
+      </div>
+      <p className="mt-1 text-xs text-gray-500 text-right">{score} / 10</p>
     </div>
   )
 }

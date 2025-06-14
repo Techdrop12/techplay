@@ -1,8 +1,10 @@
 'use client'
-
 import Head from 'next/head'
+import { useLocale } from 'next-intl'
 
 export default function ProductJsonLd({ product }) {
+  const locale = typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : 'fr'
+
   if (!product) return null
 
   const {
@@ -22,7 +24,7 @@ export default function ProductJsonLd({ product }) {
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    '@id': `https://techplay.fr/produit/${slug}`,
+    '@id': `https://techplay.fr/${locale}/produit/${slug}`,
     name: title,
     description,
     image: Array.isArray(image) ? image : [image],
@@ -42,7 +44,7 @@ export default function ProductJsonLd({ product }) {
       priceCurrency: 'EUR',
       price,
       availability,
-      url: `https://techplay.fr/produit/${slug}`,
+      url: `https://techplay.fr/${locale}/produit/${slug}`,
     },
   }
 

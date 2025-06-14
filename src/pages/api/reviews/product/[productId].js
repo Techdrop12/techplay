@@ -1,3 +1,4 @@
+// src/pages/api/reviews/product/[productId].js
 import dbConnect from '@/lib/dbConnect'
 import Review from '@/lib/models/reviewModel'
 import { z } from 'zod'
@@ -11,10 +12,11 @@ const schema = z.object({
 
 export default async function handler(req, res) {
   await dbConnect()
+  const { productId } = req.query
 
   if (req.method === 'GET') {
     try {
-      const reviews = await Review.find({}).sort({ createdAt: -1 })
+      const reviews = await Review.find({ productId }).sort({ createdAt: -1 })
       return res.status(200).json(reviews)
     } catch (err) {
       return res.status(500).json({ message: 'Erreur lors du chargement des avis.' })
@@ -36,7 +38,10 @@ export default async function handler(req, res) {
 
       return res.status(201).json(review)
     } catch (err) {
-      return res.status(400).json({ error: err.errors || 'Données invalides' })
+      return res.status(400).json({
+        message: 'Validation échouée',
+        error: err.errors || 'Format invalide',
+      })
     }
   }
 

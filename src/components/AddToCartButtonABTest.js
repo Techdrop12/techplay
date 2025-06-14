@@ -10,58 +10,59 @@ export default function AddToCartButtonABTest({ onClick, product, userEmail }) {
     if (typeof window === 'undefined') return
 
     try {
-      const stored = window.localStorage.getItem('ab_variant')
+      const stored = localStorage.getItem('ab_variant')
       if (stored) {
         setVariant(stored)
       } else {
         const random = Math.random() < 0.5 ? 'A' : 'B'
-        window.localStorage.setItem('ab_variant', random)
+        localStorage.setItem('ab_variant', random)
         setVariant(random)
       }
     } catch (e) {
-      console.warn('Erreur AddToCartButtonABTest (localStorage) :', e)
+      console.warn('Erreur lecture variant localStorage :', e)
     }
   }, [])
 
   const handleClick = () => {
     if (typeof window !== 'undefined') {
       try {
-        const currentCart = JSON.parse(window.localStorage.getItem('cartItems') || '[]')
-        const updatedCart = [...currentCart, product]
-        window.localStorage.setItem('cartItems', JSON.stringify(updatedCart))
+        const currentCart = JSON.parse(localStorage.getItem('cartItems') || '[]')
+        const updatedCart = [...currentCart, { ...product, quantity: 1 }]
+        localStorage.setItem('cartItems', JSON.stringify(updatedCart))
 
         if (userEmail) {
-          window.localStorage.setItem('cartEmail', userEmail)
+          localStorage.setItem('cartEmail', userEmail)
         }
       } catch (e) {
-        console.warn('Erreur stockage produit (AB Test) :', e)
+        console.warn('Erreur stockage panier :', e)
       }
     }
 
-    // 🔁 Backend tracking (MongoDB)
+    // ✅ Enregistrement backend MongoDB
     fetch('/api/track-ab', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ variant }),
     })
 
-    // 📊 GA4 + Meta tracking (frontend)
+    // ✅ Tracking GA4 + Meta Pixel
     logEvent('add_to_cart_ab_test', {
       variant,
       productId: product?._id || product?.id || null,
     })
 
-    onClick()
+    if (typeof onClick === 'function') {
+      onClick()
+    }
   }
 
   const label = variant === 'A' ? 'Ajouter au panier' : '🛒 Commander maintenant'
+  const bgColor = variant === 'A' ? 'bg-blue-600' : 'bg-green-500'
 
   return (
     <button
       onClick={handleClick}
-      className={`${
-        variant === 'A' ? 'bg-blue-600' : 'bg-green-500'
-      } text-white px-4 py-2 rounded shadow`}
+      className={`${bgColor} text-white px-4 py-2 rounded shadow w-full transition hover:opacity-90`}
     >
       {label}
     </button>

@@ -1,5 +1,4 @@
-// src/context/cartContext.js
-
+// ✅ src/context/cartContext.js
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
@@ -8,6 +7,7 @@ const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -28,6 +28,9 @@ export const CartProvider = ({ children }) => {
     } catch (error) {
       console.warn('Erreur sauvegarde localStorage (cart):', error);
     }
+
+    const newTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    setTotal(newTotal);
   }, [cart]);
 
   const addToCart = (product) => {
@@ -56,7 +59,7 @@ export const CartProvider = ({ children }) => {
   const clearCart = () => setCart([]);
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, total }}>
       {children}
     </CartContext.Provider>
   );

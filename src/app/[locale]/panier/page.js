@@ -1,4 +1,3 @@
-// src/app/[locale]/panier/page.js
 'use client';
 
 import { useTranslations } from 'next-intl';
@@ -6,7 +5,7 @@ import { useCart } from '@/context/cartContext';
 import SEOHead from '@/components/SEOHead';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 
@@ -40,13 +39,37 @@ export default function PanierPage() {
     }
   };
 
+  // ✅ Envoi automatique de l’email de panier abandonné après 24h
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const email = localStorage.getItem('cartEmail');
+    const alreadySent = localStorage.getItem('cartReminderSent');
+
+    if (!email || alreadySent) return;
+
+    const timeout = setTimeout(() => {
+      fetch('/api/emails/cart-abandonne', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, cart })
+      })
+        .then((res) => {
+          if (res.ok) {
+            localStorage.setItem('cartReminderSent', 'true');
+            console.log('📩 Email panier abandonné envoyé.');
+          }
+        })
+        .catch((err) => {
+          console.warn('Erreur envoi panier abandonné :', err);
+        });
+    }, 1000 * 60 * 60 * 24); // 24h
+
+    return () => clearTimeout(timeout);
+  }, [cart]);
+
   return (
     <>
-      {/* SEOHead pour panier */}
-      <SEOHead
-        titleKey="cart_title"
-        descriptionKey="cart_description"
-      />
+      <SEOHead titleKey="cart_title" descriptionKey="cart_description" />
 
       <div className="p-6 max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold mb-4">{t('your_cart')}</h1>
