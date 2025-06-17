@@ -1,8 +1,8 @@
-import dbConnect from '@/lib/dbConnect'
-import Product from '@/models/Product'
+import dbConnect from '@/lib/dbConnect';
+import Product from '@/models/Product';
 
 export default async function handler(req, res) {
-  await dbConnect()
+  await dbConnect();
 
   if (req.method === 'POST') {
     try {
@@ -13,18 +13,20 @@ export default async function handler(req, res) {
         images = [],
         slug,
         description,
-        category,
+        category = 'Général',
         stock = 0,
         tags = [],
-      } = req.body
+        isPromo = false,
+        rating = 4.5,
+      } = req.body;
 
       if (!title || !price || !image || !slug || !description) {
-        return res.status(400).json({ error: 'Champs requis manquants' })
+        return res.status(400).json({ error: 'Champs requis manquants' });
       }
 
-      const exists = await Product.findOne({ slug })
+      const exists = await Product.findOne({ slug });
       if (exists) {
-        return res.status(400).json({ error: 'Slug déjà utilisé' })
+        return res.status(400).json({ error: 'Slug déjà utilisé' });
       }
 
       const product = new Product({
@@ -32,31 +34,33 @@ export default async function handler(req, res) {
         price: parseFloat(price),
         image,
         images,
-        slug,
+        slug: slug.toLowerCase(),
         description,
         category,
         stock: parseInt(stock),
         tags,
+        isPromo,
+        rating,
         createdAt: new Date(),
-      })
+      });
 
-      await product.save()
-      return res.status(201).json(product)
+      await product.save();
+      return res.status(201).json(product);
     } catch (err) {
-      console.error('Erreur création produit:', err)
-      return res.status(500).json({ error: 'Erreur interne serveur' })
+      console.error('Erreur création produit:', err);
+      return res.status(500).json({ error: 'Erreur interne serveur' });
     }
   }
 
   if (req.method === 'GET') {
     try {
-      const products = await Product.find().sort({ createdAt: -1 })
-      return res.status(200).json(products)
+      const products = await Product.find().sort({ createdAt: -1 });
+      return res.status(200).json(products);
     } catch (err) {
-      return res.status(500).json({ error: 'Erreur lors de la récupération' })
+      return res.status(500).json({ error: 'Erreur lors de la récupération' });
     }
   }
 
-  res.setHeader('Allow', ['POST', 'GET'])
-  return res.status(405).end(`Méthode ${req.method} non autorisée`)
+  res.setHeader('Allow', ['POST', 'GET']);
+  return res.status(405).end(`Méthode ${req.method} non autorisée`);
 }

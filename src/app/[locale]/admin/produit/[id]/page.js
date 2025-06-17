@@ -1,27 +1,55 @@
-'use client';
+import dbConnect from '@/lib/dbConnect';
+import Product from '@/models/Product';
+import isAdmin from '@/lib/isAdmin';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-import EditProductForm from '@/components/EditProductForm';
+export default async function handler(req, res) {
+  await dbConnect();
 
-export default function EditProductPage({ params }) {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  const { id } = params;
+  const { id } = req.query || req.params || {};
 
-  useEffect(() => {
-    if (status === 'unauthenticated' || (session && session.user.email !== process.env.NEXT_PUBLIC_ADMIN_EMAIL)) {
-      router.push('/');
+  if (!id) {
+    return res.status(400).json({ error: 'ID produit manquant' });
+  }
+
+  if (req.method === 'GET') {
+    try {
+      const product = await Product.findById(id);
+      if (!product) return res.status(404).json({ error: 'Produit non trouvé' });
+      return res.status(200).json(product);
+    } catch (err) {
+      console.error('Erreur récupération produit:', err);
+      return res.status(500).json({ error: 'Erreur serveur' });
     }
-  }, [status, session, router]);
+  }
 
-  if (status === 'loading') return <p>Chargement...</p>;
+  if (req.method === 'PUT') {
+    const authorized = await isAdmin(req);
+    if (!authorized) return res.status(401).json({ error: 'Non autorisé' });
 
-  return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-xl font-bold mb-4">Modifier le produit</h1>
-      <EditProductForm productId={id} />
-    </div>
-  );
+    try {
+      const updated = await Product.findByIdAndUpdate(id, req.body, { new: true });
+      if (!updated) return res.status(404).json({ error: 'Produit non trouvé' });
+      return res.status(200).json(updated);
+    } catch (err) {
+      console.error('Erreur mise à jour produit:', err);
+      return res.status(500).json({ error: 'Erreur serveur' });
+    }
+  }
+
+  if (req.method === 'DELETE') {
+    const authorized = await isAdmin(req);
+    if (!authorized) return res.status(401).json({ error: 'Non autorisé' });
+
+    try {
+      const deleted = await Product.findByIdAndDelete(id);
+      if (!deleted) return res.status(404).json({ error: 'Produit non trouvé' });
+      return res.status(200).json({ success: true });
+    } catch (err) {
+      console.error('Erreur suppression produit:', err);
+      return res.status(500).json({ error: 'Erreur serveur' });
+    }
+  }
+
+  res.setHeader('Allow', ['GET', 'PUT', 'DELETE']);
+  return res.status(405).end(`Méthode ${req.method} non autorisée`);
 }

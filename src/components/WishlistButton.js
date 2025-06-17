@@ -33,18 +33,12 @@ export default function WishlistButton({ product, floating = true }) {
       if (isWishlisted) {
         wishlist = wishlist.filter((p) => p._id !== productId);
         logEvent('wishlist_remove', { productId });
-        toast.success('Retiré de la wishlist', {
-          ariaLive: 'polite',
-          role: 'alert'
-        });
+        toast.success('Retiré de la wishlist');
       } else {
         wishlist.unshift(product);
-        wishlist = wishlist.slice(0, 20);
+        wishlist = wishlist.slice(0, 20); // limite max à 20 éléments
         logEvent('wishlist_add', { productId });
-        toast.success('Ajouté à la wishlist', {
-          ariaLive: 'polite',
-          role: 'alert'
-        });
+        toast.success('Ajouté à la wishlist');
       }
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(wishlist));

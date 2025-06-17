@@ -29,10 +29,7 @@ export default function ProductCard({ product }) {
   const handleAdd = () => {
     setIsLoading(true);
     addToCart(product);
-    toast.success(`✅ ${product.title} ajouté au panier`, {
-      ariaLive: 'polite',
-      role: 'alert'
-    });
+    toast.success(`✅ ${product.title} ajouté au panier`);
 
     logEvent('add_to_cart', {
       item_id: product._id,
@@ -56,10 +53,12 @@ export default function ProductCard({ product }) {
       whileHover={{ scale: 1.02 }}
       role="group"
       aria-label={`Produit ${product.title}`}
-      tabIndex={-1}
     >
       {product.isPromo && (
-        <div className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded" aria-label="Promotion en cours">
+        <div
+          className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded"
+          aria-label="Promotion"
+        >
           Promo
         </div>
       )}
@@ -78,12 +77,11 @@ export default function ProductCard({ product }) {
       >
         <Image
           src={product.image}
-          alt={product.title || 'Image produit'}
+          alt={product.title}
           width={400}
           height={400}
           className="w-full h-64 object-contain rounded-xl"
           priority
-          loading="lazy"
         />
         <h3 className="mt-2 font-semibold text-lg truncate">{product.title}</h3>
         <p className="text-gray-600 dark:text-gray-300">{product.price} €</p>
@@ -94,7 +92,7 @@ export default function ProductCard({ product }) {
           isHalf
           edit={false}
           activeColor="#ffd700"
-          aria-label={`Note moyenne : ${product.rating || 4.5} étoiles`}
+          aria-label={`Note : ${product.rating || 4.5} étoiles`}
         />
       </div>
 

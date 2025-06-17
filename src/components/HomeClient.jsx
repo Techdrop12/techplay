@@ -13,7 +13,8 @@ export default function HomeClient() {
   const tSeo = useTranslations('seo');
   const tHome = useTranslations('home');
 
-  const [products, setProducts] = useState([]);
+  // products null = loading, [] = aucun produit
+  const [products, setProducts] = useState(null);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [displayCount, setDisplayCount] = useState(12);
@@ -33,6 +34,7 @@ export default function HomeClient() {
         setCategories(uniqueCategories);
       } catch {
         toast.error(tHome('error_loading_products'));
+        setProducts([]); // Fin chargement même en erreur
       }
     }
     fetchData();
@@ -41,7 +43,7 @@ export default function HomeClient() {
   const filteredProducts =
     selectedCategory === 'all'
       ? products
-      : products.filter((p) => p.tags?.includes(selectedCategory));
+      : products?.filter((p) => p.tags?.includes(selectedCategory)) || [];
 
   const visibleProducts = filteredProducts.slice(0, displayCount);
 
@@ -59,6 +61,20 @@ export default function HomeClient() {
     }
     return () => observer.disconnect();
   }, [displayCount, filteredProducts]);
+
+  if (products === null) {
+    // Skeleton loader quand produits non chargés
+    return (
+      <MotionWrapper>
+        <HeroCarousel />
+        <div className="p-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {[...Array(12)].map((_, i) => (
+            <div key={i} className="h-64 bg-gray-200 animate-pulse rounded-xl" />
+          ))}
+        </div>
+      </MotionWrapper>
+    );
+  }
 
   return (
     <>
