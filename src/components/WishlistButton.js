@@ -9,18 +9,19 @@ import { toast } from 'react-hot-toast';
 export default function WishlistButton({ product, floating = true }) {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const STORAGE_KEY = 'wishlist';
+  const productId = product?._id;
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !productId) return;
     try {
       const stored = localStorage.getItem(STORAGE_KEY) || '[]';
       const wishlist = JSON.parse(stored);
-      const found = wishlist.some((p) => p._id === product._id);
+      const found = wishlist.some((p) => p._id === productId);
       setIsWishlisted(found);
     } catch (err) {
       console.warn('Erreur lecture wishlist :', err);
     }
-  }, [product._id]);
+  }, [productId]);
 
   const toggleWishlist = () => {
     if (typeof window === 'undefined') return;
@@ -30,13 +31,13 @@ export default function WishlistButton({ product, floating = true }) {
       let wishlist = JSON.parse(stored);
 
       if (isWishlisted) {
-        wishlist = wishlist.filter((p) => p._id !== product._id);
-        logEvent('wishlist_remove', { productId: product._id });
+        wishlist = wishlist.filter((p) => p._id !== productId);
+        logEvent('wishlist_remove', { productId });
         toast.success('Retiré de la wishlist');
       } else {
         wishlist.unshift(product);
         wishlist = wishlist.slice(0, 20); // max 20 éléments
-        logEvent('wishlist_add', { productId: product._id });
+        logEvent('wishlist_add', { productId });
         toast.success('Ajouté à la wishlist');
       }
 
@@ -53,10 +54,11 @@ export default function WishlistButton({ product, floating = true }) {
       whileTap={{ scale: 0.9 }}
       className={
         floating
-          ? 'absolute top-2 right-2 p-1 rounded-full bg-white/90 hover:bg-white shadow transition'
-          : 'text-red-600 hover:text-red-800 transition'
+          ? 'absolute top-2 right-2 p-1 rounded-full bg-white/90 hover:bg-white shadow transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'
+          : 'text-red-600 hover:text-red-800 transition focus:outline-none focus:ring-2 focus:ring-red-500'
       }
       aria-label={isWishlisted ? 'Retirer de la wishlist' : 'Ajouter à la wishlist'}
+      title={isWishlisted ? 'Retirer de la wishlist' : 'Ajouter à la wishlist'}
     >
       {isWishlisted ? (
         <HeartOff

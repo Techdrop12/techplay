@@ -1,116 +1,103 @@
-'use client'
+'use client';
 
-import Image from 'next/image'
-import { useMemo, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useCart } from '@/context/cartContext'
-import { toast } from 'react-hot-toast'
-import { motion } from 'framer-motion'
-import ReactStars from 'react-rating-stars-component'
-import { logEvent } from '@/lib/logEvent'
-import { getUserVariant } from '@/lib/abTestVariants'
-import WishlistButton from '@/components/WishlistButton'
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useCart } from '@/context/cartContext';
+import { toast } from 'react-hot-toast';
+import { motion } from 'framer-motion';
+import ReactStars from 'react-rating-stars-component';
+import { logEvent } from '@/lib/logEvent';
+import { getUserVariant } from '@/lib/abTestVariants';
+import WishlistButton from '@/components/WishlistButton';
 
 export default function ProductCard({ product }) {
-  const { addToCart } = useCart()
-  const router = useRouter()
-  const [variant, setVariant] = useState('A')
+  const { addToCart } = useCart();
+  const router = useRouter();
+  const [variant, setVariant] = useState('A');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const v = getUserVariant()
-    setVariant(v)
+    const v = getUserVariant();
+    setVariant(v);
     logEvent('ab_variant_view', {
       variant: v,
       item_name: product.title,
-    })
-  }, [product.title])
+    });
+  }, [product.title]);
 
   const handleAdd = () => {
-    addToCart(product)
-    toast.success(`${product.title} ajouté au panier`)
+    setIsLoading(true);
+    addToCart(product);
+    toast.success(`✅ ${product.title} ajouté au panier`);
+
     logEvent('add_to_cart', {
+      item_id: product._id,
       item_name: product.title,
       price: product.price,
       variant,
-    })
-  }
+    });
 
-  const handleQuickBuy = () => {
-    addToCart({ ...product, quantity: 1 })
-    router.push('/panier')
-    logEvent('begin_checkout', {
-      item_name: product.title,
-      price: product.price,
-      variant,
-    })
-  }
-
-  const displayImage = variant === 'B' && product.imageAlt ? product.imageAlt : product.image
-  const displayTitle = variant === 'C' ? `${product.title} - Édition Limitée` : product.title
-  const displayPrice = variant === 'B'
-    ? `${(product.price * 0.95).toFixed(2)} €`
-    : `${product.price.toFixed(2)} €`
-  const ctaText = variant === 'C' ? '🔥 Je le veux !' : variant === 'B' ? 'Top deal !' : 'Ajouter au panier'
-  const ctaColor = variant === 'B' ? 'bg-indigo-600' : variant === 'C' ? 'bg-orange-600' : 'bg-black'
-
-  const rating = useMemo(() => (Math.random() * 1 + 4).toFixed(1), [])
-  const reviews = useMemo(() => Math.floor(Math.random() * 50) + 5, [])
+    if (variant === 'B') {
+      setTimeout(() => {
+        router.push('/panier');
+      }, 600); // Laisse le temps au toast
+    } else {
+      setTimeout(() => setIsLoading(false), 600);
+    }
+  };
 
   return (
     <motion.div
-      className="border rounded-lg p-4 flex flex-col justify-between shadow-md hover:shadow-xl transition bg-white dark:bg-gray-900"
+      className="relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-md p-4 hover:shadow-xl transition-shadow duration-300"
       whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.2 }}
     >
-      <div className="relative">
+      {/* Badge promo ou stock si besoin */}
+      {product.isPromo && (
+        <div className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+          Promo
+        </div>
+      )}
+
+      <div
+        onClick={() => router.push(`/produit/${product.slug}`)}
+        className="cursor-pointer"
+        aria-label={`Voir le produit ${product.title}`}
+      >
         <Image
-          src={displayImage}
-          alt={displayTitle}
+          src={product.image}
+          alt={product.title}
           width={400}
-          height={250}
-          className="w-full h-40 object-cover mb-2 rounded"
-          loading="lazy"
+          height={400}
+          className="w-full h-64 object-contain rounded-xl"
+          priority
         />
-        <WishlistButton product={product} floating />
-      </div>
-
-      <h3 className="text-md font-semibold text-gray-900 dark:text-white">{displayTitle}</h3>
-      <p className="text-gray-600 dark:text-gray-300 text-sm">{product.category}</p>
-
-      <div className="flex items-center mt-1 gap-1">
+        <h3 className="mt-2 font-semibold text-lg truncate">{product.title}</h3>
+        <p className="text-gray-600 dark:text-gray-300">{product.price} €</p>
         <ReactStars
           count={5}
-          value={Number(rating)}
-          size={16}
-          isHalf={true}
+          value={product.rating || 4.5}
+          size={20}
+          isHalf
           edit={false}
-          activeColor="#facc15"
+          activeColor="#ffd700"
         />
-        <span className="text-sm text-gray-500 dark:text-gray-400">({reviews} avis)</span>
       </div>
 
-      <p className="text-lg font-bold mt-1 text-gray-900 dark:text-white">{displayPrice}</p>
-
-      <motion.button
-        onClick={handleAdd}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        className={`mt-2 px-4 py-2 ${ctaColor} text-white rounded text-sm transition`}
-        title="Ajouter au panier"
-      >
-        {ctaText}
-      </motion.button>
-
-      <motion.button
-        onClick={handleQuickBuy}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        className="mt-2 px-4 py-2 bg-green-600 text-white rounded text-sm transition"
-        title="Acheter immédiatement"
-      >
-        Acheter maintenant
-      </motion.button>
+      <div className="flex items-center justify-between mt-4">
+        <button
+          onClick={handleAdd}
+          disabled={isLoading}
+          className={`px-4 py-2 rounded-lg transition-colors font-medium text-white ${
+            isLoading
+              ? 'bg-gray-600 cursor-not-allowed'
+              : 'bg-black hover:bg-gray-800'
+          }`}
+        >
+          {isLoading ? 'Ajout...' : 'Ajouter au panier'}
+        </button>
+        <WishlistButton product={product} />
+      </div>
     </motion.div>
-  )
+  );
 }

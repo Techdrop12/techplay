@@ -60,7 +60,7 @@ export default function ScoreTracker() {
   }, []);
 
   return (
-    <div className="fixed bottom-4 right-4 bg-white border border-gray-200 p-4 rounded-xl shadow-xl text-sm z-50 w-56">
+    <div className="fixed bottom-4 right-24 bg-white border border-gray-200 p-4 rounded-xl shadow-xl text-sm z-50 w-56">
       <p className="mb-1 font-semibold">🎮 Score utilisateur</p>
       <div className="w-full bg-gray-100 rounded-full h-2">
         <div
