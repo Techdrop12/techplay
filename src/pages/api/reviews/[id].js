@@ -1,6 +1,6 @@
-// src/pages/api/reviews/[id].js
+// src/pages/api/reviews/[id].js 
 import dbConnect from '@/lib/dbConnect'
-import Review from '@/models/ReviewModel';
+import Review from '@/lib/models/reviewModel'
 
 export default async function handler(req, res) {
   await dbConnect()
