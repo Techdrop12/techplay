@@ -8,6 +8,7 @@
     "check-env": "node scripts/env-check.js"
   },
   "dependencies": {
+    "@getbrevo/brevo": "^2.2.0",
     "@google-analytics/data": "^5.1.0",
     "@portabletext/react": "^3.2.1",
     "@sanity/client": "^7.3.0",
