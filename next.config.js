@@ -1,12 +1,11 @@
-// next.config.js
-
 const path = require('path');
 const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
-  exclude: [/middleware-manifest\.json$/]
+  exclude: [/middleware-manifest\.json$/],
+  // Optionnel: runtime caching, stratégies, etc.
 });
 
 const nextIntl = require('next-intl/plugin')('./src/i18n/request.ts');
@@ -14,7 +13,6 @@ const nextIntl = require('next-intl/plugin')('./src/i18n/request.ts');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Note : Next 15 gère la minification SWC par défaut, on retire donc swcMinify.
 
   images: {
     domains: [
@@ -29,48 +27,44 @@ const nextConfig = {
   },
 
   eslint: {
-    ignoreDuringBuilds: true
+    ignoreDuringBuilds: true,
   },
 
   typescript: {
-    ignoreBuildErrors: true
+    ignoreBuildErrors: true,
   },
 
   webpack: (config) => {
-    // Alias “@” vers “src/” pour les imports absolus
     config.resolve.alias['@'] = path.resolve(__dirname, 'src');
     return config;
   },
 
-  // ───────────────────────────────────────────────────────────────────
-  // HEADERS HTTP pour manifest.json, sw.js, firebase-messaging-sw.js
-  // ───────────────────────────────────────────────────────────────────
   headers: async () => [
     {
       source: '/(manifest\\.json|icons/.*)',
       headers: [
         { key: 'Cache-Control', value: 'public, max-age=3600, immutable' },
         { key: 'Access-Control-Allow-Origin', value: '*' },
-        { key: 'Content-Type', value: 'application/json; charset=UTF-8' }
-      ]
+        { key: 'Content-Type', value: 'application/json; charset=UTF-8' },
+      ],
     },
     {
       source: '/sw.js',
       headers: [
         { key: 'Cache-Control', value: 'public, max-age=3600, immutable' },
         { key: 'Access-Control-Allow-Origin', value: '*' },
-        { key: 'Content-Type', value: 'application/javascript' }
-      ]
+        { key: 'Content-Type', value: 'application/javascript' },
+      ],
     },
     {
       source: '/firebase-messaging-sw.js',
       headers: [
         { key: 'Cache-Control', value: 'public, max-age=3600, immutable' },
         { key: 'Access-Control-Allow-Origin', value: '*' },
-        { key: 'Content-Type', value: 'application/javascript' }
-      ]
-    }
-  ]
+        { key: 'Content-Type', value: 'application/javascript' },
+      ],
+    },
+  ],
 };
 
 module.exports = nextIntl(withPWA(nextConfig));

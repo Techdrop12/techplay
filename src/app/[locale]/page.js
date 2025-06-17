@@ -1,4 +1,3 @@
-// src/app/[locale]/page.js
 'use client';
 
 import SEOHead from '@/components/SEOHead';

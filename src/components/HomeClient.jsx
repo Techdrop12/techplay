@@ -19,7 +19,6 @@ export default function HomeClient() {
   const [displayCount, setDisplayCount] = useState(12);
   const sentinelRef = useRef(null);
 
-  // ✅ Fetch produits (uniquement) au montage
   useEffect(() => {
     async function fetchData() {
       try {
@@ -28,7 +27,7 @@ export default function HomeClient() {
         const data = await res.json();
         setProducts(data);
 
-        // Optionnel : extraire les catégories depuis tags
+        // Extraction unique des tags (catégories dynamiques)
         const allTags = data.flatMap((p) => p.tags || []);
         const uniqueCategories = Array.from(new Set(allTags));
         setCategories(uniqueCategories);
@@ -39,7 +38,6 @@ export default function HomeClient() {
     fetchData();
   }, [tHome]);
 
-  // ✅ Filtrage par tag (si tag sélectionné)
   const filteredProducts =
     selectedCategory === 'all'
       ? products
@@ -47,7 +45,6 @@ export default function HomeClient() {
 
   const visibleProducts = filteredProducts.slice(0, displayCount);
 
-  // ✅ Infinite scroll
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       if (
@@ -73,7 +70,6 @@ export default function HomeClient() {
       <MotionWrapper>
         <HeroCarousel />
 
-        {/* ✅ Filtres dynamiques par tags */}
         {categories.length > 1 && (
           <div className="flex gap-2 px-4 mt-4 overflow-x-auto">
             <button
@@ -102,21 +98,18 @@ export default function HomeClient() {
           </div>
         )}
 
-        {/* ✅ Grille responsive des produits */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
           {visibleProducts.map((p) => (
             <ProductCard key={p._id} product={p} />
           ))}
         </div>
 
-        {/* ✅ Message si aucun produit affichable */}
         {filteredProducts.length === 0 && (
           <p className="text-center text-gray-500 mt-8">
             {tHome('no_products_available')}
           </p>
         )}
 
-        {/* ✅ Div pour observer le scroll */}
         <div ref={sentinelRef} className="h-8" />
       </MotionWrapper>
     </>

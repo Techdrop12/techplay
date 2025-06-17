@@ -41,7 +41,7 @@ export default function ProductCard({ product }) {
     if (variant === 'B') {
       setTimeout(() => {
         router.push('/panier');
-      }, 600); // Laisse le temps au toast
+      }, 600);
     } else {
       setTimeout(() => setIsLoading(false), 600);
     }
@@ -51,8 +51,9 @@ export default function ProductCard({ product }) {
     <motion.div
       className="relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-md p-4 hover:shadow-xl transition-shadow duration-300"
       whileHover={{ scale: 1.02 }}
+      role="group"
+      aria-label={`Produit ${product.title}`}
     >
-      {/* Badge promo ou stock si besoin */}
       {product.isPromo && (
         <div className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
           Promo
@@ -62,7 +63,14 @@ export default function ProductCard({ product }) {
       <div
         onClick={() => router.push(`/produit/${product.slug}`)}
         className="cursor-pointer"
+        tabIndex={0}
+        role="button"
         aria-label={`Voir le produit ${product.title}`}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            router.push(`/produit/${product.slug}`);
+          }
+        }}
       >
         <Image
           src={product.image}
@@ -89,10 +97,9 @@ export default function ProductCard({ product }) {
           onClick={handleAdd}
           disabled={isLoading}
           className={`px-4 py-2 rounded-lg transition-colors font-medium text-white ${
-            isLoading
-              ? 'bg-gray-600 cursor-not-allowed'
-              : 'bg-black hover:bg-gray-800'
+            isLoading ? 'bg-gray-600 cursor-not-allowed' : 'bg-black hover:bg-gray-800'
           }`}
+          aria-label={`Ajouter ${product.title} au panier`}
         >
           {isLoading ? 'Ajout...' : 'Ajouter au panier'}
         </button>

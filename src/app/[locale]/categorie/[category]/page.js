@@ -1,4 +1,3 @@
-// File: src/app/[locale]/categorie/[category]/page.js
 'use client';
 
 import SEOHead from '@/components/SEOHead';
@@ -44,10 +43,6 @@ export default function CategoryPage() {
 
   return (
     <>
-      {/*
-        Ici on n’a pas de clés “seo.category_title” ou “seo.category_description” dans votre JSON. 
-        On utilise donc overrideTitle / overrideDescription.
-      */}
       <SEOHead
         overrideTitle={`Catégorie : ${category}`}
         overrideDescription={`Tous les produits dans la catégorie “${category}” sur TechPlay.`}

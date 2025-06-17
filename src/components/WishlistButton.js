@@ -59,6 +59,8 @@ export default function WishlistButton({ product, floating = true }) {
       }
       aria-label={isWishlisted ? 'Retirer de la wishlist' : 'Ajouter à la wishlist'}
       title={isWishlisted ? 'Retirer de la wishlist' : 'Ajouter à la wishlist'}
+      role="button"
+      tabIndex={0}
     >
       {isWishlisted ? (
         <HeartOff
@@ -66,6 +68,7 @@ export default function WishlistButton({ product, floating = true }) {
           className="text-red-500"
           fill="currentColor"
           stroke="currentColor"
+          aria-hidden="true"
         />
       ) : (
         <Heart
@@ -73,6 +76,7 @@ export default function WishlistButton({ product, floating = true }) {
           className="text-gray-600"
           fill="none"
           stroke="currentColor"
+          aria-hidden="true"
         />
       )}
     </motion.button>
