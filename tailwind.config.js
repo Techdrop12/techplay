@@ -1,20 +1,23 @@
-// tailwind.config.js
+// ✅ tailwind.config.js
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
-  darkMode: 'class', // ✅ Active le mode sombre basé sur une classe
+  content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'], // Prend en compte tous les fichiers utiles
+  darkMode: 'class', // Active le dark mode via la classe .dark
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+        sans: ['Inter', 'ui-sans-serif', 'system-ui'], // Typo moderne
       },
       colors: {
         brand: {
-          DEFAULT: '#0f172a', // exemple de couleur personnalisée
+          DEFAULT: '#0f172a', // Couleur personnalisée principale
           light: '#1e293b',
           dark: '#0e1116',
         },
+      },
+      spacing: {
+        header: '4.5rem', // Hauteur personnalisée pour header
       },
       animation: {
         fadeIn: 'fadeIn 0.4s ease-in-out',
@@ -30,14 +33,11 @@ module.exports = {
           '100%': { transform: 'translateY(0)', opacity: 1 },
         },
       },
-      spacing: {
-        'header': '4.5rem',
-      },
     },
   },
   plugins: [
-    require('@tailwindcss/forms'),
-    require('@tailwindcss/typography'),
-    require('tailwind-scrollbar'),
+    require('@tailwindcss/forms'),        // Formulaires propres
+    require('@tailwindcss/typography'),   // Style markdown / blog
+    require('tailwind-scrollbar'),        // Personnalisation scrollbar
   ],
-}
+};
