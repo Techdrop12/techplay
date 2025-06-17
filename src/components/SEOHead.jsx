@@ -1,4 +1,3 @@
-// ✅ src/components/SEOHead.jsx corrigé (ajout du fallback timezone)
 'use client';
 
 import Head from 'next/head';
@@ -21,7 +20,7 @@ export default function SEOHead({
   breadcrumbSegments
 }) {
   const tSeo = useTranslations('seo');
-  const locale = useLocale() || 'fr'; // ✅ fallback locale
+  const locale = useLocale() || 'fr';
   const pathname = usePathname();
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || '';

@@ -38,14 +38,12 @@ export default function AddToCartButtonABTest({ onClick, product, userEmail }) {
       }
     }
 
-    // ✅ Enregistrement backend MongoDB
     fetch('/api/track-ab', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ variant }),
     })
 
-    // ✅ Tracking GA4 + Meta Pixel
     logEvent('add_to_cart_ab_test', {
       variant,
       productId: product?._id || product?.id || null,
@@ -63,6 +61,7 @@ export default function AddToCartButtonABTest({ onClick, product, userEmail }) {
     <button
       onClick={handleClick}
       className={`${bgColor} text-white px-4 py-2 rounded shadow w-full transition hover:opacity-90`}
+      aria-label={label}
     >
       {label}
     </button>
