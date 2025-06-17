@@ -1,3 +1,4 @@
+// src/components/ToastNotification.js
 'use client';
 
 import { toast } from 'react-hot-toast';
@@ -33,4 +34,9 @@ export function notifyInfo(message) {
     },
     icon: 'ℹ️',
   });
+}
+
+// ✅ Export par défaut pour compatibilité composant
+export default function ToastNotification() {
+  return null;
 }
