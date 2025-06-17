@@ -48,7 +48,7 @@ export default function WishlistPage() {
       .then((res) => res.json())
       .then((data) => {
         const filtered = data.filter((p) =>
-          wishlist.some((w) => w._id === p._id)
+          wishlist?.some((w) => w._id === p._id)
         );
         setProducts(filtered);
       })

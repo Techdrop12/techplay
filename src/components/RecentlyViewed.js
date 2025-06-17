@@ -1,26 +1,33 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
-import ProductCard from './ProductCard'
+import { useEffect, useState } from 'react';
+import ProductCard from './ProductCard';
 
 export default function RecentlyViewed() {
-  const [products, setProducts] = useState([])
+  const [recentlyViewed, setRecentlyViewed] = useState([]);
 
   useEffect(() => {
-    const recent = JSON.parse(localStorage.getItem('recentlyViewed') || '[]')
-    setProducts(recent.reverse())
-  }, [])
+    if (typeof window === 'undefined') return;
+    try {
+      const stored = localStorage.getItem('recentlyViewed');
+      const parsed = stored ? JSON.parse(stored) : [];
+      setRecentlyViewed(Array.isArray(parsed) ? parsed : []);
+    } catch (e) {
+      console.warn('Erreur lecture recentlyViewed:', e);
+      setRecentlyViewed([]);
+    }
+  }, []);
 
-  if (products.length === 0) return null
+  if (recentlyViewed.length === 0) return null;
 
   return (
-    <div className="mt-10">
-      <h3 className="text-xl font-bold mb-4">🔁 Vu récemment</h3>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        {products.map((p) => (
-          <ProductCard key={p._id} product={p} />
+    <section className="mt-12">
+      <h2 className="text-xl font-semibold mb-4">Produits récemment consultés</h2>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        {recentlyViewed.map((product) => (
+          <ProductCard key={product._id} product={product} />
         ))}
       </div>
-    </div>
-  )
+    </section>
+  );
 }
