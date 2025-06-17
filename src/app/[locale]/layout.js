@@ -1,3 +1,4 @@
+// ✅ src/app/[locale]/layout.js
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
@@ -10,7 +11,7 @@ export async function generateStaticParams() {
 }
 
 export default async function LocaleLayout({ children, params: rawParams }) {
-  const params = await rawParams; // ✅ Nouvelle syntaxe Next 15
+  const params = await rawParams;
   const locale = params?.locale;
 
   if (!locales.includes(locale)) return notFound();
@@ -18,8 +19,8 @@ export default async function LocaleLayout({ children, params: rawParams }) {
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
-      <body>
+    <html lang={locale} suppressHydrationWarning>
+      <body className="transition-colors duration-300 bg-white text-black dark:bg-black dark:text-white">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <LayoutWithAnalytics>{children}</LayoutWithAnalytics>
         </NextIntlClientProvider>

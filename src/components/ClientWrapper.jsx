@@ -1,4 +1,3 @@
-// ✅ src/components/ClientWrapper.jsx
 'use client';
 
 import { useEffect } from 'react';
@@ -13,29 +12,27 @@ import { UpsellProvider } from '@/context/upsellContext';
 import PushPermission from '@/components/PushPermission';
 import ScoreTracker from '@/components/ScoreTracker';
 import useHotjar from '@/lib/hotjar';
-
 import { requestAndSaveToken, listenToMessages } from '@/lib/firebase-client';
 
-const isClient = typeof window !== 'undefined';
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
 export default function ClientWrapper({ children }) {
   const pathname = usePathname();
 
-  // Hotjar (uniquement côté client)
+  // Hotjar
   useHotjar();
 
-  // Google Analytics – déclenché à chaque changement de route
+  // Google Analytics – déclenché sur chaque changement de route
   useEffect(() => {
-    if (isClient && GA_ID) {
+    if (typeof window !== 'undefined' && GA_ID) {
       window.gtag?.('event', 'page_view', {
         page_path: pathname,
       });
     }
   }, [pathname]);
 
-  // Firebase Messaging
+  // Firebase Messaging – enregistrement token + écoute messages
   useEffect(() => {
     requestAndSaveToken().then((token) => {
       if (token) {
@@ -67,7 +64,7 @@ export default function ClientWrapper({ children }) {
             </>
           )}
 
-          {/* Meta Pixel */}
+          {/* Meta Pixel (Facebook) */}
           {META_PIXEL_ID && (
             <>
               <Script id="meta-pixel" strategy="afterInteractive">
@@ -96,7 +93,7 @@ export default function ClientWrapper({ children }) {
             </>
           )}
 
-          {/* Permission push + suivi score + toasts */}
+          {/* Bonus : autorisation push, gamification, notifications toast */}
           <PushPermission />
           <ScoreTracker />
           {children}

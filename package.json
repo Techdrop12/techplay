@@ -5,7 +5,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "check-env": "node scripts/env-check.js"
+    "check-env": "node scripts/env-check.js",
+    "postbuild": "next-sitemap"
   },
   "dependencies": {
     "@getbrevo/brevo": "^2.2.0",

@@ -1,5 +1,7 @@
-// src/components/JsonLd/ArticleJsonLd.js
+// ✅ src/components/JsonLd/ArticleJsonLd.js
 'use client'
+
+import Script from 'next/script'
 
 export default function ArticleJsonLd({ post }) {
   if (!post) return null
@@ -21,8 +23,8 @@ export default function ArticleJsonLd({ post }) {
         "url": `${process.env.NEXT_PUBLIC_SITE_URL}/logo.png`
       }
     },
-    "datePublished": post.createdAt,
-    "dateModified": post.updatedAt,
+    "datePublished": new Date(post.createdAt).toISOString(),
+    "dateModified": new Date(post.updatedAt).toISOString(),
     "mainEntityOfPage": {
       "@type": "WebPage",
       "@id": `${process.env.NEXT_PUBLIC_SITE_URL}/blog/${post.slug}`
@@ -30,6 +32,10 @@ export default function ArticleJsonLd({ post }) {
   }
 
   return (
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+    <Script
+      id={`article-jsonld-${post.slug}`}
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
   )
 }

@@ -1,4 +1,5 @@
-// File: src/app/[locale]/admin/generate-blog/page.js
+// ✅ src/app/[locale]/admin/generate-blog/page.js
+
 'use client';
 
 import { useTranslations } from 'next-intl';

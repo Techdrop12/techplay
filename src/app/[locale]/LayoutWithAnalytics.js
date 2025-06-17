@@ -9,6 +9,11 @@ import EmailCapturePopup from '@/components/EmailCapturePopup';
 import LiveChat from '@/components/LiveChat';
 import useAnalytics from '@/lib/useAnalytics';
 import CartAbandonTrigger from '@/components/CartAbandonTrigger';
+import ScrollProgress from '@/components/ScrollProgress';
+import BackToTop from '@/components/BackToTop';
+import PageTransitions from '@/components/PageTransitions';
+import LoaderOverlay from '@/components/LoaderOverlay';
+import ToastNotification from '@/components/ToastNotification';
 
 export default function LayoutWithAnalytics({ children }) {
   useAnalytics();
@@ -16,13 +21,21 @@ export default function LayoutWithAnalytics({ children }) {
   return (
     <ClientWrapper>
       <PromoBanner />
+      <ScrollProgress />
       <Header />
       <CartAbandonTrigger />
-      {children}
+      <PageTransitions>
+        <main className="min-h-screen pt-header animate-fadeIn">
+          {children}
+        </main>
+      </PageTransitions>
       <Footer />
+      <BackToTop />
       <CartReminder />
       <EmailCapturePopup />
       <LiveChat />
+      <ToastNotification />
+      <LoaderOverlay />
     </ClientWrapper>
   );
 }

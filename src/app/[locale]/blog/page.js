@@ -4,24 +4,20 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import SEOHead from '@/components/SEOHead';
 
-/**
- * Page “Blog Listing” (Server Component).
- */
+export const dynamic = 'force-dynamic';
+
 export default async function BlogListingPage({ params }) {
   const { locale } = params;
 
-  // A. Vérifier que la locale existe
   try {
     await import(`@/messages/${locale}.json`);
   } catch {
     return notFound();
   }
 
-  // B. Récupération des articles
   let posts = [];
   try {
-    const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') || 'http://localhost:3000';
     const res = await fetch(`${baseUrl}/api/blog/all`, { cache: 'no-store' });
     if (!res.ok) throw new Error('Erreur API blog');
     posts = await res.json();
@@ -29,7 +25,6 @@ export default async function BlogListingPage({ params }) {
     console.error('fetch blog error:', err);
   }
 
-  // C. Traductions blog
   let allMessages;
   try {
     allMessages = (await import(`@/messages/${locale}.json`)).default;
@@ -44,7 +39,6 @@ export default async function BlogListingPage({ params }) {
     return value.replace(/\{(\w+)\}/g, (_, k) => opts[k] ?? `{${k}}`);
   };
 
-  // ✅ D. Conversion de date sans erreur ENVIRONMENT_FALLBACK
   const dateFormatter = new Intl.DateTimeFormat(
     locale === 'fr' ? 'fr-FR' : 'en-US',
     { dateStyle: 'medium' }
