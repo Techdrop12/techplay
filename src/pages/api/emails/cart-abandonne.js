@@ -1,4 +1,3 @@
-// src/pages/api/emails/cart-abandonne.js
 import Brevo from '@getbrevo/brevo';
 import dbConnect from '@/lib/dbConnect';
 

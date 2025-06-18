@@ -13,6 +13,7 @@ export default function EditProductForm({ productId }) {
     async function fetchProduct() {
       try {
         const res = await fetch(`/api/admin/products/${productId}`);
+        if (!res.ok) throw new Error('Produit non trouvé');
         const data = await res.json();
         setFormData({
           ...data,
@@ -47,7 +48,9 @@ export default function EditProductForm({ productId }) {
           price: parseFloat(formData.price),
           stock: parseInt(formData.stock),
           tags: formData.tags.split(',').map((t) => t.trim()),
-          images: typeof formData.images === 'string' ? formData.images.split(',').map(i => i.trim()) : formData.images,
+          images: typeof formData.images === 'string' 
+            ? formData.images.split(',').map(i => i.trim()) 
+            : formData.images,
         }),
       });
 
@@ -64,20 +67,86 @@ export default function EditProductForm({ productId }) {
   if (!formData) return <p>Chargement...</p>;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto">
+    <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto p-4 bg-white rounded shadow">
       <h2 className="text-xl font-bold">Modifier un produit</h2>
 
-      <input name="title" value={formData.title} onChange={handleChange} placeholder="Titre" className="w-full border p-2" required />
-      <input name="slug" value={formData.slug} onChange={handleChange} placeholder="Slug" className="w-full border p-2" required />
-      <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Description" className="w-full border p-2" required />
-      <input name="price" value={formData.price} onChange={handleChange} placeholder="Prix" className="w-full border p-2" required />
-      <input name="image" value={formData.image} onChange={handleChange} placeholder="Image principale" className="w-full border p-2" required />
-      <input name="images" value={Array.isArray(formData.images) ? formData.images.join(', ') : formData.images} onChange={handleChange} placeholder="Images supplémentaires (séparées par virgules)" className="w-full border p-2" />
-      <input name="category" value={formData.category} onChange={handleChange} placeholder="Catégorie" className="w-full border p-2" />
-      <input name="stock" value={formData.stock} onChange={handleChange} placeholder="Stock" className="w-full border p-2" />
-      <input name="tags" value={formData.tags} onChange={handleChange} placeholder="Tags (séparés par virgules)" className="w-full border p-2" />
+      <input
+        name="title"
+        value={formData.title}
+        onChange={handleChange}
+        placeholder="Titre"
+        className="w-full border px-3 py-2 rounded"
+        required
+      />
+      <input
+        name="slug"
+        value={formData.slug}
+        onChange={handleChange}
+        placeholder="Slug (URL)"
+        className="w-full border px-3 py-2 rounded"
+        required
+      />
+      <textarea
+        name="description"
+        value={formData.description}
+        onChange={handleChange}
+        placeholder="Description"
+        className="w-full border px-3 py-2 rounded"
+        required
+      />
+      <input
+        name="price"
+        type="number"
+        step="0.01"
+        value={formData.price}
+        onChange={handleChange}
+        placeholder="Prix (€)"
+        className="w-full border px-3 py-2 rounded"
+        required
+      />
+      <input
+        name="image"
+        value={formData.image}
+        onChange={handleChange}
+        placeholder="URL image principale"
+        className="w-full border px-3 py-2 rounded"
+        required
+      />
+      <input
+        name="images"
+        value={Array.isArray(formData.images) ? formData.images.join(', ') : formData.images}
+        onChange={handleChange}
+        placeholder="Images supplémentaires (séparées par virgules)"
+        className="w-full border px-3 py-2 rounded"
+      />
+      <input
+        name="category"
+        value={formData.category}
+        onChange={handleChange}
+        placeholder="Catégorie"
+        className="w-full border px-3 py-2 rounded"
+      />
+      <input
+        name="stock"
+        type="number"
+        value={formData.stock}
+        onChange={handleChange}
+        placeholder="Stock"
+        className="w-full border px-3 py-2 rounded"
+      />
+      <input
+        name="tags"
+        value={formData.tags}
+        onChange={handleChange}
+        placeholder="Tags (séparés par virgules)"
+        className="w-full border px-3 py-2 rounded"
+      />
 
-      <button disabled={loading} className="bg-black text-white px-4 py-2 rounded">
+      <button
+        type="submit"
+        disabled={loading}
+        className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
         {loading ? 'Enregistrement...' : 'Enregistrer'}
       </button>
     </form>

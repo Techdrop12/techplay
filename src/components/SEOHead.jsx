@@ -72,9 +72,7 @@ export default function SEOHead({
 
       <OrganizationJsonLd />
       {product && <ProductJsonLd product={product} />}
-      {breadcrumbSegments && (
-        <BreadcrumbJsonLd pathSegments={breadcrumbSegments} />
-      )}
+      {breadcrumbSegments && <BreadcrumbJsonLd pathSegments={breadcrumbSegments} />}
     </>
   );
 }

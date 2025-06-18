@@ -1,26 +1,17 @@
-import axios from 'axios'
+import Brevo from '@getbrevo/brevo';
 
-const sendBrevoEmail = async ({ to, subject, html }) => {
-  const key = process.env.BREVO_API_KEY
+const apiKey = process.env.BREVO_API_KEY;
+const senderEmail = process.env.BREVO_SENDER_EMAIL || 'no-reply@techplay.com';
+const siteName = 'TechPlay';
 
-  if (!key) throw new Error('Clé API Brevo manquante')
+export default async function sendBrevoEmail({ to, subject, html }) {
+  const client = new Brevo.TransactionalEmailsApi();
+  client.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, apiKey);
 
-  await axios.post(
-    'https://api.brevo.com/v3/smtp/email',
-    {
-      sender: { name: 'TechPlay', email: 'no-reply@techplay.com' },
-      to: [{ email: to }],
-      subject,
-      htmlContent: html
-    },
-    {
-      headers: {
-        'api-key': key,
-        'Content-Type': 'application/json',
-        'accept': 'application/json'
-      }
-    }
-  )
+  return client.sendTransacEmail({
+    to: Array.isArray(to) ? to : [{ email: to }],
+    sender: { name: siteName, email: senderEmail },
+    subject,
+    htmlContent: html,
+  });
 }
-
-export default sendBrevoEmail

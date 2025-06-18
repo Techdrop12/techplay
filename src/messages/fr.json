@@ -154,5 +154,20 @@
     "pay_now": "Payer maintenant",
     "processing": "Traitement…",
     "payment_error": "Une erreur est survenue lors du paiement."
+  },
+  "reviews": {
+    "title": "Avis des clients",
+    "aria_label": "Liste des avis clients",
+    "filter_label": "Filtrer les avis par note",
+    "filter_stars": "Filtrer par {count} étoiles",
+    "clear_filter": "Effacer le filtre",
+    "clear": "Effacer",
+    "sort_label": "Trier les avis",
+    "sort_recent": "Récents",
+    "sort_helpful": "Utiles",
+    "no_reviews": "Aucun avis pour ce produit.",
+    "error_loading": "Erreur lors du chargement des avis.",
+    "retry": "Réessayer",
+    "verified": "Avis vérifié"
   }
 }

@@ -1,40 +1,40 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
-import { logEvent } from '@/lib/logEvent'
+import { useEffect, useState } from 'react';
+import { logEvent } from '@/lib/logEvent';
 
 export default function AddToCartButtonABTest({ onClick, product, userEmail }) {
-  const [variant, setVariant] = useState('A')
+  const [variant, setVariant] = useState('A');
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (typeof window === 'undefined') return;
 
     try {
-      const stored = localStorage.getItem('ab_variant')
+      const stored = localStorage.getItem('ab_variant');
       if (stored) {
-        setVariant(stored)
+        setVariant(stored);
       } else {
-        const random = Math.random() < 0.5 ? 'A' : 'B'
-        localStorage.setItem('ab_variant', random)
-        setVariant(random)
+        const random = Math.random() < 0.5 ? 'A' : 'B';
+        localStorage.setItem('ab_variant', random);
+        setVariant(random);
       }
     } catch (e) {
-      console.warn('Erreur lecture variant localStorage :', e)
+      console.warn('Erreur lecture variant localStorage :', e);
     }
-  }, [])
+  }, []);
 
   const handleClick = () => {
     if (typeof window !== 'undefined') {
       try {
-        const currentCart = JSON.parse(localStorage.getItem('cartItems') || '[]')
-        const updatedCart = [...currentCart, { ...product, quantity: 1 }]
-        localStorage.setItem('cartItems', JSON.stringify(updatedCart))
+        const currentCart = JSON.parse(localStorage.getItem('cartItems') || '[]');
+        const updatedCart = [...currentCart, { ...product, quantity: 1 }];
+        localStorage.setItem('cartItems', JSON.stringify(updatedCart));
 
         if (userEmail) {
-          localStorage.setItem('cartEmail', userEmail)
+          localStorage.setItem('cartEmail', userEmail);
         }
       } catch (e) {
-        console.warn('Erreur stockage panier :', e)
+        console.warn('Erreur stockage panier :', e);
       }
     }
 
@@ -42,20 +42,20 @@ export default function AddToCartButtonABTest({ onClick, product, userEmail }) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ variant }),
-    })
+    });
 
     logEvent('add_to_cart_ab_test', {
       variant,
       productId: product?._id || product?.id || null,
-    })
+    });
 
     if (typeof onClick === 'function') {
-      onClick()
+      onClick();
     }
-  }
+  };
 
-  const label = variant === 'A' ? 'Ajouter au panier' : '🛒 Commander maintenant'
-  const bgColor = variant === 'A' ? 'bg-blue-600' : 'bg-green-500'
+  const label = variant === 'A' ? 'Ajouter au panier' : '🛒 Commander maintenant';
+  const bgColor = variant === 'A' ? 'bg-blue-600' : 'bg-green-500';
 
   return (
     <button
@@ -65,5 +65,5 @@ export default function AddToCartButtonABTest({ onClick, product, userEmail }) {
     >
       {label}
     </button>
-  )
+  );
 }

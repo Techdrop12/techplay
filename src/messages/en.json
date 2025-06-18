@@ -22,7 +22,7 @@
     "product_not_found_description": "The product you are looking for does not exist or is no longer available."
   },
   "home": {
-    "title": "Welcome to TechPlay",
+    "title": "Home",
     "description": "Discover the best high-tech gadgets and accessories delivered to your door.",
     "categories": "Categories",
     "all": "All",
@@ -65,7 +65,7 @@
     "added_to_cart": "{title} added to cart",
     "out_of_stock": "Out of stock",
     "quantity": "Quantity",
-    "reviews_title": "Customer Reviews",
+    "reviews_title": "Customer reviews",
     "write_review": "Write a review"
   },
   "error": {
@@ -154,5 +154,20 @@
     "pay_now": "Pay now",
     "processing": "Processing…",
     "payment_error": "An error occurred during payment."
+  },
+  "reviews": {
+    "title": "Customer reviews",
+    "aria_label": "Customer review list",
+    "filter_label": "Filter reviews by rating",
+    "filter_stars": "Filter by {count} stars",
+    "clear_filter": "Clear filter",
+    "clear": "Clear",
+    "sort_label": "Sort reviews",
+    "sort_recent": "Recent",
+    "sort_helpful": "Helpful",
+    "no_reviews": "No reviews for this product.",
+    "error_loading": "Error loading reviews.",
+    "retry": "Retry",
+    "verified": "Verified review"
   }
 }

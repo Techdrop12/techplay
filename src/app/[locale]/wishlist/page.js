@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { getWishlist } from '@/lib/wishlist';
+import { useEffect, useState, useCallback } from 'react';
+import { getWishlist, toggleWishlistItem } from '@/lib/wishlist';
 import ProductCard from '@/components/ProductCard';
 import SEOHead from '@/components/SEOHead';
 import { useTranslations } from 'next-intl';
@@ -12,9 +12,9 @@ export default function WishlistPage() {
   const [wishlist, setWishlist] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Charge la wishlist depuis localStorage
-  const loadWishlist = () => {
+  const loadWishlist = useCallback(() => {
     try {
       const saved = getWishlist();
       setWishlist(saved || []);
@@ -22,21 +22,20 @@ export default function WishlistPage() {
       console.warn('Erreur lecture wishlist :', err);
       setWishlist([]);
     }
-  };
-
-  // 1. Initialisation
-  useEffect(() => {
-    loadWishlist();
   }, []);
 
-  // 2. Synchronisation avec localStorage en cas de modification ailleurs
+  useEffect(() => {
+    loadWishlist();
+  }, [loadWishlist]);
+
+  // Sync cross-tab
   useEffect(() => {
     const handler = () => loadWishlist();
     window.addEventListener('storage', handler);
     return () => window.removeEventListener('storage', handler);
-  }, []);
+  }, [loadWishlist]);
 
-  // 3. Filtrage des produits correspondants
+  // Load products matching wishlist _ids
   useEffect(() => {
     if (!wishlist.length) {
       setProducts([]);
@@ -44,20 +43,33 @@ export default function WishlistPage() {
       return;
     }
 
+    setLoading(true);
+    setError(null);
+
     fetch('/api/products')
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error('Erreur chargement produits');
+        return res.json();
+      })
       .then((data) => {
         const filtered = data.filter((p) =>
-          wishlist?.some((w) => w._id === p._id)
+          wishlist.some((w) => w._id === p._id)
         );
         setProducts(filtered);
       })
       .catch((err) => {
         console.error('Erreur chargement produits :', err);
+        setError(t('error_loading_products') || 'Erreur chargement produits');
         setProducts([]);
       })
       .finally(() => setLoading(false));
-  }, [wishlist]);
+  }, [wishlist, t]);
+
+  // Remove item handler
+  const handleRemove = (product) => {
+    toggleWishlistItem(product);
+    loadWishlist();
+  };
 
   return (
     <>
@@ -75,18 +87,20 @@ export default function WishlistPage() {
             animate={{ opacity: 1 }}
             className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"
           >
-            {[...Array(4)].map((_, i) => (
+            {[...Array(8)].map((_, i) => (
               <div
                 key={i}
                 className="h-56 bg-gray-200 dark:bg-gray-800 animate-pulse rounded"
               />
             ))}
           </motion.div>
+        ) : error ? (
+          <p className="text-red-600 text-center">{error}</p>
         ) : products.length === 0 ? (
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-sm text-gray-500"
+            className="text-sm text-gray-500 text-center"
           >
             {t('empty')}
           </motion.p>
@@ -101,6 +115,7 @@ export default function WishlistPage() {
                 key={product._id}
                 product={product}
                 showRemoveFromWishlist
+                onRemove={() => handleRemove(product)}
               />
             ))}
           </motion.div>

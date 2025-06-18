@@ -1,25 +1,24 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { toast } from 'react-hot-toast'
-import { motion } from 'framer-motion'
-import { Star } from 'lucide-react'
-// import { logEvent } from '@/lib/logEvent'
+import { useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { motion } from 'framer-motion';
+import { Star } from 'lucide-react';
 
 export default function ReviewForm({ productId }) {
-  const [review, setReview] = useState('')
-  const [rating, setRating] = useState(5)
-  const [hover, setHover] = useState(null)
-  const [submitted, setSubmitted] = useState(false)
-  const [isSending, setIsSending] = useState(false)
+  const [review, setReview] = useState('');
+  const [rating, setRating] = useState(5);
+  const [hover, setHover] = useState(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [isSending, setIsSending] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!review || rating < 1 || rating > 5 || isSending) return
+    e.preventDefault();
+    if (!review || rating < 1 || rating > 5 || isSending) return;
 
-    setIsSending(true)
+    setIsSending(true);
     try {
-      const res = await fetch('/api/reviews', {
+      const res = await fetch('/api/reviews/product/' + productId, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -28,23 +27,22 @@ export default function ReviewForm({ productId }) {
           rating,
           name: 'Client TechPlay',
         }),
-      })
+      });
 
       if (res.ok) {
-        setSubmitted(true)
-        setReview('')
-        setRating(5)
-        toast.success('Merci pour votre avis !')
-        // logEvent('review_submitted', { rating })
+        setSubmitted(true);
+        setReview('');
+        setRating(5);
+        toast.success('Merci pour votre avis !');
       } else {
-        throw new Error()
+        throw new Error();
       }
     } catch {
-      toast.error("Erreur lors de l'envoi de l'avis")
+      toast.error("Erreur lors de l'envoi de l'avis");
     } finally {
-      setIsSending(false)
+      setIsSending(false);
     }
-  }
+  };
 
   if (submitted) {
     return (
@@ -56,7 +54,7 @@ export default function ReviewForm({ productId }) {
       >
         Merci pour votre avis 💬
       </motion.p>
-    )
+    );
   }
 
   return (
@@ -84,10 +82,7 @@ export default function ReviewForm({ productId }) {
             whileTap={{ scale: 0.9 }}
             aria-label={`${val} étoile${val > 1 ? 's' : ''}`}
           >
-            <Star
-              fill={(hover || rating) >= val ? 'currentColor' : 'none'}
-              size={24}
-            />
+            <Star fill={(hover || rating) >= val ? 'currentColor' : 'none'} size={24} />
           </motion.button>
         ))}
       </motion.div>
@@ -114,5 +109,5 @@ export default function ReviewForm({ productId }) {
         {isSending ? 'Envoi en cours...' : 'Envoyer'}
       </motion.button>
     </form>
-  )
+  );
 }

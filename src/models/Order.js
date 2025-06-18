@@ -1,23 +1,25 @@
-// ✅ src/models/Order.js (OK)
-import mongoose from 'mongoose'
+import mongoose from 'mongoose';
 
-const OrderSchema = new mongoose.Schema({
-  email: String,
-  items: [
-    {
-      _id: String,
-      title: String,
-      price: Number,
-      quantity: Number,
-    }
-  ],
-  total: Number,
-  stripeSessionId: String,
-  status: {
-    type: String,
-    enum: ['en attente', 'payée'],
-    default: 'en attente'
-  }
-}, { timestamps: true })
+const orderSchema = new mongoose.Schema(
+  {
+    email: { type: String, required: true },
+    items: [
+      {
+        _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+        title: String,
+        price: Number,
+        quantity: Number,
+      },
+    ],
+    total: { type: Number, required: true },
+    stripeSessionId: { type: String, required: true },
+    status: {
+      type: String,
+      enum: ['en attente', 'payée', 'expédiée', 'annulée'],
+      default: 'en attente',
+    },
+  },
+  { timestamps: true }
+);
 
-export default mongoose.models.Order || mongoose.model('Order', OrderSchema)
+export default mongoose.models.Order || mongoose.model('Order', orderSchema);

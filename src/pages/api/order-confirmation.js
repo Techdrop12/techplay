@@ -1,10 +1,10 @@
-import sendBrevoEmail from '@/lib/sendBrevoEmail'
-import isAdmin from '@/lib/isAdmin'
+import sendBrevoEmail from '@/lib/sendBrevoEmail';
+import isAdmin from '@/lib/isAdmin';
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).end()
+  if (req.method !== 'POST') return res.status(405).end();
 
-  const { email, cart, total } = req.body
+  const { email, cart, total } = req.body;
 
   const html = `
     <div style="font-family: sans-serif; max-width: 600px; margin: auto;">
@@ -31,25 +31,25 @@ export default async function handler(req, res) {
       <p>📦 Vous recevrez un mail dès l’expédition.</p>
       <p>Merci pour votre confiance,<br>L'équipe TechPlay</p>
     </div>
-  `
+  `;
 
   try {
-    const isUserAdmin = await isAdmin(req)
+    const isUserAdmin = await isAdmin(req);
 
     if (isUserAdmin) {
-      console.log(`[Brevo] Email ignoré pour admin : ${email}`)
-      return res.status(200).json({ message: 'Email non envoyé (admin)' })
+      console.log(`[Brevo] Email ignoré pour admin : ${email}`);
+      return res.status(200).json({ message: 'Email non envoyé (admin)' });
     }
 
     await sendBrevoEmail({
       to: email,
       subject: 'Confirmation de votre commande',
       html
-    })
+    });
 
-    res.status(200).json({ success: true })
+    res.status(200).json({ success: true });
   } catch (error) {
-    console.error('Erreur Brevo:', error.message)
-    res.status(500).json({ error: 'Erreur envoi email' })
+    console.error('Erreur Brevo:', error.message);
+    res.status(500).json({ error: 'Erreur envoi email' });
   }
 }

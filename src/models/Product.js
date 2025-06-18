@@ -13,8 +13,8 @@ const productSchema = new mongoose.Schema({
   views: { type: Number, default: 0 },
   sold: { type: Number, default: 0 },
   featured: { type: Boolean, default: false },
-  highlight: { type: Boolean, default: false },
-  source: { type: String, enum: ['manual', 'api'], default: 'manual' },
+  highlight: { type: Boolean, default: false }, // 🎯 Pour mise en avant
+  source: { type: String, enum: ['manual', 'api'], default: 'manual' }, // 💡 Différencier admin / API
   seoTitle: { type: String },
   seoDescription: { type: String },
   relatedProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],

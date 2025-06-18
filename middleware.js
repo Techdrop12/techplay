@@ -19,7 +19,7 @@ const STATIC_FILES = [
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // Rewrite static files to root
+  // Réécriture des fichiers statiques
   const matchStatic = pathname.match(/^\/(fr|en)\/(.+)$/);
   if (matchStatic) {
     const [, , path] = matchStatic;
@@ -28,7 +28,7 @@ export async function middleware(request) {
     }
   }
 
-  // Public paths allowed
+  // Chemins publics autorisés
   const PUBLIC_PATHS = [
     '/favicon.ico',
     '/robots.txt',
@@ -48,7 +48,7 @@ export async function middleware(request) {
   ];
   if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next();
 
-  // Public prefixes allowed
+  // Préfixes publics autorisés
   const PUBLIC_PREFIXES = [
     '/_next/',
     '/api/',
@@ -61,14 +61,14 @@ export async function middleware(request) {
   ];
   if (PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return NextResponse.next();
 
-  // Redirect / → /fr
+  // Redirection / → /fr
   if (pathname === '/') {
     const url = request.nextUrl.clone();
     url.pathname = '/fr';
     return NextResponse.redirect(url);
   }
 
-  // Maintenance mode redirect (except admin and maintenance pages)
+  // Mode maintenance (sauf admin & maintenance)
   const maintenanceOn = process.env.MAINTENANCE === 'true';
   const isAdmin = pathname.startsWith('/admin');
   const isMaintenance = ['/maintenance', '/fr/maintenance', '/en/maintenance'].includes(pathname);
@@ -78,7 +78,7 @@ export async function middleware(request) {
     return NextResponse.redirect(url);
   }
 
-  // Admin auth for /admin/*
+  // Auth admin pour /admin/*
   if (isAdmin) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
     if (!token || token.role !== 'admin') {
@@ -89,13 +89,13 @@ export async function middleware(request) {
     return secureHeaders(request);
   }
 
-  // Intl middleware + security headers
+  // Middleware intl + headers de sécurité
   const response = await intlMiddleware(request);
   return secureHeaders(request, response);
 }
 
 export const config = {
   matcher: [
-    '/((?!_next/|api/|favicon\\.ico$|robots\\.txt$|manifest\\.json$|sw\\.js$|firebase-messaging-sw\\.js$|icons/|fr/icons/|en/icons/|images/|fonts/|static/).*)'
+    '/((?!_next/|api/|favicon\\.ico$|robots\\.txt$|manifest\\.json$|sw\\.js$|firebase-messaging-sw\\.js$|icons/|fr/icons/|en/icons/|images/|fonts/|static/).*)',
   ],
 };

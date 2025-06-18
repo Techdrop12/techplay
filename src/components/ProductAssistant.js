@@ -1,19 +1,19 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Bot, Loader2 } from 'lucide-react'
-import { motion } from 'framer-motion'
-import toast from 'react-hot-toast'
+import { useState } from 'react';
+import { Bot, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 
 export default function ProductAssistant({ product }) {
-  const [question, setQuestion] = useState('')
-  const [response, setResponse] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [question, setQuestion] = useState('');
+  const [response, setResponse] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const askAI = async () => {
-    if (!question.trim()) return
-    setLoading(true)
-    setResponse('')
+    if (!question.trim()) return;
+    setLoading(true);
+    setResponse('');
 
     try {
       const res = await fetch('/api/ai/chat', {
@@ -28,19 +28,19 @@ export default function ProductAssistant({ product }) {
             category: product?.category,
           }),
         }),
-      })
+      });
 
-      const data = await res.json()
-      if (!data?.reply) throw new Error()
+      const data = await res.json();
+      if (!data?.reply) throw new Error();
 
-      setResponse(data.reply)
+      setResponse(data.reply);
     } catch (err) {
-      toast.error("Erreur lors de la réponse de l'assistant")
-      setResponse("Désolé, une erreur s’est produite.")
+      toast.error("Erreur lors de la réponse de l'assistant");
+      setResponse("Désolé, une erreur s’est produite.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="mt-10 p-4 border rounded bg-gray-50 shadow-sm">
@@ -79,5 +79,5 @@ export default function ProductAssistant({ product }) {
         </motion.div>
       )}
     </div>
-  )
+  );
 }

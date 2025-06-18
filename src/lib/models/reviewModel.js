@@ -1,4 +1,3 @@
-// src/lib/models/reviewModel.js
 import mongoose from 'mongoose';
 
 const ReviewSchema = new mongoose.Schema(
