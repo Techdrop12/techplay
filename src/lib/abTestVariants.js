@@ -5,7 +5,7 @@ export const getUserVariant = () => {
 
   try {
     const cached = window.localStorage.getItem('ab_variant');
-    if (cached) return cached;
+    if (cached && ['A', 'B', 'C'].includes(cached)) return cached;
 
     const variants = ['A', 'B', 'C'];
     const assigned = variants[Math.floor(Math.random() * variants.length)];

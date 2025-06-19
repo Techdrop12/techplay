@@ -32,14 +32,14 @@ export default function PanierPage() {
       const data = await res.json();
       if (data.url) router.push(data.url);
       else throw new Error();
-    } catch (err) {
+    } catch {
       toast.error(t('payment_error') || 'Erreur de paiement');
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ Envoi automatique de l’email de panier abandonné après 24h
+  // Envoi automatique de l’email de panier abandonné après 24h
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const email = localStorage.getItem('cartEmail');
@@ -51,7 +51,7 @@ export default function PanierPage() {
       fetch('/api/emails/cart-abandonne', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, cart })
+        body: JSON.stringify({ email, cart }),
       })
         .then((res) => {
           if (res.ok) {
@@ -131,14 +131,12 @@ export default function PanierPage() {
                 onClick={handleCheckout}
                 disabled={loading}
                 className="bg-black text-white px-6 py-3 rounded hover:opacity-90 w-full"
+                aria-disabled={loading}
               >
                 {loading ? 'Redirection...' : t('checkout')}
               </button>
 
-              <Link
-                href="/fr"
-                className="block mt-4 text-sm text-center text-blue-600 underline"
-              >
+              <Link href={`/${t.locale || 'fr'}`} className="block mt-4 text-sm text-center text-blue-600 underline">
                 {t('continue_shopping') || '← Continuer vos achats'}
               </Link>
             </>

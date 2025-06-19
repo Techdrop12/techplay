@@ -1,5 +1,7 @@
 'use client';
 
+import React from 'react';
+import { CartAnimationProvider } from '@/context/cartAnimationContext';
 import ClientWrapper from '@/components/ClientWrapper';
 import PromoBanner from '@/components/PromoBanner';
 import Header from '@/components/Header';
@@ -19,23 +21,25 @@ export default function LayoutWithAnalytics({ children }) {
   useAnalytics();
 
   return (
-    <ClientWrapper>
-      <PromoBanner />
-      <ScrollProgress />
-      <Header />
-      <CartAbandonTrigger />
-      <PageTransitions>
-        <main className="min-h-screen pt-header animate-fadeIn">
-          {children}
-        </main>
-      </PageTransitions>
-      <Footer />
-      <BackToTop />
-      <CartReminder />
-      <EmailCapturePopup />
-      <LiveChat />
-      <ToastNotification />
-      <LoaderOverlay />
-    </ClientWrapper>
+    <CartAnimationProvider>
+      <ClientWrapper>
+        <PromoBanner />
+        <ScrollProgress />
+        <Header />
+        <CartAbandonTrigger />
+        <PageTransitions>
+          <main className="min-h-screen pt-header animate-fadeIn">
+            {children}
+          </main>
+        </PageTransitions>
+        <Footer />
+        <BackToTop />
+        <CartReminder />
+        <EmailCapturePopup />
+        <LiveChat />
+        <ToastNotification />
+        <LoaderOverlay />
+      </ClientWrapper>
+    </CartAnimationProvider>
   );
 }

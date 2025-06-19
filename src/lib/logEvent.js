@@ -1,4 +1,3 @@
-// src/lib/logEvent.js
 'use client'
 
 export const logEvent = (action, params = {}) => {

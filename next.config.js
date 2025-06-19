@@ -23,7 +23,7 @@ module.exports = nextIntl(
         'firebasestorage.googleapis.com',
         'placehold.co'
       ],
-      formats: ['image/webp']
+      formats: ['image/avif', 'image/webp']
     },
 
     eslint: { ignoreDuringBuilds: true },
@@ -39,7 +39,7 @@ module.exports = nextIntl(
       {
         source: '/(manifest\\.json|icons/.*)',
         headers: [
-          { key: 'Cache-Control', value: 'public, max-age=3600, immutable' },
+          { key: 'Cache-Control', value: 'public, max-age=86400, immutable' }, // 1 jour
           { key: 'Access-Control-Allow-Origin', value: '*' },
           { key: 'Content-Type', value: 'application/json; charset=UTF-8' }
         ]
@@ -47,7 +47,7 @@ module.exports = nextIntl(
       {
         source: '/sw.js',
         headers: [
-          { key: 'Cache-Control', value: 'public, max-age=3600, immutable' },
+          { key: 'Cache-Control', value: 'public, max-age=86400, immutable' },
           { key: 'Access-Control-Allow-Origin', value: '*' },
           { key: 'Content-Type', value: 'application/javascript' }
         ]
@@ -55,7 +55,7 @@ module.exports = nextIntl(
       {
         source: '/firebase-messaging-sw.js',
         headers: [
-          { key: 'Cache-Control', value: 'public, max-age=3600, immutable' },
+          { key: 'Cache-Control', value: 'public, max-age=86400, immutable' },
           { key: 'Access-Control-Allow-Origin', value: '*' },
           { key: 'Content-Type', value: 'application/javascript' }
         ]

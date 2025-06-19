@@ -13,18 +13,25 @@ export default function WishlistButton({ product, floating = true }) {
 
   useEffect(() => {
     if (typeof window === 'undefined' || !productId) return;
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY) || '[]';
-      const wishlist = JSON.parse(stored);
-      const found = wishlist.some((p) => p._id === productId);
-      setIsWishlisted(found);
-    } catch (err) {
-      console.warn('Erreur lecture wishlist :', err);
-    }
+
+    const checkWishlist = () => {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY) || '[]';
+        const wishlist = JSON.parse(stored);
+        setIsWishlisted(wishlist.some((p) => p._id === productId));
+      } catch {
+        setIsWishlisted(false);
+      }
+    };
+
+    checkWishlist();
+
+    window.addEventListener('storage', checkWishlist);
+    return () => window.removeEventListener('storage', checkWishlist);
   }, [productId]);
 
   const toggleWishlist = () => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !productId) return;
 
     try {
       const stored = localStorage.getItem(STORAGE_KEY) || '[]';
@@ -32,32 +39,35 @@ export default function WishlistButton({ product, floating = true }) {
 
       if (isWishlisted) {
         wishlist = wishlist.filter((p) => p._id !== productId);
+        toast.success('Produit retiré de la wishlist 💔');
         logEvent('wishlist_remove', { productId });
-        toast.success('Retiré de la wishlist');
       } else {
         wishlist.unshift(product);
-        wishlist = wishlist.slice(0, 20); // limite max à 20 éléments
+        wishlist = wishlist.slice(0, 20);
+        toast.success('Produit ajouté à la wishlist ❤️');
         logEvent('wishlist_add', { productId });
-        toast.success('Ajouté à la wishlist');
       }
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(wishlist));
       setIsWishlisted(!isWishlisted);
+      window.dispatchEvent(new Event('storage'));
     } catch (err) {
       console.warn('Erreur update wishlist :', err);
+      toast.error("Erreur lors de la mise à jour de la wishlist");
     }
   };
 
   return (
     <motion.button
       onClick={toggleWishlist}
-      whileTap={{ scale: 0.9 }}
+      whileTap={{ scale: 0.85 }}
       className={
         floating
           ? 'absolute top-2 right-2 p-1 rounded-full bg-white/90 hover:bg-white shadow transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'
           : 'text-red-600 hover:text-red-800 transition focus:outline-none focus:ring-2 focus:ring-red-500'
       }
       aria-label={isWishlisted ? 'Retirer de la wishlist' : 'Ajouter à la wishlist'}
+      aria-pressed={isWishlisted}
       title={isWishlisted ? 'Retirer de la wishlist' : 'Ajouter à la wishlist'}
       role="button"
       tabIndex={0}

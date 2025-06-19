@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Star } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -14,6 +14,16 @@ function timeAgo(date) {
   return `${Math.floor(diff / 86400)} j`;
 }
 
+function Skeleton() {
+  return (
+    <ul role="list" aria-label="Chargement des avis" className="space-y-4 animate-pulse">
+      {[...Array(3)].map((_, i) => (
+        <li key={i} className="p-4 bg-gray-200 rounded h-24" />
+      ))}
+    </ul>
+  );
+}
+
 export default function ReviewList({ productId }) {
   const t = useTranslations('reviews');
   const [reviews, setReviews] = useState([]);
@@ -24,7 +34,6 @@ export default function ReviewList({ productId }) {
 
   useEffect(() => {
     if (!productId) return;
-
     setLoading(true);
     setError(null);
 
@@ -45,25 +54,27 @@ export default function ReviewList({ productId }) {
       });
   }, [productId, t]);
 
-  const filteredReviews = reviews
-    .filter((r) => (filter ? r.rating === filter : true))
-    .sort((a, b) => {
-      if (sort === 'helpful') return (b.helpful || 0) - (a.helpful || 0);
-      return new Date(b.createdAt) - new Date(a.createdAt);
-    });
+  const filteredReviews = useMemo(() => {
+    return reviews
+      .filter((r) => (filter ? r.rating === filter : true))
+      .sort((a, b) => {
+        if (sort === 'helpful') return (b.helpful || 0) - (a.helpful || 0);
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+  }, [reviews, filter, sort]);
 
-  if (loading) {
-    return (
-      <p className="text-sm text-gray-500 mt-4" aria-live="polite">
-        {t('loading') || 'Chargement...'}
-      </p>
-    );
-  }
+  if (loading) return <Skeleton />;
 
   if (error) {
     return (
       <div className="text-sm text-red-600 mt-4 text-center" role="alert">
-        {error} <button onClick={() => window.location.reload()} className="underline">{t('retry')}</button>
+        {error}{' '}
+        <button
+          onClick={() => window.location.reload()}
+          className="underline focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+        >
+          {t('retry')}
+        </button>
       </div>
     );
   }
@@ -81,12 +92,26 @@ export default function ReviewList({ productId }) {
       <h3 className="text-lg font-semibold mb-4 text-center">{t('title')}</h3>
 
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <div className="flex space-x-1" role="group" aria-label={t('filter_label')}>
+        <div
+          className="flex space-x-1"
+          role="group"
+          aria-label={t('filter_label')}
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+              e.preventDefault();
+              const currentIndex = [5, 4, 3, 2, 1].indexOf(filter);
+              let newIndex = currentIndex;
+              if (e.key === 'ArrowLeft') newIndex = (currentIndex + 1) % 5;
+              else if (e.key === 'ArrowRight') newIndex = (currentIndex + 4) % 5;
+              setFilter(newIndex === -1 ? 5 : [5, 4, 3, 2, 1][newIndex]);
+            }
+          }}
+        >
           {[5, 4, 3, 2, 1].map((s) => (
             <button
               key={s}
               onClick={() => setFilter(s === filter ? null : s)}
-              className={`text-xs px-2 py-1 rounded border transition ${
+              className={`text-xs px-2 py-1 rounded border transition focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-black ${
                 s === filter ? 'bg-black text-white' : 'text-gray-700 hover:bg-gray-200'
               }`}
               aria-pressed={s === filter}
@@ -98,7 +123,7 @@ export default function ReviewList({ productId }) {
           {filter && (
             <button
               onClick={() => setFilter(null)}
-              className="text-xs px-2 py-1 rounded border text-gray-600 hover:bg-gray-300"
+              className="text-xs px-2 py-1 rounded border text-gray-600 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-black"
               aria-label={t('clear_filter')}
             >
               {t('clear')}
@@ -113,7 +138,7 @@ export default function ReviewList({ productId }) {
           id="sortSelect"
           value={sort}
           onChange={(e) => setSort(e.target.value)}
-          className="text-xs border rounded px-2 py-1"
+          className="text-xs border rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-black"
           aria-label={t('sort_label')}
         >
           <option value="recent">📅 {t('sort_recent')}</option>
@@ -121,7 +146,7 @@ export default function ReviewList({ productId }) {
         </select>
       </div>
 
-      <ul className="space-y-4">
+      <ul className="space-y-4" role="list">
         {filteredReviews.map((r, i) => (
           <motion.li
             key={r._id || i}

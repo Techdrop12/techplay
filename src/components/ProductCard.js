@@ -1,21 +1,26 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/cartContext';
 import { toast } from 'react-hot-toast';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import ReactStars from 'react-rating-stars-component';
 import { logEvent } from '@/lib/logEvent';
 import { getUserVariant } from '@/lib/abTestVariants';
 import WishlistButton from '@/components/WishlistButton';
+import FreeShippingBadge from '@/components/FreeShippingBadge';
+import { CartAnimationContext } from '@/context/cartAnimationContext';
 
 export default function ProductCard({ product }) {
   const { addToCart } = useCart();
   const router = useRouter();
+  const { triggerCartAnimation } = useContext(CartAnimationContext);
   const [variant, setVariant] = useState('A');
   const [isLoading, setIsLoading] = useState(false);
+  const [flyAnim, setFlyAnim] = useState(false);
+  const cardRef = useRef(null);
 
   useEffect(() => {
     const v = getUserVariant();
@@ -28,6 +33,7 @@ export default function ProductCard({ product }) {
 
   const handleAdd = () => {
     setIsLoading(true);
+    setFlyAnim(true);
     addToCart(product);
     toast.success(`✅ ${product.title} ajouté au panier`);
 
@@ -38,17 +44,20 @@ export default function ProductCard({ product }) {
       variant,
     });
 
-    if (variant === 'B') {
-      setTimeout(() => {
+    triggerCartAnimation();
+
+    setTimeout(() => {
+      setFlyAnim(false);
+      setIsLoading(false);
+      if (variant === 'B') {
         router.push('/panier');
-      }, 600);
-    } else {
-      setTimeout(() => setIsLoading(false), 600);
-    }
+      }
+    }, 800);
   };
 
   return (
     <motion.div
+      ref={cardRef}
       className="relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-md p-4 hover:shadow-xl transition-shadow duration-300"
       whileHover={{ scale: 1.02 }}
       role="group"
@@ -56,16 +65,19 @@ export default function ProductCard({ product }) {
     >
       {product.isPromo && (
         <div
-          className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded"
+          className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded z-20"
           aria-label="Promotion"
+          title={`${Math.round(
+            ((product.oldPrice - product.price) / product.oldPrice) * 100
+          )}% de réduction`}
         >
-          Promo
+          -{Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)}%
         </div>
       )}
 
       <div
         onClick={() => router.push(`/produit/${product.slug}`)}
-        className="cursor-pointer"
+        className="cursor-pointer outline-none"
         tabIndex={0}
         role="button"
         aria-label={`Voir le produit ${product.title}`}
@@ -84,7 +96,12 @@ export default function ProductCard({ product }) {
           priority
         />
         <h3 className="mt-2 font-semibold text-lg truncate">{product.title}</h3>
-        <p className="text-gray-600 dark:text-gray-300">{product.price} €</p>
+        <div className="flex items-center gap-2">
+          <p className="text-gray-600 dark:text-gray-300 text-lg font-bold">{product.price} €</p>
+          {product.oldPrice && (
+            <p className="text-gray-400 line-through text-sm">{product.oldPrice} €</p>
+          )}
+        </div>
         <ReactStars
           count={5}
           value={product.rating || 4.5}
@@ -94,12 +111,15 @@ export default function ProductCard({ product }) {
           activeColor="#ffd700"
           aria-label={`Note : ${product.rating || 4.5} étoiles`}
         />
+        <FreeShippingBadge price={product.price} />
       </div>
 
       <div className="flex items-center justify-between mt-4">
         <button
           onClick={handleAdd}
           disabled={isLoading}
+          aria-live="polite"
+          aria-busy={isLoading}
           className={`px-4 py-2 rounded-lg transition-colors font-medium text-white ${
             isLoading ? 'bg-gray-600 cursor-not-allowed' : 'bg-black hover:bg-gray-800'
           }`}
@@ -109,6 +129,34 @@ export default function ProductCard({ product }) {
         </button>
         <WishlistButton product={product} />
       </div>
+
+      <AnimatePresence>
+        {flyAnim && (
+          <motion.div
+            initial={{ opacity: 1, scale: 1, y: 0, x: 0, rotate: 0 }}
+            animate={{
+              opacity: 0,
+              scale: 0.3,
+              y: -200,
+              x: 200,
+              rotate: 360,
+              transition: { duration: 0.8, ease: 'easeInOut' },
+            }}
+            exit={{ opacity: 0 }}
+            className="absolute top-4 left-4 pointer-events-none z-50"
+          >
+            <Image
+              src={product.image}
+              alt=""
+              width={100}
+              height={100}
+              className="object-contain rounded"
+              aria-hidden="true"
+              priority
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

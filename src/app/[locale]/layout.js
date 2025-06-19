@@ -1,4 +1,4 @@
-// ✅ src/app/[locale]/layout.js
+// src/app/[locale]/layout.js
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
@@ -16,13 +16,16 @@ export default async function LocaleLayout({ children, params: rawParams }) {
 
   if (!locales.includes(locale)) return notFound();
 
+  // Charge les messages de traduction pour la locale courante
   const messages = await getMessages();
 
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className="transition-colors duration-300 bg-white text-black dark:bg-black dark:text-white">
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <LayoutWithAnalytics>{children}</LayoutWithAnalytics>
+          <LayoutWithAnalytics>
+            {children}
+          </LayoutWithAnalytics>
         </NextIntlClientProvider>
       </body>
     </html>
