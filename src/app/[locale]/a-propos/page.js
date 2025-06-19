@@ -1,5 +1,3 @@
-// src/app/[locale]/a-propos/page.js
-
 import { notFound } from 'next/navigation';
 import SEOHead from '@/components/SEOHead';
 

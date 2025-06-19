@@ -1,5 +1,3 @@
-// src/app/[locale]/mes-commandes/page.js
-
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/authOptions';
 import { redirect } from 'next/navigation';

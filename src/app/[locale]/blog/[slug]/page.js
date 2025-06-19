@@ -1,5 +1,3 @@
-// ✅ src/app/[locale]/blog/[slug]/page.js
-
 import { notFound } from 'next/navigation';
 import SEOHead from '@/components/SEOHead';
 import ArticleJsonLd from '@/components/JsonLd/ArticleJsonLd';
