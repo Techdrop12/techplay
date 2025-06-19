@@ -2,7 +2,7 @@
 
 import React, { createContext, useState, useContext, useCallback } from 'react';
 
-const CartAnimationContext = createContext({
+export const CartAnimationContext = createContext({
   animating: false,
   triggerCartAnimation: () => {},
 });
