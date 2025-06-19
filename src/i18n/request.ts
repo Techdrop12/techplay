@@ -16,9 +16,9 @@ export default async function getConfig({
   const actualLocale = locale ?? defaultLocale ?? 'fr';
 
   // 2) On importe dynamiquement le JSON correspondant
-  //    (ce fichier doit exister dans /messages/…
-  //     par exemple messages/fr.json et messages/en.json).
-  const messages = (await import(`../../messages/${actualLocale}.json`)).default;
+  //    (ce fichier doit exister dans /src/messages/…
+  //     par exemple src/messages/fr.json et src/messages/en.json).
+  const messages = (await import(`../messages/${actualLocale}.json`)).default;
 
   // 3) On retourne un objet conforme à IntlConfig :
   return {
