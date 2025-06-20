@@ -68,6 +68,9 @@ export default async function RootLayout({ children }) {
   const userAgent = headerList.get('user-agent') || '';
   const isBot = /bot|crawl|slurp|spider/i.test(userAgent);
 
+  const gaID = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
+  const pixelID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
+
   return (
     <html lang="fr" className={inter.variable} suppressHydrationWarning>
       <head>
@@ -89,6 +92,48 @@ export default async function RootLayout({ children }) {
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: themeInitScript }}
         />
+
+        {!isBot && gaID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${gaID}`}
+              strategy="afterInteractive"
+            />
+            <Script
+              id="google-analytics"
+              strategy="afterInteractive"
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', '${gaID}', { page_path: window.location.pathname });
+                `,
+              }}
+            />
+          </>
+        )}
+
+        {!isBot && pixelID && (
+          <Script
+            id="meta-pixel"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                !function(f,b,e,v,n,t,s)
+                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                n.queue=[];t=b.createElement(e);t.async=!0;
+                t.src=v;s=b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t,s)}(window, document,'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+                fbq('init', '${pixelID}');
+                fbq('track', 'PageView');
+              `,
+            }}
+          />
+        )}
       </head>
       <body className="bg-white text-black dark:bg-zinc-900 dark:text-white transition-colors duration-300">
         {!isBot && <Analytics />}
