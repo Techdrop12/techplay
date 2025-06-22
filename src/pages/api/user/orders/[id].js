@@ -1,8 +1,6 @@
-// src/pages/api/user/orders/[id].js
-
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
-import { getServerSession } from 'next-auth/next';
+import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 
 export default async function handler(req, res) {
@@ -21,6 +19,7 @@ export default async function handler(req, res) {
   await dbConnect();
 
   try {
+    // On filtre la commande en vérifiant que l’email utilisateur correspond à la session
     const order = await Order.findOne({ _id: id, 'user.email': session.user.email }).lean();
 
     if (!order) {

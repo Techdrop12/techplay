@@ -1,14 +1,10 @@
-// src/app/[locale]/account/commande/[id]/page.js
-
-import { getServerSession } from 'next-auth'; // import modifié ici
+import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import { redirect } from 'next/navigation';
 import SEOHead from '@/components/SEOHead';
-import { headers } from 'next/headers'; // important pour récupérer les cookies
+import dbConnect from '@/lib/dbConnect';
+import Order from '@/models/Order';
 
-/**
- * Cette route est 100% dynamique, on ne pré-génère pas d’IDs.
- */
 export async function generateStaticParams() {
   return [];
 }
@@ -16,70 +12,40 @@ export async function generateStaticParams() {
 export default async function OrderDetailPage({ params }) {
   const { locale, id } = params;
 
-  // Récupération de la session authentifiée
+  // Récupérer la session utilisateur
   const session = await getServerSession(authOptions);
 
-  // Si non connecté, rediriger vers la page de connexion locale.
   if (!session) {
     redirect(`/${locale}/connexion`);
   }
 
-  // Récupérer le header "cookie" de la requête entrante (navigateur)
-  const cookieHeader = headers().get('cookie') || '';
+  await dbConnect();
 
-  // Construire l’URL de base pour appeler notre API interne.
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') || 'http://localhost:3000';
+  // Récupérer la commande directement via mongoose
+  const order = await Order.findOne({ _id: id, 'user.email': session.user.email }).lean();
 
-  // Appeler l'API interne avec le cookie correct pour authentification
-  const res = await fetch(`${baseUrl}/api/user/orders/${id}`, {
-    headers: {
-      cookie: cookieHeader,
-    },
-    cache: 'no-store',
-  });
-
-  if (!res.ok) {
-    // En cas d’erreur (commande introuvable, etc.), on affiche un message 404 minimal.
+  if (!order) {
     return (
       <div className="p-6 max-w-3xl mx-auto text-center">
         <SEOHead
           overrideTitle={locale === 'fr' ? 'Commande introuvable' : 'Order Not Found'}
-          overrideDescription={
-            locale === 'fr'
-              ? 'Impossible de charger cette commande.'
-              : 'Could not load that order.'
-          }
+          overrideDescription={locale === 'fr' ? 'Impossible de charger cette commande.' : 'Could not load that order.'}
           noIndex={true}
         />
-        <p className="text-gray-600">
-          {locale === 'fr'
-            ? 'Erreur lors du chargement de la commande.'
-            : 'Error loading order.'}
-        </p>
+        <p className="text-gray-600">{locale === 'fr' ? 'Erreur lors du chargement de la commande.' : 'Error loading order.'}</p>
       </div>
     );
   }
 
-  const order = await res.json();
-
-  // Formater la date selon la locale passée.
   const dateString = new Date(order.createdAt).toLocaleDateString(locale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   });
 
-  // Titre et description dynamiques pour SEOHead.
-  const pageTitle = locale === 'fr'
-    ? `Commande #${order._id}`
-    : `Order #${order._id}`;
+  const pageTitle = locale === 'fr' ? `Commande #${order._id}` : `Order #${order._id}`;
+  const pageDesc = locale === 'fr' ? `Détails de la commande ${order._id} passée le ${dateString}.` : `Details for order ${order._id} placed on ${dateString}.`;
 
-  const pageDesc = locale === 'fr'
-    ? `Détails de la commande ${order._id} passée le ${dateString}.`
-    : `Details for order ${order._id} placed on ${dateString}.`;
-
-  // Breadcrumb JSON-LD.
   const siteUrl = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') || '';
   const breadcrumbSegments = [
     { label: locale === 'fr' ? 'Mes commandes' : 'My Orders', url: `${siteUrl}/${locale}/mes-commandes` },
@@ -88,63 +54,41 @@ export default async function OrderDetailPage({ params }) {
 
   return (
     <>
-      <SEOHead
-        overrideTitle={pageTitle}
-        overrideDescription={pageDesc}
-        breadcrumbSegments={breadcrumbSegments}
-      />
+      <SEOHead overrideTitle={pageTitle} overrideDescription={pageDesc} breadcrumbSegments={breadcrumbSegments} />
 
       <div className="p-6 max-w-3xl mx-auto space-y-6">
-        <h1 className="text-2xl font-bold">
-          {locale === 'fr' ? `Commande #${order._id}` : `Order #${order._id}`}
-        </h1>
+        <h1 className="text-2xl font-bold">{locale === 'fr' ? `Commande #${order._id}` : `Order #${order._id}`}</h1>
 
         <section className="border rounded p-4">
-          <h2 className="text-lg font-semibold mb-2">
-            {locale === 'fr' ? 'Informations client' : 'Customer Info'}
-          </h2>
+          <h2 className="text-lg font-semibold mb-2">{locale === 'fr' ? 'Informations client' : 'Customer Info'}</h2>
           <p>
-            <strong>{locale === 'fr' ? 'Nom :' : 'Name:'}</strong>{' '}
-            {order.customerName || session.user.email}
+            <strong>{locale === 'fr' ? 'Nom :' : 'Name:'}</strong> {order.customerName || session.user.email}
           </p>
           <p>
-            <strong>{locale === 'fr' ? 'Email :' : 'Email:'}</strong>{' '}
-            {order.email}
+            <strong>{locale === 'fr' ? 'Email :' : 'Email:'}</strong> {order.email}
           </p>
           <p>
-            <strong>{locale === 'fr' ? 'Date :' : 'Date:'}</strong>{' '}
-            {dateString}
+            <strong>{locale === 'fr' ? 'Date :' : 'Date:'}</strong> {dateString}
           </p>
         </section>
 
         <section className="border rounded p-4">
-          <h2 className="text-lg font-semibold mb-2">
-            {locale === 'fr' ? 'Articles commandés' : 'Items Ordered'}
-          </h2>
+          <h2 className="text-lg font-semibold mb-2">{locale === 'fr' ? 'Articles commandés' : 'Items Ordered'}</h2>
           <ul className="divide-y">
             {order.items.map((item) => (
-              <li
-                key={item._id}
-                className="py-2 flex justify-between items-center"
-              >
+              <li key={item._id} className="py-2 flex justify-between items-center">
                 <div>
                   <p className="font-medium">{item.title}</p>
-                  <p className="text-sm text-gray-600">
-                    {item.price.toFixed(2)} € × {item.quantity}
-                  </p>
+                  <p className="text-sm text-gray-600">{item.price.toFixed(2)} € × {item.quantity}</p>
                 </div>
-                <p className="font-semibold">
-                  {(item.price * item.quantity).toFixed(2)} €
-                </p>
+                <p className="font-semibold">{(item.price * item.quantity).toFixed(2)} €</p>
               </li>
             ))}
           </ul>
         </section>
 
         <section className="border rounded p-4">
-          <h2 className="text-lg font-semibold mb-2">
-            {locale === 'fr' ? 'Résumé de la commande' : 'Order Summary'}
-          </h2>
+          <h2 className="text-lg font-semibold mb-2">{locale === 'fr' ? 'Résumé de la commande' : 'Order Summary'}</h2>
           <div className="flex justify-between mb-1">
             <span>{locale === 'fr' ? 'Sous-total :' : 'Subtotal:'}</span>
             <span>{order.subtotal.toFixed(2)} €</span>
@@ -160,9 +104,7 @@ export default async function OrderDetailPage({ params }) {
         </section>
 
         <section className="border rounded p-4">
-          <h2 className="text-lg font-semibold mb-2">
-            {locale === 'fr' ? 'Statut de la commande' : 'Order Status'}
-          </h2>
+          <h2 className="text-lg font-semibold mb-2">{locale === 'fr' ? 'Statut de la commande' : 'Order Status'}</h2>
           <p
             className={`inline-block px-2 py-1 text-sm rounded ${
               order.status === 'en cours'
