@@ -1,5 +1,5 @@
 export default async function handler(req, res) {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'http://localhost:3000'
   const locales = ['fr', 'en']
   const staticPages = ['', 'a-propos', 'contact', 'panier', 'wishlist', 'blog']
 
@@ -26,7 +26,7 @@ export default async function handler(req, res) {
       })
     })
   } catch (err) {
-    console.warn('⚠️ Produits non inclus dans sitemap (non bloquant)')
+    console.warn('⚠️ Produits non inclus dans sitemap (non bloquant)', err)
   }
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>

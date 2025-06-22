@@ -1,11 +1,11 @@
-// src/lib/seoMonitor.js
+// ✅ src/lib/seoMonitor.js
 
 export async function checkSiteHealth() {
-  // Ici on utilise le fetch global de Next 15/Node 18+
-  const health = await fetch('https://example.com/health');
-  if (!health.ok) {
-    console.error('Site health check failed');
-    return false;
+  try {
+    const health = await fetch('https://example.com/health')
+    return health.ok
+  } catch (error) {
+    console.error('Site health check failed:', error)
+    return false
   }
-  return true;
 }

@@ -1,17 +1,17 @@
-// src/pages/api/rss.js
-import { getAllPosts } from '@/lib/blog' // adapte selon ta méthode de récupération blog
+// ✅ src/pages/api/rss.js
+import { getAllPosts } from '@/lib/blog' // adapte si besoin
 
 export default async function handler(req, res) {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
   try {
-    const posts = await getAllPosts() // récupérer tous articles blog publiés
+    const posts = await getAllPosts()
     const rssItems = posts.map(post => `
       <item>
         <title><![CDATA[${post.title}]]></title>
         <link>${baseUrl}/blog/${post.slug}</link>
         <pubDate>${new Date(post.publishedAt).toUTCString()}</pubDate>
-        <description><![CDATA[${post.summary}]]></description>
+        <description><![CDATA[${post.summary || post.content?.slice(0, 160)}]]></description>
       </item>
     `).join('')
 
