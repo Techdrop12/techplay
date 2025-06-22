@@ -1,25 +1,34 @@
-import Head from 'next/head';
+// ✅ src/components/JsonLd/BreadcrumbJsonLd.js
 
-export default function BreadcrumbJsonLd({ pathSegments }) {
-  if (!pathSegments || !Array.isArray(pathSegments)) return null;
+'use client';
 
-  const structuredData = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: pathSegments.map((segment, index) => ({
-      '@type': 'ListItem',
-      position: index + 1,
-      name: segment.label,
-      item: segment.url,
-    })),
-  };
+import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 
-  return (
-    <Head>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
-    </Head>
-  );
+export default function BreadcrumbJsonLd({ pathSegments = [] }) {
+  const pathname = usePathname();
+
+  const itemListElements = pathSegments.map((segment, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: segment.label,
+    item: segment.url,
+  }));
+
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.innerHTML = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: itemListElements,
+    });
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, [pathname]);
+
+  return null;
 }
