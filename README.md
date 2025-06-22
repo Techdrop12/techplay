@@ -1,27 +1,31 @@
-# TechPlay – E-commerce multilingue
+# TechPlay - E-commerce High-Tech Premium
 
-Plateforme e-commerce moderne, performante, et 100% administrable.  
-Construite avec **Next.js 13 App Router**, **Stripe**, **MongoDB**, **NextAuth**, **next-intl**, etc.
+Bienvenue dans **TechPlay**, un site e-commerce full-stack développé avec Next.js 15, MongoDB, Stripe, Firebase et optimisé pour les performances, le SEO, l'accessibilité et la conversion.
 
----
+## 🚀 Fonctions principales
 
-## 🛠 Stack technique
+- Paiement Stripe sécurisé
+- PWA + Notifications push Firebase
+- Internationalisation (`fr` et `en`)
+- SEO avancé (JSON-LD, sitemap, robots.txt)
+- A/B tests, analytics, heatmap
+- Admin dashboard (produits + commandes)
+- Blog IA, avis clients dynamiques
+- UI premium : dark mode, skeletons, animation Framer Motion
 
-- **Next.js 13 (App Router)**
-- **MongoDB + Mongoose**
-- **Stripe Checkout**
-- **NextAuth** (login admin sécurisé)
-- **next-intl** (i18n FR/EN dynamique)
+## 📦 Stack technique
+
+- **Next.js App Router (15+)**
+- **MongoDB / Mongoose**
+- **Stripe (API + Webhooks)**
+- **NextAuth (authentification admin)**
+- **Firebase (push + tokens)**
 - **TailwindCSS**
-- **Headless UI / Framer Motion**
-- **Dashboard admin intégré**
+- **next-intl** pour l'i18n
 
----
-
-## 🚀 Démarrage local
-
-### 1. Installation
+## 🔧 Scripts
 
 ```bash
-npm install
-# Trigger redeploy - 30 mai 2025
+npm run dev       # développement
+npm run build     # build production
+npm run lint      # linting
