@@ -1,11 +1,20 @@
 // ✅ src/app/[locale]/account/commande/page.js
 
+export const dynamic = 'force-dynamic';
+
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import { redirect } from 'next/navigation';
 import SEOHead from '@/components/SEOHead';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
+
+let BreadcrumbJsonLd = () => null;
+try {
+  BreadcrumbJsonLd = require('@/components/JsonLd/BreadcrumbJsonLd').default;
+} catch (e) {
+  console.warn('BreadcrumbJsonLd non chargé :', e.message);
+}
 
 export default async function OrdersPage({ params }) {
   const { locale } = params;
@@ -27,9 +36,19 @@ export default async function OrdersPage({ params }) {
     ? 'Historique de vos commandes passées sur TechPlay.'
     : 'Your order history on TechPlay.';
 
+  const siteUrl = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') || '';
+
   return (
     <>
       <SEOHead overrideTitle={pageTitle} overrideDescription={pageDesc} />
+      <BreadcrumbJsonLd
+        pathSegments={[
+          {
+            label: pageTitle,
+            url: `${siteUrl}/${locale}/account/commande`,
+          },
+        ]}
+      />
       <div className="max-w-4xl mx-auto p-6">
         <h1 className="text-2xl font-bold mb-4">{pageTitle}</h1>
 
@@ -42,8 +61,14 @@ export default async function OrdersPage({ params }) {
         ) : (
           <ul className="divide-y">
             {orders.map((order) => {
-              const date = new Date(order.createdAt).toLocaleDateString(locale);
+              const date = new Date(order.createdAt).toLocaleDateString(locale, {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              });
+
               const total = order.total?.toFixed(2) ?? '–';
+
               return (
                 <li key={order._id} className="py-4">
                   <a

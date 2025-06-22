@@ -7,14 +7,12 @@ import { redirect } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
 import SEOHead from '@/components/SEOHead';
+import dynamic from 'next/dynamic';
 
-let BreadcrumbJsonLd = () => null;
-try {
-  const mod = await import('@/components/JsonLd/BreadcrumbJsonLd');
-  BreadcrumbJsonLd = mod.default;
-} catch (e) {
-  console.warn('BreadcrumbJsonLd non chargé :', e.message);
-}
+const BreadcrumbJsonLd = dynamic(
+  () => import('@/components/JsonLd/BreadcrumbJsonLd'),
+  { ssr: false, loading: () => null }
+);
 
 export default async function OrdersPage({ params }) {
   const { locale } = params;
