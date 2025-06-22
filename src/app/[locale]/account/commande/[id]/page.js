@@ -13,18 +13,19 @@ export async function generateStaticParams() {
 
 export default async function OrderDetailPage({ params }) {
   const { locale, id } = params;
-
-  // Récupération de la session utilisateur (avec req/res implicite dans getServerSession)
   const session = await getServerSession(authOptions);
-
-  if (!session) {
-    redirect(`/${locale}/connexion`);
-  }
+  if (!session) redirect(`/${locale}/connexion`);
 
   await dbConnect();
 
-  // Recherche commande en filtrant par id et email utilisateur (sécurité)
-  const order = await Order.findOne({ _id: id, 'user.email': session.user.email }).lean();
+  // Essai plus souple : recherche par ID + email simple
+  const order = await Order.findOne({
+    _id: id,
+    $or: [
+      { 'user.email': session.user.email },
+      { email: session.user.email },
+    ],
+  }).lean();
 
   if (!order) {
     return (
@@ -34,12 +35,15 @@ export default async function OrderDetailPage({ params }) {
           overrideDescription={locale === 'fr' ? 'Impossible de charger cette commande.' : 'Could not load that order.'}
           noIndex={true}
         />
-        <p className="text-gray-600">{locale === 'fr' ? 'Erreur lors du chargement de la commande.' : 'Error loading order.'}</p>
+        <p className="text-gray-600">
+          {locale === 'fr'
+            ? 'Erreur lors du chargement de la commande.'
+            : 'Error loading order.'}
+        </p>
       </div>
     );
   }
 
-  // Formatage de la date selon locale
   const dateString = new Date(order.createdAt).toLocaleDateString(locale, {
     year: 'numeric',
     month: 'long',
@@ -47,12 +51,21 @@ export default async function OrderDetailPage({ params }) {
   });
 
   const pageTitle = locale === 'fr' ? `Commande #${order._id}` : `Order #${order._id}`;
-  const pageDesc = locale === 'fr' ? `Détails de la commande ${order._id} passée le ${dateString}.` : `Details for order ${order._id} placed on ${dateString}.`;
+  const pageDesc =
+    locale === 'fr'
+      ? `Détails de la commande ${order._id} passée le ${dateString}.`
+      : `Details for order ${order._id} placed on ${dateString}.`;
 
   const siteUrl = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') || '';
   const breadcrumbSegments = [
-    { label: locale === 'fr' ? 'Mes commandes' : 'My Orders', url: `${siteUrl}/${locale}/mes-commandes` },
-    { label: pageTitle, url: `${siteUrl}/${locale}/commande/${order._id}` },
+    {
+      label: locale === 'fr' ? 'Mes commandes' : 'My Orders',
+      url: `${siteUrl}/${locale}/mes-commandes`,
+    },
+    {
+      label: pageTitle,
+      url: `${siteUrl}/${locale}/commande/${order._id}`,
+    },
   ];
 
   return (
@@ -60,23 +73,29 @@ export default async function OrderDetailPage({ params }) {
       <SEOHead overrideTitle={pageTitle} overrideDescription={pageDesc} breadcrumbSegments={breadcrumbSegments} />
 
       <div className="p-6 max-w-3xl mx-auto space-y-6">
-        <h1 className="text-2xl font-bold">{locale === 'fr' ? `Commande #${order._id}` : `Order #${order._id}`}</h1>
+        <h1 className="text-2xl font-bold">{pageTitle}</h1>
 
         <section className="border rounded p-4">
-          <h2 className="text-lg font-semibold mb-2">{locale === 'fr' ? 'Informations client' : 'Customer Info'}</h2>
+          <h2 className="text-lg font-semibold mb-2">
+            {locale === 'fr' ? 'Informations client' : 'Customer Info'}
+          </h2>
           <p><strong>{locale === 'fr' ? 'Nom :' : 'Name:'}</strong> {order.customerName || session.user.email}</p>
-          <p><strong>{locale === 'fr' ? 'Email :' : 'Email:'}</strong> {order.email}</p>
+          <p><strong>{locale === 'fr' ? 'Email :' : 'Email:'}</strong> {order.email || session.user.email}</p>
           <p><strong>{locale === 'fr' ? 'Date :' : 'Date:'}</strong> {dateString}</p>
         </section>
 
         <section className="border rounded p-4">
-          <h2 className="text-lg font-semibold mb-2">{locale === 'fr' ? 'Articles commandés' : 'Items Ordered'}</h2>
+          <h2 className="text-lg font-semibold mb-2">
+            {locale === 'fr' ? 'Articles commandés' : 'Items Ordered'}
+          </h2>
           <ul className="divide-y">
             {order.items.map((item) => (
               <li key={item._id} className="py-2 flex justify-between items-center">
                 <div>
                   <p className="font-medium">{item.title}</p>
-                  <p className="text-sm text-gray-600">{item.price.toFixed(2)} € × {item.quantity}</p>
+                  <p className="text-sm text-gray-600">
+                    {item.price.toFixed(2)} € × {item.quantity}
+                  </p>
                 </div>
                 <p className="font-semibold">{(item.price * item.quantity).toFixed(2)} €</p>
               </li>
@@ -85,32 +104,34 @@ export default async function OrderDetailPage({ params }) {
         </section>
 
         <section className="border rounded p-4">
-          <h2 className="text-lg font-semibold mb-2">{locale === 'fr' ? 'Résumé de la commande' : 'Order Summary'}</h2>
+          <h2 className="text-lg font-semibold mb-2">
+            {locale === 'fr' ? 'Résumé de la commande' : 'Order Summary'}
+          </h2>
           <div className="flex justify-between mb-1">
             <span>{locale === 'fr' ? 'Sous-total :' : 'Subtotal:'}</span>
-            <span>{order.subtotal.toFixed(2)} €</span>
+            <span>{order.subtotal?.toFixed(2) ?? '–'} €</span>
           </div>
           <div className="flex justify-between mb-1">
             <span>{locale === 'fr' ? 'Frais de livraison :' : 'Shipping:'}</span>
-            <span>{order.shipping.toFixed(2)} €</span>
+            <span>{order.shipping?.toFixed(2) ?? '–'} €</span>
           </div>
           <div className="flex justify-between font-bold">
             <span>{locale === 'fr' ? 'Total :' : 'Total:'}</span>
-            <span>{order.total.toFixed(2)} €</span>
+            <span>{order.total?.toFixed(2) ?? '–'} €</span>
           </div>
         </section>
 
         <section className="border rounded p-4">
-          <h2 className="text-lg font-semibold mb-2">{locale === 'fr' ? 'Statut de la commande' : 'Order Status'}</h2>
-          <p
-            className={`inline-block px-2 py-1 text-sm rounded ${
-              order.status === 'en cours'
-                ? 'bg-yellow-100 text-yellow-700'
-                : order.status === 'expédiée'
-                ? 'bg-blue-100 text-blue-700'
-                : 'bg-green-100 text-green-700'
-            }`}
-          >
+          <h2 className="text-lg font-semibold mb-2">
+            {locale === 'fr' ? 'Statut de la commande' : 'Order Status'}
+          </h2>
+          <p className={`inline-block px-2 py-1 text-sm rounded ${
+            order.status === 'en cours'
+              ? 'bg-yellow-100 text-yellow-700'
+              : order.status === 'expédiée'
+              ? 'bg-blue-100 text-blue-700'
+              : 'bg-green-100 text-green-700'
+          }`}>
             {order.status}
           </p>
         </section>
