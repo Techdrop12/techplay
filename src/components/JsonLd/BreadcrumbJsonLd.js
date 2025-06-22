@@ -1,10 +1,7 @@
-// ✅ BreadcrumbJsonLd.js
-'use client'
-
-import Head from 'next/head'
+import Head from 'next/head';
 
 export default function BreadcrumbJsonLd({ pathSegments }) {
-  if (!pathSegments || !Array.isArray(pathSegments)) return null
+  if (!pathSegments || !Array.isArray(pathSegments)) return null;
 
   const structuredData = {
     '@context': 'https://schema.org',
@@ -15,7 +12,7 @@ export default function BreadcrumbJsonLd({ pathSegments }) {
       name: segment.label,
       item: segment.url,
     })),
-  }
+  };
 
   return (
     <Head>
@@ -24,5 +21,5 @@ export default function BreadcrumbJsonLd({ pathSegments }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
     </Head>
-  )
+  );
 }

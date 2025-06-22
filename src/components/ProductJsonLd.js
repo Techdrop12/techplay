@@ -1,11 +1,7 @@
-'use client'
-import Head from 'next/head'
-import { useLocale } from 'next-intl'
+import Head from 'next/head';
 
-export default function ProductJsonLd({ product }) {
-  const locale = typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : 'fr'
-
-  if (!product) return null
+export default function ProductJsonLd({ product, locale = 'fr' }) {
+  if (!product) return null;
 
   const {
     _id,
@@ -19,7 +15,7 @@ export default function ProductJsonLd({ product }) {
     rating = 4.8,
     reviewCount = 128,
     availability = 'https://schema.org/InStock',
-  } = product
+  } = product;
 
   const structuredData = {
     '@context': 'https://schema.org',
@@ -46,7 +42,7 @@ export default function ProductJsonLd({ product }) {
       availability,
       url: `https://techplay.fr/${locale}/produit/${slug}`,
     },
-  }
+  };
 
   return (
     <Head>
@@ -55,5 +51,5 @@ export default function ProductJsonLd({ product }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
     </Head>
-  )
+  );
 }

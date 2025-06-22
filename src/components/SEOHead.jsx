@@ -1,10 +1,8 @@
-// src/components/SEOHead.js
-
 import Head from 'next/head';
-import { getFallbackDescription } from '@/lib/metaFallback';
 import ProductJsonLd from './ProductJsonLd';
 import OrganizationJsonLd from './JsonLd/OrganizationJsonLd';
 import BreadcrumbJsonLd from './JsonLd/BreadcrumbJsonLd';
+import { getFallbackDescription } from '@/lib/metaFallback';
 
 export default function SEOHead({
   titleKey,
@@ -15,20 +13,15 @@ export default function SEOHead({
   image,
   url,
   noIndex = false,
-  breadcrumbSegments
+  breadcrumbSegments,
+  locale = 'fr', // ajouté pour compatibilité server-side
 }) {
-  // Ces hooks sont supprimés car incompatibles App Router serveur :
-  // const tSeo = useTranslations('seo');
-  // const locale = useLocale() || 'fr';
-  // const pathname = usePathname();
-
-  // SEO côté serveur : fallback statique uniquement ici
   const title = overrideTitle ?? product?.title ?? 'TechPlay';
   const description =
     overrideDescription ??
     (product ? getFallbackDescription(product) : 'TechPlay – boutique tech');
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || '';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://techplay.fr';
   const fullUrl = url || `${siteUrl}`;
   const fallbackImage = `${siteUrl}/logo.png`;
 
@@ -59,7 +52,7 @@ export default function SEOHead({
       </Head>
 
       <OrganizationJsonLd />
-      {product && <ProductJsonLd product={product} />}
+      {product && <ProductJsonLd product={product} locale={locale} />}
       {breadcrumbSegments && <BreadcrumbJsonLd pathSegments={breadcrumbSegments} />}
     </>
   );
