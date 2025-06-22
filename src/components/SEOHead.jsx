@@ -1,5 +1,4 @@
-// ✅ src/components/SEOHead.jsx (corrigé App Router compatible)
-
+// ✅ src/components/SEOHead.jsx
 import Head from 'next/head';
 import { getFallbackDescription } from '@/lib/metaFallback';
 
@@ -12,11 +11,11 @@ export default function SEOHead({
   image,
   url,
   noIndex = false,
-  breadcrumbSegments
 }) {
   const title = overrideTitle ?? product?.title ?? 'TechPlay';
   const description =
-    overrideDescription ?? (product ? getFallbackDescription(product) : 'TechPlay – boutique tech');
+    overrideDescription ??
+    (product ? getFallbackDescription(product) : 'TechPlay – boutique tech');
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || '';
   const fullUrl = url || `${siteUrl}`;
