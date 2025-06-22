@@ -19,9 +19,9 @@ const productSchema = new mongoose.Schema({
   seoDescription: { type: String },
   relatedProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
   alsoBought: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
-  createdAt: { type: Date, default: Date.now },
+  createdAt: { type: Date, default: Date.now }
 }, {
-  timestamps: true,
+  timestamps: true
 });
 
 export default mongoose.models.Product || mongoose.model('Product', productSchema);

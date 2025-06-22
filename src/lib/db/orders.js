@@ -1,7 +1,6 @@
-// src/lib/db/orders.js
-import client from './mongo'
+import client from './mongo';
 
 export async function getOrders() {
-  const db = client.db()
-  return db.collection('orders').find().toArray()
+  const db = client.db();
+  return db.collection('orders').find().toArray();
 }

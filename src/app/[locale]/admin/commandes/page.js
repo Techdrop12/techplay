@@ -1,7 +1,9 @@
-// File: src/app/[locale]/admin/commandes/page.js
+// ✅ src/app/[locale]/admin/commandes/page.js sécurisé & complet
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import SEOHead from '@/components/SEOHead';
@@ -9,9 +11,17 @@ import AdminAnalyticsBlock from '@/components/AdminAnalyticsBlock';
 
 export default function AdminCommandesPage() {
   const t = useTranslations('admin');
+  const router = useRouter();
+  const { data: session, status } = useSession();
+
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [statusFilter, setStatusFilter] = useState('all');
+
+  useEffect(() => {
+    if (status === 'unauthenticated') router.push('/fr/connexion');
+    if (session && session.user.role !== 'admin') router.push('/');
+  }, [session, status]);
 
   useEffect(() => {
     fetch('/api/admin/products')
@@ -74,6 +84,14 @@ export default function AdminCommandesPage() {
           >
             ➕ {t('add_product')}
           </Link>
+
+          <a
+            href="/api/admin/export-orders"
+            className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
+            download
+          >
+            📄 Export CSV
+          </a>
 
           <select
             value={statusFilter}

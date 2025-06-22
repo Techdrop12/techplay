@@ -1,6 +1,6 @@
 // ✅ src/app/[locale]/mes-commandes/page.js
 
-export const dynamic = 'force-dynamic'; // ← 🔥 Ajout clé pour éviter le plantage Vercel
+export const dynamic = 'force-dynamic';
 
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
@@ -8,7 +8,7 @@ import { redirect } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
 import SEOHead from '@/components/SEOHead';
-
+import BreadcrumbJsonLd from '@/components/JsonLd/BreadcrumbJsonLd';
 
 export default async function OrdersPage({ params }) {
   const { locale } = params;
@@ -31,10 +31,15 @@ export default async function OrdersPage({ params }) {
     <>
       <SEOHead
         overrideTitle={locale === 'fr' ? 'Mes commandes' : 'My Orders'}
-        overrideDescription={locale === 'fr'
-          ? 'Consultez l’historique de vos commandes passées sur TechPlay.'
-          : 'View your past order history on TechPlay.'}
-        breadcrumbSegments={[
+        overrideDescription={
+          locale === 'fr'
+            ? 'Consultez l’historique de vos commandes passées sur TechPlay.'
+            : 'View your past order history on TechPlay.'
+        }
+      />
+
+      <BreadcrumbJsonLd
+        pathSegments={[
           {
             label: locale === 'fr' ? 'Mes commandes' : 'My Orders',
             url: `${siteUrl}/${locale}/mes-commandes`
