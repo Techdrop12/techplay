@@ -1,25 +1,27 @@
 import mongoose from 'mongoose';
 
-const orderSchema = new mongoose.Schema(
-  {
-    email: { type: String, required: true },
-    items: [
-      {
-        _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-        title: String,
-        price: Number,
-        quantity: Number,
-      },
-    ],
-    total: { type: Number, required: true },
-    stripeSessionId: { type: String, required: true },
-    status: {
-      type: String,
-      enum: ['en attente', 'payée', 'expédiée', 'annulée'],
-      default: 'en attente',
-    },
+const OrderSchema = new mongoose.Schema({
+  user: {
+    email: String,
+    // autres infos utilisateur si besoin
   },
-  { timestamps: true }
-);
+  items: [
+    {
+      _id: String,
+      title: String,
+      price: Number,
+      quantity: Number,
+    },
+  ],
+  subtotal: Number,
+  shipping: Number,
+  total: Number,
+  status: String,
+  createdAt: Date,
+  customerName: String,
+  email: String,
+});
 
-export default mongoose.models.Order || mongoose.model('Order', orderSchema);
+const Order = mongoose.models.Order || mongoose.model('Order', OrderSchema);
+
+export default Order;

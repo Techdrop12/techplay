@@ -1,9 +1,10 @@
 // src/app/[locale]/account/commande/[id]/page.js
 
-import { getServerSession } from 'next-auth/next';
+import { getServerSession } from 'next-auth'; // import modifié ici
 import { authOptions } from '@/lib/authOptions';
 import { redirect } from 'next/navigation';
 import SEOHead from '@/components/SEOHead';
+import { headers } from 'next/headers'; // important pour récupérer les cookies
 
 /**
  * Cette route est 100% dynamique, on ne pré-génère pas d’IDs.
@@ -14,6 +15,8 @@ export async function generateStaticParams() {
 
 export default async function OrderDetailPage({ params }) {
   const { locale, id } = params;
+
+  // Récupération de la session authentifiée
   const session = await getServerSession(authOptions);
 
   // Si non connecté, rediriger vers la page de connexion locale.
@@ -21,14 +24,17 @@ export default async function OrderDetailPage({ params }) {
     redirect(`/${locale}/connexion`);
   }
 
+  // Récupérer le header "cookie" de la requête entrante (navigateur)
+  const cookieHeader = headers().get('cookie') || '';
+
   // Construire l’URL de base pour appeler notre API interne.
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') || 'http://localhost:3000';
 
-  // Monter l’en-tête « cookie » pour que l’API authentifie la session.
+  // Appeler l'API interne avec le cookie correct pour authentification
   const res = await fetch(`${baseUrl}/api/user/orders/${id}`, {
     headers: {
-      cookie: `next-auth.session-token=${session.user.id || ''}`,
+      cookie: cookieHeader,
     },
     cache: 'no-store',
   });
@@ -74,7 +80,7 @@ export default async function OrderDetailPage({ params }) {
     : `Details for order ${order._id} placed on ${dateString}.`;
 
   // Breadcrumb JSON-LD.
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || '';
+  const siteUrl = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') || '';
   const breadcrumbSegments = [
     { label: locale === 'fr' ? 'Mes commandes' : 'My Orders', url: `${siteUrl}/${locale}/mes-commandes` },
     { label: pageTitle, url: `${siteUrl}/${locale}/commande/${order._id}` },

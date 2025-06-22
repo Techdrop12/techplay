@@ -1,5 +1,3 @@
-// src/lib/authOptions.js
-
 import CredentialsProvider from 'next-auth/providers/credentials';
 
 export const authOptions = {
@@ -7,7 +5,6 @@ export const authOptions = {
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        // On utilise ADMIN_EMAIL car la variable .env.local est ADMIN_EMAIL
         email: { label: 'Adresse e-mail', type: 'text', placeholder: 'admin@techplay.com' },
         password: { label: 'Mot de passe', type: 'password' }
       },
@@ -24,18 +21,10 @@ export const authOptions = {
         }
         return null;
       }
-    })
+    }),
   ],
-
-  session: {
-    strategy: 'jwt'
-  },
-
-  pages: {
-    // Page de connexion, on renvoie vers /fr/connexion
-    signIn: '/fr/connexion'
-  },
-
+  session: { strategy: 'jwt' },
+  pages: { signIn: '/fr/connexion' },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -49,6 +38,5 @@ export const authOptions = {
       return session;
     }
   },
-
-  secret: process.env.NEXTAUTH_SECRET
+  secret: process.env.NEXTAUTH_SECRET,
 };
