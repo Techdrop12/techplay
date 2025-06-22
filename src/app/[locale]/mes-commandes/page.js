@@ -1,11 +1,14 @@
 // ✅ src/app/[locale]/mes-commandes/page.js
 
+export const dynamic = 'force-dynamic'; // ← 🔥 Ajout clé pour éviter le plantage Vercel
+
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import { redirect } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
 import SEOHead from '@/components/SEOHead';
+
 
 export default async function OrdersPage({ params }) {
   const { locale } = params;
