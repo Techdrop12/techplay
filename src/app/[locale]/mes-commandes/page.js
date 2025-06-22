@@ -7,11 +7,12 @@ import { redirect } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
 import SEOHead from '@/components/SEOHead';
-import BreadcrumbJsonLd from '@/components/JsonLd/BreadcrumbJsonLd';
+import BreadcrumbJsonLd from '@/components/JsonLd/BreadcrumbJsonLd'; // Import classique
 
 export default async function OrdersPage({ params }) {
   const { locale } = params;
   const session = await getServerSession(authOptions);
+
   if (!session) redirect(`/${locale}/connexion`);
 
   await dbConnect();
