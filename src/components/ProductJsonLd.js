@@ -1,55 +1,45 @@
+// ✅ src/components/JsonLd/ProductJsonLd.js
+import React from 'react';
 import Head from 'next/head';
 
-export default function ProductJsonLd({ product, locale = 'fr' }) {
-  if (!product) return null;
-
-  const {
-    _id,
-    title,
-    description,
-    price,
-    image,
-    category,
-    slug,
-    brand = 'TechPlay',
-    rating = 4.8,
-    reviewCount = 128,
-    availability = 'https://schema.org/InStock',
-  } = product;
-
-  const structuredData = {
-    '@context': 'https://schema.org',
+const ProductJsonLd = ({ product, siteUrl, locale }) => {
+  const data = {
+    '@context': 'https://schema.org/',
     '@type': 'Product',
-    '@id': `https://techplay.fr/${locale}/produit/${slug}`,
-    name: title,
-    description,
-    image: Array.isArray(image) ? image : [image],
-    category,
-    sku: _id,
+    name: product.title,
+    image: [`${siteUrl}${product.image}`],
+    description: product.description,
+    sku: product._id,
     brand: {
       '@type': 'Brand',
-      name: brand,
-    },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: rating,
-      reviewCount,
+      name: 'TechPlay',
     },
     offers: {
       '@type': 'Offer',
+      url: `${siteUrl}/${locale}/produit/${product.slug}`,
       priceCurrency: 'EUR',
-      price,
-      availability,
-      url: `https://techplay.fr/${locale}/produit/${slug}`,
+      price: product.price.toFixed(2),
+      availability: 'https://schema.org/InStock',
     },
+    aggregateRating: product.rating
+      ? {
+          '@type': 'AggregateRating',
+          ratingValue: product.rating.toFixed(1),
+          reviewCount: product.reviews?.length || 1,
+        }
+      : undefined,
   };
 
   return (
     <Head>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(data),
+        }}
       />
     </Head>
   );
-}
+};
+
+export default ProductJsonLd;

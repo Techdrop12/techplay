@@ -1,41 +1,30 @@
 // ✅ src/components/JsonLd/ArticleJsonLd.js
-'use client'
+import React from 'react';
+import Head from 'next/head';
 
-import Script from 'next/script'
-
-export default function ArticleJsonLd({ post }) {
-  if (!post) return null
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": post.title,
-    "image": post.image || `${process.env.NEXT_PUBLIC_SITE_URL}/logo.png`,
-    "author": {
-      "@type": "Person",
-      "name": "TechPlay"
+const ArticleJsonLd = ({ title, description, url, image, datePublished, authorName }) => {
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: title,
+    description,
+    image,
+    url,
+    datePublished,
+    author: {
+      '@type': 'Person',
+      name: authorName || 'TechPlay AI',
     },
-    "publisher": {
-      "@type": "Organization",
-      "name": "TechPlay",
-      "logo": {
-        "@type": "ImageObject",
-        "url": `${process.env.NEXT_PUBLIC_SITE_URL}/logo.png`
-      }
-    },
-    "datePublished": new Date(post.createdAt).toISOString(),
-    "dateModified": new Date(post.updatedAt).toISOString(),
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": `${process.env.NEXT_PUBLIC_SITE_URL}/blog/${post.slug}`
-    }
-  }
+  };
 
   return (
-    <Script
-      id={`article-jsonld-${post.slug}`}
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-    />
-  )
-}
+    <Head>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      />
+    </Head>
+  );
+};
+
+export default ArticleJsonLd;

@@ -1,30 +1,30 @@
-export default function BlogListJsonLd({ posts }) {
-  if (!posts || posts.length === 0) return null
+// ✅ src/components/JsonLd/BlogListJsonLd.js
+import React from 'react';
+import Head from 'next/head';
 
-  const blogPosts = posts.map(post => ({
-    "@type": "BlogPosting",
-    "headline": post.title,
-    "url": `${process.env.NEXT_PUBLIC_BASE_URL}/blog/${post.slug.current}`,
-    "image": post.mainImage?.asset?.url || "",
-    "description": post.excerpt || "",
-    "datePublished": post._createdAt,
-    "author": {
-      "@type": "Person",
-      "name": "TechPlay"
-    }
-  }))
+const BlogListJsonLd = ({ posts, locale, siteUrl }) => {
+  const items = posts.map((post, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    url: `${siteUrl}/${locale}/blog/${post.slug}`,
+  }));
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Blog",
-    "name": "TechPlay Blog",
-    "blogPosts": blogPosts
-  }
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: items,
+  };
 
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-    />
-  )
-}
+    <Head>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(data),
+        }}
+      />
+    </Head>
+  );
+};
+
+export default BlogListJsonLd;
