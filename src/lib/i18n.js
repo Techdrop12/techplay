@@ -1,6 +1,6 @@
-// ✅ src/lib/i18n.js — compatible avec module.exports (CommonJS)
+// ✅ src/lib/i18n.js
 
-const intlConfig = require('../../next-intl.config.js');
+const intlConfig = require('./next-intl.config.js'); // Corrigé : chemin local et require()
 
 export const { locales, defaultLocale, timeZone } = intlConfig;
 
