@@ -8,12 +8,13 @@ export default async function handler(req, res) {
   try {
     const product = await Product.findOne({ slug })
       .populate('relatedProducts')
-      .populate('alsoBought'); // Ajouté pour recommandations croisées
+      .populate('alsoBought');
 
     if (!product) return res.status(404).json({ error: 'Produit non trouvé' });
 
     res.status(200).json(product);
   } catch (err) {
+    console.error('Erreur serveur produit:', err);
     res.status(500).json({ error: 'Erreur serveur' });
   }
 }

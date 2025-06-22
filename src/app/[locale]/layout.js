@@ -10,14 +10,16 @@ export async function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
-export default async function LocaleLayout({ children, params: rawParams }) {
-  const params = await rawParams;
-  const locale = params?.locale;
+export default async function LocaleLayout({ children, params }) {
+  const awaitedParams = await params;
+  const locale = awaitedParams?.locale;
 
-  if (!locales.includes(locale)) return notFound();
+  if (!locales.includes(locale)) {
+    return notFound();
+  }
 
   // Charge les messages de traduction pour la locale courante
-  const messages = await getMessages();
+  const messages = await getMessages(locale);
 
   return (
     <html lang={locale} suppressHydrationWarning>

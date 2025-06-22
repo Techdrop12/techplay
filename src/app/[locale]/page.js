@@ -27,7 +27,6 @@ export default function HomeClient() {
         const data = await res.json();
         setProducts(data);
 
-        // Extraction unique des tags (catégories dynamiques)
         const allTags = data.flatMap((p) => p.tags || []);
         const uniqueCategories = Array.from(new Set(allTags));
         setCategories(uniqueCategories);
@@ -43,7 +42,6 @@ export default function HomeClient() {
       ? products
       : products.filter((p) => p.tags?.includes(selectedCategory));
 
-  // Protection slice + fallback
   const visibleProducts = filteredProducts?.slice(0, displayCount) || [];
 
   useEffect(() => {
