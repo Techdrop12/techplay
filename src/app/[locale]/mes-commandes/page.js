@@ -10,7 +10,8 @@ import SEOHead from '@/components/SEOHead';
 
 let BreadcrumbJsonLd = () => null;
 try {
-  BreadcrumbJsonLd = require('@/components/JsonLd/BreadcrumbJsonLd').default;
+  const mod = await import('@/components/JsonLd/BreadcrumbJsonLd');
+  BreadcrumbJsonLd = mod.default;
 } catch (e) {
   console.warn('BreadcrumbJsonLd non chargé :', e.message);
 }
