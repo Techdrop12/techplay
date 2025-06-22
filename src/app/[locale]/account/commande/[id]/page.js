@@ -1,4 +1,6 @@
-import { getServerSession } from 'next-auth';
+// src/app/[locale]/account/commande/[id]/page.js
+
+import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/authOptions';
 import { redirect } from 'next/navigation';
 import SEOHead from '@/components/SEOHead';
@@ -12,7 +14,7 @@ export async function generateStaticParams() {
 export default async function OrderDetailPage({ params }) {
   const { locale, id } = params;
 
-  // Récupérer la session utilisateur
+  // Récupération de la session utilisateur (avec req/res implicite dans getServerSession)
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -21,7 +23,7 @@ export default async function OrderDetailPage({ params }) {
 
   await dbConnect();
 
-  // Récupérer la commande directement via mongoose
+  // Recherche commande en filtrant par id et email utilisateur (sécurité)
   const order = await Order.findOne({ _id: id, 'user.email': session.user.email }).lean();
 
   if (!order) {
@@ -37,6 +39,7 @@ export default async function OrderDetailPage({ params }) {
     );
   }
 
+  // Formatage de la date selon locale
   const dateString = new Date(order.createdAt).toLocaleDateString(locale, {
     year: 'numeric',
     month: 'long',
@@ -61,15 +64,9 @@ export default async function OrderDetailPage({ params }) {
 
         <section className="border rounded p-4">
           <h2 className="text-lg font-semibold mb-2">{locale === 'fr' ? 'Informations client' : 'Customer Info'}</h2>
-          <p>
-            <strong>{locale === 'fr' ? 'Nom :' : 'Name:'}</strong> {order.customerName || session.user.email}
-          </p>
-          <p>
-            <strong>{locale === 'fr' ? 'Email :' : 'Email:'}</strong> {order.email}
-          </p>
-          <p>
-            <strong>{locale === 'fr' ? 'Date :' : 'Date:'}</strong> {dateString}
-          </p>
+          <p><strong>{locale === 'fr' ? 'Nom :' : 'Name:'}</strong> {order.customerName || session.user.email}</p>
+          <p><strong>{locale === 'fr' ? 'Email :' : 'Email:'}</strong> {order.email}</p>
+          <p><strong>{locale === 'fr' ? 'Date :' : 'Date:'}</strong> {dateString}</p>
         </section>
 
         <section className="border rounded p-4">

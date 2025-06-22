@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 import { getToken } from 'next-auth/jwt';
 import { middleware as secureHeaders } from './middleware-security';
-import intlConfig from './next-intl.config.cjs';
+import intlConfig from './next-intl.config.js';
 
 const intlMiddleware = createMiddleware({
   ...intlConfig,

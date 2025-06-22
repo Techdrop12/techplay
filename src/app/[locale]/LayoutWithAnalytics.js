@@ -1,45 +1,53 @@
+// ✅ src/app/[locale]/LayoutWithAnalytics.js
 'use client';
 
-import React from 'react';
-import { CartAnimationProvider } from '@/context/cartAnimationContext';
-import ClientWrapper from '@/components/ClientWrapper';
-import PromoBanner from '@/components/PromoBanner';
+import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/router';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CartReminder from '@/components/CartReminder';
-import EmailCapturePopup from '@/components/EmailCapturePopup';
 import LiveChat from '@/components/LiveChat';
-import useAnalytics from '@/lib/useAnalytics';
-import CartAbandonTrigger from '@/components/CartAbandonTrigger';
-import ScrollProgress from '@/components/ScrollProgress';
-import BackToTop from '@/components/BackToTop';
-import PageTransitions from '@/components/PageTransitions';
-import LoaderOverlay from '@/components/LoaderOverlay';
-import ToastNotification from '@/components/ToastNotification';
+import ScrollToTop from '@/components/ScrollToTop';
+import { ToastContainer } from 'react-toastify';
+import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Analytics } from '@vercel/analytics/react';
+import { useCart } from '@/context/cartContext';
+import { CartAnimationProvider } from '@/context/cartAnimationContext';
+import 'react-toastify/dist/ReactToastify.css';
 
-export default function LayoutWithAnalytics({ children }) {
-  useAnalytics();
+export default function LayoutWithAnalytics({ children, locale }) {
+  const pathname = usePathname();
+  const { cart } = useCart();
+
+  useEffect(() => {
+    // Préchargement des préférences utilisateur (ex: dark mode)
+    if (typeof window !== 'undefined') {
+      const theme = localStorage.getItem('theme');
+      if (
+        theme === 'dark' ||
+        (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)
+      ) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }, []);
 
   return (
-    <CartAnimationProvider>
-      <ClientWrapper>
-        <PromoBanner />
-        <ScrollProgress />
-        <Header />
-        <CartAbandonTrigger />
-        <PageTransitions>
-          <main className="min-h-screen pt-header animate-fadeIn">
-            {children}
-          </main>
-        </PageTransitions>
-        <Footer />
-        <BackToTop />
-        <CartReminder />
-        <EmailCapturePopup />
-        <LiveChat />
-        <ToastNotification />
-        <LoaderOverlay />
-      </ClientWrapper>
-    </CartAnimationProvider>
+    <>
+      <Analytics />
+      <SpeedInsights />
+      <LiveChat />
+      <Header locale={locale} />
+      <CartAnimationProvider>
+        <main>{children}</main>
+      </CartAnimationProvider>
+      <Footer locale={locale} />
+      <CartReminder cart={cart} />
+      <ScrollToTop />
+      <ToastContainer position="bottom-center" />
+    </>
   );
 }

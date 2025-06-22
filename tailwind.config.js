@@ -1,23 +1,21 @@
-// ✅ tailwind.config.js
-
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'], // Prend en compte tous les fichiers utiles
-  darkMode: 'class', // Active le dark mode via la classe .dark
+  content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui'], // Typo moderne
+        sans: ['Inter', 'ui-sans-serif', 'system-ui'],
       },
       colors: {
         brand: {
-          DEFAULT: '#0f172a', // Couleur personnalisée principale
+          DEFAULT: '#0f172a',
           light: '#1e293b',
           dark: '#0e1116',
         },
       },
       spacing: {
-        header: '4.5rem', // Hauteur personnalisée pour header
+        header: '4.5rem',
       },
       animation: {
         fadeIn: 'fadeIn 0.4s ease-in-out',
@@ -36,8 +34,8 @@ module.exports = {
     },
   },
   plugins: [
-    require('@tailwindcss/forms'),        // Formulaires propres
-    require('@tailwindcss/typography'),   // Style markdown / blog
-    require('tailwind-scrollbar'),        // Personnalisation scrollbar
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
+    require('tailwind-scrollbar'),
   ],
 };

@@ -1,33 +1,29 @@
-// src/app/[locale]/layout.js
+// ✅ src/app/[locale]/layout.js
 import { notFound } from 'next/navigation';
-import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
+import { NextIntlClientProvider, useMessages } from 'next-intl';
+import { unstable_setRequestLocale } from 'next-intl/server';
+import { getMessages } from '@/lib/getMessages';
 import LayoutWithAnalytics from './LayoutWithAnalytics';
+import { locales } from '@/lib/i18n';
 
-const locales = ['fr', 'en'];
-
-export async function generateStaticParams() {
+export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
-export default async function LocaleLayout({ children, params }) {
-  const awaitedParams = await params;
-  const locale = awaitedParams?.locale;
+export const dynamic = 'force-dynamic';
 
-  if (!locales.includes(locale)) {
-    return notFound();
-  }
+export default async function LocaleLayout({ children, params: { locale } }) {
+  if (!locales.includes(locale)) notFound();
 
-  // Charge les messages de traduction pour la locale courante
+  unstable_setRequestLocale(locale);
+
   const messages = await getMessages(locale);
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className="transition-colors duration-300 bg-white text-black dark:bg-black dark:text-white">
+      <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <LayoutWithAnalytics>
-            {children}
-          </LayoutWithAnalytics>
+          <LayoutWithAnalytics locale={locale}>{children}</LayoutWithAnalytics>
         </NextIntlClientProvider>
       </body>
     </html>

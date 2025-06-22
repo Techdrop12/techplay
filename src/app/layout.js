@@ -1,3 +1,4 @@
+// ✅ src/app/layout.js (TA VERSION - À GARDER TELLE QUELLE)
 import '../styles/globals.css';
 import { Inter } from 'next/font/google';
 import Script from 'next/script';
@@ -21,8 +22,7 @@ const themeInitScript = `
     } else {
       document.documentElement.classList.remove('dark');
     }
-  } catch(e) {}
-`;
+  } catch(e) {}`;
 
 const stickyHeaderStyle = `
   header.sticky {
