@@ -1,8 +1,6 @@
-'use client';
+// src/components/SEOHead.js
 
 import Head from 'next/head';
-import { useTranslations, useLocale } from 'next-intl';
-import { usePathname } from 'next/navigation';
 import { getFallbackDescription } from '@/lib/metaFallback';
 import ProductJsonLd from './ProductJsonLd';
 import OrganizationJsonLd from './JsonLd/OrganizationJsonLd';
@@ -19,29 +17,20 @@ export default function SEOHead({
   noIndex = false,
   breadcrumbSegments
 }) {
-  const tSeo = useTranslations('seo');
-  const locale = useLocale() || 'fr';
-  const pathname = usePathname();
+  // Ces hooks sont supprimés car incompatibles App Router serveur :
+  // const tSeo = useTranslations('seo');
+  // const locale = useLocale() || 'fr';
+  // const pathname = usePathname();
+
+  // SEO côté serveur : fallback statique uniquement ici
+  const title = overrideTitle ?? product?.title ?? 'TechPlay';
+  const description =
+    overrideDescription ??
+    (product ? getFallbackDescription(product) : 'TechPlay – boutique tech');
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || '';
-  const fullUrl = url ? url : `${siteUrl}${pathname || ''}`;
+  const fullUrl = url || `${siteUrl}`;
   const fallbackImage = `${siteUrl}/logo.png`;
-
-  const title = overrideTitle
-    ? overrideTitle
-    : titleKey
-      ? tSeo(titleKey)
-      : product?.title
-        ? product.title
-        : 'TechPlay';
-
-  const description = overrideDescription
-    ? overrideDescription
-    : descriptionKey
-      ? tSeo(descriptionKey)
-      : product
-        ? getFallbackDescription(product)
-        : 'TechPlay – boutique tech';
 
   return (
     <>
@@ -54,7 +43,6 @@ export default function SEOHead({
         <meta charSet="utf-8" />
 
         <meta property="og:type" content={product ? 'product' : 'website'} />
-        <meta property="og:locale" content={locale} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
         <meta property="og:image" content={image || fallbackImage} />

@@ -1,101 +1,99 @@
-import { getServerSession } from 'next-auth/next';
+// ✅ src/app/[locale]/mes-commandes/page.js
+
+import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import { redirect } from 'next/navigation';
+import dbConnect from '@/lib/dbConnect';
+import Order from '@/models/Order';
 import SEOHead from '@/components/SEOHead';
-import Link from 'next/link';
 
-/**
- * Page “Mes commandes” (Server Component).
- * 1) Extraire locale de params
- * 2) Récupérer la session côté serveur
- * 3) Si pas de session, rediriger vers /[locale]/connexion
- * 4) Récupérer les commandes depuis l’API interne
- * 5) Charger le namespace "orders"
- * 6) Passer à SEOHead + afficher la liste
- */
-export default async function MesCommandesPage({ params }) {
-  // 1) Extraire locale directement
+export default async function OrdersPage({ params }) {
   const { locale } = params;
-
-  // 2) Récupérer la session côté serveur
   const session = await getServerSession(authOptions);
 
-  // 3) Si pas de session, rediriger vers /[locale]/connexion
-  if (!session) {
-    redirect(`/${locale}/connexion`);
-  }
+  if (!session) redirect(`/${locale}/connexion`);
 
-  // 4) Charger les commandes de l’utilisateur (API interne)
-  let orders = [];
-  try {
-    const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') || 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/user/orders`, {
-      headers: {
-        // Transmettre le cookie pour authentifier l’API
-        cookie: `next-auth.session-token=${session.user.id || ''}`,
-      },
-      cache: 'no-store',
-    });
-    if (!res.ok) throw new Error('Erreur lors du chargement des commandes');
-    orders = await res.json();
-  } catch (err) {
-    console.error('fetch orders error:', err);
-    orders = [];
-  }
+  await dbConnect();
 
-  // 5) Charger le JSON global (fr.json ou en.json)
-  let allMessages;
-  try {
-    allMessages = (await import(`@/messages/${locale}.json`)).default;
-  } catch {
-    allMessages = {};
-  }
+  const orders = await Order.find({
+    $or: [
+      { 'user.email': session.user.email },
+      { email: session.user.email }
+    ]
+  }).sort({ createdAt: -1 }).lean();
 
-  // 6) Extraire le namespace "orders"
-  const namespace = allMessages['orders'] ?? {};
-  const t = (key) => namespace[key] ?? key;
-
-  // 7) Construire les segments de breadcrumb pour JSON-LD
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || '';
-  const basePath = `${siteUrl}/${locale}`;
-  const breadcrumbSegments = [
-    { label: t('my_orders'), url: `${basePath}` },
-    { label: t('my_orders'), url: `${basePath}/mes-commandes` },
-  ];
+  const siteUrl = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') || '';
 
   return (
     <>
       <SEOHead
-        titleKey="orders_title"
-        descriptionKey="orders_description"
-        breadcrumbSegments={breadcrumbSegments}
+        overrideTitle={locale === 'fr' ? 'Mes commandes' : 'My Orders'}
+        overrideDescription={locale === 'fr'
+          ? 'Consultez l’historique de vos commandes passées sur TechPlay.'
+          : 'View your past order history on TechPlay.'}
+        breadcrumbSegments={[
+          {
+            label: locale === 'fr' ? 'Mes commandes' : 'My Orders',
+            url: `${siteUrl}/${locale}/mes-commandes`
+          }
+        ]}
       />
 
-      <div className="p-6 max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">{t('my_orders')}</h1>
+      <div className="p-6 max-w-4xl mx-auto">
+        <h1 className="text-2xl font-bold mb-4">
+          {locale === 'fr' ? 'Mes commandes' : 'My Orders'}
+        </h1>
 
         {orders.length === 0 ? (
-          <p className="text-gray-500">{t('no_orders_found')}</p>
+          <p className="text-gray-600">
+            {locale === 'fr'
+              ? 'Vous n’avez passé aucune commande pour le moment.'
+              : 'You have not placed any orders yet.'}
+          </p>
         ) : (
-          <ul className="divide-y border rounded">
-            {orders.map((order) => (
-              <li key={order._id} className="p-4 flex justify-between">
-                <div>
-                  <p className="font-semibold">{order._id}</p>
-                  <p className="text-sm text-gray-600">
-                    {new Date(order.createdAt).toLocaleDateString(locale)}
-                  </p>
-                </div>
-                <p className="font-medium">{order.total.toFixed(2)} €</p>
-                <Link
-                  href={`/${locale}/commande/${order._id}`}
-                  className="text-blue-600 underline"
-                >
-                  {t('view_details')}
-                </Link>
-              </li>
-            ))}
+          <ul className="space-y-4">
+            {orders.map((order) => {
+              const date = new Date(order.createdAt).toLocaleDateString(locale, {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              });
+
+              const total = order.total?.toFixed(2) ?? '–';
+
+              return (
+                <li key={order._id} className="border rounded p-4 shadow-sm">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-semibold">
+                        {locale === 'fr' ? 'Commande' : 'Order'} #{order._id}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {locale === 'fr' ? 'Passée le' : 'Placed on'} {date}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold">{total} €</p>
+                      <p className={`text-sm ${
+                        order.status === 'en cours'
+                          ? 'text-yellow-600'
+                          : order.status === 'expédiée'
+                          ? 'text-blue-600'
+                          : 'text-green-600'
+                      }`}>
+                        {order.status}
+                      </p>
+                    </div>
+                  </div>
+                  <a
+                    href={`/${locale}/account/commande/${order._id}`}
+                    className="text-blue-600 hover:underline text-sm mt-2 inline-block"
+                  >
+                    {locale === 'fr' ? 'Voir les détails' : 'View details'}
+                  </a>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>

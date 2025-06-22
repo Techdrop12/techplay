@@ -12,11 +12,11 @@ export const authOptions = {
       },
       async authorize(credentials) {
         if (
-          credentials.email === process.env.ADMIN_EMAIL &&
-          credentials.password === process.env.ADMIN_PASSWORD
+          credentials?.email === process.env.ADMIN_EMAIL &&
+          credentials?.password === process.env.ADMIN_PASSWORD
         ) {
           return {
-            id: 1,
+            id: 'admin',
             name: 'Admin',
             email: process.env.ADMIN_EMAIL
           };
@@ -37,6 +37,7 @@ export const authOptions = {
     },
     async session({ session, token }) {
       session.user.id = token.id;
+      session.user.email = token.email;
       return session;
     }
   },

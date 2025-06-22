@@ -1,9 +1,10 @@
+// src/models/Order.js
+
 import mongoose from 'mongoose';
 
 const OrderSchema = new mongoose.Schema({
   user: {
     email: String,
-    // autres infos utilisateur si besoin
   },
   items: [
     {
@@ -17,7 +18,10 @@ const OrderSchema = new mongoose.Schema({
   shipping: Number,
   total: Number,
   status: String,
-  createdAt: Date,
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
   customerName: String,
   email: String,
 });

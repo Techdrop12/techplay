@@ -1,6 +1,6 @@
-// src/app/[locale]/account/commande/[id]/page.js
+// ✅ src/app/[locale]/account/commande/[id]/page.js
 
-import { getServerSession } from 'next-auth/next';
+import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import { redirect } from 'next/navigation';
 import SEOHead from '@/components/SEOHead';
@@ -14,11 +14,11 @@ export async function generateStaticParams() {
 export default async function OrderDetailPage({ params }) {
   const { locale, id } = params;
   const session = await getServerSession(authOptions);
+
   if (!session) redirect(`/${locale}/connexion`);
 
   await dbConnect();
 
-  // Essai plus souple : recherche par ID + email simple
   const order = await Order.findOne({
     _id: id,
     $or: [
@@ -64,7 +64,7 @@ export default async function OrderDetailPage({ params }) {
     },
     {
       label: pageTitle,
-      url: `${siteUrl}/${locale}/commande/${order._id}`,
+      url: `${siteUrl}/${locale}/account/commande/${order._id}`,
     },
   ];
 
