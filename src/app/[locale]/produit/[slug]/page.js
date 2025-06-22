@@ -1,61 +1,62 @@
+// ✅ src/app/[locale]/produit/[slug]/page.js
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { toast } from 'react-hot-toast'
-import { motion } from 'framer-motion'
-import { useLocale } from 'next-intl'
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { toast } from 'react-hot-toast';
+import { motion } from 'framer-motion';
+import { useLocale } from 'next-intl';
 
-import SEOHead from '@/components/SEOHead'
-import ProductCard from '@/components/ProductCard'
-import ScoreTracker from '@/components/ScoreTracker'
-import FreeShippingBadge from '@/components/FreeShippingBadge'
-import WishlistButton from '@/components/WishlistButton'
-import ReviewForm from '@/components/ReviewForm'
-import ReviewList from '@/components/ReviewList'
-import RecentlyViewed from '@/components/RecentlyViewed'
-import ProductJsonLd from '@/components/ProductJsonLd'
-import BreadcrumbJsonLd from '@/components/JsonLd/BreadcrumbJsonLd'
-import ProductAssistant from '@/components/ProductAssistant'
+import SEOHead from '@/components/SEOHead';
+import ProductCard from '@/components/ProductCard';
+import ScoreTracker from '@/components/ScoreTracker';
+import FreeShippingBadge from '@/components/FreeShippingBadge';
+import WishlistButton from '@/components/WishlistButton';
+import ReviewForm from '@/components/ReviewForm';
+import ReviewList from '@/components/ReviewList';
+import RecentlyViewed from '@/components/RecentlyViewed';
+import ProductJsonLd from '@/components/ProductJsonLd';
+import BreadcrumbJsonLd from '@/components/JsonLd/BreadcrumbJsonLd';
+import ProductAssistant from '@/components/ProductAssistant';
 
 export default function ProductPage() {
-  const { slug } = useParams()
-  const locale = useLocale()
-  const router = useRouter()
+  const { slug } = useParams();
+  const locale = useLocale();
+  const router = useRouter();
 
-  const [product, setProduct] = useState(null)
-  const [variant, setVariant] = useState('A')
-  const [recommendations, setRecommendations] = useState([])
+  const [product, setProduct] = useState(null);
+  const [variant, setVariant] = useState('A');
+  const [recommendations, setRecommendations] = useState([]);
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('ab_variant')
+      const stored = localStorage.getItem('ab_variant');
       if (stored) {
-        setVariant(stored)
+        setVariant(stored);
       } else {
-        const random = Math.random() < 0.5 ? 'A' : 'B'
-        localStorage.setItem('ab_variant', random)
-        setVariant(random)
+        const random = Math.random() < 0.5 ? 'A' : 'B';
+        localStorage.setItem('ab_variant', random);
+        setVariant(random);
       }
     } catch (e) {
-      console.warn('Erreur attribution variant A/B :', e)
+      console.warn('Erreur attribution variant A/B :', e);
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    if (!slug) return
+    if (!slug) return;
 
     fetch(`/api/products/${slug}`)
       .then((res) => {
-        if (!res.ok) throw new Error('Produit introuvable')
-        return res.json()
+        if (!res.ok) throw new Error('Produit introuvable');
+        return res.json();
       })
       .then((data) => setProduct(data))
-      .catch(() => toast.error('Erreur lors du chargement du produit'))
-  }, [slug])
+      .catch(() => toast.error('Erreur lors du chargement du produit'));
+  }, [slug]);
 
   useEffect(() => {
-    if (!product) return
+    if (!product) return;
 
     fetch(
       `/api/recommendations?category=${encodeURIComponent(
@@ -63,35 +64,35 @@ export default function ProductPage() {
       )}&excludeIds=${product._id}`
     )
       .then((res) => {
-        if (!res.ok) throw new Error('Erreur recommandations')
-        return res.json()
+        if (!res.ok) throw new Error('Erreur recommandations');
+        return res.json();
       })
       .then(setRecommendations)
-      .catch(() => toast.error('Erreur chargement recommandations'))
+      .catch(() => toast.error('Erreur chargement recommandations'));
 
     // Ajout aux produits vus récemment
-    const viewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]')
-    const exists = viewed.some((item) => item._id === product._id)
+    const viewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+    const exists = viewed.some((item) => item._id === product._id);
     if (!exists) {
-      const updated = [...viewed, product].slice(-8)
-      localStorage.setItem('recentlyViewed', JSON.stringify(updated))
+      const updated = [...viewed, product].slice(-8);
+      localStorage.setItem('recentlyViewed', JSON.stringify(updated));
     }
-  }, [product])
+  }, [product]);
 
   if (!product) {
     return (
       <div className="max-w-3xl mx-auto p-6 text-center text-sm text-gray-500 animate-pulse">
         Chargement du produit en cours...
       </div>
-    )
+    );
   }
 
   const baseUrl =
     typeof window !== 'undefined'
       ? window.location.origin
-      : process.env.NEXT_PUBLIC_SITE_URL || ''
+      : process.env.NEXT_PUBLIC_SITE_URL || '';
 
-  const canonicalUrl = `${baseUrl}/${locale}/produit/${product.slug}`
+  const canonicalUrl = `${baseUrl}/${locale}/produit/${product.slug}`;
 
   const breadcrumbSegments = [
     { label: locale === 'fr' ? 'Accueil' : 'Home', url: `${baseUrl}/${locale}` },
@@ -100,7 +101,7 @@ export default function ProductPage() {
       url: `${baseUrl}/${locale}/categorie/${product.category}`,
     },
     { label: product.title, url: canonicalUrl },
-  ]
+  ];
 
   return (
     <motion.div
@@ -119,7 +120,7 @@ export default function ProductPage() {
         breadcrumbSegments={breadcrumbSegments}
       />
       <ProductJsonLd product={product} />
-      <BreadcrumbJsonLd segments={breadcrumbSegments} />
+      <BreadcrumbJsonLd pathSegments={breadcrumbSegments} />
 
       <div className="flex items-start justify-between gap-2 mb-4">
         <h1 className="text-3xl font-bold">
@@ -161,5 +162,5 @@ export default function ProductPage() {
 
       <RecentlyViewed />
     </motion.div>
-  )
+  );
 }

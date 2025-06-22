@@ -15,7 +15,7 @@ export default function SEOHead({
   image,
   url,
   noIndex = false,
-  breadcrumbSegments
+  breadcrumbSegments,
 }) {
   const title = overrideTitle ?? product?.title ?? 'TechPlay';
   const description =

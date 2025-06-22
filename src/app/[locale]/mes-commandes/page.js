@@ -7,12 +7,11 @@ import { redirect } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
 import SEOHead from '@/components/SEOHead';
-import BreadcrumbJsonLd from '@/components/JsonLd/BreadcrumbJsonLd'; // Import classique
+import BreadcrumbJsonLd from '@/components/JsonLd/BreadcrumbJsonLd';
 
 export default async function OrdersPage({ params }) {
   const { locale } = params;
   const session = await getServerSession(authOptions);
-
   if (!session) redirect(`/${locale}/connexion`);
 
   await dbConnect();
@@ -20,11 +19,20 @@ export default async function OrdersPage({ params }) {
   const orders = await Order.find({
     $or: [
       { 'user.email': session.user.email },
-      { email: session.user.email }
-    ]
-  }).sort({ createdAt: -1 }).lean();
+      { email: session.user.email },
+    ],
+  })
+    .sort({ createdAt: -1 })
+    .lean();
 
   const siteUrl = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') || '';
+
+  const breadcrumbSegments = [
+    {
+      label: locale === 'fr' ? 'Mes commandes' : 'My Orders',
+      url: `${siteUrl}/${locale}/mes-commandes`,
+    },
+  ];
 
   return (
     <>
@@ -35,16 +43,11 @@ export default async function OrdersPage({ params }) {
             ? 'Consultez l’historique de vos commandes passées sur TechPlay.'
             : 'View your past order history on TechPlay.'
         }
+        breadcrumbSegments={breadcrumbSegments}
       />
 
-      <BreadcrumbJsonLd
-        pathSegments={[
-          {
-            label: locale === 'fr' ? 'Mes commandes' : 'My Orders',
-            url: `${siteUrl}/${locale}/mes-commandes`,
-          }
-        ]}
-      />
+      {/* Redondant mais SEO friendly */}
+      <BreadcrumbJsonLd pathSegments={breadcrumbSegments} />
 
       <div className="p-6 max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold mb-4">
@@ -81,13 +84,15 @@ export default async function OrdersPage({ params }) {
                     </div>
                     <div className="text-right">
                       <p className="font-semibold">{total} €</p>
-                      <p className={`text-sm ${
-                        order.status === 'en cours'
-                          ? 'text-yellow-600'
-                          : order.status === 'expédiée'
-                          ? 'text-blue-600'
-                          : 'text-green-600'
-                      }`}>
+                      <p
+                        className={`text-sm ${
+                          order.status === 'en cours'
+                            ? 'text-yellow-600'
+                            : order.status === 'expédiée'
+                            ? 'text-blue-600'
+                            : 'text-green-600'
+                        }`}
+                      >
                         {order.status}
                       </p>
                     </div>

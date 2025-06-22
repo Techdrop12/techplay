@@ -1,9 +1,13 @@
 // ✅ src/components/JsonLd/BreadcrumbJsonLd.js
+
 import React from 'react';
 import Head from 'next/head';
 
-const BreadcrumbJsonLd = ({ pathSegments }) => {
-  const itemListElement = pathSegments.map((segment, index) => ({
+const BreadcrumbJsonLd = ({ pathSegments = [], segments }) => {
+  // Compatibilité: accepte `segments` ou `pathSegments`
+  const list = Array.isArray(segments) && segments.length > 0 ? segments : pathSegments;
+
+  const itemListElement = list.map((segment, index) => ({
     '@type': 'ListItem',
     position: index + 1,
     name: segment.label,
