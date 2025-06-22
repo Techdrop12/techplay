@@ -1,5 +1,4 @@
 // ✅ src/app/[locale]/mes-commandes/page.js
-
 export const dynamic = 'force-dynamic';
 
 import { getServerSession } from 'next-auth';
@@ -8,12 +7,17 @@ import { redirect } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
 import SEOHead from '@/components/SEOHead';
-import BreadcrumbJsonLd from '@/components/JsonLd/BreadcrumbJsonLd';
+
+let BreadcrumbJsonLd = () => null;
+try {
+  BreadcrumbJsonLd = require('@/components/JsonLd/BreadcrumbJsonLd').default;
+} catch (e) {
+  console.warn('BreadcrumbJsonLd non chargé :', e.message);
+}
 
 export default async function OrdersPage({ params }) {
   const { locale } = params;
   const session = await getServerSession(authOptions);
-
   if (!session) redirect(`/${locale}/connexion`);
 
   await dbConnect();
@@ -42,7 +46,7 @@ export default async function OrdersPage({ params }) {
         pathSegments={[
           {
             label: locale === 'fr' ? 'Mes commandes' : 'My Orders',
-            url: `${siteUrl}/${locale}/mes-commandes`
+            url: `${siteUrl}/${locale}/mes-commandes`,
           }
         ]}
       />
