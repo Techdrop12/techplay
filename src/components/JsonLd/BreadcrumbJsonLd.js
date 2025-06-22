@@ -1,34 +1,29 @@
 // ✅ src/components/JsonLd/BreadcrumbJsonLd.js
+import React from 'react';
+import Head from 'next/head';
 
-'use client';
-
-import { useEffect } from 'react';
-import { usePathname } from 'next/navigation';
-
-export default function BreadcrumbJsonLd({ pathSegments = [] }) {
-  const pathname = usePathname();
-
-  const itemListElements = pathSegments.map((segment, index) => ({
+const BreadcrumbJsonLd = ({ pathSegments }) => {
+  const itemListElement = pathSegments.map((segment, index) => ({
     '@type': 'ListItem',
     position: index + 1,
     name: segment.label,
     item: segment.url,
   }));
 
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.innerHTML = JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      itemListElement: itemListElements,
-    });
-    document.head.appendChild(script);
+  return (
+    <Head>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement,
+          }),
+        }}
+      />
+    </Head>
+  );
+};
 
-    return () => {
-      document.head.removeChild(script);
-    };
-  }, [pathname]);
-
-  return null;
-}
+export default BreadcrumbJsonLd;
