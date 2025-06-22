@@ -1,6 +1,8 @@
-import { getRequestConfig } from '@/i18n/request';
+// ✅ src/lib/getMessages.js
 
-export default async function getMessages(locale) {
+import { getRequestConfig } from '@/lib/i18n';
+
+export async function getMessages(locale) {
   const config = await getRequestConfig(locale);
   return config.messages;
 }
