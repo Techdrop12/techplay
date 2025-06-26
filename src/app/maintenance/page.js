@@ -1,12 +1,13 @@
-// src/app/maintenance/page.js
+// ✅ src/app/maintenance/page.js
 
-export default function Maintenance() {
+export default function MaintenancePage() {
   return (
-    <div className="h-screen flex items-center justify-center text-center p-4">
-      <div>
-        <h1 className="text-3xl font-bold mb-4">🛠️ Maintenance en cours</h1>
-        <p className="text-gray-600">TechPlay revient très bientôt !</p>
-      </div>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white">
+      <h1 className="text-3xl font-bold mb-4">Site en maintenance</h1>
+      <p>
+        Nous procédons à des améliorations techniques.<br />
+        Revenez dans quelques minutes ! 🚧
+      </p>
     </div>
   );
 }

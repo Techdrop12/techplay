@@ -1,33 +1,14 @@
-'use client';
+// ✅ src/components/FreeShippingBadge.js
 
-import { motion } from 'framer-motion';
-
-export default function FreeShippingBadge({ price }) {
-  const threshold = 49;
-
-  if (price < threshold) {
-    const remaining = (threshold - price).toFixed(2);
-    return (
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="text-sm text-gray-600 mt-1 font-semibold animate-pulse"
-        role="alert"
-      >
-        Plus que <strong>{remaining} €</strong> pour la livraison gratuite !
-      </motion.p>
-    );
-  }
+export default function FreeShippingBadge({ price, locale = 'fr' }) {
+  const threshold = 50; // exemple
+  if (price < threshold) return null;
 
   return (
-    <motion.p
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="text-sm text-green-600 mt-1 font-semibold"
-      role="status"
-      aria-live="polite"
-    >
-      ✅ Livraison gratuite !
-    </motion.p>
+    <span className="ml-3 inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold shadow">
+      {locale === 'fr'
+        ? 'Livraison gratuite'
+        : 'Free Shipping'}
+    </span>
   );
 }

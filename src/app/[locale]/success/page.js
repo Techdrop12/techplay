@@ -1,53 +1,52 @@
-// src/app/[locale]/success/page.js
-'use client';
+// ✅ src/app/[locale]/success/page.js
 
-import { useTranslations } from 'next-intl';
 import SEOHead from '@/components/SEOHead';
-import { useEffect, useState } from 'react';
-import { useCart } from '@/context/cartContext';
-import Link from 'next/link';
-import Confetti from 'react-confetti';
 
-export default function SuccessPage() {
-  const t = useTranslations('success');
-  const { clearCart } = useCart();
-
-  const [windowSize, setWindowSize] = useState({
-    width: typeof window !== 'undefined' ? window.innerWidth : 0,
-    height: typeof window !== 'undefined' ? window.innerHeight : 0,
-  });
-
-  useEffect(() => {
-    clearCart();
-    const handleResize = () => {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [clearCart]);
+export default function SuccessPage({ params, searchParams }) {
+  const { locale } = params;
+  const orderId = searchParams?.orderId;
 
   return (
     <>
       <SEOHead
-        titleKey="success_title"
-        descriptionKey="success_description"
+        overrideTitle={locale === 'fr' ? 'Commande réussie' : 'Order Successful'}
+        overrideDescription={
+          locale === 'fr'
+            ? 'Merci pour votre commande sur TechPlay !'
+            : 'Thank you for your order on TechPlay!'
+        }
+        noIndex
       />
-
-      <Confetti width={windowSize.width} height={windowSize.height} />
-
-      <div className="p-6 text-center max-w-xl mx-auto">
-        <h1 className="text-3xl font-bold mb-4">{t('title')}</h1>
-        <p className="mb-6">{t('message')}</p>
-
-        <Link
-          href="/fr"
-          className="inline-block bg-black text-white px-6 py-3 rounded hover:opacity-90"
+      <div className="flex flex-col items-center justify-center min-h-[50vh] p-8">
+        <svg width={60} height={60} fill="none" className="mb-6" viewBox="0 0 24 24">
+          <circle cx={12} cy={12} r={12} fill="#34d399" />
+          <path d="M7 13l3 3 7-7" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <h1 className="text-2xl font-bold mb-2 text-green-700">
+          {locale === 'fr'
+            ? 'Merci pour votre commande !'
+            : 'Thank you for your order!'}
+        </h1>
+        <p className="text-gray-600 mb-2">
+          {locale === 'fr'
+            ? "Votre commande a bien été prise en compte."
+            : "Your order has been received."}
+        </p>
+        {orderId && (
+          <p className="text-sm text-gray-500 mb-4">
+            {locale === 'fr'
+              ? `Numéro de commande : ${orderId}`
+              : `Order number: ${orderId}`}
+          </p>
+        )}
+        <a
+          href={`/${locale}/mes-commandes`}
+          className="text-blue-600 hover:underline font-semibold mt-2"
         >
-          {t('back')}
-        </Link>
+          {locale === 'fr'
+            ? 'Voir mes commandes'
+            : 'View my orders'}
+        </a>
       </div>
     </>
   );

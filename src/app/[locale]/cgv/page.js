@@ -1,43 +1,33 @@
 // ✅ src/app/[locale]/cgv/page.js
-import { getTranslations } from 'next-intl/server';
+
 import SEOHead from '@/components/SEOHead';
 
-export const dynamic = 'force-dynamic';
-
-export default async function CGVPage({ params }) {
-  const locale = params.locale;
-  const tSeo = await getTranslations({ locale, namespace: 'seo' });
-  const tCgv = await getTranslations({ locale, namespace: 'cgv' });
-
-  const title = tCgv('title');
-  const intro = tCgv('intro');
-
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || '';
-  const basePath = `${siteUrl}/${locale}`;
-  const breadcrumbSegments = [
-    { label: tSeo('homepage_title'), url: `${basePath}` },
-    { label: title, url: `${basePath}/cgv` },
-  ];
-
+export default function CGVPage({ params }) {
+  const { locale } = params;
   return (
     <>
       <SEOHead
-        overrideTitle={tSeo('cgv_title')}
-        overrideDescription={tSeo('cgv_description')}
-        breadcrumbSegments={breadcrumbSegments}
+        overrideTitle={locale === 'fr' ? 'Conditions Générales de Vente' : 'Terms & Conditions'}
+        overrideDescription={
+          locale === 'fr'
+            ? 'Consultez les conditions générales de vente de TechPlay.'
+            : 'Read TechPlay terms & conditions.'
+        }
       />
-
-      <div className="p-6 max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold mb-4">{title}</h1>
-        <p className="text-gray-700 mb-6">{intro}</p>
-
-        <section className="prose dark:prose-invert">
-          <h2>{tCgv('section1_title')}</h2>
-          <p>{tCgv('section1_text')}</p>
-
-          <h2>{tCgv('section2_title')}</h2>
-          <p>{tCgv('section2_text')}</p>
-        </section>
+      <div className="max-w-3xl mx-auto p-6">
+        <h1 className="text-2xl font-bold mb-4">
+          {locale === 'fr'
+            ? 'Conditions Générales de Vente'
+            : 'Terms & Conditions'}
+        </h1>
+        <div className="prose max-w-none">
+          {/* Placez ici le texte de vos CGV ! */}
+          <p>
+            {locale === 'fr'
+              ? "Bienvenue sur nos CGV. Merci de votre confiance sur TechPlay. Les ventes sont soumises à nos conditions générales consultables ci-dessous…"
+              : "Welcome to our T&C. Thank you for trusting TechPlay. Sales are subject to the following terms and conditions…"}
+          </p>
+        </div>
       </div>
     </>
   );

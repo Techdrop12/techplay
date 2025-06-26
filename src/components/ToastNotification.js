@@ -1,42 +1,24 @@
-// src/components/ToastNotification.js
+// ✅ src/components/ToastNotification.js
+
 'use client';
 
-import { toast } from 'react-hot-toast';
+import { useEffect, useState } from 'react';
 
-export function notifySuccess(message) {
-  toast.success(message, {
-    style: {
-      borderRadius: '8px',
-      background: '#333',
-      color: '#fff',
-    },
-    icon: '✅',
-  });
-}
+export default function ToastNotification({ message, type = 'success', delay = 3500 }) {
+  const [show, setShow] = useState(!!message);
 
-export function notifyError(message) {
-  toast.error(message, {
-    style: {
-      borderRadius: '8px',
-      background: '#1f2937',
-      color: '#fff',
-    },
-    icon: '❌',
-  });
-}
+  useEffect(() => {
+    if (!message) return;
+    setShow(true);
+    const t = setTimeout(() => setShow(false), delay);
+    return () => clearTimeout(t);
+  }, [message, delay]);
 
-export function notifyInfo(message) {
-  toast(message, {
-    style: {
-      borderRadius: '8px',
-      background: '#4b5563',
-      color: '#fff',
-    },
-    icon: 'ℹ️',
-  });
-}
-
-// ✅ Export par défaut pour compatibilité composant
-export default function ToastNotification() {
-  return null;
+  if (!show) return null;
+  return (
+    <div className={`fixed bottom-6 right-8 z-50 px-5 py-3 rounded shadow-lg font-bold
+      ${type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
+      {message}
+    </div>
+  );
 }

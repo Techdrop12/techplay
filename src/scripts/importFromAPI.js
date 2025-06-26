@@ -1,45 +1,15 @@
-import dotenv from 'dotenv';
-dotenv.config({ path: process.cwd() + '/.env.local' });
+// ✅ src/scripts/importFromAPI.js
 
-import axios from 'axios';
-import dbConnect from '../lib/dbConnect.js';
-import Product from '../models/Product.js';
+import fs from 'fs';
+import fetch from 'node-fetch';
 
-async function importFromAPI() {
-  try {
-    await dbConnect();
+const API_URL = 'https://fakestoreapi.com/products';
 
-    const response = await axios.get('https://fakestoreapi.com/products');
-    const products = response.data;
-
-    let count = 0;
-    for (const item of products) {
-      const slug = item.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
-
-      const productData = {
-        title: item.title,
-        price: parseFloat(item.price),
-        image: item.image,
-        images: [item.image],
-        slug,
-        description: item.description,
-        category: item.category,
-        stock: 10,
-        tags: [item.category],
-        source: 'api',
-        rating: item.rating?.rate || 4.5,
-      };
-
-      await Product.findOneAndUpdate({ slug }, productData, { upsert: true, new: true });
-      count++;
-    }
-
-    console.log(`Import terminé, ${count} produits insérés/mis à jour.`);
-    process.exit(0);
-  } catch (error) {
-    console.error('Erreur import API:', error);
-    process.exit(1);
-  }
+async function importProducts() {
+  const res = await fetch(API_URL);
+  const products = await res.json();
+  fs.writeFileSync('./src/data/import.json', JSON.stringify(products, null, 2));
+  console.log('Produits importés !');
 }
 
-importFromAPI();
+importProducts();

@@ -1,23 +1,24 @@
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '../auth/[...nextauth]'
-import dbConnect from '@/lib/dbConnect'
-import Order from '@/models/Order'
+// ✅ src/pages/api/user/orders.js
+
+import dbConnect from '@/lib/dbConnect';
+import Order from '@/models/Order';
+import { getToken } from 'next-auth/jwt';
 
 export default async function handler(req, res) {
-  const session = await getServerSession(req, res, authOptions)
-  if (!session) {
-    return res.status(401).json({ error: 'Non autorisé' })
+  const token = await getToken({ req });
+  if (!token?.email) return res.status(401).json({ error: 'Non autorisé' });
+
+  await dbConnect();
+
+  if (req.method === 'GET') {
+    const orders = await Order.find({
+      $or: [
+        { 'user.email': token.email },
+        { email: token.email }
+      ]
+    }).sort({ createdAt: -1 }).lean();
+    return res.status(200).json(orders);
   }
 
-  await dbConnect()
-
-  const orders = await Order.find({ email: session.user.email }).sort({ createdAt: -1 })
-
-  res.status(200).json(
-    orders.map((order) => ({
-      id: order._id,
-      total: order.total,
-      date: order.createdAt.toISOString().split('T')[0],
-    }))
-  )
+  res.status(405).end();
 }

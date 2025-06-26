@@ -1,16 +1,20 @@
-// src/components/LocaleProvider.jsx
+// ✅ src/components/LocaleProvider.jsx
+
 'use client';
 
-import { NextIntlClientProvider } from 'next-intl';
+import { createContext, useContext } from 'react';
+import { useLocale } from 'next-intl';
 
-export default function LocaleProvider({ locale, messages, children }) {
+const LocaleContext = createContext('fr');
+export function useLocaleContext() {
+  return useContext(LocaleContext);
+}
+
+export default function LocaleProvider({ children }) {
+  const locale = useLocale();
   return (
-    <NextIntlClientProvider
-      locale={locale}
-      messages={messages}
-      defaultTimeZone="Europe/Paris"
-    >
+    <LocaleContext.Provider value={locale}>
       {children}
-    </NextIntlClientProvider>
+    </LocaleContext.Provider>
   );
 }

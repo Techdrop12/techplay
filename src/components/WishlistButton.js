@@ -1,94 +1,24 @@
+// ✅ src/components/WishlistButton.js
+
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Heart, HeartOff } from 'lucide-react';
-import { logEvent } from '@/lib/logEvent';
+import { useWishlist } from '@/context/wishlist';
 import { motion } from 'framer-motion';
-import { toast } from 'react-hot-toast';
 
-export default function WishlistButton({ product, floating = true }) {
-  const [isWishlisted, setIsWishlisted] = useState(false);
-  const STORAGE_KEY = 'wishlist';
-  const productId = product?._id;
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || !productId) return;
-
-    const checkWishlist = () => {
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY) || '[]';
-        const wishlist = JSON.parse(stored);
-        setIsWishlisted(wishlist.some((p) => p._id === productId));
-      } catch {
-        setIsWishlisted(false);
-      }
-    };
-
-    checkWishlist();
-
-    window.addEventListener('storage', checkWishlist);
-    return () => window.removeEventListener('storage', checkWishlist);
-  }, [productId]);
-
-  const toggleWishlist = () => {
-    if (typeof window === 'undefined' || !productId) return;
-
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY) || '[]';
-      let wishlist = JSON.parse(stored);
-
-      if (isWishlisted) {
-        wishlist = wishlist.filter((p) => p._id !== productId);
-        toast.success('Produit retiré de la wishlist 💔');
-        logEvent('wishlist_remove', { productId });
-      } else {
-        wishlist.unshift(product);
-        wishlist = wishlist.slice(0, 20);
-        toast.success('Produit ajouté à la wishlist ❤️');
-        logEvent('wishlist_add', { productId });
-      }
-
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(wishlist));
-      setIsWishlisted(!isWishlisted);
-      window.dispatchEvent(new Event('storage'));
-    } catch (err) {
-      console.warn('Erreur update wishlist :', err);
-      toast.error("Erreur lors de la mise à jour de la wishlist");
-    }
-  };
+export default function WishlistButton({ product }) {
+  const { wishlist, toggleWishlist } = useWishlist();
+  const isWished = wishlist.some((p) => p._id === product._id);
 
   return (
     <motion.button
-      onClick={toggleWishlist}
-      whileTap={{ scale: 0.85 }}
-      className={
-        floating
-          ? 'absolute top-2 right-2 p-1 rounded-full bg-white/90 hover:bg-white shadow transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'
-          : 'text-red-600 hover:text-red-800 transition focus:outline-none focus:ring-2 focus:ring-red-500'
-      }
-      aria-label={isWishlisted ? 'Retirer de la wishlist' : 'Ajouter à la wishlist'}
-      aria-pressed={isWishlisted}
-      title={isWishlisted ? 'Retirer de la wishlist' : 'Ajouter à la wishlist'}
-      role="button"
-      tabIndex={0}
+      className={`rounded-full px-3 py-1 border font-semibold shadow transition
+        ${isWished ? 'bg-pink-100 border-pink-400 text-pink-600' : 'bg-gray-50 border-gray-300 text-gray-700'}
+      `}
+      whileTap={{ scale: 0.9 }}
+      onClick={() => toggleWishlist(product)}
+      aria-label={isWished ? 'Retirer de la liste de souhaits' : 'Ajouter à la liste de souhaits'}
     >
-      {isWishlisted ? (
-        <HeartOff
-          size={20}
-          className="text-red-500"
-          fill="currentColor"
-          stroke="currentColor"
-          aria-hidden="true"
-        />
-      ) : (
-        <Heart
-          size={20}
-          className="text-gray-600"
-          fill="none"
-          stroke="currentColor"
-          aria-hidden="true"
-        />
-      )}
+      {isWished ? '♥' : '♡'}
     </motion.button>
   );
 }

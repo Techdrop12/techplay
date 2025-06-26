@@ -1,8 +1,8 @@
-// src/app/page.js
+// ✅ src/app/page.js
 
 import { redirect } from 'next/navigation';
 
-export default function HomePage() {
-  // Redirige automatiquement “/” → “/fr”
+export default function Page() {
   redirect('/fr');
+  return null;
 }

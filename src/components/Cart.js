@@ -1,93 +1,80 @@
-'use client'
+// ✅ src/components/Cart.js
 
-import { useCart } from '@/context/cartContext'
-import { useRouter } from 'next/navigation'
-import { toast } from 'react-hot-toast'
-import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+'use client';
 
-export default function Cart() {
-  const { cart, removeFromCart, updateQuantity } = useCart()
-  const [total, setTotal] = useState(0)
-  const router = useRouter()
+import { useCart } from '@/context/cartContext';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
-  useEffect(() => {
-    const calc = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
-    setTotal(calc.toFixed(2))
-  }, [cart])
+export default function Cart({ locale }) {
+  const { cart, removeFromCart, updateQuantity } = useCart();
+  const router = useRouter();
 
-  const handleCheckout = () => {
-    if (cart.length === 0) {
-      toast.error('Votre panier est vide.')
-      return
-    }
-    router.push('/commande')
+  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2);
+
+  if (cart.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        {locale === 'fr'
+          ? 'Votre panier est vide.'
+          : 'Your cart is empty.'}
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">🛒 Votre panier</h1>
-
-      {cart.length === 0 ? (
-        <p className="text-gray-500">Aucun produit pour le moment.</p>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="space-y-4"
-        >
-          {cart.map((item) => (
-            <div
-              key={item._id}
-              className="flex items-center justify-between border p-2 rounded shadow-sm"
-            >
-              <div className="flex items-center gap-3">
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="w-16 h-16 object-cover rounded"
-                />
-                <div>
-                  <h3 className="font-medium">{item.title}</h3>
-                  <p className="text-sm text-gray-500">
-                    {item.price.toFixed(2)} € x {item.quantity}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  min="1"
-                  value={item.quantity}
-                  onChange={(e) =>
-                    updateQuantity(item._id, Math.max(1, parseInt(e.target.value)))
-                  }
-                  className="w-16 text-center border rounded"
-                />
+    <div className="space-y-4">
+      <ul>
+        {cart.map((item) => (
+          <li key={item._id} className="flex items-center gap-4 border-b py-3">
+            <Image
+              src={item.image || '/placeholder.jpg'}
+              alt={item.title}
+              width={60}
+              height={60}
+              className="rounded"
+            />
+            <div className="flex-1">
+              <div className="font-semibold">{item.title}</div>
+              <div className="text-xs text-gray-500">{item.category}</div>
+              <div className="flex items-center gap-2 mt-1">
                 <button
-                  onClick={() => removeFromCart(item._id)}
-                  className="text-red-500 text-sm"
-                >
-                  Supprimer
-                </button>
+                  onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                  className="px-2 py-1 rounded bg-gray-200 hover:bg-gray-300"
+                  disabled={item.quantity <= 1}
+                  aria-label="Diminuer"
+                >-</button>
+                <span>{item.quantity}</span>
+                <button
+                  onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                  className="px-2 py-1 rounded bg-gray-200 hover:bg-gray-300"
+                  aria-label="Augmenter"
+                >+</button>
               </div>
             </div>
-          ))}
-
-          <div className="flex justify-between items-center font-semibold text-lg mt-6">
-            <span>Total :</span>
-            <span>{total} €</span>
-          </div>
-
-          <button
-            onClick={handleCheckout}
-            className="mt-4 w-full bg-black text-white py-2 rounded hover:opacity-90 transition"
-          >
-            Valider et payer
-          </button>
-        </motion.div>
-      )}
+            <div className="text-right flex flex-col items-end gap-2">
+              <span className="font-semibold">{(item.price * item.quantity).toFixed(2)} €</span>
+              <button
+                onClick={() => removeFromCart(item._id)}
+                className="text-red-600 text-xs underline hover:no-underline"
+                aria-label="Supprimer"
+              >
+                {locale === 'fr' ? 'Supprimer' : 'Remove'}
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <div className="flex justify-between font-bold text-lg border-t pt-4">
+        <span>{locale === 'fr' ? 'Total' : 'Total'}</span>
+        <span>{total} €</span>
+      </div>
+      <button
+        onClick={() => router.push(`/${locale}/commande`)}
+        className="w-full mt-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+      >
+        {locale === 'fr' ? 'Commander' : 'Checkout'}
+      </button>
     </div>
-  )
+  );
 }

@@ -1,15 +1,25 @@
-import OpenAI from 'openai'
+// ✅ src/lib/ai-tools.js
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+import OpenAI from 'openai';
 
-export async function generateProductDescription(title, category) {
-  const prompt = `Rédige une description persuasive pour un produit intitulé "${title}" dans la catégorie "${category}". Ton ton doit être vendeur et rassurant.`
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4',
-    messages: [{ role: 'user', content: prompt }],
-    temperature: 0.7,
-  })
+export async function generateProductSummary(product) {
+  const prompt = `Résumé en 1 phrase ce produit pour un e-commerce : ${product.title}, ${product.description}`;
+  const { choices } = await openai.completions.create({
+    model: 'gpt-3.5-turbo-instruct',
+    prompt,
+    max_tokens: 48,
+  });
+  return choices[0]?.text.trim() || '';
+}
 
-  return response.choices[0].message.content.trim()
+export async function generateBlogIdeas(topic) {
+  const prompt = `Donne-moi 5 idées d'articles de blog sur le sujet suivant : "${topic}" pour un site de tech high-ticket.`;
+  const { choices } = await openai.completions.create({
+    model: 'gpt-3.5-turbo-instruct',
+    prompt,
+    max_tokens: 128,
+  });
+  return choices[0]?.text.split('\n').filter(Boolean);
 }

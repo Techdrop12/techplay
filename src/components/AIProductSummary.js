@@ -1,39 +1,24 @@
-'use client'
+// ✅ src/components/AIProductSummary.js
 
-import { useEffect, useState } from 'react'
+'use client';
 
-export default function AIProductSummary({ description }) {
-  const [summary, setSummary] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+import { useEffect, useState } from 'react';
+
+export default function AIProductSummary({ product }) {
+  const [summary, setSummary] = useState('');
 
   useEffect(() => {
-    if (!description) return
+    if (!product) return;
+    fetch(`/api/ai/generate-summary?title=${encodeURIComponent(product.title)}&desc=${encodeURIComponent(product.description)}`)
+      .then((res) => res.json())
+      .then((data) => setSummary(data.summary))
+      .catch(() => setSummary(''));
+  }, [product]);
 
-    setLoading(true)
-    fetch('/api/ai/generate-summary', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ description }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.summary) {
-          setSummary(data.summary)
-          setError(null)
-        } else {
-          setError('Pas de résumé disponible')
-        }
-      })
-      .catch(() => setError('Erreur de génération'))
-      .finally(() => setLoading(false))
-  }, [description])
-
-  if (loading) return <p>Génération du résumé…</p>
-  if (error) return <p className="text-red-500">{error}</p>
-  if (!summary) return null
-
+  if (!summary) return null;
   return (
-    <p className="mb-4 italic text-gray-700">{summary}</p>
-  )
+    <div className="my-3 bg-blue-50 text-blue-900 p-2 rounded text-sm">
+      <strong>Résumé IA :</strong> {summary}
+    </div>
+  );
 }

@@ -1,107 +1,89 @@
-// ✅ src/app/[locale]/account/commande/page.js
-
-export const dynamic = 'force-dynamic';
+// ✅ src/app/[locale]/account/commande/[id]/page.js
 
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import { redirect } from 'next/navigation';
-import SEOHead from '@/components/SEOHead';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
+import SEOHead from '@/components/SEOHead';
 
-let BreadcrumbJsonLd = () => null;
-try {
-  BreadcrumbJsonLd = require('@/components/JsonLd/BreadcrumbJsonLd').default;
-} catch (e) {
-  console.warn('BreadcrumbJsonLd non chargé :', e.message);
-}
-
-export default async function OrdersPage({ params }) {
-  const { locale } = params;
+export default async function CommandeDetailPage({ params }) {
+  const { id, locale } = params;
   const session = await getServerSession(authOptions);
 
   if (!session) redirect(`/${locale}/connexion`);
-
   await dbConnect();
 
-  const orders = await Order.find({
+  const order = await Order.findOne({
+    _id: id,
     $or: [
       { 'user.email': session.user.email },
       { email: session.user.email },
     ],
-  }).sort({ createdAt: -1 }).lean();
+  }).lean();
 
-  const pageTitle = locale === 'fr' ? 'Mes commandes' : 'My Orders';
-  const pageDesc = locale === 'fr'
-    ? 'Historique de vos commandes passées sur TechPlay.'
-    : 'Your order history on TechPlay.';
+  if (!order) {
+    return (
+      <div className="p-6 max-w-2xl mx-auto text-center text-red-500">
+        {locale === 'fr' ? 'Commande introuvable ou accès refusé.' : 'Order not found or access denied.'}
+      </div>
+    );
+  }
 
-  const siteUrl = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') || '';
+  const date = new Date(order.createdAt).toLocaleDateString(locale, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  const total = order.total?.toFixed(2) ?? '–';
 
   return (
     <>
-      <SEOHead overrideTitle={pageTitle} overrideDescription={pageDesc} />
-      <BreadcrumbJsonLd
-        pathSegments={[
-          {
-            label: pageTitle,
-            url: `${siteUrl}/${locale}/account/commande`,
-          },
-        ]}
-      />
-      <div className="max-w-4xl mx-auto p-6">
-        <h1 className="text-2xl font-bold mb-4">{pageTitle}</h1>
-
-        {orders.length === 0 ? (
-          <p className="text-gray-600">
-            {locale === 'fr'
-              ? 'Vous n’avez passé aucune commande pour le moment.'
-              : 'You have not placed any orders yet.'}
-          </p>
-        ) : (
-          <ul className="divide-y">
-            {orders.map((order) => {
-              const date = new Date(order.createdAt).toLocaleDateString(locale, {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              });
-
-              const total = order.total?.toFixed(2) ?? '–';
-
-              return (
-                <li key={order._id} className="py-4">
-                  <a
-                    href={`/${locale}/account/commande/${order._id}`}
-                    className="block hover:bg-gray-100 p-4 rounded border"
-                  >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="font-semibold">
-                          #{order._id.toString().slice(-6).toUpperCase()}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {locale === 'fr' ? 'Date :' : 'Date:'} {date}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold">{total} €</p>
-                        <p className={`text-sm inline-block px-2 py-1 rounded ${
-                          order.status === 'en cours'
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : order.status === 'expédiée'
-                            ? 'bg-blue-100 text-blue-700'
-                            : 'bg-green-100 text-green-700'
-                        }`}>
-                          {order.status}
-                        </p>
-                      </div>
-                    </div>
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
+      <SEOHead overrideTitle={`Commande #${order._id}`} overrideDescription="Détail de la commande client" />
+      <div className="p-6 max-w-2xl mx-auto">
+        <h1 className="text-xl font-bold mb-2">
+          {locale === 'fr' ? 'Commande' : 'Order'} #{order._id}
+        </h1>
+        <p className="text-gray-600 mb-4">
+          {locale === 'fr' ? 'Passée le' : 'Placed on'} {date}
+        </p>
+        <div className="mb-4">
+          <strong>{locale === 'fr' ? 'Statut' : 'Status'} : </strong>
+          <span className={`px-2 py-1 rounded text-sm ${
+            order.status === 'en cours'
+              ? 'bg-yellow-100 text-yellow-700'
+              : order.status === 'expédiée'
+              ? 'bg-blue-100 text-blue-700'
+              : 'bg-green-100 text-green-700'
+          }`}>
+            {order.status}
+          </span>
+        </div>
+        <div className="mb-4">
+          <strong>{locale === 'fr' ? 'Total' : 'Total'} : </strong>
+          {total} €
+        </div>
+        <h2 className="font-semibold mb-2">{locale === 'fr' ? 'Produits' : 'Products'}</h2>
+        <ul className="mb-4">
+          {order.items?.map((item) => (
+            <li key={item._id} className="border-b py-2 flex justify-between">
+              <span>{item.title} x{item.quantity}</span>
+              <span>{(item.price * item.quantity).toFixed(2)} €</span>
+            </li>
+          ))}
+        </ul>
+        {order.trackingUrl && (
+          <a
+            href={order.trackingUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block mt-4 text-blue-600 underline"
+          >
+            {locale === 'fr' ? 'Suivre la livraison' : 'Track shipment'}
+          </a>
         )}
       </div>
     </>

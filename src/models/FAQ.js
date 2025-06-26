@@ -1,15 +1,11 @@
-import mongoose from 'mongoose'
+// ✅ src/models/FAQ.js
+
+import mongoose from 'mongoose';
 
 const FAQSchema = new mongoose.Schema({
-  product: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product',
-    required: true
-  },
-  question: { type: String, required: true },
-  answer: { type: String, required: true }
-}, {
-  timestamps: true
-})
+  productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
+  question: String,
+  answer: String,
+});
 
-export default mongoose.models.FAQ || mongoose.model('FAQ', FAQSchema)
+export default mongoose.models.FAQ || mongoose.model('FAQ', FAQSchema);

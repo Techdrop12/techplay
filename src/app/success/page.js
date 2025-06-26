@@ -1,10 +1,16 @@
-// src/app/success/page.js
+// ✅ src/app/success/page.js
+
+import Link from 'next/link';
 
 export default function SuccessPage() {
   return (
-    <div className="p-8 text-center">
-      <h1 className="text-3xl font-bold mb-4">✅ Paiement réussi</h1>
-      <p className="text-lg">Merci pour votre achat sur TechPlay !</p>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-green-50">
+      <h1 className="text-2xl font-bold text-green-700 mb-2">Merci pour votre commande !</h1>
+      <p className="mb-4 text-gray-700">
+        Votre achat a bien été pris en compte.<br />
+        Vous recevrez un email de confirmation dans quelques instants.
+      </p>
+      <Link href="/" className="text-blue-600 hover:underline">Retour à l’accueil</Link>
     </div>
   );
 }

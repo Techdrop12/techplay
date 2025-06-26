@@ -1,27 +1,27 @@
+// ✅ src/models/Product.js
+
 import mongoose from 'mongoose';
 
-const productSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  slug: { type: String, required: true, unique: true },
-  description: { type: String, required: true },
-  price: { type: Number, required: true },
-  image: { type: String, required: true },
-  images: [{ type: String }],
-  category: { type: String },
-  tags: [{ type: String }],
-  stock: { type: Number, default: 0 },
-  views: { type: Number, default: 0 },
-  sold: { type: Number, default: 0 },
-  featured: { type: Boolean, default: false },
-  highlight: { type: Boolean, default: false },
-  source: { type: String, enum: ['manual', 'api'], default: 'manual' },
-  seoTitle: { type: String },
-  seoDescription: { type: String },
-  relatedProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
-  alsoBought: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
-  createdAt: { type: Date, default: Date.now }
-}, {
-  timestamps: true
-});
+const ProductSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true },
+    slug: { type: String, required: true, unique: true },
+    description: String,
+    price: { type: Number, required: true },
+    image: String,
+    gallery: [String],
+    category: String,
+    stock: { type: Number, default: 100 },
+    supplier: String,
+    attributes: mongoose.Schema.Types.Mixed,
+    reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
+    rating: { type: Number, default: 0 },
+    reviewCount: { type: Number, default: 0 },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
+    active: { type: Boolean, default: true }
+  },
+  { timestamps: true }
+);
 
-export default mongoose.models.Product || mongoose.model('Product', productSchema);
+export default mongoose.models.Product || mongoose.model('Product', ProductSchema);

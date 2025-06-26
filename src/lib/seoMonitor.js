@@ -1,11 +1,9 @@
 // ✅ src/lib/seoMonitor.js
 
-export async function checkSiteHealth() {
-  try {
-    const health = await fetch('https://example.com/health')
-    return health.ok
-  } catch (error) {
-    console.error('Site health check failed:', error)
-    return false
+export default function seoMonitor(page, extra = {}) {
+  // Placez ici votre tracking analytics custom, ou integration externe (GA, Matomo...)
+  if (typeof window !== 'undefined') {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: 'seo_page_view', page, ...extra });
   }
 }

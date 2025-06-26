@@ -1,90 +1,58 @@
 // ✅ src/app/[locale]/contact/page.js
-'use client';
 
-import { useEffect, useState } from 'react';
 import SEOHead from '@/components/SEOHead';
-import { useTranslations } from 'next-intl';
 
-export default function ContactPage() {
-  const t = useTranslations('contact');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
-
-  // ✅ Solution au bug ENVIRONMENT_FALLBACK (Next 15 + next-intl)
-  useEffect(() => {
-    try {
-      Intl.DateTimeFormat(undefined, {
-        timeZone: 'Europe/Paris',
-      }).format(new Date());
-    } catch (e) {
-      console.error('Erreur de timeZone fallback', e);
-    }
-  }, []);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!name.trim() || !email.trim() || !message.trim()) {
-      alert('Tous les champs sont obligatoires');
-      return;
-    }
-
-    const res = await fetch('/api/contact', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, message }),
-    });
-
-    if (!res.ok) {
-      alert("Erreur lors de l'envoi du message.");
-      return;
-    }
-
-    alert('Message envoyé avec succès !');
-    setName('');
-    setEmail('');
-    setMessage('');
-  };
-
+export default function ContactPage({ params }) {
+  const { locale } = params;
   return (
     <>
       <SEOHead
-        titleKey="contact_title"
-        descriptionKey="contact_description"
+        overrideTitle={locale === 'fr' ? 'Contactez-nous' : 'Contact us'}
+        overrideDescription={
+          locale === 'fr'
+            ? 'Une question ? Contactez TechPlay via le formulaire.'
+            : 'Have a question? Contact TechPlay via this form.'
+        }
       />
-
-      <div className="p-6 max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold mb-4">{t('title')}</h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            placeholder={t('name_placeholder') || 'Votre nom'}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="border px-4 py-2 w-full rounded"
-            required
-          />
-          <input
-            type="email"
-            placeholder={t('email_placeholder') || 'Votre email'}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="border px-4 py-2 w-full rounded"
-            required
-          />
-          <textarea
-            placeholder={t('message_placeholder') || 'Votre message'}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            className="border px-4 py-2 w-full rounded"
-            rows={5}
-            required
-          />
-          <button className="bg-black text-white px-6 py-2 rounded hover:opacity-90">
-            {t('submit') || 'Envoyer'}
+      <div className="max-w-xl mx-auto p-6">
+        <h1 className="text-2xl font-bold mb-4">
+          {locale === 'fr' ? 'Contactez-nous' : 'Contact us'}
+        </h1>
+        <form
+          action="/api/contact"
+          method="POST"
+          className="space-y-4"
+        >
+          <div>
+            <label className="block mb-1">
+              {locale === 'fr' ? 'Nom' : 'Name'}
+            </label>
+            <input type="text" name="name" required className="border rounded px-3 py-2 w-full" />
+          </div>
+          <div>
+            <label className="block mb-1">
+              {locale === 'fr' ? 'Email' : 'Email'}
+            </label>
+            <input type="email" name="email" required className="border rounded px-3 py-2 w-full" />
+          </div>
+          <div>
+            <label className="block mb-1">
+              {locale === 'fr' ? 'Message' : 'Message'}
+            </label>
+            <textarea name="message" required rows={4} className="border rounded px-3 py-2 w-full" />
+          </div>
+          <button
+            type="submit"
+            className="bg-blue-600 text-white rounded px-4 py-2 font-semibold hover:bg-blue-700 transition"
+          >
+            {locale === 'fr' ? 'Envoyer' : 'Send'}
           </button>
         </form>
+        <div className="mt-6 text-gray-600 text-sm">
+          {locale === 'fr'
+            ? "Ou contactez-nous par email à contact@techplay.fr"
+            : "Or contact us by email at contact@techplay.fr"}
+        </div>
       </div>
     </>
   );

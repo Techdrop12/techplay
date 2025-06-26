@@ -1,21 +1,19 @@
-export default function handler(req, res) {
-  const { productId } = req.query
+// ✅ src/pages/api/faq/[productId].js
 
-  // Exemple de FAQ en dur (tu pourras lier à MongoDB plus tard)
-  const faqData = {
-    '1': [
-      { question: "Quel est le délai de livraison ?", answer: "3 à 5 jours ouvrés." },
-      { question: "Le produit est-il garanti ?", answer: "Oui, satisfait ou remboursé 30 jours." }
-    ],
-    '2': [
-      { question: "Ce produit est-il compatible avec Android ?", answer: "Oui, 100% compatible." }
-    ]
+import dbConnect from '@/lib/dbConnect';
+import FAQ from '@/models/FAQ';
+
+export default async function handler(req, res) {
+  await dbConnect();
+  const { productId } = req.query;
+  if (req.method === 'GET') {
+    const faqs = await FAQ.find({ productId });
+    return res.status(200).json(faqs);
   }
-
-  const faq = faqData[productId] || [
-    { question: "Livraison gratuite ?", answer: "Oui dès 50€ d'achat." },
-    { question: "Puis-je retourner l'article ?", answer: "Oui dans les 14 jours." }
-  ]
-
-  res.status(200).json(faq)
+  if (req.method === 'POST') {
+    const { question, answer } = req.body;
+    const faq = await FAQ.create({ productId, question, answer });
+    return res.status(201).json(faq);
+  }
+  res.status(405).end();
 }

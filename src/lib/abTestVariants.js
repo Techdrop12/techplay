@@ -1,18 +1,11 @@
-'use client';
+// ✅ src/lib/abTestVariants.js
 
-export const getUserVariant = () => {
+export function getUserVariant() {
   if (typeof window === 'undefined') return 'A';
-
-  try {
-    const cached = window.localStorage.getItem('ab_variant');
-    if (cached && ['A', 'B', 'C'].includes(cached)) return cached;
-
-    const variants = ['A', 'B', 'C'];
-    const assigned = variants[Math.floor(Math.random() * variants.length)];
-    window.localStorage.setItem('ab_variant', assigned);
-    return assigned;
-  } catch (e) {
-    console.warn('Erreur abTestVariants:', e);
-    return 'A';
+  let variant = localStorage.getItem('ab_variant');
+  if (!variant) {
+    variant = Math.random() < 0.5 ? 'A' : 'B';
+    localStorage.setItem('ab_variant', variant);
   }
-};
+  return variant;
+}

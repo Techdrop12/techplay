@@ -1,41 +1,21 @@
-'use client'
+// ✅ src/components/CartAbandonTrigger.js
 
-import { useEffect } from 'react'
-import { useCart } from '@/context/cartContext'
+'use client';
 
-export default function CartAbandonTrigger() {
-  const { cart } = useCart()
+import { useEffect } from 'react';
 
+export default function CartAbandonTrigger({ email, cart }) {
   useEffect(() => {
-    if (typeof window === 'undefined') return
-    if (!cart || cart.length === 0) return
+    if (!cart?.length || !email) return;
+    const timer = setTimeout(() => {
+      fetch('/api/brevo/abandon-panier', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, cart }),
+      });
+    }, 1000 * 60 * 30); // 30 minutes
+    return () => clearTimeout(timer);
+  }, [cart, email]);
 
-    const emailSentKey = 'abandon_email_sent'
-    const email = localStorage.getItem('cartEmail')
-
-    // Si pas d'email associé, ou déjà envoyé → on ne fait rien
-    if (!email || localStorage.getItem(emailSentKey) === 'true') return
-
-    // Déclenche l'envoi après 24 heures si l'utilisateur n’a pas finalisé la commande
-    const timeoutId = setTimeout(async () => {
-      try {
-        const res = await fetch('/api/emails/cart-abandonne', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ cart, email }),
-        })
-
-        const data = await res.json()
-        if (data.success) {
-          localStorage.setItem(emailSentKey, 'true')
-        }
-      } catch (e) {
-        console.warn('Erreur envoi email abandon panier :', e)
-      }
-    }, 24 * 60 * 60 * 1000) // 24 heures en millisecondes
-
-    return () => clearTimeout(timeoutId)
-  }, [cart])
-
-  return null
+  return null;
 }

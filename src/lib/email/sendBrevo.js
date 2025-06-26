@@ -1,28 +1,16 @@
+// ✅ src/lib/email/sendBrevo.js
+
 import axios from 'axios';
 
-const BREVO_API_KEY = process.env.BREVO_API_KEY;
-const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
-
-export const sendBrevoEmail = async ({ to, subject, htmlContent }) => {
-  try {
-    const res = await axios.post(
-      BREVO_API_URL,
-      {
-        sender: { name: 'TechPlay', email: 'noreply@techplay.com' },
-        to: [{ email: to }],
-        subject,
-        htmlContent,
-      },
-      {
-        headers: {
-          'api-key': BREVO_API_KEY,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-    return res.data;
-  } catch (err) {
-    console.error('Brevo Error:', err.response?.data || err.message);
-    throw new Error('Brevo send failed');
-  }
-};
+export default async function sendBrevo({ to, templateId, params }) {
+  return axios.post('https://api.brevo.com/v3/smtp/email', {
+    to,
+    templateId,
+    params,
+  }, {
+    headers: {
+      'api-key': process.env.BREVO_API_KEY,
+      'Content-Type': 'application/json',
+    }
+  });
+}

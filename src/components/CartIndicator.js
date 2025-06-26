@@ -1,40 +1,23 @@
+// ✅ src/components/CartIndicator.js
+
 'use client';
 
-import { useContext } from 'react';
-import { CartAnimationContext } from '@/context/cartAnimationContext';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart } from 'lucide-react';
 import { useCart } from '@/context/cartContext';
+import Link from 'next/link';
 
-export default function CartIndicator() {
+export default function CartIndicator({ locale = 'fr' }) {
   const { cart } = useCart();
-  const { animating } = useContext(CartAnimationContext);
+  const count = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 0), 0);
+  if (count === 0) return null;
 
   return (
-    <AnimatePresence>
-      <motion.span
-        key="cart-indicator"
-        className="relative inline-block cursor-pointer"
-        role="button"
-        tabIndex={0}
-        aria-label={`Panier (${totalItems} article${totalItems > 1 ? 's' : ''})`}
-        initial={{ scale: 1 }}
-        animate={animating ? { scale: [1, 1.4, 1], rotate: [0, 15, -15, 0] } : { scale: 1, rotate: 0 }}
-        transition={{ duration: 0.6, ease: 'easeInOut' }}
-      >
-        <ShoppingCart className="w-6 h-6" aria-hidden="true" />
-        {totalItems > 0 && (
-          <span
-            className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold text-white bg-red-600 rounded-full"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            {totalItems}
-          </span>
-        )}
-      </motion.span>
-    </AnimatePresence>
+    <Link
+      href={`/${locale}/panier`}
+      className="fixed bottom-8 right-6 z-50 flex items-center px-4 py-2 rounded-full bg-blue-600 text-white shadow-lg font-bold text-lg animate-bounce hover:scale-105 transition"
+      aria-label="Aller au panier"
+    >
+      🛒 <span className="ml-2">{count}</span>
+    </Link>
   );
 }

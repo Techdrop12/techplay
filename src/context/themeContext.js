@@ -1,45 +1,33 @@
-'use client';
+// ✅ src/context/themeContext.js
 
 import { createContext, useContext, useEffect, useState } from 'react';
 
 const ThemeContext = createContext();
 
-export const ThemeProvider = ({ children }) => {
+export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState('light');
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      const saved = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const defaultTheme = saved || (prefersDark ? 'dark' : 'light');
-
-      setTheme(defaultTheme);
-      document.documentElement.classList.toggle('dark', defaultTheme === 'dark');
-      localStorage.setItem('theme', defaultTheme);
-    } catch (e) {
-      console.warn('Erreur lecture themeContext:', e);
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('theme');
+      setTheme(stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
     }
   }, []);
 
-  const toggleTheme = () => {
-    setTheme((prev) => {
-      const next = prev === 'light' ? 'dark' : 'light';
-      try {
-        localStorage.setItem('theme', next);
-        document.documentElement.classList.toggle('dark', next === 'dark');
-      } catch (e) {
-        console.warn('Erreur sauvegarde themeContext:', e);
-      }
-      return next;
-    });
-  };
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      document.documentElement.className = theme;
+      localStorage.setItem('theme', theme);
+    }
+  }, [theme]);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );
-};
+}
 
-export const useTheme = () => useContext(ThemeContext);
+export function useTheme() {
+  return useContext(ThemeContext);
+}

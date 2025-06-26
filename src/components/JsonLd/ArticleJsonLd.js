@@ -1,19 +1,29 @@
 // ✅ src/components/JsonLd/ArticleJsonLd.js
-import React from 'react';
+
 import Head from 'next/head';
 
-const ArticleJsonLd = ({ title, description, url, image, datePublished, authorName }) => {
+export default function ArticleJsonLd({ article }) {
+  if (!article) return null;
+
   const data = {
     '@context': 'https://schema.org',
     '@type': 'Article',
-    headline: title,
-    description,
-    image,
-    url,
-    datePublished,
+    headline: article.title,
+    description: article.description,
+    image: article.image,
     author: {
       '@type': 'Person',
-      name: authorName || 'TechPlay AI',
+      name: article.author || 'TechPlay',
+    },
+    datePublished: article.publishedAt,
+    dateModified: article.updatedAt || article.publishedAt,
+    publisher: {
+      '@type': 'Organization',
+      name: 'TechPlay',
+      logo: {
+        '@type': 'ImageObject',
+        url: `${process.env.NEXT_PUBLIC_SITE_URL}/logo.png`,
+      },
     },
   };
 
@@ -25,6 +35,4 @@ const ArticleJsonLd = ({ title, description, url, image, datePublished, authorNa
       />
     </Head>
   );
-};
-
-export default ArticleJsonLd;
+}

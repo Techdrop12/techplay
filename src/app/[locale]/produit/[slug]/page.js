@@ -1,5 +1,6 @@
 // ✅ src/app/[locale]/produit/[slug]/page.js
-'use client'
+
+'use client';
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -59,7 +60,7 @@ export default function ProductPage() {
     if (!product) return;
 
     fetch(
-      `/api/recommendations?category=${encodeURIComponent(
+      `/api/products/recommendations?category=${encodeURIComponent(
         product.category
       )}&excludeIds=${product._id}`
     )

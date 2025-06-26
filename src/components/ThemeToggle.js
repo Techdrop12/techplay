@@ -1,25 +1,31 @@
-'use client'
+// ✅ src/components/ThemeToggle.js
 
-import { useTheme } from '@/context/themeContext'
-import { useEffect, useState } from 'react'
+'use client';
+
+import { useEffect, useState } from 'react';
 
 export default function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
+  const [dark, setDark] = useState(false);
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    // Init mode selon système utilisateur
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setDark(prefersDark);
+    document.documentElement.classList.toggle('dark', prefersDark);
+  }, []);
 
-  if (!mounted) return null
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', dark);
+  }, [dark]);
 
   return (
     <button
-      onClick={toggleTheme}
-      aria-label="Basculer le thème"
-      className="transition duration-300 rounded-full p-2 text-xl border hover:scale-105 bg-white text-black dark:bg-gray-800 dark:text-white"
+      aria-label="Basculer le mode sombre"
+      className="p-2 rounded bg-gray-100 dark:bg-gray-800 border"
+      onClick={() => setDark((v) => !v)}
+      style={{ position: 'fixed', top: 12, right: 12, zIndex: 100 }}
     >
-      {theme === 'dark' ? '☀️' : '🌙'}
+      {dark ? '🌙' : '☀️'}
     </button>
-  )
+  );
 }

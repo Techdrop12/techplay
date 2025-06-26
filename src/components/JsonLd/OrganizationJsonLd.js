@@ -1,24 +1,36 @@
+// ✅ src/components/JsonLd/OrganizationJsonLd.js
+
 import Head from 'next/head';
 
 export default function OrganizationJsonLd() {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://techplay.fr';
-
-  const jsonLd = {
+  const org = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'TechPlay',
-    url: siteUrl,
-    logo: `${siteUrl}/logo.png`,
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.fr',
+    logo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.fr'}/logo.png`,
     sameAs: [
-      'https://www.facebook.com/TechPlay',
-      'https://www.instagram.com/TechPlay',
-      'https://www.linkedin.com/company/TechPlay'
-    ]
+      'https://facebook.com/techplay',
+      'https://instagram.com/techplay',
+      'https://twitter.com/techplay',
+    ],
+    contactPoint: [
+      {
+        '@type': 'ContactPoint',
+        telephone: '+33-1-23-45-67-89',
+        contactType: 'customer service',
+        areaServed: 'FR',
+        availableLanguage: ['French', 'English'],
+      },
+    ],
   };
 
   return (
     <Head>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(org) }}
+      />
     </Head>
   );
 }

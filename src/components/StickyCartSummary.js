@@ -1,40 +1,19 @@
-'use client'
+// ✅ src/components/StickyCartSummary.js
 
-import { useEffect, useState } from 'react'
-import { useCart } from '@/context/cartContext'
-import Link from 'next/link'
+'use client';
+
+import { useCart } from '@/context/cartContext';
 
 export default function StickyCartSummary() {
-  const { cart } = useCart()
-  const [visible, setVisible] = useState(false)
+  const { cart, total } = useCart();
 
-  useEffect(() => {
-    setVisible(cart.length > 0)
-  }, [cart])
-
-  if (!visible) return null
-
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)
-  const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0)
-
+  if (!cart?.length) return null;
   return (
-    <div className="fixed bottom-4 right-4 z-50 max-w-xs bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 shadow-xl rounded-2xl p-4 w-72 animate-fade-in">
-      <h4 className="font-semibold mb-2">Panier ({itemCount})</h4>
-      <ul className="max-h-40 overflow-y-auto text-sm space-y-1">
-        {cart.map((item) => (
-          <li key={item._id} className="flex justify-between">
-            <span>{item.title}</span>
-            <span>{item.quantity}×{item.price}€</span>
-          </li>
-        ))}
-      </ul>
-      <div className="mt-2 font-bold">Total : {total} €</div>
-      <Link
-        href="/panier"
-        className="mt-3 block text-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-1.5 rounded-xl"
-      >
-        Finaliser mon panier
-      </Link>
+    <div className="fixed bottom-0 left-0 w-full bg-blue-700 text-white p-4 flex justify-between items-center z-40 shadow-lg">
+      <span>{cart.length} article{cart.length > 1 ? 's' : ''} — {total.toFixed(2)} €</span>
+      <a href="/panier" className="bg-white text-blue-700 rounded px-3 py-2 font-bold ml-4">
+        Voir le panier
+      </a>
     </div>
-  )
+  );
 }

@@ -1,48 +1,25 @@
-import { Configuration, OpenAIApi } from 'openai';
-import { z } from 'zod';
+// ✅ src/pages/api/ai/chat.js
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import OpenAI from 'openai';
 
-const openai = new OpenAIApi(configuration);
-
-const schema = z.object({
-  question: z.string().min(3),
-  context: z.string().optional(),
-});
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', ['POST']);
-    return res.status(405).end(`Method ${req.method} Not Allowed`);
-  }
+  if (req.method !== 'POST') return res.status(405).end();
+  const { message, history } = req.body;
+  if (!message) return res.status(400).json({ error: 'Missing message' });
 
-  try {
-    const { question, context } = schema.parse(req.body);
+  const conversation = [
+    ...(history || []),
+    { role: 'user', content: message },
+  ];
 
-    const prompt = context
-      ? `Produit : ${context}\n\nQuestion du client : ${question}`
-      : question;
+  const completion = await openai.chat.completions.create({
+    model: 'gpt-3.5-turbo',
+    messages: [{ role: 'system', content: 'Assistant TechPlay' }, ...conversation],
+    max_tokens: 256,
+  });
 
-    const completion = await openai.createChatCompletion({
-      model: 'gpt-3.5-turbo',
-      messages: [
-        {
-          role: 'system',
-          content:
-            'Tu es un conseiller expert pour une boutique e-commerce de produits tech. Tu expliques de manière simple, honnête, persuasive et rassurante, comme un très bon vendeur en boutique.',
-        },
-        { role: 'user', content: prompt },
-      ],
-      temperature: 0.7,
-      max_tokens: 300,
-    });
-
-    const reply = completion.data.choices[0].message.content;
-    return res.status(200).json({ reply });
-  } catch (err) {
-    console.error('Erreur OpenAI:', err);
-    return res.status(500).json({ error: 'Erreur serveur IA' });
-  }
+  const reply = completion.choices[0]?.message.content?.trim() || 'Je n’ai pas compris, peux-tu reformuler ?';
+  res.status(200).json({ reply });
 }

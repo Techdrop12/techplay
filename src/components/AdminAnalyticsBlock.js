@@ -1,25 +1,36 @@
-'use client'
+// ✅ src/components/AdminAnalyticsBlock.js
 
-import { useEffect, useState } from 'react'
+'use client';
+
+import { useEffect, useState } from 'react';
 
 export default function AdminAnalyticsBlock() {
-  const [data, setData] = useState(null)
+  const [data, setData] = useState(null);
 
   useEffect(() => {
     fetch('/api/admin/analytics')
-      .then(res => res.json())
-      .then(setData)
-      .catch(() => setData(null))
-  }, [])
+      .then((res) => res.json())
+      .then(setData);
+  }, []);
 
-  if (!data) return <p>Chargement stats...</p>
+  if (!data) {
+    return <div className="text-gray-400 animate-pulse">Chargement statistiques…</div>;
+  }
 
   return (
-    <div className="bg-zinc-100 dark:bg-zinc-800 p-4 rounded mb-6 text-sm">
-      <p><strong>👥 Visiteurs uniques (30j) :</strong> {data.users}</p>
-      <p><strong>📈 Pages vues :</strong> {data.pageViews}</p>
-      <p><strong>🛒 Conversion :</strong> {data.conversionRate}%</p>
-      <p><strong>💰 CA total :</strong> {data.totalRevenue} €</p>
+    <div className="grid grid-cols-3 gap-6 my-8">
+      <div className="bg-white p-4 rounded shadow text-center">
+        <div className="text-xl font-bold">{data.orders}</div>
+        <div className="text-xs text-gray-600">Commandes</div>
+      </div>
+      <div className="bg-white p-4 rounded shadow text-center">
+        <div className="text-xl font-bold">{data.revenue.toFixed(2)} €</div>
+        <div className="text-xs text-gray-600">CA total</div>
+      </div>
+      <div className="bg-white p-4 rounded shadow text-center">
+        <div className="text-xl font-bold">{data.avgOrder.toFixed(2)} €</div>
+        <div className="text-xs text-gray-600">Panier moyen</div>
+      </div>
     </div>
-  )
+  );
 }

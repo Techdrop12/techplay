@@ -1,37 +1,13 @@
-// src/scripts/fixPriceField.js
+// ✅ src/scripts/fixPriceField.js
 
-import dotenv from 'dotenv';
-dotenv.config({ path: './.env.local' }); // Charger les variables d'environnement depuis la racine
+import fs from 'fs';
 
-import { connectToDatabase } from '../lib/mongo.js';
-import Product from '../models/Product.js';
+const products = JSON.parse(fs.readFileSync('./src/data/import.json', 'utf-8'));
 
-async function fixPriceField() {
-  try {
-    await connectToDatabase();
+const fixed = products.map(prod => ({
+  ...prod,
+  price: Math.round((prod.price || 0) * 100) / 100
+}));
 
-    const products = await Product.find({});
-
-    for (const product of products) {
-      // S'assurer que price est bien un nombre (float)
-      if (typeof product.price !== 'number') {
-        const fixedPrice = parseFloat(product.price);
-        if (!isNaN(fixedPrice)) {
-          product.price = fixedPrice;
-          await product.save();
-          console.log(`Prix corrigé pour produit ${product._id} (${product.title}) : ${fixedPrice}`);
-        } else {
-          console.warn(`Impossible de corriger le prix pour produit ${product._id} (${product.title})`);
-        }
-      }
-    }
-
-    console.log('Correction des prix terminée.');
-    process.exit(0);
-  } catch (error) {
-    console.error('Erreur lors de la correction des prix:', error);
-    process.exit(1);
-  }
-}
-
-fixPriceField();
+fs.writeFileSync('./src/data/import.json', JSON.stringify(fixed, null, 2));
+console.log('Prix corrigés !');

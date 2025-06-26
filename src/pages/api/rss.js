@@ -1,35 +1,30 @@
 // ✅ src/pages/api/rss.js
-import { getAllPosts } from '@/lib/blog' // adapte si besoin
+
+import dbConnect from '@/lib/dbConnect';
+import Blog from '@/models/Blog';
 
 export default async function handler(req, res) {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  await dbConnect();
+  const articles = await Blog.find({ published: true }).sort({ publishedAt: -1 }).lean();
 
-  try {
-    const posts = await getAllPosts()
-    const rssItems = posts.map(post => `
+  let rss = `<?xml version="1.0" encoding="UTF-8" ?><rss version="2.0"><channel>
+    <title>TechPlay Blog</title>
+    <link>${process.env.NEXT_PUBLIC_SITE_URL}/blog</link>
+    <description>Actualités tech, conseils et guides par TechPlay</description>
+  `;
+
+  for (const a of articles) {
+    rss += `
       <item>
-        <title><![CDATA[${post.title}]]></title>
-        <link>${baseUrl}/blog/${post.slug}</link>
-        <pubDate>${new Date(post.publishedAt).toUTCString()}</pubDate>
-        <description><![CDATA[${post.summary || post.content?.slice(0, 160)}]]></description>
+        <title>${a.title}</title>
+        <link>${process.env.NEXT_PUBLIC_SITE_URL}/blog/${a.slug}</link>
+        <pubDate>${new Date(a.publishedAt).toUTCString()}</pubDate>
+        <description><![CDATA[${a.description}]]></description>
       </item>
-    `).join('')
-
-    const rss = `<?xml version="1.0" encoding="UTF-8" ?>
-      <rss version="2.0">
-        <channel>
-          <title>TechPlay - Blog</title>
-          <link>${baseUrl}/blog</link>
-          <description>Le blog TechPlay sur la tech et gadgets innovants</description>
-          <language>fr-fr</language>
-          ${rssItems}
-        </channel>
-      </rss>`
-
-    res.setHeader('Content-Type', 'application/rss+xml')
-    res.status(200).send(rss)
-  } catch (error) {
-    console.error('Erreur génération RSS:', error)
-    res.status(500).end()
+    `;
   }
+  rss += `</channel></rss>`;
+
+  res.setHeader('Content-Type', 'application/rss+xml');
+  res.status(200).send(rss);
 }

@@ -1,22 +1,27 @@
+// ✅ src/components/BackToTop.js
+
 'use client';
 
 import { useEffect, useState } from 'react';
 
 export default function BackToTop() {
-  const [visible, setVisible] = useState(false);
+  const [show, setShow] = useState(false);
 
   useEffect(() => {
-    const toggleVisibility = () => setVisible(window.scrollY > 300);
-    window.addEventListener('scroll', toggleVisibility);
-    return () => window.removeEventListener('scroll', toggleVisibility);
+    const handle = () => setShow(window.scrollY > 200);
+    window.addEventListener('scroll', handle);
+    return () => window.removeEventListener('scroll', handle);
   }, []);
 
-  return visible ? (
+  if (!show) return null;
+
+  return (
     <button
+      className="fixed bottom-7 right-8 bg-blue-600 text-white px-4 py-2 rounded-full shadow-xl z-50"
       onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-      className="fixed bottom-16 right-4 p-2 bg-blue-600 text-white rounded-full shadow-xl z-50"
+      aria-label="Retour en haut"
     >
       ↑ Haut
     </button>
-  ) : null;
+  );
 }

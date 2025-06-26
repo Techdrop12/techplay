@@ -1,33 +1,29 @@
+// ✅ src/components/RecentlyViewed.js
+
 'use client';
 
 import { useEffect, useState } from 'react';
 import ProductCard from './ProductCard';
 
 export default function RecentlyViewed() {
-  const [recentlyViewed, setRecentlyViewed] = useState([]);
+  const [products, setProducts] = useState([]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    try {
-      const stored = localStorage.getItem('recentlyViewed');
-      const parsed = stored ? JSON.parse(stored) : [];
-      setRecentlyViewed(Array.isArray(parsed) ? parsed : []);
-    } catch (e) {
-      console.warn('Erreur lecture recentlyViewed:', e);
-      setRecentlyViewed([]);
-    }
+    const data = localStorage.getItem('recentlyViewed');
+    if (!data) return;
+    setProducts(JSON.parse(data));
   }, []);
 
-  if (recentlyViewed.length === 0) return null;
-
+  if (!products.length) return null;
   return (
-    <section className="mt-12">
-      <h2 className="text-xl font-semibold mb-4">Produits récemment consultés</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-        {recentlyViewed.map((product) => (
-          <ProductCard key={product._id} product={product} />
+    <div className="my-10">
+      <h3 className="text-xl font-bold mb-2">Vu récemment</h3>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        {products.map((p) => (
+          <ProductCard key={p._id} product={p} />
         ))}
       </div>
-    </section>
+    </div>
   );
 }

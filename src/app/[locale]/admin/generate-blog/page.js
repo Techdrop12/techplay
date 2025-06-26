@@ -1,24 +1,20 @@
 // ✅ src/app/[locale]/admin/generate-blog/page.js
 
-'use client';
-
-import { useTranslations } from 'next-intl';
-import SEOHead from '@/components/SEOHead';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/authOptions';
+import { redirect } from 'next/navigation';
 import GenerateBlogPost from '@/components/GenerateBlogPost';
 
-export default function GenerateBlogAdminPage() {
-  const t = useTranslations('admin');
+export default async function GenerateBlogPage({ params }) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== 'admin') {
+    redirect('/fr/admin/login');
+  }
 
   return (
-    <>
-      <SEOHead
-        overrideTitle={t('dashboard')}
-        overrideDescription="Générateur IA de nouveaux articles"
-      />
-      <div className="p-6 max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">🧠 Générateur d’articles IA</h1>
-        <GenerateBlogPost />
-      </div>
-    </>
+    <div>
+      <h1 className="text-2xl font-bold mb-4">Générer des articles IA</h1>
+      <GenerateBlogPost />
+    </div>
   );
 }

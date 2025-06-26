@@ -1,19 +1,34 @@
-'use client'; // ← Nécessaire pour utiliser le hook useTranslations()
-import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+// ✅ src/app/[locale]/not-found.js
+
+import SEOHead from '@/components/SEOHead';
 
 export default function NotFound() {
-  const t = useTranslations();
-
+  // Impossible de récupérer locale ici sur tous les contextes, donc page neutre (multi-locale)
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center">
-      <h1 className="text-4xl font-bold">{t('error.404_title')}</h1>
-      <p className="mt-4 text-gray-600">{t('error.404_message')}</p>
-      <Link href="/fr">
-        <button className="mt-8 px-4 py-2 bg-black text-white rounded">
-          {t('error.back_home')}
-        </button>
-      </Link>
-    </div>
+    <>
+      <SEOHead
+        overrideTitle="Page introuvable"
+        overrideDescription="La page demandée n’existe pas sur TechPlay."
+        noIndex
+      />
+      <div className="flex flex-col items-center justify-center min-h-[50vh] p-8">
+        <svg width={60} height={60} fill="none" className="mb-4" viewBox="0 0 24 24">
+          <circle cx={12} cy={12} r={12} fill="#fbbf24" />
+          <text x="12" y="18" textAnchor="middle" fontSize="14" fill="#fff" fontWeight="bold">
+            404
+          </text>
+        </svg>
+        <h1 className="text-xl font-bold mb-2 text-yellow-700">Oups…</h1>
+        <p className="text-gray-600 mb-2">
+          La page demandée n’existe pas ou n’est plus disponible.
+        </p>
+        <a
+          href="/fr"
+          className="text-blue-600 hover:underline font-semibold mt-2"
+        >
+          Retour à l’accueil
+        </a>
+      </div>
+    </>
   );
 }
