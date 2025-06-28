@@ -1,88 +1,147 @@
-// ✅ /src/app/layout.js (full option, analytique, SEO, PWA, accessibilité, dark mode, bonus inclus)
-import './globals.css';
+import '../styles/globals.css';
 import { Inter } from 'next/font/google';
 import Script from 'next/script';
-import Head from 'next/head';
+import { headers } from 'next/headers';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
+import { CartProvider } from '@/context/cartContext';
+import { CartAnimationProvider } from '@/context/cartAnimationContext';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ 
+  subsets: ['latin'], 
+  variable: '--font-inter',
+  preload: true
+});
+
+const themeInitScript = `
+  try {
+    const mode = localStorage.getItem('theme');
+    if (mode === 'dark' || (!mode && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  } catch(e) {}`;
+
+const stickyHeaderStyle = `
+  header.sticky {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: var(--body-bg, #fff);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+    transition: background-color 0.3s ease;
+  }
+  :focus-visible {
+    outline: 3px solid #2563eb;
+    outline-offset: 2px;
+  }
+`;
 
 export const metadata = {
   title: {
-    default: 'TechPlay – High Tech, Gadgets et Accessoires',
-    template: '%s | TechPlay'
+    default: 'TechPlay - Boutique Tech Premium',
+    template: '%s | TechPlay',
   },
-  description: 'TechPlay : boutique en ligne d’objets high-tech, accessoires et innovations. Livraison rapide, avis clients, offres spéciales, garantie et SAV premium.',
-  manifest: '/manifest.json',
-  icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon.ico',
-    apple: '/apple-touch-icon.png'
-  },
-  themeColor: '#2563eb',
+  description: 'La boutique ultime pour les passionnés de tech et de gadgets innovants.',
+  metadataBase: new URL('https://techplay.fr'),
   openGraph: {
+    title: 'TechPlay',
+    description: 'Découvrez les meilleurs produits tech du moment, livrés gratuitement.',
+    siteName: 'TechPlay',
+    locale: 'fr_FR',
     type: 'website',
-    title: 'TechPlay – High Tech, Gadgets et Accessoires',
-    description: 'TechPlay : boutique en ligne d’objets high-tech, accessoires et innovations.',
-    url: 'https://techplay.fr',
-    images: [
-      { url: '/og-image.jpg', width: 1200, height: 630, alt: 'TechPlay OG' }
-    ]
   },
   twitter: {
     card: 'summary_large_image',
-    site: '@techplay',
-    title: 'TechPlay – High Tech, Gadgets et Accessoires',
-    description: 'TechPlay : boutique en ligne d’objets high-tech, accessoires et innovations.',
-    images: ['/og-image.jpg']
-  }
+    title: 'TechPlay',
+    description: 'La boutique ultime pour les passionnés de tech.',
+  },
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const headerList = await headers();
+  const userAgent = headerList.get('user-agent') || '';
+  const isBot = /bot|crawl|slurp|spider/i.test(userAgent);
+
+  const gaID = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
+  const pixelID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
+
   return (
-    <html lang="fr" className="scroll-smooth dark">
-      <Head>
-        {/* SEO essentials */}
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta charSet="utf-8" />
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <meta name="theme-color" content="#2563eb" />
-        <link rel="icon" href="/favicon.ico" />
-        {/* Preload font */}
-        <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        {/* Preconnect bonus */}
-        <link rel="preconnect" href="https://plausible.io" crossOrigin="" />
-        <link rel="preconnect" href="https://www.clarity.ms" crossOrigin="" />
-        {/* PWA prompt */}
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="mobile-web-app-capable" content="yes" />
-      </Head>
+    <html lang="fr" className={inter.variable} suppressHydrationWarning>
+      <head>
+        <link
+          rel="preload"
+          href="https://fonts.googleapis.com/css2?family=Inter&display=swap"
+          as="style"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter&display=swap"
+          rel="stylesheet"
+          crossOrigin="anonymous"
+        />
+        <style>{stickyHeaderStyle}</style>
+        <meta name="theme-color" content="#000000" />
+        <Script
+          id="init-theme"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: themeInitScript }}
+        />
 
-      {/* Plausible Analytics */}
-      <Script
-        defer
-        data-domain="techplay.fr"
-        src="https://plausible.io/js/script.js"
-        strategy="afterInteractive"
-      />
-      {/* Microsoft Clarity */}
-      <Script
-        id="clarity"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `
-          (function(c,l,a,r,i,t,y){
-            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-          })(window, document, "clarity", "script", "YOUR_CLARITY_ID");
-          `
-        }}
-      />
+        {!isBot && gaID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${gaID}`}
+              strategy="afterInteractive"
+            />
+            <Script
+              id="google-analytics"
+              strategy="afterInteractive"
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', '${gaID}', { page_path: window.location.pathname });
+                `,
+              }}
+            />
+          </>
+        )}
 
-      {/* Dark mode switch (auto / user) */}
-      <body className={`${inter.className} bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-white antialiased`}>
-        {children}
+        {!isBot && pixelID && (
+          <Script
+            id="meta-pixel"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                !function(f,b,e,v,n,t,s)
+                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                n.queue=[];t=b.createElement(e);t.async=!0;
+                t.src=v;s=b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t,s)}(window, document,'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+                fbq('init', '${pixelID}');
+                fbq('track', 'PageView');
+              `,
+            }}
+          />
+        )}
+      </head>
+      <body className="bg-white text-black dark:bg-zinc-900 dark:text-white transition-colors duration-300">
+        {!isBot && <Analytics />}
+        {!isBot && <SpeedInsights />}
+        <CartProvider>
+          <CartAnimationProvider>
+            {children}
+          </CartAnimationProvider>
+        </CartProvider>
       </body>
     </html>
   );

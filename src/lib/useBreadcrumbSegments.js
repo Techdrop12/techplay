@@ -1,21 +1,61 @@
-// ✅ /src/lib/useBreadcrumbSegments.js (hook pour générer les segments du fil d’Ariane)
-import { useRouter } from 'next/navigation';
+'use client';
 
-export default function useBreadcrumbSegments(locale, customSegments = []) {
-  const router = useRouter();
-  // Par défaut : Accueil > ... > Dernier segment
-  let path = router?.asPath || '/';
-  if (typeof window !== 'undefined') path = window.location.pathname;
+import { usePathname } from 'next/navigation';
+import { useLocale } from 'next-intl';
 
-  // Nettoie le path pour extraire les segments
-  const segments = path
-    .split('/')
-    .filter((seg) => seg && seg !== locale)
-    .map((seg, idx, arr) => ({
-      label: seg,
-      url: '/' + [locale, ...arr.slice(0, idx + 1)].join('/'),
-    }));
+/**
+ * Génère dynamiquement les segments du fil d’Ariane (breadcrumb) selon le chemin et la locale.
+ * Utilisé pour le SEO (JSON-LD), la navigation secondaire, les balises meta dynamiques, etc.
+ */
+export default function useBreadcrumbSegments() {
+  const pathname = usePathname();
+  const locale = useLocale();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || '';
 
-  // Fusionne avec customSegments si fournis
-  return customSegments.length > 0 ? customSegments : segments;
+  const segments = pathname.split('/').filter(Boolean);
+
+  let path = '';
+  const translations = {
+    fr: {
+      produit: 'Produit',
+      panier: 'Panier',
+      wishlist: 'Favoris',
+      blog: 'Blog',
+      'a-propos': 'À propos',
+      contact: 'Contact',
+      commande: 'Commande',
+      'mes-commandes': 'Mes commandes',
+      success: 'Succès',
+      admin: 'Admin',
+      dashboard: 'Dashboard',
+    },
+    en: {
+      produit: 'Product',
+      panier: 'Cart',
+      wishlist: 'Wishlist',
+      blog: 'Blog',
+      'a-propos': 'About',
+      contact: 'Contact',
+      commande: 'Order',
+      'mes-commandes': 'My Orders',
+      success: 'Success',
+      admin: 'Admin',
+      dashboard: 'Dashboard',
+    },
+  };
+
+  const breadcrumb = segments.map((seg) => {
+    path += `/${seg}`;
+    const label =
+      translations[locale]?.[seg] ||
+      decodeURIComponent(seg.replace(/-/g, ' '))
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+
+    return {
+      label,
+      url: `${siteUrl}${path}`,
+    };
+  });
+
+  return breadcrumb;
 }

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 import { getToken } from 'next-auth/jwt';
 import { middleware as secureHeaders } from './middleware-security';
-import intlConfig from './src/lib/next-intl.config.js';
+import intlConfig from '@/lib/next-intl.config.js'; // Chemin simplifié
 
 const intlMiddleware = createMiddleware({
   ...intlConfig,
@@ -19,7 +19,7 @@ const STATIC_FILES = [
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // Réécriture des fichiers statiques
+  // Rewrite fichiers statiques localisés (ex: /fr/manifest.json → /manifest.json)
   const matchStatic = pathname.match(/^\/(fr|en)\/(.+)$/);
   if (matchStatic) {
     const [, , path] = matchStatic;
@@ -28,7 +28,7 @@ export async function middleware(request) {
     }
   }
 
-  // Chemins publics autorisés
+  // Bypass fichiers publics
   const PUBLIC_PATHS = [
     '/favicon.ico',
     '/robots.txt',
@@ -48,7 +48,6 @@ export async function middleware(request) {
   ];
   if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next();
 
-  // Préfixes publics autorisés
   const PUBLIC_PREFIXES = [
     '/_next/',
     '/api/',
@@ -61,37 +60,36 @@ export async function middleware(request) {
   ];
   if (PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return NextResponse.next();
 
-  // Redirection / → /fr
+  // Redirection / vers /fr
   if (pathname === '/') {
     const url = request.nextUrl.clone();
     url.pathname = '/fr';
     return NextResponse.redirect(url);
   }
 
-  // Mode maintenance (sauf admin & maintenance)
-  const maintenanceOn = process.env.MAINTENANCE === 'true';
-  const isAdmin = pathname.startsWith('/admin');
-  const isMaintenance = ['/maintenance', '/fr/maintenance', '/en/maintenance'].includes(pathname);
-  if (maintenanceOn && !isAdmin && !isMaintenance) {
+  // Maintenance mode
+  const maintenance = process.env.MAINTENANCE === 'true';
+  const isAdminPath = pathname.startsWith('/admin');
+  const isMaintenancePath = ['/maintenance', '/fr/maintenance', '/en/maintenance'].includes(pathname);
+  if (maintenance && !isAdminPath && !isMaintenancePath) {
     const url = request.nextUrl.clone();
     url.pathname = '/maintenance';
     return NextResponse.redirect(url);
   }
 
-  // Auth admin pour /admin/*
-  if (isAdmin) {
+  // Admin auth
+  if (isAdminPath) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
     if (!token || token.role !== 'admin') {
       const url = request.nextUrl.clone();
       url.pathname = '/fr/connexion';
       return NextResponse.redirect(url);
     }
-    return secureHeaders(request);
   }
 
-  // Middleware intl + headers de sécurité
-  const response = await intlMiddleware(request);
-  return secureHeaders(request, response);
+  // Appel combiné i18n + headers sécurisés
+  const intlResponse = await intlMiddleware(request);
+  return secureHeaders(request, intlResponse);
 }
 
 export const config = {

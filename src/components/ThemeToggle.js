@@ -1,31 +1,27 @@
-// ✅ /src/components/ThemeToggle.js (bonus dark mode auto)
 'use client';
 
+import { useTheme } from '@/context/themeContext';
 import { useEffect, useState } from 'react';
 
 export default function ThemeToggle() {
-  const [dark, setDark] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
+  // Empêche les erreurs d’hydratation
   useEffect(() => {
-    setDark(window.matchMedia('(prefers-color-scheme: dark)').matches);
+    setMounted(true);
   }, []);
 
-  function toggle() {
-    setDark(d => {
-      const next = !d;
-      document.documentElement.classList.toggle('dark', next);
-      return next;
-    });
-  }
+  if (!mounted) return null;
 
   return (
     <button
-      onClick={toggle}
-      aria-label="Basculer mode sombre"
-      className="ml-2 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-      type="button"
+      onClick={toggleTheme}
+      aria-label="Basculer le thème"
+      title="Changer de thème"
+      className="p-2 rounded-full border text-xl transition bg-white text-black dark:bg-gray-800 dark:text-white hover:scale-105"
     >
-      {dark ? '🌙' : '☀️'}
+      {theme === 'dark' ? '☀️' : '🌙'}
     </button>
   );
 }

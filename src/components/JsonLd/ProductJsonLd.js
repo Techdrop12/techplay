@@ -1,17 +1,26 @@
-// ✅ src/components/JsonLd/ProductJsonLd.js
-
 import Head from 'next/head';
 
-export default function ProductJsonLd({ product }) {
-  if (!product) return null;
+export default function ProductJsonLd({ product, siteUrl, locale = 'fr' }) {
+  if (!product || !product.title || !product.slug) return null;
+
+  const url = `${siteUrl}/${locale}/produit/${product.slug}`;
+  const price = parseFloat(product.price).toFixed(2);
+  const stock = product.stock ?? 10;
+  const availability = stock > 0
+    ? 'https://schema.org/InStock'
+    : 'https://schema.org/OutOfStock';
+
+  const images = Array.isArray(product.image)
+    ? product.image.map((img) => `${siteUrl}${img}`)
+    : [`${siteUrl}${product.image}`];
 
   const data = {
     '@context': 'https://schema.org/',
     '@type': 'Product',
     name: product.title,
-    image: product.image,
-    description: product.description,
-    sku: product.sku,
+    image: images,
+    description: product.description || '',
+    sku: product.sku || product._id,
     mpn: product._id,
     brand: {
       '@type': 'Brand',
@@ -19,16 +28,17 @@ export default function ProductJsonLd({ product }) {
     },
     offers: {
       '@type': 'Offer',
-      url: `${process.env.NEXT_PUBLIC_SITE_URL}/produit/${product.slug}`,
+      url,
       priceCurrency: 'EUR',
-      price: product.price,
-      availability: product.stock > 0 ? 'InStock' : 'OutOfStock',
+      price,
+      availability,
+      itemCondition: 'https://schema.org/NewCondition',
     },
     aggregateRating: product.rating
       ? {
           '@type': 'AggregateRating',
-          ratingValue: product.rating,
-          reviewCount: product.reviewCount,
+          ratingValue: parseFloat(product.rating).toFixed(1),
+          reviewCount: product.reviews?.length || product.reviewCount || 1,
         }
       : undefined,
   };

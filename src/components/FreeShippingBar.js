@@ -1,19 +1,36 @@
-// ✅ /src/components/FreeShippingBar.js (barre progression livraison gratuite, bonus panier)
 'use client';
 
 import { useCart } from '@/context/cartContext';
+import { useEffect, useState } from 'react';
 
-export default function FreeShippingBar() {
+export default function FreeShippingBar({ threshold = 49 }) {
   const { cart } = useCart();
-  const total = cart.reduce((sum, item) => sum + (item.price || 0) * (item.qty || 1), 0);
-  const threshold = 49;
+  const [total, setTotal] = useState(0);
 
-  if (total >= threshold) return null;
-  const missing = (threshold - total).toFixed(2);
+  useEffect(() => {
+    const totalAmount = cart.reduce(
+      (sum, item) => sum + (item.price || 0) * (item.quantity || 1),
+      0
+    );
+    setTotal(totalAmount);
+  }, [cart]);
+
+  if (total >= threshold || cart.length === 0) return null;
+
+  const remaining = (threshold - total).toFixed(2);
+  const progress = Math.min((total / threshold) * 100, 100);
 
   return (
-    <div className="w-full bg-blue-100 text-blue-800 p-2 text-center text-sm">
-      Plus que <span className="font-bold">{missing} €</span> pour profiter de la livraison gratuite !
+    <div className="w-full bg-gray-100 border-b border-gray-300 text-center text-sm font-medium py-2 px-4 shadow-sm animate-pulse">
+      <div className="mb-1">
+        Plus que <span className="text-blue-600 font-semibold">{remaining} €</span> pour la livraison gratuite 🚚
+      </div>
+      <div className="w-full h-2 bg-gray-300 rounded overflow-hidden">
+        <div
+          className="h-full bg-blue-600 transition-all duration-500"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
     </div>
   );
 }

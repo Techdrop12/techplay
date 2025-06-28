@@ -1,13 +1,26 @@
-// ✅ /src/components/ScoreStars.js (demi-étoiles, animations, bonus UX)
+'use client';
+
 import { FaStar, FaStarHalfAlt, FaRegStar } from 'react-icons/fa';
 
-export default function ScoreStars({ value = 0 }) {
-  const stars = [];
-  let v = Math.round(value * 2) / 2;
-  for (let i = 1; i <= 5; i++) {
-    if (v >= i) stars.push(<FaStar key={i} className="inline text-yellow-500" />);
-    else if (v >= i - 0.5) stars.push(<FaStarHalfAlt key={i} className="inline text-yellow-400" />);
-    else stars.push(<FaRegStar key={i} className="inline text-gray-300" />);
-  }
-  return <span className="space-x-0.5">{stars}</span>;
+export default function ScoreStars({ value = 0, max = 5 }) {
+  const rounded = Math.round(value * 2) / 2;
+
+  return (
+    <div
+      className="flex items-center gap-0.5 text-yellow-400"
+      role="img"
+      aria-label={`${rounded} étoile${rounded > 1 ? 's' : ''}`}
+    >
+      {Array.from({ length: max }).map((_, i) => {
+        const index = i + 1;
+        if (rounded >= index) {
+          return <FaStar key={i} className="w-4 h-4" />;
+        } else if (rounded >= index - 0.5) {
+          return <FaStarHalfAlt key={i} className="w-4 h-4" />;
+        } else {
+          return <FaRegStar key={i} className="w-4 h-4 text-gray-300" />;
+        }
+      })}
+    </div>
+  );
 }

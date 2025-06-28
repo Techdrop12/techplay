@@ -1,11 +1,23 @@
-// ✅ /src/components/LocalizedLink.js (bonus i18n, navigation)
+'use client';
+
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
 
-export default function LocalizedLink({ href, children, ...props }) {
+export default function LocalizedLink({ href = '/', children, ...props }) {
   const locale = useLocale();
-  const localHref = `/${locale}${href.startsWith('/') ? href : `/${href}`}`;
+
+  let finalHref = href;
+  if (typeof href === 'string') {
+    // Nettoyage : retire la locale si elle est déjà incluse
+    const localePattern = new RegExp(`^/${locale}(?=/|$)`);
+    finalHref = href.replace(localePattern, '');
+    // Force le / initial et ajoute locale
+    finalHref = `/${locale}${finalHref.startsWith('/') ? finalHref : '/' + finalHref}`;
+  }
+
   return (
-    <Link href={localHref} {...props}>{children}</Link>
+    <Link href={finalHref} {...props}>
+      {children}
+    </Link>
   );
 }

@@ -1,28 +1,56 @@
-// ✅ /src/components/PromoBanner.js (bannière promo dynamique, bonus conversion)
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+
+const promos = [
+  {
+    text: '🎁 Livraison gratuite ce soir jusqu’à minuit !',
+    url: '/fr/produit',
+    bg: 'bg-green-600',
+    condition: () => {
+      const hour = new Date().getHours();
+      return hour >= 18 && hour <= 23;
+    },
+  },
+  {
+    text: '🚚 Livraison rapide sur tous les produits TechPlay !',
+    url: '/fr/categorie',
+    bg: 'bg-blue-700',
+  },
+  {
+    text: '⭐ Offres limitées sur nos best-sellers high-tech !',
+    url: '/fr/categorie/best-sellers',
+    bg: 'bg-orange-500',
+  },
+];
 
 export default function PromoBanner() {
-  const [show, setShow] = useState(true);
+  const [visible, setVisible] = useState(true);
+  const [current, setCurrent] = useState(null);
 
-  // Exemple de promo : voir pour dynamique plus tard
-  const promo = {
-    message: '🚀 -10% sur tout avec le code TECH10 !',
-    url: '/fr/produit',
-  };
+  useEffect(() => {
+    const eligible = promos.filter((p) => !p.condition || p.condition());
+    if (eligible.length > 0) {
+      const random = Math.floor(Math.random() * eligible.length);
+      setCurrent(eligible[random]);
+    }
 
-  if (!show) return null;
+    const autoClose = setTimeout(() => setVisible(false), 12000);
+    return () => clearTimeout(autoClose);
+  }, []);
+
+  if (!visible || !current) return null;
 
   return (
-    <div className="bg-gradient-to-r from-blue-600 to-blue-400 text-white text-center p-2 font-medium shadow-md">
-      <a href={promo.url} className="hover:underline">
-        {promo.message}
-      </a>
+    <div className={`${current.bg} text-white text-sm text-center py-2 px-4 font-medium shadow-md relative z-40`}>
+      <Link href={current.url} className="hover:underline block">
+        {current.text}
+      </Link>
       <button
-        className="absolute right-4 top-1 text-white"
-        aria-label="Fermer"
-        onClick={() => setShow(false)}
+        onClick={() => setVisible(false)}
+        className="absolute right-3 top-1 text-white text-lg font-bold"
+        aria-label="Fermer la bannière promotionnelle"
       >
         ×
       </button>

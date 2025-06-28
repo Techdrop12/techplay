@@ -1,28 +1,42 @@
-// ✅ src/components/JsonLd/ArticleJsonLd.js
-
 import Head from 'next/head';
 
-export default function ArticleJsonLd({ article }) {
-  if (!article) return null;
+export default function ArticleJsonLd({ article, siteUrl }) {
+  if (!article || !siteUrl) return null;
 
-  const data = {
+  const {
+    title,
+    description,
+    image,
+    author = 'TechPlay AI',
+    publishedAt,
+    updatedAt,
+    slug,
+  } = article;
+
+  const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
-    headline: article.title,
-    description: article.description,
-    image: article.image,
+    headline: title,
+    description,
+    image,
     author: {
       '@type': 'Person',
-      name: article.author || 'TechPlay',
+      name: author,
     },
-    datePublished: article.publishedAt,
-    dateModified: article.updatedAt || article.publishedAt,
+    datePublished: publishedAt,
+    dateModified: updatedAt || publishedAt,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${siteUrl}/blog/${slug}`,
+    },
     publisher: {
       '@type': 'Organization',
       name: 'TechPlay',
       logo: {
         '@type': 'ImageObject',
-        url: `${process.env.NEXT_PUBLIC_SITE_URL}/logo.png`,
+        url: `${siteUrl}/icons/icon-512x512.png`,
+        width: 512,
+        height: 512,
       },
     },
   };
@@ -31,7 +45,7 @@ export default function ArticleJsonLd({ article }) {
     <Head>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
     </Head>
   );

@@ -1,48 +1,45 @@
-'use client'
+'use client';
 
-import Link from 'next/link'
-import { useCart } from '@/context/cartContext'
-import LanguageSwitcher from './LanguageSwitcher'
+import { usePathname, useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
 
-export default function Header() {
-  const { cart } = useCart()
-  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0)
+/**
+ * Composant switcher de langue FR / EN
+ * Fonctionne avec l’App Router + next-intl
+ */
+export default function LanguageSwitcher() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const locale = useLocale();
+
+  const changeLanguage = (newLocale) => {
+    if (!pathname) return;
+    const segments = pathname.split('/');
+    segments[1] = newLocale; // remplace la langue actuelle
+    const newPath = segments.join('/');
+    router.push(newPath);
+  };
 
   return (
-    <header className="flex justify-between items-center px-6 py-4 bg-black text-white">
-      {/* Logo */}
-      <div className="flex items-center gap-6">
-        <Link href="/">
-          <img src="/logo.png" alt="TechPlay logo" className="h-10" />
-        </Link>
-
-        {/* Switcher de langue */}
-        <LanguageSwitcher />
-      </div>
-
-      {/* Navigation droite */}
-      <nav className="flex items-center space-x-4">
-        {/* Lien panier avec compteur */}
-        <Link href="/panier" className="relative">
-          🛒
-          {totalItems > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-xs rounded-full px-1">
-              {totalItems}
-            </span>
-          )}
-        </Link>
-
-        {/* Wishlist */}
-        <Link href="/wishlist" className="hover:underline text-sm text-white">
-          💖 Wishlist
-        </Link>
-
-        {/* Admin */}
-        <Link href="/admin" className="text-sm text-white hover:underline">
-          Admin
-        </Link>
-      </nav>
-    </header>
-  )
+    <div className="flex gap-2">
+      <button
+        onClick={() => changeLanguage('fr')}
+        className={`px-2 py-1 rounded ${
+          locale === 'fr' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'
+        } text-sm`}
+        aria-pressed={locale === 'fr'}
+      >
+        🇫🇷 FR
+      </button>
+      <button
+        onClick={() => changeLanguage('en')}
+        className={`px-2 py-1 rounded ${
+          locale === 'en' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'
+        } text-sm`}
+        aria-pressed={locale === 'en'}
+      >
+        🇬🇧 EN
+      </button>
+    </div>
+  );
 }
-

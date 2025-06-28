@@ -1,16 +1,34 @@
-// ✅ src/components/JsonLd/BlogJsonLd.js
-import React from 'react';
 import Head from 'next/head';
 
-const BlogJsonLd = ({ locale, siteUrl }) => {
+export default function BlogJsonLd({ locale = 'fr', siteUrl }) {
+  if (!siteUrl) return null;
+
+  const url = `${siteUrl}/${locale}/blog`;
+
   const data = {
     '@context': 'https://schema.org',
     '@type': 'Blog',
-    url: `${siteUrl}/${locale}/blog`,
+    url,
     name: locale === 'fr' ? 'Blog TechPlay' : 'TechPlay Blog',
-    description: locale === 'fr'
-      ? 'Actualités, conseils et tendances high-tech sélectionnés par TechPlay.'
-      : 'Tech news, tips and trends curated by TechPlay.',
+    description:
+      locale === 'fr'
+        ? 'Actualités, conseils et tendances high-tech sélectionnés par l’équipe TechPlay. Astuces, nouveautés, innovations et guides pratiques.'
+        : 'Tech news, advice, and trending topics curated by the TechPlay team. Tips, innovations and practical guides.',
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': url
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'TechPlay',
+      url: siteUrl,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${siteUrl}/icons/icon-512x512.png`,
+        width: 512,
+        height: 512
+      }
+    }
   };
 
   return (
@@ -21,6 +39,4 @@ const BlogJsonLd = ({ locale, siteUrl }) => {
       />
     </Head>
   );
-};
-
-export default BlogJsonLd;
+}

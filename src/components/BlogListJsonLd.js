@@ -1,30 +1,24 @@
-// ✅ src/components/JsonLd/BlogListJsonLd.js
-import React from 'react';
 import Head from 'next/head';
 
-const BlogListJsonLd = ({ posts, locale, siteUrl }) => {
-  const items = posts.map((post, index) => ({
-    '@type': 'ListItem',
-    position: index + 1,
-    url: `${siteUrl}/${locale}/blog/${post.slug}`,
-  }));
+export default function BlogListJsonLd({ posts = [], locale = 'fr', siteUrl }) {
+  if (!siteUrl || !Array.isArray(posts) || posts.length === 0) return null;
 
   const data = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    itemListElement: items,
+    itemListElement: posts.map((post, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      url: `${siteUrl}/${locale}/blog/${post.slug}`,
+    })),
   };
 
   return (
     <Head>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(data),
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
       />
     </Head>
   );
-};
-
-export default BlogListJsonLd;
+}

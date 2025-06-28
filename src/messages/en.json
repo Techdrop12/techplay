@@ -5,18 +5,169 @@
     "a_propos_title": "About TechPlay",
     "a_propos_description": "Learn more about our mission, team, and values.",
     "contact_title": "Contact",
-    "contact_description": "Any questions? Get in touch with TechPlay."
+    "contact_description": "Any question? Contact TechPlay by email.",
+    "wishlist_title": "My wishlist",
+    "wishlist_description": "Find your favorite saved products on TechPlay.",
+    "cart_title": "My cart",
+    "cart_description": "View and manage the products in your TechPlay cart.",
+    "success_title": "Order successful",
+    "success_description": "Your TechPlay order has been confirmed.",
+    "orders_title": "My orders",
+    "orders_description": "List of your orders on TechPlay",
+    "cgv_title": "Terms & Conditions",
+    "cgv_description": "All TechPlay terms and conditions.",
+    "blog_title": "TechPlay Blog",
+    "blog_description": "All the latest news and articles from TechPlay.",
+    "product_not_found_title": "Product Not Found",
+    "product_not_found_description": "The product you are looking for does not exist or is no longer available."
   },
-  "common": {
-    "home": "Home",
-    "about": "About",
-    "contact": "Contact",
-    "wishlist": "Wishlist",
-    "cart": "Cart",
-    "my_orders": "My Orders",
-    "logout": "Logout",
-    "login": "Login",
-    "search": "Search products...",
-    "faq": "FAQ"
+  "home": {
+    "title": "Home",
+    "description": "Discover the best high-tech gadgets and accessories delivered to your door.",
+    "categories": "Categories",
+    "all": "All",
+    "add_to_cart": "Add to cart",
+    "continue_shopping": "← Continue shopping",
+    "your_cart": "Your cart",
+    "empty_cart": "Your cart is empty",
+    "total": "Total",
+    "checkout": "Proceed to checkout",
+    "redirecting": "Redirecting...",
+    "payment_error": "Payment error",
+    "error_loading_products": "Error loading products.",
+    "no_products_available": "No products available."
+  },
+  "admin": {
+    "add_product": "Add a product",
+    "title": "Title",
+    "description": "Description",
+    "price": "Price",
+    "category": "Category",
+    "image": "Image",
+    "submit": "Submit",
+    "success": "Product added successfully",
+    "error": "Error adding product",
+    "dashboard": "Dashboard",
+    "total_sales": "Total Sales",
+    "total_orders": "Total Orders",
+    "latest_order": "Latest Order",
+    "manage_products": "Manage Products",
+    "delete_confirmation": "Are you sure you want to delete this product?"
+  },
+  "login": {
+    "admin_login": "Admin login",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Login",
+    "failed": "Login failed"
+  },
+  "product": {
+    "added_to_cart": "{title} added to cart",
+    "out_of_stock": "Out of stock",
+    "quantity": "Quantity",
+    "reviews_title": "Customer reviews",
+    "write_review": "Write a review"
+  },
+  "error": {
+    "404_title": "Page not found",
+    "404_message": "The page you are looking for does not exist.",
+    "back_home": "Back to homepage",
+    "generic": "An error occurred."
+  },
+  "a_propos": {
+    "title": "About",
+    "description": "TechPlay is a store specializing in quality tech and gaming products.",
+    "our_mission_title": "Our mission",
+    "our_mission_text": "Our mission is to bring the latest tech innovations to enthusiasts everywhere.",
+    "our_team_title": "Our team",
+    "our_team_text": "We are a team of developers, marketers and tech fans committed to giving you the best experience.",
+    "our_values_title": "Our values",
+    "our_values_text": "Quality, transparency, and passion are our guiding principles."
+  },
+  "contact": {
+    "title": "Contact",
+    "intro": "Any question? Write us at"
+  },
+  "wishlist": {
+    "title": "My wishlist",
+    "empty": "No products in your wishlist.",
+    "view": "View product",
+    "remove": "Remove from wishlist"
+  },
+  "cart": {
+    "your_cart": "Your cart",
+    "empty": "Your cart is empty",
+    "total": "Total",
+    "checkout": "Proceed to checkout",
+    "continue": "← Continue shopping",
+    "error": "Payment error",
+    "free_shipping_reached": "Free shipping reached!",
+    "add_x_more": "Add {missing} more for free shipping"
+  },
+  "success": {
+    "title": "Thank you for your order 🎉",
+    "message": "Your payment has been confirmed. You will receive a confirmation email shortly.",
+    "back": "Return to homepage"
+  },
+  "orders": {
+    "my_orders": "My orders",
+    "no_orders_found": "You have no orders yet.",
+    "view_details": "View details",
+    "order_id": "Order #{orderId}",
+    "date": "Date",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "total": "Total",
+    "status": "Status",
+    "customer_info": "Customer Info",
+    "items_ordered": "Items Ordered",
+    "order_summary": "Order Summary",
+    "order_not_found": "Order Not Found",
+    "error_loading_order": "Error loading order."
+  },
+  "cgv": {
+    "title": "Terms & Conditions",
+    "intro": "These terms and conditions apply to all orders placed on TechPlay.",
+    "section1_title": "Article 1: Purpose",
+    "section1_text": "These terms govern TechPlay’s product sales.",
+    "section2_title": "Article 2: Orders",
+    "section2_text": "The order becomes firm once payment is validated."
+  },
+  "blog": {
+    "title": "TechPlay Blog",
+    "no_posts": "No posts available at the moment.",
+    "read_more": "Read more",
+    "author": "Author: {author}",
+    "published_on": "Published on {date}"
+  },
+  "category": {
+    "title": "Category: {category}",
+    "no_products": "No products found in this category."
+  },
+  "commande": {
+    "title": "Checkout",
+    "checkout_title": "Payment",
+    "checkout_description": "Complete your purchase on TechPlay.",
+    "your_cart": "Your cart",
+    "cart_empty": "Your cart is empty",
+    "payment_details": "Payment details",
+    "pay_now": "Pay now",
+    "processing": "Processing…",
+    "payment_error": "An error occurred during payment."
+  },
+  "reviews": {
+    "title": "Customer reviews",
+    "aria_label": "Customer review list",
+    "filter_label": "Filter reviews by rating",
+    "filter_stars": "Filter by {count} stars",
+    "clear_filter": "Clear filter",
+    "clear": "Clear",
+    "sort_label": "Sort reviews",
+    "sort_recent": "Recent",
+    "sort_helpful": "Helpful",
+    "no_reviews": "No reviews for this product.",
+    "error_loading": "Error loading reviews.",
+    "retry": "Retry",
+    "verified": "Verified review"
   }
 }

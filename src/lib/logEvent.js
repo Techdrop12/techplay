@@ -1,16 +1,34 @@
-// ✅ /src/lib/logEvent.js (universal event logger : GA4, Pixel, Brevo, tracking)
+'use client';
+
 export function logEvent(event, params = {}) {
+  if (typeof window === 'undefined') return;
+
   // Google Analytics 4
-  if (typeof window !== 'undefined' && window.gtag) {
+  if (typeof window.gtag === 'function') {
     window.gtag('event', event, params);
+  } else if (process.env.NODE_ENV === 'development') {
+    console.warn('[logEvent] gtag non disponible :', event, params);
   }
-  // Facebook Pixel
-  if (typeof window !== 'undefined' && window.fbq) {
+
+  // Meta (Facebook) Pixel
+  if (typeof window.fbq === 'function') {
     window.fbq('trackCustom', event, params);
   }
-  // Brevo
-  if (typeof window !== 'undefined' && window._brevo && event === 'newsletter_signup') {
+
+  // Brevo (Sendinblue) — événement marketing personnalisé
+  if (typeof window._brevo === 'object' && event === 'newsletter_signup') {
     window._brevo.track('event', params);
   }
-  // Ajoute d’autres plateformes ici si besoin (Hotjar, etc)
+
+  // Optionnel : log interne (dev uniquement)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[logEvent] (dev only)', event, params);
+  }
+
+  // Optionnel : backend tracking (AB test, logs, analytics internes)
+  // fetch('/api/track', {
+  //   method: 'POST',
+  //   headers: { 'Content-Type': 'application/json' },
+  //   body: JSON.stringify({ event, ...params }),
+  // });
 }

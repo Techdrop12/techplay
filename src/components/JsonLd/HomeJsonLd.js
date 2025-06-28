@@ -1,19 +1,24 @@
-// ✅ src/components/JsonLd/HomeJsonLd.js
-
 import Head from 'next/head';
 
-export default function HomeJsonLd() {
+export default function HomeJsonLd({ locale = 'fr', siteUrl }) {
+  if (!siteUrl) return null;
+
+  const url = `${siteUrl}/${locale}`;
   const data = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'TechPlay',
-    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.fr',
+    url,
+    name:
+      locale === 'fr'
+        ? 'TechPlay – Boutique high-tech, gadgets et innovations'
+        : 'TechPlay – Tech gadgets & smart shop',
     potentialAction: {
       '@type': 'SearchAction',
-      target: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.fr'}/search?q={search_term_string}`,
+      target: `${url}/search?q={search_term_string}`,
       'query-input': 'required name=search_term_string',
     },
   };
+
   return (
     <Head>
       <script

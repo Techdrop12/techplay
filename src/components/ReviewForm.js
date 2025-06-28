@@ -1,63 +1,106 @@
-// ✅ /src/components/ReviewForm.js (ajout d’avis, bonus UX, optimisé)
 'use client';
 
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import ScoreStars from './ScoreStars';
+import { motion } from 'framer-motion';
+import { Star } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export default function ReviewForm({ productId }) {
-  const [note, setNote] = useState(5);
+  const t = useTranslations('reviews');
   const [comment, setComment] = useState('');
-  const [pending, setPending] = useState(false);
+  const [rating, setRating] = useState(5);
+  const [hover, setHover] = useState(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
 
-  async function submit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!comment) return toast.error("Merci d'écrire un avis !");
-    setPending(true);
-    const res = await fetch('/api/reviews', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ productId, note, comment }),
-    });
-    setPending(false);
-    if (res.ok) {
-      toast.success('Avis envoyé ! Merci 🙂');
+    if (!comment || rating < 1 || rating > 5 || sending) return;
+
+    setSending(true);
+    try {
+      const res = await fetch('/api/reviews/product/' + productId, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId,
+          rating,
+          comment,
+          name: 'Client TechPlay',
+        }),
+      });
+
+      if (!res.ok) throw new Error();
+      setSubmitted(true);
       setComment('');
-      setNote(5);
-    } else {
-      toast.error('Erreur, réessayez.');
+      setRating(5);
+      toast.success(t('thank_you'));
+    } catch {
+      toast.error(t('submit_error'));
+    } finally {
+      setSending(false);
     }
+  };
+
+  if (submitted) {
+    return (
+      <motion.p
+        className="mt-6 text-green-600 font-semibold text-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        aria-live="polite"
+      >
+        {t('thank_you')}
+      </motion.p>
+    );
   }
 
   return (
-    <form onSubmit={submit} className="my-8 bg-gray-50 rounded p-4 shadow-sm">
-      <label className="block mb-2 font-semibold">Votre note</label>
-      <ScoreStars value={note} />
-      <input
-        type="range"
-        min="1"
-        max="5"
-        step="1"
-        value={note}
-        onChange={(e) => setNote(Number(e.target.value))}
-        className="mb-3 w-full"
-      />
-      <label className="block mb-2 font-semibold">Votre avis</label>
+    <form onSubmit={handleSubmit} className="mt-8 border-t pt-6 space-y-4">
+      <h3 className="text-xl font-semibold">{t('write_review')}</h3>
+
+      <div className="flex gap-1 justify-center" role="radiogroup" aria-label={t('rating_label')}>
+        {[1, 2, 3, 4, 5].map((val) => (
+          <motion.button
+            key={val}
+            type="button"
+            onClick={() => setRating(val)}
+            onMouseEnter={() => setHover(val)}
+            onMouseLeave={() => setHover(null)}
+            className={`transition text-2xl ${
+              (hover || rating) >= val ? 'text-yellow-400' : 'text-gray-300'
+            }`}
+            whileHover={{ scale: 1.2 }}
+            whileTap={{ scale: 0.9 }}
+            aria-label={`${val} ${t('stars')}`}
+          >
+            <Star fill={(hover || rating) >= val ? 'currentColor' : 'none'} size={24} />
+          </motion.button>
+        ))}
+      </div>
+
       <textarea
         value={comment}
-        onChange={e => setComment(e.target.value)}
-        className="w-full p-2 border rounded mb-2"
+        onChange={(e) => setComment(e.target.value)}
+        placeholder={t('placeholder')}
+        className="w-full border p-3 rounded focus:outline-none focus:ring-2 focus:ring-black"
+        rows={4}
         required
-        rows={2}
-        placeholder="Votre retour compte vraiment !"
+        aria-label={t('textarea_label')}
       />
-      <button
+
+      <motion.button
         type="submit"
-        disabled={pending}
-        className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded mt-2"
+        disabled={sending}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className={`bg-black text-white px-4 py-2 rounded w-full transition ${
+          sending ? 'opacity-50 cursor-not-allowed' : ''
+        }`}
       >
-        Envoyer mon avis
-      </button>
+        {sending ? t('sending') : t('submit')}
+      </motion.button>
     </form>
   );
 }
