@@ -1,16 +1,6 @@
-// ✅ src/app/[locale]/admin/layout.js
+// ✅ /src/app/[locale]/admin/layout.js (layout admin, sécurisé)
+import AdminLayout from '@/components/AdminLayout';
 
-import AdminHeader from '@/components/AdminHeader';
-import AdminSidebar from '@/components/AdminSidebar';
-
-export default function AdminLayout({ children }) {
-  return (
-    <div className="min-h-screen flex bg-gray-50">
-      <AdminSidebar />
-      <div className="flex-1 flex flex-col">
-        <AdminHeader />
-        <main className="p-6 flex-1">{children}</main>
-      </div>
-    </div>
-  );
+export default function AdminLayoutWrapper({ children }) {
+  return <AdminLayout>{children}</AdminLayout>;
 }

@@ -1,5 +1,4 @@
-// ✅ src/components/JsonLd/BreadcrumbJsonLd.js
-
+// ✅ /src/components/JsonLd/BreadcrumbJsonLd.js (SEO JSON-LD fil d’Ariane)
 import React from 'react';
 import Head from 'next/head';
 

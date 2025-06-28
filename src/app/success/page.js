@@ -1,16 +1,7 @@
-// ✅ src/app/success/page.js
+// ✅ /src/app/success/page.js (redirection/fallback)
+import { redirect } from 'next/navigation';
 
-import Link from 'next/link';
-
-export default function SuccessPage() {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-green-50">
-      <h1 className="text-2xl font-bold text-green-700 mb-2">Merci pour votre commande !</h1>
-      <p className="mb-4 text-gray-700">
-        Votre achat a bien été pris en compte.<br />
-        Vous recevrez un email de confirmation dans quelques instants.
-      </p>
-      <Link href="/" className="text-blue-600 hover:underline">Retour à l’accueil</Link>
-    </div>
-  );
+export default function SuccessRedirect() {
+  // Redirige selon la langue ou l’url par défaut
+  redirect('/fr/success');
 }

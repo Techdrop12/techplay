@@ -1,32 +1,21 @@
 {
-  "name": "TechPlay - Boutique Tech Premium",
+  "name": "TechPlay",
   "short_name": "TechPlay",
-  "description": "La boutique ultime pour les passionnés de tech et de gadgets innovants.",
+  "description": "Boutique high-tech, gadgets et accessoires innovants, livraison rapide, SAV premium.",
   "start_url": "/",
-  "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#2563eb",
+  "theme_color": "#2563eb",
   "orientation": "portrait-primary",
-  "lang": "fr-FR",
+  "scope": "/",
   "icons": [
-    {
-      "src": "/icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/maskable-icon.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
+    { "src": "/favicon.ico", "sizes": "64x64 32x32 24x24 16x16", "type": "image/x-icon" },
+    { "src": "/logo-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/logo-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ],
+  "shortcuts": [
+    { "name": "Wishlist", "url": "/fr/wishlist", "description": "Voir mes favoris" },
+    { "name": "Panier", "url": "/fr/panier", "description": "Voir mon panier" }
   ]
 }

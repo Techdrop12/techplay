@@ -1,34 +1,34 @@
-// ✅ src/components/ExitPopup.js
-
+// ✅ /src/components/ExitPopup.js (popup exit-intent, bonus conversion)
 'use client';
 
 import { useEffect, useState } from 'react';
 
-export default function ExitPopup({ show, onClose, children }) {
-  const [visible, setVisible] = useState(false);
+export default function ExitPopup({ message, onAccept }) {
+  const [show, setShow] = useState(false);
 
   useEffect(() => {
-    const handleMouseLeave = (e) => {
-      if (e.clientY <= 0) setVisible(true);
+    const onMouseLeave = (e) => {
+      if (e.clientY <= 0) setShow(true);
     };
-    document.addEventListener('mouseleave', handleMouseLeave);
-    return () => document.removeEventListener('mouseleave', handleMouseLeave);
+    document.addEventListener('mouseout', onMouseLeave);
+    return () => document.removeEventListener('mouseout', onMouseLeave);
   }, []);
 
-  if (!visible && !show) return null;
+  if (!show) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow p-8 max-w-sm w-full">
-        {children}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="bg-white p-6 rounded shadow-xl max-w-sm mx-auto text-center">
+        <h3 className="font-bold text-lg mb-2">Ne partez pas !</h3>
+        <p className="mb-4">{message || "Profitez de notre offre spéciale avant de quitter !"}</p>
         <button
-          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded"
           onClick={() => {
-            setVisible(false);
-            onClose && onClose();
+            setShow(false);
+            onAccept && onAccept();
           }}
         >
-          Fermer
+          Je profite de l’offre
         </button>
       </div>
     </div>

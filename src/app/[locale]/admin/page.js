@@ -1,20 +1,15 @@
-// ✅ src/app/[locale]/admin/page.js
-
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/authOptions';
-import { redirect } from 'next/navigation';
+// ✅ /src/app/[locale]/admin/page.js (dashboard admin, SEO, tracking)
+import AdminSidebar from '@/components/AdminSidebar';
 import AdminAnalyticsBlock from '@/components/AdminAnalyticsBlock';
 
-export default async function AdminPage({ params }) {
-  const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== 'admin') {
-    redirect('/fr/admin/login');
-  }
-
+export default function AdminDashboard() {
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Dashboard Admin</h1>
-      <AdminAnalyticsBlock />
+    <div className="flex min-h-[80vh]">
+      <AdminSidebar />
+      <main className="flex-1 p-8">
+        <h1 className="text-3xl font-bold mb-4">Dashboard admin</h1>
+        <AdminAnalyticsBlock />
+      </main>
     </div>
   );
 }

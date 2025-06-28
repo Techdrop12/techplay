@@ -1,25 +1,29 @@
-// ✅ src/lib/ai-tools.js
-
+// ✅ /src/lib/ai-tools.js (bonus : outils IA divers, résumé, trad, idée de produit…)
 import OpenAI from 'openai';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-export async function generateProductSummary(product) {
-  const prompt = `Résumé en 1 phrase ce produit pour un e-commerce : ${product.title}, ${product.description}`;
-  const { choices } = await openai.completions.create({
-    model: 'gpt-3.5-turbo-instruct',
-    prompt,
-    max_tokens: 48,
+export async function generateSummary(text, locale = 'fr') {
+  const completion = await openai.chat.completions.create({
+    model: 'gpt-4o',
+    messages: [
+      { role: 'system', content: `Résume ce texte en 3 phrases (${locale}).` },
+      { role: 'user', content: text }
+    ],
+    max_tokens: 250,
+    temperature: 0.5,
   });
-  return choices[0]?.text.trim() || '';
+  return completion.choices[0].message.content;
 }
 
-export async function generateBlogIdeas(topic) {
-  const prompt = `Donne-moi 5 idées d'articles de blog sur le sujet suivant : "${topic}" pour un site de tech high-ticket.`;
-  const { choices } = await openai.completions.create({
-    model: 'gpt-3.5-turbo-instruct',
-    prompt,
-    max_tokens: 128,
+export async function suggestProductIdeas(theme, locale = 'fr') {
+  const completion = await openai.chat.completions.create({
+    model: 'gpt-4o',
+    messages: [
+      { role: 'system', content: `Génère des idées de produits e-commerce dans la thématique : ${theme} (${locale})` }
+    ],
+    max_tokens: 350,
+    temperature: 0.8,
   });
-  return choices[0]?.text.split('\n').filter(Boolean);
+  return completion.choices[0].message.content;
 }

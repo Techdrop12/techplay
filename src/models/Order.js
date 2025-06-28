@@ -1,33 +1,32 @@
-// ✅ src/models/Order.js
-
+// ✅ /src/models/Order.js (commandes, toutes options)
 import mongoose from 'mongoose';
 
 const OrderSchema = new mongoose.Schema(
   {
     user: {
-      email: String,
+      email: { type: String, required: true },
       name: String,
+      address: String,
       phone: String
     },
-    email: String,
+    email: String, // fallback pour compatibilité
     items: [
       {
-        productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-        title: String,
-        price: Number,
+        product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
         quantity: Number,
+        price: Number,
+        title: String,
         image: String
       }
     ],
     total: Number,
     status: { type: String, default: 'en cours' },
-    address: String,
-    postalCode: String,
-    city: String,
-    country: String,
-    phone: String,
-    paymentIntentId: String,
-    createdAt: { type: Date, default: Date.now }
+    trackingNumber: String,
+    shippingProvider: String,
+    shippingDetails: {},
+    meta: {},
+    coupon: String,
+    deliveredAt: Date
   },
   { timestamps: true }
 );

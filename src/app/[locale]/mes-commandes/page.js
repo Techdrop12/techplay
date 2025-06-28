@@ -1,5 +1,4 @@
-// ✅ src/app/[locale]/mes-commandes/page.js
-
+// ✅ /src/app/[locale]/mes-commandes/page.js (liste commandes utilisateur, SEO, tracking, badge)
 export const dynamic = 'force-dynamic';
 
 import { getServerSession } from 'next-auth';
@@ -8,7 +7,7 @@ import { redirect } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
 import SEOHead from '@/components/SEOHead';
-import BreadcrumbJsonLd from '@/components/JsonLd/BreadcrumbJsonLd';
+import Badge from '@/components/FreeShippingBadge';
 
 export default async function OrdersPage({ params }) {
   const { locale } = params;
@@ -24,7 +23,7 @@ export default async function OrdersPage({ params }) {
     ]
   }).sort({ createdAt: -1 }).lean();
 
-  const siteUrl = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') || '';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || '';
 
   return (
     <>
@@ -35,18 +34,10 @@ export default async function OrdersPage({ params }) {
             ? 'Consultez l’historique de vos commandes passées sur TechPlay.'
             : 'View your past order history on TechPlay.'
         }
+        url={`${siteUrl}/${locale}/mes-commandes`}
       />
 
-      <BreadcrumbJsonLd
-        pathSegments={[
-          {
-            label: locale === 'fr' ? 'Mes commandes' : 'My Orders',
-            url: `${siteUrl}/${locale}/mes-commandes`,
-          }
-        ]}
-      />
-
-      <div className="p-6 max-w-4xl mx-auto">
+      <main className="p-6 max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold mb-4">
           {locale === 'fr' ? 'Mes commandes' : 'My Orders'}
         </h1>
@@ -69,7 +60,7 @@ export default async function OrdersPage({ params }) {
               const total = order.total?.toFixed(2) ?? '–';
 
               return (
-                <li key={order._id} className="border rounded p-4 shadow-sm">
+                <li key={order._id} className="border rounded p-4 shadow-sm bg-white">
                   <div className="flex justify-between items-center">
                     <div>
                       <p className="font-semibold">
@@ -80,7 +71,7 @@ export default async function OrdersPage({ params }) {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">{total} €</p>
+                      <p className="font-semibold">{total} €</p>
                       <p className={`text-sm ${
                         order.status === 'en cours'
                           ? 'text-yellow-600'
@@ -98,12 +89,15 @@ export default async function OrdersPage({ params }) {
                   >
                     {locale === 'fr' ? 'Voir les détails' : 'View details'}
                   </a>
+                  {order.freeShipping && (
+                    <Badge price={order.total} />
+                  )}
                 </li>
               );
             })}
           </ul>
         )}
-      </div>
+      </main>
     </>
   );
 }

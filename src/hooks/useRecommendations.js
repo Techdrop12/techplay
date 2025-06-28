@@ -1,19 +1,16 @@
-// ✅ src/hooks/useRecommendations.js
+// ✅ /src/hooks/useRecommendations.js (hook produits recommandés, bonus A/B)
+import { useState, useEffect } from 'react';
 
-import { useEffect, useState } from 'react';
-
-export default function useRecommendations(category, excludeIds = []) {
+export default function useRecommendations(category, excludeId) {
   const [recommendations, setRecommendations] = useState([]);
 
   useEffect(() => {
     if (!category) return;
-    fetch(
-      `/api/products/recommendations?category=${encodeURIComponent(category)}&excludeIds=${excludeIds.join(',')}`
-    )
-      .then((res) => res.json())
+    fetch(`/api/products/recommendations?category=${encodeURIComponent(category)}&excludeId=${excludeId}`)
+      .then((res) => res.ok ? res.json() : [])
       .then(setRecommendations)
       .catch(() => setRecommendations([]));
-  }, [category, excludeIds]);
+  }, [category, excludeId]);
 
   return recommendations;
 }

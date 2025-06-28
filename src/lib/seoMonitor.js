@@ -1,9 +1,7 @@
-// ✅ src/lib/seoMonitor.js
-
-export default function seoMonitor(page, extra = {}) {
-  // Placez ici votre tracking analytics custom, ou integration externe (GA, Matomo...)
+// ✅ /src/lib/seoMonitor.js (bonus SEO audit auto)
+export function reportSEOIssue(msg) {
   if (typeof window !== 'undefined') {
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({ event: 'seo_page_view', page, ...extra });
+    console.warn('[SEO Monitor]', msg);
+    // Possibilité d’envoyer à un endpoint si besoin
   }
 }

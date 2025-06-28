@@ -1,16 +1,17 @@
-// ✅ src/app/[locale]/layout.js
-
+// ✅ /src/app/[locale]/layout.js (i18n, PWA, UX, analytics, SEO)
 import LayoutWithAnalytics from './LayoutWithAnalytics';
 
+export const metadata = {
+  title: {
+    default: 'TechPlay – High Tech, Gadgets et Accessoires',
+    template: '%s | TechPlay'
+  }
+};
+
 export default function LocaleLayout({ children, params }) {
-  const { locale } = params;
   return (
-    <html lang={locale}>
-      <body>
-        <LayoutWithAnalytics locale={locale}>
-          {children}
-        </LayoutWithAnalytics>
-      </body>
-    </html>
+    <LayoutWithAnalytics locale={params.locale}>
+      {children}
+    </LayoutWithAnalytics>
   );
 }

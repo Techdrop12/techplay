@@ -1,23 +1,12 @@
-// ✅ src/app/[locale]/account/layout.js
+// ✅ /src/app/[locale]/account/layout.js (layout espace compte, UX sécurisé)
+import LayoutWithAnalytics from '../LayoutWithAnalytics';
 
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/authOptions';
-import { redirect } from 'next/navigation';
-
-export default async function AccountLayout({ children, params }) {
-  const session = await getServerSession(authOptions);
-  const { locale } = params;
-  if (!session) {
-    redirect(`/${locale}/connexion`);
-  }
+export default function AccountLayout({ children, params }) {
   return (
-    <section className="max-w-4xl mx-auto p-4">
-      <nav className="mb-6 flex gap-4 text-sm border-b pb-2">
-        <a href={`/${locale}/account/commande`} className="hover:underline">Mes commandes</a>
-        <a href={`/${locale}/wishlist`} className="hover:underline">Wishlist</a>
-        {/* Ajoutez d'autres liens compte si besoin */}
-      </nav>
-      {children}
-    </section>
+    <LayoutWithAnalytics locale={params.locale}>
+      <div className="max-w-4xl mx-auto py-8">
+        {children}
+      </div>
+    </LayoutWithAnalytics>
   );
 }

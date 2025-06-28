@@ -1,45 +1,35 @@
-// ✅ src/components/JsonLd/ProductJsonLd.js
-import React from 'react';
+// ✅ /src/components/ProductJsonLd.js (SEO produit structuré)
 import Head from 'next/head';
 
-const ProductJsonLd = ({ product, siteUrl, locale }) => {
-  const data = {
-    '@context': 'https://schema.org/',
-    '@type': 'Product',
-    name: product.title,
-    image: [`${siteUrl}${product.image}`],
-    description: product.description,
-    sku: product._id,
-    brand: {
-      '@type': 'Brand',
-      name: 'TechPlay',
-    },
-    offers: {
-      '@type': 'Offer',
-      url: `${siteUrl}/${locale}/produit/${product.slug}`,
-      priceCurrency: 'EUR',
-      price: product.price.toFixed(2),
-      availability: 'https://schema.org/InStock',
-    },
-    aggregateRating: product.rating
-      ? {
-          '@type': 'AggregateRating',
-          ratingValue: product.rating.toFixed(1),
-          reviewCount: product.reviews?.length || 1,
-        }
-      : undefined,
-  };
+export default function ProductJsonLd({ product }) {
+  if (!product) return null;
 
   return (
     <Head>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(data),
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Product',
+            name: product.title,
+            image: [product.image],
+            description: product.description,
+            sku: product.sku,
+            brand: {
+              '@type': 'Thing',
+              name: 'TechPlay'
+            },
+            offers: {
+              '@type': 'Offer',
+              priceCurrency: 'EUR',
+              price: product.price,
+              availability: product.stock > 0 ? 'InStock' : 'OutOfStock',
+              url: product.url || '',
+            }
+          }),
         }}
       />
     </Head>
   );
-};
-
-export default ProductJsonLd;
+}

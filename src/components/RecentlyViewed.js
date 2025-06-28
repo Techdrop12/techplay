@@ -1,29 +1,29 @@
-// ✅ src/components/RecentlyViewed.js
-
+// ✅ /src/components/RecentlyViewed.js (bonus : section produits vus)
 'use client';
 
 import { useEffect, useState } from 'react';
 import ProductCard from './ProductCard';
 
 export default function RecentlyViewed() {
-  const [products, setProducts] = useState([]);
+  const [items, setItems] = useState([]);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const data = localStorage.getItem('recentlyViewed');
-    if (!data) return;
-    setProducts(JSON.parse(data));
+    try {
+      const arr = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+      setItems(arr.reverse());
+    } catch {}
   }, []);
 
-  if (!products.length) return null;
+  if (!items.length) return null;
+
   return (
-    <div className="my-10">
-      <h3 className="text-xl font-bold mb-2">Vu récemment</h3>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        {products.map((p) => (
+    <section className="mt-10">
+      <h3 className="text-xl font-semibold mb-2">Vu récemment</h3>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        {items.map((p) => (
           <ProductCard key={p._id} product={p} />
         ))}
       </div>
-    </div>
+    </section>
   );
 }

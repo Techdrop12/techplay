@@ -1,44 +1,29 @@
-'use client'
+// ✅ /src/components/UpsellProducts.js (bonus : upsell sur page panier)
+'use client';
 
-import { useEffect, useState } from 'react'
-import ProductCard from './ProductCard'
-import { useCart } from '@/context/cartContext'
+import { useEffect, useState } from 'react';
+import ProductCard from './ProductCard';
 
-export default function UpsellProducts() {
-  const { cart } = useCart()
-  const [recommendations, setRecommendations] = useState([])
+export default function UpsellProducts({ cart }) {
+  const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    if (!cart.length) return
-
-    // Extraire catégorie majoritaire du panier pour recommendations simples
-    const categoryCounts = {}
-    cart.forEach(item => {
-      categoryCounts[item.category] = (categoryCounts[item.category] || 0) + 1
-    })
-
-    const mainCategory = Object.entries(categoryCounts).sort((a,b) => b[1] - a[1])[0]?.[0]
-
-    if (!mainCategory) return
-
-    const excludeIds = cart.map(item => item._id)
-
-    fetch(`/api/products/recommendations?category=${mainCategory}&excludeIds=${excludeIds.join(',')}`)
+    if (!cart?.length) return;
+    fetch(`/api/products/recommendations?excludeIds=${cart.map(i => i._id).join(',')}`)
       .then(res => res.json())
-      .then(setRecommendations)
-      .catch(() => setRecommendations([]))
-  }, [cart])
+      .then(setProducts);
+  }, [cart]);
 
-  if (!recommendations.length) return null
+  if (!products.length) return null;
 
   return (
-    <section className="p-4 bg-gray-50 rounded mt-8">
-      <h2 className="text-xl font-semibold mb-4">Vous pourriez aimer aussi</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {recommendations.map(product => (
-          <ProductCard key={product._id} product={product} />
+    <div className="mt-8">
+      <h3 className="text-xl font-semibold mb-3">Ils pourraient aussi vous plaire</h3>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {products.map((p) => (
+          <ProductCard key={p._id} product={p} />
         ))}
       </div>
-    </section>
-  )
+    </div>
+  );
 }

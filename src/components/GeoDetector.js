@@ -1,20 +1,15 @@
+// ✅ /src/components/GeoDetector.js (détection pays client, bonus conversion)
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
-export default function GeoDetector() {
-  const [country, setCountry] = useState(null);
-
+export default function GeoDetector({ onDetect }) {
   useEffect(() => {
     fetch('/api/geolocate')
       .then(res => res.json())
-      .then(data => setCountry(data.country))
-      .catch(() => setCountry('unknown'));
-  }, []);
-
-  return (
-    <div>
-      <p>Vous êtes localisé en : {country || '...'}</p>
-    </div>
-  );
+      .then(loc => {
+        if (loc && loc.country) onDetect(loc.country);
+      });
+  }, [onDetect]);
+  return null;
 }

@@ -1,18 +1,13 @@
-import db from '../db/mongo'
+// ✅ /src/lib/promos/scheduledPromos.js (gestion promos planifiées, bonus e-commerce)
+import dbConnect from '../dbConnect';
+import Product from '../../models/Product';
 
 export async function applyScheduledPromos() {
-  const now = new Date()
-  const promos = await db.collection('promotions').find({
-    start: { $lte: now },
-    end: { $gte: now }
-  }).toArray()
-
-  for (const promo of promos) {
-    await db.collection('products').updateMany(
-      { category: promo.category },
-      { $set: { price: promo.newPrice } }
-    )
-  }
-
-  return promos.length
+  await dbConnect();
+  const now = new Date();
+  const promos = await Product.updateMany(
+    { 'promo.endDate': { $lte: now } },
+    { $unset: { promo: '' } }
+  );
+  return promos.modifiedCount;
 }

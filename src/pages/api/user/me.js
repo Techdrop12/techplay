@@ -1,16 +1,9 @@
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '../auth/[...nextauth]'
+// ✅ /src/pages/api/user/me.js (récup infos profil utilisateur connecté)
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/authOptions';
 
 export default async function handler(req, res) {
-  const session = await getServerSession(req, res, authOptions)
-
-  if (!session) {
-    return res.status(401).json({ error: 'Non autorisé' })
-  }
-
-  // Tu peux enrichir ici selon ton modèle User (ex: MongoDB)
-  res.status(200).json({
-    name: session.user.name,
-    email: session.user.email,
-  })
+  const session = await getServerSession(authOptions, req, res);
+  if (!session) return res.status(401).json({ error: 'Not authenticated' });
+  res.status(200).json({ user: session.user });
 }

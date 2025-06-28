@@ -1,12 +1,24 @@
-export default function handler(req, res) {
-  const { message } = req.body
+// ✅ /src/pages/api/chatbot.js (assistant IA public / API pour chatbot)
+import { OpenAIApi, Configuration } from 'openai';
 
-  let reply = "Je n'ai pas compris. Pouvez-vous reformuler ?"
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
-  if (/livraison/i.test(message)) reply = "La livraison prend généralement 2 à 4 jours ouvrés."
-  else if (/retour/i.test(message)) reply = "Les retours sont possibles sous 14 jours."
-  else if (/produit/i.test(message)) reply = "Nos produits sont garantis 2 ans."
-  else if (/contact/i.test(message)) reply = "Vous pouvez nous contacter via le formulaire en bas de page."
+const openai = new OpenAIApi(configuration);
 
-  res.status(200).json({ reply })
+export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).end();
+  const { prompt } = req.body;
+  if (!prompt) return res.status(400).json({ error: 'Prompt is required.' });
+  try {
+    const completion = await openai.createChatCompletion({
+      model: 'gpt-4o',
+      messages: [{ role: 'user', content: prompt }]
+    });
+    const response = completion.data.choices[0].message.content;
+    res.status(200).json({ response });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 }

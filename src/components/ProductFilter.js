@@ -1,60 +1,25 @@
-'use client'
+// ✅ /src/components/ProductFilter.js (filtre produits, UX shop)
+'use client';
 
-import { useState } from 'react'
+import { useState } from 'react';
 
-export default function ProductFilter({ products, onFilter }) {
-  const categories = Array.from(new Set(products.map(p => p.category))).filter(Boolean)
-  const [selectedCategory, setSelectedCategory] = useState('')
-  const [sortPrice, setSortPrice] = useState('')
-
-  const handleFilterChange = (category) => {
-    setSelectedCategory(category)
-    filterAndSort(category, sortPrice)
-  }
-
-  const handleSortChange = (sort) => {
-    setSortPrice(sort)
-    filterAndSort(selectedCategory, sort)
-  }
-
-  const filterAndSort = (category, sort) => {
-    let filtered = products
-
-    if (category) {
-      filtered = filtered.filter(p => p.category === category)
-    }
-
-    if (sort === 'asc') {
-      filtered = filtered.slice().sort((a, b) => a.price - b.price)
-    } else if (sort === 'desc') {
-      filtered = filtered.slice().sort((a, b) => b.price - a.price)
-    }
-
-    onFilter(filtered)
-  }
-
+export default function ProductFilter({ categories, onChange }) {
+  const [cat, setCat] = useState('');
   return (
-    <div className="mb-6 flex flex-wrap gap-4 items-center">
+    <div className="mb-4 flex flex-wrap gap-2">
       <select
-        value={selectedCategory}
-        onChange={e => handleFilterChange(e.target.value)}
-        className="border rounded px-3 py-2"
+        value={cat}
+        onChange={e => {
+          setCat(e.target.value);
+          onChange(e.target.value);
+        }}
+        className="border p-2 rounded"
       >
-        <option value="">Toutes catégories</option>
-        {categories.map(cat => (
-          <option key={cat} value={cat}>{cat}</option>
+        <option value="">Toutes les catégories</option>
+        {categories.map((c) => (
+          <option key={c} value={c}>{c}</option>
         ))}
       </select>
-
-      <select
-        value={sortPrice}
-        onChange={e => handleSortChange(e.target.value)}
-        className="border rounded px-3 py-2"
-      >
-        <option value="">Trier par prix</option>
-        <option value="asc">Prix croissant</option>
-        <option value="desc">Prix décroissant</option>
-      </select>
     </div>
-  )
+  );
 }

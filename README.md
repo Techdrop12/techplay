@@ -1,31 +1,21 @@
-# TechPlay - E-commerce High-Tech Premium
+# TechPlay – E-commerce high-tech (Next.js 15, MongoDB, Stripe, IA, SEO, PWA)
 
-Bienvenue dans **TechPlay**, un site e-commerce full-stack développé avec Next.js 15, MongoDB, Stripe, Firebase et optimisé pour les performances, le SEO, l'accessibilité et la conversion.
+## Setup rapide
 
-## 🚀 Fonctions principales
+1. Clone ce repo, configure `.env.local` (voir `.env.local.example`)
+2. `npm install`
+3. `npm run dev`
+4. Accès admin : `/fr/admin/login`
 
-- Paiement Stripe sécurisé
-- PWA + Notifications push Firebase
-- Internationalisation (`fr` et `en`)
-- SEO avancé (JSON-LD, sitemap, robots.txt)
-- A/B tests, analytics, heatmap
-- Admin dashboard (produits + commandes)
-- Blog IA, avis clients dynamiques
-- UI premium : dark mode, skeletons, animation Framer Motion
+## Fonctionnalités
 
-## 📦 Stack technique
+- Multilingue (`fr`/`en`), SEO complet (sitemap, JSON-LD, robots.txt)
+- PWA installable, push notifications
+- Blog IA, avis produits, tracking analytics (Plausible, Clarity, GA4)
+- Admin automatisé, produits, commandes, exports, notifications
+- Full responsive, dark mode, animations Framer Motion
+- Bonus : heatmap, assistant IA, skeleton, A/B test, etc.
 
-- **Next.js App Router (15+)**
-- **MongoDB / Mongoose**
-- **Stripe (API + Webhooks)**
-- **NextAuth (authentification admin)**
-- **Firebase (push + tokens)**
-- **TailwindCSS**
-- **next-intl** pour l'i18n
+---
 
-## 🔧 Scripts
-
-```bash
-npm run dev       # développement
-npm run build     # build production
-npm run lint      # linting
+**Site prêt à scaler et performer !**

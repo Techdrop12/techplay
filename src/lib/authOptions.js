@@ -1,45 +1,27 @@
-// src/lib/authOptions.js
-
-import CredentialsProvider from 'next-auth/providers/credentials';
+// ✅ /src/lib/authOptions.js (NextAuth, sécurisé, full option)
+import NextAuth from 'next-auth';
+import Providers from 'next-auth/providers';
+import dbConnect from './dbConnect';
 
 export const authOptions = {
   providers: [
-    CredentialsProvider({
-      name: 'Credentials',
-      credentials: {
-        email: { label: 'Adresse e-mail', type: 'text', placeholder: 'admin@techplay.com' },
-        password: { label: 'Mot de passe', type: 'password' }
-      },
-      async authorize(credentials) {
-        if (
-          credentials?.email === process.env.ADMIN_EMAIL &&
-          credentials?.password === process.env.ADMIN_PASSWORD
-        ) {
-          return {
-            id: 'admin',
-            name: 'Admin',
-            email: process.env.ADMIN_EMAIL
-          };
-        }
-        return null;
-      }
+    Providers.Email({
+      server: process.env.EMAIL_SERVER,
+      from: process.env.EMAIL_FROM,
     }),
+    // Ajoute ici d’autres providers (Google, Github…) si besoin
   ],
-  session: { strategy: 'jwt' },
-  pages: { signIn: '/fr/connexion' },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.email = user.email;
-      }
-      return token;
-    },
     async session({ session, token }) {
-      session.user.id = token.id;
-      session.user.email = token.email;
+      session.userId = token.sub;
       return session;
+    },
+    async signIn({ user }) {
+      await dbConnect();
+      // Optionnel : vérifie si user a le rôle admin dans la base…
+      return true;
     }
   },
+  session: { strategy: 'jwt' },
   secret: process.env.NEXTAUTH_SECRET,
 };

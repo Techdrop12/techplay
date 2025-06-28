@@ -1,42 +1,30 @@
-// ✅ src/app/[locale]/blog/[slug]/page.js
-
-import dbConnect from '@/lib/dbConnect';
-import Blog from '@/models/Blog';
+// ✅ /src/app/[locale]/blog/[slug]/page.js (détail article, SEO, JsonLD)
 import SEOHead from '@/components/SEOHead';
+import BlogJsonLd from '@/components/BlogJsonLd';
 
 export const dynamic = 'force-dynamic';
 
-export default async function BlogArticlePage({ params }) {
-  const { slug, locale } = params;
-  await dbConnect();
-  const article = await Blog.findOne({ slug, published: true }).lean();
-
-  if (!article) {
-    return (
-      <div className="max-w-2xl mx-auto p-6 text-center text-red-500">
-        {locale === 'fr' ? "Article introuvable." : "Article not found."}
-      </div>
-    );
-  }
+export default async function BlogDetailPage({ params }) {
+  const { slug } = params;
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/blog/one?slug=${slug}`, { cache: 'no-store' });
+  if (!res.ok) return <div className="p-8">Article introuvable.</div>;
+  const article = await res.json();
 
   return (
     <>
       <SEOHead
         overrideTitle={article.title}
-        overrideDescription={article.summary}
-        url={`/${locale}/blog/${article.slug}`}
+        overrideDescription={article.description || article.content?.slice(0, 160)}
+        url={`${process.env.NEXT_PUBLIC_SITE_URL || ''}/blog/${slug}`}
       />
-      <div className="max-w-2xl mx-auto p-6">
-        <h1 className="text-2xl font-bold mb-2">{article.title}</h1>
-        <div className="text-gray-500 text-sm mb-4">
-          {new Date(article.publishedAt).toLocaleDateString(locale, {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </div>
-        <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: article.content }} />
-      </div>
+      <BlogJsonLd article={article} />
+      <main className="max-w-3xl mx-auto py-8">
+        <h1 className="text-3xl font-bold mb-4">{article.title}</h1>
+        <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: article.contentHtml }} />
+        <p className="mt-8 text-sm text-gray-500">
+          Publié le {new Date(article.createdAt).toLocaleDateString('fr')}
+        </p>
+      </main>
     </>
   );
 }

@@ -1,22 +1,20 @@
-// src/lib/rateLimit.js
+// ✅ /src/lib/rateLimit.js (middleware rate limiting pour API Next.js)
+const rateLimiters = {};
 
-const cache = new Map();
-
-export function rateLimit({ limit = 5, interval = 60_000 }) {
-  return (req, res) => {
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    const now = Date.now();
-
-    const calls = cache.get(ip) || [];
-    const recentCalls = calls.filter((time) => now - time < interval);
-
-    if (recentCalls.length >= limit) {
-      res.status(429).json({ error: 'Trop de requêtes. Réessaie bientôt.' });
-      return false;
-    }
-
-    recentCalls.push(now);
-    cache.set(ip, recentCalls);
-    return true;
-  };
+export default function rateLimit(key, limit = 10, interval = 60000) {
+  if (!rateLimiters[key]) {
+    rateLimiters[key] = { count: 1, time: Date.now() };
+    return false; // pas bloqué
+  }
+  const entry = rateLimiters[key];
+  if (Date.now() - entry.time > interval) {
+    entry.count = 1;
+    entry.time = Date.now();
+    return false;
+  }
+  entry.count += 1;
+  if (entry.count > limit) {
+    return true; // bloqué
+  }
+  return false;
 }

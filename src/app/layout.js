@@ -1,5 +1,4 @@
-// ✅ src/app/layout.js (full option, analytique, SEO, UX, PWA, bonus inclus)
-
+// ✅ /src/app/layout.js (full option, analytique, SEO, PWA, accessibilité, dark mode, bonus inclus)
 import './globals.css';
 import { Inter } from 'next/font/google';
 import Script from 'next/script';
@@ -12,8 +11,7 @@ export const metadata = {
     default: 'TechPlay – High Tech, Gadgets et Accessoires',
     template: '%s | TechPlay'
   },
-  description:
-    'TechPlay : boutique en ligne d’objets high-tech, accessoires et innovations. Livraison rapide, avis clients, offres spéciales, garantie et SAV premium.',
+  description: 'TechPlay : boutique en ligne d’objets high-tech, accessoires et innovations. Livraison rapide, avis clients, offres spéciales, garantie et SAV premium.',
   manifest: '/manifest.json',
   icons: {
     icon: '/favicon.ico',
@@ -41,7 +39,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="fr" className="scroll-smooth">
+    <html lang="fr" className="scroll-smooth dark">
       <Head>
         {/* SEO essentials */}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -52,10 +50,10 @@ export default function RootLayout({ children }) {
         <link rel="icon" href="/favicon.ico" />
         {/* Preload font */}
         <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        {/* Bonus : Preconnect pour analytics et PWA */}
+        {/* Preconnect bonus */}
         <link rel="preconnect" href="https://plausible.io" crossOrigin="" />
         <link rel="preconnect" href="https://www.clarity.ms" crossOrigin="" />
-        {/* Bonus : PWA prompt */}
+        {/* PWA prompt */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
       </Head>
@@ -81,17 +79,9 @@ export default function RootLayout({ children }) {
           `
         }}
       />
-      {/* Meta Pixel (facultatif) */}
-      {/* <Script id="meta-pixel" strategy="afterInteractive">
-        {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-          n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-          n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-          t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}
-          (window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
-          fbq('init', 'YOUR_PIXEL_ID');fbq('track', 'PageView');`}
-      </Script> */}
 
-      <body className={inter.className + " bg-gray-50 text-gray-900 antialiased"}>
+      {/* Dark mode switch (auto / user) */}
+      <body className={`${inter.className} bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-white antialiased`}>
         {children}
       </body>
     </html>

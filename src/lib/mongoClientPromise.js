@@ -1,19 +1,25 @@
-import { MongoClient } from 'mongodb'
+// ✅ /src/lib/mongoClientPromise.js (Mongo universel, bonus : fallback)
+import { MongoClient } from 'mongodb';
 
-const uri = process.env.MONGODB_URI
-const options = {}
+const uri = process.env.MONGODB_URI || process.env.MONGO_URL;
+const options = {};
 
-let client
-let clientPromise
+let client;
+let clientPromise;
 
-if (!process.env.MONGODB_URI) {
-  throw new Error('Ajoute MONGODB_URI dans ton fichier .env.local')
+if (!process.env.MONGODB_URI && !process.env.MONGO_URL) {
+  throw new Error('Please add your Mongo URI to .env.local');
 }
 
-if (!global._mongoClientPromise) {
-  client = new MongoClient(uri, options)
-  global._mongoClientPromise = client.connect()
+if (process.env.NODE_ENV === 'development') {
+  if (!global._mongoClientPromise) {
+    client = new MongoClient(uri, options);
+    global._mongoClientPromise = client.connect();
+  }
+  clientPromise = global._mongoClientPromise;
+} else {
+  client = new MongoClient(uri, options);
+  clientPromise = client.connect();
 }
-clientPromise = global._mongoClientPromise
 
-export default clientPromise
+export default clientPromise;

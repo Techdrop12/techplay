@@ -1,8 +1,11 @@
-import { createClient } from '@sanity/client'
+// ✅ /src/lib/sanity.js (Sanity.io CMS, compatible Next.js)
+import { createClient } from '@sanity/client';
 
-export const sanity = createClient({
-  projectId: 'votre_project_id',       // ← remplace par ton ID
-  dataset: 'production',
-  apiVersion: '2023-01-01',
+const client = createClient({
+  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
+  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET,
+  apiVersion: '2023-11-01',
   useCdn: true,
-})
+});
+
+export default client;

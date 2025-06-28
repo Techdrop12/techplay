@@ -1,11 +1,15 @@
-// ✅ src/data/sync-stock.js
-
-import importData from './import.json';
+// ✅ /src/data/sync-stock.js (script de synchro stock fournisseur)
 import supplierStock from './supplier-stock.json';
+import dbConnect from '@/lib/dbConnect';
+import Product from '@/models/Product';
 
-export default function syncStock() {
-  return importData.map(product => {
-    const stock = supplierStock[product.category] || 0;
-    return { ...product, stock };
-  });
+export default async function syncStock() {
+  await dbConnect();
+  for (const item of supplierStock) {
+    await Product.updateOne(
+      { sku: item.sku },
+      { $set: { stock: item.stock } }
+    );
+  }
+  return true;
 }

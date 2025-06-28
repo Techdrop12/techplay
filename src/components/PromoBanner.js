@@ -1,26 +1,31 @@
-// ✅ src/components/PromoBanner.js
-
+// ✅ /src/components/PromoBanner.js (bannière promo dynamique, bonus conversion)
 'use client';
 
 import { useEffect, useState } from 'react';
 
-const banners = [
-  { text: "⚡️ Livraison gratuite dès 50€ !", bg: "bg-green-600" },
-  { text: "🔥 Promo : -10% sur tout, code WELCOME10", bg: "bg-orange-500" },
-  { text: "🎉 Découvrez notre nouveau blog TechPlay", bg: "bg-blue-600" },
-];
-
 export default function PromoBanner() {
-  const [idx, setIdx] = useState(0);
+  const [show, setShow] = useState(true);
 
-  useEffect(() => {
-    const interval = setInterval(() => setIdx(i => (i + 1) % banners.length), 9000);
-    return () => clearInterval(interval);
-  }, []);
+  // Exemple de promo : voir pour dynamique plus tard
+  const promo = {
+    message: '🚀 -10% sur tout avec le code TECH10 !',
+    url: '/fr/produit',
+  };
+
+  if (!show) return null;
 
   return (
-    <div className={`w-full text-white text-center py-2 ${banners[idx].bg} transition-colors duration-300`}>
-      {banners[idx].text}
+    <div className="bg-gradient-to-r from-blue-600 to-blue-400 text-white text-center p-2 font-medium shadow-md">
+      <a href={promo.url} className="hover:underline">
+        {promo.message}
+      </a>
+      <button
+        className="absolute right-4 top-1 text-white"
+        aria-label="Fermer"
+        onClick={() => setShow(false)}
+      >
+        ×
+      </button>
     </div>
   );
 }

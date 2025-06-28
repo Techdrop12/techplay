@@ -1,12 +1,10 @@
-import db from './mongo' // ou ton système de connexion
+// ✅ /src/lib/db/users.js (helpers utilisateurs)
+import User from '../../models/User';
 
-export async function getInactiveUsers(days = 30) {
-  const cutoff = new Date()
-  cutoff.setDate(cutoff.getDate() - days)
+export async function getUserByEmail(email) {
+  return await User.findOne({ email }).lean();
+}
 
-  const users = await db.collection('users').find({
-    lastOrderDate: { $lt: cutoff },
-  }).toArray()
-
-  return users
+export async function createUser(data) {
+  return await User.create(data);
 }

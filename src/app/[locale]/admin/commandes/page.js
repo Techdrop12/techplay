@@ -1,20 +1,11 @@
-// ✅ src/app/[locale]/admin/commandes/page.js
+// ✅ /src/app/[locale]/admin/commandes/page.js (gestion commandes admin)
+import OrderTable from '@/components/OrderTable';
 
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/authOptions';
-import { redirect } from 'next/navigation';
-import OrdersTable from '@/components/OrdersTable';
-
-export default async function AdminCommandesPage({ params }) {
-  const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== 'admin') {
-    redirect('/fr/admin/login');
-  }
-
+export default function AdminCommandesPage() {
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Commandes clients</h1>
-      <OrdersTable />
+    <div className="max-w-4xl mx-auto py-8">
+      <h1 className="text-2xl font-bold mb-4">Gestion des commandes</h1>
+      <OrderTable />
     </div>
   );
 }

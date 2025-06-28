@@ -1,28 +1,16 @@
-import admin from '../../lib/firebase-admin';
+// ✅ /src/pages/api/send-push.js (envoi notification web push, bonus admin)
+import { sendWebPush } from '@/lib/firebase-admin';
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Méthode non autorisée.' });
+  if (req.method !== 'POST') return res.status(405).end();
+  const { title, body, tokens } = req.body;
+  if (!title || !body || !tokens || !tokens.length) {
+    return res.status(400).json({ error: 'Invalid params' });
   }
-
-  const { fcmToken, title, body, data } = req.body;
-  if (!fcmToken || !title || !body) {
-    return res
-      .status(400)
-      .json({ error: 'Paramètres manquants : fcmToken, title et body sont requis.' });
-  }
-
   try {
-    const message = {
-      token: fcmToken,
-      notification: { title, body },
-      data: data || {},
-    };
-
-    const response = await admin.messaging().send(message);
-    return res.status(200).json({ message: 'Notification envoyée', response });
-  } catch (error) {
-    console.error('❌ Erreur envoi push :', error);
-    return res.status(500).json({ error: 'Erreur interne du serveur.' });
+    const result = await sendWebPush({ title, body, tokens });
+    res.status(200).json({ success: true, result });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 }

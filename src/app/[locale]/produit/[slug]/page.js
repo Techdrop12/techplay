@@ -1,5 +1,4 @@
-// ✅ src/app/[locale]/produit/[slug]/page.js
-
+// ✅ /src/app/[locale]/produit/[slug]/page.js (fiche produit, A/B test, reviews, wishlist, bonus)
 'use client';
 
 import { useState, useEffect } from 'react';

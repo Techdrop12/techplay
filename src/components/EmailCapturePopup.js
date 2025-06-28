@@ -1,95 +1,43 @@
-// src/components/EmailCapturePopup.js
+// ✅ /src/components/EmailCapturePopup.js (popup email, bonus conversion, Brevo)
 'use client';
 
 import { useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
 
 export default function EmailCapturePopup() {
-  const [email, setEmail] = useState('');
   const [visible, setVisible] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    try {
-      const savedEmail = window.localStorage.getItem('user_email');
-      const alreadyClosed = window.localStorage.getItem('email_popup_closed');
-
-      if (!savedEmail && !alreadyClosed) {
-        const timeout = setTimeout(() => setVisible(true), 15000);
-        return () => clearTimeout(timeout);
-      }
-    } catch (e) {
-      console.warn('Erreur accès localStorage (popup) :', e);
-    }
+    const shown = localStorage.getItem('email_popup_shown');
+    if (!shown) setTimeout(() => setVisible(true), 12000);
   }, []);
 
-  const handleSubmit = async () => {
-    if (!email || !email.includes('@')) {
-      toast.error('Adresse email invalide');
-      return;
-    }
-
-    try {
-      const res = await fetch('/api/brevo/abandon-panier', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      if (res.ok) {
-        toast.success('Merci ! Vous recevrez nos offres par email.');
-        try {
-          window.localStorage.setItem('user_email', email);
-        } catch {}
-
-        setSubmitted(true);
-        setTimeout(() => setVisible(false), 2000);
-      } else {
-        throw new Error();
-      }
-    } catch (err) {
-      toast.error("Erreur lors de l'enregistrement");
-    }
-  };
-
-  const handleClose = () => {
+  function handleSubmit(e) {
+    e.preventDefault();
+    const email = e.target.email.value;
+    if (!/\S+@\S+\.\S+/.test(email)) return alert('Email invalide');
+    fetch('/api/brevo-track', { method: 'POST', body: JSON.stringify({ email }) });
+    localStorage.setItem('email_popup_shown', '1');
     setVisible(false);
-    try {
-      window.localStorage.setItem('email_popup_closed', 'true');
-    } catch {}
-  };
+  }
 
-  if (!visible || submitted) return null;
-
+  if (!visible) return null;
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-xl text-center">
-        <h2 className="text-lg font-semibold mb-2">🎁 -10 % sur votre 1ʳᵉ commande</h2>
-        <p className="text-sm mb-4">
-          Recevez une réduction exclusive en vous inscrivant à notre newsletter !
+    <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center">
+      <form className="bg-white p-6 rounded shadow-lg w-96" onSubmit={handleSubmit}>
+        <h2 className="font-bold text-lg mb-2">Recevez une offre exclusive</h2>
+        <p className="mb-4 text-sm text-gray-500">
+          Inscrivez-vous et recevez -10 % sur votre première commande !
         </p>
         <input
+          name="email"
           type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          required
           placeholder="Votre email"
-          className="border w-full p-2 mb-3 rounded text-sm"
+          className="border rounded px-3 py-2 w-full mb-2"
         />
-        <button
-          onClick={handleSubmit}
-          className="bg-black text-white px-4 py-2 rounded w-full text-sm"
-        >
-          Recevoir mon code
-        </button>
-        <button
-          onClick={handleClose}
-          className="mt-2 text-xs text-gray-500 underline"
-        >
-          Non merci
-        </button>
-      </div>
+        <button className="w-full bg-blue-600 text-white py-2 rounded font-bold">Je m’inscris</button>
+        <button type="button" onClick={() => setVisible(false)} className="text-xs text-gray-400 mt-2 w-full">Fermer</button>
+      </form>
     </div>
   );
 }

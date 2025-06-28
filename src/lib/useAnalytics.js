@@ -1,15 +1,13 @@
-// ✅ src/lib/useAnalytics.js
-
+// ✅ /src/lib/useAnalytics.js (hook React bonus, GA4, Pixel, events)
 import { useEffect } from 'react';
 
-export default function useAnalytics(event, data) {
+export default function useAnalytics(event, params) {
   useEffect(() => {
-    if (!event) return;
-    // GA4
-    if (window.gtag) window.gtag('event', event, data || {});
-    // Meta Pixel
-    if (window.fbq) window.fbq('trackCustom', event, data || {});
-    // Hotjar
-    if (window.hj) window.hj('event', event, data || {});
-  }, [event, data]);
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', event, params);
+    }
+    if (typeof window !== 'undefined' && window.fbq) {
+      window.fbq('trackCustom', event, params);
+    }
+  }, [event, params]);
 }

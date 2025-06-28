@@ -1,45 +1,35 @@
-'use client'
+// ✅ /src/components/CartReminder.js (popin relance panier, bonus conversion)
+'use client';
 
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { useEffect, useState } from 'react';
+import { useCart } from '@/context/cartContext';
 
 export default function CartReminder() {
-  const [show, setShow] = useState(false)
+  const { cart } = useCart();
+  const [show, setShow] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const storedCart = window.localStorage.getItem('cart')
-        if (storedCart && JSON.parse(storedCart).length > 0) {
-          const timer = setTimeout(() => setShow(true), 7000)
-          return () => clearTimeout(timer)
-        }
-      } catch (e) {
-        console.warn('Erreur CartReminder (localStorage) :', e)
-      }
-    }
-  }, [])
+    if (cart.length === 0) return;
+    const timer = setTimeout(() => setShow(true), 1000 * 60 * 10); // 10 minutes
+    return () => clearTimeout(timer);
+  }, [cart]);
 
-  if (!show) return null
+  if (!show) return null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="fixed bottom-4 right-4 bg-white border border-gray-300 shadow-md rounded px-4 py-3 z-50"
-      onClick={() => setShow(false)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => e.key === 'Enter' && setShow(false)}
-    >
-      <p className="text-sm">🛒 Vous avez un panier en attente !</p>
-      <Link
-        href="/panier"
-        className="text-blue-600 underline text-sm mt-1 inline-block"
+    <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 bg-white border shadow-xl rounded p-6 flex flex-col items-center animate-fadeIn">
+      <span className="font-semibold mb-2">
+        🛒 Votre panier vous attend&nbsp;!
+      </span>
+      <a
+        href="/fr/panier"
+        className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-900 mt-2"
       >
-        Voir mon panier →
-      </Link>
-    </motion.div>
-  )
+        Voir mon panier
+      </a>
+      <button onClick={() => setShow(false)} className="text-xs text-gray-400 mt-2">
+        Fermer
+      </button>
+    </div>
+  );
 }

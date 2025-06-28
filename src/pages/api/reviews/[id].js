@@ -1,21 +1,31 @@
-// src/pages/api/reviews/[id].js 
-import dbConnect from '@/lib/dbConnect'
-import Review from '@/lib/models/reviewModel'
+// ✅ /src/pages/api/reviews/[id].js (suppression/édition d’un avis)
+import dbConnect from '@/lib/dbConnect';
+import Review from '@/models/reviewModel';
 
 export default async function handler(req, res) {
-  await dbConnect()
-  const { id } = req.query
+  await dbConnect();
+  const { id } = req.query;
 
   if (req.method === 'DELETE') {
     try {
-      const deleted = await Review.findByIdAndDelete(id)
-      if (!deleted) return res.status(404).json({ message: 'Avis introuvable' })
-      return res.status(200).json({ message: 'Avis supprimé' })
-    } catch (error) {
-      return res.status(500).json({ message: 'Erreur serveur', error })
+      await Review.findByIdAndDelete(id);
+      res.status(200).json({ success: true });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
     }
+  } else if (req.method === 'PUT') {
+    const { rating, comment } = req.body;
+    try {
+      const review = await Review.findByIdAndUpdate(
+        id,
+        { rating, comment },
+        { new: true }
+      );
+      res.status(200).json(review);
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  } else {
+    res.status(405).end();
   }
-
-  res.setHeader('Allow', ['DELETE'])
-  res.status(405).end(`Méthode ${req.method} non autorisée`)
 }

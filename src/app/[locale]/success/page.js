@@ -1,53 +1,26 @@
-// ✅ src/app/[locale]/success/page.js
-
+// ✅ /src/app/[locale]/success/page.js (remerciement après paiement)
 import SEOHead from '@/components/SEOHead';
 
-export default function SuccessPage({ params, searchParams }) {
-  const { locale } = params;
-  const orderId = searchParams?.orderId;
-
+export default function SuccessPage() {
   return (
     <>
       <SEOHead
-        overrideTitle={locale === 'fr' ? 'Commande réussie' : 'Order Successful'}
-        overrideDescription={
-          locale === 'fr'
-            ? 'Merci pour votre commande sur TechPlay !'
-            : 'Thank you for your order on TechPlay!'
-        }
-        noIndex
+        overrideTitle="Paiement réussi"
+        overrideDescription="Votre commande TechPlay est validée. Merci pour votre achat !"
       />
-      <div className="flex flex-col items-center justify-center min-h-[50vh] p-8">
-        <svg width={60} height={60} fill="none" className="mb-6" viewBox="0 0 24 24">
-          <circle cx={12} cy={12} r={12} fill="#34d399" />
-          <path d="M7 13l3 3 7-7" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        <h1 className="text-2xl font-bold mb-2 text-green-700">
-          {locale === 'fr'
-            ? 'Merci pour votre commande !'
-            : 'Thank you for your order!'}
-        </h1>
-        <p className="text-gray-600 mb-2">
-          {locale === 'fr'
-            ? "Votre commande a bien été prise en compte."
-            : "Your order has been received."}
+      <main className="max-w-xl mx-auto py-16 text-center">
+        <h1 className="text-3xl font-bold mb-4">Paiement réussi ✅</h1>
+        <p className="text-lg text-gray-600 mb-8">
+          Merci pour votre achat sur TechPlay.<br />
+          Un email de confirmation vous a été envoyé.
         </p>
-        {orderId && (
-          <p className="text-sm text-gray-500 mb-4">
-            {locale === 'fr'
-              ? `Numéro de commande : ${orderId}`
-              : `Order number: ${orderId}`}
-          </p>
-        )}
         <a
-          href={`/${locale}/mes-commandes`}
-          className="text-blue-600 hover:underline font-semibold mt-2"
+          href="/"
+          className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
         >
-          {locale === 'fr'
-            ? 'Voir mes commandes'
-            : 'View my orders'}
+          Retour à l’accueil
         </a>
-      </div>
+      </main>
     </>
   );
 }

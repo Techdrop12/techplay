@@ -1,12 +1,11 @@
-// ✅ src/components/LowStockWarning.js
-
+// ✅ /src/components/LowStockWarning.js (alerte stock bas, bonus urgence)
 export default function LowStockWarning({ stock }) {
-  if (!stock || stock > 7) return null;
+  if (stock == null || stock > 10) return null;
   return (
-    <div className="bg-yellow-100 text-yellow-800 rounded px-3 py-2 mb-2 text-sm font-medium animate-pulse">
-      {stock <= 2
-        ? "🚨 Attention, il ne reste plus que 2 exemplaires !"
-        : `Stock limité : il ne reste plus que ${stock} exemplaires.`}
+    <div className="my-2 text-sm text-red-600 font-semibold animate-pulse">
+      {stock > 1
+        ? `Plus que ${stock} articles en stock !`
+        : `Dernier article disponible !`}
     </div>
   );
 }

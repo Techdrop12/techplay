@@ -1,19 +1,9 @@
-// ✅ src/lib/getMessages.js
-import { createTranslator } from 'next-intl';
-import { defaultLocale } from './i18n';
-import messagesFr from '@/messages/fr.json';
-import messagesEn from '@/messages/en.json';
+// ✅ /src/lib/getMessages.js (récupération messages i18n pour next-intl)
+import fs from 'fs/promises';
+import path from 'path';
 
-const MESSAGES = {
-  fr: messagesFr,
-  en: messagesEn,
-};
-
-export async function getMessages(locale) {
-  const messages = MESSAGES[locale] || MESSAGES[defaultLocale];
-  const t = createTranslator({ locale, messages });
-  return {
-    ...messages,
-    t,
-  };
+export default async function getMessages(locale) {
+  const filePath = path.join(process.cwd(), 'src', 'messages', `${locale}.json`);
+  const data = await fs.readFile(filePath, 'utf8');
+  return JSON.parse(data);
 }

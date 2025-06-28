@@ -1,23 +1,14 @@
-// ✅ src/components/CartIndicator.js
-
+// ✅ /src/components/CartIndicator.js (badge dynamique panier, bonus UX)
 'use client';
 
 import { useCart } from '@/context/cartContext';
-import Link from 'next/link';
 
-export default function CartIndicator({ locale = 'fr' }) {
+export default function CartIndicator() {
   const { cart } = useCart();
-  const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-
-  if (count === 0) return null;
-
+  if (!cart.length) return null;
   return (
-    <Link
-      href={`/${locale}/panier`}
-      className="fixed bottom-8 right-6 z-50 flex items-center px-4 py-2 rounded-full bg-blue-600 text-white shadow-lg font-bold text-lg animate-bounce hover:scale-105 transition"
-      aria-label="Aller au panier"
-    >
-      🛒 <span className="ml-2">{count}</span>
-    </Link>
+    <span className="ml-2 inline-block min-w-[20px] bg-blue-600 text-white text-xs rounded-full px-2 py-0.5 text-center font-bold">
+      {cart.reduce((acc, item) => acc + (item.qty || 1), 0)}
+    </span>
   );
 }

@@ -1,50 +1,36 @@
-import { buffer } from 'micro'
-import Stripe from 'stripe'
-import dbConnect from '@/lib/dbConnect'
-import Order from '@/models/Order'
+// ✅ /src/pages/api/stripe-webhook.js (webhook paiement Stripe)
+import Stripe from 'stripe';
+import { buffer } from 'micro';
+import dbConnect from '@/lib/dbConnect';
+import Order from '@/models/Order';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
-
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-}
+export const config = { api: { bodyParser: false } };
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).end('Method Not Allowed')
+  if (req.method !== 'POST') return res.status(405).end();
+  const sig = req.headers['stripe-signature'];
 
-  const buf = await buffer(req)
-  const sig = req.headers['stripe-signature']
-
-  let event
-
+  let event;
   try {
+    const rawBody = await buffer(req);
     event = stripe.webhooks.constructEvent(
-      buf,
+      rawBody,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
-    )
+    );
   } catch (err) {
-    console.error('❌ Erreur vérification webhook :', err.message)
-    return res.status(400).send(`Webhook Error: ${err.message}`)
+    return res.status(400).send(`Webhook Error: ${err.message}`);
   }
+  await dbConnect();
 
   if (event.type === 'checkout.session.completed') {
-    const session = event.data.object
-
-    await dbConnect()
-
-    try {
-      await Order.findOneAndUpdate(
-        { stripeSessionId: session.id },
-        { status: 'payée' }
-      )
-      console.log('✅ Paiement confirmé pour commande', session.id)
-    } catch (e) {
-      console.error('❌ Erreur mise à jour commande', e)
+    const session = event.data.object;
+    const orderId = session.metadata?.orderId;
+    if (orderId) {
+      await Order.findByIdAndUpdate(orderId, { status: 'payée' });
     }
   }
 
-  res.json({ received: true })
+  res.status(200).json({ received: true });
 }

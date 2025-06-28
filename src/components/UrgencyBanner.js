@@ -1,15 +1,22 @@
-// ✅ src/components/UrgencyBanner.js
+// ✅ /src/components/UrgencyBanner.js (bonus : bannière d'urgence conversion)
+'use client';
 
-export default function UrgencyBanner({ endsAt }) {
-  const rest = endsAt
-    ? Math.max(0, Math.floor((new Date(endsAt) - Date.now()) / 1000))
-    : 0;
-  if (!rest) return null;
-  const minutes = Math.floor(rest / 60);
-  const seconds = rest % 60;
+import { useEffect, useState } from 'react';
+
+export default function UrgencyBanner({ message }) {
+  const [show, setShow] = useState(true);
+
+  useEffect(() => {
+    // Masquer après 30s
+    const timer = setTimeout(() => setShow(false), 30000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!show) return null;
+
   return (
-    <div className="bg-red-600 text-white py-1 px-3 rounded mb-2 text-sm font-bold animate-pulse">
-      ⚡️ Offre flash — il reste {minutes}min {seconds}s !
+    <div className="bg-red-600 text-white text-center py-2 px-4 font-bold">
+      {message || '⚡ Offre limitée : livraison gratuite dès 49 € !'}
     </div>
   );
 }

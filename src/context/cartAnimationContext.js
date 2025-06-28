@@ -1,27 +1,22 @@
+// ✅ /src/context/cartAnimationContext.js (bonus : animation panier)
 'use client';
+import { createContext, useContext, useState } from 'react';
 
-import React, { createContext, useState, useContext, useCallback } from 'react';
-
-export const CartAnimationContext = createContext({
-  animating: false,
-  triggerCartAnimation: () => {},
-});
+const CartAnimationContext = createContext();
 
 export function CartAnimationProvider({ children }) {
-  const [animating, setAnimating] = useState(false);
+  const [animate, setAnimate] = useState(false);
 
-  const triggerCartAnimation = useCallback(() => {
-    setAnimating(true);
-    setTimeout(() => setAnimating(false), 1000);
-  }, []);
+  const trigger = () => {
+    setAnimate(true);
+    setTimeout(() => setAnimate(false), 1200);
+  };
 
   return (
-    <CartAnimationContext.Provider value={{ animating, triggerCartAnimation }}>
+    <CartAnimationContext.Provider value={{ animate, trigger }}>
       {children}
     </CartAnimationContext.Provider>
   );
 }
 
-export function useCartAnimation() {
-  return useContext(CartAnimationContext);
-}
+export const useCartAnimation = () => useContext(CartAnimationContext);

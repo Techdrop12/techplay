@@ -1,12 +1,12 @@
-// ✅ src/models/Category.js
-
+// ✅ /src/models/Category.js (catégories produits, bonus SEO)
 import mongoose from 'mongoose';
 
 const CategorySchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, unique: true },
+    name: { type: String, required: true },
+    slug: { type: String, required: true, unique: true },
     description: String,
-    parent: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' }
+    image: String
   },
   { timestamps: true }
 );

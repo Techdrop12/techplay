@@ -1,5 +1,7 @@
-{
-  "souris": 200,
-  "tapis": 400,
-  "support": 120
-}
+[
+  {
+    "sku": "CLAVIER-MEC-RGB",
+    "supplier": "TechSupplier",
+    "stock": 120
+  }
+]

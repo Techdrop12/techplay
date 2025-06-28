@@ -1,18 +1,12 @@
+
 [
   {
-    "_id": "ex1",
-    "title": "Souris Gaming RGB",
-    "price": 29.99,
-    "category": "souris",
-    "stock": 50,
-    "image": "/uploads/souris-gaming.jpg"
-  },
-  {
-    "_id": "ex2",
-    "title": "Tapis de souris XXL",
-    "price": 19.99,
-    "category": "tapis",
-    "stock": 100,
-    "image": "/uploads/tapis-xxl.jpg"
+    "title": "Clavier Mécanique RGB",
+    "slug": "clavier-mecanique-rgb",
+    "category": "clavier",
+    "price": 59.99,
+    "image": "/products/clavier-rgb.jpg",
+    "description": "Clavier mécanique RGB idéal gaming, switches bleus.",
+    "stock": 22
   }
 ]

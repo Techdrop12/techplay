@@ -1,20 +1,16 @@
-// ✅ src/components/LocaleProvider.jsx
-
+// ✅ /src/components/LocaleProvider.jsx (provider i18n, bonus App Router)
 'use client';
 
 import { createContext, useContext } from 'react';
-import { useLocale } from 'next-intl';
 
 const LocaleContext = createContext('fr');
-export function useLocaleContext() {
+
+export function useLocale() {
   return useContext(LocaleContext);
 }
 
-export default function LocaleProvider({ children }) {
-  const locale = useLocale();
+export default function LocaleProvider({ locale, children }) {
   return (
-    <LocaleContext.Provider value={locale}>
-      {children}
-    </LocaleContext.Provider>
+    <LocaleContext.Provider value={locale}>{children}</LocaleContext.Provider>
   );
 }

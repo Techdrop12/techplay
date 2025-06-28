@@ -1,30 +1,19 @@
-'use client'
+// ✅ /src/components/FreeShippingBar.js (barre progression livraison gratuite, bonus panier)
+'use client';
 
-import { useEffect, useState } from 'react'
+import { useCart } from '@/context/cartContext';
 
-export default function FreeShippingBar({ threshold = 50 }) {
-  const [amount, setAmount] = useState(0)
-  const [show, setShow] = useState(false)
+export default function FreeShippingBar() {
+  const { cart } = useCart();
+  const total = cart.reduce((sum, item) => sum + (item.price || 0) * (item.qty || 1), 0);
+  const threshold = 49;
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return
+  if (total >= threshold) return null;
+  const missing = (threshold - total).toFixed(2);
 
-    try {
-      const cartItems = JSON.parse(window.localStorage.getItem('cartItems') || '[]')
-      const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-      setAmount(total)
-      setShow(total < threshold)
-    } catch {
-      setShow(false)
-    }
-  }, [threshold])
-
-  if (!show) return null
-
-  const remaining = (threshold - amount).toFixed(2)
   return (
-    <div className="bg-yellow-300 text-black text-sm text-center py-2 font-medium animate-pulse">
-      Plus que {remaining} € pour la livraison offerte 🚚
+    <div className="w-full bg-blue-100 text-blue-800 p-2 text-center text-sm">
+      Plus que <span className="font-bold">{missing} €</span> pour profiter de la livraison gratuite !
     </div>
-  )
+  );
 }

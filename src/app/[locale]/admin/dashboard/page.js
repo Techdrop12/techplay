@@ -1,19 +1,10 @@
-// ✅ src/app/[locale]/admin/dashboard/page.js
-
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/authOptions';
-import { redirect } from 'next/navigation';
+// ✅ /src/app/[locale]/admin/dashboard/page.js (dashboard admin synthèse)
 import AdminAnalyticsBlock from '@/components/AdminAnalyticsBlock';
 
-export default async function AdminDashboardPage({ params }) {
-  const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== 'admin') {
-    redirect('/fr/admin/login');
-  }
-
+export default function AdminDashboardPage() {
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Statistiques & Données</h1>
+    <div className="max-w-5xl mx-auto py-8">
+      <h1 className="text-2xl font-bold mb-4">Tableau de bord (synthèse)</h1>
       <AdminAnalyticsBlock />
     </div>
   );

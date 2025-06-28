@@ -1,24 +1,21 @@
-// ✅ src/pages/api/user/orders.js
-
+// ✅ /src/pages/api/user/orders.js (liste commandes utilisateur, version API)
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
-import { getToken } from 'next-auth/jwt';
 
 export default async function handler(req, res) {
-  const token = await getToken({ req });
-  if (!token?.email) return res.status(401).json({ error: 'Non autorisé' });
-
   await dbConnect();
+  const { email } = req.query;
+  if (!email) return res.status(400).json({ error: 'Email required' });
 
-  if (req.method === 'GET') {
+  try {
     const orders = await Order.find({
       $or: [
-        { 'user.email': token.email },
-        { email: token.email }
+        { 'user.email': email },
+        { email }
       ]
-    }).sort({ createdAt: -1 }).lean();
-    return res.status(200).json(orders);
+    }).sort({ createdAt: -1 });
+    res.status(200).json(orders);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
-
-  res.status(405).end();
 }

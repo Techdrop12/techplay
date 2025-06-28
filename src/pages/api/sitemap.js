@@ -1,43 +1,37 @@
-// ✅ src/pages/api/sitemap.js
-
+// ✅ /src/pages/api/sitemap.js (génération sitemap.xml dynamique pour SEO)
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
 import Blog from '@/models/Blog';
 
 export default async function handler(req, res) {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.fr';
   await dbConnect();
-  const products = await Product.find({}).lean();
-  const articles = await Blog.find({ published: true }).lean();
+  try {
+    const products = await Product.find({}).lean();
+    const blogs = await Blog.find({ published: true }).lean();
 
-  let urls = [
-    '',
-    '/a-propos',
-    '/contact',
-    '/blog',
-    '/wishlist',
-    '/cgv',
-    '/panier',
-  ];
+    const staticRoutes = [
+      '', '/a-propos', '/contact', '/categorie', '/blog', '/cgv', '/panier'
+    ];
+    let sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
 
-  const base = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://techplay.fr';
+    // Static
+    staticRoutes.forEach(route => {
+      sitemap += `  <url><loc>${baseUrl}${route ? `/${route}` : ''}</loc></url>\n`;
+    });
+    // Products
+    products.forEach(prod => {
+      sitemap += `  <url><loc>${baseUrl}/produit/${prod.slug}</loc></url>\n`;
+    });
+    // Blogs
+    blogs.forEach(blog => {
+      sitemap += `  <url><loc>${baseUrl}/blog/${blog.slug}</loc></url>\n`;
+    });
 
-  products.forEach((p) => {
-    urls.push(`/produit/${p.slug}`);
-  });
-
-  articles.forEach((a) => {
-    urls.push(`/blog/${a.slug}`);
-  });
-
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls
-  .map(
-    (u) => `<url><loc>${base}${u}</loc><changefreq>weekly</changefreq></url>`
-  )
-  .join('\n')}
-</urlset>`;
-
-  res.setHeader('Content-Type', 'application/xml');
-  res.status(200).send(xml);
+    sitemap += `</urlset>`;
+    res.setHeader('Content-Type', 'application/xml');
+    res.status(200).send(sitemap);
+  } catch (e) {
+    res.status(500).send('Erreur sitemap');
+  }
 }

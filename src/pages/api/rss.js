@@ -1,30 +1,29 @@
-// ✅ src/pages/api/rss.js
-
-import dbConnect from '@/lib/dbConnect';
-import Blog from '@/models/Blog';
+// ✅ /src/pages/api/rss.js (flux RSS automatique du blog)
+import { getPublishedArticles } from '@/lib/blog';
 
 export default async function handler(req, res) {
-  await dbConnect();
-  const articles = await Blog.find({ published: true }).sort({ publishedAt: -1 }).lean();
-
-  let rss = `<?xml version="1.0" encoding="UTF-8" ?><rss version="2.0"><channel>
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.fr';
+  try {
+    const articles = await getPublishedArticles();
+    const rss = `<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+  <channel>
     <title>TechPlay Blog</title>
-    <link>${process.env.NEXT_PUBLIC_SITE_URL}/blog</link>
-    <description>Actualités tech, conseils et guides par TechPlay</description>
-  `;
-
-  for (const a of articles) {
-    rss += `
+    <link>${baseUrl}/blog</link>
+    <description>Nouveautés TechPlay – High Tech, Gadgets, Astuces</description>
+    ${articles.map(article => `
       <item>
-        <title>${a.title}</title>
-        <link>${process.env.NEXT_PUBLIC_SITE_URL}/blog/${a.slug}</link>
-        <pubDate>${new Date(a.publishedAt).toUTCString()}</pubDate>
-        <description><![CDATA[${a.description}]]></description>
+        <title>${article.title}</title>
+        <link>${baseUrl}/blog/${article.slug}</link>
+        <description>${article.summary || ''}</description>
+        <pubDate>${new Date(article.publishedAt).toUTCString()}</pubDate>
       </item>
-    `;
+    `).join('')}
+  </channel>
+</rss>`;
+    res.setHeader('Content-Type', 'application/xml');
+    res.status(200).send(rss);
+  } catch (e) {
+    res.status(500).send('Erreur RSS');
   }
-  rss += `</channel></rss>`;
-
-  res.setHeader('Content-Type', 'application/rss+xml');
-  res.status(200).send(rss);
 }

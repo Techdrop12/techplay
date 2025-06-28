@@ -1,31 +1,31 @@
-// ✅ src/components/FAQBlock.js
+// ✅ /src/components/FAQBlock.js (mini FAQ produit, bonus conversion SEO)
+'use client';
 
 import { useEffect, useState } from 'react';
 
 export default function FAQBlock({ productId }) {
-  const [faqs, setFaqs] = useState([]);
+  const [faq, setFaq] = useState([]);
 
   useEffect(() => {
+    if (!productId) return;
     fetch(`/api/faq/${productId}`)
-      .then((res) => res.json())
-      .then(setFaqs);
+      .then(res => res.json())
+      .then(data => setFaq(data.faq || []));
   }, [productId]);
 
-  if (!faqs.length) return null;
+  if (!faq.length) return null;
 
   return (
-    <div className="my-8">
-      <h2 className="text-xl font-bold mb-2">FAQ Produit</h2>
+    <section className="mt-6">
+      <h3 className="text-lg font-semibold mb-2">Questions fréquentes</h3>
       <ul>
-        {faqs.map((f) => (
-          <li key={f._id} className="mb-3">
-            <details>
-              <summary className="font-semibold">{f.question}</summary>
-              <div className="pl-2">{f.answer}</div>
-            </details>
+        {faq.map((item, i) => (
+          <li key={i} className="mb-2">
+            <strong>{item.q}</strong>
+            <div>{item.a}</div>
           </li>
         ))}
       </ul>
-    </div>
+    </section>
   );
 }

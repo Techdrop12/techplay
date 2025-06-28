@@ -1,21 +1,21 @@
-// ✅ src/components/CartAbandonTrigger.js
-
+// ✅ /src/components/CartAbandonTrigger.js (déclencheur relance email panier abandonné, bonus conversion)
 'use client';
 
 import { useEffect } from 'react';
 
 export default function CartAbandonTrigger({ email, cart }) {
   useEffect(() => {
-    if (!cart?.length || !email) return;
+    if (!email || !cart?.length) return;
     const timer = setTimeout(() => {
       fetch('/api/brevo/abandon-panier', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, cart }),
       });
-    }, 1000 * 60 * 30); // 30 minutes
+    }, 60000 * 30); // 30 min d'inactivité
+
     return () => clearTimeout(timer);
-  }, [cart, email]);
+  }, [email, cart]);
 
   return null;
 }

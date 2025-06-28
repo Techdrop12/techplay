@@ -1,36 +1,36 @@
-const STORAGE_KEY = 'wishlist';
-
+// ✅ /src/lib/wishlist.js (helper universel, SSR et client)
 export function getWishlist() {
   if (typeof window === 'undefined') return [];
   try {
-    return JSON.parse(window.localStorage.getItem(STORAGE_KEY)) || [];
-  } catch (e) {
-    console.warn('Erreur lecture wishlist:', e);
+    return JSON.parse(localStorage.getItem('wishlist') || '[]');
+  } catch {
     return [];
   }
 }
 
-export function toggleWishlistItem(product) {
+export function addToWishlist(product) {
   if (typeof window === 'undefined') return;
   try {
-    const current = getWishlist();
-    const exists = current.find((p) => p._id === product._id);
-    const updated = exists
-      ? current.filter((p) => p._id !== product._id)
-      : [product, ...current];
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-  } catch (e) {
-    console.warn('Erreur sauvegarde wishlist:', e);
-  }
+    const list = getWishlist();
+    if (!list.find((item) => item._id === product._id)) {
+      localStorage.setItem('wishlist', JSON.stringify([...list, product]));
+    }
+  } catch {}
 }
 
-export function isInWishlist(productId) {
+export function removeFromWishlist(id) {
+  if (typeof window === 'undefined') return;
+  try {
+    const list = getWishlist().filter((item) => item._id !== id);
+    localStorage.setItem('wishlist', JSON.stringify(list));
+  } catch {}
+}
+
+export function isInWishlist(id) {
   if (typeof window === 'undefined') return false;
   try {
-    const current = getWishlist();
-    return current.some((p) => p._id === productId);
-  } catch (e) {
-    console.warn('Erreur isInWishlist:', e);
+    return getWishlist().some((item) => item._id === id);
+  } catch {
     return false;
   }
 }

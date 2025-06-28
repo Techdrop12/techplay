@@ -1,85 +1,59 @@
-import stripe from '@/lib/stripe';
+// ✅ /src/pages/api/checkout.js (checkout Stripe)
+import Stripe from 'stripe';
 import dbConnect from '@/lib/dbConnect';
-import Product from '@/models/Product';
 import Order from '@/models/Order';
 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', ['POST']);
-    return res.status(405).end(`Méthode ${req.method} non autorisée`);
+  if (req.method !== 'POST') return res.status(405).end();
+
+  await dbConnect();
+  const { items, user } = req.body;
+
+  // Vérification basique
+  if (!items || !Array.isArray(items) || !user?.email) {
+    return res.status(400).json({ error: 'Invalid payload.' });
   }
 
   try {
-    const { cart } = req.body;
+    // Calcul du total
+    const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-    if (!cart || !Array.isArray(cart) || cart.length === 0) {
-      return res.status(400).json({ error: 'Le panier est vide ou invalide.' });
-    }
+    // Création de la commande en base pour suivi
+    const order = await Order.create({
+      user,
+      email: user.email,
+      items,
+      total,
+      status: 'en cours'
+    });
 
-    await dbConnect();
-
-    const verifiedItems = [];
-    let total = 0;
-
-    for (const item of cart) {
-      const product = await Product.findById(item._id);
-      if (!product) {
-        return res.status(400).json({ error: `Produit introuvable: ${item.title}` });
-      }
-
-      const quantity = Math.max(1, item.quantity);
-      const unitPrice = Math.round(product.price * 100);
-
-      total += product.price * quantity;
-
-      verifiedItems.push({
-        title: product.title,
-        price: product.price,
-        quantity,
-        _id: product._id,
-      });
-
-      item.stripeData = {
+    // Stripe Checkout
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: items.map((item) => ({
         price_data: {
           currency: 'eur',
-          product_data: { name: product.title },
-          unit_amount: unitPrice,
+          product_data: {
+            name: item.title,
+            images: [item.image]
+          },
+          unit_amount: Math.round(item.price * 100)
         },
-        quantity,
-      };
-    }
-
-    const session = await stripe.checkout.sessions.create({
-      line_items: verifiedItems.map(i => i.stripeData),
+        quantity: item.quantity
+      })),
       mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/`,
+      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/success?orderId=${order._id}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/panier?cancelled=1`,
+      customer_email: user.email,
       metadata: {
-        email: cart[0]?.email || 'inconnu',
-      },
+        orderId: order._id.toString()
+      }
     });
 
-    await Order.create({
-      email: cart[0]?.email || 'inconnu',
-      items: verifiedItems,
-      total,
-      stripeSessionId: session.id,
-      status: 'en attente',
-    });
-
-    await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/order-confirmation`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: cart[0]?.email || 'inconnu',
-        cart: verifiedItems,
-        total,
-      }),
-    });
-
-    return res.status(200).json({ url: session.url });
-  } catch (error) {
-    console.error('Erreur lors de la création de la session Stripe:', error);
-    return res.status(500).json({ error: 'Erreur serveur Stripe' });
+    res.status(200).json({ url: session.url });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 }

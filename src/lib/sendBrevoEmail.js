@@ -1,17 +1,18 @@
-import Brevo from '@getbrevo/brevo';
+// ✅ /src/lib/sendBrevoEmail.js (email transactionnel, Brevo)
+import SibApiV3Sdk from 'sib-api-v3-sdk';
 
-const apiKey = process.env.BREVO_API_KEY;
-const senderEmail = process.env.BREVO_SENDER_EMAIL || 'no-reply@techplay.com';
-const siteName = 'TechPlay';
+export async function sendBrevoEmail({ to, subject, html }) {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) throw new Error('Brevo API Key missing');
+  SibApiV3Sdk.ApiClient.instance.authentications['api-key'].apiKey = apiKey;
+  const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 
-export default async function sendBrevoEmail({ to, subject, html }) {
-  const client = new Brevo.TransactionalEmailsApi();
-  client.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, apiKey);
-
-  return client.sendTransacEmail({
-    to: Array.isArray(to) ? to : [{ email: to }],
-    sender: { name: siteName, email: senderEmail },
+  const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail({
+    to: [{ email: to }],
+    sender: { email: process.env.BREVO_SENDER, name: 'TechPlay' },
     subject,
     htmlContent: html,
   });
+
+  return await apiInstance.sendTransacEmail(sendSmtpEmail);
 }

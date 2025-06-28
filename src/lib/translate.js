@@ -1,39 +1,20 @@
-import OpenAI from 'openai'
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-})
-
-/**
- * Traduit un contenu HTML ou texte brut en anglais.
- * Conserve la structure HTML si présente.
- * @param {string} content - Contenu à traduire
- * @returns {string} - Contenu traduit en anglais
- */
-export async function translateToEnglish(content) {
-  if (!content || typeof content !== 'string') {
-    throw new Error('⛔ Contenu invalide ou vide à traduire.')
+// ✅ /src/lib/translate.js (Google Translate API, fallback IA OpenAI)
+export async function translate(text, target = 'fr') {
+  const apiKey = process.env.GOOGLE_TRANSLATE_API_KEY;
+  if (!apiKey) throw new Error('Clé API Google Translate manquante');
+  const url = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    body: JSON.stringify({
+      q: text,
+      target,
+      format: 'text',
+    }),
+    headers: { 'Content-Type': 'application/json' },
+  });
+  const data = await res.json();
+  if (data.data?.translations?.[0]?.translatedText) {
+    return data.data.translations[0].translatedText;
   }
-
-  const prompt = `
-Tu es un traducteur professionnel. Traduis le contenu HTML suivant en anglais, en gardant les balises HTML intactes.
-Ne modifie pas la structure HTML, traduis uniquement le texte.
-
-Contenu :
-${content}
-`
-
-  try {
-    const res = await openai.chat.completions.create({
-      model: 'gpt-4',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.3,
-      max_tokens: 1000
-    })
-
-    return res.choices[0].message.content.trim()
-  } catch (error) {
-    console.error('Erreur traduction OpenAI:', error)
-    return '[Erreur de traduction]'
-  }
+  return text;
 }

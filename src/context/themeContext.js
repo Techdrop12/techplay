@@ -1,6 +1,6 @@
-// ✅ src/context/themeContext.js
-
-import { createContext, useContext, useEffect, useState } from 'react';
+// ✅ /src/context/themeContext.js (bonus : dark mode automatique)
+'use client';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
@@ -10,13 +10,17 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('theme');
-      setTheme(stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+      if (stored) setTheme(stored);
+      else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        setTheme('dark');
+      }
     }
   }, []);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      document.documentElement.className = theme;
+      document.documentElement.classList.remove('dark', 'light');
+      document.documentElement.classList.add(theme);
       localStorage.setItem('theme', theme);
     }
   }, [theme]);
@@ -28,6 +32,4 @@ export function ThemeProvider({ children }) {
   );
 }
 
-export function useTheme() {
-  return useContext(ThemeContext);
-}
+export const useTheme = () => useContext(ThemeContext);

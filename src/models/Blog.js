@@ -1,18 +1,16 @@
-// ✅ src/models/Blog.js
-
+// ✅ /src/models/Blog.js (modèle blog, bonus SEO)
 import mongoose from 'mongoose';
 
 const BlogSchema = new mongoose.Schema(
   {
-    title: { type: String, required: true },
-    slug: { type: String, required: true, unique: true },
+    title: String,
     description: String,
-    content: String,
+    slug: { type: String, unique: true },
     image: String,
     author: String,
     published: { type: Boolean, default: false },
     publishedAt: Date,
-    tags: [String]
+    articles: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Article' }]
   },
   { timestamps: true }
 );
