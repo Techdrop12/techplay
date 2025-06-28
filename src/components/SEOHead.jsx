@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import { getFallbackDescription } from '@/lib/metaFallback';
-import ProductJsonLd from './ProductJsonLd';
+import ProductJsonLd from './JsonLd/ProductJsonLd';
 import OrganizationJsonLd from './JsonLd/OrganizationJsonLd';
 import BreadcrumbJsonLd from './JsonLd/BreadcrumbJsonLd';
 

@@ -11,8 +11,8 @@ export default function ProductJsonLd({ product, siteUrl, locale = 'fr' }) {
     : 'https://schema.org/OutOfStock';
 
   const images = Array.isArray(product.image)
-    ? product.image.map((img) => `${siteUrl}${img}`)
-    : [`${siteUrl}${product.image}`];
+    ? product.image.map((img) => img.startsWith('http') ? img : `${siteUrl}${img}`)
+    : [product.image.startsWith('http') ? product.image : `${siteUrl}${product.image}`];
 
   const data = {
     '@context': 'https://schema.org/',

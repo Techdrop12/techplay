@@ -9,11 +9,12 @@ const nextPwaConfig = withPWA({
   exclude: [/middleware-manifest\.json$/],
 });
 
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   ...nextPwaConfig,
   reactStrictMode: true,
   experimental: {
-    serverActions: true, // utile pour les évolutions App Router
+    serverActions: {}, // ✅ fix ici
   },
   images: {
     domains: [
@@ -26,8 +27,12 @@ const nextConfig = {
     ],
     formats: ['image/avif', 'image/webp'],
   },
-  eslint: { ignoreDuringBuilds: true },
-  typescript: { ignoreBuildErrors: true },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   webpack(config) {
     config.resolve.alias['@'] = path.resolve('./src');
     return config;

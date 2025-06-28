@@ -1,4 +1,3 @@
-// ✅ /src/app/[locale]/produit/[slug]/page.js (fiche produit, A/B test, reviews, wishlist, bonus)
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -15,7 +14,7 @@ import WishlistButton from '@/components/WishlistButton';
 import ReviewForm from '@/components/ReviewForm';
 import ReviewList from '@/components/ReviewList';
 import RecentlyViewed from '@/components/RecentlyViewed';
-import ProductJsonLd from '@/components/ProductJsonLd';
+import ProductJsonLd from '@/components/JsonLd/ProductJsonLd'; // ✅ chemin corrigé
 import BreadcrumbJsonLd from '@/components/JsonLd/BreadcrumbJsonLd';
 import ProductAssistant from '@/components/ProductAssistant';
 
@@ -51,18 +50,14 @@ export default function ProductPage() {
         if (!res.ok) throw new Error('Produit introuvable');
         return res.json();
       })
-      .then((data) => setProduct(data))
+      .then(setProduct)
       .catch(() => toast.error('Erreur lors du chargement du produit'));
   }, [slug]);
 
   useEffect(() => {
     if (!product) return;
 
-    fetch(
-      `/api/products/recommendations?category=${encodeURIComponent(
-        product.category
-      )}&excludeIds=${product._id}`
-    )
+    fetch(`/api/products/recommendations?category=${encodeURIComponent(product.category)}&excludeIds=${product._id}`)
       .then((res) => {
         if (!res.ok) throw new Error('Erreur recommandations');
         return res.json();
@@ -70,7 +65,6 @@ export default function ProductPage() {
       .then(setRecommendations)
       .catch(() => toast.error('Erreur chargement recommandations'));
 
-    // Ajout aux produits vus récemment
     const viewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
     const exists = viewed.some((item) => item._id === product._id);
     if (!exists) {
@@ -87,13 +81,11 @@ export default function ProductPage() {
     );
   }
 
-  const baseUrl =
-    typeof window !== 'undefined'
-      ? window.location.origin
-      : process.env.NEXT_PUBLIC_SITE_URL || '';
+  const baseUrl = typeof window !== 'undefined'
+    ? window.location.origin
+    : process.env.NEXT_PUBLIC_SITE_URL || '';
 
   const canonicalUrl = `${baseUrl}/${locale}/produit/${product.slug}`;
-
   const breadcrumbSegments = [
     { label: locale === 'fr' ? 'Accueil' : 'Home', url: `${baseUrl}/${locale}` },
     {
@@ -111,7 +103,6 @@ export default function ProductPage() {
       className="max-w-3xl mx-auto p-6"
     >
       <ScoreTracker />
-
       <SEOHead
         overrideTitle={product.title}
         product={product}
@@ -124,9 +115,7 @@ export default function ProductPage() {
 
       <div className="flex items-start justify-between gap-2 mb-4">
         <h1 className="text-3xl font-bold">
-          {variant === 'A'
-            ? product.title
-            : `${product.title} – Édition Limitée`}
+          {variant === 'A' ? product.title : `${product.title} – Édition Limitée`}
         </h1>
         <WishlistButton product={product} />
       </div>
