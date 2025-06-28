@@ -1,4 +1,5 @@
-import '@/app/globals.css';
+// ✅ /src/app/[locale]/layout.js (corrigé full option)
+import '@/styles/globals.css';
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider } from 'next-intl';
 import { unstable_setRequestLocale } from 'next-intl/server';
@@ -19,12 +20,11 @@ export async function generateStaticParams() {
 
 export default async function LocaleLayout({ children, params: { locale } }) {
   if (!locales.includes(locale)) notFound();
-
   unstable_setRequestLocale(locale);
 
   let messages;
   try {
-    messages = (await import(`@/translations/${locale}.json`)).default;
+    messages = (await import(`@/messages/${locale}.json`)).default;
   } catch (error) {
     notFound();
   }
