@@ -14,7 +14,7 @@ import WishlistButton from '@/components/WishlistButton';
 import ReviewForm from '@/components/ReviewForm';
 import ReviewList from '@/components/ReviewList';
 import RecentlyViewed from '@/components/RecentlyViewed';
-import ProductJsonLd from '@/components/JsonLd/ProductJsonLd'; // ✅ chemin corrigé
+import ProductJsonLd from '@/components/JsonLd/ProductJsonLd';
 import BreadcrumbJsonLd from '@/components/JsonLd/BreadcrumbJsonLd';
 import ProductAssistant from '@/components/ProductAssistant';
 
@@ -83,7 +83,7 @@ export default function ProductPage() {
 
   const baseUrl = typeof window !== 'undefined'
     ? window.location.origin
-    : process.env.NEXT_PUBLIC_SITE_URL || '';
+    : 'https://techplay.fr';
 
   const canonicalUrl = `${baseUrl}/${locale}/produit/${product.slug}`;
   const breadcrumbSegments = [
