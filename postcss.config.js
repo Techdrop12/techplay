@@ -1,8 +1,11 @@
-// ✅ postcss.config.js – version compatible Next.js 15.3.3 + Tailwind v3
-module.exports = {
-  plugins: {
-    'postcss-import': {},
-    tailwindcss: {},
-    autoprefixer: {},
-  },
+import tailwindcss from 'tailwindcss';
+import autoprefixer from 'autoprefixer';
+import postcssImport from 'postcss-import';
+
+export default {
+  plugins: [
+    postcssImport,
+    tailwindcss,
+    autoprefixer
+  ]
 };
