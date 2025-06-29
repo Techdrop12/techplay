@@ -1,6 +1,7 @@
 {
   "name": "techplay",
   "version": "1.0.0",
+  "type": "module",
   "description": "TechPlay : boutique high-tech, gadgets et accessoires innovants – SEO, PWA, IA, notifications, full options.",
   "scripts": {
     "dev": "next dev",

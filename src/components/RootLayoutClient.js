@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 
 export default function RootLayoutClient({ children }) {
+  // Dark mode dynamique
   useEffect(() => {
     try {
       const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -19,10 +20,11 @@ export default function RootLayoutClient({ children }) {
       darkQuery.addEventListener('change', setTheme);
       return () => darkQuery.removeEventListener('change', setTheme);
     } catch (e) {
-      console.error('Dark mode error:', e);
+      console.error('[Dark mode error]', e);
     }
   }, []);
 
+  // Analytics & tracking
   useEffect(() => {
     try {
       if (process.env.NEXT_PUBLIC_GA4_ID) {
@@ -32,7 +34,7 @@ export default function RootLayoutClient({ children }) {
         gtag('config', process.env.NEXT_PUBLIC_GA4_ID);
       }
     } catch (e) {
-      console.error('GA4 error:', e);
+      console.error('[GA4 error]', e);
     }
 
     try {
@@ -57,7 +59,7 @@ export default function RootLayoutClient({ children }) {
         window.fbq('track', 'PageView');
       }
     } catch (e) {
-      console.error('Meta Pixel error:', e);
+      console.error('[Meta Pixel error]', e);
     }
 
     try {
@@ -74,7 +76,7 @@ export default function RootLayoutClient({ children }) {
         })(window, document, 'clarity', 'script', process.env.NEXT_PUBLIC_CLARITY_ID);
       }
     } catch (e) {
-      console.error('Clarity error:', e);
+      console.error('[Clarity error]', e);
     }
 
     try {
@@ -90,7 +92,7 @@ export default function RootLayoutClient({ children }) {
         })(window, document, 'https://static.hotjar.com/c/hotjar-', '.js?sv=');
       }
     } catch (e) {
-      console.error('Hotjar error:', e);
+      console.error('[Hotjar error]', e);
     }
 
     try {
@@ -99,7 +101,7 @@ export default function RootLayoutClient({ children }) {
         window.deferredPrompt = e;
       });
     } catch (e) {
-      console.error('PWA install prompt error:', e);
+      console.error('[PWA install prompt error]', e);
     }
   }, []);
 
