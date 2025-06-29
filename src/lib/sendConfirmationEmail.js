@@ -1,4 +1,4 @@
-// ✅ /src/lib/sendConfirmationEmail.js (corrigé + cohérent avec l'import)
+// ✅ /src/lib/sendConfirmationEmail.js
 import { sendBrevoEmail } from './email/sendBrevo';
 
 export async function sendConfirmationEmail({ to, order }) {
@@ -7,6 +7,6 @@ export async function sendConfirmationEmail({ to, order }) {
   <p>Commande #${order._id}</p>
   <p>Total : ${order.total} €</p>
   <p>Livraison : ${order.shippingMethod || 'Standard'}</p>`;
-  
+
   await sendBrevoEmail({ to, subject, html });
 }

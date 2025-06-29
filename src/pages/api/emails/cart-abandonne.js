@@ -5,13 +5,18 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const { email, cart } = req.body;
-  if (!email || !cart) return res.status(400).json({ error: 'Missing fields' });
+  if (!email || !cart) {
+    return res.status(400).json({ error: 'Missing fields' });
+  }
 
-  await sendBrevo({
-    to: email,
-    subject: 'Panier abandonné',
-    html: `<p>Voici un récapitulatif de votre panier : ${JSON.stringify(cart)}</p>`,
-  });
-
-  res.status(200).json({ ok: true });
+  try {
+    await sendBrevo({
+      to: email,
+      subject: 'Panier abandonné',
+      html: `<p>Voici un récapitulatif de votre panier : ${JSON.stringify(cart)}</p>`,
+    });
+    res.status(200).json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 }

@@ -3,8 +3,11 @@ import { sendBrevoEmail } from '@/lib/email/sendBrevo';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
+
   const { email, cart } = req.body;
-  if (!email || !cart) return res.status(400).json({ error: 'Champs manquants' });
+  if (!email || !cart) {
+    return res.status(400).json({ error: 'Champs manquants' });
+  }
 
   try {
     await sendBrevoEmail({
