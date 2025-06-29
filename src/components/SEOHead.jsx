@@ -1,4 +1,4 @@
-// src/components/SEOHead.jsx
+// ✅ /src/components/SEOHead.jsx – version corrigée et sécurisée (full option premium)
 import Head from 'next/head';
 import { getFallbackDescription } from '@/lib/metaFallback';
 import ProductJsonLd from './JsonLd/ProductJsonLd';
@@ -38,6 +38,8 @@ export default function SEOHead({
   const fullUrl = url || siteUrl;
   const fallbackImage = `${siteUrl}/logo.png`;
 
+  const validImage = typeof image === 'string' && image.startsWith('http') ? image : fallbackImage;
+
   return (
     <>
       <Head>
@@ -51,7 +53,7 @@ export default function SEOHead({
         <meta property="og:type" content={product ? 'product' : 'website'} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={safeDescription} />
-        <meta property="og:image" content={image || fallbackImage} />
+        <meta property="og:image" content={validImage} />
         <meta property="og:url" content={fullUrl} />
         <meta property="og:site_name" content={siteName} />
 
@@ -59,7 +61,7 @@ export default function SEOHead({
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={safeDescription} />
-        <meta name="twitter:image" content={image || fallbackImage} />
+        <meta name="twitter:image" content={validImage} />
 
         <link rel="canonical" href={fullUrl} />
         <link rel="icon" href="/favicon.ico" />
