@@ -14,9 +14,10 @@ import { CartAnimationProvider } from '@/context/cartAnimationContext';
 import 'react-toastify/dist/ReactToastify.css';
 
 export default function LayoutWithAnalytics({ children, locale }) {
+  // ✅ Corrigé : hook client dans useEffect
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      useAnalytics('page_view', { locale }); // ✅ Hook déclenché proprement
+      useAnalytics(locale);
     }
   }, [locale]);
 
