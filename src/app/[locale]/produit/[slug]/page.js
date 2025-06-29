@@ -27,6 +27,7 @@ export default function ProductPage() {
   const [variant, setVariant] = useState('A');
   const [recommendations, setRecommendations] = useState([]);
 
+  // Attribution variante A/B
   useEffect(() => {
     try {
       const stored = localStorage.getItem('ab_variant');
@@ -42,6 +43,7 @@ export default function ProductPage() {
     }
   }, []);
 
+  // Chargement du produit
   useEffect(() => {
     if (!slug) return;
 
@@ -54,6 +56,7 @@ export default function ProductPage() {
       .catch(() => toast.error('Erreur lors du chargement du produit'));
   }, [slug]);
 
+  // Recommandations + suivi localStorage
   useEffect(() => {
     if (!product) return;
 
@@ -81,11 +84,9 @@ export default function ProductPage() {
     );
   }
 
-  const baseUrl = typeof window !== 'undefined'
-    ? window.location.origin
-    : 'https://techplay.fr';
-
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://techplay.fr';
   const canonicalUrl = `${baseUrl}/${locale}/produit/${product.slug}`;
+
   const breadcrumbSegments = [
     { label: locale === 'fr' ? 'Accueil' : 'Home', url: `${baseUrl}/${locale}` },
     {
@@ -103,6 +104,7 @@ export default function ProductPage() {
       className="max-w-3xl mx-auto p-6"
     >
       <ScoreTracker />
+
       <SEOHead
         overrideTitle={product.title}
         product={product}
@@ -110,14 +112,15 @@ export default function ProductPage() {
         url={canonicalUrl}
         breadcrumbSegments={breadcrumbSegments}
       />
-      <ProductJsonLd product={product} />
+
+      <ProductJsonLd product={product} siteUrl={baseUrl} locale={locale} />
       <BreadcrumbJsonLd pathSegments={breadcrumbSegments} />
 
       <div className="flex items-start justify-between gap-2 mb-4">
         <h1 className="text-3xl font-bold">
           {variant === 'A' ? product.title : `${product.title} – Édition Limitée`}
         </h1>
-        <WishlistButton product={product} />
+        <WishlistButton product={product} aria-label={`Ajouter ${product.title} à la wishlist`} />
       </div>
 
       <ProductCard product={product} variant={variant} />

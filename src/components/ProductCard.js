@@ -71,7 +71,7 @@ export default function ProductCard({ product }) {
       {discount && (
         <div
           className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded z-20"
-          aria-label="Promotion"
+          aria-label={`Promotion : -${discount}%`}
           title={`-${discount}% de réduction`}
         >
           -{discount}%
@@ -99,6 +99,7 @@ export default function ProductCard({ product }) {
           priority
         />
         <h3 className="mt-2 font-semibold text-lg truncate">{product.title}</h3>
+
         <div className="flex items-center gap-2">
           <p className="text-gray-600 dark:text-gray-300 text-lg font-bold">
             {product.price.toFixed(2)} €
@@ -109,6 +110,7 @@ export default function ProductCard({ product }) {
             </p>
           )}
         </div>
+
         <ReactStars
           count={5}
           value={product.rating || 4.5}
@@ -118,6 +120,7 @@ export default function ProductCard({ product }) {
           activeColor="#ffd700"
           aria-label={`Note : ${product.rating || 4.5} étoiles`}
         />
+
         <FreeShippingBadge price={product.price} />
       </div>
 
