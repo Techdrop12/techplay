@@ -1,4 +1,4 @@
-// Hook React – Google Analytics, Facebook Pixel, Clarity
+// ✅ /src/lib/useAnalytics.js
 'use client';
 import { useEffect } from 'react';
 

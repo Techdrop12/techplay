@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import LiveChat from '@/components/LiveChat';
@@ -14,12 +13,8 @@ import { CartAnimationProvider } from '@/context/cartAnimationContext';
 import 'react-toastify/dist/ReactToastify.css';
 
 export default function LayoutWithAnalytics({ children, locale }) {
-  // ✅ Corrigé : hook client dans useEffect
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      useAnalytics(locale);
-    }
-  }, [locale]);
+  // ✅ hook appelé inconditionnellement, protection gérée à l'intérieur du hook
+  useAnalytics(locale);
 
   return (
     <>
