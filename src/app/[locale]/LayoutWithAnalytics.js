@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import LiveChat from '@/components/LiveChat';
@@ -13,10 +14,11 @@ import { CartAnimationProvider } from '@/context/cartAnimationContext';
 import 'react-toastify/dist/ReactToastify.css';
 
 export default function LayoutWithAnalytics({ children, locale }) {
-  // ✅ Protection : éviter l’exécution serveur pour les hooks client
-  if (typeof window !== 'undefined') {
-    useAnalytics(locale); // Active GA4, Pixel, Clarity, etc.
-  }
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      useAnalytics('page_view', { locale }); // ✅ Hook déclenché proprement
+    }
+  }, [locale]);
 
   return (
     <>
@@ -34,4 +36,3 @@ export default function LayoutWithAnalytics({ children, locale }) {
     </>
   );
 }
-
