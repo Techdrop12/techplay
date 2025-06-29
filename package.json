@@ -8,8 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "analyze": "NODE_OPTIONS='--inspect' next build",
     "type-check": "tsc --noEmit",
+    "analyze": "NODE_OPTIONS='--inspect' next build",
     "test": "echo \"No tests yet!\""
   },
   "dependencies": {

@@ -1,70 +1,64 @@
 import { NextResponse } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 import { getToken } from 'next-auth/jwt';
-import { applySecureHeaders } from './middleware-security';
-import intlConfig from '@/lib/next-intl.config.js';
+import { applySecureHeaders } from './middleware-security.js';
+import intlConfig from './src/lib/next-intl.config.js';
 
 const intlMiddleware = createMiddleware({ ...intlConfig });
 
 const STATIC_FILES = [
-  'manifest.json',
   'favicon.ico',
+  'manifest.json',
   'robots.txt',
   'sw.js',
   'firebase-messaging-sw.js',
 ];
 
-const PUBLIC_PATHS = [
-  ...STATIC_FILES.map((f) => `/${f}`),
-  ...STATIC_FILES.map((f) => `/fr/${f}`),
-  ...STATIC_FILES.map((f) => `/en/${f}`),
-];
-
-const PUBLIC_PREFIXES = [
-  '/_next/',
-  '/api/',
-  '/images/',
-  '/fonts/',
-  '/static/',
-  '/icons/',
-  '/fr/icons/',
-  '/en/icons/',
-];
-
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // 🔁 Redirection des fichiers localisés (ex: /fr/manifest.json -> /manifest.json)
+  // 🧩 Cas des fichiers statiques avec langue (ex: /fr/manifest.json)
   const matchStatic = pathname.match(/^\/(fr|en)\/(.+)$/);
   if (matchStatic) {
-    const [, , path] = matchStatic;
-    if (STATIC_FILES.includes(path) || path.startsWith('icons/')) {
-      return NextResponse.rewrite(new URL(`/${path}`, request.url));
+    const [, , file] = matchStatic;
+    if (STATIC_FILES.includes(file) || file.startsWith('icons/')) {
+      return NextResponse.rewrite(new URL(`/${file}`, request.url));
     }
   }
 
-  // ⛔ Ignorer les fichiers publics purs
+  // ✅ Autoriser le passage des fichiers publics sans middleware
+  const PUBLIC_PATHS = [
+    ...STATIC_FILES.flatMap((f) => [`/${f}`, `/fr/${f}`, `/en/${f}`]),
+  ];
   if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next();
-  if (PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return NextResponse.next();
 
-  // 🌍 Redirection automatique / -> /fr
+  const PUBLIC_PREFIXES = [
+    '/_next/', '/api/', '/images/', '/fonts/', '/static/',
+    '/icons/', '/fr/icons/', '/en/icons/',
+  ];
+  if (PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
+    return NextResponse.next();
+  }
+
+  // 🌐 Rediriger / vers /fr
   if (pathname === '/') {
     const url = request.nextUrl.clone();
     url.pathname = '/fr';
     return NextResponse.redirect(url);
   }
 
-  // 🛠 Mode maintenance
-  const maintenance = process.env.MAINTENANCE === 'true';
+  // 🚧 Mode maintenance (sauf admin ou /maintenance)
+  const isMaintenance = process.env.MAINTENANCE === 'true';
   const isAdminPath = pathname.startsWith('/admin');
-  const isMaintenancePage = ['/maintenance', '/fr/maintenance', '/en/maintenance'].includes(pathname);
-  if (maintenance && !isAdminPath && !isMaintenancePage) {
+  const isMaintenancePath = ['/maintenance', '/fr/maintenance', '/en/maintenance'].includes(pathname);
+
+  if (isMaintenance && !isAdminPath && !isMaintenancePath) {
     const url = request.nextUrl.clone();
     url.pathname = '/maintenance';
     return NextResponse.redirect(url);
   }
 
-  // 🔐 Authentification Admin
+  // 🔐 Protection admin (JWT + rôle admin requis)
   if (isAdminPath) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
     if (!token || token.role !== 'admin') {
@@ -74,10 +68,10 @@ export async function middleware(request) {
     }
   }
 
-  // 🌐 Internationalisation
+  // 🌍 i18n dynamique (en dernier)
   const intlResponse = await intlMiddleware(request);
 
-  // 🛡 Headers de sécurité (via middleware-security.js)
+  // 🛡️ Headers de sécurité
   return applySecureHeaders(intlResponse);
 }
 

@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 
 export default function RootLayoutClient({ children }) {
-  // Dark mode dynamique
+  // 🌙 Dark mode auto avec fallback couleur
   useEffect(() => {
     try {
       const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -20,13 +20,14 @@ export default function RootLayoutClient({ children }) {
       darkQuery.addEventListener('change', setTheme);
       return () => darkQuery.removeEventListener('change', setTheme);
     } catch (e) {
-      console.error('[Dark mode error]', e);
+      console.error('Dark mode error:', e);
     }
   }, []);
 
-  // Analytics & tracking
+  // 📊 Trackers & outils marketing
   useEffect(() => {
     try {
+      // Google Analytics (GA4)
       if (process.env.NEXT_PUBLIC_GA4_ID) {
         window.dataLayer = window.dataLayer || [];
         function gtag() { window.dataLayer.push(arguments); }
@@ -34,10 +35,11 @@ export default function RootLayoutClient({ children }) {
         gtag('config', process.env.NEXT_PUBLIC_GA4_ID);
       }
     } catch (e) {
-      console.error('[GA4 error]', e);
+      console.error('GA4 error:', e);
     }
 
     try {
+      // Meta Pixel (Facebook)
       if (process.env.NEXT_PUBLIC_META_PIXEL_ID) {
         !(function (f, b, e, v, n, t, s) {
           if (f.fbq) return;
@@ -59,15 +61,14 @@ export default function RootLayoutClient({ children }) {
         window.fbq('track', 'PageView');
       }
     } catch (e) {
-      console.error('[Meta Pixel error]', e);
+      console.error('Meta Pixel error:', e);
     }
 
     try {
+      // Microsoft Clarity
       if (process.env.NEXT_PUBLIC_CLARITY_ID) {
         (function (c, l, a, r, i, t, y) {
-          c[a] = c[a] || function () {
-            (c[a].q = c[a].q || []).push(arguments);
-          };
+          c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments); };
           t = l.createElement(r);
           t.async = 1;
           t.src = 'https://www.clarity.ms/tag/' + i;
@@ -76,10 +77,11 @@ export default function RootLayoutClient({ children }) {
         })(window, document, 'clarity', 'script', process.env.NEXT_PUBLIC_CLARITY_ID);
       }
     } catch (e) {
-      console.error('[Clarity error]', e);
+      console.error('Clarity error:', e);
     }
 
     try {
+      // Hotjar (optionnel)
       if (process.env.NEXT_PUBLIC_HOTJAR_ID) {
         (function (h, o, t, j, a, r) {
           h.hj = h.hj || function () { (h.hj.q = h.hj.q || []).push(arguments); };
@@ -92,16 +94,17 @@ export default function RootLayoutClient({ children }) {
         })(window, document, 'https://static.hotjar.com/c/hotjar-', '.js?sv=');
       }
     } catch (e) {
-      console.error('[Hotjar error]', e);
+      console.error('Hotjar error:', e);
     }
 
     try {
+      // 📲 PWA install prompt
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         window.deferredPrompt = e;
       });
     } catch (e) {
-      console.error('[PWA install prompt error]', e);
+      console.error('PWA install prompt error:', e);
     }
   }, []);
 
