@@ -11,8 +11,13 @@ export default function ProductJsonLd({ product, siteUrl, locale = 'fr' }) {
     : 'https://schema.org/OutOfStock';
 
   const images = Array.isArray(product.image)
-    ? product.image.map((img) => img.startsWith('http') ? img : `${siteUrl}${img}`)
-    : [product.image.startsWith('http') ? product.image : `${siteUrl}${product.image}`];
+    ? product.image.map((img) =>
+        typeof img === 'string' && img.startsWith('http') ? img : `${siteUrl}${img}`
+      )
+    : [typeof product.image === 'string'
+        ? (product.image.startsWith('http') ? product.image : `${siteUrl}${product.image}`)
+        : `${siteUrl}/placeholder.jpg`
+      ];
 
   const data = {
     '@context': 'https://schema.org/',

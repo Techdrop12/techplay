@@ -23,10 +23,7 @@ export default function SEOHead({
     overrideDescription ??
     (product ? getFallbackDescription(product) : 'TechPlay – boutique high-tech, gadgets et innovations.');
 
-  const siteUrl = typeof window !== 'undefined'
-    ? window.location.origin
-    : process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://techplay.fr';
-
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://techplay.fr';
   const fullUrl = url || siteUrl;
   const fallbackImage = `${siteUrl}/logo.png`;
 
@@ -39,6 +36,7 @@ export default function SEOHead({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta charSet="utf-8" />
 
+        {/* Open Graph */}
         <meta property="og:type" content={product ? 'product' : 'website'} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
@@ -46,6 +44,7 @@ export default function SEOHead({
         <meta property="og:url" content={fullUrl} />
         <meta property="og:site_name" content={siteName} />
 
+        {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={description} />
@@ -56,8 +55,12 @@ export default function SEOHead({
       </Head>
 
       <OrganizationJsonLd />
+
+      {/* ✅ Ne jamais rendre les JsonLd sans vérification */}
       {product && <ProductJsonLd product={product} siteUrl={siteUrl} />}
-      {breadcrumbSegments && <BreadcrumbJsonLd pathSegments={breadcrumbSegments} />}
+      {breadcrumbSegments && Array.isArray(breadcrumbSegments) && (
+        <BreadcrumbJsonLd pathSegments={breadcrumbSegments} />
+      )}
     </>
   );
 }
