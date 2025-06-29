@@ -1,6 +1,4 @@
-// ✅ src/pages/api/emails/cart-abandonne.js
-
-import sendBrevo from '@/lib/email/sendBrevo';
+import { sendBrevoEmail as sendBrevo } from '@/lib/email/sendBrevo'; // alias correct
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();

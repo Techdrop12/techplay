@@ -1,6 +1,4 @@
-// ✅ src/pages/api/brevo/abandon-panier.js
-
-import sendBrevoEmail from '@/lib/sendBrevoEmail';
+import { sendBrevoEmail } from '@/lib/email/sendBrevo'; // bon chemin et bon type d'import
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
