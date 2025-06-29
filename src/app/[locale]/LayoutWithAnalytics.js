@@ -13,7 +13,10 @@ import { CartAnimationProvider } from '@/context/cartAnimationContext';
 import 'react-toastify/dist/ReactToastify.css';
 
 export default function LayoutWithAnalytics({ children, locale }) {
-  useAnalytics(locale); // Appelle Meta Pixel, GA4, Clarity, etc.
+  // ✅ Protection : éviter l’exécution serveur pour les hooks client
+  if (typeof window !== 'undefined') {
+    useAnalytics(locale); // Active GA4, Pixel, Clarity, etc.
+  }
 
   return (
     <>
@@ -31,3 +34,4 @@ export default function LayoutWithAnalytics({ children, locale }) {
     </>
   );
 }
+

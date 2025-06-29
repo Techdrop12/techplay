@@ -1,3 +1,4 @@
+// ✅ /src/app/layout.js (version premium avec tracking, theme, fonts, layout context)
 import '../styles/globals.css';
 import { Inter } from 'next/font/google';
 import Script from 'next/script';
@@ -6,11 +7,12 @@ import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { CartProvider } from '@/context/cartContext';
 import { CartAnimationProvider } from '@/context/cartAnimationContext';
+import RootLayoutClient from '@/components/RootLayoutClient';
 
-const inter = Inter({ 
-  subsets: ['latin'], 
+const inter = Inter({
+  subsets: ['latin'],
   variable: '--font-inter',
-  preload: true
+  preload: true,
 });
 
 const themeInitScript = `
@@ -86,11 +88,7 @@ export default async function RootLayout({ children }) {
         />
         <style>{stickyHeaderStyle}</style>
         <meta name="theme-color" content="#000000" />
-        <Script
-          id="init-theme"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: themeInitScript }}
-        />
+        <Script id="init-theme" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: themeInitScript }} />
 
         {!isBot && gaID && (
           <>
@@ -137,11 +135,13 @@ export default async function RootLayout({ children }) {
       <body className="bg-white text-black dark:bg-zinc-900 dark:text-white transition-colors duration-300">
         {!isBot && <Analytics />}
         {!isBot && <SpeedInsights />}
-        <CartProvider>
-          <CartAnimationProvider>
-            {children}
-          </CartAnimationProvider>
-        </CartProvider>
+        <RootLayoutClient>
+          <CartProvider>
+            <CartAnimationProvider>
+              {children}
+            </CartAnimationProvider>
+          </CartProvider>
+        </RootLayoutClient>
       </body>
     </html>
   );
