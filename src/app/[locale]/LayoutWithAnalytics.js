@@ -13,8 +13,7 @@ import { CartAnimationProvider } from '@/context/cartAnimationContext';
 import 'react-toastify/dist/ReactToastify.css';
 
 export default function LayoutWithAnalytics({ children, locale }) {
-  // ✅ hook appelé inconditionnellement, protection gérée à l'intérieur du hook
-  useAnalytics(locale);
+  useAnalytics('page_view', { locale });
 
   return (
     <>

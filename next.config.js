@@ -1,68 +1,49 @@
-import path from 'path';
-import withPWA from 'next-pwa';
-
-const nextPwaConfig = withPWA({
+/** @type {import('next').NextConfig} */
+const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
-  exclude: [/middleware-manifest\.json$/],
 });
 
-/** @type {import('next').NextConfig} */
 const nextConfig = {
-  ...nextPwaConfig,
   reactStrictMode: true,
-  experimental: {
-    serverActions: {}, // ✅ fix ici
-  },
+  swcMinify: true,
   images: {
     domains: [
+      'cdn.techplay.fr',
       'images.unsplash.com',
-      'cdn.jsdelivr.net',
+      'source.unsplash.com',
       'res.cloudinary.com',
-      'lh3.googleusercontent.com',
       'firebasestorage.googleapis.com',
-      'placehold.co',
     ],
     formats: ['image/avif', 'image/webp'],
   },
-  eslint: {
-    ignoreDuringBuilds: true,
+  experimental: {
+    serverActions: true,
+    optimizePackageImports: ['react-icons'], // ou d’autres si tu utilises shadcn/ui
   },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  webpack(config) {
-    config.resolve.alias['@'] = path.resolve('./src');
-    return config;
+  i18n: {
+    locales: ['fr', 'en'],
+    defaultLocale: 'fr',
+    localeDetection: true,
   },
   headers: async () => [
     {
-      source: '/(manifest\\.json|icons/.*)',
+      source: '/(.*)',
       headers: [
-        { key: 'Cache-Control', value: 'public, max-age=86400, immutable' },
-        { key: 'Access-Control-Allow-Origin', value: '*' },
-        { key: 'Content-Type', value: 'application/json; charset=UTF-8' },
-      ],
-    },
-    {
-      source: '/sw.js',
-      headers: [
-        { key: 'Cache-Control', value: 'public, max-age=86400, immutable' },
-        { key: 'Access-Control-Allow-Origin', value: '*' },
-        { key: 'Content-Type', value: 'application/javascript' },
-      ],
-    },
-    {
-      source: '/firebase-messaging-sw.js',
-      headers: [
-        { key: 'Cache-Control', value: 'public, max-age=86400, immutable' },
-        { key: 'Access-Control-Allow-Origin', value: '*' },
-        { key: 'Content-Type', value: 'application/javascript' },
+        { key: 'X-DNS-Prefetch-Control', value: 'on' },
+        { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+        { key: 'X-Content-Type-Options', value: 'nosniff' },
+        { key: 'X-Frame-Options', value: 'DENY' },
+        { key: 'X-XSS-Protection', value: '1; mode=block' },
+        { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+        { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+        { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+        { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
       ],
     },
   ],
 };
 
-export default nextConfig;
+module.exports = withPWA(nextConfig);

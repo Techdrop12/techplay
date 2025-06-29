@@ -1,4 +1,3 @@
-// ✅ /src/app/layout.js (version premium avec tracking, theme, fonts, layout context)
 import '../styles/globals.css';
 import { Inter } from 'next/font/google';
 import Script from 'next/script';
@@ -15,15 +14,14 @@ const inter = Inter({
   preload: true,
 });
 
-const themeInitScript = `
-  try {
-    const mode = localStorage.getItem('theme');
-    if (mode === 'dark' || (!mode && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  } catch(e) {}`;
+const themeInitScript = `try {
+  const mode = localStorage.getItem('theme');
+  if (mode === 'dark' || (!mode && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+} catch(e) {}`;
 
 const stickyHeaderStyle = `
   header.sticky {
@@ -71,10 +69,12 @@ export default async function RootLayout({ children }) {
 
   const gaID = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
   const pixelID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
+  const clarityID = process.env.NEXT_PUBLIC_CLARITY_ID;
 
   return (
     <html lang="fr" className={inter.variable} suppressHydrationWarning>
       <head>
+        {/* Fonts */}
         <link
           rel="preload"
           href="https://fonts.googleapis.com/css2?family=Inter&display=swap"
@@ -86,10 +86,15 @@ export default async function RootLayout({ children }) {
           rel="stylesheet"
           crossOrigin="anonymous"
         />
+
+        {/* CSS custom */}
         <style>{stickyHeaderStyle}</style>
         <meta name="theme-color" content="#000000" />
+
+        {/* Dark mode init */}
         <Script id="init-theme" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: themeInitScript }} />
 
+        {/* Google Analytics */}
         {!isBot && gaID && (
           <>
             <Script
@@ -111,6 +116,7 @@ export default async function RootLayout({ children }) {
           </>
         )}
 
+        {/* Meta Pixel */}
         {!isBot && pixelID && (
           <Script
             id="meta-pixel"
@@ -127,6 +133,23 @@ export default async function RootLayout({ children }) {
                 'https://connect.facebook.net/en_US/fbevents.js');
                 fbq('init', '${pixelID}');
                 fbq('track', 'PageView');
+              `,
+            }}
+          />
+        )}
+
+        {/* Microsoft Clarity */}
+        {!isBot && clarityID && (
+          <Script
+            id="clarity"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function(c,l,a,r,i,t,y){
+                  c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                  t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+                })(window, document, "clarity", "script", "${clarityID}");
               `,
             }}
           />
