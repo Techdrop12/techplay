@@ -1,14 +1,12 @@
-// ✅ /src/pages/api/order-confirmation.js (confirmation de commande)
-import { sendConfirmationEmail } from '@/lib/sendConfirmationEmail';
+// ✅ /src/lib/sendConfirmationEmail.js (export nommé attendu)
+import { sendBrevoEmail } from './email/sendBrevo';
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).end();
-  try {
-    const { order } = req.body;
-    if (!order) return res.status(400).json({ error: 'Order required' });
-    await sendConfirmationEmail(order);
-    res.status(200).json({ success: true });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+export async function sendConfirmationEmail({ to, order }) {
+  const subject = 'Confirmation de votre commande TechPlay';
+  const html = `<h1>Merci pour votre commande !</h1>
+  <p>Commande #${order._id}</p>
+  <p>Total : ${order.total} €</p>
+  <p>Livraison : ${order.shippingMethod || 'Standard'}</p>`;
+
+  await sendBrevoEmail({ to, subject, html });
 }
