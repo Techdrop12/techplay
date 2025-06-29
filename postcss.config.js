@@ -1,8 +1,7 @@
-// ✅ postcss.config.js – Vercel + Tailwind v4 compatible
+// ✅ postcss.config.js – version corrigée pour Vercel
 module.exports = {
   plugins: {
     'postcss-import': {},
-    'tailwindcss/nesting': {},
     tailwindcss: {},
     autoprefixer: {},
   },
