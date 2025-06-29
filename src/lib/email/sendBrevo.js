@@ -1,16 +1,21 @@
-// ✅ /src/lib/email/sendBrevo.js (bonus: email marketing via Brevo)
+// Envoi d'emails transactionnels via Brevo
 import SibApiV3Sdk from 'sib-api-v3-sdk';
 
-export async function sendBrevo({ to, subject, html }) {
+export async function sendBrevoEmail({ to, subject, html }) {
   const apiKey = process.env.BREVO_API_KEY;
   if (!apiKey) throw new Error('Brevo API Key missing');
+
   SibApiV3Sdk.ApiClient.instance.authentications['api-key'].apiKey = apiKey;
   const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-  const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail({
+  const email = new SibApiV3Sdk.SendSmtpEmail({
     to: [{ email: to }],
-    sender: { email: process.env.BREVO_SENDER, name: 'TechPlay' },
+    sender: {
+      email: process.env.BREVO_SENDER || 'noreply@techplay.com',
+      name: 'TechPlay',
+    },
     subject,
     htmlContent: html,
   });
-  return await apiInstance.sendTransacEmail(sendSmtpEmail);
+
+  return await apiInstance.sendTransacEmail(email);
 }

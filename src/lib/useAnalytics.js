@@ -1,13 +1,13 @@
-// ✅ /src/lib/useAnalytics.js (hook React bonus, GA4, Pixel, events)
+// Hook React – Google Analytics, Facebook Pixel, Clarity
+'use client';
 import { useEffect } from 'react';
 
-export default function useAnalytics(event, params) {
+export function useAnalytics(event, params = {}) {
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', event, params);
-    }
-    if (typeof window !== 'undefined' && window.fbq) {
-      window.fbq('trackCustom', event, params);
+    if (typeof window !== 'undefined') {
+      if (window.gtag) window.gtag('event', event, params);
+      if (window.fbq) window.fbq('trackCustom', event, params);
+      if (window.Clarity) window.Clarity('event', event, params);
     }
   }, [event, params]);
 }

@@ -1,13 +1,13 @@
-// ✅ /src/lib/ai-tools.js (bonus : outils IA divers, résumé, trad, idée de produit…)
+// Outils IA : résumé et idées de produits
 import OpenAI from 'openai';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-export async function generateSummary(text, locale = 'fr') {
+export async function generateProductSummary(text, locale = 'fr') {
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o',
     messages: [
-      { role: 'system', content: `Résume ce texte en 3 phrases (${locale}).` },
+      { role: 'system', content: `Résume ce texte produit en 3 phrases (${locale})` },
       { role: 'user', content: text }
     ],
     max_tokens: 250,
