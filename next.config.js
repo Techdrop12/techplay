@@ -1,15 +1,8 @@
-/** @type {import('next').NextConfig} */
-const withPWA = require('next-pwa')({
-  dest: 'public',
-  register: true,
-  skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development',
-});
+// ✅ /next.config.js – version ESModule pour Next.js 15+ avec "type": "module"
+import { withPWA } from 'next-pwa';
 
 const nextConfig = {
   reactStrictMode: true,
-
-  // ✅ Corrigé : swcMinify supprimé car obsolète dans Next 13+
   images: {
     domains: [
       'cdn.techplay.fr',
@@ -20,18 +13,11 @@ const nextConfig = {
     ],
     formats: ['image/avif', 'image/webp'],
   },
-
   experimental: {
-    serverActions: {}, // ✅ Corrigé : true → {}
+    serverActions: true,
     optimizePackageImports: ['react-icons'],
   },
-
-  i18n: {
-    locales: ['fr', 'en'],
-    defaultLocale: 'fr',
-    localeDetection: false, // ✅ Corrigé : false (et non "true" en string)
-  },
-
+  // ❌ i18n n'est plus supporté ici => supprimé pour éviter le warning Vercel
   headers: async () => [
     {
       source: '/(.*)',
@@ -50,4 +36,9 @@ const nextConfig = {
   ],
 };
 
-module.exports = withPWA(nextConfig);
+export default withPWA({
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === 'development',
+})(nextConfig);
