@@ -1,5 +1,3 @@
-// ✅ src/components/ProductGallery.js (version premium optimisée)
-
 'use client';
 
 import { useState } from 'react';
@@ -7,16 +5,21 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 
 export default function ProductGallery({ images = [] }) {
+  const safeImages = Array.isArray(images) ? images.filter(Boolean) : [];
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const mainImage = images[selectedIndex] || '/default.jpg';
+
+  const mainImage =
+    safeImages[selectedIndex] ||
+    safeImages[0] ||
+    '/default.jpg';
 
   const handleKeyDown = (e) => {
     if (!lightboxOpen) return;
     if (e.key === 'ArrowRight') {
-      setSelectedIndex((prev) => (prev + 1) % images.length);
+      setSelectedIndex((prev) => (prev + 1) % safeImages.length);
     } else if (e.key === 'ArrowLeft') {
-      setSelectedIndex((prev) => (prev - 1 + images.length) % images.length);
+      setSelectedIndex((prev) => (prev - 1 + safeImages.length) % safeImages.length);
     } else if (e.key === 'Escape') {
       setLightboxOpen(false);
     }
@@ -26,7 +29,7 @@ export default function ProductGallery({ images = [] }) {
     <div onKeyDown={handleKeyDown} tabIndex={0} className="outline-none">
       {/* Miniatures */}
       <div className="flex md:flex-col gap-2 md:w-24 overflow-x-auto md:overflow-y-auto mb-4">
-        {images.map((img, i) => (
+        {safeImages.map((img, i) => (
           <Image
             key={i}
             src={img}
