@@ -1,9 +1,4 @@
-# *
 User-agent: *
-Allow: /
+Disallow:
 
-# Host
-Host: https://www.techplay.com
-
-# Sitemaps
-Sitemap: https://www.techplay.com/sitemap.xml
+Sitemap: https://techplay.fr/api/sitemap

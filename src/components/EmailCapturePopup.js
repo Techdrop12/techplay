@@ -1,43 +1,53 @@
-// ✅ /src/components/EmailCapturePopup.js (popup email, bonus conversion, Brevo)
 'use client';
 
 import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 export default function EmailCapturePopup() {
   const [visible, setVisible] = useState(false);
+  const [email, setEmail] = useState('');
 
   useEffect(() => {
-    const shown = localStorage.getItem('email_popup_shown');
-    if (!shown) setTimeout(() => setVisible(true), 12000);
+    const timeout = setTimeout(() => setVisible(true), 15000);
+    return () => clearTimeout(timeout);
   }, []);
 
-  function handleSubmit(e) {
-    e.preventDefault();
-    const email = e.target.email.value;
-    if (!/\S+@\S+\.\S+/.test(email)) return alert('Email invalide');
-    fetch('/api/brevo-track', { method: 'POST', body: JSON.stringify({ email }) });
-    localStorage.setItem('email_popup_shown', '1');
-    setVisible(false);
-  }
+  const submit = async () => {
+    if (!email) return;
+    try {
+      const res = await fetch('/api/emails/capture', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (res.ok) {
+        toast.success('Merci !');
+        setVisible(false);
+      } else {
+        toast.error('Erreur');
+      }
+    } catch {
+      toast.error('Erreur');
+    }
+  };
 
   if (!visible) return null;
+
   return (
-    <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center">
-      <form className="bg-white p-6 rounded shadow-lg w-96" onSubmit={handleSubmit}>
-        <h2 className="font-bold text-lg mb-2">Recevez une offre exclusive</h2>
-        <p className="mb-4 text-sm text-gray-500">
-          Inscrivez-vous et recevez -10 % sur votre première commande !
-        </p>
-        <input
-          name="email"
-          type="email"
-          required
-          placeholder="Votre email"
-          className="border rounded px-3 py-2 w-full mb-2"
-        />
-        <button className="w-full bg-blue-600 text-white py-2 rounded font-bold">Je m’inscris</button>
-        <button type="button" onClick={() => setVisible(false)} className="text-xs text-gray-400 mt-2 w-full">Fermer</button>
-      </form>
+    <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-900 border p-4 rounded shadow-md max-w-sm space-y-2">
+      <p>💌 Recevez nos nouveautés en avant-première</p>
+      <input
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Votre email"
+        className="w-full border px-2 py-1 rounded"
+      />
+      <button
+        onClick={submit}
+        className="bg-blue-600 text-white w-full py-1 rounded hover:bg-blue-700"
+      >
+        S’inscrire
+      </button>
     </div>
   );
 }

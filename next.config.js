@@ -1,13 +1,22 @@
-/** @type {import('next').NextConfig} */
-import withPWA from 'next-pwa';
+import withPWA from 'next-pwa'
 
-const isDev = process.env.NODE_ENV === 'development';
+const isDev = process.env.NODE_ENV === 'development'
 
-const nextConfig = {
+const withPwaPlugin = withPWA({
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  disable: isDev
+})
+
+export default withPwaPlugin({
   reactStrictMode: true,
+  compress: true,
+  poweredByHeader: false,
   experimental: {
-    // ✅ Option autorisée : import optimisé
     optimizePackageImports: ['react-icons'],
+    scrollRestoration: true,
+    legacyBrowsers: false
   },
   images: {
     domains: [
@@ -15,9 +24,12 @@ const nextConfig = {
       'images.unsplash.com',
       'source.unsplash.com',
       'res.cloudinary.com',
-      'firebasestorage.googleapis.com',
+      'firebasestorage.googleapis.com'
     ],
-    formats: ['image/avif', 'image/webp'],
+    formats: ['image/avif', 'image/webp']
+  },
+  eslint: {
+    ignoreDuringBuilds: true
   },
   headers: async () => [
     {
@@ -31,17 +43,8 @@ const nextConfig = {
         { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
         { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
         { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
-        { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
-      ],
-    },
-  ],
-};
-
-const withPwaPlugin = withPWA({
-  dest: 'public',
-  register: true,
-  skipWaiting: true,
-  disable: isDev,
-});
-
-export default withPwaPlugin(nextConfig);
+        { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' }
+      ]
+    }
+  ]
+})

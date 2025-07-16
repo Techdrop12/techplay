@@ -1,34 +1,27 @@
-/* ✅ globals.css – version premium */
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Animations personnalisées */
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+@layer base {
+  html {
+    scroll-behavior: smooth;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  body {
+    @apply bg-white text-gray-900 dark:bg-black dark:text-white;
   }
 }
 
-.animate-fade-in {
-  animation: fade-in 0.4s ease-out;
-}
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 
-/* Fix scrollbar style */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-thumb {
-  background-color: rgba(100, 100, 100, 0.4);
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(100, 100, 100, 0.6);
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .transition-default {
+    @apply transition duration-300 ease-in-out;
+  }
 }

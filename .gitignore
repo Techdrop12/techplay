@@ -1,7 +1,11 @@
 .env.local
 node_modules/
 .next/
-bfg.jar
+.vscode/
+.vercel/
 *.log
 .DS_Store
-.vercel
+bfg.jar
+coverage/
+dist/
+out/

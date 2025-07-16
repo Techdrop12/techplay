@@ -1,54 +1,21 @@
 {
-  "name": "TechPlay – Boutique Tech Premium",
+  "name": "TechPlay",
   "short_name": "TechPlay",
-  "description": "Boutique high-tech, gadgets et accessoires innovants. Livraison rapide, SAV premium.",
-  "lang": "fr-FR",
+  "description": "Boutique ultra premium de gadgets high-tech",
   "start_url": "/",
-  "scope": "/",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "background_color": "#2563eb",
-  "theme_color": "#2563eb",
+  "background_color": "#ffffff",
+  "theme_color": "#0f172a",
   "icons": [
     {
-      "src": "/favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "/logo-192.png",
+      "src": "/icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/logo-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/maskable-icon.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/apple-touch-icon.png",
-      "sizes": "180x180",
       "type": "image/png"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Wishlist",
-      "url": "/fr/wishlist",
-      "description": "Voir mes favoris"
     },
     {
-      "name": "Panier",
-      "url": "/fr/panier",
-      "description": "Voir mon panier"
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ]
 }
