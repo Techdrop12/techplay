@@ -1,19 +1,37 @@
-import ProductCard from './ProductCard'
+'use client'
 
-interface Product {
-  id: string
-  title: string
-  price: number
-  imageUrl: string
-  slug: string
+import { Product } from '@/types/product'
+import ProductCard from '@/components/ProductCard'
+import { motion, AnimatePresence } from 'framer-motion'
+
+interface ProductGridProps {
+  products: Product[]
+  emptyMessage?: string
 }
 
-export default function ProductGrid({ products }: { products: Product[] }) {
+export default function ProductGrid({ products, emptyMessage }: ProductGridProps) {
+  if (!products || products.length === 0) {
+    return (
+      <div className="py-12 text-center text-gray-500 dark:text-gray-400">
+        {emptyMessage || 'Aucun produit trouvé.'}
+      </div>
+    )
+  }
+
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      {products.map(product => (
-        <ProductCard key={product.id} {...product} />
-      ))}
-    </div>
+    <AnimatePresence mode="wait">
+      <motion.div
+        layout
+        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6"
+        aria-live="polite"
+        role="list"
+      >
+        {products.map((product) => (
+          <motion.div key={product._id} layout>
+            <ProductCard product={product} />
+          </motion.div>
+        ))}
+      </motion.div>
+    </AnimatePresence>
   )
 }

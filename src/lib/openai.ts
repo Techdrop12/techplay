@@ -9,6 +9,5 @@ export async function generateBlog(prompt: string) {
     messages: [{ role: 'user', content: prompt }],
     model: 'gpt-4',
   })
-
   return response.choices[0].message.content
 }

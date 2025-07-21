@@ -1,9 +1,16 @@
-"use client";
+'use client'
 
-import { useState } from "react";
+import { useState } from 'react'
+
+type CartItem = {
+  id: string
+  name: string
+  price: number
+  quantity: number
+}
 
 export default function CartPage() {
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState<CartItem[]>([])
 
   return (
     <section className="max-w-4xl mx-auto py-16 px-4">
@@ -12,11 +19,13 @@ export default function CartPage() {
         <p className="text-gray-600">Votre panier est vide.</p>
       ) : (
         <ul>
-          {items.map((item, index) => (
-            <li key={index}>{item.name} – {item.price} €</li>
+          {items.map((item) => (
+            <li key={item.id}>
+              {item.name} – {item.price} € x {item.quantity}
+            </li>
           ))}
         </ul>
       )}
     </section>
-  );
+  )
 }

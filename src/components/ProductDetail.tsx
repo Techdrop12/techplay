@@ -2,44 +2,102 @@
 
 import Image from 'next/image'
 import { useState } from 'react'
-import { formatPrice } from '@/lib/formatPrice'
-import StarsRating from './StarsRating'
-import PricingBadge from './PricingBadge'
+import { formatPrice } from '@/lib/utils'
+import { motion } from 'framer-motion'
+import WishlistButton from '@/components/WishlistButton'
+import FreeShippingBadge from '@/components/FreeShippingBadge'
+import QuantitySelector from '@/components/QuantitySelector'
+import RatingStars from '@/components/ui/RatingStars'
+import PricingBadge from '@/components/PricingBadge'
+import AddToCartButton from '@/components/AddToCartButton'
+import ReviewForm from '@/components/ReviewForm'
+import StickyCartSummary from '@/components/StickyCartSummary'
+import type { Product } from '@/types/product'
 
 interface Props {
-  slug: string
+  product: Product
+  locale?: string
 }
 
-export default function ProductDetail({ slug }: Props) {
-  const [quantity, setQuantity] = useState(1)
+export default function ProductDetail({ product, locale = 'fr' }: Props) {
+  const [quantity, setQuantity] = useState<number>(1)
 
-  // Simulation temporaire
-  const product = {
-    title: 'Produit test',
-    image: '/product.jpg',
-    price: 24.99,
-    rating: 4,
-    description: 'Description du produit ici.',
-  }
+  const {
+    _id,
+    slug,
+    title = 'Produit',
+    price,
+    oldPrice,
+    image = '/placeholder.png',
+    description = '',
+    rating = 4,
+  } = product
 
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-      <div className="relative aspect-square">
-        <Image src={product.image} alt={product.title} fill className="rounded object-cover" />
+    <motion.section
+      className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start max-w-7xl mx-auto px-4"
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      aria-labelledby="product-title"
+      data-product-id={_id}
+      data-product-slug={slug}
+    >
+      {/* ✅ Image produit */}
+      <div className="relative aspect-square w-full">
+        <Image
+          src={image}
+          alt={`Image du produit ${title}`}
+          fill
+          className="rounded-lg object-cover shadow"
+          sizes="(min-width: 1024px) 50vw, 100vw"
+          priority
+        />
+        <PricingBadge
+          price={price}
+          oldPrice={oldPrice}
+          showDiscountLabel
+          showOldPrice
+        />
       </div>
-      <div>
-        <h1 className="text-2xl font-bold">{product.title}</h1>
-        <div className="mt-2 flex items-center gap-2">
-          <PricingBadge>{formatPrice(product.price)}</PricingBadge>
-          <StarsRating rating={product.rating} />
+
+      {/* ✅ Détails produit */}
+      <div className="space-y-6">
+        <h1
+          id="product-title"
+          className="text-3xl font-bold text-gray-900 dark:text-white"
+        >
+          {title}
+        </h1>
+
+        <RatingStars value={rating} />
+
+        <FreeShippingBadge price={price} />
+
+        <WishlistButton
+          product={{ _id, slug, title, price, image }}
+        />
+
+        <div className="flex items-center gap-4">
+          <label htmlFor="quantity" className="font-medium">
+            Quantité :
+          </label>
+          <QuantitySelector value={quantity} onChange={setQuantity} />
         </div>
-        <p className="mt-4 text-sm text-muted-foreground">{product.description}</p>
-        <div className="mt-6 flex items-center gap-4">
-          <button className="rounded bg-black px-5 py-2 text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-100">
-            Ajouter au panier
-          </button>
-        </div>
+
+        <AddToCartButton product={{ ...product, quantity }} />
+
+        {description && (
+          <p className="text-gray-700 dark:text-gray-300 leading-relaxed mt-4">
+            {description}
+          </p>
+        )}
+
+        <ReviewForm productId={_id} />
       </div>
-    </div>
+
+      {/* ✅ Résumé panier mobile sticky */}
+      <StickyCartSummary locale={locale} />
+    </motion.section>
   )
 }

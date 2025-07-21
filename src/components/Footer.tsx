@@ -1,38 +1,61 @@
+// src/components/Footer.tsx
+'use client'
+
 import Link from 'next/link'
 
-export default function Footer() {
+interface FooterLink {
+  label: string
+  href: string
+}
+
+interface FooterProps {
+  links?: FooterLink[]
+  companyName?: string
+  compact?: boolean
+  children?: React.ReactNode
+}
+
+export default function Footer({
+  links = [
+    { label: 'Mentions légales', href: '/mentions-legales' },
+    { label: 'Confidentialité', href: '/confidentialite' },
+    { label: 'CGV', href: '/cgv' },
+  ],
+  companyName = 'TechPlay',
+  compact = false,
+  children,
+}: FooterProps) {
+  const currentYear = new Date().getFullYear()
+
   return (
-    <footer className="mt-24 border-t py-12 text-sm text-muted-foreground">
-      <div className="container grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4">
-        <div>
-          <p className="font-semibold">TechPlay</p>
-          <p className="mt-2 max-w-xs text-xs text-muted">Votre boutique high-tech nouvelle génération.</p>
-        </div>
-        <div>
-          <p className="font-semibold">Navigation</p>
-          <ul className="mt-2 space-y-1">
-            <li><Link href="/">Accueil</Link></li>
-            <li><Link href="/categorie/accessoires">Catégories</Link></li>
-            <li><Link href="/blog">Blog</Link></li>
-          </ul>
-        </div>
-        <div>
-          <p className="font-semibold">Infos</p>
-          <ul className="mt-2 space-y-1">
-            <li><Link href="/cgv">CGV</Link></li>
-            <li><Link href="/mentions-legales">Mentions légales</Link></li>
-            <li><Link href="/contact">Contact</Link></li>
-          </ul>
-        </div>
-        <div>
-          <p className="font-semibold">Suivez-nous</p>
-          <ul className="mt-2 space-y-1">
-            <li><a href="#">Instagram</a></li>
-            <li><a href="#">TikTok</a></li>
-            <li><a href="#">Facebook</a></li>
-          </ul>
-        </div>
+    <footer
+      className="bg-gray-100 dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-t border-gray-200 dark:border-gray-800 py-8 mt-12 transition-all duration-300 ease-in-out"
+      role="contentinfo"
+    >
+      <div
+        className={`max-w-6xl mx-auto px-4 flex flex-col ${
+          compact ? 'items-center text-center' : 'md:flex-row justify-between items-center'
+        } gap-4 text-sm`}
+      >
+        <p className={compact ? '' : 'text-center md:text-left'}>
+          © {currentYear}{' '}
+          <span className="font-semibold text-black dark:text-white">{companyName}</span>. Tous droits réservés.
+        </p>
+
+        <nav className="flex gap-4 flex-wrap justify-center md:justify-end" aria-label="Liens utiles en bas de page">
+          {links.map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              className="hover:underline hover:text-black dark:hover:text-white transition"
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
       </div>
+
+      {children && <div className="mt-6 text-center">{children}</div>}
     </footer>
   )
 }

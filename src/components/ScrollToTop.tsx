@@ -1,26 +1,36 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { ArrowUp } from 'lucide-react'
 
 export default function ScrollToTop() {
-  const [visible, setVisible] = useState(false)
+  const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
-    const toggleVisible = () => {
-      setVisible(window.scrollY > 300)
-    }
-
-    window.addEventListener('scroll', toggleVisible)
-    return () => window.removeEventListener('scroll', toggleVisible)
+    const handleScroll = () => setIsVisible(window.scrollY > 300)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  return visible ? (
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  if (!isVisible) return null
+
+  return (
     <button
-      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-      className="fixed bottom-6 right-6 z-50 rounded-full bg-black p-3 text-white shadow-lg transition hover:scale-105 dark:bg-white dark:text-black"
-      aria-label="Retour en haut"
+      onClick={scrollToTop}
+      onKeyDown={(e) =>
+        (e.key === 'Enter' || e.key === ' ') && scrollToTop()
+      }
+      className="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-brand text-white shadow-lg hover:bg-brand-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand transition"
+      aria-label="Remonter en haut"
+      title="Remonter en haut"
+      role="button"
+      tabIndex={0}
     >
-      ↑
+      <ArrowUp className="w-5 h-5" />
     </button>
-  ) : null
+  )
 }

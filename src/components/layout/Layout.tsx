@@ -1,20 +1,52 @@
-import Header from './Header'
-import Footer from './Footer'
-import Toast from '../ui/Toast'
-import BannerPromo from '../home/BannerPromo'
-import PWAInstall from './PWAInstall'
-import ScrollTopButton from '../ui/ScrollTopButton'
+// src/components/layout/Layout.tsx
+'use client'
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+import { ReactNode, useEffect } from 'react'
+import dynamic from 'next/dynamic'
+import Header from './Header'
+import Footer from '@/components/Footer'
+import { usePathname } from 'next/navigation'
+import { pageview } from '@/lib/ga'
+import LiveChat from '../LiveChat'
+import { useTheme } from '@/context/themeContext'
+
+const PWAInstall = dynamic(() => import('./PWAInstall'), { ssr: false })
+const ScrollTopButton = dynamic(() => import('../ui/ScrollTopButton'), { ssr: false })
+
+interface LayoutProps {
+  children: ReactNode
+  analytics?: boolean
+  chat?: boolean
+  pwaPrompt?: boolean
+}
+
+export default function Layout({
+  children,
+  analytics = true,
+  chat = false,
+  pwaPrompt = true,
+}: LayoutProps) {
+  const pathname = usePathname()
+  const { theme } = useTheme()
+
+  useEffect(() => {
+    if (analytics) pageview(pathname)
+  }, [pathname, analytics])
+
   return (
     <>
       <Header />
-      <BannerPromo />
-      <main>{children}</main>
-      <PWAInstall />
+      <main
+        role="main"
+        className="relative min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-white transition-colors"
+        aria-label="Contenu principal"
+      >
+        {children}
+      </main>
+      {pwaPrompt && <PWAInstall />}
       <ScrollTopButton />
+      {chat && <LiveChat />}
       <Footer />
-      <Toast />
     </>
   )
 }

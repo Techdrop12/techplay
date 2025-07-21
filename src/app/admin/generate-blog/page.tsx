@@ -1,6 +1,13 @@
 'use client'
+
 import { useState } from 'react'
+// Choisis import nommé ou défaut en fonction de l'export
+
+// Import nommé (à privilégier ici)
 import { generateBlog } from '@/lib/openai'
+
+// Si tu préfères import par défaut, alors :
+// import generateBlog from '@/lib/openai'
 
 export default function GenerateBlogPage() {
   const [prompt, setPrompt] = useState('')

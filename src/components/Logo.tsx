@@ -1,10 +1,24 @@
-import Link from 'next/link'
+// src/components/Logo.tsx
+'use client'
 
-export default function Logo() {
+import Image from 'next/image'
+
+interface LogoProps {
+  className?: string
+  priority?: boolean
+}
+
+export default function Logo({ className = '', priority = false }: LogoProps) {
   return (
-    <Link href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight">
-      <img src="/logo.svg" alt="TechPlay logo" className="h-6 dark:hidden" />
-      <img src="/logo-dark.svg" alt="TechPlay logo dark" className="h-6 hidden dark:block" />
-    </Link>
+    <div className={`flex items-center gap-2 ${className}`}>
+      <Image
+        src="/logo.png"
+        alt="Logo TechPlay"
+        width={40}
+        height={40}
+        priority={priority}
+      />
+      <span className="text-xl font-bold tracking-tight">TechPlay</span>
+    </div>
   )
 }

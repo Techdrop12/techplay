@@ -1,3 +1,5 @@
+// src/components/TrustBadges.tsx
+
 export default function TrustBadges() {
   return (
     <section className="py-6 text-center border-t border-gray-200 dark:border-gray-700">

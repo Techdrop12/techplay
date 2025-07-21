@@ -1,28 +1,28 @@
-// ✅ /src/components/BackToTop.js (autre variante retour haut, bonus UX)
-'use client';
+// components/BackToTop.tsx
+'use client'
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react'
 
 export default function BackToTop() {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    function onScroll() {
-      setVisible(window.scrollY > 400);
+    const toggleVisibility = () => {
+      setVisible(window.scrollY > 400)
     }
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+    window.addEventListener('scroll', toggleVisibility, { passive: true })
+    return () => window.removeEventListener('scroll', toggleVisibility)
+  }, [])
 
-  if (!visible) return null;
+  if (!visible) return null
 
   return (
     <button
-      className="fixed bottom-4 left-4 bg-blue-600 text-white rounded-full p-3 shadow-xl z-50 hover:bg-blue-800 transition"
       onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-      aria-label="Haut de page"
+      aria-label="Retour en haut de page"
+      className="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-blue-600 text-white shadow-xl hover:bg-blue-700 transition-all"
     >
-      ↑ Haut
+      ↑
     </button>
-  );
+  )
 }

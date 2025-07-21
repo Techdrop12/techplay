@@ -1,23 +1,20 @@
+// src/app/layout.tsx
 import './globals.css'
-import LayoutWithAnalytics from '@/components/layout/LayoutWithAnalytics'
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { ThemeProvider } from '@/context/themeContext'
+import Layout from '@/components/layout/Layout'
 
-const inter = Inter({ subsets: ['latin'] })
-
-export const metadata: Metadata = {
-  title: {
-    default: 'TechPlay – Boutique high-tech',
-    template: '%s | TechPlay',
-  },
-  description: 'Découvrez les meilleurs gadgets tech, design, utiles et accessibles.',
+export const metadata = {
+  title: 'TechPlay',
+  description: 'Le meilleur site tech en dropshipping',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={inter.className}>
+    <html lang="fr">
       <body>
-        <LayoutWithAnalytics>{children}</LayoutWithAnalytics>
+        <ThemeProvider>
+          <Layout>{children}</Layout>
+        </ThemeProvider>
       </body>
     </html>
   )

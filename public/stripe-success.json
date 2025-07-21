@@ -1,5 +1,0 @@
-{
-  "id": "cs_test_success_example",
-  "object": "checkout.session",
-  "payment_status": "paid"
-}

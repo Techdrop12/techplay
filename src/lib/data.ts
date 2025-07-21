@@ -1,17 +1,48 @@
-import { db } from './db'
+import { connectToDatabase } from './db'
+import Product from '@/models/Product'
+import Pack from '@/models/Pack'
+import Blog from '@/models/Blog'
 
-export async function getBestProducts() {
-  return await db.product.findMany({ where: { featured: true }, take: 8 })
+import type { Product as ProductType, Pack as PackType } from '@/types/product'
+import type { BlogPost } from '@/types/blog'
+
+// Produits
+
+export async function getBestProducts(): Promise<ProductType[]> {
+  await connectToDatabase()
+  return (await Product.find({ featured: true }).limit(8).lean()) as unknown as ProductType[]
 }
 
-export async function getRecommendedPacks() {
-  return await db.pack.findMany({ where: { recommended: true }, take: 6 })
+export async function getAllProducts(): Promise<ProductType[]> {
+  await connectToDatabase()
+  return (await Product.find({}).lean()) as unknown as ProductType[]
 }
 
-export async function getBlogArticles() {
-  return await db.blog.findMany({ take: 10 })
+export async function getProductBySlug(slug: string): Promise<ProductType | null> {
+  await connectToDatabase()
+  return (await Product.findOne({ slug }).lean()) as unknown as ProductType | null
 }
 
-export async function getBlogBySlug(slug: string) {
-  return await db.blog.findUnique({ where: { slug } })
+// Packs
+
+export async function getRecommendedPacks(): Promise<PackType[]> {
+  await connectToDatabase()
+  return (await Pack.find({ recommended: true }).limit(6).lean()) as unknown as PackType[]
+}
+
+export async function getPackBySlug(slug: string): Promise<PackType | null> {
+  await connectToDatabase()
+  return (await Pack.findOne({ slug }).lean()) as unknown as PackType | null
+}
+
+// Blog
+
+export async function getLatestBlogPosts(): Promise<BlogPost[]> {
+  await connectToDatabase()
+  return (await Blog.find({}).sort({ createdAt: -1 }).limit(10).lean()) as unknown as BlogPost[]
+}
+
+export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
+  await connectToDatabase()
+  return (await Blog.findOne({ slug }).lean()) as unknown as BlogPost | null
 }

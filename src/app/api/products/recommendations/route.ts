@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { connectToDatabase } from '@/lib/db'
+import Product from '@/models/Product'
 
 export async function GET() {
-  const recommended = await db.product.findMany({
-    where: { featured: true },
-    take: 4,
-  })
+  await connectToDatabase()
 
+  const recommended = await Product.find({ recommended: true }).limit(4).lean()
   return NextResponse.json(recommended)
 }

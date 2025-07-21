@@ -1,11 +1,43 @@
-.env.local
+# 🔒 Environnements & secrets
+.env*
+!.env.example
+
+# 📦 Dépendances
 node_modules/
+
+# 🚧 Builds
 .next/
-.vscode/
-.vercel/
-*.log
-.DS_Store
-bfg.jar
-coverage/
 dist/
 out/
+coverage/
+build/
+*.tsbuildinfo
+
+# 🔧 Configs éditeur
+.vscode/
+.idea/
+*.log
+
+# 🧪 Tests & tools
+bfg.jar
+*.test.ts
+*.test.js
+
+# 💻 OS files
+.DS_Store
+Thumbs.db
+
+# 📤 Déploiement Vercel
+.vercel/
+
+# 🔍 Storybook
+storybook-static/
+
+# 🔁 Prettier cache
+.prettiercache
+
+# 🧱 Sitemaps et statiques exportés
+/public/sitemap.xml
+/public/sitemap-*.xml
+/public/robots.txt
+/public/workbox-*.js

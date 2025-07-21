@@ -2,7 +2,7 @@
   "name": "techplay",
   "version": "1.0.0",
   "type": "module",
-  "description": "TechPlay : boutique high-tech, gadgets et accessoires innovants – SEO, PWA, IA, notifications, full options.",
+  "description": "TechPlay – Boutique e-commerce high-tech, gadgets innovants. SEO, PWA, IA, sécurité, animations, performance : full option.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -10,7 +10,9 @@
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "analyze": "cross-env ANALYZE=true next build",
-    "test": "echo \"No tests yet!\""
+    "prepare": "husky install",
+    "format": "prettier --write .",
+    "test": "echo \"Tests à venir\""
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.10.0",
@@ -44,23 +46,50 @@
     "zod": "^3.25.67"
   },
   "devDependencies": {
+    "@storybook/react": "^9.0.17",
     "@tailwindcss/forms": "^0.5.7",
     "@tailwindcss/typography": "^0.5.10",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20.10.0",
+    "@types/nodemailer": "^6.4.17",
+    "@types/pdfkit": "^0.17.1",
     "@types/react": "^18.2.14",
+    "@types/react-dom": "^18.2.7",
+    "@types/web-push": "^3.6.4",
     "autoprefixer": "^10.4.21",
+    "cross-env": "^7.0.3",
     "eslint": "^8.57.0",
     "eslint-config-next": "15.3.3",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.0",
     "postcss": "^8.4.35",
     "postcss-import": "^16.1.1",
     "prettier": "^3.3.2",
     "tailwind-scrollbar": "^3.1.0",
-    "tailwindcss": "^3.4.1"
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.4.5"
   },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
   },
-  "keywords": ["nextjs", "ecommerce", "techplay", "pwa", "ia", "full-option"],
+  "lint-staged": {
+    "**/*.{js,ts,tsx,jsx,json,css,md}": [
+      "prettier --write"
+    ]
+  },
+  "keywords": [
+    "nextjs",
+    "ecommerce",
+    "techplay",
+    "pwa",
+    "seo",
+    "ai",
+    "stripe",
+    "mongodb",
+    "typescript",
+    "full-option"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/ton-repo/techplay"
