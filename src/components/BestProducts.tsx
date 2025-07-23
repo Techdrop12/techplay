@@ -1,42 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { getBestProducts } from '@/lib/data'
 import type { Product } from '@/types/product'
 import ProductCard from '@/components/ProductCard'
 import { motion } from 'framer-motion'
 
-export default function BestProducts() {
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
+interface Props {
+  products: Product[]
+}
 
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        const res = await getBestProducts()
-        setProducts(res || [])
-      } catch (err) {
-        console.error('Erreur récupération produits vedettes', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetch()
-  }, [])
-
-  if (loading) {
-    return (
-      <div
-        className="max-w-6xl mx-auto px-4 py-10 text-center text-gray-500"
-        role="status"
-        aria-live="polite"
-      >
-        Chargement des meilleures ventes...
-      </div>
-    )
-  }
-
+export default function BestProducts({ products }: Props) {
   if (!products.length) {
     return (
       <div
