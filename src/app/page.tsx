@@ -4,7 +4,7 @@ import PacksSection from '@/components/PacksSection'
 import TrustBadges from '@/components/TrustBadges'
 import FAQ from '@/components/FAQ'
 import type { Metadata } from 'next'
-import { getBestProducts } from '@/lib/data'  // <-- importer la fonction serveur
+import { getBestProducts, getRecommendedPacks } from '@/lib/data'
 
 export const metadata: Metadata = {
   title: 'TechPlay - Accueil',
@@ -12,7 +12,8 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  const bestProducts = await getBestProducts()  // appel serveur OK ici
+  const bestProducts = await getBestProducts()
+  const recommendedPacks = await getRecommendedPacks()
 
   return (
     <main className="space-y-20 px-4">
@@ -20,10 +21,10 @@ export default async function HomePage() {
         <HeroCarousel />
       </section>
       <section>
-        <BestProducts products={bestProducts} /> {/* passer via props */}
+        <BestProducts products={bestProducts} />
       </section>
       <section>
-        <PacksSection />
+        <PacksSection packs={recommendedPacks} />
       </section>
       <section>
         <TrustBadges />
