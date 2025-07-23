@@ -18,10 +18,13 @@ export default function CartPage() {
       {items.length === 0 ? (
         <p className="text-gray-600">Votre panier est vide.</p>
       ) : (
-        <ul>
-          {items.map((item) => (
-            <li key={item.id}>
-              {item.name} – {item.price} € x {item.quantity}
+        <ul role="list" className="space-y-4">
+          {items.map(item => (
+            <li key={item.id} className="border rounded p-4 flex justify-between items-center">
+              <span>{item.name}</span>
+              <span>
+                {item.price} € x {item.quantity}
+              </span>
             </li>
           ))}
         </ul>

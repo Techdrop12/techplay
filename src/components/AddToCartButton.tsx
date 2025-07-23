@@ -25,7 +25,7 @@ export default function AddToCartButton({ product }: Props) {
     <Button
       onClick={handleClick}
       disabled={false}
-      aria-label="Ajouter au panier"
+      aria-label={`Ajouter ${product.title ?? product.name ?? 'produit'} au panier`}
       type="button"
     >
       Ajouter au panier

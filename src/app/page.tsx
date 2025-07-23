@@ -7,8 +7,31 @@ import type { Metadata } from 'next'
 import { getBestProducts, getRecommendedPacks } from '@/lib/data'
 
 export const metadata: Metadata = {
-  title: 'TechPlay - Accueil',
-  description: 'Découvrez les meilleures offres et packs TechPlay.',
+  title: 'TechPlay – Boutique high-tech & packs exclusifs',
+  description: 'Découvrez les meilleures offres et packs TechPlay, sélectionnés pour vous avec passion et innovation.',
+  keywords: 'TechPlay, high-tech, gadgets, offres, packs, dropshipping, boutique, innovation',
+  openGraph: {
+    title: 'TechPlay – Boutique high-tech & packs exclusifs',
+    description: 'Découvrez les meilleures offres et packs TechPlay, sélectionnés pour vous avec passion et innovation.',
+    url: 'https://techplay.example.com',
+    siteName: 'TechPlay',
+    images: [
+      {
+        url: 'https://techplay.example.com/og-homepage.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'TechPlay – Accueil'
+      }
+    ],
+    locale: 'fr_FR',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'TechPlay – Boutique high-tech & packs exclusifs',
+    description: 'Découvrez les meilleures offres et packs TechPlay, sélectionnés pour vous avec passion et innovation.',
+    creator: '@TechPlay',
+  }
 }
 
 export default async function HomePage() {
@@ -16,20 +39,20 @@ export default async function HomePage() {
   const recommendedPacks = await getRecommendedPacks()
 
   return (
-    <main className="space-y-20 px-4">
-      <section>
+    <main className="space-y-20 px-4 max-w-screen-xl mx-auto" role="main" tabIndex={-1}>
+      <section aria-label="Carrousel des produits en vedette">
         <HeroCarousel />
       </section>
-      <section>
+      <section aria-label="Meilleurs produits">
         <BestProducts products={bestProducts} />
       </section>
-      <section>
+      <section aria-label="Packs recommandés">
         <PacksSection packs={recommendedPacks} />
       </section>
-      <section>
+      <section aria-label="Badges de confiance TechPlay">
         <TrustBadges />
       </section>
-      <section>
+      <section aria-label="Foire aux questions">
         <FAQ />
       </section>
     </main>

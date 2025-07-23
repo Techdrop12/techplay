@@ -25,6 +25,7 @@ export default function BestProducts({ products }: Props) {
     <section
       className="max-w-6xl mx-auto px-4 py-10"
       aria-labelledby="best-products-heading"
+      role="region"
     >
       <h2
         id="best-products-heading"
@@ -33,7 +34,7 @@ export default function BestProducts({ products }: Props) {
         Nos Meilleures Ventes
       </h2>
 
-      <motion.div
+      <motion.ul
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -42,17 +43,18 @@ export default function BestProducts({ products }: Props) {
       >
         {products.map((product) =>
           product ? (
-            <ProductCard
-              key={product._id}
-              product={{
-                ...product,
-                title: product.title ?? product.name ?? 'Produit',
-                image: product.image ?? product.imageUrl ?? '/placeholder.png',
-              }}
-            />
+            <li key={product._id}>
+              <ProductCard
+                product={{
+                  ...product,
+                  title: product.title ?? product.name ?? 'Produit',
+                  image: product.image ?? product.imageUrl ?? '/placeholder.png',
+                }}
+              />
+            </li>
           ) : null
         )}
-      </motion.div>
+      </motion.ul>
     </section>
   )
 }

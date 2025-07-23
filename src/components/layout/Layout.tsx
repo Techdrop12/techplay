@@ -1,4 +1,3 @@
-// src/components/layout/Layout.tsx
 'use client'
 
 import { ReactNode, useEffect } from 'react'

@@ -21,13 +21,22 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
 export default async function PackPage({ params }: { params: { slug: string } }) {
   const pack = await getPackBySlug(params.slug)
-  if (!pack) return <p>Pack introuvable</p>
+  if (!pack)
+    return (
+      <main className="max-w-4xl mx-auto px-4 py-10 text-center text-red-600 dark:text-red-400">
+        <p>Pack introuvable</p>
+      </main>
+    )
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-10">
       <ClientOnly
         load={() => import('@/components/PackDetails')}
-        fallback={<p className="text-center py-10 text-gray-500 animate-pulse">Chargement du pack...</p>}
+        fallback={
+          <p className="text-center py-10 text-gray-500 animate-pulse dark:text-gray-400">
+            Chargement du pack...
+          </p>
+        }
         props={{ pack }}
       />
     </main>

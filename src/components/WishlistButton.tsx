@@ -1,4 +1,3 @@
-// src/components/WishlistButton.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -81,12 +80,11 @@ export default function WishlistButton({
     <motion.button
       onClick={toggleWishlist}
       whileTap={{ scale: 0.85 }}
-      className={cn(
+      className={`${
         floating
           ? 'absolute top-2 right-2 p-1 rounded-full bg-white/90 dark:bg-zinc-800/90 hover:bg-white dark:hover:bg-zinc-700 shadow transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'
-          : 'text-red-600 hover:text-red-800 transition focus:outline-none focus:ring-2 focus:ring-red-500',
-        className
-      )}
+          : 'text-red-600 hover:text-red-800 transition focus:outline-none focus:ring-2 focus:ring-red-500'
+      } ${className}`}
       aria-label={isWishlisted ? 'Retirer de la wishlist' : 'Ajouter à la wishlist'}
       aria-pressed={isWishlisted}
       title={isWishlisted ? 'Retirer de la wishlist' : 'Ajouter à la wishlist'}
@@ -101,8 +99,4 @@ export default function WishlistButton({
       )}
     </motion.button>
   )
-}
-
-function cn(...classes: (string | undefined | false)[]) {
-  return classes.filter(Boolean).join(' ')
 }

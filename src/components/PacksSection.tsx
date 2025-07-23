@@ -25,6 +25,7 @@ export default function PacksSection({ packs }: Props) {
     <section
       className="max-w-6xl mx-auto px-4 py-12"
       aria-labelledby="packs-section-heading"
+      role="region"
     >
       <h2
         id="packs-section-heading"
@@ -33,7 +34,7 @@ export default function PacksSection({ packs }: Props) {
         Nos Packs Recommandés
       </h2>
 
-      <motion.div
+      <motion.ul
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
@@ -41,9 +42,11 @@ export default function PacksSection({ packs }: Props) {
         role="list"
       >
         {packs.map((pack) => (
-          <PackCard key={pack.slug} pack={pack} />
+          <li key={pack.slug}>
+            <PackCard pack={pack} />
+          </li>
         ))}
-      </motion.div>
+      </motion.ul>
     </section>
   )
 }

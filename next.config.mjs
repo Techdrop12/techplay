@@ -1,4 +1,3 @@
-// ✅ next.config.mjs – full option pour Next.js 15 avec PWA & sécurité
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
 import withPWA from 'next-pwa'
@@ -13,6 +12,9 @@ const withPwaPlugin = withPWA({
   skipWaiting: true,
   disable: isDev,
   buildExcludes: [/middleware-manifest\.json$/],
+  fallbacks: {
+    image: '/fallback.png'
+  }
 })
 
 export default withPwaPlugin({
@@ -21,7 +23,8 @@ export default withPwaPlugin({
   poweredByHeader: false,
   experimental: {
     scrollRestoration: true,
-    optimizePackageImports: ['react-icons'],
+    optimizePackageImports: ['react-icons', 'lodash'],
+    reactRoot: true, // React 18 concurrent features (stable)
   },
   images: {
     remotePatterns: [
@@ -29,10 +32,11 @@ export default withPwaPlugin({
     ],
     formats: ['image/avif', 'image/webp'],
     dangerouslyAllowSVG: true,
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;"
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    unoptimized: false
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false, // pour détecter tous les warnings
   },
   headers: async () => [
     {
@@ -46,7 +50,9 @@ export default withPwaPlugin({
         { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
         { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
         { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
-        { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' }
+        { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
+        { key: 'Expect-CT', value: 'max-age=86400, enforce, report-uri="https://your-report-uri.example.com"' },
+        { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }
       ]
     }
   ],

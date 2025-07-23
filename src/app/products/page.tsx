@@ -3,7 +3,6 @@
 import { useState, useMemo } from 'react'
 import Fuse from 'fuse.js'
 
-import { getAllProducts } from '@/lib/data'
 import { Product } from '@/types/product'
 
 import ProductGrid from '@/components/ProductGrid'
@@ -19,13 +18,11 @@ import Analytics from '@/components/Analytics'
 import MetaPixel from '@/components/MetaPixel'
 import HeatmapScript from '@/components/HeatmapScript'
 
-export default async function ProductsPage() {
-  const products: Product[] = await getAllProducts()
-  return <ProductCatalogue products={products} />
-}
+type Props = { products: Product[] }
 
-type Props = {
-  products: Product[]
+export default async function ProductsPage() {
+  const products: Product[] = await (await fetch('/api/products')).json()
+  return <ProductCatalogue products={products} />
 }
 
 function ProductCatalogue({ products }: Props) {
@@ -33,40 +30,28 @@ function ProductCatalogue({ products }: Props) {
   const [selectedCategory, setCategory] = useState<string | null>(null)
   const [sortOption, setSortOption] = useState<'asc' | 'desc' | 'alpha'>('asc')
 
-  const fuse = useMemo(
-    () =>
-      new Fuse(products, {
-        keys: ['title', 'name', 'tags', 'category'],
-        threshold: 0.3,
-      }),
-    [products]
-  )
+  const fuse = useMemo(() => new Fuse(products, {
+    keys: ['title', 'name', 'tags', 'category'],
+    threshold: 0.3,
+  }), [products])
 
   const filtered = useMemo(() => {
     let results = query ? fuse.search(query).map((r) => r.item) : products
 
-    if (selectedCategory) {
-      results = results.filter((p) => p.category === selectedCategory)
-    }
+    if (selectedCategory) results = results.filter(p => p.category === selectedCategory)
 
-    if (sortOption === 'asc') {
-      results = results.sort((a, b) => a.price - b.price)
-    } else if (sortOption === 'desc') {
-      results = results.sort((a, b) => b.price - a.price)
-    } else if (sortOption === 'alpha') {
-      results = results.sort((a, b) => {
-        const aTitle = a.title ?? a.name ?? ''
-        const bTitle = b.title ?? b.name ?? ''
-        return aTitle.localeCompare(bTitle)
-      })
-    }
+    if (sortOption === 'asc') results = results.sort((a, b) => a.price - b.price)
+    else if (sortOption === 'desc') results = results.sort((a, b) => b.price - a.price)
+    else if (sortOption === 'alpha') results = results.sort((a, b) => {
+      const aTitle = a.title ?? a.name ?? ''
+      const bTitle = b.title ?? b.name ?? ''
+      return aTitle.localeCompare(bTitle)
+    })
 
     return results
   }, [query, products, selectedCategory, sortOption, fuse])
 
-  const categories = useMemo(() => {
-    return Array.from(new Set(products.map((p) => p.category ?? 'Autre')))
-  }, [products])
+  const categories = useMemo(() => Array.from(new Set(products.map(p => p.category ?? 'Autre'))), [products])
 
   return (
     <>
@@ -86,9 +71,7 @@ function ProductCatalogue({ products }: Props) {
           </div>
 
           {filtered.length === 0 ? (
-            <p className="text-center text-gray-500 dark:text-gray-400 mt-10">
-              Aucun produit trouvé.
-            </p>
+            <p className="text-center text-gray-500 dark:text-gray-400 mt-10">Aucun produit trouvé.</p>
           ) : (
             <ProductGrid products={filtered} />
           )}
