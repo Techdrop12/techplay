@@ -26,12 +26,12 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     _id,
     slug,
     title = 'Produit',
-    price,
+    price = 0,
     oldPrice,
     image = '/placeholder.png',
     description = '',
     rating = 4,
-  } = product
+  } = product ?? {}
 
   return (
     <motion.section
@@ -40,18 +40,22 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       aria-labelledby="product-title"
-      data-product-id={_id}
-      data-product-slug={slug}
+      data-product-id={typeof _id === 'string' ? _id : ''}
+      data-product-slug={slug || ''}
+      role="region"
+      aria-live="polite"
     >
-      {/* ✅ Image produit */}
-      <div className="relative aspect-square w-full">
+      {/* Image produit */}
+      <div className="relative aspect-square w-full rounded-lg overflow-hidden shadow-lg">
         <Image
           src={image}
           alt={`Image du produit ${title}`}
           fill
-          className="rounded-lg object-cover shadow"
+          className="object-cover"
           sizes="(min-width: 1024px) 50vw, 100vw"
           priority
+          placeholder="blur"
+          blurDataURL="/placeholder-blur.png" // Remplacer par vrai image floue ou supprimer si indisponible
         />
         <PricingBadge
           price={price}
@@ -61,42 +65,63 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         />
       </div>
 
-      {/* ✅ Détails produit */}
+      {/* Détails produit */}
       <div className="space-y-6">
         <h1
           id="product-title"
-          className="text-3xl font-bold text-gray-900 dark:text-white"
+          className="text-3xl font-extrabold text-gray-900 dark:text-white"
+          tabIndex={-1} // focus programmatique
         >
           {title}
         </h1>
 
-        <RatingStars value={rating} />
+        <RatingStars
+          value={rating}
+          aria-label={`Note moyenne : ${rating} sur 5 étoiles`}
+        />
 
         <FreeShippingBadge price={price} />
 
         <WishlistButton
-          product={{ _id, slug, title, price, image }}
+          product={{
+            _id: typeof _id === 'string' ? _id : '',
+            slug: slug || '',
+            title,
+            price,
+            image,
+          }}
         />
 
         <div className="flex items-center gap-4">
-          <label htmlFor="quantity" className="font-medium">
+          <label htmlFor="quantity" className="font-semibold">
             Quantité :
           </label>
-          <QuantitySelector value={quantity} onChange={setQuantity} />
+          <QuantitySelector
+            value={quantity}
+            onChange={setQuantity}
+            id="quantity"
+            aria-describedby="quantity-desc"
+          />
         </div>
+        <p id="quantity-desc" className="sr-only">
+          Sélectionnez la quantité à ajouter au panier
+        </p>
 
         <AddToCartButton product={{ ...product, quantity }} />
 
         {description && (
-          <p className="text-gray-700 dark:text-gray-300 leading-relaxed mt-4">
+          <p
+            className="text-gray-700 dark:text-gray-300 leading-relaxed mt-4 whitespace-pre-line"
+            aria-label="Description du produit"
+          >
             {description}
           </p>
         )}
 
-        <ReviewForm productId={_id} />
+        <ReviewForm productId={typeof _id === 'string' ? _id : ''} />
       </div>
 
-      {/* ✅ Résumé panier mobile sticky */}
+      {/* Résumé panier sticky pour mobile */}
       <StickyCartSummary locale={locale} />
     </motion.section>
   )

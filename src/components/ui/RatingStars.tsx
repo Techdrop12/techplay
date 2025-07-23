@@ -19,6 +19,7 @@ export default function RatingStars({
       activeColor="#facc15"
       edit={editable}
       isHalf={true}
+      aria-label={`Notation : ${value} étoiles sur 5`}
     />
   )
 }

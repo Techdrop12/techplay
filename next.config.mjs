@@ -1,3 +1,4 @@
+// next.config.mjs
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
 import withPWA from 'next-pwa'
@@ -13,8 +14,8 @@ const withPwaPlugin = withPWA({
   disable: isDev,
   buildExcludes: [/middleware-manifest\.json$/],
   fallbacks: {
-    image: '/fallback.png'
-  }
+    image: '/fallback.png',
+  },
 })
 
 export default withPwaPlugin({
@@ -24,19 +25,17 @@ export default withPwaPlugin({
   experimental: {
     scrollRestoration: true,
     optimizePackageImports: ['react-icons', 'lodash'],
-    reactRoot: true, // React 18 concurrent features (stable)
+    // reactRoot removed due to deprecation
   },
   images: {
-    remotePatterns: [
-      { protocol: 'https', hostname: '**' },
-    ],
+    remotePatterns: [{ protocol: 'https', hostname: '**' }],
     formats: ['image/avif', 'image/webp'],
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-    unoptimized: false
+    unoptimized: false,
   },
   eslint: {
-    ignoreDuringBuilds: false, // pour détecter tous les warnings
+    ignoreDuringBuilds: false,
   },
   headers: async () => [
     {
@@ -52,12 +51,12 @@ export default withPwaPlugin({
         { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
         { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
         { key: 'Expect-CT', value: 'max-age=86400, enforce, report-uri="https://your-report-uri.example.com"' },
-        { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }
-      ]
-    }
+        { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+      ],
+    },
   ],
   webpack: (config) => {
     config.resolve.alias['@'] = path.resolve(__dirname, 'src')
     return config
-  }
+  },
 })

@@ -2,7 +2,7 @@
 
 import { useCart } from '@/hooks/useCart'
 import type { Product } from '@/types/product'
-import Button from '@/components/ui/Button'
+import Button from '@/components/Button'
 import { toast } from 'react-hot-toast'
 
 interface Props {

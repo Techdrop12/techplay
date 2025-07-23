@@ -5,15 +5,15 @@ import ProductDetail from '@/components/ProductDetail'
 import AddToCartButton from '@/components/AddToCartButton'
 import ReviewForm from '@/components/ReviewForm'
 import { ProductJsonLd } from '@/components/JsonLd/ProductJsonLd'
-import { pageview } from '@/lib/analytics'
 import type { Product } from '@/types/product'
 
 interface Props {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const product = await getProductBySlug(params.slug)
+  const { slug } = await params
+  const product = await getProductBySlug(slug)
   if (!product) return {}
 
   return {
@@ -24,32 +24,37 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: product.description,
       type: 'website',
       url: `${process.env.NEXT_PUBLIC_SITE_URL}/produit/${product.slug}`,
-      images: [{ url: product.image || '/placeholder.png', alt: product.title || 'Produit TechPlay' }],
+      images: [
+        {
+          url: product.image || '/placeholder.png',
+          alt: product.title || 'Produit TechPlay',
+        },
+      ],
     },
   }
 }
 
 export default async function ProductPage({ params }: Props) {
-  const product: Product | null = await getProductBySlug(params.slug)
+  const { slug } = await params
+  const product = await getProductBySlug(slug)
+
   if (!product) notFound()
 
-  if (typeof window !== 'undefined') {
-    pageview(`/produit/${params.slug}`)
-  }
+  const safeProduct: Product = product as Product
 
   return (
     <>
       <main className="max-w-6xl mx-auto px-4 py-10">
-        <ProductDetail product={product} />
+        <ProductDetail product={safeProduct} />
         <div className="mt-8">
-          <AddToCartButton product={{ ...product, quantity: 1 }} />
+          <AddToCartButton product={{ ...safeProduct, quantity: 1 }} />
         </div>
         <div className="mt-12">
-          <ReviewForm productId={product._id} />
+          <ReviewForm productId={safeProduct._id} />
         </div>
       </main>
 
-      <ProductJsonLd product={product} />
+      <ProductJsonLd product={safeProduct} />
     </>
   )
 }

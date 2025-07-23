@@ -21,7 +21,7 @@ export default function ReviewForm({ productId }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!comment || rating < 1 || rating > 5 || sending) return
+    if (!comment.trim() || rating < 1 || rating > 5 || sending) return
 
     setSending(true)
     try {
@@ -31,8 +31,8 @@ export default function ReviewForm({ productId }: Props) {
         body: JSON.stringify({
           productId,
           rating,
-          comment,
-          name: 'Client TechPlay', // ✅ à remplacer si login client
+          comment: comment.trim(),
+          name: 'Client TechPlay', // à remplacer par user connecté si dispo
         }),
       })
 
@@ -67,6 +67,7 @@ export default function ReviewForm({ productId }: Props) {
       onSubmit={handleSubmit}
       className="mt-8 border-t pt-6 space-y-4"
       aria-label={t('form_label')}
+      noValidate
     >
       <h3 className="text-xl font-semibold">{t('write_review')}</h3>
 
