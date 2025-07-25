@@ -36,7 +36,7 @@ export default function Footer({
 
   return (
     <footer
-      className="bg-gray-100 dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-t border-gray-200 dark:border-gray-800 py-12 mt-16 transition-all duration-300 ease-in-out"
+      className="bg-gray-100 dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-t border-gray-200 dark:border-gray-800 py-12 mt-16 transition-all duration-300 ease-in-out select-none"
       role="contentinfo"
       aria-label="Pied de page"
     >

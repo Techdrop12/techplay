@@ -33,8 +33,8 @@ export default function WishlistButton({
     if (typeof window === 'undefined' || !product?._id) return
     try {
       const stored = localStorage.getItem(STORAGE_KEY) || '[]'
-      const wishlist = JSON.parse(stored)
-      setIsWishlisted(wishlist.some((p: WishlistProduct) => p._id === product._id))
+      const wishlist: WishlistProduct[] = JSON.parse(stored)
+      setIsWishlisted(wishlist.some((p) => p._id === product._id))
     } catch {
       setIsWishlisted(false)
     }
@@ -55,16 +55,16 @@ export default function WishlistButton({
   const toggleWishlist = () => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY) || '[]'
-      let wishlist = JSON.parse(stored)
+      let wishlist: WishlistProduct[] = JSON.parse(stored)
 
       if (isWishlisted) {
-        wishlist = wishlist.filter((p: WishlistProduct) => p._id !== product._id)
-        toast('💔 Retiré de la wishlist')
+        wishlist = wishlist.filter((p) => p._id !== product._id)
+        toast('💔 Retiré de la wishlist', { icon: '💔' })
         logEvent('wishlist_remove', { productId: product._id })
       } else {
         wishlist.unshift(product)
         wishlist = wishlist.slice(0, 20)
-        toast('❤️ Ajouté à la wishlist')
+        toast('❤️ Ajouté à la wishlist', { icon: '❤️' })
         logEvent('wishlist_add', { productId: product._id })
       }
 

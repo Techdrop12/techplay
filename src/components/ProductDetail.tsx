@@ -31,46 +31,61 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     image = '/placeholder.png',
     description = '',
     rating = 4,
+    isNew,
+    isBestSeller,
   } = product ?? {}
 
   return (
-    <>
-      <motion.section
-        className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-7xl mx-auto px-6 py-12"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        aria-labelledby="product-title"
-        data-product-id={typeof _id === 'string' ? _id : ''}
-        data-product-slug={slug || ''}
-        role="region"
-        aria-live="polite"
-      >
-        {/* Image produit */}
-        <div className="relative aspect-square w-full rounded-3xl overflow-hidden shadow-2xl border border-gray-300 dark:border-gray-700">
-          <Image
-            src={image}
-            alt={`Image du produit ${title}`}
-            fill
-            className="object-cover"
-            sizes="(min-width: 1024px) 50vw, 100vw"
-            priority
-            placeholder="blur"
-            blurDataURL="/placeholder-blur.png"
-          />
-          <PricingBadge
-            price={price}
-            oldPrice={oldPrice}
-            showDiscountLabel
-            showOldPrice
-          />
+    <motion.section
+      className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-7xl mx-auto px-4 py-12"
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+      aria-labelledby="product-title"
+      data-product-id={typeof _id === 'string' ? _id : ''}
+      data-product-slug={slug || ''}
+      role="region"
+      aria-live="polite"
+    >
+      {/* Image produit */}
+      <div className="relative w-full aspect-square rounded-3xl overflow-hidden shadow-lg border border-gray-300 dark:border-gray-700">
+        <Image
+          src={image}
+          alt={`Image du produit ${title}`}
+          fill
+          className="object-cover transition-transform duration-700 hover:scale-105"
+          sizes="(min-width: 1024px) 50vw, 100vw"
+          priority
+          placeholder="blur"
+          blurDataURL="/placeholder-blur.png"
+        />
+        <PricingBadge
+          price={price}
+          oldPrice={oldPrice}
+          showDiscountLabel
+          showOldPrice
+        />
+        {/* Badges "Nouveau" et "Best Seller" */}
+        <div className="absolute top-4 left-4 flex flex-col gap-2 pointer-events-none select-none">
+          {isNew && (
+            <span className="bg-green-600 text-white px-3 py-1 rounded-full font-semibold text-sm shadow-md">
+              Nouveau
+            </span>
+          )}
+          {isBestSeller && (
+            <span className="bg-yellow-400 text-black px-3 py-1 rounded-full font-semibold text-sm shadow-md">
+              Best Seller
+            </span>
+          )}
         </div>
+      </div>
 
-        {/* Détails produit */}
-        <div className="space-y-8">
+      {/* Détails produit */}
+      <div className="flex flex-col justify-between space-y-8">
+        <div>
           <h1
             id="product-title"
-            className="text-4xl font-extrabold text-gray-900 dark:text-white leading-tight"
+            className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white"
             tabIndex={-1}
           >
             {title}
@@ -79,9 +94,41 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           <RatingStars
             value={rating}
             aria-label={`Note moyenne : ${rating} sur 5 étoiles`}
+            editable={false}
           />
 
-          <FreeShippingBadge price={price} />
+          <FreeShippingBadge price={price} minimal />
+
+          {description && (
+            <p
+              className="mt-6 text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed text-lg"
+              aria-label="Description du produit"
+            >
+              {description}
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-6">
+          <div className="flex items-center gap-4">
+            <label
+              htmlFor="quantity"
+              className="text-lg font-semibold text-gray-900 dark:text-white"
+            >
+              Quantité :
+            </label>
+            <QuantitySelector
+              value={quantity}
+              onChange={setQuantity}
+              id="quantity"
+              aria-describedby="quantity-desc"
+            />
+          </div>
+          <p id="quantity-desc" className="sr-only">
+            Sélectionnez la quantité à ajouter au panier
+          </p>
+
+          <AddToCartButton product={{ ...product, quantity }} />
 
           <WishlistButton
             product={{
@@ -91,40 +138,14 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
               price,
               image,
             }}
+            floating={false}
+            className="mt-4"
           />
-
-          <div className="flex flex-wrap items-center gap-6">
-            <label htmlFor="quantity" className="font-semibold text-lg">
-              Quantité :
-            </label>
-            <QuantitySelector
-              value={quantity}
-              onChange={setQuantity}
-              id="quantity"
-              aria-describedby="quantity-desc"
-            />
-            <p id="quantity-desc" className="sr-only">
-              Sélectionnez la quantité à ajouter au panier
-            </p>
-          </div>
-
-          <AddToCartButton product={{ ...product, quantity }} />
-
-          {description && (
-            <p
-              className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed mt-6 text-lg"
-              aria-label="Description du produit"
-            >
-              {description}
-            </p>
-          )}
-
-          <ReviewForm productId={typeof _id === 'string' ? _id : ''} />
         </div>
-      </motion.section>
+      </div>
 
-      {/* Résumé panier sticky pour mobile */}
+      {/* Sticky résumé panier mobile */}
       <StickyCartSummary locale={locale} />
-    </>
+    </motion.section>
   )
 }

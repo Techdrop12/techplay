@@ -66,10 +66,10 @@ export default function Header() {
                 key={href}
                 href={href}
                 className={cn(
-                  'relative text-gray-900 dark:text-gray-100 transition-colors',
+                  'relative text-gray-900 dark:text-gray-100 transition-colors group',
                   isActive(href)
                     ? 'font-extrabold text-accent after:absolute after:-bottom-1 after:left-0 after:h-[3px] after:w-full after:rounded-full after:bg-accent'
-                    : 'hover:text-accent focus-visible:text-accent',
+                    : 'hover:text-accent focus-visible:text-accent'
                 )}
               >
                 {label}
