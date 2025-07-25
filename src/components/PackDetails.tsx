@@ -5,7 +5,7 @@ import { formatPrice } from '@/lib/utils'
 import WishlistButton from '@/components/WishlistButton'
 import StarsRating from '@/components/StarsRating'
 import ProductTags from '@/components/ProductTags'
-import { Pack } from '@/types/product'
+import type { Pack } from '@/types/product'
 import { motion } from 'framer-motion'
 
 interface Props {
@@ -15,49 +15,51 @@ interface Props {
 export default function PackDetails({ pack }: Props) {
   const {
     _id,
-    title,
-    price,
+    title = 'Pack',
+    price = 0,
     oldPrice,
-    rating,
-    image,
+    rating = 0,
+    image = '/placeholder.png',
     slug,
-    description,
-    tags,
-  } = pack
+    description = '',
+    tags = [],
+  } = pack ?? {}
 
   return (
     <motion.section
-      className="grid md:grid-cols-2 gap-8"
-      data-pack-id={slug}
+      className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto px-4 py-12"
+      data-pack-id={_id}
       aria-labelledby="pack-title"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
     >
       {/* Image */}
-      <div className="relative w-full h-80 md:h-[30rem] rounded-xl overflow-hidden border">
+      <div className="relative w-full aspect-square rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-md">
         <Image
-          src={image ?? '/placeholder.png'}
+          src={image}
           alt={`Image du pack ${title}`}
           fill
           className="object-cover"
           sizes="(max-width: 768px) 100vw, 50vw"
           priority
+          placeholder="blur"
+          blurDataURL="/placeholder-blur.png"
         />
       </div>
 
       {/* Détails */}
-      <div className="flex flex-col justify-center">
+      <div className="flex flex-col justify-center space-y-6">
         <h1
           id="pack-title"
-          className="text-3xl font-bold mb-4 tracking-tight"
+          className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight"
         >
           {title}
         </h1>
 
-        {/* Prix & Ancien prix */}
-        <div className="flex items-center gap-4 mb-4">
-          <span className="text-brand text-xl font-semibold">
+        {/* Prix */}
+        <div className="flex items-center gap-4">
+          <span className="text-brand text-2xl font-semibold">
             {formatPrice(price)}
           </span>
           {oldPrice && (
@@ -67,35 +69,32 @@ export default function PackDetails({ pack }: Props) {
           )}
         </div>
 
-        {/* Étoiles si rating dispo */}
-        {typeof rating === 'number' && (
-          <div className="mb-4">
-            <StarsRating rating={rating} />
-          </div>
+        {/* Étoiles */}
+        {rating > 0 && (
+          <StarsRating rating={rating} aria-label={`Note : ${rating} étoiles`} />
         )}
 
         {/* Wishlist */}
-        <div className="my-4">
-          <WishlistButton
-            product={{
-              _id,
-              title,
-              price,
-              image: image ?? '/placeholder.png',
-              slug,
-            }}
-          />
-        </div>
+        <WishlistButton
+          product={{
+            _id,
+            slug,
+            title,
+            price,
+            image,
+          }}
+          floating={false}
+        />
 
         {/* Description */}
         {description && (
-          <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+          <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed whitespace-pre-line">
             {description}
           </p>
         )}
 
-        {/* Tags si présents */}
-        {tags && <ProductTags tags={tags} />}
+        {/* Tags */}
+        {tags.length > 0 && <ProductTags tags={tags} />}
       </div>
     </motion.section>
   )

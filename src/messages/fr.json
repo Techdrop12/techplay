@@ -102,7 +102,10 @@
     "continue": "← Continuer vos achats",
     "error": "Erreur lors du paiement",
     "free_shipping_reached": "Frais de port offerts !",
-    "add_x_more": "Ajoutez {missing} € pour la livraison gratuite"
+    "add_x_more": "Ajoutez {missing} € pour la livraison gratuite",
+    "summary_mobile_label": "Résumé du panier",
+    "items_count": "{count, plural, one {# article} other {# articles}}",
+    "view_cart": "Voir le panier"
   },
   "success": {
     "title": "Merci pour votre commande 🎉",

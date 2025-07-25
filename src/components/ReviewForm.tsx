@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast'
 import { motion } from 'framer-motion'
 import { Star } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { event } from '@/lib/ga'
 
 interface Props {
   productId: string
@@ -32,11 +33,20 @@ export default function ReviewForm({ productId }: Props) {
           productId,
           rating,
           comment: comment.trim(),
-          name: 'Client TechPlay', // à remplacer par user connecté si dispo
+          name: 'Client TechPlay', // à remplacer si user connecté
         }),
       })
 
       if (!res.ok) throw new Error()
+
+      // Tracking GA4
+      event({
+        action: 'submit_review',
+        category: 'engagement',
+        label: 'Avis client',
+        value: rating,
+      })
+
       setSubmitted(true)
       setComment('')
       setRating(5)
@@ -71,7 +81,7 @@ export default function ReviewForm({ productId }: Props) {
     >
       <h3 className="text-xl font-semibold">{t('write_review')}</h3>
 
-      {/* Étoiles */}
+      {/* Étoiles */} 
       <div
         className="flex gap-1 justify-center"
         role="radiogroup"
@@ -101,7 +111,7 @@ export default function ReviewForm({ productId }: Props) {
         ))}
       </div>
 
-      {/* Commentaire */}
+      {/* Commentaire */} 
       <textarea
         value={comment}
         onChange={(e) => setComment(e.target.value)}
@@ -112,13 +122,13 @@ export default function ReviewForm({ productId }: Props) {
         aria-label={t('textarea_label')}
       />
 
-      {/* Bouton envoyer */}
+      {/* Bouton envoyer */} 
       <motion.button
         type="submit"
         disabled={sending}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className={`bg-black text-white px-4 py-2 rounded w-full transition ${
+        className={`bg-black text-white px-4 py-2 rounded w-full transition font-medium ${
           sending ? 'opacity-50 cursor-not-allowed' : ''
         }`}
         aria-busy={sending}

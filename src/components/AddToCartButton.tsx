@@ -8,9 +8,10 @@ import { motion } from 'framer-motion'
 
 interface Props {
   product: Product & { quantity: number }
+  onAdd?: () => void // ✅ Ajout ici
 }
 
-export default function AddToCartButton({ product }: Props) {
+export default function AddToCartButton({ product, onAdd }: Props) {
   const { addToCart } = useCart()
 
   const handleClick = () => {
@@ -33,6 +34,10 @@ export default function AddToCartButton({ product }: Props) {
         secondary: '#fff',
       },
     })
+
+    if (onAdd) {
+      onAdd() // ✅ Appel si défini
+    }
   }
 
   return (

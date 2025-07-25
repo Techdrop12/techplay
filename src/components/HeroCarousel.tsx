@@ -37,7 +37,7 @@ const defaultSlides: Slide[] = [
     image: '/carousel2.jpg',
     alt: 'Souris RGB',
     text: 'Souris RGB – Précision & Style',
-    ctaLabel: 'Découvrir',
+    ctaLabel: 'Explorer',
     ctaLink: '/produit/souris-rgb',
   },
   {
@@ -45,16 +45,16 @@ const defaultSlides: Slide[] = [
     image: '/carousel3.jpg',
     alt: 'Claviers Mécaniques',
     text: 'Claviers Mécaniques – Réactivité ultime',
-    ctaLabel: 'Découvrir',
+    ctaLabel: 'Voir plus',
     ctaLink: '/produit/clavier-mecanique',
   },
 ]
 
 export default function HeroCarousel({
   slides = defaultSlides,
-  intervalMs = 6000,
+  intervalMs = 7000,
   showOverlay = true,
-  overlayOpacity = 0.5,
+  overlayOpacity = 0.4,
   textSize = 'xl',
   className,
 }: HeroCarouselProps) {
@@ -86,20 +86,19 @@ export default function HeroCarousel({
   }
 
   const textSizes = {
-    sm: 'text-sm',
-    md: 'text-lg',
-    lg: 'text-3xl',
-    xl: 'text-5xl',
+    sm: 'text-xl sm:text-2xl',
+    md: 'text-3xl sm:text-4xl',
+    lg: 'text-5xl sm:text-6xl',
+    xl: 'text-6xl sm:text-7xl',
   }
 
   return (
     <section
       className={cn(
-        'relative h-[90vh] w-full overflow-hidden rounded-lg shadow-2xl select-none',
+        'relative h-[92vh] w-full overflow-hidden rounded-none sm:rounded-2xl shadow-2xl select-none',
         className
       )}
-      aria-label="Carrousel principal des produits"
-      role="region"
+      aria-label="Carrousel principal TechPlay"
     >
       <AnimatePresence initial={false} mode="wait">
         {slides.map(
@@ -111,7 +110,7 @@ export default function HeroCarousel({
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 1 }}
-                className="absolute inset-0 flex flex-col justify-center items-center px-6 text-center"
+                className="absolute inset-0 flex flex-col justify-center items-center text-center px-6 z-10"
                 aria-hidden={i !== index}
                 onMouseEnter={pause}
                 onMouseLeave={resume}
@@ -130,13 +129,13 @@ export default function HeroCarousel({
                 />
                 {showOverlay && (
                   <div
-                    className="absolute inset-0 flex flex-col justify-center items-center px-4"
+                    className="absolute inset-0 flex flex-col justify-center items-center px-6 sm:px-12"
                     style={{ backgroundColor: `rgba(0, 0, 0, ${overlayOpacity})` }}
                   >
                     {slide.text && (
                       <h2
                         className={cn(
-                          'text-white font-extrabold drop-shadow-lg mb-6',
+                          'text-white font-extrabold drop-shadow-xl mb-6 animate-fadeIn',
                           textSizes[textSize]
                         )}
                       >
@@ -146,7 +145,7 @@ export default function HeroCarousel({
                     {slide.ctaLabel && slide.ctaLink && (
                       <a
                         href={slide.ctaLink}
-                        className="inline-block rounded-md bg-accent px-8 py-3 text-lg font-semibold text-white shadow-lg hover:bg-accent/90 focus:outline-none focus:ring-4 focus:ring-accent/70 transition-transform transform hover:scale-105 active:scale-95"
+                        className="inline-block rounded-xl bg-accent px-8 py-3 text-lg font-semibold text-white shadow-lg hover:bg-accent/90 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-accent/60 transition-transform transform active:scale-95 animate-slideUp"
                         tabIndex={0}
                       >
                         {slide.ctaLabel}
@@ -160,7 +159,7 @@ export default function HeroCarousel({
       </AnimatePresence>
 
       {/* Progress bar */}
-      <div className="absolute bottom-6 left-1/2 w-2/3 -translate-x-1/2 rounded-full bg-white/20 h-2 overflow-hidden" aria-hidden="true">
+      <div className="absolute bottom-6 left-1/2 w-2/3 -translate-x-1/2 rounded-full bg-white/30 h-2 overflow-hidden" aria-hidden="true">
         <motion.div
           className="bg-accent h-full rounded-full"
           animate={{ width: `${((index + 1) / slides.length) * 100}%` }}
@@ -168,9 +167,9 @@ export default function HeroCarousel({
         />
       </div>
 
-      {/* Pagination buttons */}
+      {/* Pagination bullets */}
       <nav
-        className="absolute bottom-4 left-1/2 flex gap-4 -translate-x-1/2"
+        className="absolute bottom-3 left-1/2 flex gap-4 -translate-x-1/2 z-20"
         aria-label="Changer de diapositive"
       >
         {slides.map((_, i) => (
@@ -178,8 +177,8 @@ export default function HeroCarousel({
             key={i}
             type="button"
             className={cn(
-              'w-5 h-5 rounded-full transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
-              i === index ? 'bg-accent' : 'bg-accent/50 hover:bg-accent'
+              'w-4 h-4 rounded-full transition-colors focus:outline-none',
+              i === index ? 'bg-accent' : 'bg-accent/40 hover:bg-accent/80'
             )}
             aria-current={i === index ? 'true' : undefined}
             aria-label={`Diapositive ${i + 1}`}

@@ -36,24 +36,25 @@ export default function Footer({
 
   return (
     <footer
-      className="bg-gray-100 dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-t border-gray-200 dark:border-gray-800 py-12 mt-16 transition-all duration-300 ease-in-out select-none"
+      className="bg-white dark:bg-gray-950 text-gray-700 dark:text-gray-300 border-t border-gray-200 dark:border-gray-800 pt-12 pb-6 px-6 select-none"
       role="contentinfo"
       aria-label="Pied de page"
     >
-      <div
-        className={`max-w-6xl mx-auto px-6 flex flex-col ${
-          compact ? 'items-center text-center' : 'md:flex-row justify-between items-center'
-        } gap-6 text-sm`}
-      >
-        <p className={compact ? '' : 'text-center md:text-left'}>
-          © {currentYear}{' '}
-          <span className="font-semibold text-black dark:text-white">{companyName}</span>. Tous droits
-          réservés.
-        </p>
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-8">
+        {/* Colonne 1 — description + copyright */}
+        <div className="space-y-4 md:w-1/2">
+          <p className="text-lg font-semibold text-accent">
+            TechPlay, votre boutique high-tech de confiance.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            © {currentYear} <span className="font-semibold text-black dark:text-white">{companyName}</span>. Tous droits réservés.
+          </p>
+        </div>
 
+        {/* Colonne 2 — liens légaux */}
         <nav
-          className="flex gap-6 flex-wrap justify-center md:justify-end"
-          aria-label="Liens légaux et utiles"
+          className="flex flex-col gap-3 text-sm md:text-right md:w-1/4"
+          aria-label="Liens utiles"
         >
           {links.map(({ href, label }) => {
             let Icon = null
@@ -65,7 +66,7 @@ export default function Footer({
               <Link
                 key={href}
                 href={href}
-                className="flex items-center gap-2 hover:underline hover:text-black dark:hover:text-white transition"
+                className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-accent transition-colors"
               >
                 {Icon && <Icon className="text-accent" aria-hidden="true" />}
                 {label}
@@ -73,14 +74,9 @@ export default function Footer({
             )
           })}
         </nav>
-      </div>
 
-      <div className="max-w-6xl mx-auto px-6 mt-8 border-t border-gray-300 dark:border-gray-700 pt-8 flex flex-col md:flex-row md:justify-between md:items-center gap-6">
-        <p className="text-center md:text-left font-semibold text-lg text-accent">
-          TechPlay, votre boutique high-tech de confiance.
-        </p>
-
-        <div className="flex justify-center gap-6 text-gray-600 dark:text-gray-400">
+        {/* Colonne 3 — réseaux sociaux */}
+        <div className="flex items-center justify-start md:justify-end gap-6 text-gray-500 dark:text-gray-400 text-xl">
           <a
             href="https://facebook.com/techplay"
             target="_blank"
@@ -88,7 +84,7 @@ export default function Footer({
             aria-label="Facebook"
             className="hover:text-accent transition-colors"
           >
-            <FaFacebookF size={22} />
+            <FaFacebookF />
           </a>
           <a
             href="https://twitter.com/techplay"
@@ -97,7 +93,7 @@ export default function Footer({
             aria-label="Twitter"
             className="hover:text-accent transition-colors"
           >
-            <FaTwitter size={22} />
+            <FaTwitter />
           </a>
           <a
             href="https://instagram.com/techplay"
@@ -106,11 +102,12 @@ export default function Footer({
             aria-label="Instagram"
             className="hover:text-accent transition-colors"
           >
-            <FaInstagram size={22} />
+            <FaInstagram />
           </a>
         </div>
       </div>
 
+      {/* Enfant ou bonus */}
       {children && <div className="mt-10 text-center">{children}</div>}
     </footer>
   )

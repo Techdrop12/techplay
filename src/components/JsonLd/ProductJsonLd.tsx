@@ -1,18 +1,18 @@
 'use client'
 
 import Head from 'next/head'
-import { Product } from '@/types/product'
+import type { Product } from '@/types/product'
 
 interface Props {
   product: Product
 }
 
-export function ProductJsonLd({ product }: Props) {
+export default function ProductJsonLd({ product }: Props) {
   const {
-    slug,
-    title,
-    description,
-    price,
+    slug = '',
+    title = 'Produit',
+    description = 'Découvrez ce produit sur notre boutique.',
+    price = 0,
     image,
     category = 'Produit',
   } = product
@@ -21,7 +21,7 @@ export function ProductJsonLd({ product }: Props) {
     '@context': 'https://schema.org/',
     '@type': 'Product',
     name: title,
-    image: [image || '/placeholder.png'],
+    image: [image ?? '/placeholder.png'],
     description,
     sku: slug,
     category,
@@ -42,6 +42,7 @@ export function ProductJsonLd({ product }: Props) {
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(structuredData),
         }}
+        id={`jsonld-product-${slug}`}
       />
     </Head>
   )

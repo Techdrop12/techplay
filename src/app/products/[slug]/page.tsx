@@ -1,35 +1,63 @@
+import { notFound } from 'next/navigation'
 import { getProductBySlug } from '@/lib/data'
 import type { Metadata } from 'next'
 import type { Product } from '@/types/product'
-import ClientOnly from '@/components/ClientOnly'
+import ProductDetail from '@/components/ProductDetail'
+import AddToCartButton from '@/components/AddToCartButton'
+import ReviewForm from '@/components/ReviewForm'
+import ProductJsonLd from '@/components/JsonLd/ProductJsonLd'
+
+interface Props {
+  params: { slug: string }
+  searchParams: { [key: string]: string | string[] | undefined }
+}
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const product = await getProductBySlug(params.slug)
+
+  if (!product) return { title: 'Produit introuvable – TechPlay' }
+
   return {
-    title: product?.title ? `${product.title} – TechPlay` : 'Produit introuvable – TechPlay',
-    description: product?.description || 'Détail du produit | TechPlay',
-    alternates: { canonical: `/produit/${params.slug}` },
+    title: `${product.title} | TechPlay`,
+    description: product.description || 'Détail du produit TechPlay',
+    alternates: {
+      canonical: `${process.env.NEXT_PUBLIC_SITE_URL}/products/${params.slug}`,
+    },
     openGraph: {
-      title: product?.title || 'Produit introuvable',
-      description: product?.description || 'Découvrez les meilleurs produits TechPlay.',
-      type: 'website',
-      url: `https://www.techplay.fr/produit/${params.slug}`,
-      images: product?.image ? [{ url: product.image, alt: product.title || 'Produit TechPlay' }] : [],
+      title: product.title,
+      description: product.description || '',
+      type: 'website', // ✅ corrigé
+      url: `${process.env.NEXT_PUBLIC_SITE_URL}/products/${params.slug}`,
+      images: product.image
+        ? [{ url: product.image, alt: product.title }]
+        : [{ url: '/placeholder.png', alt: 'Produit TechPlay' }],
     },
   }
 }
 
 export default async function ProductPage({ params }: { params: { slug: string } }) {
   const product = await getProductBySlug(params.slug)
-  if (!product) return <p>Produit introuvable</p>
+
+  if (!product) return notFound()
+
+  const safeProduct = product as Product
 
   return (
-    <main className="container py-16">
-      <ClientOnly
-        load={() => import('@/components/ProductDetail')}
-        fallback={<p className="text-center py-10 text-gray-500 animate-pulse">Chargement du produit...</p>}
-        props={{ product }}
-      />
-    </main>
+    <>
+      <main
+        className="max-w-6xl mx-auto px-4 py-10"
+        aria-label={`Page produit : ${safeProduct.title}`}
+      >
+        <ProductDetail product={safeProduct} />
+        <div className="mt-8">
+          <AddToCartButton product={{ ...safeProduct, quantity: 1 }} />
+        </div>
+        <div className="mt-12">
+          <ReviewForm productId={safeProduct._id} />
+        </div>
+      </main>
+
+      <ProductJsonLd product={safeProduct} />
+    </>
   )
 }

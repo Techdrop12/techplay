@@ -31,9 +31,11 @@ export default function ProductCard({
       : null
 
   const handleClick = () => {
-    logEvent('product_card_click', {
-      productId: _id,
-      name: displayTitle,
+    logEvent({
+      action: 'product_card_click',
+      category: 'engagement',
+      label: displayTitle,
+      value: price,
     })
   }
 

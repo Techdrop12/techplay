@@ -60,12 +60,22 @@ export default function WishlistButton({
       if (isWishlisted) {
         wishlist = wishlist.filter((p) => p._id !== product._id)
         toast('💔 Retiré de la wishlist', { icon: '💔' })
-        logEvent('wishlist_remove', { productId: product._id })
+        logEvent({
+          action: 'wishlist_remove',
+          category: 'wishlist',
+          label: `product_${product._id}`,
+          value: 1,
+        })
       } else {
         wishlist.unshift(product)
         wishlist = wishlist.slice(0, 20)
         toast('❤️ Ajouté à la wishlist', { icon: '❤️' })
-        logEvent('wishlist_add', { productId: product._id })
+        logEvent({
+          action: 'wishlist_add',
+          category: 'wishlist',
+          label: `product_${product._id}`,
+          value: 1,
+        })
       }
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(wishlist))

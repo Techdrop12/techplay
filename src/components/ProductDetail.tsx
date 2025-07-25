@@ -2,8 +2,8 @@
 
 import Image from 'next/image'
 import { useState } from 'react'
-import { formatPrice } from '@/lib/utils'
 import { motion } from 'framer-motion'
+import { formatPrice } from '@/lib/utils'
 import WishlistButton from '@/components/WishlistButton'
 import FreeShippingBadge from '@/components/FreeShippingBadge'
 import QuantitySelector from '@/components/QuantitySelector'
@@ -13,6 +13,7 @@ import AddToCartButton from '@/components/AddToCartButton'
 import ReviewForm from '@/components/ReviewForm'
 import StickyCartSummary from '@/components/StickyCartSummary'
 import type { Product } from '@/types/product'
+import { logEvent } from '@/lib/logEvent'
 
 interface Props {
   product: Product
@@ -33,7 +34,17 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     rating = 4,
     isNew,
     isBestSeller,
+    tags,
   } = product ?? {}
+
+  const handleAdd = () => {
+    logEvent({
+      action: 'add_to_cart',
+      category: 'Panier',
+      label: title,
+      value: price * quantity,
+    })
+  }
 
   return (
     <motion.section
@@ -65,8 +76,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           showDiscountLabel
           showOldPrice
         />
-        {/* Badges "Nouveau" et "Best Seller" */}
-        <div className="absolute top-4 left-4 flex flex-col gap-2 pointer-events-none select-none">
+        <div className="absolute top-4 left-4 flex flex-col gap-2 pointer-events-none select-none z-10">
           {isNew && (
             <span className="bg-green-600 text-white px-3 py-1 rounded-full font-semibold text-sm shadow-md">
               Nouveau
@@ -128,7 +138,10 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             Sélectionnez la quantité à ajouter au panier
           </p>
 
-          <AddToCartButton product={{ ...product, quantity }} />
+          <AddToCartButton
+            product={{ ...product, quantity }}
+            onAdd={handleAdd}
+          />
 
           <WishlistButton
             product={{
@@ -144,8 +157,11 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         </div>
       </div>
 
-      {/* Sticky résumé panier mobile */}
       <StickyCartSummary locale={locale} />
+
+      <div className="lg:col-span-2 mt-12">
+        <ReviewForm productId={_id as string} />
+      </div>
     </motion.section>
   )
 }

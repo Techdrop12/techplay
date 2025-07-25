@@ -39,26 +39,28 @@ export default function Header() {
     <>
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 z-[9999] bg-white dark:bg-black text-black dark:text-white px-2 py-1 rounded"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 z-[9999] bg-white dark:bg-black text-black dark:text-white px-3 py-1 rounded-md"
       >
         Aller au contenu principal
       </a>
 
       <header
         className={cn(
-          'fixed top-0 z-50 w-full backdrop-blur-md bg-gradient-to-b from-white/95 via-white/70 to-white/50 dark:from-black/95 dark:via-black/75 dark:to-black/50 transition-transform duration-300 shadow-lg border-b border-gray-200 dark:border-gray-800',
+          'fixed top-0 left-0 right-0 z-50 w-full backdrop-blur-md bg-white/80 dark:bg-black/80 shadow-sm transition-transform duration-300 border-b border-gray-200 dark:border-gray-800',
           hidden ? '-translate-y-full' : 'translate-y-0'
         )}
         role="banner"
-        aria-label="En-tête du site TechPlay"
+        aria-label="En-tête du site"
       >
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 sm:px-8 lg:px-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 flex items-center justify-between py-4">
+          {/* Logo */}
           <Link href="/" aria-label="Retour à l’accueil" className="flex items-center gap-3">
-            <Logo className="h-12 w-auto" />
+            <Logo className="h-10 w-auto" />
           </Link>
 
+          {/* Navigation desktop */}
           <nav
-            className="hidden md:flex gap-8 text-base font-semibold tracking-wide"
+            className="hidden md:flex gap-6 lg:gap-10 font-medium text-gray-800 dark:text-gray-100 tracking-tight"
             aria-label="Navigation principale"
           >
             {links.map(({ href, label }) => (
@@ -66,32 +68,32 @@ export default function Header() {
                 key={href}
                 href={href}
                 className={cn(
-                  'relative text-gray-900 dark:text-gray-100 transition-colors group',
+                  'relative transition-colors duration-200 group',
                   isActive(href)
-                    ? 'font-extrabold text-accent after:absolute after:-bottom-1 after:left-0 after:h-[3px] after:w-full after:rounded-full after:bg-accent'
+                    ? 'text-accent font-bold after:absolute after:-bottom-1 after:left-0 after:w-full after:h-0.5 after:rounded-full after:bg-accent'
                     : 'hover:text-accent focus-visible:text-accent'
                 )}
               >
                 {label}
-                {/* Underline animation */}
                 {!isActive(href) && (
-                  <span className="absolute bottom-0 left-0 w-0 h-[3px] rounded-full bg-accent transition-[width] group-hover:w-full"></span>
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-accent rounded-full transition-all duration-300 group-hover:w-full"></span>
                 )}
               </Link>
             ))}
           </nav>
 
-          {/* CTA bouton visible sur desktop */}
+          {/* Bouton promo */}
           <div className="hidden md:block">
             <Link
               href="/promo"
-              className="inline-block rounded-md bg-accent px-6 py-2 text-white font-bold tracking-wide shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-accent/60 transition-transform transform hover:scale-105 active:scale-95 animate-pulse"
+              className="rounded-xl bg-accent text-white font-semibold px-5 py-2 shadow-md hover:shadow-lg hover:bg-accent/90 focus:outline-none focus:ring-4 focus:ring-accent/40 transition-all"
               aria-label="Voir la promotion du jour"
             >
-              Promo du jour
+              🎉 Promo du jour
             </Link>
           </div>
 
+          {/* Menu mobile */}
           <MobileNav />
         </div>
       </header>
