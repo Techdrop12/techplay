@@ -1,4 +1,5 @@
 'use client'
+
 import ReactStars from 'react-rating-stars-component'
 
 export default function RatingStars({
@@ -15,11 +16,14 @@ export default function RatingStars({
       count={5}
       value={value}
       onChange={onChange}
-      size={24}
+      size={28}
       activeColor="#facc15"
       edit={editable}
       isHalf={true}
       aria-label={`Notation : ${value} étoiles sur 5`}
+      aria-live="polite"
+      aria-atomic="true"
+      role="slider"
     />
   )
 }

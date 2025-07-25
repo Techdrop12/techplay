@@ -9,6 +9,8 @@ interface Slide {
   image: string
   alt: string
   text?: string
+  ctaLabel?: string
+  ctaLink?: string
 }
 
 interface HeroCarouselProps {
@@ -26,26 +28,32 @@ const defaultSlides: Slide[] = [
     image: '/carousel1.jpg',
     alt: 'Casques Gaming',
     text: 'Casques Gaming – Immersion totale',
+    ctaLabel: 'Découvrir',
+    ctaLink: '/produit/casque-gaming',
   },
   {
     id: 2,
     image: '/carousel2.jpg',
     alt: 'Souris RGB',
     text: 'Souris RGB – Précision & Style',
+    ctaLabel: 'Découvrir',
+    ctaLink: '/produit/souris-rgb',
   },
   {
     id: 3,
     image: '/carousel3.jpg',
     alt: 'Claviers Mécaniques',
     text: 'Claviers Mécaniques – Réactivité ultime',
+    ctaLabel: 'Découvrir',
+    ctaLink: '/produit/clavier-mecanique',
   },
 ]
 
 export default function HeroCarousel({
   slides = defaultSlides,
-  intervalMs = 5000,
+  intervalMs = 6000,
   showOverlay = true,
-  overlayOpacity = 0.4,
+  overlayOpacity = 0.5,
   textSize = 'xl',
   className,
 }: HeroCarouselProps) {
@@ -65,14 +73,14 @@ export default function HeroCarousel({
   const textSizes = {
     sm: 'text-sm',
     md: 'text-lg',
-    lg: 'text-2xl',
-    xl: 'text-4xl',
+    lg: 'text-3xl',
+    xl: 'text-5xl',
   }
 
   return (
     <section
       className={cn(
-        'relative h-96 w-full overflow-hidden rounded-lg shadow-md',
+        'relative h-[90vh] w-full overflow-hidden rounded-lg shadow-2xl',
         className
       )}
       aria-label="Carrousel principal des produits"
@@ -82,8 +90,8 @@ export default function HeroCarousel({
         <div
           key={slide.id}
           className={cn(
-            'absolute inset-0 transition-opacity duration-1000 ease-in-out',
-            i === index ? 'opacity-100 z-10' : 'opacity-0 z-0',
+            'absolute inset-0 flex flex-col justify-center items-center px-6 text-center transition-opacity duration-1200 ease-in-out',
+            i === index ? 'opacity-100 z-20' : 'opacity-0 z-0',
             'pointer-events-none'
           )}
           aria-hidden={i !== index}
@@ -92,37 +100,57 @@ export default function HeroCarousel({
             src={slide.image}
             alt={slide.alt}
             fill
-            className="object-cover"
+            className="object-cover brightness-75"
             priority={i === 0}
           />
           {showOverlay && (
             <div
-              className="absolute inset-0 flex items-center justify-center px-4 text-center"
+              className="absolute inset-0 bg-black/50 flex flex-col justify-center items-center px-4"
               style={{ backgroundColor: `rgba(0, 0, 0, ${overlayOpacity})` }}
             >
               {slide.text && (
                 <h2
                   className={cn(
-                    'text-white font-bold drop-shadow',
+                    'text-white font-extrabold drop-shadow-lg mb-6 animate-fadeIn',
                     textSizes[textSize]
                   )}
                 >
                   {slide.text}
                 </h2>
               )}
+              {slide.ctaLabel && slide.ctaLink && (
+                <a
+                  href={slide.ctaLink}
+                  className="inline-block rounded-md bg-accent px-8 py-3 text-lg font-semibold text-white shadow-lg hover:bg-accent/90 focus:outline-none focus:ring-4 focus:ring-accent/70 transition-transform transform hover:scale-105 active:scale-95"
+                >
+                  {slide.ctaLabel}
+                </a>
+              )}
             </div>
           )}
         </div>
       ))}
-      {/* Indicateurs de pagination */}
-      <nav className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-3" aria-label="Changer de diapositive">
+
+      {/* Progress bar */}
+      <div className="absolute bottom-6 left-1/2 w-2/3 -translate-x-1/2 rounded-full bg-white/20 h-2 overflow-hidden">
+        <div
+          className="bg-accent h-full rounded-full transition-all duration-[6000ms] ease-linear"
+          style={{ width: `${((index + 1) / slides.length) * 100}%` }}
+        />
+      </div>
+
+      {/* Pagination buttons */}
+      <nav
+        className="absolute bottom-4 left-1/2 flex gap-4 -translate-x-1/2"
+        aria-label="Changer de diapositive"
+      >
         {slides.map((_, i) => (
           <button
             key={i}
             type="button"
             className={cn(
-              'w-3 h-3 rounded-full transition-colors',
-              i === index ? 'bg-white' : 'bg-white/50 hover:bg-white'
+              'w-4 h-4 rounded-full transition-colors',
+              i === index ? 'bg-accent' : 'bg-accent/50 hover:bg-accent'
             )}
             aria-current={i === index ? 'true' : undefined}
             aria-label={`Diapositive ${i + 1}`}

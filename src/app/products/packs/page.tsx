@@ -28,7 +28,7 @@ export default function PacksPage() {
       <SectionTitle title="Nos Packs" />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {dummyPacks.map((pack) => (
-          <PackCard key={pack.slug} pack={pack} />
+          <PackCard key={pack._id} pack={pack} />
         ))}
       </div>
     </SectionWrapper>

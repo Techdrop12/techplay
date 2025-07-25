@@ -24,23 +24,30 @@ export default function ProductCatalogue({ products }: Props) {
   const [selectedCategory, setCategory] = useState<string | null>(null)
   const [sortOption, setSortOption] = useState<'asc' | 'desc' | 'alpha'>('asc')
 
-  const fuse = useMemo(() => new Fuse(products, {
-    keys: ['title', 'name', 'tags', 'category'],
-    threshold: 0.3,
-  }), [products])
+  const fuse = useMemo(
+    () =>
+      new Fuse(products, {
+        keys: ['title', 'tags', 'category'],
+        threshold: 0.3,
+      }),
+    [products]
+  )
 
   const filtered = useMemo(() => {
     let results = query ? fuse.search(query).map(r => r.item) : products
 
     if (selectedCategory) results = results.filter(p => p.category === selectedCategory)
 
-    if (sortOption === 'asc') results = results.sort((a, b) => a.price - b.price)
-    else if (sortOption === 'desc') results = results.sort((a, b) => b.price - a.price)
-    else if (sortOption === 'alpha') results = results.sort((a, b) => {
-      const aTitle = a.title ?? a.name ?? ''
-      const bTitle = b.title ?? b.name ?? ''
-      return aTitle.localeCompare(bTitle)
-    })
+    if (sortOption === 'asc')
+      results = results.sort((a, b) => a.price - b.price)
+    else if (sortOption === 'desc')
+      results = results.sort((a, b) => b.price - a.price)
+    else if (sortOption === 'alpha')
+      results = results.sort((a, b) => {
+        const aTitle = a.title ?? ''
+        const bTitle = b.title ?? ''
+        return aTitle.localeCompare(bTitle)
+      })
 
     return results
   }, [query, products, selectedCategory, sortOption, fuse])
@@ -55,17 +62,26 @@ export default function ProductCatalogue({ products }: Props) {
       <ScrollToTop />
       <BackToTopButton />
 
-      <main role="main" className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors">
+      <main
+        role="main"
+        className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors"
+      >
         <SectionWrapper>
           <SectionTitle title="Catalogue TechPlay" />
           <div className="flex flex-col md:flex-row gap-6 mb-8">
             <SearchBar query={query} setQuery={setQuery} />
-            <FilterPanel categories={categories} selected={selectedCategory} setSelected={setCategory} />
+            <FilterPanel
+              categories={categories}
+              selected={selectedCategory}
+              setSelected={setCategory}
+            />
             <SortDropdown sort={sortOption} setSort={setSortOption} />
           </div>
 
           {filtered.length === 0 ? (
-            <p className="text-center text-gray-500 dark:text-gray-400 mt-10">Aucun produit trouvé.</p>
+            <p className="text-center text-gray-500 dark:text-gray-400 mt-10">
+              Aucun produit trouvé.
+            </p>
           ) : (
             <ProductGrid products={filtered} />
           )}

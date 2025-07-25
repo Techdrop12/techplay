@@ -29,8 +29,8 @@ export default async function ProductListPage() {
               key={product._id}
               product={{
                 ...product,
-                title: product.title ?? product.name,
-                image: product.image ?? product.imageUrl ?? '/placeholder.png',
+                title: product.title ?? 'Produit',
+                image: product.image ?? '/placeholder.png',
               }}
             />
           ))}

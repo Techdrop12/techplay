@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
@@ -26,6 +26,8 @@ export default function QuantitySelector({
   'aria-describedby': ariaDescribedBy,
 }: QuantitySelectorProps) {
   const [qty, setQty] = useState(value ?? min)
+  const btnMinusRef = useRef<HTMLButtonElement | null>(null)
+  const btnPlusRef = useRef<HTMLButtonElement | null>(null)
 
   useEffect(() => {
     if (typeof value === 'number') setQty(value)
@@ -37,11 +39,22 @@ export default function QuantitySelector({
     onChange?.(newVal)
   }
 
+  // Support clavier flèches haut/bas pour changer quantité
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      update(step)
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      update(-step)
+    }
+  }
+
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className={cn('flex items-center gap-2', className)}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={cn('flex items-center gap-3', className)}
       role="spinbutton"
       aria-label="Quantité"
       aria-valuenow={qty}
@@ -50,25 +63,30 @@ export default function QuantitySelector({
       tabIndex={0}
       id={id}
       aria-describedby={ariaDescribedBy}
+      onKeyDown={onKeyDown}
     >
       <button
+        ref={btnMinusRef}
         onClick={() => update(-step)}
-        className="px-2 py-1 border rounded text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-black dark:focus:ring-white"
+        className="px-3 py-1 border rounded-md text-lg font-bold focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition"
         aria-label="Diminuer la quantité"
         disabled={qty <= min}
       >
         −
       </button>
+
       <span
-        className="min-w-[24px] text-center font-semibold"
+        className="min-w-[32px] text-center font-semibold select-none text-lg"
         aria-live="polite"
         aria-atomic="true"
       >
         {qty}
       </span>
+
       <button
+        ref={btnPlusRef}
         onClick={() => update(step)}
-        className="px-2 py-1 border rounded text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-black dark:focus:ring-white"
+        className="px-3 py-1 border rounded-md text-lg font-bold focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition"
         aria-label="Augmenter la quantité"
         disabled={qty >= max}
       >

@@ -47,8 +47,8 @@ export default function BestProducts({ products }: Props) {
               <ProductCard
                 product={{
                   ...product,
-                  title: product.title ?? product.name ?? 'Produit',
-                  image: product.image ?? product.imageUrl ?? '/placeholder.png',
+                  title: product.title ?? 'Produit',
+                  image: product.image ?? '/placeholder.png',
                 }}
               />
             </li>

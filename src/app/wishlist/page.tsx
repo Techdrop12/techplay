@@ -43,8 +43,8 @@ export default function WishlistPage() {
                 key={product._id}
                 product={{
                   ...product,
-                  title: product.title || product.name || 'Produit',
-                  image: product.image || product.imageUrl || '/placeholder.png',
+                  title: product.title ?? 'Produit',
+                  image: product.image ?? '/placeholder.png',
                 }}
               />
             ) : null

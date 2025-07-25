@@ -8,11 +8,13 @@ import { getBestProducts, getRecommendedPacks } from '@/lib/data'
 
 export const metadata: Metadata = {
   title: 'TechPlay – Boutique high-tech & packs exclusifs',
-  description: 'Découvrez les meilleures offres et packs TechPlay, sélectionnés pour vous avec passion et innovation.',
+  description:
+    'Découvrez les meilleures offres et packs TechPlay, sélectionnés pour vous avec passion et innovation.',
   keywords: 'TechPlay, high-tech, gadgets, offres, packs, dropshipping, boutique, innovation',
   openGraph: {
     title: 'TechPlay – Boutique high-tech & packs exclusifs',
-    description: 'Découvrez les meilleures offres et packs TechPlay, sélectionnés pour vous avec passion et innovation.',
+    description:
+      'Découvrez les meilleures offres et packs TechPlay, sélectionnés pour vous avec passion et innovation.',
     url: 'https://techplay.example.com',
     siteName: 'TechPlay',
     images: [
@@ -20,8 +22,8 @@ export const metadata: Metadata = {
         url: 'https://techplay.example.com/og-homepage.jpg',
         width: 1200,
         height: 630,
-        alt: 'TechPlay – Accueil'
-      }
+        alt: 'TechPlay – Accueil',
+      },
     ],
     locale: 'fr_FR',
     type: 'website',
@@ -31,7 +33,7 @@ export const metadata: Metadata = {
     title: 'TechPlay – Boutique high-tech & packs exclusifs',
     description: 'Découvrez les meilleures offres et packs TechPlay, sélectionnés pour vous avec passion et innovation.',
     creator: '@TechPlay',
-  }
+  },
 }
 
 export default async function HomePage() {
@@ -39,20 +41,26 @@ export default async function HomePage() {
   const recommendedPacks = await getRecommendedPacks()
 
   return (
-    <main className="space-y-20 px-4 max-w-screen-xl mx-auto" role="main" tabIndex={-1}>
+    <main className="space-y-28 px-6 max-w-screen-xl mx-auto" role="main" tabIndex={-1}>
       <section aria-label="Carrousel des produits en vedette">
         <HeroCarousel />
       </section>
-      <section aria-label="Meilleurs produits">
+      <section
+        aria-label="Meilleurs produits"
+        className="animate-fadeIn"
+      >
         <BestProducts products={bestProducts} />
       </section>
-      <section aria-label="Packs recommandés">
+      <section
+        aria-label="Packs recommandés"
+        className="animate-fadeIn"
+      >
         <PacksSection packs={recommendedPacks} />
       </section>
-      <section aria-label="Badges de confiance TechPlay">
+      <section aria-label="Badges de confiance TechPlay" className="animate-fadeIn">
         <TrustBadges />
       </section>
-      <section aria-label="Foire aux questions">
+      <section aria-label="Foire aux questions" className="animate-fadeIn">
         <FAQ />
       </section>
     </main>

@@ -1,30 +1,28 @@
-// src/types/product.ts
-
 export interface Product {
   _id: string
   slug: string
-  name: string          // utilisé dans certains composants
-  title?: string        // alias pour compatibilité UI
-  image: string
-  imageUrl?: string     // alias pour compatibilité avec ProductCard
-  description?: string
+  title?: string
   price: number
   oldPrice?: number
+  image?: string
   rating?: number
-  featured?: boolean
-  tags?: string[]
+  isNew?: boolean         // Badge "Nouveau"
+  isBestSeller?: boolean  // Badge "Best Seller"
   category?: string
+  description?: string
+  tags?: string[]
+  // Ajoute d’autres propriétés nécessaires ici
 }
 
-// ✅ Version enrichie et unifiée
 export interface Pack {
-  _id: string
+  _id: string                 // Ajouté pour correspondre au code
   slug: string
   title: string
   description: string
-  image: string
   price: number
-  oldPrice?: number
-  rating?: number
-  tags?: string[]
+  oldPrice?: number           // Optionnel, si utilisé dans PackDetails etc.
+  rating?: number             // Optionnel, si utilisé dans PackDetails etc.
+  tags?: string[]             // Optionnel, si utilisé dans PackDetails etc.
+  image?: string
+  // Ajoute d’autres propriétés nécessaires ici
 }

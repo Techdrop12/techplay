@@ -37,7 +37,7 @@ export default function PackDetails({ pack }: Props) {
       {/* Image */}
       <div className="relative w-full h-80 md:h-[30rem] rounded-xl overflow-hidden border">
         <Image
-          src={image || '/placeholder.png'}
+          src={image ?? '/placeholder.png'}
           alt={`Image du pack ${title}`}
           fill
           className="object-cover"
@@ -81,7 +81,7 @@ export default function PackDetails({ pack }: Props) {
               _id,
               title,
               price,
-              image,
+              image: image ?? '/placeholder.png',
               slug,
             }}
           />
