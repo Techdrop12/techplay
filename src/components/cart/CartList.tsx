@@ -1,14 +1,24 @@
 'use client'
 
-import CartItem from '@/components/cart/CartItem'
 import type { Product } from '@/types/product'
+import CartItem from '@/components/cart/CartItem'
 
 interface CartListProps {
   items: (Product & { quantity: number })[]
 }
 
 export default function CartList({ items }: CartListProps) {
-  if (!items?.length) return null
+  if (!items?.length) {
+    return (
+      <p
+        className="text-center text-gray-600 dark:text-gray-400 text-sm"
+        role="alert"
+        aria-live="polite"
+      >
+        Aucun article dans le panier.
+      </p>
+    )
+  }
 
   return (
     <ul
@@ -18,7 +28,7 @@ export default function CartList({ items }: CartListProps) {
     >
       {items.map((item) => (
         <CartItem
-          key={item._id || item.slug}
+          key={item._id ?? item.slug}
           item={{
             _id: item._id,
             slug: item.slug,

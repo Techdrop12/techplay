@@ -5,5 +5,6 @@ export async function createCheckoutSession(data: any) {
     body: JSON.stringify(data),
   })
 
+  if (!res.ok) throw new Error('Échec création session Stripe')
   return await res.json()
 }

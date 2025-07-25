@@ -1,76 +1,46 @@
 'use client'
 
 import { useCart } from '@/hooks/useCart'
-import CartItem from '@/components/cart/CartItem'
-import { formatPrice } from '@/lib/utils'
-import { motion, AnimatePresence } from 'framer-motion'
-import Link from 'next/link'
-import { useEffect } from 'react'
+import type { Metadata } from 'next'
+import CartList from '@/components/cart/CartList'
+import StickyCartSummary from '@/components/StickyCartSummary'
+
+export const metadata: Metadata = {
+  title: 'Mon panier – TechPlay',
+  description: 'Consultez les produits de votre panier avant de passer commande.',
+}
 
 export default function CartPage() {
   const { cart } = useCart()
 
-  const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0)
-  const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [])
-
   return (
     <main
-      className="max-w-6xl mx-auto py-16 px-4"
-      aria-labelledby="cart-heading"
+      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10"
+      role="main"
+      aria-labelledby="page-title"
     >
       <h1
-        id="cart-heading"
-        className="text-3xl font-bold mb-8 text-center text-brand"
+        id="page-title"
+        className="text-3xl font-extrabold text-gray-900 dark:text-white text-center"
       >
         Mon panier
       </h1>
 
       {cart.length === 0 ? (
-        <motion.p
+        <p
           className="text-center text-gray-600 dark:text-gray-400 text-lg"
           role="alert"
           aria-live="polite"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
         >
           Votre panier est vide.
-        </motion.p>
+        </p>
       ) : (
-        <>
-          <ul role="list" className="space-y-6">
-            <AnimatePresence>
-              {cart.map((item) => (
-                <CartItem key={item._id} item={item} />
-              ))}
-            </AnimatePresence>
-          </ul>
-
-          <div className="mt-10 border-t pt-6 flex flex-col items-center gap-4">
-            <p className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-              Total : <span className="font-bold">{formatPrice(totalPrice)}</span>
-            </p>
-
-            <Link
-              href="/commande"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition text-base font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-zinc-900"
-              aria-label="Passer au paiement"
-            >
-              Passer au paiement
-            </Link>
-
-            <Link
-              href="/"
-              className="text-sm text-gray-600 underline hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-              aria-label="Continuer vos achats"
-            >
-              ← Continuer vos achats
-            </Link>
+        <div className="grid lg:grid-cols-3 gap-10">
+          <div className="lg:col-span-2">
+            <CartList items={cart} />
           </div>
-        </>
+          <StickyCartSummary />
+        </div>
       )}
     </main>
   )

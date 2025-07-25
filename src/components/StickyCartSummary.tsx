@@ -22,14 +22,15 @@ export default function StickyCartSummary({ locale = 'fr' }: Props) {
   const pathname = usePathname()
   const t = useTranslations('cart')
 
-  const typedCart = (cart || []) as CartItem[]
+  const typedCart: CartItem[] = cart || []
   const itemCount = typedCart.reduce((sum, item) => sum + item.quantity, 0)
-  const totalPrice = typedCart.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const totalPrice = typedCart.reduce((sum, item) => sum + (item.price ?? 0) * item.quantity, 0)
 
   useEffect(() => {
-    const show = !pathname.includes('/checkout') && itemCount > 0
-    setVisible(show)
-  }, [cart, pathname, itemCount])
+    const shouldShow =
+      itemCount > 0 && !['/checkout', '/commande', '/panier'].some(path => pathname.includes(path))
+    setVisible(shouldShow)
+  }, [pathname, itemCount])
 
   const handleClick = () => {
     event({
@@ -52,13 +53,16 @@ export default function StickyCartSummary({ locale = 'fr' }: Props) {
           role="complementary"
           aria-label={t('mobile_summary')}
         >
-          <div className="text-sm font-medium text-gray-900 dark:text-gray-100" aria-live="polite">
+          <div
+            className="text-sm font-medium text-gray-900 dark:text-gray-100"
+            aria-live="polite"
+          >
             🛒 {itemCount} {t('item', { count: itemCount })} –{' '}
             <span className="font-bold">{formatPrice(totalPrice)}</span>
           </div>
 
           <Link
-            href={`/${locale}/panier`}
+            href={`/${locale}/cart`}
             onClick={handleClick}
             className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-zinc-900"
             aria-label={t('view_cart')}
