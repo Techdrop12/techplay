@@ -18,12 +18,11 @@ export default function CheckoutForm() {
     setError(null)
 
     try {
-      // Ajout de value pour respecter le typage attendu
       event({
         action: 'checkout_start',
         category: 'engagement',
         label: 'checkout_form',
-        value: 1,
+        value: 1, // Obligatoire pour respecter le typage
       })
 
       const session = await createCheckoutSession({ email, address })
