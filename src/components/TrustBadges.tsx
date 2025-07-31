@@ -1,5 +1,3 @@
-// src/components/TrustBadges.tsx
-
 export default function TrustBadges() {
   const badges = [
     { emoji: '✅', label: 'Paiement sécurisé' },
@@ -13,7 +11,7 @@ export default function TrustBadges() {
       className="py-6 text-center border-t border-gray-200 dark:border-gray-700"
       aria-label="Badges de confiance"
     >
-      <div className="max-w-4xl mx-auto flex flex-wrap justify-center gap-6 text-sm font-medium text-gray-700 dark:text-gray-300">
+      <div className="max-w-4xl mx-auto flex flex-wrap justify-center gap-4 sm:gap-6 text-sm font-medium text-gray-700 dark:text-gray-300">
         {badges.map(({ emoji, label }) => (
           <div
             key={label}

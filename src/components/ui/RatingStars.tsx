@@ -27,7 +27,9 @@ export default function RatingStars({
   const id = useId()
 
   const handleClick = (index: number) => {
-    if (editable && onChange) onChange(index + 1)
+    if (editable && onChange) {
+      onChange(index + 1)
+    }
   }
 
   return (

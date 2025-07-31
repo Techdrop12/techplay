@@ -17,7 +17,9 @@ import Analytics from '@/components/Analytics'
 import MetaPixel from '@/components/MetaPixel'
 import HeatmapScript from '@/components/HeatmapScript'
 
-type Props = { products: Product[] }
+type Props = {
+  products: Product[]
+}
 
 export default function ProductCatalogue({ products }: Props) {
   const [query, setQuery] = useState('')
@@ -36,23 +38,25 @@ export default function ProductCatalogue({ products }: Props) {
   const filtered = useMemo(() => {
     let results = query ? fuse.search(query).map(r => r.item) : products
 
-    if (selectedCategory) results = results.filter(p => p.category === selectedCategory)
+    if (selectedCategory) {
+      results = results.filter(p => p.category === selectedCategory)
+    }
 
-    if (sortOption === 'asc')
+    if (sortOption === 'asc') {
       results = results.sort((a, b) => a.price - b.price)
-    else if (sortOption === 'desc')
+    } else if (sortOption === 'desc') {
       results = results.sort((a, b) => b.price - a.price)
-    else if (sortOption === 'alpha')
-      results = results.sort((a, b) => {
-        const aTitle = a.title ?? ''
-        const bTitle = b.title ?? ''
-        return aTitle.localeCompare(bTitle)
-      })
+    } else if (sortOption === 'alpha') {
+      results = results.sort((a, b) => (a.title ?? '').localeCompare(b.title ?? ''))
+    }
 
     return results
   }, [query, products, selectedCategory, sortOption, fuse])
 
-  const categories = useMemo(() => Array.from(new Set(products.map(p => p.category ?? 'Autre'))), [products])
+  const categories = useMemo(
+    () => Array.from(new Set(products.map(p => p.category ?? 'Autre'))),
+    [products]
+  )
 
   return (
     <>
@@ -69,7 +73,7 @@ export default function ProductCatalogue({ products }: Props) {
         <SectionWrapper>
           <SectionTitle title="Catalogue TechPlay" />
           <div className="flex flex-col md:flex-row gap-6 mb-8">
-            <SearchBar query={query} setQuery={setQuery} />
+            <SearchBar query={query} setQuery={setQuery} products={products} />
             <FilterPanel
               categories={categories}
               selected={selectedCategory}

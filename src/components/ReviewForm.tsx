@@ -33,13 +33,13 @@ export default function ReviewForm({ productId }: Props) {
           productId,
           rating,
           comment: comment.trim(),
-          name: 'Client TechPlay', // à remplacer si user connecté
+          name: 'Client TechPlay', // ⚠️ à remplacer si user connecté
         }),
       })
 
       if (!res.ok) throw new Error()
 
-      // Tracking GA4
+      // 📊 Tracking GA4
       event({
         action: 'submit_review',
         category: 'engagement',

@@ -36,9 +36,10 @@ export default function PacksSection({ packs }: Props) {
 
       <motion.ul
         initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10"
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8"
         role="list"
       >
         {packs.map((pack) => (

@@ -14,6 +14,7 @@ import ReviewForm from '@/components/ReviewForm'
 import StickyCartSummary from '@/components/StickyCartSummary'
 import type { Product } from '@/types/product'
 import { logEvent } from '@/lib/logEvent'
+import ProductTags from '@/components/ProductTags'
 
 interface Props {
   product: Product
@@ -58,8 +59,8 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
       role="region"
       aria-live="polite"
     >
-      {/* Image produit */}
-      <div className="relative w-full aspect-square rounded-3xl overflow-hidden shadow-lg border border-gray-300 dark:border-gray-700">
+      {/* 🖼️ Image produit */}
+      <div className="relative w-full aspect-square rounded-3xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700">
         <Image
           src={image}
           alt={`Image du produit ${title}`}
@@ -70,12 +71,14 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           placeholder="blur"
           blurDataURL="/placeholder-blur.png"
         />
-        <PricingBadge
-          price={price}
-          oldPrice={oldPrice}
-          showDiscountLabel
-          showOldPrice
-        />
+        <div className="absolute bottom-4 right-4 z-10">
+          <PricingBadge
+            price={price}
+            oldPrice={oldPrice}
+            showDiscountLabel
+            showOldPrice
+          />
+        </div>
         <div className="absolute top-4 left-4 flex flex-col gap-2 pointer-events-none select-none z-10">
           {isNew && (
             <span className="bg-green-600 text-white px-3 py-1 rounded-full font-semibold text-sm shadow-md">
@@ -90,7 +93,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         </div>
       </div>
 
-      {/* Détails produit */}
+      {/* 📄 Détails produit */}
       <div className="flex flex-col justify-between space-y-8">
         <div>
           <h1
@@ -107,7 +110,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             editable={false}
           />
 
-          <FreeShippingBadge price={price} minimal />
+          <FreeShippingBadge price={price} minimal className="mt-2" />
 
           {description && (
             <p
@@ -116,6 +119,12 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             >
               {description}
             </p>
+          )}
+
+          {Array.isArray(tags) && tags.length > 0 && (
+            <div className="mt-4">
+              <ProductTags tags={tags} />
+            </div>
           )}
         </div>
 

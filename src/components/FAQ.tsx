@@ -21,7 +21,6 @@ export default function FAQ() {
       setFaqs(data)
     } catch (error) {
       console.error('Erreur de chargement des FAQs', error)
-      // Fallback local si erreur
       setFaqs([
         {
           _id: '1',
@@ -51,7 +50,7 @@ export default function FAQ() {
   }
 
   return (
-    <section className="max-w-3xl mx-auto px-4 py-10" aria-label="Foire aux questions">
+    <section className="max-w-3xl mx-auto px-4 py-12" aria-label="Foire aux questions">
       <h2 className="text-2xl font-bold mb-6 text-center">FAQ</h2>
       <div role="list" aria-live="polite">
         {faqs.map((faq, index) => {

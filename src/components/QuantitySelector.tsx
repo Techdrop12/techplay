@@ -39,7 +39,6 @@ export default function QuantitySelector({
     onChange?.(newVal)
   }
 
-  // Support clavier flèches haut/bas pour changer quantité
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'ArrowUp') {
       e.preventDefault()

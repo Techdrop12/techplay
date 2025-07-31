@@ -1,10 +1,13 @@
+import { getBestProducts, getRecommendedPacks } from '@/lib/data'
+import type { Metadata } from 'next'
+
 import HeroCarousel from '@/components/HeroCarousel'
+import BannerPromo from '@/components/BannerPromo'
 import BestProducts from '@/components/BestProducts'
 import PacksSection from '@/components/PacksSection'
 import TrustBadges from '@/components/TrustBadges'
 import FAQ from '@/components/FAQ'
-import type { Metadata } from 'next'
-import { getBestProducts, getRecommendedPacks } from '@/lib/data'
+import ScrollTopButton from '@/components/ui/ScrollTopButton'
 
 export const metadata: Metadata = {
   title: 'TechPlay – Boutique high-tech & packs exclusifs',
@@ -35,39 +38,69 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  const bestProducts = await getBestProducts()
-  const recommendedPacks = await getRecommendedPacks()
+  const [bestProducts, recommendedPacks] = await Promise.all([
+    getBestProducts(),
+    getRecommendedPacks(),
+  ])
+
+  if (typeof window !== 'undefined' && window.gtag) {
+    window.gtag('event', 'homepage_view')
+  }
 
   return (
-    <main
-      className="space-y-28 px-6 max-w-screen-xl mx-auto scroll-smooth"
-      role="main"
-      tabIndex={-1}
-    >
-      {/* HERO CAROUSEL */}
-      <section aria-label="Carrousel des produits en vedette" className="animate-fadeIn">
-        <HeroCarousel />
-      </section>
+    <>
+      <BannerPromo />
 
-      {/* MEILLEURS PRODUITS */}
-      <section aria-label="Meilleurs produits" className="animate-fadeIn" id="best-products">
-        <BestProducts products={bestProducts} />
-      </section>
+      <main
+        className="space-y-28 px-6 max-w-screen-xl mx-auto scroll-smooth"
+        role="main"
+        tabIndex={-1}
+      >
+        {/* HERO CAROUSEL */}
+        <section
+          aria-label="Carrousel des produits en vedette"
+          className="motion-section"
+          id="hero"
+        >
+          <HeroCarousel />
+        </section>
 
-      {/* PACKS RECOMMANDÉS */}
-      <section aria-label="Packs recommandés" className="animate-fadeIn" id="packs">
-        <PacksSection packs={recommendedPacks} />
-      </section>
+        {/* MEILLEURS PRODUITS */}
+        <section
+          aria-label="Meilleurs produits"
+          className="motion-section"
+          id="best-products"
+        >
+          <BestProducts products={bestProducts} />
+        </section>
 
-      {/* BADGES DE CONFIANCE */}
-      <section aria-label="Badges de confiance TechPlay" className="animate-fadeIn">
-        <TrustBadges />
-      </section>
+        {/* PACKS RECOMMANDÉS */}
+        <section
+          aria-label="Packs recommandés"
+          className="motion-section"
+          id="packs"
+        >
+          <PacksSection packs={recommendedPacks} />
+        </section>
 
-      {/* FAQ */}
-      <section aria-label="Foire aux questions" className="animate-fadeIn">
-        <FAQ />
-      </section>
-    </main>
+        {/* BADGES DE CONFIANCE */}
+        <section
+          aria-label="Badges de confiance TechPlay"
+          className="motion-section"
+        >
+          <TrustBadges />
+        </section>
+
+        {/* FAQ */}
+        <section
+          aria-label="Foire aux questions"
+          className="motion-section"
+        >
+          <FAQ />
+        </section>
+      </main>
+
+      <ScrollTopButton />
+    </>
   )
 }
