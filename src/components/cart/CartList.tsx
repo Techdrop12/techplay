@@ -2,21 +2,28 @@
 
 import type { Product } from '@/types/product'
 import CartItem from '@/components/cart/CartItem'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface CartListProps {
   items: (Product & { quantity: number })[]
 }
 
 export default function CartList({ items }: CartListProps) {
-  if (!items?.length) {
+  const isEmpty = !items?.length
+
+  if (isEmpty) {
     return (
-      <p
+      <motion.p
         className="text-center text-gray-600 dark:text-gray-400 text-sm"
         role="alert"
         aria-live="polite"
+        aria-atomic="true"
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
       >
         Aucun article dans le panier.
-      </p>
+      </motion.p>
     )
   }
 
@@ -26,19 +33,28 @@ export default function CartList({ items }: CartListProps) {
       aria-label="Liste des articles du panier"
       className="space-y-4"
     >
-      {items.map((item) => (
-        <CartItem
-          key={item._id ?? item.slug}
-          item={{
-            _id: item._id,
-            slug: item.slug,
-            title: item.title ?? 'Produit',
-            image: item.image ?? '/placeholder.png',
-            price: item.price ?? 0,
-            quantity: item.quantity,
-          }}
-        />
-      ))}
+      <AnimatePresence initial={false}>
+        {items.map((item) => (
+          <motion.li
+            key={item._id ?? item.slug}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25 }}
+          >
+            <CartItem
+              item={{
+                _id: item._id,
+                slug: item.slug,
+                title: item.title ?? 'Produit',
+                image: item.image ?? '/placeholder.png',
+                price: item.price ?? 0,
+                quantity: item.quantity,
+              }}
+            />
+          </motion.li>
+        ))}
+      </AnimatePresence>
     </ul>
   )
 }

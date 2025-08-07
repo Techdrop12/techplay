@@ -23,6 +23,7 @@ export default function CartItem({ item }: CartItemProps) {
 
   const handleRemove = () => {
     removeFromCart(item._id)
+    // 📊 Optionnel : logEvent('remove_from_cart', { item_id: item._id, quantity: item.quantity })
   }
 
   return (
@@ -31,9 +32,11 @@ export default function CartItem({ item }: CartItemProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3 }}
-      className="flex items-center gap-4 p-4 border rounded-lg shadow-sm bg-white dark:bg-zinc-900 dark:border-zinc-700"
+      className="group flex items-center gap-4 p-4 border rounded-lg shadow-sm bg-white dark:bg-zinc-900 dark:border-zinc-700 hover:shadow-md transition-all"
       role="listitem"
       aria-label={`Produit : ${item.title}`}
+      data-id={item._id}
+      data-slug={item.slug}
     >
       <Link
         href={`/produit/${item.slug}`}
@@ -53,7 +56,7 @@ export default function CartItem({ item }: CartItemProps) {
       <div className="flex-1 min-w-0 space-y-1">
         <Link
           href={`/produit/${item.slug}`}
-          className="block font-medium text-sm text-gray-900 dark:text-white hover:underline line-clamp-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent"
+          className="block font-semibold text-sm text-gray-900 dark:text-white hover:underline line-clamp-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent"
         >
           {item.title}
         </Link>
@@ -71,7 +74,10 @@ export default function CartItem({ item }: CartItemProps) {
         aria-label={`Supprimer ${item.title} du panier`}
         title={`Supprimer ${item.title}`}
       >
-        <Trash2 className="w-5 h-5 text-red-600" aria-hidden="true" />
+        <Trash2
+          className="w-5 h-5 text-red-600 group-hover:scale-110 transition-transform"
+          aria-hidden="true"
+        />
       </button>
     </motion.li>
   )

@@ -6,7 +6,7 @@ import { useCart } from '@/context/cartContext'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatPrice } from '@/lib/utils'
-import { event } from '@/lib/ga'
+import { event, logEvent } from '@/lib/ga'
 import { useTranslations } from 'next-intl'
 import type { Product } from '@/types/product'
 
@@ -36,16 +36,24 @@ export default function StickyCartSummary({ locale = 'fr' }: StickyCartSummaryPr
 
   useEffect(() => {
     const excludedPaths = ['/checkout', '/commande', '/cart', '/panier']
-    const shouldShow = itemCount > 0 && !excludedPaths.some((path) => pathname.includes(path))
+    const shouldShow = itemCount > 0 && !excludedPaths.some(path => pathname.includes(path))
     setVisible(shouldShow)
   }, [pathname, itemCount])
 
   const handleClick = () => {
+    // Google Analytics tracking
     event({
       action: 'view_cart_mobile',
       category: 'engagement',
       label: 'Sticky cart CTA',
       value: totalPrice,
+    })
+
+    // Bonus : tracking événement personnalisé
+    logEvent('sticky_cart_click', {
+      page: pathname,
+      cart_count: itemCount,
+      total_price: totalPrice,
     })
   }
 
@@ -61,6 +69,7 @@ export default function StickyCartSummary({ locale = 'fr' }: StickyCartSummaryPr
           className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 px-4 py-3 flex justify-between items-center shadow-xl md:hidden"
           role="complementary"
           aria-label={t('mobile_summary', { count: itemCount })}
+          data-visible="true"
         >
           <div
             className="text-sm font-medium text-gray-900 dark:text-gray-100"
@@ -76,6 +85,7 @@ export default function StickyCartSummary({ locale = 'fr' }: StickyCartSummaryPr
             onClick={handleClick}
             className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-zinc-900"
             aria-label={t('view_cart')}
+            data-action="open-cart"
           >
             {t('view_cart')}
           </Link>
