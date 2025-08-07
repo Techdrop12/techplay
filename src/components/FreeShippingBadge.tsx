@@ -13,7 +13,7 @@ interface FreeShippingBadgeProps {
 export default function FreeShippingBadge({
   price,
   threshold = 49,
-  className = '',
+  className,
   minimal = false,
 }: FreeShippingBadgeProps) {
   if (typeof price !== 'number') return null
@@ -21,15 +21,15 @@ export default function FreeShippingBadge({
   const isEligible = price >= threshold
   const remaining = (threshold - price).toFixed(2)
 
+  const baseStyle = 'inline-block px-2 py-1 text-xs font-medium rounded transition shadow-sm'
+  const eligibleStyle = 'bg-green-100 text-green-800 dark:bg-green-800/20 dark:text-green-300'
+  const alertStyle = 'bg-yellow-100 text-yellow-800 animate-pulse dark:bg-yellow-900/30 dark:text-yellow-300'
+
   const content = isEligible
-    ? '🚚 Livraison gratuite'
-    : `Plus que ${remaining} € pour la livraison gratuite`
-
-  const baseStyle =
-    'inline-block px-2 py-1 text-xs font-medium rounded transition shadow-sm'
-
-  const eligibleStyle = 'bg-green-100 text-green-800'
-  const alertStyle = 'bg-yellow-100 text-yellow-800 animate-pulse'
+    ? minimal
+      ? '✅ Livraison offerte'
+      : '🚚 Livraison gratuite'
+    : `Encore ${remaining} € pour la livraison gratuite`
 
   return (
     <motion.div
@@ -44,7 +44,7 @@ export default function FreeShippingBadge({
         className
       )}
     >
-      {minimal && isEligible ? '✅ Livraison offerte' : content}
+      {content}
     </motion.div>
   )
 }

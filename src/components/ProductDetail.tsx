@@ -12,9 +12,9 @@ import PricingBadge from '@/components/PricingBadge'
 import AddToCartButton from '@/components/AddToCartButton'
 import ReviewForm from '@/components/ReviewForm'
 import StickyCartSummary from '@/components/StickyCartSummary'
+import ProductTags from '@/components/ProductTags'
 import type { Product } from '@/types/product'
 import { logEvent } from '@/lib/logEvent'
-import ProductTags from '@/components/ProductTags'
 
 interface Props {
   product: Product
@@ -26,7 +26,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
 
   const {
     _id,
-    slug,
+    slug = '',
     title = 'Produit',
     price = 0,
     oldPrice,
@@ -54,12 +54,12 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
       aria-labelledby="product-title"
-      data-product-id={typeof _id === 'string' ? _id : ''}
-      data-product-slug={slug || ''}
+      data-product-id={_id}
+      data-product-slug={slug}
       role="region"
       aria-live="polite"
     >
-      {/* 🖼️ Image produit */}
+      {/* 📸 Image produit */}
       <div className="relative w-full aspect-square rounded-3xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700">
         <Image
           src={image}
@@ -72,12 +72,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           blurDataURL="/placeholder-blur.png"
         />
         <div className="absolute bottom-4 right-4 z-10">
-          <PricingBadge
-            price={price}
-            oldPrice={oldPrice}
-            showDiscountLabel
-            showOldPrice
-          />
+          <PricingBadge price={price} oldPrice={oldPrice} showDiscountLabel showOldPrice />
         </div>
         <div className="absolute top-4 left-4 flex flex-col gap-2 pointer-events-none select-none z-10">
           {isNew && (
@@ -93,7 +88,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         </div>
       </div>
 
-      {/* 📄 Détails produit */}
+      {/* 📝 Infos produit */}
       <div className="flex flex-col justify-between space-y-8">
         <div>
           <h1
@@ -104,19 +99,12 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             {title}
           </h1>
 
-          <RatingStars
-            value={rating}
-            aria-label={`Note moyenne : ${rating} sur 5 étoiles`}
-            editable={false}
-          />
+          <RatingStars value={rating} editable={false} />
 
           <FreeShippingBadge price={price} minimal className="mt-2" />
 
           {description && (
-            <p
-              className="mt-6 text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed text-lg"
-              aria-label="Description du produit"
-            >
+            <p className="mt-6 text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed text-lg">
               {description}
             </p>
           )}
@@ -128,12 +116,10 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           )}
         </div>
 
+        {/* 🛒 Actions */}
         <div className="space-y-6">
           <div className="flex items-center gap-4">
-            <label
-              htmlFor="quantity"
-              className="text-lg font-semibold text-gray-900 dark:text-white"
-            >
+            <label htmlFor="quantity" className="text-lg font-semibold text-gray-900 dark:text-white">
               Quantité :
             </label>
             <QuantitySelector
@@ -147,19 +133,10 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             Sélectionnez la quantité à ajouter au panier
           </p>
 
-          <AddToCartButton
-            product={{ ...product, quantity }}
-            onAdd={handleAdd}
-          />
+          <AddToCartButton product={{ ...product, quantity }} onAdd={handleAdd} />
 
           <WishlistButton
-            product={{
-              _id: typeof _id === 'string' ? _id : '',
-              slug: slug || '',
-              title,
-              price,
-              image,
-            }}
+            product={{ _id, slug, title, price, image }}
             floating={false}
             className="mt-4"
           />
@@ -169,7 +146,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
       <StickyCartSummary locale={locale} />
 
       <div className="lg:col-span-2 mt-12">
-        <ReviewForm productId={_id as string} />
+        <ReviewForm productId={_id} />
       </div>
     </motion.section>
   )

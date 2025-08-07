@@ -50,8 +50,12 @@ export default function RatingStars({
             role={editable ? 'radio' : undefined}
             aria-checked={editable ? i + 1 === Math.round(value) : undefined}
             aria-label={`${i + 1} étoile${i > 0 ? 's' : ''}`}
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            whileHover={{ scale: editable ? 1.2 : 1 }}
+            whileTap={{ scale: editable ? 0.95 : 1 }}
             className={clsx(
-              'transition transform hover:scale-110 focus:outline-none',
+              'transition transform focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-yellow-400 rounded-full',
               {
                 'cursor-pointer': editable,
                 'text-yellow-400': filled,

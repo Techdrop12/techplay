@@ -7,13 +7,12 @@ import { Star } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { event } from '@/lib/ga'
 
-interface Props {
+interface ReviewFormProps {
   productId: string
 }
 
-export default function ReviewForm({ productId }: Props) {
+export default function ReviewForm({ productId }: ReviewFormProps) {
   const t = useTranslations('reviews')
-
   const [comment, setComment] = useState('')
   const [rating, setRating] = useState(5)
   const [hover, setHover] = useState<number | null>(null)
@@ -33,7 +32,7 @@ export default function ReviewForm({ productId }: Props) {
           productId,
           rating,
           comment: comment.trim(),
-          name: 'Client TechPlay', // ⚠️ à remplacer si user connecté
+          name: 'Client TechPlay', // 🔁 remplacer dynamiquement si user connecté
         }),
       })
 
@@ -79,9 +78,9 @@ export default function ReviewForm({ productId }: Props) {
       aria-label={t('form_label')}
       noValidate
     >
-      <h3 className="text-xl font-semibold">{t('write_review')}</h3>
+      <h3 className="text-xl font-semibold text-center">{t('write_review')}</h3>
 
-      {/* Étoiles */} 
+      {/* ⭐ Note étoiles */}
       <div
         className="flex gap-1 justify-center"
         role="radiogroup"
@@ -94,14 +93,14 @@ export default function ReviewForm({ productId }: Props) {
             onClick={() => setRating(val)}
             onMouseEnter={() => setHover(val)}
             onMouseLeave={() => setHover(null)}
-            className={`transition text-2xl ${
-              (hover ?? rating) >= val ? 'text-yellow-400' : 'text-gray-300'
-            }`}
             whileHover={{ scale: 1.2 }}
-            whileTap={{ scale: 0.9 }}
+            whileTap={{ scale: 0.95 }}
             aria-checked={rating === val}
             aria-label={`${val} ${t('stars')}`}
             role="radio"
+            className={`transition text-2xl focus:outline-none ${
+              (hover ?? rating) >= val ? 'text-yellow-400' : 'text-gray-300'
+            }`}
           >
             <Star
               fill={(hover ?? rating) >= val ? 'currentColor' : 'none'}
@@ -111,7 +110,7 @@ export default function ReviewForm({ productId }: Props) {
         ))}
       </div>
 
-      {/* Commentaire */} 
+      {/* 💬 Champ commentaire */}
       <textarea
         value={comment}
         onChange={(e) => setComment(e.target.value)}
@@ -122,16 +121,16 @@ export default function ReviewForm({ productId }: Props) {
         aria-label={t('textarea_label')}
       />
 
-      {/* Bouton envoyer */} 
+      {/* ✅ Bouton d'envoi */}
       <motion.button
         type="submit"
         disabled={sending}
+        aria-busy={sending}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         className={`bg-black text-white px-4 py-2 rounded w-full transition font-medium ${
           sending ? 'opacity-50 cursor-not-allowed' : ''
         }`}
-        aria-busy={sending}
       >
         {sending ? t('sending') : t('submit')}
       </motion.button>

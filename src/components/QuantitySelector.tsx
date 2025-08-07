@@ -25,17 +25,17 @@ export default function QuantitySelector({
   id,
   'aria-describedby': ariaDescribedBy,
 }: QuantitySelectorProps) {
-  const [qty, setQty] = useState(value ?? min)
+  const [quantity, setQuantity] = useState(value ?? min)
   const btnMinusRef = useRef<HTMLButtonElement | null>(null)
   const btnPlusRef = useRef<HTMLButtonElement | null>(null)
 
   useEffect(() => {
-    if (typeof value === 'number') setQty(value)
+    if (typeof value === 'number') setQuantity(value)
   }, [value])
 
   const update = (delta: number) => {
-    const newVal = Math.min(max, Math.max(min, qty + delta))
-    setQty(newVal)
+    const newVal = Math.min(max, Math.max(min, quantity + delta))
+    setQuantity(newVal)
     onChange?.(newVal)
   }
 
@@ -56,7 +56,7 @@ export default function QuantitySelector({
       className={cn('flex items-center gap-3', className)}
       role="spinbutton"
       aria-label="Quantité"
-      aria-valuenow={qty}
+      aria-valuenow={quantity}
       aria-valuemin={min}
       aria-valuemax={max}
       tabIndex={0}
@@ -69,7 +69,7 @@ export default function QuantitySelector({
         onClick={() => update(-step)}
         className="px-3 py-1 border rounded-md text-lg font-bold focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition"
         aria-label="Diminuer la quantité"
-        disabled={qty <= min}
+        disabled={quantity <= min}
       >
         −
       </button>
@@ -79,7 +79,7 @@ export default function QuantitySelector({
         aria-live="polite"
         aria-atomic="true"
       >
-        {qty}
+        {quantity}
       </span>
 
       <button
@@ -87,7 +87,7 @@ export default function QuantitySelector({
         onClick={() => update(step)}
         className="px-3 py-1 border rounded-md text-lg font-bold focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition"
         aria-label="Augmenter la quantité"
-        disabled={qty >= max}
+        disabled={quantity >= max}
       >
         +
       </button>

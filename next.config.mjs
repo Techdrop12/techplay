@@ -1,11 +1,11 @@
 // next.config.mjs
-import path, { dirname } from 'path'
-import { fileURLToPath } from 'url'
-import withPWA from 'next-pwa'
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import withPWA from 'next-pwa';
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-const isDev = process.env.NODE_ENV === 'development'
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const isDev = process.env.NODE_ENV === 'development';
 
 const withPwaPlugin = withPWA({
   dest: 'public',
@@ -16,7 +16,7 @@ const withPwaPlugin = withPWA({
   fallbacks: {
     image: '/fallback.png',
   },
-})
+});
 
 export default withPwaPlugin({
   reactStrictMode: true,
@@ -25,7 +25,6 @@ export default withPwaPlugin({
   experimental: {
     scrollRestoration: true,
     optimizePackageImports: ['react-icons', 'lodash'],
-    // reactRoot removed due to deprecation
   },
   images: {
     remotePatterns: [{ protocol: 'https', hostname: '**' }],
@@ -50,13 +49,13 @@ export default withPwaPlugin({
         { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
         { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
         { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
-        { key: 'Expect-CT', value: 'max-age=86400, enforce, report-uri="https://your-report-uri.example.com"' },
+        { key: 'Expect-CT', value: 'max-age=86400, enforce, report-uri="https://techplay.fr/csp-report"' },
         { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
       ],
     },
   ],
   webpack: (config) => {
-    config.resolve.alias['@'] = path.resolve(__dirname, 'src')
-    return config
+    config.resolve.alias['@'] = path.resolve(__dirname, 'src');
+    return config;
   },
-})
+});

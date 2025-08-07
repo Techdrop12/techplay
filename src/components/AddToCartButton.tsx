@@ -18,13 +18,15 @@ export default function AddToCartButton({ product, onAdd }: Props) {
 
   const handleClick = () => {
     if (loading) return
-
     setLoading(true)
 
     addToCart({
-      ...product,
+      _id: product._id,
+      slug: product.slug,
       title: product.title ?? 'Produit',
       image: product.image ?? '/placeholder.png',
+      price: product.price,
+      quantity: product.quantity,
     })
 
     toast.success('Produit ajouté au panier 🎉', {
@@ -41,22 +43,17 @@ export default function AddToCartButton({ product, onAdd }: Props) {
       },
     })
 
-    // Optionnel : scroll auto vers sticky cart sur mobile
     if (typeof window !== 'undefined' && window.innerWidth < 768) {
       const sticky = document.querySelector('[aria-label="Résumé panier mobile"]')
       sticky?.scrollIntoView({ behavior: 'smooth' })
     }
 
     if (onAdd) onAdd()
-
-    setTimeout(() => setLoading(false), 500) // évite double clics rapides
+    setTimeout(() => setLoading(false), 500)
   }
 
   return (
-    <motion.div
-      whileTap={{ scale: 0.96 }}
-      className="w-full"
-    >
+    <motion.div whileTap={{ scale: 0.96 }} className="w-full">
       <Button
         onClick={handleClick}
         aria-label={`Ajouter ${product.title ?? 'produit'} au panier`}

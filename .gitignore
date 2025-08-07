@@ -18,12 +18,12 @@ build/
 .idea/
 *.log
 
-# 🧪 Tests & tools
+# 🧪 Tests & outils
 bfg.jar
 *.test.ts
 *.test.js
 
-# 💻 OS files
+# 💻 OS
 .DS_Store
 Thumbs.db
 
@@ -33,10 +33,10 @@ Thumbs.db
 # 🔍 Storybook
 storybook-static/
 
-# 🔁 Prettier cache
+# 🔁 Prettier
 .prettiercache
 
-# 🧱 Sitemaps et statiques exportés
+# 🧱 Sitemaps / SW / Robots
 /public/sitemap.xml
 /public/sitemap-*.xml
 /public/robots.txt
