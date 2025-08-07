@@ -1,18 +1,17 @@
 import { getBlogPostBySlug } from '@/lib/data'
 import type { Metadata } from 'next'
-import type { BlogPost } from '@/types/blog'
 import { notFound } from 'next/navigation'
 import ArticleJsonLd from '@/components/JsonLd/ArticleJsonLd'
+import type { BlogPost } from '@/types/blog'
 
 interface Props {
   params: { slug: string }
-  locale: string
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await getBlogPostBySlug(params.slug)
 
-  if (!post || typeof post !== 'object' || Array.isArray(post)) {
+  if (!post) {
     return {
       title: 'Article introuvable – TechPlay',
       description: 'Cet article n’existe pas ou a été supprimé.',
@@ -21,13 +20,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `${post.title} – TechPlay`,
-    description: post.description || 'Article de blog TechPlay',
+    description: post.description ?? 'Article du blog TechPlay.',
     alternates: {
       canonical: `${process.env.NEXT_PUBLIC_SITE_URL}/blog/${params.slug}`,
     },
     openGraph: {
       title: post.title,
-      description: post.description || '',
+      description: post.description ?? '',
       type: 'article',
       url: `${process.env.NEXT_PUBLIC_SITE_URL}/blog/${params.slug}`,
       images: post.image
@@ -40,9 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function BlogPostPage({ params }: Props) {
   const post = await getBlogPostBySlug(params.slug)
 
-  if (!post || typeof post !== 'object' || Array.isArray(post)) {
-    notFound()
-  }
+  if (!post) notFound()
 
   const safePost = post as BlogPost
 
