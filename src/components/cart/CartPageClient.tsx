@@ -1,16 +1,15 @@
 'use client'
 
+import { useMemo } from 'react'
+import Link from 'next/link'
+import { motion } from 'framer-motion'
 import { useCart } from '@/hooks/useCart'
+import { event } from '@/lib/ga'
 import CartList from '@/components/cart/CartList'
 import StickyCartSummary from '@/components/StickyCartSummary'
-import { motion } from 'framer-motion'
-import Link from 'next/link'
-import { useMemo } from 'react'
-import { event } from '@/lib/ga'
 
 export default function CartPageClient() {
   const { cart } = useCart()
-
   const isEmpty = useMemo(() => cart.length === 0, [cart])
 
   const handleExploreClick = () => {
@@ -26,10 +25,10 @@ export default function CartPageClient() {
     <main
       className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10"
       role="main"
-      aria-labelledby="page-title"
+      aria-labelledby="cart-title"
     >
       <h1
-        id="page-title"
+        id="cart-title"
         className="text-3xl font-extrabold text-gray-900 dark:text-white text-center"
       >
         Mon panier

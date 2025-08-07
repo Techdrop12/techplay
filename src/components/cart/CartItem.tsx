@@ -6,6 +6,7 @@ import { Trash2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useCart } from '@/hooks/useCart'
 import { formatPrice } from '@/lib/utils'
+// import { logEvent } from '@/lib/ga' // Décommente si tracking activé
 
 interface CartItemProps {
   item: {
@@ -23,7 +24,12 @@ export default function CartItem({ item }: CartItemProps) {
 
   const handleRemove = () => {
     removeFromCart(item._id)
-    // 📊 Optionnel : logEvent('remove_from_cart', { item_id: item._id, quantity: item.quantity })
+    // logEvent('remove_from_cart', {
+    //   item_id: item._id,
+    //   quantity: item.quantity,
+    //   price: item.price,
+    //   title: item.title,
+    // })
   }
 
   return (
@@ -34,21 +40,20 @@ export default function CartItem({ item }: CartItemProps) {
       transition={{ duration: 0.3 }}
       className="group flex items-center gap-4 p-4 border rounded-lg shadow-sm bg-white dark:bg-zinc-900 dark:border-zinc-700 hover:shadow-md transition-all"
       role="listitem"
-      aria-label={`Produit : ${item.title}`}
+      aria-label={`Produit dans le panier : ${item.title}`}
       data-id={item._id}
-      data-slug={item.slug}
     >
       <Link
         href={`/produit/${item.slug}`}
         className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent"
-        aria-label={`Voir le produit ${item.title}`}
+        aria-label={`Voir la fiche produit de ${item.title}`}
       >
         <Image
           src={item.image || '/placeholder.png'}
-          alt={item.title || 'Produit'}
+          alt={item.title || 'Image produit'}
           fill
           sizes="80px"
-          className="object-cover rounded"
+          className="object-cover rounded transition-transform duration-200 group-hover:scale-105"
           priority
         />
       </Link>
@@ -62,7 +67,7 @@ export default function CartItem({ item }: CartItemProps) {
         </Link>
         <p
           className="text-sm text-gray-600 dark:text-gray-400"
-          aria-label={`Prix ${formatPrice(item.price)} × ${item.quantity}`}
+          aria-label={`Prix unitaire ${formatPrice(item.price)} multiplié par quantité ${item.quantity}`}
         >
           {formatPrice(item.price)} × {item.quantity}
         </p>
