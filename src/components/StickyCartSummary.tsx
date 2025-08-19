@@ -1,146 +1,133 @@
-// src/components/StickyCartSummary.tsx
-'use client';
+'use client'
 
-import Link from 'next/link';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useCart } from '@/hooks/useCart'; // ← unifié
-import { formatPrice, cn } from '@/lib/utils';
-import { event, logEvent } from '@/lib/ga';
-import { useTranslations } from 'next-intl';
+import Link from 'next/link'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { usePathname } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useCart } from '@/context/cartContext'
+import { formatPrice, cn } from '@/lib/utils'
+import { event, logEvent } from '@/lib/ga'
+import { useTranslations } from 'next-intl'
 
 type Props = {
-  /** Pour préfixer les routes si besoin (facultatif) */
-  locale?: string;
-  /** URL explicite du panier (ex: '/cart' ou '/{locale}/cart') */
-  cartHref?: string;
-  /** URL explicite du checkout (ex: '/commande') */
-  checkoutHref?: string;
-  /** Pages sur lesquelles on masque la barre */
-  excludePaths?: string[];
-  /** Seuil de livraison offerte (fallback sur env) */
-  freeShippingThreshold?: number;
-  className?: string;
-};
+  locale?: string
+  cartHref?: string
+  excludePaths?: string[]
+  freeShippingThreshold?: number
+  className?: string
+}
 
 /**
- * StickyCartSummary — résumé panier mobile
- * - Mobile only, safe-area iOS, blur, spring anim
- * - Masqué sur /checkout, /commande, /cart, /panier, /success (défaut)
+ * StickyCartSummary — résumé panier mobile full option
+ * - Mobile only (md:hidden), safe-area iOS, blur, spring anim
+ * - Masqué sur /checkout, /commande, /cart, /panier, /404, /_not-found (configurable)
  * - État plié/déplié persistant (localStorage)
- * - Progress “livraison offerte”
- * - i18n robustes (fallbacks), a11y, GA4
+ * - Progress “livraison offerte” (env NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD ou prop)
+ * - a11y + aria-live
+ * - Tracking GA4 + logEvent custom
+ * - ✅ Robuste: ne casse pas si next-intl Provider est absent (prerender 404)
  */
 export default function StickyCartSummary({
   locale = 'fr',
   cartHref,
-  checkoutHref,
-  excludePaths = ['/checkout', '/commande', '/cart', '/panier', '/success'],
+  excludePaths = ['/checkout', '/commande', '/cart', '/panier', '/404', '/_not-found'],
   freeShippingThreshold,
   className,
 }: Props) {
-  const t = useTranslations('cart');
-  const pathname = usePathname();
-  const { cart } = useCart();
+  // ⚠️ next-intl peut ne pas être initialisé (ex: _not-found en prerender).
+  // On tente le hook; s’il jette, on met un stub qui jette aussi,
+  // et notre helper `tx()` retournera le fallback.
+  let t: any
+  try {
+    t = useTranslations('cart')
+  } catch {
+    t = (() => {
+      throw new Error('next-intl provider missing')
+    }) as any
+  }
 
-  const [mounted, setMounted] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
-
-  // i18n helper avec fallback propre (évite t(key, fallback))
+  // helper i18n avec fallback (PAS d’exception si pas de provider)
   const tx = (key: string, fallback: string, values?: Record<string, any>) => {
     try {
-      return values ? (t as any)(key, values) : (t as any)(key);
+      return values ? t(key as any, values as any) : (t(key as any) as any)
     } catch {
-      return fallback;
+      return fallback
     }
-  };
+  }
+
+  const pathname = usePathname() || ''
+  const { cart } = useCart()
+  const [mounted, setMounted] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
 
   // Seuil livraison offerte
   const FREE_SHIPPING_THRESHOLD = useMemo(() => {
     if (typeof freeShippingThreshold === 'number' && freeShippingThreshold > 0) {
-      return freeShippingThreshold;
+      return freeShippingThreshold
     }
-    const env = Number(process.env.NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD);
-    return Number.isFinite(env) && env > 0 ? env : 50;
-  }, [freeShippingThreshold]);
+    const env = Number(process.env.NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD)
+    return Number.isFinite(env) && env > 0 ? env : 50
+  }, [freeShippingThreshold])
 
   // Mémorisation UI
   useEffect(() => {
-    setMounted(true);
+    setMounted(true)
     try {
-      const saved = localStorage.getItem('tp_cart_sticky_collapsed');
-      if (saved === '1') setCollapsed(true);
+      const saved = localStorage.getItem('tp_cart_sticky_collapsed')
+      if (saved === '1') setCollapsed(true)
     } catch {}
-  }, []);
+  }, [])
 
   const setCollapsedPersist = (v: boolean) => {
-    setCollapsed(v);
+    setCollapsed(v)
     try {
-      localStorage.setItem('tp_cart_sticky_collapsed', v ? '1' : '0');
+      localStorage.setItem('tp_cart_sticky_collapsed', v ? '1' : '0')
     } catch {}
-  };
+  }
 
   // Totaux
   const { count, subtotal } = useMemo(() => {
-    const c = Array.isArray(cart)
-      ? cart.reduce((n: number, it: any) => n + (it?.quantity || 1), 0)
-      : 0;
-    const s = Array.isArray(cart)
-      ? cart.reduce(
-          (sum: number, it: any) => sum + (Number(it?.price) || 0) * (it?.quantity || 1),
-          0
-        )
-      : 0;
-    return { count: c, subtotal: s };
-  }, [cart]);
+    const c = cart?.reduce((n: number, it: any) => n + (it?.quantity || 1), 0) || 0
+    const s =
+      cart?.reduce((sum: number, it: any) => sum + (it?.price || 0) * (it?.quantity || 1), 0) || 0
+    return { count: c, subtotal: s }
+  }, [cart])
 
-  const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
-  const progress = Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD) * 100));
+  const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal)
+  const progress = Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD) * 100))
 
   // Affichage uniquement si items + path autorisé
   const visible = useMemo(() => {
-    if (!mounted || !count) return false;
-    const path = pathname || '';
-    return !excludePaths.some((p) => path.includes(p));
-  }, [mounted, count, pathname, excludePaths]);
+    if (!mounted || !count) return false
+    return !excludePaths.some((p) => pathname.includes(p))
+  }, [mounted, count, pathname, excludePaths])
 
-  // Tracking à l’apparition (1 seule fois)
-  const trackedRef = useRef(false);
+  // Tracking à l’apparition
+  const trackedRef = useRef(false)
   useEffect(() => {
     if (visible && !trackedRef.current) {
-      trackedRef.current = true;
+      trackedRef.current = true
       event({
         action: 'sticky_cart_visible',
         category: 'engagement',
         label: 'sticky_cart',
-        value: count, // GA4: value number requis
-      });
+        value: count,
+      })
     }
-  }, [visible, count]);
+  }, [visible, count])
 
-  // URLs (avec fallback ; tu peux préfixer par locale si tu veux)
-  const cartUrl =
-    cartHref ?? (locale ? `/${locale.replace(/^\/?/, '')}/cart` : '/cart');
-  const checkoutUrl =
-    checkoutHref ?? (locale ? `/${locale.replace(/^\/?/, '')}/commande` : '/commande');
-
-  const onCta = (label: 'voir_panier' | 'commander') => {
-    event({
-      action: 'sticky_cart_click',
-      category: 'engagement',
-      label,
-      value: Math.round(subtotal),
-    });
-    logEvent('sticky_cart_click', {
+  const goto = cartHref || '/commande'
+  const onCta = (label: string) => {
+    event({ action: 'sticky_cart_click', category: 'engagement', label, value: subtotal })
+    logEvent?.('sticky_cart_click', {
       page: pathname,
       cart_count: count,
       total_price: subtotal,
       label,
-    });
-  };
+    })
+  }
 
-  if (!visible) return null;
+  if (!visible) return null
 
   return (
     <AnimatePresence mode="wait">
@@ -161,7 +148,7 @@ export default function StickyCartSummary({
         aria-label={tx('mobile_summary', 'Résumé de votre panier', { count })}
         data-visible="true"
       >
-        {/* Barre top : toggle + total */}
+        {/* Barre supérieure : toggle + total */}
         <div className="flex items-center justify-between px-4 py-2">
           <button
             type="button"
@@ -171,7 +158,7 @@ export default function StickyCartSummary({
             aria-controls="sticky-cart-panel"
           >
             {collapsed ? tx('show', 'Afficher') : tx('hide', 'Masquer')} · {count}{' '}
-            {tx('item', 'article', { count })}
+            {tx('item', count > 1 ? 'articles' : 'article', { count })}
           </button>
 
           <div className="text-sm text-gray-800 dark:text-gray-100" aria-live="polite">
@@ -233,16 +220,15 @@ export default function StickyCartSummary({
               {/* CTAs */}
               <div className="grid grid-cols-2 gap-2 px-4 py-3">
                 <Link
-                  href={cartUrl}
+                  href={goto}
                   onClick={() => onCta('voir_panier')}
                   className="inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-zinc-700 px-3 py-2 text-sm font-semibold text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-accent"
                   aria-label={tx('view_cart', 'Voir le panier')}
                 >
                   {tx('view_cart', 'Voir le panier')}
                 </Link>
-
                 <Link
-                  href={checkoutUrl}
+                  href={goto}
                   onClick={() => onCta('commander')}
                   className="inline-flex items-center justify-center rounded-lg bg-accent text-white px-3 py-2 text-sm font-extrabold shadow-md hover:bg-accent/90 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-accent"
                   aria-label={tx('checkout', 'Commander')}
@@ -264,5 +250,5 @@ export default function StickyCartSummary({
         </AnimatePresence>
       </motion.aside>
     </AnimatePresence>
-  );
+  )
 }
