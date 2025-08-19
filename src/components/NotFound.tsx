@@ -2,18 +2,25 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
+import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 
 export default function NotFound() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
-  // URL complète tentée (jolie à afficher)
+  // Construit joliment l’URL tentée
   const attempted = useMemo(() => {
     const qs = searchParams?.toString();
     return qs ? `${pathname}?${qs}` : pathname || '/';
   }, [pathname, searchParams]);
+
+  // Focus accessible sur le titre
+  const h1Ref = useRef<HTMLHeadingElement | null>(null);
+  useEffect(() => {
+    h1Ref.current?.focus();
+  }, []);
 
   const popularLinks = [
     { href: '/', label: 'Accueil' },
@@ -26,19 +33,59 @@ export default function NotFound() {
   ];
 
   return (
-    <section
-      className="mt-10 mx-auto max-w-4xl text-center"
-      aria-label="Suggestions suite à une erreur 404"
+    <main
+      id="main"
+      className="max-w-5xl mx-auto px-4 pt-32 pb-24 text-center"
+      role="main"
+      aria-labelledby="nf-title"
     >
-      <p className="text-sm text-gray-500 dark:text-gray-400">
+      <h1
+        id="nf-title"
+        ref={h1Ref}
+        tabIndex={-1}
+        className="text-4xl sm:text-5xl font-extrabold tracking-tight text-brand dark:text-brand-light"
+      >
+        404 – Page introuvable
+      </h1>
+
+      <p className="mt-4 text-muted-foreground">
+        Désolé, cette page n’existe pas ou a été déplacée.
+      </p>
+
+      {/* Chemin tenté (utile pour support) */}
+      <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
         Chemin demandé :
         <code className="ml-2 rounded bg-gray-100 dark:bg-zinc-900 px-2 py-1 text-[12px]">
           {attempted}
         </code>
       </p>
 
+      {/* CTA principaux */}
+      <div className="mt-8 flex items-center justify-center gap-3">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-3 text-white font-semibold shadow hover:bg-accent/90 focus:outline-none focus:ring-4 focus:ring-accent/50"
+          aria-label="Retour à l’accueil"
+        >
+          ← Retour à l’accueil
+        </Link>
+
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-zinc-700 px-5 py-3 font-semibold hover:bg-gray-50 dark:hover:bg-zinc-800 focus:outline-none focus:ring-4 focus:ring-accent/30"
+          aria-label="Revenir à la page précédente"
+        >
+          ⟲ Page précédente
+        </button>
+      </div>
+
       {/* Liens utiles */}
-      <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 gap-3">
+      <div
+        className="mt-10 grid grid-cols-2 sm:grid-cols-3 gap-3"
+        role="navigation"
+        aria-label="Liens rapides"
+      >
         {popularLinks.map((l) => (
           <Link
             key={l.href}
@@ -50,7 +97,7 @@ export default function NotFound() {
         ))}
       </div>
 
-      {/* Action secondaire : signaler un lien brisé (mailto simple) */}
+      {/* Action secondaire : signaler un lien brisé */}
       <div className="mt-8">
         <a
           href={`mailto:support@techplay.example.com?subject=Lien brisé&body=URL introuvable : ${encodeURIComponent(
@@ -61,6 +108,6 @@ export default function NotFound() {
           Signaler ce lien brisé
         </a>
       </div>
-    </section>
+    </main>
   );
 }
