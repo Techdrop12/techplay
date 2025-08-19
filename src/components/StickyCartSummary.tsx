@@ -25,7 +25,7 @@ type Props = {
  * - Progress “livraison offerte” (env NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD ou prop)
  * - a11y + aria-live
  * - Tracking GA4 + logEvent custom
- * - ✅ Robuste: ne casse pas si next-intl Provider est absent (prerender 404)
+ * - ✅ Robuste: ne monte pas sur 404 et ne dépend pas de next-intl/cart provider sur ces pages
  */
 export default function StickyCartSummary({
   locale = 'fr',
@@ -34,9 +34,13 @@ export default function StickyCartSummary({
   freeShippingThreshold,
   className,
 }: Props) {
-  // ⚠️ next-intl peut ne pas être initialisé (ex: _not-found en prerender).
-  // On tente le hook; s’il jette, on met un stub qui jette aussi,
-  // et notre helper `tx()` retournera le fallback.
+  const pathname = usePathname() || ''
+
+  // ⛔️ Court-circuit ultra-tôt : ne rien monter sur les routes exclues (évite le crash du provider)
+  const isExcluded = excludePaths.some((p) => pathname.includes(p))
+  if (isExcluded) return null
+
+  // i18n (robuste si provider absent ailleurs, mais ici on a déjà filtré les routes à risque)
   let t: any
   try {
     t = useTranslations('cart')
@@ -45,8 +49,6 @@ export default function StickyCartSummary({
       throw new Error('next-intl provider missing')
     }) as any
   }
-
-  // helper i18n avec fallback (PAS d’exception si pas de provider)
   const tx = (key: string, fallback: string, values?: Record<string, any>) => {
     try {
       return values ? t(key as any, values as any) : (t(key as any) as any)
@@ -55,7 +57,7 @@ export default function StickyCartSummary({
     }
   }
 
-  const pathname = usePathname() || ''
+  // ✅ On peut maintenant utiliser le panier en toute sécurité
   const { cart } = useCart()
   const [mounted, setMounted] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
@@ -96,11 +98,9 @@ export default function StickyCartSummary({
   const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal)
   const progress = Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD) * 100))
 
-  // Affichage uniquement si items + path autorisé
-  const visible = useMemo(() => {
-    if (!mounted || !count) return false
-    return !excludePaths.some((p) => pathname.includes(p))
-  }, [mounted, count, pathname, excludePaths])
+  // Affichage uniquement si items
+  const visible = mounted && count > 0
+  const goto = cartHref || '/commande'
 
   // Tracking à l’apparition
   const trackedRef = useRef(false)
@@ -116,7 +116,6 @@ export default function StickyCartSummary({
     }
   }, [visible, count])
 
-  const goto = cartHref || '/commande'
   const onCta = (label: string) => {
     event({ action: 'sticky_cart_click', category: 'engagement', label, value: subtotal })
     logEvent?.('sticky_cart_click', {
