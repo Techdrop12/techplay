@@ -1,15 +1,17 @@
 'use client'
 
+import { motion } from 'framer-motion'
 import type { Product } from '@/types/product'
 import ProductCard from '@/components/ProductCard'
-import { motion } from 'framer-motion'
 
-interface Props {
+interface BestProductsProps {
   products: Product[]
 }
 
-export default function BestProducts({ products }: Props) {
-  if (!products.length) {
+export default function BestProducts({ products }: BestProductsProps) {
+  const isEmpty = !products || products.length === 0
+
+  if (isEmpty) {
     return (
       <div
         className="max-w-6xl mx-auto px-4 py-10 text-center text-gray-500 dark:text-gray-400"
@@ -29,16 +31,17 @@ export default function BestProducts({ products }: Props) {
     >
       <h2
         id="best-products-heading"
-        className="text-2xl font-bold mb-6 text-center text-brand dark:text-brand-light"
+        className="text-3xl sm:text-4xl font-extrabold mb-8 text-center text-brand dark:text-brand-light animate-fadeIn"
       >
-        Nos Meilleures Ventes
+        ⭐ Nos Meilleures Ventes
       </h2>
 
       <motion.ul
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-        className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6"
         role="list"
       >
         {products.map((product) =>
@@ -47,7 +50,7 @@ export default function BestProducts({ products }: Props) {
               <ProductCard
                 product={{
                   ...product,
-                  title: product.title ?? 'Produit',
+                  title: product.title ?? 'Produit sans titre',
                   image: product.image ?? '/placeholder.png',
                 }}
               />

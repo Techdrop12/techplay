@@ -23,26 +23,34 @@ export default function BannerPromo({
   const [visible, setVisible] = useState(true)
 
   useEffect(() => {
-    const dismissed = sessionStorage.getItem(dismissKey)
-    if (dismissed) setVisible(false)
+    try {
+      if (sessionStorage.getItem(dismissKey)) {
+        setVisible(false)
+      }
+    } catch (error) {
+      console.warn('SessionStorage inaccessible :', error)
+    }
   }, [dismissKey])
 
   useEffect(() => {
-    if (autoHideAfterMs) {
-      const timer = setTimeout(() => setVisible(false), autoHideAfterMs)
-      return () => clearTimeout(timer)
-    }
+    if (!autoHideAfterMs) return
+    const timer = setTimeout(() => setVisible(false), autoHideAfterMs)
+    return () => clearTimeout(timer)
   }, [autoHideAfterMs])
 
   const handleClose = () => {
-    sessionStorage.setItem(dismissKey, '1')
+    try {
+      sessionStorage.setItem(dismissKey, '1')
+    } catch (error) {
+      console.warn('Impossible d’enregistrer le dismiss :', error)
+    }
     setVisible(false)
   }
 
   if (!visible) return null
 
   const variantStyles: Record<string, string> = {
-    brand: 'bg-brand text-white dark:bg-zinc-900',
+    brand: 'bg-brand text-white dark:bg-zinc-900 dark:text-white',
     yellow: 'bg-yellow-100 text-yellow-800',
     gray: 'bg-gray-200 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
   }
@@ -50,17 +58,19 @@ export default function BannerPromo({
   return (
     <div
       className={cn(
-        'w-full px-4 py-2 text-sm text-center flex justify-center items-center gap-2 transition-all duration-300',
+        'w-full px-4 py-2 text-sm text-center flex justify-center items-center gap-2 transition-all duration-300 motion-safe:animate-fadeInDown z-50',
         variantStyles[variant],
         className
       )}
       role="alert"
+      aria-live="polite"
     >
-      <span>{message}</span>
+      <span className="truncate">{message}</span>
+
       {showCloseButton && (
         <button
           onClick={handleClose}
-          className="underline text-xs hover:opacity-75 transition"
+          className="underline text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent hover:opacity-75 transition"
           aria-label="Fermer la bannière promotionnelle"
         >
           Fermer

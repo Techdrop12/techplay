@@ -5,24 +5,36 @@ export interface Product {
   price: number
   oldPrice?: number
   image?: string
+  images?: string[]          // galerie optionnelle
   rating?: number
-  isNew?: boolean         // Badge "Nouveau"
-  isBestSeller?: boolean  // Badge "Best Seller"
+  isNew?: boolean
+  isBestSeller?: boolean
   category?: string
   description?: string
   tags?: string[]
-  // Ajoute d’autres propriétés nécessaires ici
+  brand?: string
+  sku?: string
+  stock?: number
+}
+
+// Pour le panier (réutilisé partout)
+export type CartItem = {
+  _id: string
+  slug: string
+  title?: string
+  price: number
+  image?: string
+  quantity: number
 }
 
 export interface Pack {
-  _id: string                 // Ajouté pour correspondre au code
+  _id: string
   slug: string
   title: string
   description: string
   price: number
-  oldPrice?: number           // Optionnel, si utilisé dans PackDetails etc.
-  rating?: number             // Optionnel, si utilisé dans PackDetails etc.
-  tags?: string[]             // Optionnel, si utilisé dans PackDetails etc.
+  oldPrice?: number
+  rating?: number
+  tags?: string[]
   image?: string
-  // Ajoute d’autres propriétés nécessaires ici
 }

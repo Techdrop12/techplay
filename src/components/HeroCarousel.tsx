@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import Link from 'next/link'
 
 interface Slide {
   id: number
@@ -50,6 +51,13 @@ const defaultSlides: Slide[] = [
   },
 ]
 
+const textSizes = {
+  sm: 'text-xl sm:text-2xl',
+  md: 'text-3xl sm:text-4xl',
+  lg: 'text-5xl sm:text-6xl',
+  xl: 'text-6xl sm:text-7xl',
+}
+
 export default function HeroCarousel({
   slides = defaultSlides,
   intervalMs = 7000,
@@ -60,36 +68,27 @@ export default function HeroCarousel({
 }: HeroCarouselProps) {
   const [index, setIndex] = useState(0)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
-  const isPausedRef = useRef(false)
+  const isPaused = useRef(false)
 
   const advanceSlide = useCallback(() => {
     setIndex((prev) => (prev + 1) % slides.length)
   }, [slides.length])
 
   useEffect(() => {
-    if (intervalRef.current) clearInterval(intervalRef.current)
-    if (!isPausedRef.current) {
+    if (!isPaused.current) {
       intervalRef.current = setInterval(advanceSlide, intervalMs)
     }
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current)
-    }
-  }, [advanceSlide, intervalMs, index])
+    return () => clearInterval(intervalRef.current as NodeJS.Timeout)
+  }, [advanceSlide, intervalMs])
 
   const pause = () => {
-    isPausedRef.current = true
-    if (intervalRef.current) clearInterval(intervalRef.current)
-  }
-  const resume = () => {
-    isPausedRef.current = false
-    intervalRef.current = setInterval(advanceSlide, intervalMs)
+    isPaused.current = true
+    clearInterval(intervalRef.current as NodeJS.Timeout)
   }
 
-  const textSizes = {
-    sm: 'text-xl sm:text-2xl',
-    md: 'text-3xl sm:text-4xl',
-    lg: 'text-5xl sm:text-6xl',
-    xl: 'text-6xl sm:text-7xl',
+  const resume = () => {
+    isPaused.current = false
+    intervalRef.current = setInterval(advanceSlide, intervalMs)
   }
 
   return (
@@ -100,89 +99,98 @@ export default function HeroCarousel({
       )}
       aria-label="Carrousel principal TechPlay"
     >
-      <AnimatePresence initial={false} mode="wait">
-        {slides.map(
-          (slide, i) =>
-            i === index && (
-              <motion.div
-                key={slide.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 1 }}
-                className="absolute inset-0 flex flex-col justify-center items-center text-center px-6 z-10"
-                aria-hidden={i !== index}
-                onMouseEnter={pause}
-                onMouseLeave={resume}
-                onFocus={pause}
-                onBlur={resume}
-                tabIndex={-1}
-              >
-                <Image
-                  src={slide.image}
-                  alt={slide.alt}
-                  fill
-                  className="object-cover brightness-75"
-                  priority={i === 0}
-                  placeholder="blur"
-                  blurDataURL="/placeholder-blur.png"
-                />
-                {showOverlay && (
-                  <div
-                    className="absolute inset-0 flex flex-col justify-center items-center px-6 sm:px-12"
-                    style={{ backgroundColor: `rgba(0, 0, 0, ${overlayOpacity})` }}
-                  >
-                    {slide.text && (
-                      <h2
-                        className={cn(
-                          'text-white font-extrabold drop-shadow-xl mb-6 animate-fadeIn',
-                          textSizes[textSize]
-                        )}
-                      >
-                        {slide.text}
-                      </h2>
-                    )}
-                    {slide.ctaLabel && slide.ctaLink && (
-                      <a
-                        href={slide.ctaLink}
-                        className="inline-block rounded-xl bg-accent px-8 py-3 text-lg font-semibold text-white shadow-lg hover:bg-accent/90 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-accent/60 transition-transform transform active:scale-95 animate-slideUp"
-                        tabIndex={0}
-                      >
-                        {slide.ctaLabel}
-                      </a>
-                    )}
-                  </div>
-                )}
-              </motion.div>
-            )
+      <AnimatePresence mode="wait">
+        {slides.map((slide, i) =>
+          i === index ? (
+            <motion.div
+              key={slide.id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.9 }}
+              className="absolute inset-0 flex items-center justify-center z-10"
+              aria-hidden={i !== index}
+              onMouseEnter={pause}
+              onMouseLeave={resume}
+              tabIndex={0}
+              aria-roledescription="diapositive"
+              aria-label={`Diapositive ${i + 1}`}
+            >
+              <Image
+                src={slide.image}
+                alt={slide.alt}
+                fill
+                className="object-cover brightness-75"
+                priority={i === 0}
+                placeholder="blur"
+                blurDataURL="/placeholder-blur.png"
+              />
+
+              {showOverlay && (
+                <div
+                  className="absolute inset-0 flex flex-col justify-center items-center text-center px-6 sm:px-12"
+                  style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity})` }}
+                >
+                  {slide.text && (
+                    <h2
+                      className={cn(
+                        'text-white font-extrabold drop-shadow-xl mb-6 animate-fadeIn',
+                        textSizes[textSize]
+                      )}
+                    >
+                      {slide.text}
+                    </h2>
+                  )}
+
+                  {slide.ctaLabel && slide.ctaLink && (
+                    <Link
+                      href={slide.ctaLink}
+                      className="inline-block rounded-xl bg-accent px-8 py-3 text-lg font-semibold text-white shadow-lg hover:bg-accent/90 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-accent/60 transition-transform transform active:scale-95 animate-slideUp"
+                    >
+                      {slide.ctaLabel}
+                    </Link>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          ) : null
         )}
       </AnimatePresence>
 
-      {/* Progress bar */}
-      <div className="absolute bottom-6 left-1/2 w-2/3 -translate-x-1/2 rounded-full bg-white/30 h-2 overflow-hidden" aria-hidden="true">
+      {/* ✅ Progress bar */}
+      <div
+        className="absolute bottom-6 left-1/2 w-2/3 -translate-x-1/2 rounded-full bg-white/30 h-2 overflow-hidden"
+        role="presentation"
+      >
         <motion.div
           className="bg-accent h-full rounded-full"
-          animate={{ width: `${((index + 1) / slides.length) * 100}%` }}
+          key={index}
+          initial={{ width: 0 }}
+          animate={{ width: '100%' }}
           transition={{ duration: intervalMs / 1000, ease: 'linear' }}
         />
       </div>
 
-      {/* Pagination bullets */}
+      {/* 🔘 Pagination bullets */}
       <nav
         className="absolute bottom-3 left-1/2 flex gap-4 -translate-x-1/2 z-20"
-        aria-label="Changer de diapositive"
+        aria-label="Navigation du carrousel"
       >
         {slides.map((_, i) => (
           <button
             key={i}
             type="button"
             className={cn(
-              'w-4 h-4 rounded-full transition-colors focus:outline-none',
+              'w-4 h-4 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-white',
               i === index ? 'bg-accent' : 'bg-accent/40 hover:bg-accent/80'
             )}
+            aria-label={`Aller à la diapositive ${i + 1}`}
             aria-current={i === index ? 'true' : undefined}
-            aria-label={`Diapositive ${i + 1}`}
-            onClick={() => setIndex(i)}
+            onClick={() => {
+              pause()
+              setIndex(i)
+              resume()
+            }}
           />
         ))}
       </nav>

@@ -8,14 +8,18 @@ import PacksSection from '@/components/PacksSection'
 import TrustBadges from '@/components/TrustBadges'
 import FAQ from '@/components/FAQ'
 import ScrollTopButton from '@/components/ui/ScrollTopButton'
+import ClientTrackingScript from '@components/ClientTrackingScript'// → tracking Google Analytics client-side
 
 export const metadata: Metadata = {
   title: 'TechPlay – Boutique high-tech & packs exclusifs',
-  description: 'Découvrez les meilleures offres et packs TechPlay, sélectionnées pour vous avec passion et innovation.',
-  keywords: 'TechPlay, high-tech, gadgets, offres, packs, dropshipping, boutique, innovation',
+  description:
+    'Découvrez les meilleures offres et packs TechPlay, sélectionnées pour vous avec passion et innovation. Casques, souris, claviers, et accessoires gaming de qualité supérieure.',
+  keywords:
+    'TechPlay, boutique high-tech, gadgets innovants, accessoires gaming, packs exclusifs, technologie, électronique, audio, clavier, souris, casque, innovation',
   openGraph: {
     title: 'TechPlay – Boutique high-tech & packs exclusifs',
-    description: 'Découvrez les meilleures offres et packs TechPlay, sélectionnées pour vous avec passion et innovation.',
+    description:
+      'Découvrez les meilleures offres et packs TechPlay, sélectionnées pour vous avec passion et innovation.',
     url: 'https://techplay.example.com',
     siteName: 'TechPlay',
     images: [
@@ -32,7 +36,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'TechPlay – Boutique high-tech & packs exclusifs',
-    description: 'Découvrez les meilleures offres et packs TechPlay, sélectionnées pour vous avec passion et innovation.',
+    description:
+      'Découvrez les meilleures offres et packs TechPlay, sélectionnées pour vous avec passion et innovation.',
     creator: '@TechPlay',
   },
 }
@@ -43,20 +48,20 @@ export default async function HomePage() {
     getRecommendedPacks(),
   ])
 
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'homepage_view')
-  }
-
   return (
     <>
+      {/* 🎯 Tracking Google Analytics côté client */}
+      <ClientTrackingScript event="homepage_view" />
+
+      {/* 🔥 Bannière de promo journalière */}
       <BannerPromo />
 
       <main
-        className="space-y-28 px-6 max-w-screen-xl mx-auto scroll-smooth"
+        className="space-y-28 px-4 sm:px-6 max-w-screen-xl mx-auto scroll-smooth"
         role="main"
         tabIndex={-1}
       >
-        {/* HERO CAROUSEL */}
+        {/* 🎥 Carrousel Hero */}
         <section
           aria-label="Carrousel des produits en vedette"
           className="motion-section"
@@ -65,41 +70,42 @@ export default async function HomePage() {
           <HeroCarousel />
         </section>
 
-        {/* MEILLEURS PRODUITS */}
+        {/* 🏆 Meilleures ventes */}
         <section
-          aria-label="Meilleurs produits"
+          aria-label="Meilleures ventes TechPlay"
           className="motion-section"
           id="best-products"
         >
           <BestProducts products={bestProducts} />
         </section>
 
-        {/* PACKS RECOMMANDÉS */}
+        {/* 🎁 Packs recommandés */}
         <section
-          aria-label="Packs recommandés"
+          aria-label="Packs TechPlay recommandés"
           className="motion-section"
           id="packs"
         >
           <PacksSection packs={recommendedPacks} />
         </section>
 
-        {/* BADGES DE CONFIANCE */}
+        {/* ✅ Badges de confiance */}
         <section
-          aria-label="Badges de confiance TechPlay"
+          aria-label="Nos garanties de confiance"
           className="motion-section"
         >
           <TrustBadges />
         </section>
 
-        {/* FAQ */}
+        {/* ❓ Foire aux questions */}
         <section
-          aria-label="Foire aux questions"
+          aria-label="Questions fréquentes de nos clients"
           className="motion-section"
         >
           <FAQ />
         </section>
       </main>
 
+      {/* ⬆️ Bouton retour haut de page */}
       <ScrollTopButton />
     </>
   )
