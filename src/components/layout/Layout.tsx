@@ -34,7 +34,7 @@ export default function Layout({
 
   return (
     <>
-      {/* ✅ Suspense globale pour couvrir tout composant client utilisant useSearchParams */}
+      {/* ✅ Barrière Suspense globale (couvre les hooks navigation côté client) */}
       <Suspense fallback={null}>
         <Header />
       </Suspense>
