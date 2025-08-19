@@ -1,59 +1,24 @@
 'use client'
 
-import {useEffect, useLayoutEffect} from 'react'
+import { ReactNode, useEffect } from 'react'
+import { CartProvider } from '@/context/cartContext'
+import { ThemeProvider } from '@/context/themeContext'
 
-type Props = { children: React.ReactNode }
-
-function applyThemeFromStorageOrSystem() {
-  const saved = typeof window !== 'undefined' ? localStorage.getItem('theme') : null
-  const prefersDark =
-    typeof window !== 'undefined' &&
-    window.matchMedia &&
-    window.matchMedia('(prefers-color-scheme: dark)').matches
-
-  const isDark = saved
-    ? saved === 'dark'
-    : prefersDark
-
-  const root = document.documentElement
-  root.classList.toggle('dark', !!isDark)
-  // hint pour les composants natifs (inputs, etc.)
-  root.style.colorScheme = isDark ? 'dark' : 'light'
-}
-
-export default function RootLayoutClient({ children }: Props) {
-  // Applique avant paint pour éviter le flash clair/sombre
-  useLayoutEffect(() => {
-    applyThemeFromStorageOrSystem()
-  }, [])
-
-  // Suit les changements du thème système si l’utilisateur n’a rien fixé
+export default function RootLayoutClient({ children }: { children: React.ReactNode }) {
+  // Optionnel : conserver ta logique de thème au premier rendu
   useEffect(() => {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
     const saved = localStorage.getItem('theme')
-    if (saved && saved !== 'system') return
-
-    const mql = window.matchMedia('(prefers-color-scheme: dark)')
-    const onChange = (e: MediaQueryListEvent | { matches: boolean }) => {
-      const root = document.documentElement
-      root.classList.toggle('dark', e.matches)
-      root.style.colorScheme = e.matches ? 'dark' : 'light'
-    }
-
-    try {
-      mql.addEventListener('change', onChange as any)
-    } catch {
-      // Safari < 14
-      mql.addListener(onChange as any)
-    }
-
-    return () => {
-      try {
-        mql.removeEventListener('change', onChange as any)
-      } catch {
-        mql.removeListener(onChange as any)
-      }
-    }
+    const isDark = saved ? saved === 'dark' : prefersDark
+    document.documentElement.classList.toggle('dark', isDark)
   }, [])
 
-  return <>{children}</>
+  return (
+    <ThemeProvider>
+      {/* ✅ Fournit le contexte panier à TOUTE l’app (Header, StickyCart, etc.) */}
+      <CartProvider>
+        {children}
+      </CartProvider>
+    </ThemeProvider>
+  )
 }

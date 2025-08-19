@@ -1,25 +1,21 @@
-// src/app/layout.tsx
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { Suspense } from 'react'
 
-import { ThemeProvider } from '@/context/themeContext'
 import Layout from '@/components/layout/Layout'
+import RootLayoutClient from '@/components/RootLayoutClient'
 
 // Clients/UX
 import StickyFreeShippingBar from '@/components/ui/StickyFreeShippingBar'
 import StickyCartSummary from '@/components/StickyCartSummary'
 import { Toaster } from 'react-hot-toast'
 
-// Analytics / Pixels (clients)
+// Analytics (client)
 import Analytics from '@/components/Analytics'
 import MetaPixel from '@/components/MetaPixel'
 import Hotjar from '@/components/Hotjar'
 import AppInstallPrompt from '@/components/AppInstallPrompt'
-
-// Option : évite le flash de mauvais thème au 1er rendu
-import RootLayoutClient from '@/components/RootLayoutClient'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -38,32 +34,13 @@ export const metadata: Metadata = {
   },
   description:
     'TechPlay, votre boutique high-tech : audio, gaming, accessoires et packs exclusifs. Qualité, rapidité, satisfaction garantie.',
-  keywords: [
-    'TechPlay',
-    'boutique high-tech',
-    'gadgets',
-    'gaming',
-    'audio',
-    'accessoires',
-    'packs',
-    'technologie',
-  ],
-  applicationName: SITE_NAME,
-  category: 'technology',
   openGraph: {
     title: 'TechPlay – Boutique high-tech innovante',
     description:
       'TechPlay, votre boutique high-tech : audio, gaming, accessoires et packs exclusifs.',
     url: SITE_URL,
     siteName: SITE_NAME,
-    images: [
-      {
-        url: '/og-image.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'TechPlay – Boutique high-tech',
-      },
-    ],
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'TechPlay – Boutique high-tech' }],
     locale: 'fr_FR',
     type: 'website',
   },
@@ -72,38 +49,9 @@ export const metadata: Metadata = {
     title: 'TechPlay – Boutique high-tech innovante',
     description:
       'TechPlay, votre boutique high-tech : audio, gaming, accessoires et packs exclusifs.',
-    creator: '@TechPlay',
     images: ['/og-image.jpg'],
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-      'max-video-preview': -1,
-    },
-  },
-  alternates: {
-    canonical: SITE_URL,
-  },
-  icons: {
-    icon: [
-      { url: '/favicon.ico' },
-      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-    ],
-    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180' }],
-  },
   manifest: '/site.webmanifest',
-  appleWebApp: {
-    capable: true,
-    title: SITE_NAME,
-    statusBarStyle: 'default',
-  },
-  formatDetection: { telephone: false, address: false, email: false },
 }
 
 export const viewport: Viewport = {
@@ -120,35 +68,32 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr" className={`${inter.variable} scroll-smooth`} suppressHydrationWarning>
       <head>
-        {/* PWA / Perf */}
+        {/* PWA / perf */}
         <link rel="manifest" href="/site.webmanifest" />
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
       </head>
 
       <body className="min-h-screen bg-white text-black antialiased dark:bg-black dark:text-white">
+        {/* ✅ Tous les providers client (Theme + Cart) sont gérés dans RootLayoutClient */}
         <RootLayoutClient>
-          <ThemeProvider>
-            {/* Analytics & Pixels sous Suspense (sécurise les hooks de navigation) */}
-            <Suspense fallback={null}>
-              <Analytics />
-              <MetaPixel />
-              <Hotjar />
-              <AppInstallPrompt />
-            </Suspense>
+          {/* Analytics & pixels sous Suspense pour éviter tout bailout pendant le prerender */}
+          <Suspense fallback={null}><Analytics /></Suspense>
+          <Suspense fallback={null}><MetaPixel /></Suspense>
+          <Suspense fallback={null}><Hotjar /></Suspense>
 
-            {/* Shell UI */}
-            <Layout>{children}</Layout>
+          {/* PWA install prompt (client) */}
+          <AppInstallPrompt />
 
-            {/* Helpers sticky, non bloquants */}
-            <Suspense fallback={null}>
-              <StickyFreeShippingBar />
-              <StickyCartSummary />
-            </Suspense>
+          {/* UI globale */}
+          <Layout>{children}</Layout>
 
-            {/* Toaster global */}
-            <Toaster position="top-right" />
-          </ThemeProvider>
+          {/* Helpers sticky */}
+          <StickyFreeShippingBar />
+          <StickyCartSummary />
+
+          {/* Toaster global */}
+          <Toaster position="top-right" />
         </RootLayoutClient>
       </body>
     </html>
