@@ -2,9 +2,9 @@
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
+import { Suspense } from 'react'
 
 import { ThemeProvider } from '@/context/themeContext'
-import { CartProvider } from '@/context/cartContext'               // ⬅️ NEW
 import Layout from '@/components/layout/Layout'
 
 // Clients/UX
@@ -12,27 +12,20 @@ import StickyFreeShippingBar from '@/components/ui/StickyFreeShippingBar'
 import StickyCartSummary from '@/components/StickyCartSummary'
 import { Toaster } from 'react-hot-toast'
 
-// Analytics (clients)
+// Analytics (client components)
 import Analytics from '@/components/Analytics'
 import MetaPixel from '@/components/MetaPixel'
 import Hotjar from '@/components/Hotjar'
 import AppInstallPrompt from '@/components/AppInstallPrompt'
 
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
-})
+const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' })
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://techplay.example.com'
 const SITE_NAME = 'TechPlay'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: {
-    default: 'TechPlay – Boutique high-tech innovante',
-    template: '%s | TechPlay',
-  },
+  title: { default: 'TechPlay – Boutique high-tech innovante', template: '%s | TechPlay' },
   description:
     'TechPlay, votre boutique high-tech : audio, gaming, accessoires et packs exclusifs. Qualité, rapidité, satisfaction garantie.',
   keywords: [
@@ -53,14 +46,7 @@ export const metadata: Metadata = {
       'TechPlay, votre boutique high-tech : audio, gaming, accessoires et packs exclusifs.',
     url: SITE_URL,
     siteName: SITE_NAME,
-    images: [
-      {
-        url: '/og-image.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'TechPlay – Boutique high-tech',
-      },
-    ],
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'TechPlay – Boutique high-tech' }],
     locale: 'fr_FR',
     type: 'website',
   },
@@ -83,9 +69,7 @@ export const metadata: Metadata = {
       'max-video-preview': -1,
     },
   },
-  alternates: {
-    canonical: SITE_URL,
-  },
+  alternates: { canonical: SITE_URL },
   icons: {
     icon: [
       { url: '/favicon.ico' },
@@ -95,16 +79,8 @@ export const metadata: Metadata = {
     apple: [{ url: '/apple-touch-icon.png', sizes: '180x180' }],
   },
   manifest: '/site.webmanifest',
-  appleWebApp: {
-    capable: true,
-    title: SITE_NAME,
-    statusBarStyle: 'default',
-  },
-  formatDetection: {
-    telephone: false,
-    address: false,
-    email: false,
-  },
+  appleWebApp: { capable: true, title: SITE_NAME, statusBarStyle: 'default' },
+  formatDetection: { telephone: false, address: false, email: false },
 }
 
 export const viewport: Viewport = {
@@ -125,32 +101,30 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="manifest" href="/site.webmanifest" />
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-        {/* (optionnel) blur placeholder souvent utilisé */}
-        <link rel="preload" as="image" href="/placeholder-blur.png" />
       </head>
 
       <body className="min-h-screen bg-white text-black antialiased dark:bg-black dark:text-white">
-        {/* Providers */}
         <ThemeProvider>
-          <CartProvider>
-            {/* Analytics & Pixels (no-ops si désactivés par env) */}
+          {/* Wrap ALL client stuff with Suspense to satisfy useSearchParams() constraint */}
+          <Suspense fallback={null}>
+            {/* Analytics & Pixels (no-ops si désactivés) */}
             <Analytics />
             <MetaPixel />
             <Hotjar />
 
-            {/* PWA install prompt (client) */}
+            {/* PWA prompt */}
             <AppInstallPrompt />
 
-            {/* UI globale */}
+            {/* Global UI */}
             <Layout>{children}</Layout>
 
-            {/* Sticky helpers (auto-masqués selon page / contenu) */}
+            {/* Sticky helpers */}
             <StickyFreeShippingBar />
             <StickyCartSummary />
 
-            {/* Toaster global pour les `toast.*` */}
+            {/* Toasts */}
             <Toaster position="top-right" />
-          </CartProvider>
+          </Suspense>
         </ThemeProvider>
       </body>
     </html>

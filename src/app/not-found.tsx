@@ -1,45 +1,51 @@
 // src/app/not-found.tsx
-import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import NotFoundClient from '@/components/NotFound'
+import Link from 'next/link'
 
-// SEO minimal & noindex pour 404
-export const metadata: Metadata = {
-  title: '404 – Page introuvable | TechPlay',
-  description:
-    "Désolé, cette page n'existe pas ou a été déplacée. Retrouvez nos catégories ou retournez à l'accueil.",
-  robots: { index: false, follow: false },
-  openGraph: {
-    title: '404 – Page introuvable | TechPlay',
-    description:
-      "Cette page n'existe pas. Recherchez un produit ou revenez à l'accueil.",
-    type: 'website',
-  },
+export const metadata = { title: 'Page introuvable – TechPlay' }
+
+function NotFoundClientSafe() {
+  return (
+    <div className="text-center py-32">
+      <h1 className="text-3xl font-bold mb-4">Page introuvable</h1>
+      <p className="mb-6">La page que vous recherchez n&apos;existe pas ou a été déplacée.</p>
+      <Link href="/" className="text-blue-600 hover:underline">Retour à l’accueil</Link>
+    </div>
+  )
 }
 
-// ✅ Empêche le prerender strict de la route /_not-found => plus de bailouts
-export const dynamic = 'force-dynamic'
-
 export default function NotFoundPage() {
-  // On rend *uniquement* le composant client sous <Suspense>,
-  // ainsi tous les hooks de navigation (useSearchParams, usePathname...) sont couverts.
   return (
-    <Suspense
-      fallback={
-        <main
-          id="main"
-          className="max-w-5xl mx-auto px-4 pt-32 pb-24 text-center"
-          role="main"
-          aria-busy="true"
-        >
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-brand dark:text-brand-light">
-            404 – Page introuvable
-          </h1>
-          <p className="mt-4 text-muted-foreground">Chargement…</p>
-        </main>
-      }
+    <main
+      id="main"
+      className="max-w-4xl mx-auto px-4 pt-32 pb-20 text-center"
+      aria-labelledby="nf-title"
+      role="main"
     >
-      <NotFoundClient />
-    </Suspense>
+      <h1
+        id="nf-title"
+        className="text-4xl sm:text-5xl font-extrabold tracking-tight text-brand dark:text-brand-light"
+      >
+        404 – Page introuvable
+      </h1>
+
+      <p className="mt-4 text-muted-foreground">
+        Désolé, cette page n’existe pas ou a été déplacée.
+      </p>
+
+      <div className="mt-8">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-3 text-white font-semibold shadow hover:bg-accent/90 focus:outline-none focus:ring-4 focus:ring-accent/50"
+          aria-label="Retour à l’accueil"
+        >
+          ← Retour à l’accueil
+        </Link>
+      </div>
+
+      <Suspense fallback={<p className="mt-10 text-sm text-gray-500">Chargement…</p>}>
+        <NotFoundClientSafe />
+      </Suspense>
+    </main>
   )
 }
