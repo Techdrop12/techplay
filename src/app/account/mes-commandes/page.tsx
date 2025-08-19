@@ -1,4 +1,7 @@
 // src/app/account/mes-commandes/page.tsx
+export const dynamic = 'force-dynamic'   // ✅ pas de SSG pour une page compte
+export const revalidate = 0              // ✅ toujours frais côté serveur
+
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import OrderList from '@/components/account/OrderList'
@@ -10,12 +13,19 @@ export const metadata: Metadata = {
 }
 
 /**
- * ⚠️ Certains composants enfants (actuels ou futurs) peuvent utiliser useSearchParams().
- * Next.js exige un <Suspense> autour du subtree de la page pour le prerender.
- * Cette page est donc systématiquement encapsulée.
+ * Page totalement encapsulée dans <Suspense> pour satisfaire Next 15
+ * lorsque des sous-composants utilisent useSearchParams().
  */
 export default function MyOrdersPage() {
-  // À brancher sur la session utilisateur
+  return (
+    <Suspense fallback={<OrdersSkeleton />}>
+      <OrdersContent />
+    </Suspense>
+  )
+}
+
+function OrdersContent() {
+  // À connecter à la session utilisateur ensuite
   const mockOrders = [{ id: '12345' }, { id: '67890' }]
 
   return (
@@ -27,10 +37,7 @@ export default function MyOrdersPage() {
       <h1 id="orders-title" className="text-2xl font-bold mb-6">
         Mes commandes
       </h1>
-
-      <Suspense fallback={<OrdersSkeleton />}>
-        <OrderList orders={mockOrders} />
-      </Suspense>
+      <OrderList orders={mockOrders} />
     </main>
   )
 }
