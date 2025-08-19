@@ -2,25 +2,36 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useRef } from 'react';
-import { usePathname, useSearchParams, useRouter } from 'next/navigation';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 
 export default function NotFound() {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const pathname = usePathname() || '/';
   const router = useRouter();
 
-  // Construit joliment l’URL tentée
   const attempted = useMemo(() => {
-    const qs = searchParams?.toString();
-    return qs ? `${pathname}?${qs}` : pathname || '/';
-  }, [pathname, searchParams]);
+    const qs = typeof window !== 'undefined' ? window.location.search : '';
+    return `${pathname}${qs || ''}`;
+  }, [pathname]);
 
   // Focus accessible sur le titre
   const h1Ref = useRef<HTMLHeadingElement | null>(null);
   useEffect(() => {
     h1Ref.current?.focus();
   }, []);
+
+  const [copied, setCopied] = useState(false);
+  const copyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        typeof window !== 'undefined' ? window.location.href : attempted
+      );
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* noop */
+    }
+  };
 
   const popularLinks = [
     { href: '/', label: 'Accueil' },
@@ -59,6 +70,17 @@ export default function NotFound() {
           {attempted}
         </code>
       </p>
+
+      <div className="mt-3">
+        <button
+          type="button"
+          onClick={copyUrl}
+          className="text-xs rounded-lg border border-gray-300 dark:border-zinc-700 px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-accent"
+          aria-live="polite"
+        >
+          {copied ? 'Copié ✓' : 'Copier l’URL'}
+        </button>
+      </div>
 
       {/* CTA principaux */}
       <div className="mt-8 flex items-center justify-center gap-3">

@@ -1,43 +1,32 @@
 // src/components/LanguageSwitcher.tsx
 'use client'
 
-import {useLocale} from 'next-intl'
-import {usePathname, useRouter, useSearchParams} from 'next/navigation'
+import { useLocale } from 'next-intl'
+import { usePathname, useRouter } from 'next/navigation'
 
 const SUPPORTED = ['fr', 'en'] as const
 type Locale = (typeof SUPPORTED)[number]
 
 function buildPathWithLocale(pathname: string, newLocale: Locale) {
-  // découpe propre, évite les doubles "///"
   const segments = pathname.split('/').filter(Boolean)
-
   if (segments.length > 0 && SUPPORTED.includes(segments[0] as Locale)) {
-    // remplace la 1ère section si c'est déjà une locale
     segments[0] = newLocale
   } else {
-    // sinon on préfixe la locale
     segments.unshift(newLocale)
   }
-
   return '/' + segments.join('/')
 }
 
 export default function LanguageSwitcher() {
-  const locale = useLocale()
+  const locale = (useLocale() as Locale) ?? 'fr'
   const pathname = usePathname() || '/'
-  const searchParams = useSearchParams()
   const router = useRouter()
 
   const changeLanguage = (newLocale: Locale) => {
     if (newLocale === locale) return
-
     const base = buildPathWithLocale(pathname, newLocale)
-
-    // on préserve la query string
-    const query = searchParams.toString()
-    const url = query ? `${base}?${query}` : base
-
-    router.replace(url)
+    const qs = typeof window !== 'undefined' ? window.location.search : ''
+    router.replace(base + (qs || ''))
   }
 
   return (
@@ -56,7 +45,7 @@ export default function LanguageSwitcher() {
               'px-2 py-1 rounded text-sm transition outline-none focus:ring-2',
               active
                 ? 'bg-blue-600 text-white cursor-default'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 hover:opacity-90 focus:ring-blue-400'
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 hover:opacity-90 focus:ring-blue-400',
             ].join(' ')}
           >
             {lang === 'fr' ? '🇫🇷 FR' : '🇬🇧 EN'}

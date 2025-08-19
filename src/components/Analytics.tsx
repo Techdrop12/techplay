@@ -1,29 +1,27 @@
+// src/components/Analytics.tsx
 'use client';
 
 import { useEffect } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import Script from 'next/script';
 import { pageview } from '@/lib/ga';
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID ?? '';
 
 export default function Analytics() {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const pathname = usePathname() || '/';
 
-  // 🔁 Pageview à chaque navigation
+  // Pageview à chaque navigation
   useEffect(() => {
-    if (!GA_ID) return;
-    const qs = searchParams?.toString();
-    const url = qs ? `${pathname}?${qs}` : pathname;
-    pageview(url);
-  }, [pathname, searchParams]);
+    if (process.env.NODE_ENV !== 'production' || !GA_ID) return;
+    const qs = typeof window !== 'undefined' ? window.location.search : '';
+    pageview(`${pathname}${qs}`);
+  }, [pathname]);
 
   if (!GA_ID) return null;
 
   return (
     <>
-      {/* Charge GA4 une fois le client hydraté */}
       <Script
         id="ga4-src"
         src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
