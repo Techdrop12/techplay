@@ -7,15 +7,21 @@ export default function ScrollTopButton() {
 
   useEffect(() => {
     const handle = () => setVisible(window.scrollY > 300)
-    window.addEventListener('scroll', handle)
+    window.addEventListener('scroll', handle, { passive: true })
     return () => window.removeEventListener('scroll', handle)
   }, [])
 
   if (!visible) return null
 
+  const handleClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+    e.preventDefault()
+    // Appelle la fonction utilitaire (options facultatives possibles)
+    scrollToTop({ behavior: 'smooth' })
+  }
+
   return (
     <button
-      onClick={scrollToTop}
+      onClick={handleClick}
       className="fixed bottom-4 right-4 bg-brand text-white px-3 py-2 rounded-full shadow-lg z-50"
       aria-label="Retour en haut"
     >

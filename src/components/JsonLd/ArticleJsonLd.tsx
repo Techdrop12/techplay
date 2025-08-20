@@ -7,18 +7,19 @@ interface ArticleJsonLdProps {
   post: BlogPost
 }
 
+// Convertit en ISO en acceptant string | number | Date | undefined
+const toISO = (v: unknown, fallbackISO?: string): string => {
+  const d = new Date(v as any)
+  return Number.isNaN(d.getTime())
+    ? (fallbackISO ?? new Date().toISOString())
+    : d.toISOString()
+}
+
 export default function ArticleJsonLd({ post }: ArticleJsonLdProps) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.techplay.fr'
 
-  const createdDate =
-    typeof post.createdAt === 'string' || post.createdAt instanceof Date
-      ? new Date(post.createdAt).toISOString()
-      : new Date().toISOString()
-
-  const modifiedDate =
-    typeof (post as any).updatedAt === 'string' || (post as any).updatedAt instanceof Date
-      ? new Date((post as any).updatedAt).toISOString()
-      : createdDate
+  const createdDate = toISO((post as any)?.createdAt)
+  const modifiedDate = toISO((post as any)?.updatedAt, createdDate)
 
   const structuredData = {
     '@context': 'https://schema.org',
@@ -27,25 +28,13 @@ export default function ArticleJsonLd({ post }: ArticleJsonLdProps) {
     description: post.description || '',
     datePublished: createdDate,
     dateModified: modifiedDate,
-    author: {
-      '@type': 'Person',
-      name: post.author || 'TechPlay',
-    },
-    image: {
-      '@type': 'ImageObject',
-      url: post.image || `${siteUrl}/placeholder.png`,
-    },
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': `${siteUrl}/blog/${post.slug}`,
-    },
+    author: { '@type': 'Person', name: post.author || 'TechPlay' },
+    image: { '@type': 'ImageObject', url: post.image || `${siteUrl}/placeholder.png` },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': `${siteUrl}/blog/${post.slug}` },
     publisher: {
       '@type': 'Organization',
       name: 'TechPlay',
-      logo: {
-        '@type': 'ImageObject',
-        url: `${siteUrl}/logo.png`,
-      },
+      logo: { '@type': 'ImageObject', url: `${siteUrl}/logo.png` },
     },
   }
 
@@ -53,9 +42,8 @@ export default function ArticleJsonLd({ post }: ArticleJsonLdProps) {
     <Head>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(structuredData),
-        }}
+        // ok: stringifié côté client
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
     </Head>
   )

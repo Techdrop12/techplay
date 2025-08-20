@@ -9,6 +9,11 @@ interface BlogJsonLdProps {
   siteUrl?: string
 }
 
+const toISO = (v: unknown): string | undefined => {
+  const d = new Date(v as any)
+  return Number.isNaN(d.getTime()) ? undefined : d.toISOString()
+}
+
 export default function BlogJsonLd({
   posts = [],
   locale = 'fr',
@@ -26,22 +31,16 @@ export default function BlogJsonLd({
         ? 'Actualités, conseils et tendances high-tech sélectionnés par l’équipe TechPlay.'
         : 'Tech news, advice, and trending topics curated by the TechPlay team.',
     blogPost: posts.map((post) => {
-      const date =
-        typeof post.createdAt === 'string'
-          ? post.createdAt
-          : post.createdAt instanceof Date
-            ? post.createdAt.toISOString()
-            : undefined
+      const published = toISO((post as any)?.createdAt)
+      const modified = toISO((post as any)?.updatedAt)
 
       return {
         '@type': 'BlogPosting',
         headline: post.title,
         url: `${siteUrl}/${locale}/blog/${post.slug}`,
-        ...(date && { datePublished: date }),
-        author: {
-          '@type': 'Person',
-          name: post.author || 'TechPlay',
-        },
+        ...(published && { datePublished: published }),
+        ...(modified && { dateModified: modified }),
+        author: { '@type': 'Person', name: post.author || 'TechPlay' },
       }
     }),
     publisher: {
@@ -59,7 +58,10 @@ export default function BlogJsonLd({
 
   return (
     <Head>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
     </Head>
   )
 }

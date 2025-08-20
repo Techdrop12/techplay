@@ -1,32 +1,50 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { sendAbandonCartReminder } from '@/lib/abandon-cart'
 import type { Product } from '@/types/product'
+
+type CartItemDTO = {
+  id: string
+  title: string
+  price: number
+  quantity: number
+  imageUrl?: string
+}
 
 interface AbandonCartTrackerProps {
   email: string
   cart: (Product & { quantity: number })[]
 }
 
-export default function AbandonCartTracker({ email, cart }: AbandonCartTrackerProps) {
-  useEffect(() => {
-    // Si pas d'email ou panier vide → ne rien faire
-    if (!email || cart.length === 0) return
+function adaptCart(items: (Product & { quantity: number })[]): CartItemDTO[] {
+  return items.map((p) => ({
+    id: String((p as any)._id ?? (p as any).id ?? p.slug ?? p.title ?? 'unknown'),
+    title: p.title ?? 'Produit',
+    price: Number((p as any).price ?? 0),
+    quantity: Number((p as any).quantity ?? 1),
+    imageUrl: (p as any).imageUrl ?? (p as any).image ?? undefined,
+  }))
+}
 
-    // ⏱️ Déclenche après 1m30 d’inactivité
+export default function AbandonCartTracker({ email, cart }: AbandonCartTrackerProps) {
+  const payload = useMemo(() => adaptCart(cart), [cart])
+
+  useEffect(() => {
+    if (!email || payload.length === 0) return
+
     const timer = setTimeout(() => {
       if (typeof window !== 'undefined') {
         try {
-          sendAbandonCartReminder(email, cart)
+          sendAbandonCartReminder(email, payload)
         } catch (error) {
           console.error('[AbandonCartTracker] Failed to send reminder:', error)
         }
       }
-    }, 90_000) // 90_000 ms = 1m30
+    }, 90_000) // 1m30
 
     return () => clearTimeout(timer)
-  }, [email, cart])
+  }, [email, payload])
 
   return null
 }

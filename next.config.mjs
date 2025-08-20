@@ -12,17 +12,8 @@ const withPwaPlugin = withPWA({
   register: true,
   skipWaiting: true,
   disable: isDev,
-
-  // Evite d’inclure des manifests internes au precache
   buildExcludes: [/middleware-manifest\.json$/],
-
-  // Fallback image
   fallbacks: { image: '/fallback.png' },
-
-  // 🚫 Couper le module Workbox "offlineGoogleAnalytics" (source d’alertes)
-  // (nom d’option selon la version : on met les 2 clés par sécurité)
-  workboxOptions: { offlineGoogleAnalytics: false },
-  workboxOpts: { offlineGoogleAnalytics: false },
 })
 
 export default withPwaPlugin({
@@ -31,7 +22,6 @@ export default withPwaPlugin({
   poweredByHeader: false,
   experimental: {
     scrollRestoration: true,
-    // (Tu peux réactiver optimizePackageImports plus tard si besoin)
     // optimizePackageImports: ['react-icons', 'lodash'],
   },
   images: {
@@ -41,10 +31,7 @@ export default withPwaPlugin({
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     unoptimized: false,
   },
-
-  // On évite de casser le build à cause de lint en prod
   eslint: { ignoreDuringBuilds: true },
-
   headers: async () => [
     {
       source: '/:path*',
@@ -62,12 +49,10 @@ export default withPwaPlugin({
       headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
     },
     {
-      // ✅ Pattern compatible Next 15
       source: '/:all*.(js|css|png|jpg|jpeg|gif|webp|svg|ico|woff|woff2)',
       headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
     },
   ],
-
   webpack: (config) => {
     config.resolve.alias['@'] = path.resolve(__dirname, 'src')
     return config

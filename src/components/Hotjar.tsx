@@ -5,13 +5,6 @@ import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Script from 'next/script'
 
-declare global {
-  interface Window {
-    hj?: (...args: any[]) => void
-    _hjSettings?: any
-  }
-}
-
 const HOTJAR_ID = Number(process.env.NEXT_PUBLIC_HOTJAR_ID ?? 0)
 const HOTJAR_SV = Number(process.env.NEXT_PUBLIC_HOTJAR_SV ?? 6) // version du script
 const ENABLE_IN_DEV = process.env.NEXT_PUBLIC_HOTJAR_IN_DEV === 'true'
@@ -19,16 +12,19 @@ const ENABLE_IN_DEV = process.env.NEXT_PUBLIC_HOTJAR_IN_DEV === 'true'
 function isEnabled() {
   if (!HOTJAR_ID) return false
   if (typeof window === 'undefined') return false
+
   const dnt =
     (navigator as any).doNotTrack === '1' ||
     (window as any).doNotTrack === '1' ||
     (navigator as any).msDoNotTrack === '1'
+
   let optedOut = false
   try {
     optedOut =
       localStorage.getItem('hotjar:disabled') === '1' ||
       localStorage.getItem('analytics:disabled') === '1'
   } catch {}
+
   if (dnt || optedOut) return false
   if (process.env.NODE_ENV !== 'production' && !ENABLE_IN_DEV) return false
   return true
@@ -41,6 +37,7 @@ export default function Hotjar() {
   useEffect(() => {
     if (!isEnabled()) return
     try {
+      // Typé via src/types/global.d.ts
       window.hj?.('stateChange', pathname)
     } catch {}
   }, [pathname])
@@ -49,7 +46,7 @@ export default function Hotjar() {
 
   return (
     <>
-      {/* Snippet officiel Hotjar (propre, idempotent, sans double init) */}
+      {/* Snippet officiel Hotjar (idempotent) */}
       <Script id="hotjar-init" strategy="afterInteractive">
         {`
           (function(h,o,t,j,a,r){
