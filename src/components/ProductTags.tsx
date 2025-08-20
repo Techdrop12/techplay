@@ -1,4 +1,3 @@
-// src/components/ProductTags.tsx
 'use client'
 
 import { motion } from 'framer-motion'
@@ -22,7 +21,7 @@ export default function ProductTags({
     soft: 'bg-gray-200 dark:bg-zinc-700 text-gray-700 dark:text-gray-200',
     solid: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100',
     ghost: 'border border-gray-300 dark:border-zinc-600 text-gray-600 dark:text-gray-300',
-  }
+  } as const
 
   const style = variants[variant] || variants.soft
 
@@ -37,8 +36,9 @@ export default function ProductTags({
     >
       {tags.map((tag, index) => (
         <motion.span
-          key={index}
+          key={`${tag}-${index}`}
           role="listitem"
+          title={tag}
           className={cn(base, style)}
           whileHover={{ scale: 1.05 }}
           transition={{ type: 'spring', stiffness: 300 }}

@@ -11,23 +11,17 @@ import React, {
 } from 'react';
 import { event as gaEvent, trackAddToCart } from '@/lib/ga';
 
-/** ----------------------- Constantes & env ----------------------- */
-const STORAGE_KEY = 'cart';              // on garde le même (migration OK)
+const STORAGE_KEY = 'cart';
 const COUPON_KEY = 'cart_coupon_v1';
 const CART_ID_KEY = 'cart_id';
 
 const MIN_QTY = 1;
 const MAX_QTY = 99;
 
-const FREE_SHIPPING_THRESHOLD = Number(
-  process.env.NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD ?? 60
-);
-const FLAT_SHIPPING_FEE = Number(
-  process.env.NEXT_PUBLIC_FLAT_SHIPPING_FEE ?? 0
-);
-const TAX_RATE = Number(process.env.NEXT_PUBLIC_TAX_RATE ?? 0); // ex: 0.2 (20%)
+const FREE_SHIPPING_THRESHOLD = Number(process.env.NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD ?? 60);
+const FLAT_SHIPPING_FEE = Number(process.env.NEXT_PUBLIC_FLAT_SHIPPING_FEE ?? 0);
+const TAX_RATE = Number(process.env.NEXT_PUBLIC_TAX_RATE ?? 0); // ex: 0.2
 
-/** ----------------------- Types ----------------------- */
 export type CartItem = {
   _id: string;
   slug: string;
@@ -35,7 +29,7 @@ export type CartItem = {
   image: string;
   price: number;
   quantity: number;
-  sku?: string; // bonus: cohérent avec Product
+  sku?: string;
 };
 
 export type CartInput = Omit<CartItem, 'quantity'> & { quantity?: number };
@@ -47,7 +41,7 @@ export type Coupon =
 export interface CartContextValue {
   cart: CartItem[];
   cartId: string;
-  // actions
+
   addToCart: (item: CartInput) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
@@ -55,31 +49,33 @@ export interface CartContextValue {
   decrement: (id: string, step?: number) => void;
   clearCart: () => void;
   replaceCart: (items: CartItem[]) => void;
-  // coupon (optionnel)
+  /** Alias compat : setCart(items) = replaceCart(items) */
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  setCart?: (items: CartItem[]) => void;
+
   coupon?: Coupon | null;
   applyCoupon: (coupon: Coupon) => void;
   removeCoupon: () => void;
-  // sélecteurs
+
   count: number;
-  total: number; // sous-total HT/TTC selon usage (ici TTC si TAX_RATE>0)
+  total: number; // sous-total (arrondi)
   isInCart: (id: string) => boolean;
   getItemQuantity: (id: string) => number;
   getItem: (id: string) => CartItem | undefined;
   getLineTotal: (id: string) => number;
-  // livraison gratuite (UX)
+
   freeShippingThreshold: number;
   amountToFreeShipping: number;
   progressToFreeShipping: number;
-  // breakdown complet (bonus)
+
   discount: number;
   shipping: number;
   tax: number;
   grandTotal: number;
 }
 
-/** ----------------------- Utils internes ----------------------- */
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
-const round2 = (n: number) => Math.round(n * 100) / 100;
+const round2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
 
 const ensureItemShape = (it: Partial<CartItem>): CartItem => ({
   _id: String(it._id ?? ''),
@@ -97,7 +93,6 @@ function readCart(): CartItem[] {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    // migration douce : on accepte vieux formats
     const arr: unknown[] = Array.isArray(parsed) ? parsed : parsed?.items ?? [];
     return (arr as any[]).filter(Boolean).map(ensureItemShape);
   } catch {
@@ -108,12 +103,11 @@ function readCart(): CartItem[] {
 function writeCart(cart: CartItem[]) {
   if (typeof window === 'undefined') return;
   try {
-    // stocker sous forme objet (prêt pour futures versions)
     const payload = { v: 2, items: cart };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     window.dispatchEvent(new CustomEvent('cart-updated', { detail: cart }));
   } catch {
-    console.warn("Impossible d'enregistrer le panier.");
+    // silencieux
   }
 }
 
@@ -130,6 +124,7 @@ function readCoupon(): Coupon | null {
     return null;
   }
 }
+
 function writeCoupon(coupon: Coupon | null) {
   if (typeof window === 'undefined') return;
   try {
@@ -152,12 +147,10 @@ function getOrCreateCartId(): string {
   }
 }
 
-/** ----------------------- Provider ----------------------- */
 const CartContext = createContext<CartContextValue | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  // lire le panier dès le 1er render client pour limiter le "flash"
-  const [cart, setCart] = useState<CartItem[]>(
+  const [cart, _setCart] = useState<CartItem[]>(
     () => (typeof window !== 'undefined' ? readCart() : [])
   );
   const [coupon, setCoupon] = useState<Coupon | null>(
@@ -166,37 +159,49 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cartId, setCartId] = useState<string>('anon');
 
   const hydrated = useRef(false);
-  const writeTimer = useRef<number | null>(null);
+
+  type Timer = ReturnType<typeof setTimeout>;
+  const writeTimer = useRef<Timer | null>(null);
 
   useEffect(() => {
-    // cartId au mount
     setCartId(getOrCreateCartId());
     hydrated.current = true;
+    return () => {
+      if (writeTimer.current) clearTimeout(writeTimer.current);
+    };
   }, []);
 
-  // Persistance (débouonçage léger pour éviter d'écrire à chaque frapppe)
+  // Persistance (idle si possible sinon debounce)
   useEffect(() => {
     if (!hydrated.current) return;
-    if (writeTimer.current) window.clearTimeout(writeTimer.current);
-    writeTimer.current = window.setTimeout(() => writeCart(cart), 80);
+
+    const save = () => writeCart(cart);
+
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(save, { timeout: 120 });
+    } else {
+      if (writeTimer.current) clearTimeout(writeTimer.current);
+      writeTimer.current = setTimeout(save, 80);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cart]);
 
+  // Persistance coupon
   useEffect(() => {
     if (!hydrated.current) return;
     writeCoupon(coupon);
   }, [coupon]);
 
-  // Synchronisation multi-onglets
+  // Sync multi-onglets
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY) setCart(readCart());
+      if (e.key === STORAGE_KEY) _setCart(readCart());
       if (e.key === COUPON_KEY) setCoupon(readCoupon());
       if (e.key === CART_ID_KEY && e.newValue) setCartId(e.newValue);
     };
     const onCustom = (e: Event) => {
       const detail = (e as CustomEvent<CartItem[]>).detail;
-      if (detail) setCart(detail.map(ensureItemShape));
+      if (detail) _setCart(detail.map(ensureItemShape));
     };
     window.addEventListener('storage', onStorage);
     window.addEventListener('cart-updated', onCustom as EventListener);
@@ -206,7 +211,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  /** ----------------------- Sélecteurs ----------------------- */
+  /* ============ Sélecteurs ============ */
   const count = useMemo(
     () => cart.reduce((s, it) => s + (it.quantity || 0), 0),
     [cart]
@@ -217,9 +222,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [cart]
   );
 
+  // ✅ Percent "10" (10%) ou "0.10" → normalisé en taux 0..1
   const discount = useMemo(() => {
     if (!coupon) return 0;
-    if (coupon.type === 'percent') return round2(subtotal * Math.max(0, Math.min(1, coupon.value)));
+    if (coupon.type === 'percent') {
+      const rateRaw = coupon.value;
+      const rate = clamp(rateRaw > 1 ? rateRaw / 100 : rateRaw, 0, 1);
+      return round2(subtotal * rate);
+    }
     return round2(Math.max(0, Math.min(subtotal, coupon.value)));
   }, [coupon, subtotal]);
 
@@ -233,8 +243,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const tax = useMemo(() => round2(taxableBase * Math.max(0, TAX_RATE)), [taxableBase]);
   const grandTotal = useMemo(() => round2(taxableBase + tax + shipping), [taxableBase, tax, shipping]);
 
-  // Pour compat API existante : "total" = sous-total (arrondi)
-  const total = useMemo(() => round2(subtotal), [subtotal]);
+  // compat : "total" = sous-total
+  const total = subtotal;
 
   const amountToFreeShipping = useMemo(() => {
     if (FREE_SHIPPING_THRESHOLD <= 0) return 0;
@@ -254,11 +264,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return it ? round2(it.price * it.quantity) : 0;
   };
 
-  /** ----------------------- Actions ----------------------- */
+  /* ============ Actions ============ */
   const addToCart = (input: CartInput) => {
     const item = ensureItemShape({ ...input, quantity: input.quantity ?? 1 });
 
-    setCart((curr) => {
+    _setCart((curr) => {
       const idx = curr.findIndex((it) => it._id === item._id);
       if (idx >= 0) {
         const next = [...curr];
@@ -271,7 +281,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return [...curr, item];
     });
 
-    // Tracking
+    // Tracking (best-effort)
     try {
       gaEvent?.({
         action: 'add_to_cart',
@@ -284,20 +294,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       trackAddToCart?.({
         currency: 'EUR',
         value: round2(item.price * item.quantity),
-        items: [
-          {
-            item_id: item._id,
-            item_name: item.title,
-            price: item.price,
-            quantity: item.quantity,
-          },
-        ],
+        items: [{ item_id: item._id, item_name: item.title, price: item.price, quantity: item.quantity }],
       });
     } catch {}
   };
 
   const removeFromCart = (id: string) => {
-    setCart((curr) => curr.filter((it) => it._id !== id));
+    _setCart((curr) => curr.filter((it) => it._id !== id));
     try {
       gaEvent?.({ action: 'remove_from_cart', category: 'ecommerce', label: id, value: 0 });
     } catch {}
@@ -306,14 +309,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const updateQuantity = (id: string, quantity: number) => {
     if (!Number.isFinite(quantity)) return;
     const q = clamp(Math.trunc(quantity), MIN_QTY, MAX_QTY);
-    setCart((curr) => curr.map((it) => (it._id === id ? { ...it, quantity: q } : it)));
+    _setCart((curr) => curr.map((it) => (it._id === id ? { ...it, quantity: q } : it)));
     try {
       gaEvent?.({ action: 'update_cart_quantity', category: 'ecommerce', label: id, value: q });
     } catch {}
   };
 
   const increment = (id: string, step: number = 1) => {
-    setCart((curr) =>
+    _setCart((curr) =>
       curr.map((it) =>
         it._id === id ? { ...it, quantity: clamp(it.quantity + step, MIN_QTY, MAX_QTY) } : it
       )
@@ -321,24 +324,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const decrement = (id: string, step: number = 1) => {
-    setCart((curr) =>
+    _setCart((curr) =>
       curr.map((it) =>
         it._id === id ? { ...it, quantity: clamp(it.quantity - step, MIN_QTY, MAX_QTY) } : it
       )
-      // .filter((it) => it.quantity >= MIN_QTY) // ↩️ active si tu veux auto-supprimer à 0
     );
   };
 
   const clearCart = () => {
-    setCart([]);
+    _setCart([]);
     try {
       gaEvent?.({ action: 'clear_cart', category: 'ecommerce', label: 'all', value: 0 });
     } catch {}
   };
 
   const replaceCart = (items: CartItem[]) => {
-    setCart(items.map(ensureItemShape));
+    _setCart(items.map(ensureItemShape));
   };
+
+  // Alias compat éventuelle (certains modules attendent setCart)
+  const setCartAlias = (items: CartItem[]) => replaceCart(items);
 
   const applyCoupon = (c: Coupon) => setCoupon(c);
   const removeCoupon = () => setCoupon(null);
@@ -346,6 +351,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const value: CartContextValue = {
     cart,
     cartId,
+
     addToCart,
     removeFromCart,
     updateQuantity,
@@ -353,21 +359,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     decrement,
     clearCart,
     replaceCart,
-    // coupon
+    setCart: setCartAlias,
+
     coupon,
     applyCoupon,
     removeCoupon,
-    // selectors
+
     count,
     total,
     isInCart,
     getItemQuantity,
     getItem,
     getLineTotal,
+
     freeShippingThreshold: FREE_SHIPPING_THRESHOLD,
     amountToFreeShipping,
     progressToFreeShipping,
-    // breakdown
+
     discount,
     shipping,
     tax,
@@ -377,7 +385,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
-/** ----------------------- Hook ----------------------- */
 export function useCart(): CartContextValue {
   const ctx = useContext(CartContext);
   if (!ctx) throw new Error('useCart must be used inside <CartProvider />');

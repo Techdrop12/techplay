@@ -29,14 +29,31 @@ interface ProductGridProps {
   className?: string
 }
 
+/** --- Safelist Tailwind pour classes dynamiques --- */
+const COL_CLASS: Record<number, string> = {
+  1: 'grid-cols-1',
+  2: 'grid-cols-2',
+  3: 'grid-cols-3',
+  4: 'grid-cols-4',
+  5: 'grid-cols-5',
+  6: 'grid-cols-6',
+}
+const PREFIX: Record<string, string> = { base: '', sm: 'sm:', md: 'md:', lg: 'lg:', xl: 'xl:' }
+/* références littérales pour JIT (ne pas supprimer)
+ grid-cols-1 grid-cols-2 grid-cols-3 grid-cols-4 grid-cols-5 grid-cols-6
+ sm:grid-cols-1 sm:grid-cols-2 sm:grid-cols-3 sm:grid-cols-4 sm:grid-cols-5 sm:grid-cols-6
+ md:grid-cols-1 md:grid-cols-2 md:grid-cols-3 md:grid-cols-4 md:grid-cols-5 md:grid-cols-6
+ lg:grid-cols-1 lg:grid-cols-2 lg:grid-cols-3 lg:grid-cols-4 lg:grid-cols-5 lg:grid-cols-6
+ xl:grid-cols-1 xl:grid-cols-2 xl:grid-cols-3 xl:grid-cols-4 xl:grid-cols-5 xl:grid-cols-6
+*/
+
 function colsToClass(cols?: Cols) {
   const c = { base: 2, sm: 3, lg: 4, ...(cols || {}) }
   const parts: string[] = []
-  if (c.base) parts.push(`grid-cols-${c.base}`)
-  if (c.sm) parts.push(`sm:grid-cols-${c.sm}`)
-  if (c.md) parts.push(`md:grid-cols-${c.md}`)
-  if (c.lg) parts.push(`lg:grid-cols-${c.lg}`)
-  if (c.xl) parts.push(`xl:grid-cols-${c.xl}`)
+  ;(['base', 'sm', 'md', 'lg', 'xl'] as const).forEach((bp) => {
+    const n = (c as any)[bp] as number | undefined
+    if (n && COL_CLASS[n]) parts.push(`${PREFIX[bp]}${COL_CLASS[n]}`)
+  })
   return parts.join(' ')
 }
 
@@ -71,7 +88,7 @@ export default function ProductGrid({
         try {
           onLoadMore()
         } finally {
-          // on laisse une petite fenêtre pour éviter spam IO (ou on attendra isLoading=false)
+          // petite fenêtre pour éviter spam IO
           setTimeout(() => {
             loadingGateRef.current = false
           }, 500)
@@ -109,12 +126,7 @@ export default function ProductGrid({
   return (
     <>
       {/* Région live pour lecteurs d’écran */}
-      <p
-        ref={statusRef}
-        className="sr-only"
-        role="status"
-        aria-live="polite"
-      >
+      <p ref={statusRef} className="sr-only" role="status" aria-live="polite">
         {countMsg}
       </p>
 
@@ -128,15 +140,14 @@ export default function ProductGrid({
           role="list"
         >
           {/* Produits */}
-          {products.map((product) => (
-            <motion.div
-              key={product._id}
-              layout={!prefersReducedMotion}
-              role="listitem"
-            >
-              <ProductCard product={product} showWishlistIcon={showWishlistIcon} />
-            </motion.div>
-          ))}
+          {products.map((product) => {
+            const key = product._id || (product as any).slug || product.title
+            return (
+              <motion.div key={key} layout={!prefersReducedMotion} role="listitem">
+                <ProductCard product={product} showWishlistIcon={showWishlistIcon} />
+              </motion.div>
+            )
+          })}
 
           {/* Squelettes pendant chargement */}
           {isLoading &&

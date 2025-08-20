@@ -7,26 +7,27 @@ import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useCart } from '@/context/cartContext';
 import { formatPrice, cn } from '@/lib/utils';
-import { event, logEvent } from '@/lib/ga';
+import { event } from '@/lib/ga';
+import { logEvent as devLogEvent } from '@/lib/logEvent';
 import { useTranslations } from 'next-intl';
 
 type Props = {
   locale?: string;
-  cartHref?: string;        // ex: '/cart' ou '/panier'
-  checkoutHref?: string;    // ex: '/commande'
+  cartHref?: string;             // ex: '/panier'
+  checkoutHref?: string;         // ex: '/commande'
   excludePaths?: string[];
-  freeShippingThreshold?: number; // si non fourni, on prend le contexte/env
+  freeShippingThreshold?: number;
   className?: string;
 };
 
 /**
  * StickyCartSummary — résumé panier mobile
- * - Mobile only (md:hidden), safe-area iOS, blur, spring anim
+ * - Mobile only (md:hidden), safe-area iOS, blur + fallback bg, spring anim
  * - Masqué sur /checkout, /commande, /cart, /panier, /404, /_not-found (configurable)
  * - État plié/déplié persistant (localStorage)
  * - Utilise les totaux du CartContext (remise, TVA, livraison, total)
  * - a11y + aria-live
- * - Tracking GA4 + logEvent custom
+ * - GA4 + log custom
  */
 export default function StickyCartSummary({
   locale = 'fr',
@@ -43,13 +44,12 @@ export default function StickyCartSummary({
   const isExcluded = excludePaths.some((p) => pathname.includes(p));
   if (isExcluded) return null;
 
-  // i18n (fallback safe si provider indisponible)
+  // i18n (fallback si provider indisponible)
   let t: any;
   try {
     t = useTranslations('cart');
   } catch {
-    t = ((key: string, _v?: Record<string, any>) => {
-      // fallback minimal FR
+    t = ((key: string, values?: Record<string, any>) => {
       const dict: Record<string, string> = {
         mobile_summary: 'Résumé de votre panier',
         show: 'Afficher',
@@ -70,14 +70,16 @@ export default function StickyCartSummary({
         vat: 'TVA (est.)',
         shipping: 'Livraison',
       };
-      return dict[key] ?? key;
+      return (dict[key] ?? key).replace(/\{(\w+)\}/g, (_, k) => String(values?.[k] ?? ''));
     }) as any;
   }
   const tx = (key: string, fallback: string, values?: Record<string, any>) => {
     try {
-      return values ? t(key as any, values as any) : (t(key as any) as any);
+      return values ? t(key, values) : t(key);
     } catch {
-      return fallback;
+      return values
+        ? fallback.replace(/\{(\w+)\}/g, (_, k) => String(values?.[k] ?? ''))
+        : fallback;
     }
   };
 
@@ -104,14 +106,33 @@ export default function StickyCartSummary({
   }, [freeShippingThreshold, ctxThreshold]);
 
   // Compat si certaines valeurs de contexte sont absentes
-  const subtotal = Number.isFinite(total) ? total : (cart ?? []).reduce((s, it: any) => s + (it?.price || 0) * (it?.quantity || 1), 0);
-  const remaining = Number.isFinite(amountToFreeShipping)
-    ? amountToFreeShipping
-    : Math.max(0, FREE_SHIP - subtotal);
-  const progress = Number.isFinite(progressToFreeShipping)
-    ? progressToFreeShipping
-    : Math.min(100, Math.round((subtotal / FREE_SHIP) * 100));
-  const payable = Number.isFinite(grandTotal) ? grandTotal : subtotal + (Number.isFinite(shipping) ? shipping : 0) + (Number.isFinite(tax) ? tax : 0);
+  const subtotal = useMemo(
+    () =>
+      Number.isFinite(total)
+        ? total
+        : (cart ?? []).reduce((s, it: any) => s + (Number(it?.price) || 0) * Math.max(1, Number(it?.quantity || 1)), 0),
+    [total, cart]
+  );
+
+  const remaining = useMemo(
+    () => (Number.isFinite(amountToFreeShipping) ? amountToFreeShipping : Math.max(0, FREE_SHIP - subtotal)),
+    [amountToFreeShipping, FREE_SHIP, subtotal]
+  );
+
+  const progress = useMemo(
+    () =>
+      Number.isFinite(progressToFreeShipping)
+        ? progressToFreeShipping
+        : Math.min(100, Math.round((subtotal / FREE_SHIP) * 100)),
+    [progressToFreeShipping, subtotal, FREE_SHIP]
+  );
+
+  const payable = useMemo(() => {
+    if (Number.isFinite(grandTotal)) return grandTotal;
+    const s = Number.isFinite(shipping) ? shipping : 0;
+    const t = Number.isFinite(tax) ? tax : 0;
+    return subtotal + s + t;
+  }, [grandTotal, shipping, tax, subtotal]);
 
   // Mémorisation UI (plié/déplié)
   const [mounted, setMounted] = useState(false);
@@ -132,8 +153,13 @@ export default function StickyCartSummary({
 
   // Affichage uniquement si items
   const visible = mounted && (count ?? 0) > 0;
-  const gotoCart = cartHref || (locale === 'fr' ? '/cart' : '/cart');
-  const gotoCheckout = checkoutHref || '/commande';
+
+  const gotoCart = useMemo(() => {
+    if (cartHref) return cartHref;
+    return String(locale).toLowerCase().startsWith('fr') ? '/panier' : '/cart';
+  }, [cartHref, locale]);
+
+  const gotoCheckout = useMemo(() => checkoutHref || '/commande', [checkoutHref]);
 
   // Tracking à l’apparition
   const trackedRef = useRef(false);
@@ -154,12 +180,7 @@ export default function StickyCartSummary({
   const onCta = (label: string) => {
     try {
       event({ action: 'sticky_cart_click', category: 'engagement', label, value: subtotal });
-      logEvent?.('sticky_cart_click', {
-        page: pathname,
-        cart_count: count,
-        total_price: subtotal,
-        label,
-      });
+      devLogEvent({ action: 'sticky_cart_click', category: 'engagement', label, value: subtotal, page: pathname, cart_count: count });
     } catch {}
   };
 
@@ -175,6 +196,8 @@ export default function StickyCartSummary({
         transition={prefersReduced ? { duration: 0.15 } : { type: 'spring', stiffness: 320, damping: 26 }}
         className={cn(
           'md:hidden fixed bottom-0 left-0 right-0 z-[60]',
+          // ✅ fallback bg en plus du backdrop (pour navigateurs sans support)
+          'bg-white/95 dark:bg-zinc-900/95',
           'backdrop-blur supports-[backdrop-filter]:bg-white/85 dark:supports-[backdrop-filter]:bg-zinc-900/85',
           'border-t border-gray-200 dark:border-zinc-800 shadow-[0_-6px_20px_rgba(0,0,0,0.08)]',
           'pb-[env(safe-area-inset-bottom)]',
@@ -183,6 +206,7 @@ export default function StickyCartSummary({
         role="region"
         aria-label={tx('mobile_summary', 'Résumé de votre panier', { count })}
         data-visible="true"
+        data-collapsed={collapsed ? 'true' : 'false'}
       >
         {/* Barre supérieure : toggle + total à payer */}
         <div className="flex items-center justify-between px-4 py-2">
@@ -243,6 +267,7 @@ export default function StickyCartSummary({
                       ? 'text-gray-600 dark:text-gray-300'
                       : 'text-green-600 dark:text-green-400 font-semibold'
                   )}
+                  role="status"
                   aria-live="polite"
                 >
                   {remaining > 0
@@ -256,12 +281,10 @@ export default function StickyCartSummary({
               {/* Lignes montants (rapide) */}
               <div className="px-4 pt-2 text-[13px] text-gray-700 dark:text-gray-300 space-y-1">
                 <Line label={tx('subtotal', 'Sous-total')} value={formatPrice(subtotal)} />
-                {discount > 0 && (
-                  <Line label={tx('discount', 'Remise')} value={`- ${formatPrice(discount)}`} accent />
-                )}
+                {discount > 0 && <Line label={tx('discount', 'Remise')} value={`- ${formatPrice(discount)}`} accent />}
                 <Line label={tx('vat', 'TVA (est.)')} value={tax > 0 ? formatPrice(tax) : '—'} />
                 <Line label={tx('shipping', 'Livraison')} value={shipping === 0 ? 'Offerte' : formatPrice(shipping)} />
-                <div className="border-t border-gray-300 dark:border-zinc-700 my-2" />
+                <div className="border-t border-gray-300 dark:border-zinc-700 my-2" aria-hidden="true" />
                 <Line label={tx('total', 'Total')} value={formatPrice(payable)} bold />
               </div>
 
@@ -297,11 +320,23 @@ export default function StickyCartSummary({
           )}
         </AnimatePresence>
       </motion.aside>
+      {/* Spacer pour ne pas masquer le contenu si besoin */}
+      <div className="md:hidden h-20" aria-hidden="true" />
     </AnimatePresence>
   );
 }
 
-function Line({ label, value, bold = false, accent = false }: { label: string; value: string; bold?: boolean; accent?: boolean }) {
+function Line({
+  label,
+  value,
+  bold = false,
+  accent = false,
+}: {
+  label: string;
+  value: string;
+  bold?: boolean;
+  accent?: boolean;
+}) {
   return (
     <div className="flex items-center justify-between">
       <span className={cn('text-gray-700 dark:text-gray-300', bold && 'font-semibold')}>{label}</span>

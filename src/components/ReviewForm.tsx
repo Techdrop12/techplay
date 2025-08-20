@@ -95,7 +95,7 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
 
     // Honeypot -> bot probable
     if (hp) {
-      toast.success('Merci !') // silencieux pour les bots
+      toast.success('Merci !')
       return
     }
 
@@ -285,6 +285,7 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
           id="review-text"
           value={comment}
           onChange={(e) => setComment(e.target.value.slice(0, MAX_LEN))}
+          maxLength={MAX_LEN}
           placeholder={tr('placeholder', 'Partagez votre expérience…')}
           className="w-full border border-gray-300 dark:border-gray-700 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent dark:bg-zinc-900 dark:text-white"
           rows={5}

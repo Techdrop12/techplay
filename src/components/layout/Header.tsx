@@ -1,20 +1,18 @@
-// src/components/layout/Header.tsx
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import Logo from '../Logo'
 import MobileNav from './MobileNav'
 import { cn } from '@/lib/utils'
 import { useCart } from '@/hooks/useCart'
 
-// (facultatif) switcher langues si tu le réactives plus tard
-// import LanguageSwitcher from '@/components/LanguageSwitcher'
+/* ---------- Types & Const ---------- */
 
-type NavLink = { href: string; label: string }
+export type NavLink = { href: string; label: string }
 
-const LINKS: NavLink[] = [
+const DEFAULT_LINKS: NavLink[] = [
   { href: '/', label: 'Accueil' },
   { href: '/categorie/accessoires', label: 'Catégories' },
   { href: '/produit', label: 'Produits' },
@@ -26,14 +24,40 @@ const LINKS: NavLink[] = [
 
 const SCROLL_HIDE_OFFSET = 80
 
-export default function Header() {
-  const pathname = usePathname()
+export interface HeaderProps {
+  /** Liens de navigation (par défaut : DEFAULT_LINKS) */
+  links?: NavLink[]
+  /** Masquer l’en-tête quand on scrolle vers le bas (respecte prefers-reduced-motion) */
+  hideOnScroll?: boolean
+  /** Fond plus transparent en haut de page, puis solide au scroll */
+  transparentAtTop?: boolean
+  /** Afficher l’input de recherche desktop */
+  showSearch?: boolean
+  /** Afficher le bouton “Offres” (promotions) */
+  showOffersCta?: boolean
+  /** URL du CTA promos (défaut: /produit?promo=1) */
+  offersHref?: string
+}
 
-  // 🛒 Récupération “safe” du panier (si le Provider n’est pas encore monté côté client)
+export default function Header({
+  links = DEFAULT_LINKS,
+  hideOnScroll = true,
+  transparentAtTop = true,
+  showSearch = true,
+  showOffersCta = true,
+  offersHref = '/produit?promo=1',
+}: HeaderProps) {
+  const pathname = usePathname()
+  const router = useRouter()
+
+  // 🛒 Compteur panier (sécurisé si Provider pas encore dispo)
   let cartCount = 0
   try {
     const { cart } = useCart()
-    cartCount = Array.isArray(cart) ? cart.reduce((t, it: any) => t + (it?.quantity || 1), 0) : 0
+    cartCount = useMemo(
+      () => (Array.isArray(cart) ? cart.reduce((t, it: any) => t + Math.max(1, Number(it?.quantity || 1)), 0) : 0),
+      [cart]
+    )
   } catch {
     cartCount = 0
   }
@@ -60,6 +84,7 @@ export default function Header() {
 
   // Hide-on-scroll + état "scrolled" (ombre/fond)
   useEffect(() => {
+    if (!hideOnScroll) return
     const onScroll = () => {
       const y = window.scrollY
       if (ticking.current) return
@@ -75,16 +100,41 @@ export default function Header() {
         ticking.current = false
       })
     }
-
     window.addEventListener('scroll', onScroll, { passive: true })
     onScroll() // état initial
     return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+  }, [hideOnScroll])
 
   const isActive = (href: string) => {
     if (!pathname) return false
     return pathname === href || pathname.startsWith(href + '/')
   }
+
+  /* ---------- Recherche (desktop) ---------- */
+  const [q, setQ] = useState('')
+  const searchRef = useRef<HTMLInputElement | null>(null)
+
+  const submitSearch = (e?: React.FormEvent) => {
+    e?.preventDefault()
+    const query = q.trim()
+    if (!query) return
+    router.push(`/recherche?q=${encodeURIComponent(query)}`)
+  }
+
+  // Raccourci ⌘K / Ctrl+K pour focus la recherche
+  useEffect(() => {
+    if (!showSearch) return
+    const onKey = (e: KeyboardEvent) => {
+      const isMac = navigator.platform.toUpperCase().includes('MAC')
+      const primary = isMac ? e.metaKey : e.ctrlKey
+      if (primary && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        searchRef.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [showSearch])
 
   return (
     <>
@@ -103,70 +153,100 @@ export default function Header() {
         data-scrolled={scrolled ? 'true' : 'false'}
         className={cn(
           'fixed top-0 left-0 right-0 z-50 w-full',
+          // Safe-area iOS
+          'pb-[env(safe-area-inset-top,0)]',
           // Effet verre + saturation
-          'supports-[backdrop-filter]:backdrop-blur-md backdrop-saturate-150',
+          'supports-[backdrop-filter]:backdrop-blur-xl backdrop-saturate-150',
           // Bordure/ombres évolutives
           'border-b transition-all',
           // Transitions accessibles
           'motion-safe:duration-300 motion-safe:ease-out motion-safe:transition-transform motion-reduce:transition-none',
-          scrolled
+          scrolled || !transparentAtTop
             ? 'bg-white/95 shadow-md border-gray-200 dark:bg-black/80 dark:border-gray-800'
             : 'bg-white/70 border-transparent dark:bg-black/60',
-          hidden ? '-translate-y-full' : 'translate-y-0'
+          hideOnScroll && hidden ? '-translate-y-full' : 'translate-y-0'
         )}
       >
-        <div className="mx-auto flex h-16 md:h-20 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-10">
+        <div className="mx-auto max-w-7xl h-16 md:h-20 px-4 sm:px-6 lg:px-10 flex items-center justify-between gap-3">
           {/* Logo */}
           <Link href="/" aria-label="Retour à l’accueil" className="flex shrink-0 items-center gap-3">
             <Logo className="h-8 w-auto md:h-10" />
           </Link>
 
-          {/* Navigation desktop */}
-          <nav
-            className="hidden md:flex gap-6 lg:gap-10 tracking-tight font-medium text-gray-800 dark:text-gray-100"
-            aria-label="Navigation principale"
-          >
-            {LINKS.map(({ href, label }) => {
-              const active = isActive(href)
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  prefetch={false}
-                  aria-current={active ? 'page' : undefined}
-                  className={cn(
-                    'relative transition-colors duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm',
-                    active
-                      ? 'text-accent font-semibold after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-accent'
-                      : 'hover:text-accent focus-visible:text-accent'
-                  )}
+          {/* Navigation + Recherche (desktop) */}
+          <div className="hidden md:flex items-center gap-6 lg:gap-8">
+            <nav
+              className="flex gap-6 lg:gap-8 tracking-tight font-medium text-gray-800 dark:text-gray-100"
+              aria-label="Navigation principale"
+              role="navigation"
+            >
+              {links.map(({ href, label }) => {
+                const active = isActive(href)
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    prefetch={false}
+                    aria-current={active ? 'page' : undefined}
+                    className={cn(
+                      'relative transition-colors duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm',
+                      active
+                        ? 'text-accent font-semibold after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-accent'
+                        : 'hover:text-accent focus-visible:text-accent'
+                    )}
+                  >
+                    {label}
+                    {!active && (
+                      <span
+                        className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-accent transition-all duration-300 group-hover:w-full"
+                        aria-hidden="true"
+                      />
+                    )}
+                  </Link>
+                )
+              })}
+            </nav>
+
+            {/* Recherche rapide */}
+            {showSearch && (
+              <form
+                onSubmit={submitSearch}
+                role="search"
+                aria-label="Rechercher des produits"
+                className="hidden lg:flex items-center gap-2 rounded-xl border border-gray-300/80 dark:border-zinc-700/70 bg-white/80 dark:bg-zinc-900/70 px-3 py-1.5 shadow-sm focus-within:ring-2 focus-within:ring-accent"
+              >
+                <span aria-hidden className="text-lg">🔎</span>
+                <input
+                  ref={searchRef}
+                  type="search"
+                  placeholder="Rechercher… (⌘/Ctrl K)"
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  className="w-48 bg-transparent text-sm outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                />
+                <button
+                  type="submit"
+                  className="rounded-lg px-2 py-1 text-xs font-semibold bg-accent text-white hover:bg-accent/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+                  aria-label="Lancer la recherche"
                 >
-                  {label}
-                  {!active && (
-                    <span
-                      className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-accent transition-all duration-300 group-hover:w-full"
-                      aria-hidden="true"
-                    />
-                  )}
-                </Link>
-              )
-            })}
-          </nav>
+                  OK
+                </button>
+              </form>
+            )}
+          </div>
 
           {/* Actions droites (desktop) */}
           <div className="hidden md:flex items-center gap-3">
-            {/* Bouton promo (glow) */}
-            <Link
-              href="/promo"
-              prefetch={false}
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 px-5 py-2 font-semibold text-white shadow-md transition-all hover:shadow-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40"
-              aria-label="Voir la promotion du jour"
-            >
-              🎁 <span className="hidden sm:inline">Promo du jour</span>
-            </Link>
-
-            {/* Langues (à réactiver au besoin) */}
-            {/* <div className="hidden lg:block"><LanguageSwitcher /></div> */}
+            {showOffersCta && (
+              <Link
+                href={offersHref}
+                prefetch={false}
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 px-5 py-2 font-semibold text-white shadow-md transition-all hover:shadow-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40"
+                aria-label="Voir les offres en cours"
+              >
+                🎁 <span className="hidden sm:inline">Offres</span>
+              </Link>
+            )}
 
             {/* Panier */}
             <div className="relative">
@@ -174,7 +254,11 @@ export default function Header() {
                 href="/commande"
                 prefetch={false}
                 className="relative text-gray-800 hover:text-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:text-white"
-                aria-label={cartCount > 0 ? `Voir le panier (${cartCount} article${cartCount > 1 ? 's' : ''})` : 'Voir le panier'}
+                aria-label={
+                  cartCount > 0
+                    ? `Voir le panier (${cartCount} article${cartCount > 1 ? 's' : ''})`
+                    : 'Voir le panier'
+                }
               >
                 <span className="sr-only">Panier</span>
                 <span className="text-2xl" aria-hidden="true">🛒</span>
@@ -192,7 +276,7 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Menu mobile */}
+          {/* Menu / actions mobile */}
           <MobileNav />
         </div>
 

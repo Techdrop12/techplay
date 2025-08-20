@@ -35,6 +35,8 @@ interface QuantitySelectorProps {
   'aria-describedby'?: string
   /** Incrément rapide quand Shift est maintenu (par défaut x10) */
   fastMultiplier?: number
+  /** Optionnel : libellé ARIA explicite (sinon SR “Quantité X”) */
+  'aria-label'?: string
 }
 
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
@@ -57,6 +59,7 @@ export default function QuantitySelector({
   readOnly = false,
   'aria-describedby': ariaDescribedBy,
   fastMultiplier = 10,
+  'aria-label': ariaLabel,
 }: QuantitySelectorProps) {
   const prefersReducedMotion = useReducedMotion()
   const isControlled = typeof value === 'number'
@@ -149,9 +152,13 @@ export default function QuantitySelector({
       window.addEventListener('mouseup', repeatStop, once)
       window.addEventListener('touchend', repeatStop, once)
       window.addEventListener('pointercancel', repeatStop, once)
-      window.addEventListener('visibilitychange', () => {
-        if (document.visibilityState !== 'visible') repeatStop()
-      }, once)
+      window.addEventListener(
+        'visibilitychange',
+        () => {
+          if (document.visibilityState !== 'visible') repeatStop()
+        },
+        once
+      )
     }
 
   // Saisie directe
@@ -205,7 +212,7 @@ export default function QuantitySelector({
 
   const minusDisabled = disabled || readOnly || qty <= min
   const plusDisabled = disabled || readOnly || qty >= max
-  const srText = useMemo(() => `Quantité ${qty}`, [qty])
+  const srText = useMemo(() => (ariaLabel ? `${ariaLabel}: ${qty}` : `Quantité ${qty}`), [qty, ariaLabel])
 
   return (
     <div className={cn('inline-flex items-center gap-3 select-none', className)}>
@@ -253,6 +260,7 @@ export default function QuantitySelector({
         disabled={disabled}
         readOnly={readOnly}
         aria-describedby={ariaDescribedBy}
+        aria-label={ariaLabel}
         aria-live="off"
         aria-valuemin={min}
         aria-valuemax={max}

@@ -101,7 +101,7 @@ export default function CartList({
   return (
     <section aria-label="Articles du panier" className={className}>
       {/* Live region (sr-only) */}
-      <span ref={srRef} className="sr-only" role="status" aria-live="polite" />
+      <span ref={srRef} className="sr-only" role="status" aria-live="polite" aria-atomic="true" />
 
       {showControls && (
         <div className="mb-2 flex items-center justify-between">

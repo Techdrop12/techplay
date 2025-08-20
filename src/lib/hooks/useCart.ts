@@ -1,4 +1,4 @@
-// /src/lib/hooks/useCart.ts
-// Rétro-compat : ré-exporte le hook du nouveau context.
-export type { CartItem, CartInput, CartContextValue } from '@/context/cartContext'
-export { useCart } from '@/context/cartContext'
+// src/lib/hooks/useCart.ts
+// Rétro-compat : alias vers le hook du contexte + exports des types.
+export { useCart, useCartSafe, useCartSelectors } from '@/hooks/useCart'
+export type { CartItem, CartInput, CartContextValue } from '@/hooks/useCart'

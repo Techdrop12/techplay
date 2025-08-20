@@ -2,30 +2,42 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { formatPrice, cn } from '@/lib/utils';
-import type { Product } from '@/types/product';
+import { cn, formatPrice } from '@/lib/utils';
 import FreeShippingBadge from '@/components/FreeShippingBadge';
+import { useCart } from '@/hooks/useCart';
+import type { Product } from '@/types/product';
+import type { CartItem as CtxCartItem } from '@/context/cartContext';
+
+/**
+ * On autorise deux formes d'items :
+ * - ceux provenant du contexte (CartItem)
+ * - ceux dérivés d'un Product + quantity
+ */
+type InputItem = (Product & { quantity: number }) | CtxCartItem;
 
 type CouponSpec =
-  | { type: 'percent'; value: number } // ex: 10 = -10%
-  | { type: 'amount'; value: number }  // ex: 5  = -5 €
+  | { type: 'percent'; value: number } // ex: 10 => -10 %
+  | { type: 'amount'; value: number }  // ex: 5  => -5 €
   | { type: 'freeship' };              // livraison offerte
 
 interface CartSummaryProps {
-  items: (Product & { quantity: number })[];
+  /** Optionnel : si non fourni, on lit dans le CartContext */
+  items?: InputItem[];
   /** Taux de TVA (ex: 0.2 = 20%). Mettre 0 si prix TTC déjà fournis. */
   taxRate?: number;
-  /** Seuil de livraison gratuite (par défaut env ou 49€) */
+  /** Seuil de livraison gratuite */
   shippingThreshold?: number;
   /** Frais de livraison si sous le seuil */
   shippingFee?: number;
   /** Dictionnaire de codes promos disponibles (clé = code) */
   couponCodes?: Record<string, CouponSpec>;
-  /** Callback quand un coupon est appliqué */
+  /** Callbacks (facultatifs) */
   onCouponApplied?: (code: string) => void;
-  /** Callback quand un coupon est retiré */
   onCouponRemoved?: (code: string) => void;
+  /** Style */
   className?: string;
+  /** Version compacte (masque les notes/astuces) */
+  compact?: boolean;
 }
 
 const round2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
@@ -39,14 +51,20 @@ const DEFAULT_COUPONS: Record<string, CouponSpec> = {
 
 export default function CartSummary({
   items,
-  taxRate = 0.2,
+  taxRate = Number(process.env.NEXT_PUBLIC_TAX_RATE ?? 0.2),
   shippingThreshold = Number(process.env.NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD ?? 49),
   shippingFee = Number(process.env.NEXT_PUBLIC_FLAT_SHIPPING_FEE ?? 4.9),
   couponCodes = DEFAULT_COUPONS,
   onCouponApplied,
   onCouponRemoved,
   className = '',
+  compact = false,
 }: CartSummaryProps) {
+  const { cart: ctxCart } = useCart();
+
+  // Si items n'est pas fourni, on prend le panier du contexte
+  const sourceItems = (items && items.length ? items : ctxCart) as InputItem[];
+
   const [code, setCode] = useState('');
   const [applied, setApplied] = useState('');
   const [msg, setMsg] = useState('');
@@ -62,11 +80,11 @@ export default function CartSummary({
   /** ---- Totaux ---- */
   const safeItems = useMemo(
     () =>
-      (items ?? []).map((it) => ({
-        price: Number(it.price) || 0,
-        quantity: Math.max(1, Number(it.quantity) || 1),
+      (sourceItems ?? []).map((it) => ({
+        price: Number((it as any).price) || 0,
+        quantity: Math.max(1, Number((it as any).quantity) || 1),
       })),
-    [items]
+    [sourceItems]
   );
 
   const itemsCount = useMemo(
@@ -143,13 +161,13 @@ export default function CartSummary({
       aria-labelledby="cart-summary-title"
     >
       {/* Live region pour lecteurs d’écran */}
-      <p ref={srRef} className="sr-only" role="status" aria-live="polite" />
+      <p ref={srRef} className="sr-only" role="status" aria-live="polite" aria-atomic="true" />
 
       <h2 id="cart-summary-title" className="text-xl font-bold text-gray-900 dark:text-white">
         🧾 Résumé de la commande
       </h2>
 
-      {/* Progression livraison gratuite */}
+      {/* Progression vers la livraison gratuite */}
       <div className="pt-1">
         <FreeShippingBadge price={taxableBase} withProgress />
       </div>
@@ -169,12 +187,12 @@ export default function CartSummary({
         )}
         <Row label="TVA (est.)" value={taxRate > 0 ? formatPrice(tax) : '—'} />
         <Row label="Livraison" value={shipping === 0 ? 'Offerte' : formatPrice(shipping)} />
-        <hr className="border-gray-300 dark:border-zinc-700 my-3" />
+        <hr className="border-gray-300 dark:border-zinc-700 my-3" aria-hidden="true" />
         <Row label="Total" value={formatPrice(total)} bold big />
       </div>
 
       {/* Économies totales */}
-      {savings > 0 && (
+      {!compact && savings > 0 && (
         <p className="text-xs text-emerald-600 dark:text-emerald-400">
           Vous économisez {formatPrice(savings)} {applied ? `avec le code ${applied}` : ''}.
         </p>
@@ -232,14 +250,17 @@ export default function CartSummary({
       </div>
 
       {/* Note légale */}
-      <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
-        Montants estimatifs. Le calcul final des taxes et frais s’effectue au paiement.
-        Livraison offerte dès {formatPrice(shippingThreshold)} après remise.
-      </p>
+      {!compact && (
+        <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
+          Montants estimatifs. Le calcul final des taxes et frais s’effectue au paiement.
+          Livraison offerte dès {formatPrice(shippingThreshold)} après remise.
+        </p>
+      )}
     </section>
   );
 }
 
+/* ---------- Sous-composant ligne ---------- */
 function Row({
   label,
   value,

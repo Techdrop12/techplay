@@ -1,8 +1,7 @@
 'use client'
 
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
-import { cn } from '@/lib/utils'
 
 interface PricingBadgeProps {
   price: number
@@ -21,10 +20,8 @@ export default function PricingBadge({
   compact = false,
   className,
 }: PricingBadgeProps) {
-  const hasDiscount = oldPrice && oldPrice > price
-  const discount = hasDiscount
-    ? Math.round(((oldPrice - price) / oldPrice) * 100)
-    : null
+  const hasDiscount = typeof oldPrice === 'number' && oldPrice > price
+  const discount = hasDiscount ? Math.round(((oldPrice - price) / oldPrice) * 100) : null
 
   return (
     <motion.div
@@ -34,13 +31,13 @@ export default function PricingBadge({
       role="contentinfo"
       aria-label={`Prix : ${formatPrice(price)}${discount ? `, ${discount}% de réduction` : ''}`}
     >
-      <span className="font-bold text-brand text-sm sm:text-base">
+      <span className={cn('font-bold text-brand', compact ? 'text-sm' : 'text-sm sm:text-base')}>
         {formatPrice(price)}
       </span>
 
       {hasDiscount && showOldPrice && (
-        <span className="line-through text-gray-400 dark:text-gray-500 text-xs sm:text-sm">
-          {formatPrice(oldPrice)}
+        <span className={cn('line-through text-gray-400 dark:text-gray-500', compact ? 'text-xs' : 'text-xs sm:text-sm')}>
+          {formatPrice(oldPrice!)}
         </span>
       )}
 
@@ -49,7 +46,10 @@ export default function PricingBadge({
           initial={{ scale: 0.95 }}
           animate={{ scale: 1 }}
           transition={{ type: 'spring', stiffness: 300 }}
-          className="text-xs px-2 py-0.5 rounded bg-red-100 text-red-700 font-semibold dark:bg-red-900/20 dark:text-red-400"
+          className={cn(
+            'text-[11px] px-2 py-0.5 rounded font-semibold',
+            'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+          )}
         >
           -{discount}%
         </motion.span>

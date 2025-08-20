@@ -1,7 +1,7 @@
 // src/components/AddToCartButton.tsx
 'use client'
 
-import { useRef, useState, useId } from 'react'
+import { useRef, useState, useId, useCallback } from 'react'
 import { useCart } from '@/hooks/useCart'
 import type { Product } from '@/types/product'
 import Button from '@/components/Button'
@@ -55,7 +55,28 @@ export default function AddToCartButton({
       ? 'py-5 px-6 text-lg'
       : 'py-4 px-4 text-base'
 
-  const handleClick = () => {
+  const vibrate = (pattern: number | number[]) => {
+    if (!haptic || typeof window === 'undefined') return
+    try {
+      // @ts-ignore
+      if ('vibrate' in navigator) (navigator as any).vibrate?.(pattern)
+    } catch {}
+  }
+
+  const smoothScrollToSticky = () => {
+    if (!scrollToStickyOnMobile || typeof window === 'undefined' || window.innerWidth >= 768) return
+    const run = () => {
+      const el =
+        document.querySelector('aside[role="region"][data-visible="true"]') ||
+        document.querySelector('aside[role="region"]')
+      el && el.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    }
+    // @ts-ignore
+    const rif = window.requestIdleCallback || ((cb: any) => setTimeout(cb, 120))
+    rif(run)
+  }
+
+  const handleClick = useCallback(() => {
     if (loading || disabled) return
 
     // anti double-click (300ms)
@@ -99,11 +120,7 @@ export default function AddToCartButton({
       } catch {}
 
       // 3) Haptique léger (mobile)
-      if (haptic && typeof window !== 'undefined' && 'vibrate' in navigator) {
-        try {
-          navigator.vibrate?.(prefersReduced ? 10 : [8, 12, 8])
-        } catch {}
-      }
+      vibrate(prefersReduced ? 10 : [8, 12, 8])
 
       // 4) Toast de succès
       toast.success(successText, {
@@ -118,13 +135,7 @@ export default function AddToCartButton({
       setAdded(true)
 
       // 6) Scroll vers sticky cart en mobile
-      if (scrollToStickyOnMobile && typeof window !== 'undefined' && window.innerWidth < 768) {
-        const sticky =
-          document.querySelector('aside[role="region"][data-visible="true"]') ||
-          // fallback : tout aside “region” visible
-          document.querySelector('aside[role="region"]')
-        sticky && sticky.scrollIntoView({ behavior: 'smooth', block: 'end' })
-      }
+      smoothScrollToSticky()
 
       // 7) Event custom (intégrations)
       try {
@@ -138,7 +149,7 @@ export default function AddToCartButton({
       setTimeout(() => setSrMessage(''), 1800)
       setTimeout(() => setAdded(false), 1200)
     }
-  }
+  }, [addToCart, disabled, haptic, loading, prefersReduced, product, successText])
 
   return (
     <>
@@ -165,6 +176,7 @@ export default function AddToCartButton({
           disabled={loading || disabled}
           data-qty={product.quantity ?? 1}
           data-product-id={product._id}
+          data-gtm="add-to-cart"
         >
           <span id={labelId}>
             {loading ? pendingText : added ? 'Ajouté ✅' : 'Ajouter au panier'}

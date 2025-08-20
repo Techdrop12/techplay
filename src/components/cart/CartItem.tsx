@@ -25,6 +25,12 @@ const MIN_QTY = 1;
 const MAX_QTY = 99;
 const clamp = (n: number) => Math.max(MIN_QTY, Math.min(MAX_QTY, Math.trunc(n || 0)));
 
+const BLUR_SVG =
+  'data:image/svg+xml;charset=utf-8,' +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 24"><filter id="b"><feGaussianBlur stdDeviation="1.5"/></filter><rect width="32" height="24" fill="#e5e7eb"/><g filter="url(#b)"><rect width="32" height="24" fill="#f3f4f6"/></g></svg>`
+  );
+
 export default function CartItem({ item }: CartItemProps) {
   const prefersReduced = useReducedMotion();
   const { removeFromCart, increment, decrement, updateQuantity } = useCart();
@@ -40,14 +46,14 @@ export default function CartItem({ item }: CartItemProps) {
   const handleRemove = () => {
     removeFromCart(item._id);
     // logEvent('remove_from_cart', { item_id: item._id, quantity: item.quantity, price: item.price, title: item.title })
-    srRef.current && (srRef.current.textContent = `${item.title} retiré du panier`);
+    if (srRef.current) srRef.current.textContent = `${item.title} retiré du panier`;
   };
 
   const commitQty = (n: number) => {
     const q = clamp(n);
     if (q !== item.quantity) {
       updateQuantity(item._id, q);
-      srRef.current && (srRef.current.textContent = `Quantité de ${item.title} mise à ${q}`);
+      if (srRef.current) srRef.current.textContent = `Quantité de ${item.title} mise à ${q}`;
     }
     setQty(q);
   };
@@ -67,7 +73,7 @@ export default function CartItem({ item }: CartItemProps) {
       data-id={item._id}
     >
       {/* live region pour annonces (SR only) */}
-      <span ref={srRef} className="sr-only" role="status" aria-live="polite" />
+      <span ref={srRef} className="sr-only" role="status" aria-live="polite" aria-atomic="true" />
 
       <Link
         href={`/produit/${item.slug}`}
@@ -81,6 +87,10 @@ export default function CartItem({ item }: CartItemProps) {
           sizes="80px"
           className="object-cover transition-transform duration-200 group-hover:scale-105"
           priority
+          placeholder="blur"
+          blurDataURL={BLUR_SVG}
+          decoding="async"
+          draggable={false}
         />
       </Link>
 
@@ -105,6 +115,7 @@ export default function CartItem({ item }: CartItemProps) {
             disabled={item.quantity <= MIN_QTY}
             className="p-1 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 disabled:opacity-40"
             aria-label={`Diminuer la quantité de ${item.title}`}
+            title="Diminuer"
           >
             <Minus className="h-4 w-4" aria-hidden="true" />
           </button>
@@ -116,9 +127,7 @@ export default function CartItem({ item }: CartItemProps) {
             onChange={(e) => setQty(clamp(Number(e.target.value)))}
             onBlur={() => commitQty(qty)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.currentTarget.blur();
-              }
+              if (e.key === 'Enter') e.currentTarget.blur();
             }}
             aria-label={`Quantité pour ${item.title}`}
             className="w-10 text-center bg-transparent outline-none text-sm"
@@ -130,6 +139,7 @@ export default function CartItem({ item }: CartItemProps) {
             disabled={item.quantity >= MAX_QTY}
             className="p-1 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 disabled:opacity-40"
             aria-label={`Augmenter la quantité de ${item.title}`}
+            title="Augmenter"
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
           </button>

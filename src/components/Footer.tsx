@@ -29,6 +29,8 @@ interface FooterProps {
   subscribeEndpoint?: string
   /** URL canonique du site (pour JSON-LD) */
   siteUrl?: string
+  /** Indication locale/currency pour le ruban bas */
+  localeTag?: string
 }
 
 const DEFAULT_LINKS: FooterLink[] = [
@@ -42,7 +44,7 @@ const isValidEmail = (v: string) => /^\S+@\S+\.\S+$/.test(v.trim())
 // GA helper – tolérant
 const track = (action: string, data: Record<string, any> = {}) => {
   try { gaEvent?.({ action, category: 'engagement', label: data.label ?? action, value: 1 }) } catch {}
-  try { logEvent?.(action, data) } catch {}
+  try { (logEvent as any)?.(action, data) } catch {}
 }
 
 function LegalIcon({ label }: { label: string }) {
@@ -59,7 +61,8 @@ export default function Footer({
   compact = false,
   children,
   subscribeEndpoint = '/api/notifications/subscribe',
-  siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.techplay.fr',
+  siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://techplay.example.com',
+  localeTag = 'FR • EUR',
 }: FooterProps) {
   const currentYear = useMemo(() => new Date().getFullYear(), [])
   const emailId = useId()
@@ -75,9 +78,7 @@ export default function Footer({
   const onSubscribe = async (e: React.FormEvent) => {
     e.preventDefault()
     if (status === 'loading') return
-
-    // bot -> on fait rien
-    if (website) return
+    if (website) return // bot
 
     if (!isValidEmail(email)) {
       setStatus('error')
@@ -95,7 +96,6 @@ export default function Footer({
         body: JSON.stringify({ email }),
       })
       if (!res.ok) {
-        // essaie de récupérer un message d’erreur backend
         const maybe = await res.json().catch(() => null)
         throw new Error(maybe?.message || 'Erreur API')
       }
@@ -104,11 +104,10 @@ export default function Footer({
       setStatus('success')
       setMessage('Inscription confirmée. Bienvenue chez TechPlay !')
       setEmail('')
-      // toast (si Toaster présent)
       try { toast.success('Vous êtes inscrit(e) 🎉') } catch {}
     } catch (err: any) {
       setStatus('error')
-      setMessage(err?.message || "Une erreur est survenue. Réessayez dans un instant.")
+      setMessage(err?.message || 'Une erreur est survenue. Réessayez dans un instant.')
       try { toast.error('Inscription impossible pour le moment') } catch {}
     }
   }
@@ -121,12 +120,12 @@ export default function Footer({
     <footer
       className="relative border-t border-gray-200/70 dark:border-gray-800/70 overflow-hidden"
       role="contentinfo"
-      aria-label="Pied de page"
+      aria-label={`Pied de page ${companyName}`}
     >
-      {/* Background subtil */}
+      {/* Background subtil + léger blur */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_600px_at_80%_-20%,rgba(37,99,235,0.08),transparent),radial-gradient(800px_400px_at_10%_120%,rgba(16,185,129,0.06),transparent)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(1100px_540px_at_80%_-20%,rgba(37,99,235,0.08),transparent),radial-gradient(800px_360px_at_10%_120%,rgba(16,185,129,0.06),transparent)]"
       />
       <div className="absolute inset-0 backdrop-blur-[2px]" aria-hidden="true" />
 
@@ -234,7 +233,7 @@ export default function Footer({
                   <p
                     id={msgId}
                     className={status === 'error' ? 'text-xs text-red-600' : 'text-xs text-green-600'}
-                    role="status"
+                    role={status === 'error' ? 'alert' : 'status'}
                     aria-live="polite"
                   >
                     {message}
@@ -252,9 +251,9 @@ export default function Footer({
               <a
                 href="https://facebook.com/techplay"
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noopener noreferrer me"
                 aria-label="Facebook"
-                className="hover:text-accent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm"
+                className="transition-colors hover:text-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm"
                 onClick={() => onSocialClick('facebook')}
               >
                 <FaFacebookF />
@@ -262,9 +261,9 @@ export default function Footer({
               <a
                 href="https://twitter.com/techplay"
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noopener noreferrer me"
                 aria-label="Twitter"
-                className="hover:text-accent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm"
+                className="transition-colors hover:text-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm"
                 onClick={() => onSocialClick('twitter')}
               >
                 <FaTwitter />
@@ -272,9 +271,9 @@ export default function Footer({
               <a
                 href="https://instagram.com/techplay"
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noopener noreferrer me"
                 aria-label="Instagram"
-                className="hover:text-accent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm"
+                className="transition-colors hover:text-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm"
                 onClick={() => onSocialClick('instagram')}
               >
                 <FaInstagram />
@@ -298,15 +297,18 @@ export default function Footer({
               <FaLock aria-hidden="true" /> Stripe · Visa · Mastercard · PayPal
             </li>
             <li className="hidden sm:inline text-gray-400">•</li>
-            <li>FR • EUR</li>
+            <li>{localeTag}</li>
+            <li className="hidden sm:inline text-gray-400">•</li>
+            <li>
+              <a href="/sitemap.xml" className="hover:text-accent">Sitemap</a>
+            </li>
           </ul>
         </div>
       </div>
 
-      {/* JSON-LD Organization */}
+      {/* JSON-LD Organization (ok si dupliqué avec celui du layout) */}
       <script
         type="application/ld+json"
-        // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             '@context': 'https://schema.org',

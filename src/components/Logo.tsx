@@ -1,3 +1,4 @@
+// src/components/Logo.tsx
 'use client'
 
 interface LogoProps {
@@ -13,8 +14,8 @@ interface LogoProps {
 
 /**
  * Logo responsive et accessible.
- * - Utilise <picture> pour servir automatiquement la variante dark.
- * - La hauteur se contrôle au niveau du wrapper (l’icône suit avec h-full).
+ * - <picture> pour servir la variante dark automatiquement.
+ * - Hauteur contrôlée par le wrapper (l’icône suit avec h-full).
  */
 export default function Logo({
   className = 'h-10 md:h-12',
@@ -28,7 +29,7 @@ export default function Logo({
       role="img"
       aria-label={ariaLabel}
     >
-      {/* SVG → <picture> pour thème auto ; PNG fallback si vieux UA */}
+      {/* SVG → <picture> pour thème auto ; PNG fallback si SVG non supporté */}
       <picture className="block h-full">
         <source srcSet="/logo-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)" />
         <source srcSet="/logo.svg" type="image/svg+xml" media="(prefers-color-scheme: light), (prefers-color-scheme: no-preference)" />
@@ -41,6 +42,8 @@ export default function Logo({
           aria-hidden={withText ? true : undefined}
           className="h-full w-auto select-none"
           draggable={false}
+          decoding="async"
+          loading="eager"
         />
       </picture>
 

@@ -1,4 +1,3 @@
-// src/components/NotFound.tsx
 'use client'
 
 import Link from 'next/link'
@@ -12,7 +11,7 @@ export default function NotFound() {
 
   const attempted = useMemo(() => {
     const qs = searchParams?.toString()
-    return qs ? `${pathname ?? '/' }?${qs}` : (pathname ?? '/')
+    return qs ? `${pathname ?? '/'}?${qs}` : (pathname ?? '/')
   }, [pathname, searchParams])
 
   const h1Ref = useRef<HTMLHeadingElement | null>(null)
@@ -29,8 +28,8 @@ export default function NotFound() {
   ]
 
   return (
-    <section className="mt-8">
-      <h2 ref={h1Ref} tabIndex={-1} className="sr-only">
+    <section className="mt-8" aria-labelledby="nf-subtitle">
+      <h2 id="nf-subtitle" ref={h1Ref} tabIndex={-1} className="sr-only">
         Détails de la page introuvable
       </h2>
 
@@ -45,6 +44,7 @@ export default function NotFound() {
         <Link
           href="/"
           className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-3 text-white font-semibold shadow hover:bg-accent/90 focus:outline-none focus:ring-4 focus:ring-accent/50"
+          aria-label="Retour à l’accueil"
         >
           ← Retour à l’accueil
         </Link>
@@ -59,10 +59,7 @@ export default function NotFound() {
         </button>
       </div>
 
-      <nav
-        className="mt-10 grid grid-cols-2 sm:grid-cols-3 gap-3"
-        aria-label="Liens rapides"
-      >
+      <nav className="mt-10 grid grid-cols-2 sm:grid-cols-3 gap-3" aria-label="Liens rapides">
         {popularLinks.map((l) => (
           <Link
             key={l.href}

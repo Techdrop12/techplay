@@ -8,7 +8,15 @@ import type { BlogPost } from '@/types/blog'
 
 export async function getBestProducts(): Promise<ProductType[]> {
   await connectToDatabase()
-  return (await Product.find({ featured: true }).limit(8).lean()) as unknown as ProductType[]
+  // featured + tri par rating/createdAt si présents, projection légère
+  const rows = await Product.find(
+    { featured: true },
+    { _id: 1, slug: 1, title: 1, price: 1, oldPrice: 1, image: 1, rating: 1, isNew: 1, isBestSeller: 1, stock: 1 }
+  )
+    .sort({ rating: -1, createdAt: -1 })
+    .limit(8)
+    .lean()
+  return rows as unknown as ProductType[]
 }
 
 export async function getAllProducts(): Promise<ProductType[]> {
@@ -24,7 +32,13 @@ export async function getProductBySlug(slug: string): Promise<ProductType | null
 
 export async function getRecommendedPacks(): Promise<PackType[]> {
   await connectToDatabase()
-  return (await Pack.find({ recommended: true }).limit(6).lean()) as unknown as PackType[]
+  const rows = await Pack.find(
+    { recommended: true },
+    { _id: 1, slug: 1, title: 1, description: 1, price: 1, oldPrice: 1, rating: 1, image: 1 }
+  )
+    .limit(6)
+    .lean()
+  return rows as unknown as PackType[]
 }
 
 export async function getPackBySlug(slug: string): Promise<PackType | null> {
@@ -42,4 +56,11 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
   await connectToDatabase()
   const post = await Blog.findOne({ slug }).lean()
   return post ? JSON.parse(JSON.stringify(post)) : null
+}
+
+/** --- SSG helper : tous les slugs produits (Mongo) --- */
+export async function getAllProductSlugs(): Promise<string[]> {
+  await connectToDatabase()
+  const rows = await Product.find({}, { slug: 1, _id: 0 }).lean()
+  return rows.map((r: any) => r?.slug).filter(Boolean)
 }

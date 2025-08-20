@@ -2,7 +2,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo, useRef, useState, useId } from 'react'
+import { useEffect, useRef, useState, useId } from 'react'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { useCart } from '@/hooks/useCart'
@@ -17,17 +17,13 @@ const NAV: Readonly<NavItem[]> = [
   { href: '/wishlist', label: 'Wishlist' },
   { href: '/blog', label: 'Blog' },
   { href: '/contact', label: 'Contact' },
-  { href: '/promo', label: '🎁 Promo du jour' },
+  { href: '/products?promo=1', label: '🎁 Offres' },
 ]
 
-// Analytics helper (value requis par GA)
+// Analytics helper
 const track = (args: { action: string; category?: string; label?: string; value?: number; [k: string]: any }) => {
-  try {
-    gaEvent?.({ category: 'navigation', label: args.label ?? args.action, value: args.value ?? 1, ...args })
-  } catch {}
-  try {
-    logEvent?.(args.action, args)
-  } catch {}
+  try { gaEvent?.({ category: 'navigation', label: args.label ?? args.action, value: args.value ?? 1, ...args }) } catch {}
+  try { (logEvent as any)?.(args.action, args) } catch {}
 }
 
 export default function MobileNav() {
@@ -35,18 +31,15 @@ export default function MobileNav() {
   const reducedMotion = useReducedMotion()
   const dialogId = useId()
   const titleId = `${dialogId}-title`
+  const hintId = `${dialogId}-hint`
 
-  // 🛒 Récup panier “safe”
+  // ✅ Règle des hooks respectée — on appelle toujours le hook
   let cartCount = 0
   try {
     const { cart } = useCart()
-    cartCount = useMemo(
-      () => (Array.isArray(cart) ? cart.reduce((t, i) => t + (i?.quantity || 1), 0) : 0),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [JSON.stringify(cart)]
-    )
+    cartCount = Array.isArray(cart) ? cart.reduce((t, i: any) => t + (Number(i?.quantity) || 1), 0) : 0
   } catch {
-    cartCount = 0
+    cartCount = 0 // si provider non monté très tôt
   }
 
   const [open, setOpen] = useState(false)
@@ -54,7 +47,7 @@ export default function MobileNav() {
   const dialogRef = useRef<HTMLDivElement | null>(null)
   const panelRef = useRef<HTMLDivElement | null>(null)
 
-  // Scroll locking (iOS-safe) + compensation du scrollbar pour éviter le “layout shift”
+  // ===== Scroll lock (iOS-safe) =====
   const savedScrollY = useRef(0)
   const lockScroll = () => {
     savedScrollY.current = window.scrollY || document.documentElement.scrollTop
@@ -80,6 +73,22 @@ export default function MobileNav() {
     window.scrollTo(0, savedScrollY.current)
   }
 
+  // ===== Rendre le reste de la page inerte pendant l’ouverture =====
+  const setMainInert = (flag: boolean) => {
+    const main = document.getElementById('main')
+    if (!main) return
+    try { (main as any).inert = flag } catch {}
+    if (flag) {
+      main.setAttribute('aria-hidden', 'true')
+      ;(main as HTMLElement).style.pointerEvents = 'none'
+      ;(main as HTMLElement).style.userSelect = 'none'
+    } else {
+      main.removeAttribute('aria-hidden')
+      ;(main as HTMLElement).style.pointerEvents = ''
+      ;(main as HTMLElement).style.userSelect = ''
+    }
+  }
+
   const openMenu = () => {
     setOpen(true)
     track({ action: 'mobile_nav_open', label: 'hamburger' })
@@ -89,7 +98,8 @@ export default function MobileNav() {
     track({ action: 'mobile_nav_close', label: reason })
   }
 
-  // Focus trap + ESC
+  // ===== Focus trap + ESC + popstate (bouton retour) =====
+  const pushedHistory = useRef(false)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') closeMenu('escape')
@@ -100,33 +110,46 @@ export default function MobileNav() {
         if (!focusables.length) return
         const first = focusables[0]
         const last = focusables[focusables.length - 1]
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault()
-          last.focus()
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault()
-          first.focus()
-        }
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
       }
     }
+    const onPop = () => { if (open) closeMenu('popstate') }
+    const onResize = () => { if (open) lockScroll() } // recalc padding scrollbar
 
     if (open) {
       lockScroll()
+      setMainInert(true)
       window.addEventListener('keydown', onKey)
-      // Focus premier élément disponible
+      window.addEventListener('resize', onResize)
+      // bouton retour
+      try { window.history.pushState({ m: 'menu' }, '', window.location.href); pushedHistory.current = true } catch {}
+      window.addEventListener('popstate', onPop)
+
+      // Focus premier interactif
       setTimeout(() => {
         const first = dialogRef.current?.querySelector<HTMLElement>('a,button,[tabindex]:not([tabindex="-1"])')
         first?.focus()
       }, 0)
     } else {
       unlockScroll()
+      setMainInert(false)
       window.removeEventListener('keydown', onKey)
+      window.removeEventListener('resize', onResize)
+      window.removeEventListener('popstate', onPop)
+      if (pushedHistory.current) {
+        try { window.history.back() } catch {}
+        pushedHistory.current = false
+      }
       triggerRef.current?.focus()
     }
 
     return () => {
       window.removeEventListener('keydown', onKey)
+      window.removeEventListener('resize', onResize)
+      window.removeEventListener('popstate', onPop)
       unlockScroll()
+      setMainInert(false)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
@@ -137,7 +160,7 @@ export default function MobileNav() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname])
 
-  // Gestes (swipe down to close)
+  // Gestes (swipe down pour fermer)
   const startY = useRef<number | null>(null)
   const onTouchStart = (e: React.TouchEvent) => { startY.current = e.touches[0].clientY }
   const onTouchMove = (e: React.TouchEvent) => {
@@ -147,7 +170,7 @@ export default function MobileNav() {
   }
   const onTouchEnd = () => { startY.current = null }
 
-  // Variants anim
+  // Animations
   const overlayVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { duration: reducedMotion ? 0 : 0.18 } },
@@ -184,6 +207,7 @@ export default function MobileNav() {
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
+            aria-describedby={hintId}
             className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center"
             initial="hidden"
             animate="visible"
@@ -192,7 +216,7 @@ export default function MobileNav() {
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
           >
-            {/* Backdrop glassy */}
+            {/* Backdrop */}
             <motion.div
               className="absolute inset-0 bg-black/40 backdrop-blur-sm"
               variants={overlayVariants}
@@ -200,7 +224,7 @@ export default function MobileNav() {
               aria-hidden="true"
             />
 
-            {/* Sheet / panneau central */}
+            {/* Sheet */}
             <motion.div
               ref={panelRef}
               className="relative w-full sm:max-w-md sm:rounded-2xl overflow-hidden bg-white/90 dark:bg-zinc-950/90 supports-[backdrop-filter]:backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-2xl"
@@ -208,9 +232,7 @@ export default function MobileNav() {
               drag={reducedMotion ? false : 'y'}
               dragConstraints={{ top: 0, bottom: 0 }}
               dragElastic={0.04}
-              onDragEnd={(_, info) => {
-                if (info.offset.y > 80) closeMenu('drag_close')
-              }}
+              onDragEnd={(_, info) => { if (info.offset.y > 80) closeMenu('drag_close') }}
             >
               {/* Top handle + header */}
               <div className="pt-[env(safe-area-inset-top)]" />
@@ -225,12 +247,15 @@ export default function MobileNav() {
                   ✕
                 </button>
               </div>
+              <p id={hintId} className="sr-only">
+                Utilisez la touche Échap pour fermer. Glissez vers le bas pour fermer sur mobile.
+              </p>
 
-              {/* Grid de liens avec accent actif */}
+              {/* Liens */}
               <nav aria-label="Navigation mobile" className="px-5 pb-4">
                 <ul className="grid grid-cols-1 gap-2 text-lg text-gray-800 dark:text-gray-100">
                   {NAV.map(({ href, label }) => {
-                    const promo = href === '/promo'
+                    const promo = href.includes('promo=1') || href === '/promo'
                     const active = isActive(href)
                     const handleClick = () => {
                       track({ action: 'mobile_nav_link_click', label: href })
@@ -265,10 +290,7 @@ export default function MobileNav() {
                 <Link
                   href="/commande"
                   prefetch={false}
-                  onClick={() => {
-                    track({ action: 'mobile_nav_cart_click', label: 'cart', value: cartCount || 1 })
-                    closeMenu('cart')
-                  }}
+                  onClick={() => { track({ action: 'mobile_nav_cart_click', label: 'cart', value: cartCount || 1 }); closeMenu('cart') }}
                   className="relative inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-zinc-700 px-4 py-2 text-base font-semibold hover:bg-gray-50 dark:hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                   aria-label="Voir le panier"
                 >
