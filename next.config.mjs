@@ -32,48 +32,31 @@ export default withPwaPlugin({
     unoptimized: false,
   },
 
-  // (tu peux remettre false quand on aura nettoyé ESLint côté repo)
+  // On détend le lint en build prod pour éviter les fails pendant la mise au point
   eslint: { ignoreDuringBuilds: true },
 
-  headers: async () => {
-    const base = [
-      { key: 'X-DNS-Prefetch-Control', value: 'on' },
-      { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
-      { key: 'X-Content-Type-Options', value: 'nosniff' },
-      { key: 'X-Frame-Options', value: 'DENY' },
-      { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-      { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
-    ]
-
-    // Isolation stricte (désactive-la si Hotjar/MetaPixel doivent fonctionner)
-    if (process.env.NEXT_STRICT_ISOLATION === '1') {
-      base.push(
-        { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
-        { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
-      )
-    }
-
-    if (process.env.NEXT_ADD_EXPECT_CT === '1') {
-      base.push({ key: 'Expect-CT', value: 'max-age=86400, enforce, report-uri="https://techplay.fr/csp-report"' })
-    }
-
-    return [
-      // Global (toutes les routes)
-      { source: '/:path*', headers: base },
-
-      // Cache fort pour le bundle Next
-      {
-        source: '/_next/static/:any*',
-        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
-      },
-
-      // ✅ Pattern compatible Next (pas de (?:...) ni '?')
-      {
-        source: '/:all*.(js|css|png|jpg|jpeg|gif|webp|svg|ico|woff|woff2)',
-        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
-      },
-    ]
-  },
+  headers: async () => [
+    {
+      source: '/:path*',
+      headers: [
+        { key: 'X-DNS-Prefetch-Control', value: 'on' },
+        { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+        { key: 'X-Content-Type-Options', value: 'nosniff' },
+        { key: 'X-Frame-Options', value: 'DENY' },
+        { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+        { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' }
+      ],
+    },
+    {
+      source: '/_next/static/:any*',
+      headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+    },
+    {
+      // ✅ Matcher compatible Next 15 (pas de (?:...) ni de ?)
+      source: '/:all*.(js|css|png|jpg|jpeg|gif|webp|svg|ico|woff|woff2)',
+      headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+    },
+  ],
 
   webpack: (config) => {
     config.resolve.alias['@'] = path.resolve(__dirname, 'src')
