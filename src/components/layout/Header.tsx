@@ -1,3 +1,4 @@
+// src/components/layout/Header.tsx
 'use client'
 
 import Link from 'next/link'
@@ -7,6 +8,9 @@ import Logo from '../Logo'
 import MobileNav from './MobileNav'
 import { cn } from '@/lib/utils'
 import { useCart } from '@/hooks/useCart'
+
+// (facultatif) switcher langues si tu le réactives plus tard
+// import LanguageSwitcher from '@/components/LanguageSwitcher'
 
 type NavLink = { href: string; label: string }
 
@@ -24,17 +28,25 @@ const SCROLL_HIDE_OFFSET = 80
 
 export default function Header() {
   const pathname = usePathname()
-  const { cart } = useCart()
+
+  // 🛒 Récupération “safe” du panier (si le Provider n’est pas encore monté côté client)
+  let cartCount = 0
+  try {
+    const { cart } = useCart()
+    cartCount = Array.isArray(cart) ? cart.reduce((t, it: any) => t + (it?.quantity || 1), 0) : 0
+  } catch {
+    cartCount = 0
+  }
 
   const [hidden, setHidden] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
-  // Refs (évite re-render à chaque scroll)
+  // Refs pour limiter les re-renders au scroll
   const lastY = useRef(0)
   const ticking = useRef(false)
   const reducedMotion = useRef(false)
 
-  // Respecte prefers-reduced-motion (pas de hide-on-scroll si activé)
+  // Respecte prefers-reduced-motion (désactive hide-on-scroll si actif)
   useEffect(() => {
     const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)')
     reducedMotion.current = !!mq?.matches
@@ -46,22 +58,19 @@ export default function Header() {
     return () => mq?.removeEventListener?.('change', onChange)
   }, [])
 
+  // Hide-on-scroll + état "scrolled" (ombre/fond)
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY
       if (ticking.current) return
       ticking.current = true
       window.requestAnimationFrame(() => {
-        // style plus solide dès qu’on quitte le top
         setScrolled(y > 2)
-
-        // cache/affiche le header selon le sens de scroll (sauf reduced motion)
         if (!reducedMotion.current) {
           setHidden(y > lastY.current && y > SCROLL_HIDE_OFFSET)
         } else {
           setHidden(false)
         }
-
         lastY.current = y
         ticking.current = false
       })
@@ -74,12 +83,8 @@ export default function Header() {
 
   const isActive = (href: string) => {
     if (!pathname) return false
-    // Active si route exacte ou segment enfant (ex: /produit/slug)
     return pathname === href || pathname.startsWith(href + '/')
   }
-
-  const cartCount =
-    Array.isArray(cart) ? cart.reduce((t, it: any) => t + (it?.quantity || 1), 0) : 0
 
   return (
     <>
@@ -98,9 +103,11 @@ export default function Header() {
         data-scrolled={scrolled ? 'true' : 'false'}
         className={cn(
           'fixed top-0 left-0 right-0 z-50 w-full',
-          'border-b transition-all',
+          // Effet verre + saturation
           'supports-[backdrop-filter]:backdrop-blur-md backdrop-saturate-150',
-          // Transitions respectueuses de l’accessibilité
+          // Bordure/ombres évolutives
+          'border-b transition-all',
+          // Transitions accessibles
           'motion-safe:duration-300 motion-safe:ease-out motion-safe:transition-transform motion-reduce:transition-none',
           scrolled
             ? 'bg-white/95 shadow-md border-gray-200 dark:bg-black/80 dark:border-gray-800'
@@ -110,11 +117,7 @@ export default function Header() {
       >
         <div className="mx-auto flex h-16 md:h-20 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-10">
           {/* Logo */}
-          <Link
-            href="/"
-            aria-label="Retour à l’accueil"
-            className="flex shrink-0 items-center gap-3"
-          >
+          <Link href="/" aria-label="Retour à l’accueil" className="flex shrink-0 items-center gap-3">
             <Logo className="h-8 w-auto md:h-10" />
           </Link>
 
@@ -150,9 +153,9 @@ export default function Header() {
             })}
           </nav>
 
-          {/* Actions */}
+          {/* Actions droites (desktop) */}
           <div className="hidden md:flex items-center gap-3">
-            {/* Promo */}
+            {/* Bouton promo (glow) */}
             <Link
               href="/promo"
               prefetch={false}
@@ -162,13 +165,16 @@ export default function Header() {
               🎁 <span className="hidden sm:inline">Promo du jour</span>
             </Link>
 
+            {/* Langues (à réactiver au besoin) */}
+            {/* <div className="hidden lg:block"><LanguageSwitcher /></div> */}
+
             {/* Panier */}
             <div className="relative">
               <Link
                 href="/commande"
                 prefetch={false}
                 className="relative text-gray-800 hover:text-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:text-white"
-                aria-label="Voir le panier"
+                aria-label={cartCount > 0 ? `Voir le panier (${cartCount} article${cartCount > 1 ? 's' : ''})` : 'Voir le panier'}
               >
                 <span className="sr-only">Panier</span>
                 <span className="text-2xl" aria-hidden="true">🛒</span>
@@ -189,6 +195,9 @@ export default function Header() {
           {/* Menu mobile */}
           <MobileNav />
         </div>
+
+        {/* Liseré dégradé fin (finesse visuelle) */}
+        <div aria-hidden="true" className="pointer-events-none h-[2px] w-full bg-gradient-to-r from-transparent via-accent/40 to-transparent" />
       </header>
     </>
   )

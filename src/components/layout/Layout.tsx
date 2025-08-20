@@ -1,16 +1,23 @@
+// src/components/layout/Layout.tsx
 'use client'
 
-import { ReactNode, useEffect, Suspense } from 'react'
+import { type ReactNode, useEffect, Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import Header from './Header'
-import Footer from '@/components/Footer'
 import { usePathname } from 'next/navigation'
 import { pageview } from '@/lib/ga'
 import LiveChat from '../LiveChat'
 import { useTheme } from '@/context/themeContext'
 
+// Lazy chunks non-critiques
 const PWAInstall = dynamic(() => import('./PWAInstall'), { ssr: false })
 const ScrollTopButton = dynamic(() => import('../ui/ScrollTopButton'), { ssr: false })
+
+// ⚠️ compat Next types: pas d'option "suspense" ici
+const FooterLazy = dynamic(() => import('@/components/Footer'), {
+  ssr: true,
+  loading: () => null, // affichage pendant le chargement
+})
 
 interface LayoutProps {
   children: ReactNode
@@ -28,13 +35,24 @@ export default function Layout({
   const pathname = usePathname()
   const { theme } = useTheme()
 
+  // Pageview sur changement de route (safe)
   useEffect(() => {
-    if (analytics) pageview(pathname)
+    if (!analytics || !pathname) return
+    try {
+      pageview(pathname)
+    } catch {
+      /* noop */
+    }
   }, [pathname, analytics])
+
+  // Focus sur <main> après navigation (accessibilité)
+  useEffect(() => {
+    document.getElementById('main')?.focus()
+  }, [pathname])
 
   return (
     <>
-      {/* ✅ Barrière Suspense globale (couvre les hooks navigation côté client) */}
+      {/* ✅ Barrière Suspense globale (couvre hooks de navigation côté client) */}
       <Suspense fallback={null}>
         <Header />
       </Suspense>
@@ -42,7 +60,9 @@ export default function Layout({
       <main
         id="main"
         role="main"
-        className="relative min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-white transition-colors"
+        tabIndex={-1}
+        data-theme={theme}
+        className="relative min-h-screen pt-16 md:pt-20 bg-white dark:bg-gray-950 text-gray-900 dark:text-white transition-colors"
         aria-label="Contenu principal"
       >
         <Suspense fallback={<div className="px-4 py-8 text-sm text-gray-500">Chargement…</div>}>
@@ -54,9 +74,8 @@ export default function Layout({
       <ScrollTopButton />
       {chat && <LiveChat />}
 
-      <Suspense fallback={null}>
-        <Footer />
-      </Suspense>
+      {/* plus de Suspense ici pour compat types */}
+      <FooterLazy />
     </>
   )
 }
