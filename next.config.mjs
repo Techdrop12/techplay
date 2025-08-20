@@ -12,8 +12,17 @@ const withPwaPlugin = withPWA({
   register: true,
   skipWaiting: true,
   disable: isDev,
+
+  // Evite d’inclure des manifests internes au precache
   buildExcludes: [/middleware-manifest\.json$/],
+
+  // Fallback image
   fallbacks: { image: '/fallback.png' },
+
+  // 🚫 Couper le module Workbox "offlineGoogleAnalytics" (source d’alertes)
+  // (nom d’option selon la version : on met les 2 clés par sécurité)
+  workboxOptions: { offlineGoogleAnalytics: false },
+  workboxOpts: { offlineGoogleAnalytics: false },
 })
 
 export default withPwaPlugin({
@@ -22,7 +31,8 @@ export default withPwaPlugin({
   poweredByHeader: false,
   experimental: {
     scrollRestoration: true,
-    optimizePackageImports: ['react-icons', 'lodash'],
+    // (Tu peux réactiver optimizePackageImports plus tard si besoin)
+    // optimizePackageImports: ['react-icons', 'lodash'],
   },
   images: {
     remotePatterns: [{ protocol: 'https', hostname: '**' }],
@@ -32,7 +42,7 @@ export default withPwaPlugin({
     unoptimized: false,
   },
 
-  // On détend le lint en build prod pour éviter les fails pendant la mise au point
+  // On évite de casser le build à cause de lint en prod
   eslint: { ignoreDuringBuilds: true },
 
   headers: async () => [
@@ -44,7 +54,7 @@ export default withPwaPlugin({
         { key: 'X-Content-Type-Options', value: 'nosniff' },
         { key: 'X-Frame-Options', value: 'DENY' },
         { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-        { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' }
+        { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
       ],
     },
     {
@@ -52,7 +62,7 @@ export default withPwaPlugin({
       headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
     },
     {
-      // ✅ Matcher compatible Next 15 (pas de (?:...) ni de ?)
+      // ✅ Pattern compatible Next 15
       source: '/:all*.(js|css|png|jpg|jpeg|gif|webp|svg|ico|woff|woff2)',
       headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
     },

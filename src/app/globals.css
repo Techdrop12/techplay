@@ -1,15 +1,20 @@
+/* Design tokens (couleurs, rayons, ombres, etc.) */
+@import '../styles/design-tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Design tokens (couleurs, rayons, ombres, etc.) */
-@import '../styles/design-tokens.css';
 
 /* =============== Base =============== */
 @layer base {
   html {
     scroll-behavior: smooth;
     text-rendering: optimizeLegibility;
+
+    /* Scrollbars (plugin tailwind-scrollbar actif) */
+    /* (fusionné ici pour éviter la double règle html) */
+    @apply scrollbar-thin scrollbar-track-transparent
+           scrollbar-thumb-gray-300 dark:scrollbar-thumb-zinc-700;
   }
 
   body {
@@ -43,12 +48,6 @@
       0 0 0 2px hsl(var(--surface)),
       0 0 0 4px hsl(var(--accent));
     border-radius: .5rem;
-  }
-
-  /* Scrollbars (plugin tailwind-scrollbar actif) */
-  html {
-    @apply scrollbar-thin scrollbar-track-transparent
-           scrollbar-thumb-gray-300 dark:scrollbar-thumb-zinc-700;
   }
 
   /* Sélection de texte */

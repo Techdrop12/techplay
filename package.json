@@ -1,6 +1,7 @@
 {
   "name": "techplay",
   "version": "1.0.0",
+  "private": true,
   "type": "module",
   "description": "TechPlay – Boutique e-commerce high-tech, gadgets innovants. SEO, PWA, IA, sécurité, animations, performance : full option.",
   "scripts": {
@@ -11,7 +12,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "type-check": "tsc --noEmit",
     "analyze": "cross-env ANALYZE=true next build",
-    "prepare": "husky install",
+    "prepare": "husky",
     "format": "prettier --write .",
     "test": "echo \"Tests à venir\"",
     "clean": "rimraf .next",
@@ -43,10 +44,8 @@
     "react-icons": "^5.5.0",
     "react-rating-stars-component": "^2.2.0",
     "react-toastify": "^11.0.5",
-    "sib-api-v3-sdk": "^8.5.0",
     "stripe": "^14.16.0",
     "swr": "^2.2.4",
-    "ts-node": "^10.9.2",
     "web-push": "^3.6.7",
     "zod": "^3.25.67"
   },
@@ -65,7 +64,7 @@
     "autoprefixer": "^10.4.21",
     "cross-env": "^7.0.3",
     "eslint": "^8.57.0",
-    "eslint-config-next": "15.3.3",
+    "eslint-config-next": "^15.4.3",
     "eslint-plugin-jsx-a11y": "^6.7.1",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.0",
@@ -75,10 +74,11 @@
     "rimraf": "^5.0.0",
     "tailwind-scrollbar": "^3.1.0",
     "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
   "engines": {
-    "node": ">=18.0.0",
+    "node": "20.x",
     "npm": ">=9.0.0"
   },
   "lint-staged": {
@@ -102,5 +102,5 @@
     "type": "git",
     "url": "https://github.com/Techdrop12/techplay"
   },
-  "sideEffects": false
+  "sideEffects": true
 }
