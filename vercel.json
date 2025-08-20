@@ -4,12 +4,5 @@
   "buildCommand": "npm run build",
   "ignoreCommand": "exit 1",
   "cleanUrls": true,
-  "trailingSlash": false,
-  "functions": {
-    "api/**": {
-      "runtime": "nodejs20.x",
-      "memory": 1024,
-      "maxDuration": 10
-    }
-  }
+  "trailingSlash": false
 }
