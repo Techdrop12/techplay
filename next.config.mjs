@@ -11,7 +11,7 @@ const withPwaPlugin = withPWA({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  disable: isDev,
+  disable: isDev, // désactive le SW en dev
   buildExcludes: [/middleware-manifest\.json$/],
   fallbacks: { image: '/fallback.png' },
 })
@@ -24,14 +24,26 @@ export default withPwaPlugin({
     scrollRestoration: true,
     // optimizePackageImports: ['react-icons', 'lodash'],
   },
+
+  // ✅ Liste explicite des domaines d’images autorisés (évite hostname: '**')
   images: {
-    remotePatterns: [{ protocol: 'https', hostname: '**' }],
+    remotePatterns: [
+      { protocol: 'https', hostname: 'fakestoreapi.com' },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'cdn.shopify.com' },
+      { protocol: 'https', hostname: 'i.imgur.com' },
+      { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
+    ],
     formats: ['image/avif', 'image/webp'],
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-    unoptimized: false,
+    unoptimized: false, // laisse l’optimisation Next/Image activée
   },
+
+  // Évite que le build casse à cause du lint en CI
   eslint: { ignoreDuringBuilds: true },
+
+  // Headers de sécu et de cache
   headers: async () => [
     {
       source: '/:path*',
@@ -53,6 +65,8 @@ export default withPwaPlugin({
       headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
     },
   ],
+
+  // Alias @ → src
   webpack: (config) => {
     config.resolve.alias['@'] = path.resolve(__dirname, 'src')
     return config

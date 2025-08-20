@@ -1,64 +1,53 @@
 // src/app/produit/[slug]/page.tsx
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { getProductBySlug, getAllProductSlugs } from '@/lib/data'
+import { getProductBySlug } from '@/lib/data'
+import ProductDetail from '@/components/ProductDetail'
 import type { Product } from '@/types/product'
 import { getLocale } from 'next-intl/server'
-import ProductDetail from '@/components/ProductDetail' // ← import direct (client component)
 
-export const revalidate = 1800
+/** 👉 Force dynamique pour éviter tout échec au prerender */
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 export const dynamicParams = true
 
 function absoluteUrl(path: string, base: string) {
   try { return new URL(path, base).toString() } catch { return path }
 }
+
 async function safeGetLocale() {
   try { return (await getLocale()) || 'fr' } catch { return 'fr' }
 }
-function normalizeProduct(p: any, fallbackSlug: string): Product {
-  const images = Array.isArray(p?.images) ? p.images.filter(Boolean) : []
-  return {
-    _id: String(p?._id ?? p?.id ?? p?.slug ?? fallbackSlug),
-    slug: String(p?.slug ?? fallbackSlug),
-    title: String(p?.title ?? 'Produit'),
-    description: typeof p?.description === 'string' ? p.description : '',
-    image: String(p?.image ?? '/placeholder.png'),
-    images,
-    price: Number(p?.price ?? 0),
-    oldPrice: Number.isFinite(p?.oldPrice) ? Number(p.oldPrice) : undefined,
-    rating: Number.isFinite(p?.rating) ? Number(p.rating) : undefined,
-    reviewCount: Number.isFinite(p?.reviewCount) ? Number(p.reviewCount) : undefined,
-    isNew: !!p?.isNew,
-    isBestSeller: !!p?.isBestSeller,
-    tags: Array.isArray(p?.tags) ? p.tags : [],
-    stock: Number.isFinite(p?.stock) ? Number(p.stock) : undefined,
-    brand: p?.brand,
-    sku: p?.sku,
-    gtin: p?.gtin,
-    currency: String(p?.currency || 'EUR').toUpperCase(),
-  } as Product
-}
+
 async function safeGetProduct(slug: string): Promise<Product | null> {
   const s = String(slug || '').trim()
   if (!s) return null
   try {
     const p = await getProductBySlug(s)
     if (!p) return null
-    const prod = normalizeProduct(p, s)
+    // 💡 on s’assure que tout est sérialisable côté client
+    const prod: Product = {
+      ...(p as any),
+      _id: String((p as any)?._id ?? ''),            // toString au cas où
+      slug: String((p as any)?.slug ?? s),
+      title: String((p as any)?.title ?? 'Produit'),
+      description: typeof (p as any)?.description === 'string' ? (p as any).description : '',
+      image: (p as any)?.image ? String((p as any).image) : '/placeholder.png',
+      price: Number((p as any)?.price ?? 0),
+    } as Product
     if (!prod.slug || !prod.title) return null
-    return prod
+    return JSON.parse(JSON.stringify(prod)) // strip tout résidu non-sérialisable
   } catch (e) {
-    if (process.env.NODE_ENV !== 'production') console.error('[product:getBySlug] failed for', slug, e)
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('[product:getBySlug] failed for', slug, e)
+    }
     return null
   }
 }
 
+/** ❌ On ne pré-génère plus les slugs (évite les erreurs de build) */
 export async function generateStaticParams() {
-  try {
-    const slugs = await getAllProductSlugs().catch(() => [])
-    const uniq = Array.from(new Set((slugs || []).map((s: any) => String(s ?? '').trim()).filter(Boolean)))
-    return uniq.slice(0, 5000).map((slug) => ({ slug }))
-  } catch { return [] }
+  return []
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
@@ -86,14 +75,12 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       },
     },
     openGraph: {
-      title,
-      description,
-      url,
-      siteName: 'TechPlay',
-      type: 'website',
+      title, description, url, siteName: 'TechPlay', type: 'website',
       images: [{ url: absImage, alt: product.title || 'Produit TechPlay', width: 1200, height: 630 }],
       locale,
     },
+    twitter: { card: 'summary_large_image', title, description, images: [absImage] },
+    robots: { index: true, follow: true },
   }
 }
 
@@ -104,11 +91,12 @@ export default async function ProductPage({ params }: { params: { slug: string }
 
   const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, '') ?? 'https://techplay.example.com')
   const productUrl = absoluteUrl(`/${locale}/produit/${product.slug}`, baseUrl)
+
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Accueil', item: absoluteUrl(`/${locale}`, baseUrl) },
+      { '@type': 'ListItem', position: 1, name: 'Accueil',  item: absoluteUrl(`/${locale}`, baseUrl) },
       { '@type': 'ListItem', position: 2, name: 'Produits', item: absoluteUrl(`/${locale}/produit`, baseUrl) },
       { '@type': 'ListItem', position: 3, name: product.title, item: productUrl },
     ],
