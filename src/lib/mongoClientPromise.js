@@ -1,25 +1,30 @@
-// ✅ /src/lib/mongoClientPromise.js (Mongo universel, bonus : fallback)
-import { MongoClient } from 'mongodb';
+// src/lib/mongoClientPromise.js — client MongoDB singleton (HMR-safe)
+import { MongoClient } from 'mongodb'
 
-const uri = process.env.MONGODB_URI || process.env.MONGO_URL;
-const options = {};
+const uri = process.env.MONGODB_URI || process.env.MONGO_URL
+if (!uri) throw new Error('MONGODB_URI (ou MONGO_URL) manquant')
 
-let client;
-let clientPromise;
-
-if (!process.env.MONGODB_URI && !process.env.MONGO_URL) {
-  throw new Error('Please add your Mongo URI to .env.local');
+const options = {
+  maxPoolSize: Number(process.env.MONGO_MAX_POOL || 10),
+  minPoolSize: 0,
+  serverSelectionTimeoutMS: Number(process.env.MONGO_SST_MS || 5000),
+  retryWrites: true,
+  w: 'majority',
 }
 
-if (process.env.NODE_ENV === 'development') {
-  if (!global._mongoClientPromise) {
-    client = new MongoClient(uri, options);
-    global._mongoClientPromise = client.connect();
-  }
-  clientPromise = global._mongoClientPromise;
-} else {
-  client = new MongoClient(uri, options);
-  clientPromise = client.connect();
+const g = globalThis
+/** @type {Promise<import('mongodb').MongoClient>} */
+let clientPromise = g._mongoClientPromise
+
+if (!clientPromise) {
+  const client = new MongoClient(uri, options)
+  clientPromise = client.connect()
+  g._mongoClientPromise = clientPromise
 }
 
-export default clientPromise;
+export function getMongoClient() { return clientPromise }
+/** @param {string} [dbName] */ export async function getDb(dbName) {
+  const client = await clientPromise
+  return client.db(dbName)
+}
+export default clientPromise

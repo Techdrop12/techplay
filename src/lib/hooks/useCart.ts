@@ -1,14 +1,4 @@
-import { useEffect, useState } from 'react'
-
-export function useCart() {
-  const [cart, setCart] = useState<any[]>([])
-
-  useEffect(() => {
-    const stored = localStorage.getItem('cart')
-    if (stored) {
-      setCart(JSON.parse(stored))
-    }
-  }, [])
-
-  return { cart }
-}
+// /src/lib/hooks/useCart.ts
+// Rétro-compat : ré-exporte le hook du nouveau context.
+export type { CartItem, CartInput, CartContextValue } from '@/context/cartContext'
+export { useCart } from '@/context/cartContext'

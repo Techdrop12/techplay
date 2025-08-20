@@ -1,23 +1,28 @@
-'use client';
+// src/lib/abTestVariants.js
+// ✅ Attribution A/B persistante (localStorage), TTL, SSR-safe fallback
 
-export function getUserVariant() {
+'use client'
+
+const KEY = 'ab_variant_v2'
+
+export function getUserVariant(allowed = ['A', 'B'], ttlDays = 90) {
   if (typeof window === 'undefined') {
-    // En SSR, ne peut pas accéder au localStorage → fallback pseudo-aléatoire (non persistant)
-    return Math.random() < 0.5 ? 'A' : 'B';
+    // SSR: renvoie un choix pseudo-aléatoire non persistant
+    return Math.random() < 0.5 ? allowed[0] : allowed[1] || allowed[0]
   }
 
+  const now = Date.now()
   try {
-    let variant = localStorage.getItem('ab_variant');
-
-    if (!variant || !['A', 'B', 'C'].includes(variant)) {
-      const variants = ['A', 'B']; // ajoute 'C' si nécessaire
-      variant = variants[Math.floor(Math.random() * variants.length)];
-      localStorage.setItem('ab_variant', variant);
+    const raw = localStorage.getItem(KEY)
+    if (raw) {
+      const { v, ts } = JSON.parse(raw)
+      if (now - ts < ttlDays * 864e5 && allowed.includes(v)) return v
     }
+  } catch {}
 
-    return variant;
-  } catch (e) {
-    console.warn('Erreur attribution AB test :', e);
-    return 'A'; // fallback de sécurité
-  }
+  const chosen = allowed[Math.floor(Math.random() * allowed.length)]
+  try {
+    localStorage.setItem(KEY, JSON.stringify({ v: chosen, ts: now }))
+  } catch {}
+  return chosen
 }

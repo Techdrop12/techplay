@@ -1,22 +1,30 @@
+// src/components/AddToCartButton.tsx
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState, useId } from 'react'
 import { useCart } from '@/hooks/useCart'
 import type { Product } from '@/types/product'
 import Button from '@/components/Button'
 import { toast } from 'react-hot-toast'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { logEvent } from '@/lib/logEvent'
 import { trackAddToCart } from '@/lib/ga'
 
 type MinimalProduct = Pick<Product, '_id' | 'slug' | 'title' | 'image' | 'price'>
 
 interface Props {
-  product: MinimalProduct & { quantity?: number } // 👈 quantity optionnel
+  product: MinimalProduct & { quantity?: number }
   onAdd?: () => void
   size?: 'sm' | 'md' | 'lg'
   className?: string
   disabled?: boolean
+  /** Afficher un petit haptique sur mobile (par défaut true) */
+  haptic?: boolean
+  /** Tenter de scroller vers le sticky cart en mobile (par défaut true) */
+  scrollToStickyOnMobile?: boolean
+  /** Texte personnalisé */
+  pendingText?: string
+  successText?: string
 }
 
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n))
@@ -27,10 +35,18 @@ export default function AddToCartButton({
   size = 'md',
   className,
   disabled = false,
+  haptic = true,
+  scrollToStickyOnMobile = true,
+  pendingText = 'Ajout en cours…',
+  successText = 'Produit ajouté au panier 🎉',
 }: Props) {
   const { addToCart } = useCart()
   const [loading, setLoading] = useState(false)
+  const [added, setAdded] = useState(false)
   const [srMessage, setSrMessage] = useState('')
+  const prefersReduced = useReducedMotion()
+  const lastClickRef = useRef<number>(0)
+  const labelId = useId()
 
   const sizeClasses =
     size === 'sm'
@@ -41,6 +57,11 @@ export default function AddToCartButton({
 
   const handleClick = () => {
     if (loading || disabled) return
+
+    // anti double-click (300ms)
+    const now = Date.now()
+    if (now - (lastClickRef.current || 0) < 300) return
+    lastClickRef.current = now
 
     // garde-fous sur les données
     const id = String(product?._id || '')
@@ -57,9 +78,10 @@ export default function AddToCartButton({
     setLoading(true)
 
     try {
+      // 1) Contexte panier
       addToCart({ _id: id, slug: product.slug, title, image, price, quantity })
 
-      // Analytics (tolérant)
+      // 2) Tracks (tolérants)
       try {
         logEvent?.({
           action: 'add_to_cart',
@@ -76,28 +98,45 @@ export default function AddToCartButton({
         })
       } catch {}
 
-      toast.success('Produit ajouté au panier 🎉', {
-        duration: 2800,
+      // 3) Haptique léger (mobile)
+      if (haptic && typeof window !== 'undefined' && 'vibrate' in navigator) {
+        try {
+          navigator.vibrate?.(prefersReduced ? 10 : [8, 12, 8])
+        } catch {}
+      }
+
+      // 4) Toast de succès
+      toast.success(successText, {
+        duration: 2400,
         position: 'top-right',
         style: { borderRadius: '10px', background: '#333', color: '#fff' },
         iconTheme: { primary: '#2563eb', secondary: '#fff' },
       })
 
-      // Live region pour lecteurs d'écran
+      // 5) Live region + état visuel “ajouté”
       setSrMessage(`${title} ajouté au panier`)
+      setAdded(true)
 
-      // Auto-scroll vers le résumé panier mobile si présent
-      if (typeof window !== 'undefined' && window.innerWidth < 768) {
-        const sticky = document.querySelector('[aria-label="Résumé panier mobile"]')
-        sticky && sticky.scrollIntoView({ behavior: 'smooth' })
+      // 6) Scroll vers sticky cart en mobile
+      if (scrollToStickyOnMobile && typeof window !== 'undefined' && window.innerWidth < 768) {
+        const sticky =
+          document.querySelector('aside[role="region"][data-visible="true"]') ||
+          // fallback : tout aside “region” visible
+          document.querySelector('aside[role="region"]')
+        sticky && sticky.scrollIntoView({ behavior: 'smooth', block: 'end' })
       }
+
+      // 7) Event custom (intégrations)
+      try {
+        window.dispatchEvent(new CustomEvent('cart-added', { detail: { id, title, price, quantity } }))
+      } catch {}
 
       onAdd?.()
     } finally {
       // petit délai pour laisser l'anim/feedback respirer
-      setTimeout(() => setLoading(false), 450)
-      // efface le message SR après un moment
-      setTimeout(() => setSrMessage(''), 2000)
+      setTimeout(() => setLoading(false), 420)
+      setTimeout(() => setSrMessage(''), 1800)
+      setTimeout(() => setAdded(false), 1200)
     }
   }
 
@@ -108,22 +147,28 @@ export default function AddToCartButton({
         {srMessage}
       </span>
 
-      <motion.div whileTap={{ scale: 0.96 }} className="w-full">
+      <motion.div whileTap={prefersReduced ? undefined : { scale: 0.96 }} className="w-full">
         <Button
           onClick={handleClick}
-          aria-label={`Ajouter ${product.title ?? 'produit'} au panier`}
+          aria-labelledby={labelId}
           type="button"
           data-loading={loading ? 'true' : 'false'}
           aria-busy={loading ? 'true' : 'false'}
           className={[
-            'w-full font-extrabold bg-accent hover:bg-accent-dark text-white rounded-xl shadow-lg transition-colors focus:outline-none focus:ring-4 focus:ring-accent/70 active:scale-95',
+            'w-full font-extrabold rounded-xl shadow-lg transition-colors focus:outline-none focus:ring-4 active:scale-95',
+            'bg-accent hover:bg-accent/90 text-white focus:ring-accent/60',
             sizeClasses,
             (loading || disabled) ? 'opacity-80 cursor-not-allowed' : '',
+            added ? 'ring-4 ring-emerald-400/40' : '',
             className || '',
           ].join(' ')}
           disabled={loading || disabled}
+          data-qty={product.quantity ?? 1}
+          data-product-id={product._id}
         >
-          {loading ? 'Ajout en cours…' : 'Ajouter au panier'}
+          <span id={labelId}>
+            {loading ? pendingText : added ? 'Ajouté ✅' : 'Ajouter au panier'}
+          </span>
         </Button>
       </motion.div>
     </>

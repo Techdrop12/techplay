@@ -1,3 +1,4 @@
+// src/components/ProductDetail.tsx
 'use client'
 
 import Image from 'next/image'
@@ -45,6 +46,9 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     isNew,
     isBestSeller,
     tags,
+    // facultatifs si présents dans ton type
+    stock,
+    brand,
   } = product ?? {}
 
   const hasRating = typeof rating === 'number' && !Number.isNaN(rating)
@@ -53,8 +57,14 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
       ? Math.round(((oldPrice - price) / oldPrice) * 100)
       : null
 
-  const productUrl = useMemo(() => (slug ? `/produit/${slug}` : '#'), [slug])
-  const priceStr = useMemo(() => price.toFixed(2), [price])
+  const priceStr = useMemo(() => Math.max(0, Number(price || 0)).toFixed(2), [price])
+  const availability =
+    typeof stock === 'number'
+      ? stock > 0
+        ? 'https://schema.org/InStock'
+        : 'https://schema.org/OutOfStock'
+      : 'https://schema.org/InStock'
+  const lowStock = typeof stock === 'number' && stock > 0 && stock <= 5
 
   // Log “vue fiche produit” + GA4 view_item une seule fois quand visible
   useEffect(() => {
@@ -105,7 +115,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     } catch {}
   }, [title, price, quantity])
 
-  // JSON-LD (Product + Offer)
+  // JSON-LD (Product + Offer) enrichi
   const jsonLd = useMemo(() => {
     const data: any = {
       '@context': 'https://schema.org',
@@ -114,11 +124,12 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
       image: [image],
       description: description || undefined,
       sku: _id,
+      brand: brand ? { '@type': 'Brand', name: String(brand) } : undefined,
       offers: {
         '@type': 'Offer',
         priceCurrency: 'EUR',
-        price: price.toFixed(2),
-        availability: 'https://schema.org/InStock',
+        price: priceStr,
+        availability,
         url: typeof window !== 'undefined' ? window.location.href : undefined,
         itemCondition: 'https://schema.org/NewCondition',
       },
@@ -126,12 +137,12 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     if (hasRating) {
       data.aggregateRating = {
         '@type': 'AggregateRating',
-        ratingValue: rating!.toFixed(1),
+        ratingValue: Number(rating!.toFixed(1)),
         reviewCount: 12, // remplace par ta vraie donnée si dispo
       }
     }
     return data
-  }, [_id, title, image, description, price, hasRating, rating])
+  }, [_id, title, image, description, brand, priceStr, availability, hasRating, rating])
 
   return (
     <motion.section
@@ -170,9 +181,11 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             aria-hidden="true"
           />
         )}
+
         <div className="absolute bottom-4 right-4 z-10">
           <PricingBadge price={price} oldPrice={oldPrice} showDiscountLabel showOldPrice />
         </div>
+
         <div className="absolute top-4 left-4 flex flex-col gap-2 pointer-events-none select-none z-10">
           {isNew && (
             <span className="bg-green-600 text-white px-3 py-1 rounded-full font-semibold text-sm shadow-md">
@@ -204,10 +217,24 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             {title}
           </h1>
 
-          {/* Note + badge livraison */}
-          <div className="mt-3 flex items-center gap-3">
+          {/* Note + badge livraison + stock */}
+          <div className="mt-3 flex flex-wrap items-center gap-3">
             <RatingStars value={hasRating ? rating! : 4} editable={false} />
             <FreeShippingBadge price={price} minimal />
+            {typeof stock === 'number' && (
+              <span
+                className={`text-xs px-2 py-1 rounded-full border ${
+                  stock > 0
+                    ? lowStock
+                      ? 'border-amber-300 text-amber-700 dark:text-amber-300'
+                      : 'border-emerald-300 text-emerald-700 dark:text-emerald-300'
+                    : 'border-red-300 text-red-600 dark:text-red-400'
+                }`}
+                aria-live="polite"
+              >
+                {stock > 0 ? (lowStock ? `Plus que ${stock} en stock` : 'En stock') : 'Rupture'}
+              </span>
+            )}
           </div>
 
           {/* Bloc prix */}
@@ -221,9 +248,10 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             >
               <meta itemProp="priceCurrency" content="EUR" />
               <meta itemProp="price" content={priceStr} />
+              <meta itemProp="availability" content={availability} />
               {formatPrice(price)}
             </span>
-            {typeof oldPrice === 'number' && (
+            {typeof oldPrice === 'number' && oldPrice > price && (
               <span className="line-through text-gray-400 dark:text-gray-500">
                 {formatPrice(oldPrice)}
               </span>
@@ -236,7 +264,10 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           </div>
 
           {description && (
-            <p className="mt-6 text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed text-lg" itemProp="description">
+            <p
+              className="mt-6 text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed text-lg"
+              itemProp="description"
+            >
               {description}
             </p>
           )}
@@ -265,24 +296,30 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             Sélectionnez la quantité à ajouter au panier
           </p>
 
-          <AddToCartButton
-            product={{
-              _id,
-              slug,
-              title,
-              price,
-              image,
-              quantity, // AddToCartButton gère défaut + analytics
-            }}
-            onAdd={handleAdd}
-            size="lg"
-          />
+          {!(typeof stock === 'number' && stock <= 0) ? (
+            <AddToCartButton
+              product={{
+                _id,
+                slug,
+                title,
+                price,
+                image,
+                quantity,
+              }}
+              onAdd={handleAdd}
+              size="lg"
+              aria-label={`Ajouter ${title} au panier`}
+            />
+          ) : (
+            <div
+              className="inline-flex items-center justify-center rounded-lg border border-red-300 px-4 py-3 text-red-700 dark:text-red-300"
+              role="alert"
+            >
+              Indisponible actuellement
+            </div>
+          )}
 
-          <WishlistButton
-            product={{ _id, slug, title, price, image }}
-            floating={false}
-            className="mt-2"
-          />
+          <WishlistButton product={{ _id, slug, title, price, image }} floating={false} className="mt-2" />
         </div>
       </div>
 

@@ -1,18 +1,19 @@
-'use client'
+// src/components/cart/CartList.tsx
+'use client';
 
-import { useEffect, useMemo, useRef } from 'react'
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import type { Product } from '@/types/product'
-import CartItem from '@/components/cart/CartItem'
-import { useCart } from '@/hooks/useCart'
+import React, { useEffect, useMemo, useRef } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import type { Product } from '@/types/product';
+import CartItem from '@/components/cart/CartItem';
+import { useCart } from '@/hooks/useCart';
 
 interface CartListProps {
-  items: (Product & { quantity: number })[]
+  items: (Product & { quantity: number })[];
   /** Afficher un mini header (compteur + bouton “Vider”) */
-  showControls?: boolean
+  showControls?: boolean;
   /** Callback clear custom (sinon utilise useCart().clearCart) */
-  onClear?: () => void
-  className?: string
+  onClear?: () => void | Promise<void>;
+  className?: string;
 }
 
 export default function CartList({
@@ -21,24 +22,53 @@ export default function CartList({
   onClear,
   className = '',
 }: CartListProps) {
-  const prefersReducedMotion = useReducedMotion()
-  const srRef = useRef<HTMLSpanElement | null>(null)
-  const { clearCart } = useCart()
+  const prefersReducedMotion = useReducedMotion();
+  const srRef = useRef<HTMLSpanElement | null>(null);
+  const prevCountRef = useRef<number>(0);
+  const { clearCart } = useCart();
 
-  const isEmpty = !items?.length
-  const itemsCount = useMemo(
-    () => (items || []).reduce((s, it) => s + Math.max(1, Number(it.quantity || 1)), 0),
+  const safeItems = useMemo(
+    () =>
+      (items || []).map((it) => ({
+        _id: (it as any)._id ?? it.slug, // fallback si _id absent
+        slug: it.slug,
+        title: it.title ?? 'Produit',
+        image: it.image ?? '/placeholder.png',
+        price: Number(it.price ?? 0),
+        quantity: Math.max(1, Number(it.quantity || 1)),
+      })),
     [items]
-  )
+  );
 
-  // Région live : annonce le nombre d’articles
+  const isEmpty = safeItems.length === 0;
+
+  const itemsCount = useMemo(
+    () => safeItems.reduce((s, it) => s + it.quantity, 0),
+    [safeItems]
+  );
+
+  // Région live : annonce le nombre d’articles (et l’évolution)
   useEffect(() => {
-    if (!srRef.current) return
-    srRef.current.textContent =
-      isEmpty
-        ? 'Panier vide'
-        : `${itemsCount} article${itemsCount > 1 ? 's' : ''} dans le panier`
-  }, [isEmpty, itemsCount])
+    if (!srRef.current) return;
+
+    const prev = prevCountRef.current;
+    let text: string;
+
+    if (isEmpty) text = 'Panier vide';
+    else if (prev === 0) text = `${itemsCount} article${itemsCount > 1 ? 's' : ''} dans le panier`;
+    else if (itemsCount > prev) {
+      const diff = itemsCount - prev;
+      text = `${diff} article${diff > 1 ? 's' : ''} ajouté${diff > 1 ? 's' : ''}. ${itemsCount} au total.`;
+    } else if (itemsCount < prev) {
+      const diff = prev - itemsCount;
+      text = `${diff} article${diff > 1 ? 's' : ''} retiré${diff > 1 ? 's' : ''}. ${itemsCount} au total.`;
+    } else {
+      text = `${itemsCount} article${itemsCount > 1 ? 's' : ''} dans le panier`;
+    }
+
+    srRef.current.textContent = text;
+    prevCountRef.current = itemsCount;
+  }, [isEmpty, itemsCount]);
 
   if (isEmpty) {
     return (
@@ -53,19 +83,20 @@ export default function CartList({
       >
         Aucun article dans le panier.
       </motion.p>
-    )
+    );
   }
 
-  const handleClear = () => {
-    if (onClear) onClear()
-    else {
+  const handleClear = async () => {
+    if (onClear) {
+      await Promise.resolve(onClear());
+    } else {
       try {
-        clearCart()
+        clearCart();
       } catch {
-        // no-op
+        /* no-op */
       }
     }
-  }
+  };
 
   return (
     <section aria-label="Articles du panier" className={className}>
@@ -80,7 +111,9 @@ export default function CartList({
           <button
             type="button"
             onClick={handleClear}
-            className="text-sm font-semibold text-red-600 hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 rounded"
+            disabled={itemsCount === 0}
+            aria-disabled={itemsCount === 0}
+            className="text-sm font-semibold text-red-600 disabled:text-red-400 disabled:cursor-not-allowed hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 rounded"
             aria-label="Vider le panier"
           >
             Vider le panier
@@ -90,10 +123,11 @@ export default function CartList({
 
       <ul role="list" className="space-y-4">
         <AnimatePresence initial={false}>
-          {items.map((item) => (
+          {safeItems.map((item) => (
             <motion.li
-              key={item._id ?? item.slug}
+              key={String(item._id)}
               role="listitem"
+              layout={!prefersReducedMotion}
               initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
               animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
               exit={prefersReducedMotion ? undefined : { opacity: 0, y: -8 }}
@@ -101,12 +135,12 @@ export default function CartList({
             >
               <CartItem
                 item={{
-                  _id: item._id,
+                  _id: String(item._id),
                   slug: item.slug,
-                  title: item.title ?? 'Produit',
-                  image: item.image ?? '/placeholder.png',
-                  price: item.price ?? 0,
-                  quantity: Math.max(1, Number(item.quantity || 1)),
+                  title: item.title,
+                  image: item.image,
+                  price: item.price,
+                  quantity: item.quantity,
                 }}
               />
             </motion.li>
@@ -114,5 +148,5 @@ export default function CartList({
         </AnimatePresence>
       </ul>
     </section>
-  )
+  );
 }

@@ -1,17 +1,11 @@
-export const sendEvent = (eventName: string, eventParams = {}) => {
-  if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-    window.gtag('event', eventName, eventParams)
-  }
-}
+// src/lib/analytics.ts
+// ✅ Fait le pont avec notre util GA4 avancé (`lib/ga.ts`) tout en restant rétro-compatible
 
-export const pageview = (url: string) => {
-  if (
-    typeof window !== 'undefined' &&
-    typeof window.gtag === 'function' &&
-    process.env.NEXT_PUBLIC_GA_ID
-  ) {
-    window.gtag('config', process.env.NEXT_PUBLIC_GA_ID, {
-      page_path: url,
-    })
-  }
-}
+import { pageview as _pageview, trackEvent as _trackEvent, consent, setUserId } from './ga'
+
+export const pageview = (url: string) => _pageview(url)
+export const sendEvent = (eventName: string, eventParams: Record<string, any> = {}) =>
+  _trackEvent(eventName, eventParams)
+
+// Bonus utils (si tu veux les utiliser directement)
+export { consent, setUserId }

@@ -1,27 +1,28 @@
 // src/lib/ga.ts
 // 📊 Google Analytics 4 — utilitaires robustes (TS), SSR-safe, DNT, opt-out, Consent Mode v2, file d’attente.
 
+// IMPORTANT : pour éviter les conflits avec @types/gtag.js, on déclare les props en non-optionnel
 declare global {
   interface Window {
-    dataLayer?: unknown[]
-    gtag?: (...args: any[]) => void
+    dataLayer: unknown[]
+    gtag: (...args: any[]) => void
   }
 }
 
-export const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GA_ID || ''
+export const GA_TRACKING_ID: string = process.env.NEXT_PUBLIC_GA_ID || ''
 
 /** Détermine si on peut toucher au window */
-const isBrowser = typeof window !== 'undefined'
+const isBrowser: boolean = typeof window !== 'undefined'
 
 /** Respecte "Do Not Track" de l’OS/navigateur */
-const doNotTrack =
+const doNotTrack: boolean =
   isBrowser &&
   (((navigator as any).doNotTrack === '1') ||
     ((window as any).doNotTrack === '1') ||
     ((navigator as any).msDoNotTrack === '1'))
 
 /** Opt-out manuel: via env ou storage */
-const envOptOut =
+const envOptOut: boolean =
   (process.env.NEXT_PUBLIC_ANALYTICS_DISABLED || '').toLowerCase() === 'true'
 
 function storageOptOut(): boolean {
@@ -45,13 +46,13 @@ function isGaEnabled(): boolean {
 const queue: any[][] = []
 
 function canTrack(): boolean {
-  return isBrowser && typeof window.gtag === 'function' && isGaEnabled()
+  return isBrowser && typeof (window as any).gtag === 'function' && isGaEnabled()
 }
 
 function gtagSafe(...args: any[]) {
   if (!isGaEnabled() || !isBrowser) return
   if (canTrack()) {
-    window.gtag!(...args)
+    ;(window as any).gtag(...args)
   } else {
     queue.push(args)
     startFlushPoller()
@@ -74,7 +75,7 @@ function startFlushPoller() {
 function flushQueue() {
   while (queue.length && canTrack()) {
     const args = queue.shift()!
-    window.gtag!(...args)
+    ;(window as any).gtag(...args)
   }
 }
 
@@ -118,6 +119,20 @@ export function denyConsent(update: ConsentUpdate = {}) {
   })
 }
 
+/**
+ * ✅ Alias demandé par `analytics.ts`
+ * - `consent('grant', update)` → équivaut à grantConsent(update)
+ * - `consent('deny', update)`  → équivaut à denyConsent(update)
+ * - `consent(update)`          → consent update brut (objet)
+ */
+export function consent(modeOrUpdate: 'grant' | 'deny' | ConsentUpdate, update?: ConsentUpdate) {
+  if (!isBrowser) return
+  if (typeof modeOrUpdate === 'string') {
+    return modeOrUpdate === 'grant' ? grantConsent(update) : denyConsent(update)
+  }
+  gtagSafe('consent', 'update', modeOrUpdate)
+}
+
 /* ======================== Pageviews ======================== */
 
 export function pageview(url: string, title?: string, opts?: { send_page_view?: boolean }) {
@@ -135,7 +150,7 @@ export type GAEventParams = {
   action: string
   category?: string
   label?: string
-  value?: number // optionnel
+  value?: number
   nonInteraction?: boolean
   params?: Record<string, unknown>
 }
@@ -161,6 +176,11 @@ export function event({
 export function logEvent(eventName: string, eventParams?: Record<string, unknown>) {
   if (!isGaEnabled() || !isBrowser) return
   gtagSafe('event', eventName, eventParams || {})
+}
+
+/** ✅ Alias attendu par `analytics.ts` */
+export function trackEvent(eventName: string, eventParams?: Record<string, unknown>) {
+  return logEvent(eventName, eventParams)
 }
 
 /* ======================== E-commerce helpers (GA4) ======================== */
@@ -230,8 +250,8 @@ export function setUserProperties(props: Record<string, unknown>) {
 
 export function pushDataLayer(data: Record<string, unknown>) {
   if (!isBrowser) return
-  window.dataLayer = window.dataLayer || []
-  window.dataLayer.push(data)
+  ;(window as any).dataLayer = (window as any).dataLayer || []
+  ;(window as any).dataLayer.push(data)
 }
 
 /* ======================== Exposed helpers ======================== */

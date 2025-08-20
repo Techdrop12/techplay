@@ -1,30 +1,31 @@
-'use client'
+// src/components/ProductCard.tsx
+'use client';
 
-import { useEffect, useMemo, useRef, useState, MouseEvent, useCallback } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
-import { motion, useReducedMotion } from 'framer-motion'
-import { cn, formatPrice } from '@/lib/utils'
-import WishlistButton from '@/components/WishlistButton'
-import FreeShippingBadge from '@/components/FreeShippingBadge'
-import AddToCartButton from '@/components/AddToCartButton'
-import type { Product } from '@/types/product'
-import { logEvent } from '@/lib/logEvent'
+import { useEffect, useMemo, useRef, useState, MouseEvent, useCallback } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { motion, useReducedMotion } from 'framer-motion';
+import { cn, formatPrice } from '@/lib/utils';
+import WishlistButton from '@/components/WishlistButton';
+import FreeShippingBadge from '@/components/FreeShippingBadge';
+import AddToCartButton from '@/components/AddToCartButton';
+import type { Product } from '@/types/product';
+import { logEvent } from '@/lib/logEvent';
 
 interface ProductCardProps {
-  product: Product
+  product: Product;
   /** Priorise le chargement de l’image (LCP) */
-  priority?: boolean
+  priority?: boolean;
   /** Afficher le bouton wishlist */
-  showWishlistIcon?: boolean
+  showWishlistIcon?: boolean;
   /** Afficher le CTA “Ajouter au panier” */
-  showAddToCart?: boolean
+  showAddToCart?: boolean;
   /** Classe(s) personnalisée(s) */
-  className?: string
+  className?: string;
 }
 
 /** Clamp helper */
-const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
+const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
 
 export default function ProductCard({
   product,
@@ -43,19 +44,21 @@ export default function ProductCard({
     rating,
     isNew,
     isBestSeller,
-  } = product ?? {}
+    // facultatif si défini dans Product
+    stock,
+  } = product ?? {};
 
-  const prefersReducedMotion = useReducedMotion()
+  const prefersReducedMotion = useReducedMotion();
 
-  const [imgError, setImgError] = useState(false)
-  const [imgLoaded, setImgLoaded] = useState(false)
+  const [imgError, setImgError] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
-  const cardRef = useRef<HTMLDivElement | null>(null)
-  const viewedRef = useRef(false)
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const viewedRef = useRef(false);
 
   // Tilt state + rAF throttle
-  const [tilt, setTilt] = useState<{ rx: number; ry: number }>({ rx: 0, ry: 0 })
-  const ticking = useRef(false)
+  const [tilt, setTilt] = useState<{ rx: number; ry: number }>({ rx: 0, ry: 0 });
+  const ticking = useRef(false);
 
   const discount = useMemo(
     () =>
@@ -63,33 +66,33 @@ export default function ProductCard({
         ? Math.round(((oldPrice - price) / oldPrice) * 100)
         : null,
     [oldPrice, price]
-  )
+  );
 
   // 🔎 Log “vue carte” une seule fois quand visible à l’écran
   useEffect(() => {
-    if (!cardRef.current || viewedRef.current) return
-    const el = cardRef.current
+    if (!cardRef.current || viewedRef.current) return;
+    const el = cardRef.current;
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
           if (e.isIntersecting && !viewedRef.current) {
-            viewedRef.current = true
+            viewedRef.current = true;
             try {
               logEvent({
                 action: 'product_card_view',
                 category: 'engagement',
                 label: title,
                 value: price,
-              })
+              });
             } catch {}
           }
         }
       },
       { threshold: 0.35 }
-    )
-    io.observe(el)
-    return () => io.disconnect()
-  }, [title, price])
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [title, price]);
 
   const handleClick = useCallback(() => {
     try {
@@ -98,39 +101,42 @@ export default function ProductCard({
         category: 'engagement',
         label: title,
         value: price,
-      })
+      });
     } catch {}
-  }, [title, price])
+  }, [title, price]);
 
-  const productUrl = useMemo(() => (slug ? `/produit/${slug}` : '#'), [slug])
-  const imgSrc = imgError ? '/placeholder.png' : image
-  const hasRating = typeof rating === 'number' && !Number.isNaN(rating)
-  const priceContent = useMemo(() => price.toFixed(2), [price])
+  const productUrl = useMemo(() => (slug ? `/produit/${slug}` : '#'), [slug]);
+  const imgSrc = imgError ? '/placeholder.png' : image;
+  const hasRating = typeof rating === 'number' && !Number.isNaN(rating);
+  const priceContent = useMemo(() => Math.max(0, Number(price || 0)).toFixed(2), [price]);
 
   // Tilt 3D doux au survol (throttlé via rAF)
   const onMouseMove = (e: MouseEvent<HTMLDivElement>) => {
-    if (prefersReducedMotion) return
+    if (prefersReducedMotion) return;
     // évite de calculer si l’appareil ne supporte pas le hover
-    if (window.matchMedia && !window.matchMedia('(hover:hover)').matches) return
+    if (window.matchMedia && !window.matchMedia('(hover:hover)').matches) return;
 
-    const el = e.currentTarget
-    const r = el.getBoundingClientRect()
-    const cx = r.left + r.width / 2
-    const cy = r.top + r.height / 2
-    const dx = e.clientX - cx
-    const dy = e.clientY - cy
-    const ry = clamp((dx / (r.width / 2)) * 6, -8, 8) // rotateY
-    const rx = clamp((-dy / (r.height / 2)) * 6, -8, 8) // rotateX
+    const el = e.currentTarget;
+    const r = el.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+    const dx = e.clientX - cx;
+    const dy = e.clientY - cy;
+    const ry = clamp((dx / (r.width / 2)) * 6, -8, 8); // rotateY
+    const rx = clamp((-dy / (r.height / 2)) * 6, -8, 8); // rotateX
 
-    if (ticking.current) return
-    ticking.current = true
+    if (ticking.current) return;
+    ticking.current = true;
     requestAnimationFrame(() => {
-      setTilt({ rx, ry })
-      ticking.current = false
-    })
-  }
+      setTilt({ rx, ry });
+      ticking.current = false;
+    });
+  };
 
-  const resetTilt = () => setTilt({ rx: 0, ry: 0 })
+  const resetTilt = () => setTilt({ rx: 0, ry: 0 });
+
+  const availability =
+    typeof stock === 'number' ? (stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock') : undefined;
 
   return (
     <motion.article
@@ -149,6 +155,8 @@ export default function ProductCard({
       transition={{ duration: 0.25, ease: 'easeOut' }}
       onMouseMove={onMouseMove}
       onMouseLeave={resetTilt}
+      data-product-id={_id}
+      data-product-slug={slug}
     >
       <meta itemProp="name" content={title} />
       <meta itemProp="image" content={imgSrc} />
@@ -174,7 +182,7 @@ export default function ProductCard({
           onClick={handleClick}
         >
           {/* Image */}
-          <div className="relative w-full aspect-[4/3] bg-gray-100 dark:bg-zinc-800">
+          <div className="relative w-full aspect-[4/3] bg-gray-100 dark:bg-zinc-800" aria-busy={!imgLoaded}>
             <Image
               src={imgSrc}
               alt={`Image du produit ${title}`}
@@ -185,6 +193,7 @@ export default function ProductCard({
                 'group-hover:scale-105'
               )}
               priority={priority}
+              loading={priority ? 'eager' : 'lazy'}
               placeholder="blur"
               blurDataURL="/placeholder-blur.png"
               onError={() => setImgError(true)}
@@ -255,9 +264,10 @@ export default function ProductCard({
               >
                 <meta itemProp="priceCurrency" content="EUR" />
                 <meta itemProp="price" content={priceContent} />
+                {availability && <meta itemProp="availability" content={availability} />}
                 {formatPrice(price)}
               </span>
-              {typeof oldPrice === 'number' && (
+              {typeof oldPrice === 'number' && oldPrice > price && (
                 <span className="line-through text-sm text-gray-400 dark:text-gray-500" aria-label="Ancien prix">
                   {formatPrice(oldPrice)}
                 </span>
@@ -303,5 +313,5 @@ export default function ProductCard({
         )}
       </motion.div>
     </motion.article>
-  )
+  );
 }

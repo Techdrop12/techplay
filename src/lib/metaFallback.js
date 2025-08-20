@@ -1,26 +1,26 @@
-// ✅ src/lib/metaFallback.js
-/**
- * Génère une description SEO de secours à partir des données produit.
- * Utilisé dans <SEOHead /> si aucune description personnalisée n’est fournie.
- */
+// src/lib/metaFallback.js — description SEO de secours à partir du produit
+export function getFallbackDescription(product = {}) {
+  const { title, brand, description, price, currency = 'EUR' } = product || {}
+  const fmt = new Intl.NumberFormat('fr-FR', { style: 'currency', currency })
 
-export function getFallbackDescription(product) {
-  if (!product || typeof product !== 'object') {
-    return 'TechPlay – Découvrez les meilleurs produits tech, gadgets et innovations. Livraison rapide, SAV premium.';
+  let parts = []
+  if (title) parts.push(`Découvrez ${title}`)
+  if (brand) parts.push(`de la marque ${brand}`)
+  let out = parts.join(' ')
+  if (price != null && price !== '') out += ` à partir de ${fmt.format(Number(price))}`
+  out += ' sur TechPlay. Livraison rapide et SAV premium.'
+
+  if (typeof description === 'string' && description.trim()) {
+    const clean = strip(description)
+    const snippet = clean.length > 160 ? clean.slice(0, 157) + '…' : clean
+    out += ' ' + snippet
   }
-
-  const { title, brand, description, price } = product;
-
-  let fallback = `Découvrez ${title}`;
-  if (brand) fallback += ` de la marque ${brand}`;
-  if (price) fallback += ` à seulement ${price} €`;
-  fallback += ' sur TechPlay. Livraison rapide et satisfaction garantie.';
-
-  if (description && typeof description === 'string') {
-    const cleanDesc = description.replace(/[\n\r]+/g, ' ').trim();
-    const snippet = cleanDesc.length > 160 ? cleanDesc.substring(0, 160) + '...' : cleanDesc;
-    fallback += ` ${snippet}`;
-  }
-
-  return fallback;
+  return out
+}
+function strip(s) {
+  return String(s)
+    .replace(/<[^>]+>/g, '')
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
 }

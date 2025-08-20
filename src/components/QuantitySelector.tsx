@@ -1,6 +1,18 @@
+// src/components/QuantitySelector.tsx
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type KeyboardEvent,
+  type WheelEvent,
+  type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
+} from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
@@ -8,113 +20,144 @@ interface QuantitySelectorProps {
   value?: number
   defaultValue?: number
   onChange?: (val: number) => void
+  /** Déclenché au blur ou sur ENTER (validation explicite) */
+  onCommit?: (val: number) => void
   min?: number
   max?: number
   step?: number
+  /** Aligner la valeur sur le pas par rapport à min (ex: min=1, step=2 ⇒ 1,3,5,...) */
+  snapToStep?: boolean
   className?: string
   id?: string
   name?: string
   disabled?: boolean
   readOnly?: boolean
   'aria-describedby'?: string
+  /** Incrément rapide quand Shift est maintenu (par défaut x10) */
+  fastMultiplier?: number
 }
 
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
+const alignToStep = (n: number, min: number, step: number) =>
+  min + Math.round((n - min) / step) * step
 
 export default function QuantitySelector({
   value,
   defaultValue,
   onChange,
+  onCommit,
   min = 1,
   max = 99,
   step = 1,
+  snapToStep = true,
   className,
   id,
   name,
   disabled = false,
   readOnly = false,
   'aria-describedby': ariaDescribedBy,
+  fastMultiplier = 10,
 }: QuantitySelectorProps) {
   const prefersReducedMotion = useReducedMotion()
-
   const isControlled = typeof value === 'number'
-  const [internal, setInternal] = useState<number>(() =>
-    clamp(
-      typeof defaultValue === 'number' ? defaultValue : (typeof value === 'number' ? value : min),
-      min,
-      max
-    )
-  )
 
-  const qty = isControlled ? clamp(value!, min, max) : internal
+  // valeur interne initiale
+  const [internal, setInternal] = useState<number>(() => {
+    const base =
+      typeof defaultValue === 'number'
+        ? defaultValue
+        : typeof value === 'number'
+        ? value
+        : min
+    const aligned = snapToStep ? alignToStep(base, min, step) : base
+    return clamp(aligned, min, max)
+  })
 
+  // valeur affichée (source de vérité)
+  const qty = isControlled
+    ? clamp(snapToStep ? alignToStep(value!, min, step) : value!, min, max)
+    : internal
+
+  // Re-clamp si min/max changent
   useEffect(() => {
-    // si min/max changent, on re-clamp la valeur courante
     if (!isControlled) {
-      setInternal((v) => clamp(v, min, max))
+      setInternal((v) => clamp(snapToStep ? alignToStep(v, min, step) : v, min, max))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [min, max])
+  }, [min, max, step, snapToStep])
 
-  // sync vers interne si parent passe une value
+  // Suivre value si contrôlé
   useEffect(() => {
-    if (isControlled) {
-      setInternal(qty)
-    }
+    if (isControlled) setInternal(qty)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value])
+  }, [value, qty])
 
   const emit = useCallback(
-    (n: number) => {
-      const next = clamp(n, min, max)
+    (n: number, commit = false) => {
+      const base = snapToStep ? alignToStep(n, min, step) : n
+      const next = clamp(base, min, max)
       if (!isControlled) setInternal(next)
       onChange?.(next)
+      if (commit) onCommit?.(next)
     },
-    [isControlled, min, max, onChange]
+    [isControlled, min, max, step, snapToStep, onChange, onCommit]
   )
 
   const changeBy = useCallback(
-    (delta: number) => {
-      const next = (qty ?? min) + delta
-      emit(next)
-    },
+    (delta: number) => emit((qty ?? min) + delta),
     [emit, qty, min]
   )
 
-  // Auto-repeat (maintien appuyé)
+  // Auto-repeat (maintien appuyé) + arrêt fiable
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pressInterval = useRef<ReturnType<typeof setInterval> | null>(null)
-  const repeatStart = (delta: number) => (e: React.MouseEvent | React.PointerEvent) => {
-    e.preventDefault()
-    changeBy(delta)
-    // délai avant répétition
-    pressTimer.current && clearTimeout(pressTimer.current)
-    pressInterval.current && clearInterval(pressInterval.current)
-    let speed = 120
-    let count = 0
-    pressTimer.current = setTimeout(() => {
-      pressInterval.current = setInterval(() => {
-        changeBy(delta)
-        count++
-        // accélération légère
-        if (count % 6 === 0) speed = Math.max(40, speed - 10)
-      }, speed)
-    }, 350)
-    window.addEventListener('pointerup', repeatStop, { once: true })
-    window.addEventListener('mouseup', repeatStop, { once: true })
-    window.addEventListener('touchend', repeatStop, { once: true })
-  }
+
   const repeatStop = () => {
-    pressTimer.current && clearTimeout(pressTimer.current)
-    pressInterval.current && clearInterval(pressInterval.current)
+    if (pressTimer.current) clearTimeout(pressTimer.current)
+    if (pressInterval.current) clearInterval(pressInterval.current)
     pressTimer.current = null
     pressInterval.current = null
   }
 
-  const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value
+  // Nettoyage si le composant démonte pendant un maintien
+  useEffect(() => repeatStop, [])
+
+  const repeatStart =
+    (delta: number) =>
+    (e: ReactMouseEvent | ReactPointerEvent): void => {
+      e.preventDefault()
+      if (disabled || readOnly) return
+
+      changeBy(delta)
+
+      // délai avant répétition
+      repeatStop()
+      let speed = 120
+      let count = 0
+
+      pressTimer.current = setTimeout(() => {
+        pressInterval.current = setInterval(() => {
+          changeBy(delta)
+          count++
+          if (count % 6 === 0) speed = Math.max(40, speed - 10) // accélération légère
+        }, speed)
+      }, 350)
+
+      // Arrêt sur relâche / leave / visibility change
+      const once = { once: true } as AddEventListenerOptions
+      window.addEventListener('pointerup', repeatStop, once)
+      window.addEventListener('mouseup', repeatStop, once)
+      window.addEventListener('touchend', repeatStop, once)
+      window.addEventListener('pointercancel', repeatStop, once)
+      window.addEventListener('visibilitychange', () => {
+        if (document.visibilityState !== 'visible') repeatStop()
+      }, once)
+    }
+
+  // Saisie directe
+  const onInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.trim()
     if (raw === '') {
-      // laisse vider le champ mais ne notifie pas
       if (!isControlled) setInternal(min)
       return
     }
@@ -123,34 +166,37 @@ export default function QuantitySelector({
     emit(n)
   }
 
-  const onInputBlur = () => {
-    // au blur, on re-clamp proprement
-    emit(qty)
-  }
+  // Validation au blur
+  const onInputBlur = () => emit(qty, true)
 
-  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    const fast = e.shiftKey ? fastMultiplier : 1
     if (e.key === 'ArrowUp') {
       e.preventDefault()
-      changeBy(step)
+      changeBy(step * fast)
     } else if (e.key === 'ArrowDown') {
       e.preventDefault()
-      changeBy(-step)
+      changeBy(-step * fast)
     } else if (e.key === 'PageUp') {
       e.preventDefault()
-      changeBy(step * 10)
+      changeBy(step * fastMultiplier)
     } else if (e.key === 'PageDown') {
       e.preventDefault()
-      changeBy(-step * 10)
+      changeBy(-step * fastMultiplier)
     } else if (e.key === 'Home') {
       e.preventDefault()
       emit(min)
     } else if (e.key === 'End') {
       e.preventDefault()
       emit(max)
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      emit(qty, true)
     }
   }
 
-  const onWheel = (e: React.WheelEvent<HTMLInputElement>) => {
+  // Molette : uniquement quand l’input a le focus
+  const onWheel = (e: WheelEvent<HTMLInputElement>) => {
     if (document.activeElement !== e.currentTarget) return
     e.preventDefault()
     const delta = e.deltaY > 0 ? -step : step
@@ -159,7 +205,6 @@ export default function QuantitySelector({
 
   const minusDisabled = disabled || readOnly || qty <= min
   const plusDisabled = disabled || readOnly || qty >= max
-
   const srText = useMemo(() => `Quantité ${qty}`, [qty])
 
   return (
@@ -209,6 +254,9 @@ export default function QuantitySelector({
         readOnly={readOnly}
         aria-describedby={ariaDescribedBy}
         aria-live="off"
+        aria-valuemin={min}
+        aria-valuemax={max}
+        aria-valuenow={qty}
         className={cn(
           'w-16 text-center font-semibold text-lg',
           'border rounded-md py-1.5 px-2 bg-white dark:bg-zinc-900',
