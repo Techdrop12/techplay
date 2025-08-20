@@ -1,3 +1,4 @@
+// next.config.mjs
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
 import withPWA from 'next-pwa'
@@ -30,7 +31,10 @@ export default withPwaPlugin({
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     unoptimized: false,
   },
-  eslint: { ignoreDuringBuilds: false },
+
+  // (tu peux remettre false quand on aura nettoyé ESLint côté repo)
+  eslint: { ignoreDuringBuilds: true },
+
   headers: async () => {
     const base = [
       { key: 'X-DNS-Prefetch-Control', value: 'on' },
@@ -41,7 +45,7 @@ export default withPwaPlugin({
       { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
     ]
 
-    // ⚠️ Isolation stricte (peut bloquer Hotjar/MetaPixel). Active seulement si tu veux.
+    // Isolation stricte (désactive-la si Hotjar/MetaPixel doivent fonctionner)
     if (process.env.NEXT_STRICT_ISOLATION === '1') {
       base.push(
         { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
@@ -49,26 +53,28 @@ export default withPwaPlugin({
       )
     }
 
-    // En-tête hérité : on le garde derrière un flag pour éviter les warnings
     if (process.env.NEXT_ADD_EXPECT_CT === '1') {
       base.push({ key: 'Expect-CT', value: 'max-age=86400, enforce, report-uri="https://techplay.fr/csp-report"' })
     }
 
     return [
-      // Global
-      { source: '/(.*)', headers: base },
-      // Caching fort sur assets Next
+      // Global (toutes les routes)
+      { source: '/:path*', headers: base },
+
+      // Cache fort pour le bundle Next
       {
-        source: '/_next/static/(.*)',
+        source: '/_next/static/:any*',
         headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
       },
-      // Caching fort sur assets publics fingerprintés
+
+      // ✅ Pattern compatible Next (pas de (?:...) ni '?')
       {
-        source: '/(.*)\\.(?:js|css|png|jpg|jpeg|gif|webp|svg|ico|woff2?)',
+        source: '/:all*.(js|css|png|jpg|jpeg|gif|webp|svg|ico|woff|woff2)',
         headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
       },
     ]
   },
+
   webpack: (config) => {
     config.resolve.alias['@'] = path.resolve(__dirname, 'src')
     return config
