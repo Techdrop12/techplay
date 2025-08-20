@@ -1,42 +1,20 @@
 // src/app/produit/[slug]/page.tsx
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import dynamic from 'next/dynamic'
 import { getProductBySlug, getAllProductSlugs } from '@/lib/data'
 import type { Product } from '@/types/product'
 import { getLocale } from 'next-intl/server'
+import ProductDetail from '@/components/ProductDetail' // ← import direct (client component)
 
 export const revalidate = 1800
 export const dynamicParams = true
 
-const ProductDetail = dynamic(() => import('@/components/ProductDetail'), {
-  ssr: false,
-  loading: () => (
-    <main className="max-w-7xl mx-auto px-4 py-10">
-      <div className="animate-pulse space-y-4">
-        <div className="h-8 w-2/3 rounded bg-gray-200/70 dark:bg-zinc-800" />
-        <div className="h-64 w-full rounded bg-gray-200/70 dark:bg-zinc-800" />
-      </div>
-    </main>
-  ),
-})
-
 function absoluteUrl(path: string, base: string) {
-  try {
-    return new URL(path, base).toString()
-  } catch {
-    return path
-  }
+  try { return new URL(path, base).toString() } catch { return path }
 }
-
 async function safeGetLocale() {
-  try {
-    return (await getLocale()) || 'fr'
-  } catch {
-    return 'fr'
-  }
+  try { return (await getLocale()) || 'fr' } catch { return 'fr' }
 }
-
 function normalizeProduct(p: any, fallbackSlug: string): Product {
   const images = Array.isArray(p?.images) ? p.images.filter(Boolean) : []
   return {
@@ -60,7 +38,6 @@ function normalizeProduct(p: any, fallbackSlug: string): Product {
     currency: String(p?.currency || 'EUR').toUpperCase(),
   } as Product
 }
-
 async function safeGetProduct(slug: string): Promise<Product | null> {
   const s = String(slug || '').trim()
   if (!s) return null
@@ -71,9 +48,7 @@ async function safeGetProduct(slug: string): Promise<Product | null> {
     if (!prod.slug || !prod.title) return null
     return prod
   } catch (e) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.error('[product:getBySlug] failed for', slug, e)
-    }
+    if (process.env.NODE_ENV !== 'production') console.error('[product:getBySlug] failed for', slug, e)
     return null
   }
 }
@@ -81,18 +56,12 @@ async function safeGetProduct(slug: string): Promise<Product | null> {
 export async function generateStaticParams() {
   try {
     const slugs = await getAllProductSlugs().catch(() => [])
-    const uniq = Array.from(
-      new Set((slugs || []).map((s: any) => String(s ?? '').trim()).filter(Boolean))
-    )
+    const uniq = Array.from(new Set((slugs || []).map((s: any) => String(s ?? '').trim()).filter(Boolean)))
     return uniq.slice(0, 5000).map((slug) => ({ slug }))
-  } catch {
-    return []
-  }
+  } catch { return [] }
 }
 
-export async function generateMetadata(
-  { params }: { params: { slug: string } }
-): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, '') ?? 'https://techplay.example.com')
   const locale = await safeGetLocale()
   const product = await safeGetProduct(params.slug)
@@ -104,8 +73,7 @@ export async function generateMetadata(
   const url = absoluteUrl(`/${locale}/produit/${product.slug}`, baseUrl)
   const absImage = absoluteUrl(product.image || '/placeholder.png', baseUrl)
   const title = `${product.title} | TechPlay`
-  const description =
-    (product.description && product.description.slice(0, 160)) || 'Découvrez ce produit TechPlay.'
+  const description = (product.description && product.description.slice(0, 160)) || 'Découvrez ce produit TechPlay.'
 
   return {
     title,
@@ -140,7 +108,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Accueil',  item: absoluteUrl(`/${locale}`, baseUrl) },
+      { '@type': 'ListItem', position: 1, name: 'Accueil', item: absoluteUrl(`/${locale}`, baseUrl) },
       { '@type': 'ListItem', position: 2, name: 'Produits', item: absoluteUrl(`/${locale}/produit`, baseUrl) },
       { '@type': 'ListItem', position: 3, name: product.title, item: productUrl },
     ],
