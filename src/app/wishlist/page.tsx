@@ -1,19 +1,25 @@
 'use client'
 
+import { useEffect, useMemo } from 'react'
 import { useWishlist } from '@/hooks/useWishlist'
 import ProductCard from '@/components/ProductCard'
-import { useEffect } from 'react'
 import { sendEvent } from '@/lib/analytics'
 import type { Product } from '@/types/product'
 
 export default function WishlistPage() {
-  const { wishlist }: { wishlist: Product[] } = useWishlist()
+  // le hook expose `items`, pas `wishlist`
+  const { items = [], count } = useWishlist()
+
+  // si tu veux typer fort les items comme Product
+  const wishlist: Product[] = useMemo(() => items as unknown as Product[], [items])
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && typeof sendEvent === 'function') {
-      sendEvent('wishlist_view', { count: wishlist.length })
-    }
-  }, [wishlist.length])
+    try {
+      if (typeof window !== 'undefined' && typeof sendEvent === 'function') {
+        sendEvent('wishlist_view', { count: count ?? wishlist.length })
+      }
+    } catch {}
+  }, [count, wishlist.length])
 
   return (
     <main className="max-w-6xl mx-auto px-4 py-10" aria-labelledby="wishlist-title">
@@ -37,10 +43,10 @@ export default function WishlistPage() {
           className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 fade-in"
           role="list"
         >
-          {wishlist.map((product) =>
+          {wishlist.map((product, i) =>
             product ? (
               <ProductCard
-                key={product._id}
+                key={product._id ?? product.slug ?? i}
                 product={{
                   ...product,
                   title: product.title ?? 'Produit',
