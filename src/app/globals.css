@@ -109,7 +109,7 @@
     @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold px-4 py-2
            transition active:scale-[0.98] focus:outline-none;
   }
-  .btn:focus-visible { @apply focus-ring; } /* utilitaire du plugin Tailwind */
+  .btn:focus-visible { @apply focus-ring; } /* utilitaire du plugin Tailwind (fallback en utilities) */
 
   .btn-primary {
     @apply btn text-white;
@@ -145,19 +145,77 @@
     -webkit-background-clip: text; background-clip: text;
     color: transparent;
   }
+
+  /* Skeleton */
+  .skeleton {
+    position: relative;
+    border-radius: 0.75rem;
+    background: linear-gradient(90deg,
+      hsl(var(--surface-2)) 25%,
+      hsl(var(--surface)) 37%,
+      hsl(var(--surface-2)) 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.2s linear infinite;
+  }
 }
 
 /* ================== Utilities =================== */
 @layer utilities {
   .shadow-soft    { box-shadow: var(--shadow-sm); }
   .shadow-soft-lg { box-shadow: var(--shadow-lg); }
+  .shadow-elevated { box-shadow: 0 14px 28px hsl(var(--elev-c) / var(--elev-a2)); }
 
-  /* Motion : on anime seulement quand autorisé */
+  /* ===== Utilitaires tokens utilisés partout ===== */
+  .bg-token-surface { background-color: hsl(var(--bg)); }
+  .text-token-text  { color:            hsl(var(--text)); }
+  .border-token-border { border-color:  hsl(var(--border)); }
+
+  /* Variants les plus utilisés (escapes pour le /) */
+  .bg-token-surface\/70 { background-color: hsl(var(--surface) / .70); }
+  .bg-token-surface\/60 { background-color: hsl(var(--surface) / .60); }
+  .text-token-text\/70  { color:            hsl(var(--text) / .70); }
+  .text-token-text\/60  { color:            hsl(var(--text) / .60); }
+
+  /* Couleurs brand */
+  .bg-brand  { background-color: hsl(var(--brand)); }
+  .text-brand{ color:            hsl(var(--brand)); }
+
+  /* Gradients Tailwind-like pour tokens (from-/via-/to-) */
+  .from-token-surface { --tw-gradient-from: hsl(var(--surface)) var(--tw-gradient-from-position); --tw-gradient-to: hsl(var(--surface) / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+  .via-token-surface  { --tw-gradient-to: hsl(var(--surface) / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), hsl(var(--surface)) var(--tw-gradient-via-position), var(--tw-gradient-to); }
+  .to-token-surface   { --tw-gradient-to: hsl(var(--surface)) var(--tw-gradient-to-position); }
+
+  /* Décors utilisés par le Layout */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, rgba(0,0,0,.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0,0,0,.06) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  :is(html.dark, .dark) .bg-grid {
+    background-image:
+      linear-gradient(to right, rgba(255,255,255,.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,.08) 1px, transparent 1px);
+  }
+  .overlay-hero { background: var(--overlay-hero); }
+
+  /* ===== Motion : visible par défaut (FIN du bug) ===== */
+  .motion-section { opacity: 1; transform: none; } /* ← plus jamais caché par défaut */
+
   @media (prefers-reduced-motion: no-preference) {
+    /* Utilise la keyframe existante 'fadeInUp' (définie dans design-tokens.css) */
     .motion-section {
-      animation: fadeUp 0.45s var(--ease-out) both;
+      animation: fadeInUp 0.45s var(--ease-out) both;
       will-change: transform, opacity;
     }
+  }
+
+  /* Fallback focus ring (si le plugin n'est pas chargé) */
+  .focus-ring {
+    box-shadow:
+      0 0 0 var(--ring-offset) hsl(var(--surface)),
+      0 0 0 calc(var(--ring-offset) + 2px) hsl(var(--accent)) !important;
+    outline: none !important;
   }
 
   /* Accessibilité */
@@ -169,3 +227,5 @@
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* (La keyframe 'fadeInUp' est définie dans styles/design-tokens.css et réutilisée ici) */

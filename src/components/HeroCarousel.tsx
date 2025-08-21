@@ -78,7 +78,7 @@ const DEFAULT_SLIDES: Slide[] = [
     ctaLabel: 'Voir plus',
     ctaLink: '/produit/clavier-mecanique',
   },
-] as const
+]
 
 const TEXT_SIZES = {
   sm: 'text-xl sm:text-2xl',
@@ -94,7 +94,7 @@ const BLUR_DATA_URL =
 /* ------------------------------- Component ------------------------------- */
 
 export default function HeroCarousel({
-  slides = DEFAULT_SLIDES as unknown as Slide[],
+  slides = DEFAULT_SLIDES,
   intervalMs = 7000,
   showOverlay = true,
   overlayOpacity = 0.35,
@@ -122,7 +122,7 @@ export default function HeroCarousel({
   /* Derived slide */
   const current = useMemo(() => slides[index], [slides, index])
 
-  /* Parallaxe */
+  /* Parallaxe (désactivée si parallaxPx = 0) */
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end start'],
@@ -200,7 +200,7 @@ export default function HeroCarousel({
     } catch {}
   }, [index, current, total, onSlideChange, srId])
 
-  /* Swipe tactile (⚠️ handlers sur le container, pas sur un overlay bloquant) */
+  /* Swipe tactile (handlers sur le container, pas sur un overlay bloquant) */
   const onTouchStart: React.TouchEventHandler<HTMLDivElement> = (e) => {
     touchStartX.current = e.touches[0].clientX
     pause()
@@ -219,7 +219,7 @@ export default function HeroCarousel({
     else if (e.key === 'ArrowLeft') { pause(); prev(); resume() }
     else if (e.key === 'Home') { pause(); setIndex(0); resume() }
     else if (e.key === 'End') { pause(); setIndex(total - 1); resume() }
-    else if (e.key.toLowerCase() === ' ') { e.preventDefault(); isPaused ? resume() : pause() }
+    else if (e.key === ' ' || e.key === 'Spacebar' || e.key === 'Space') { e.preventDefault(); isPaused ? resume() : pause() }
   }
 
   if (total === 0) return null
@@ -229,7 +229,7 @@ export default function HeroCarousel({
       ref={containerRef}
       className={cn(
         'relative h-[60vh] sm:h-[72vh] lg:h-[88vh] w-full overflow-hidden rounded-none sm:rounded-3xl shadow-2xl select-none',
-        'bg-token-surface/5 will-change-transform',
+        'bg-token-surface/60 will-change-transform', // surface translucide pour le fallback
         className
       )}
       role="region"
@@ -295,7 +295,6 @@ export default function HeroCarousel({
                 poster={current.poster || current.image}
                 onPlay={(e: SyntheticEvent<HTMLVideoElement>) => { if (isPaused) e.currentTarget.pause() }}
               >
-                {/* Ajout type explicite pour compatibilité */}
                 <source src={current.videoUrl} type="video/mp4" />
               </video>
             ) : (
@@ -310,6 +309,7 @@ export default function HeroCarousel({
                 placeholder="blur"
                 blurDataURL={BLUR_DATA_URL}
                 draggable={false}
+                onError={(e) => { (e.currentTarget as any).style.display = 'none' }}
               />
             )}
           </motion.div>
@@ -322,8 +322,11 @@ export default function HeroCarousel({
         {showOverlay && (
           <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity})` }} />
         )}
-        {/* halo conique doux via util perso */}
-        <div className="ring-conic absolute inset-0 opacity-60 mix-blend-overlay dark:mix-blend-screen" />
+        {/* Halo conique alimenté par --ring-conic */}
+        <div
+          className="absolute inset-0 opacity-60 mix-blend-overlay dark:mix-blend-screen"
+          style={{ background: 'var(--ring-conic)' }}
+        />
       </div>
 
       {/* Badge header (optionnel) */}
