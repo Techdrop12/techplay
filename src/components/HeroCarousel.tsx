@@ -103,6 +103,10 @@ const TEXT_SIZES = {
   xl: 'text-6xl sm:text-7xl',
 } as const
 
+// Blur tiny placeholder (évite dépendance à un fichier externe)
+const BLUR_DATA_URL =
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+'
+
 /* -------------------------------------------------------------------------- */
 /*                                  Component                                 */
 /* -------------------------------------------------------------------------- */
@@ -230,21 +234,13 @@ export default function HeroCarousel({
   /* ------------------------------ Keyboard nav ------------------------------ */
   const onKeyDown: React.KeyboardEventHandler = (e) => {
     if (e.key === 'ArrowRight') {
-      pause()
-      next()
-      resume()
+      pause(); next(); resume()
     } else if (e.key === 'ArrowLeft') {
-      pause()
-      prev()
-      resume()
+      pause(); prev(); resume()
     } else if (e.key === 'Home') {
-      pause()
-      setIndex(0)
-      resume()
+      pause(); setIndex(0); resume()
     } else if (e.key === 'End') {
-      pause()
-      setIndex(total - 1)
-      resume()
+      pause(); setIndex(total - 1); resume()
     } else if (e.key.toLowerCase() === ' ') {
       e.preventDefault()
       isPaused ? resume() : pause()
@@ -258,7 +254,7 @@ export default function HeroCarousel({
       ref={containerRef as any}
       className={cn(
         'relative h-[60vh] sm:h-[72vh] lg:h-[88vh] w-full overflow-hidden rounded-none sm:rounded-3xl shadow-2xl select-none',
-        'bg-black/10 dark:bg-zinc-900',
+        'bg-black/10 dark:bg-zinc-900 will-change-transform',
         className
       )}
       role="region"
@@ -279,11 +275,11 @@ export default function HeroCarousel({
       {edgeFade && (
         <>
           <div
-            className="pointer-events-none absolute inset-y-0 left-0 w-24 sm:w-36 z-[2] bg-gradient-to-r from-black/40 to-transparent"
+            className="pointer-events-none absolute inset-y-0 left-0 w-24 sm:w-36 z-[2] bg-gradient-to-r from-black/40 to-transparent dark:from-black/60"
             aria-hidden
           />
           <div
-            className="pointer-events-none absolute inset-y-0 right-0 w-24 sm:w-36 z-[2] bg-gradient-to-l from-black/40 to-transparent"
+            className="pointer-events-none absolute inset-y-0 right-0 w-24 sm:w-36 z-[2] bg-gradient-to-l from-black/40 to-transparent dark:from-black/60"
             aria-hidden
           />
         </>
@@ -293,43 +289,54 @@ export default function HeroCarousel({
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={current.id}
-          initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, scale: 1.02 }}
+          initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, scale: 1.01 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0.25, scale: 0.98 }}
-          transition={{ duration: prefersReducedMotion ? 0 : 0.8, ease: 'easeOut' }}
-          className="absolute inset-0 z-0"
+          exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0.25, scale: 0.99 }}
+          transition={{ duration: prefersReducedMotion ? 0 : 0.6, ease: 'easeOut' }}
+          className="absolute inset-0 z-0 will-change-transform"
           style={parallaxStyle as any}
+          aria-roledescription="slide"
+          aria-label={`${index + 1} / ${total}${current?.alt ? ` — ${current.alt}` : ''}`}
         >
-          {/* Image ou vidéo */}
-          {current.videoUrl ? (
-            <video
-              key={String(current.videoUrl)}
-              className="h-full w-full object-cover"
-              playsInline
-              muted
-              loop
-              autoPlay={effectiveAutoplay}
-              preload="metadata"
-              poster={current.poster || current.image}
-              onPlay={(e: SyntheticEvent<HTMLVideoElement>) => {
-                if (isPaused) e.currentTarget.pause()
-              }}
-            >
-              <source src={current.videoUrl} />
-            </video>
-          ) : (
-            <Image
-              src={current.image || '/placeholder.png'}
-              alt={current.alt || ''}
-              fill
-              sizes="100vw"
-              priority={index === 0}
-              className="object-cover"
-              placeholder="blur"
-              blurDataURL="/placeholder-blur.png"
-              draggable={false}
-            />
-          )}
+          {/* Ken Burns doux sur le média */}
+          <motion.div
+            key={`kb-${current.id}`}
+            initial={{ scale: 1.02 }}
+            animate={prefersReducedMotion ? { scale: 1 } : { scale: 1.07 }}
+            transition={{ duration: intervalMs / 1000, ease: 'linear' }}
+            className="absolute inset-0 will-change-transform"
+          >
+            {current.videoUrl ? (
+              <video
+                key={String(current.videoUrl)}
+                className="h-full w-full object-cover"
+                playsInline
+                muted
+                loop
+                autoPlay={effectiveAutoplay}
+                preload="metadata"
+                poster={current.poster || current.image}
+                onPlay={(e: SyntheticEvent<HTMLVideoElement>) => {
+                  if (isPaused) e.currentTarget.pause()
+                }}
+              >
+                <source src={current.videoUrl} />
+              </video>
+            ) : (
+              <Image
+                src={current.image || '/og-image.jpg'}
+                alt={current.alt || ''}
+                fill
+                sizes="100vw"
+                priority={index === 0}
+                quality={85}
+                className="object-cover"
+                placeholder="blur"
+                blurDataURL={BLUR_DATA_URL}
+                draggable={false}
+              />
+            )}
+          </motion.div>
         </motion.div>
       </AnimatePresence>
 
@@ -402,11 +409,7 @@ export default function HeroCarousel({
               'w-11 h-11 sm:w-12 sm:h-12 grid place-items-center',
               'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60'
             )}
-            onClick={() => {
-              pause()
-              prev()
-              resume()
-            }}
+            onClick={() => { pause(); prev(); resume() }}
           >
             <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
               <path fill="currentColor" d="M15.78 19.78L8 12l7.78-7.78l1.44 1.44L10.88 12l6.34 6.34z" />
@@ -422,11 +425,7 @@ export default function HeroCarousel({
               'w-11 h-11 sm:w-12 sm:h-12 grid place-items-center',
               'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60'
             )}
-            onClick={() => {
-              pause()
-              next()
-              resume()
-            }}
+            onClick={() => { pause(); next(); resume() }}
           >
             <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
               <path fill="currentColor" d="M8.22 4.22L16 12l-7.78 7.78l-1.44-1.44L13.12 12L6.78 5.66z" />
@@ -487,11 +486,7 @@ export default function HeroCarousel({
                 )}
                 aria-label={`Aller à la diapositive ${i + 1} : ${s.alt || ''}`}
                 aria-current={active ? 'true' : undefined}
-                onClick={() => {
-                  pause()
-                  setIndex(i)
-                  resume()
-                }}
+                onClick={() => { pause(); setIndex(i); resume() }}
               />
             )
           })}
@@ -507,7 +502,7 @@ export default function HeroCarousel({
           <ul className="flex gap-3">
             {slides.map((s, i) => {
               const active = i === index
-              const thumb = s.image || s.poster || '/placeholder.png'
+              const thumb = s.image || s.poster || '/og-image.jpg'
               return (
                 <li key={s.id ?? i}>
                   <button
@@ -518,11 +513,7 @@ export default function HeroCarousel({
                     )}
                     aria-label={`Aller à la diapositive ${i + 1}`}
                     aria-current={active ? 'true' : undefined}
-                    onClick={() => {
-                      pause()
-                      setIndex(i)
-                      resume()
-                    }}
+                    onClick={() => { pause(); setIndex(i); resume() }}
                   >
                     <Image
                       src={thumb}
@@ -530,6 +521,8 @@ export default function HeroCarousel({
                       fill
                       sizes="80px"
                       className="object-cover"
+                      placeholder="blur"
+                      blurDataURL={BLUR_DATA_URL}
                       draggable={false}
                     />
                   </button>

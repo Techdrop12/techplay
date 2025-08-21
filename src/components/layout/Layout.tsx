@@ -16,7 +16,7 @@ const ScrollTopButton = dynamic(() => import('../ui/ScrollTopButton'), { ssr: fa
 // ⚠️ compat Next types: pas d'option "suspense" ici
 const FooterLazy = dynamic(() => import('@/components/Footer'), {
   ssr: true,
-  loading: () => null, // affichage pendant le chargement
+  loading: () => null,
 })
 
 interface LayoutProps {
@@ -38,11 +38,7 @@ export default function Layout({
   // Pageview sur changement de route (safe)
   useEffect(() => {
     if (!analytics || !pathname) return
-    try {
-      pageview(pathname)
-    } catch {
-      /* noop */
-    }
+    try { pageview(pathname) } catch {}
   }, [pathname, analytics])
 
   // Focus sur <main> après navigation (accessibilité)
@@ -62,10 +58,10 @@ export default function Layout({
         role="main"
         tabIndex={-1}
         data-theme={theme}
-        className="relative min-h-screen pt-16 md:pt-20 bg-white dark:bg-gray-950 text-gray-900 dark:text-white transition-colors"
+        className="relative min-h-screen pt-16 md:pt-20 bg-token-surface text-token-text transition-colors"
         aria-label="Contenu principal"
       >
-        <Suspense fallback={<div className="px-4 py-8 text-sm text-gray-500">Chargement…</div>}>
+        <Suspense fallback={<div className="px-4 py-8 text-sm text-token-text/70">Chargement…</div>}>
           {children}
         </Suspense>
       </main>

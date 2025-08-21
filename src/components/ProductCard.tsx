@@ -35,6 +35,10 @@ interface ProductCardProps {
 /** Clamp helper */
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
 
+/** Blur tiny placeholder autonome (évite dépendance fichier) */
+const BLUR_DATA_URL =
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+'
+
 export default function ProductCard({
   product,
   priority = false,
@@ -49,7 +53,6 @@ export default function ProductCard({
     price = 0,
     oldPrice,
     image = '/placeholder.png',
-    // si ton type a un tableau d’images, on prend la 1re
     images,
     rating,
     isNew,
@@ -178,7 +181,9 @@ export default function ProductCard({
       itemScope
       itemType="https://schema.org/Product"
       className={cn(
-        'group relative rounded-3xl p-[1px] bg-gradient-to-br from-accent/25 via-transparent to-transparent',
+        'group relative rounded-3xl p-[1px]',
+        // bordure gradient “anneau” physique
+        'bg-[conic-gradient(from_140deg,rgba(59,130,246,.35),transparent_35%,rgba(14,165,233,.35),transparent_75%)]',
         'shadow-sm hover:shadow-2xl transition-shadow',
         className
       )}
@@ -199,7 +204,8 @@ export default function ProductCard({
       <motion.div
         className={cn(
           'relative rounded-[inherit] overflow-hidden',
-          'bg-white dark:bg-zinc-900 border border-gray-200/70 dark:border-zinc-800'
+          'bg-white/80 dark:bg-zinc-900/80 backdrop-blur',
+          'border border-white/40 dark:border-white/10 ring-1 ring-gray-200/60 dark:ring-gray-800/60'
         )}
         style={
           !prefersReducedMotion
@@ -213,7 +219,7 @@ export default function ProductCard({
           className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
           style={{
             background:
-              'radial-gradient(600px 200px at 10% -10%, rgba(255,255,255,0.35), transparent 60%)',
+              'radial-gradient(700px 220px at 12% -10%, rgba(255,255,255,0.35), transparent 60%)',
           }}
         />
 
@@ -239,7 +245,8 @@ export default function ProductCard({
               priority={priority}
               loading={priority ? 'eager' : 'lazy'}
               placeholder="blur"
-              blurDataURL="/placeholder-blur.png"
+              blurDataURL={BLUR_DATA_URL}
+              quality={85}
               onError={() => setImgError(true)}
               onLoadingComplete={() => setImgLoaded(true)}
               decoding="async"
@@ -311,7 +318,7 @@ export default function ProductCard({
               {title}
             </h3>
 
-            {/* Tags (optionnel si présents) */}
+            {/* Tags (optionnels) */}
             {Array.isArray(tags) && tags.length > 0 && (
               <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400 line-clamp-1">
                 {tags.slice(0, 3).join(' • ')}

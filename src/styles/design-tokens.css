@@ -1,4 +1,4 @@
-/* src/styles/design-tokens.css  — tokens premium */
+/* src/styles/design-tokens.css — tokens premium */
 
 :root {
   /* Couleurs (HSL) */
@@ -24,6 +24,7 @@
   --radius: 0.75rem;
   --radius-lg: 1rem;
   --radius-2xl: 1.25rem;
+  --radius-3xl: 1.75rem;
 
   --shadow-sm: 0 1px 2px rgba(0,0,0,.05);
   --shadow-md: 0 4px 14px rgba(0,0,0,.08);
@@ -33,11 +34,18 @@
   --ring-color: hsl(var(--accent));
   --ring-offset: 2px;
 
+  /* Easing / Durées (motion) */
+  --ease-out: cubic-bezier(.19,1,.22,1);
+  --ease-in: cubic-bezier(.95,.05,.795,.035);
+  --dur-fast: .18s;
+  --dur: .28s;
+  --dur-slow: .45s;
+
   /* Typo (injectées par next/font) */
   --font-inter: Inter, ui-sans-serif, system-ui;
   --font-sora: Sora, ui-sans-serif, system-ui;
 
-  /* Piles de police project */
+  /* Piles de police projet */
   --font-sans: var(--font-inter), Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
   --font-heading: var(--font-sora), var(--font-inter), Inter, ui-sans-serif, system-ui;
 
@@ -46,6 +54,10 @@
   /* Sélection texte */
   --selection-bg: hsl(var(--accent) / .18);
   --selection-fg: hsl(var(--text));
+
+  /* Gradients utilitaires */
+  --ring-conic: conic-gradient(from 140deg, hsl(var(--accent) / .45), transparent 40%, hsl(199 89% 48% / .35), transparent 70%);
+  --overlay-hero: radial-gradient(80% 60% at 50% 40%, transparent, rgba(0,0,0,.55));
 }
 
 .dark {
@@ -84,11 +96,14 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* Headings premium */
+h1, h2, h3, h4 { font-family: var(--font-heading); letter-spacing: -0.01em; }
+
 /* Liens */
 a {
   color: hsl(var(--accent));
   text-decoration: none;
-  transition: color .18s ease, opacity .18s ease, text-decoration-color .18s ease;
+  transition: color var(--dur-fast) ease, opacity var(--dur-fast) ease, text-decoration-color var(--dur-fast) ease;
 }
 a:hover,
 a:focus-visible {
@@ -132,12 +147,39 @@ button {
 .soft-card {
   background: hsl(var(--surface));
   border: 1px solid hsl(var(--border));
-  border-radius: var(--radius);
+  border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-sm);
 }
 .soft-card:hover {
   box-shadow: var(--shadow-md);
-  transition: box-shadow .2s ease, transform .2s ease;
+  transition: box-shadow var(--dur) var(--ease-out), transform var(--dur) var(--ease-out);
+}
+
+/* Ombres physiques premium (multi-couches) */
+.shadow-phys {
+  box-shadow:
+    0 1px 1px rgba(0,0,0,.06),
+    0 8px 18px rgba(0,0,0,.08),
+    0 20px 40px rgba(0,0,0,.06);
+}
+.shadow-phys-lg {
+  box-shadow:
+    0 2px 2px rgba(0,0,0,.06),
+    0 10px 24px rgba(0,0,0,.10),
+    0 28px 60px rgba(0,0,0,.10);
+}
+
+/* Sections avec apparition douce (fallback si pas de JS) */
+.motion-section {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: fadeInUp var(--dur-slow) var(--ease-out) forwards;
+  will-change: transform, opacity;
+}
+
+/* Overlay héro utilitaire (utilisé dans le HeroCarousel) */
+.overlay-hero {
+  background: var(--overlay-hero);
 }
 
 /* Motion reduce */
@@ -148,4 +190,10 @@ button {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Keyframes locales pour .motion-section */
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
 }

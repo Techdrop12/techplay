@@ -3,6 +3,7 @@ import './globals.css'
 import type { Metadata, Viewport } from 'next'
 import { Inter, Sora } from 'next/font/google'
 import { Suspense } from 'react'
+import type React from 'react'
 
 import Layout from '@/components/layout/Layout'
 import RootLayoutClient from '@/components/RootLayoutClient'
@@ -97,8 +98,25 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" dir="ltr" className={`${inter.variable} ${sora.variable} scroll-smooth`} suppressHydrationWarning>
+    <html
+      lang="fr"
+      dir="ltr"
+      className={`${inter.variable} ${sora.variable} scroll-smooth`}
+      suppressHydrationWarning
+    >
       <head>
+        {/* Anti-FOUC thème: appliquer le mode sombre le plus tôt possible */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var t = localStorage.getItem('theme');
+                if (t === 'dark') document.documentElement.classList.add('dark');
+              } catch(e) {}
+            `,
+          }}
+        />
+
         {/* Consent Mode v2 par défaut */}
         <script
           dangerouslySetInnerHTML={{
@@ -116,10 +134,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
 
-        {/* Perf: préconnect */}
-        <link rel="preconnect" href="https://www.googletagmanager.com" />
-        <link rel="preconnect" href="https://www.google-analytics.com" />
-        <link rel="preconnect" href="https://connect.facebook.net" />
+        {/* Perf: préconnect (avec CORS lorsque utile) */}
+        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="" />
+        <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="" />
+        <link rel="preconnect" href="https://connect.facebook.net" crossOrigin="" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
         <link rel="dns-prefetch" href="https://connect.facebook.net" />
@@ -131,7 +149,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
       </head>
 
-      <body className="min-h-screen bg-white text-black antialiased dark:bg-black dark:text-white">
+      {/* Utilisation des tokens tailwind (bg-token-\* / text-token-\*) */}
+      <body className="min-h-screen bg-token-surface text-token-text antialiased dark:[color-scheme:dark]">
         {/* Décor global premium */}
         <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
           <div className="absolute left-1/2 top-[-120px] h-[420px] w-[620px] -translate-x-1/2 rounded-full bg-accent/25 blur-3xl dark:bg-accent/30" />
@@ -150,7 +169,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </div>
 
         <AccessibilitySkip />
-        <div id="main" tabIndex={-1} />
+        {/* Sentinelle pour focus (évite un doublon d'ID avec <main id="main">) */}
+        <div id="focus-sentinel" tabIndex={-1} />
 
         <RootLayoutClient>
           <AfterIdleClient>

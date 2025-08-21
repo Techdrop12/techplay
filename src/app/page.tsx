@@ -5,6 +5,8 @@ import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 
 import { getBestProducts, getRecommendedPacks } from '@/lib/data'
+import type { Product } from '@/types/product'
+import type { Pack } from '@/types/product' // si Pack est ailleurs, ajuste l’import
 
 import BannerPromo from '@/components/BannerPromo'
 import TrustBadges from '@/components/TrustBadges'
@@ -25,6 +27,7 @@ const FAQ = dynamic(() => import('@/components/FAQ'), {
 
 /* ------------------------------ Metadata page ----------------------------- */
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://techplay.example.com'
+const OG_IMAGE = `${SITE_URL}/og-image.jpg` // présent dans /public d’après ta capture
 
 export const metadata: Metadata = {
   title: 'TechPlay – Boutique high-tech & packs exclusifs',
@@ -38,7 +41,7 @@ export const metadata: Metadata = {
       'Découvrez les meilleures offres et packs TechPlay, sélectionnées pour vous avec passion et innovation.',
     url: SITE_URL,
     siteName: 'TechPlay',
-    images: [{ url: `${SITE_URL}/og-homepage.jpg`, width: 1200, height: 630, alt: 'TechPlay – Accueil' }],
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: 'TechPlay – Accueil' }],
     locale: 'fr_FR',
     type: 'website',
   },
@@ -48,7 +51,10 @@ export const metadata: Metadata = {
     description:
       'Découvrez les meilleures offres et packs TechPlay, sélectionnées pour vous avec passion et innovation.',
     creator: '@TechPlay',
-    images: [`${SITE_URL}/og-homepage.jpg`],
+    images: [OG_IMAGE],
+  },
+  alternates: {
+    canonical: SITE_URL,
   },
 }
 
@@ -69,12 +75,16 @@ function SectionHeader({
 }) {
   return (
     <header className={center ? 'text-center max-w-3xl mx-auto' : ''}>
-      {kicker ? <p className="text-xs tracking-widest uppercase font-bold text-accent/90">{kicker}</p> : null}
+      {kicker ? (
+        <p className="text-xs tracking-widest uppercase font-bold text-accent/90">{kicker}</p>
+      ) : null}
       <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight">
         <span className="text-brand dark:text-brand-light">{title}</span>
         <span className="text-accent">.</span>
       </h2>
-      {sub ? <p className="mt-3 text-sm sm:text-base text-gray-600 dark:text-gray-400">{sub}</p> : null}
+      {sub ? (
+        <p className="mt-3 text-sm sm:text-base text-gray-600 dark:text-gray-400">{sub}</p>
+      ) : null}
     </header>
   )
 }
@@ -106,7 +116,9 @@ function FeaturedCategories() {
               <div className="text-3xl sm:text-4xl">{c.emoji}</div>
               <div className="mt-3 font-semibold">{c.label}</div>
               <div className="text-xs text-gray-500 dark:text-gray-400">{c.desc}</div>
-              <div className="mt-3 text-xs text-accent font-semibold opacity-0 group-hover:opacity-100 transition">Voir →</div>
+              <div className="mt-3 text-xs text-accent font-semibold opacity-0 group-hover:opacity-100 transition">
+                Voir →
+              </div>
             </Link>
           </li>
         ))}
@@ -149,8 +161,8 @@ function SplitCTA() {
             </Link>
           </div>
         </div>
-        {/* image / visuel libre si tu veux ici */}
-        <div className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/50 dark:bg-zinc-900/50 min-h-[180px] shadow-soft" />
+        {/* Espace visuel (image/3D/particles) si souhaité */}
+        <div className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/50 dark:bg-zinc-900/50 min-h-[180px] shadow-xl" />
       </div>
     </section>
   )
@@ -167,7 +179,10 @@ function Testimonials() {
       <SectionHeader kicker="Avis" title="Les clients en parlent" sub="Une communauté exigeante et satisfaite." />
       <ul role="list" className="mt-8 grid gap-4 sm:grid-cols-3">
         {items.map((t, i) => (
-          <li key={i} className="rounded-2xl border border-gray-200/70 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/70 p-5 shadow-sm">
+          <li
+            key={i}
+            className="rounded-2xl border border-gray-200/70 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/70 p-5 shadow-sm"
+          >
             <p className="text-sm text-gray-700 dark:text-gray-300">“{t.text}”</p>
             <p className="mt-3 text-sm font-semibold">— {t.name}</p>
           </li>
@@ -193,11 +208,13 @@ function SectionSkeleton({ title }: { title: string }) {
 
 /* --------------------------------- PAGE ---------------------------------- */
 export default async function HomePage() {
-  let bestProducts: any[] = []
-  let recommendedPacks: any[] = []
+  let bestProducts: Product[] = []
+  let recommendedPacks: Pack[] = []
   try {
     ;[bestProducts, recommendedPacks] = await Promise.all([getBestProducts(), getRecommendedPacks()])
-  } catch {}
+  } catch {
+    // soft-fail : on laisse les sections se squeletonner élégamment
+  }
 
   const itemListJsonLd =
     Array.isArray(bestProducts) && bestProducts.length > 0
@@ -217,17 +234,19 @@ export default async function HomePage() {
     <>
       <h1 className="sr-only">TechPlay – Boutique high-tech & packs exclusifs</h1>
       <ClientTrackingScript event="homepage_view" />
+
+      {/* 🔥 Hero / Promo — unique, tout en haut */}
       <BannerPromo />
 
-      {/* Décor doux (glow) */}
+      {/* Glow décoratif global (light + dark) */}
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute left-1/2 top-[-120px] h-[420px] w-[620px] -translate-x-1/2 rounded-full bg-accent/20 blur-3xl" />
       </div>
 
       <main className="space-y-28 px-4 sm:px-6 max-w-screen-xl mx-auto scroll-smooth" role="main" tabIndex={-1}>
-        {/* 🎥 Hero */}
+        {/* 🎥 Carrousel produits vedettes */}
         <section aria-label="Carrousel des produits en vedette" className="motion-section" id="hero">
-          <Suspense>
+          <Suspense fallback={<div className="h-40 sm:h-56 lg:h-72 animate-pulse rounded-2xl bg-gray-200/60 dark:bg-zinc-800/60" />}>
             <HeroCarousel />
           </Suspense>
         </section>
@@ -235,9 +254,13 @@ export default async function HomePage() {
         {/* 🗂️ Catégories vedettes */}
         <FeaturedCategories />
 
-        {/* 🏆 Meilleures ventes (sans doublon de titre) */}
+        {/* 🏆 Meilleures ventes */}
         <section aria-label="Meilleures ventes TechPlay" className="motion-section" id="best-products">
-          <SectionHeader kicker="Top ventes" title="Nos Meilleures Ventes" sub="Les favoris de la communauté – stock limité." />
+          <SectionHeader
+            kicker="Top ventes"
+            title="Nos Meilleures Ventes"
+            sub="Les favoris de la communauté – stock limité."
+          />
           <div className="mt-8">
             <Suspense fallback={<SectionSkeleton title="Nos Meilleures Ventes" />}>
               <BestProducts products={bestProducts} showTitle={false} />
@@ -247,7 +270,11 @@ export default async function HomePage() {
 
         {/* 🎁 Packs recommandés */}
         <section aria-label="Packs TechPlay recommandés" className="motion-section" id="packs">
-          <SectionHeader kicker="Bundle" title="Packs recommandés" sub="Des combinaisons pensées pour la performance et l’économie." />
+          <SectionHeader
+            kicker="Bundle"
+            title="Packs recommandés"
+            sub="Des combinaisons pensées pour la performance et l’économie."
+          />
           <div className="mt-8">
             <Suspense fallback={<SectionSkeleton title="Packs recommandés" />}>
               <PacksSection packs={recommendedPacks} />
@@ -255,13 +282,13 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* 💬 Témoignages simples */}
+        {/* 💬 Témoignages */}
         <Testimonials />
 
-        {/* ⚡ CTA premium (allégé) */}
+        {/* ⚡ CTA premium (court, non redondant avec le Hero) */}
         <SplitCTA />
 
-        {/* ❓ Foire aux questions */}
+        {/* ❓ FAQ */}
         <section aria-label="Questions fréquentes de nos clients" className="motion-section">
           <SectionHeader kicker="FAQ" title="Questions fréquentes" />
           <div className="mt-8">
@@ -271,7 +298,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ✅ Badges de confiance — version premium, unique et en bas */}
+        {/* ✅ Badges de confiance — unique, en bas */}
         <TrustBadges variant="premium" className="mt-10" />
       </main>
 

@@ -9,9 +9,7 @@ import type { PluginAPI } from 'tailwindcss/types/config'
 const config: Config = {
   darkMode: 'class',
 
-  content: [
-    './src/**/*.{js,ts,jsx,tsx,mdx}',
-  ],
+  content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
 
   theme: {
     container: {
@@ -24,10 +22,11 @@ const config: Config = {
 
       fontFamily: {
         // le body est piloté par --font-inter (via globals)
-        // on garde une famille Tailwind “sécurité”
         sans: ['InterVariable', 'Inter', 'ui-sans-serif', 'system-ui'],
+        heading: ['SoraVariable', 'var(--font-sora)', 'Inter', 'ui-sans-serif', 'system-ui'],
       },
 
+      // Palette hybride : valeurs hex + accès aux tokens CSS (hsl(var(--...)))
       colors: {
         brand: { DEFAULT: '#0f172a', light: '#1e293b', dark: '#0e1116' },
         accent: {
@@ -49,6 +48,17 @@ const config: Config = {
 
         surface: { DEFAULT: '#ffffff', muted: '#f8fafc', dark: '#0b0f14' },
         border: { DEFAULT: '#e5e7eb', dark: '#262b35' },
+
+        // Accès direct aux tokens CSS (pour bg-[var] avec alpha)
+        token: {
+          bg: 'hsl(var(--bg) / <alpha-value>)',
+          text: 'hsl(var(--text) / <alpha-value>)',
+          'text-muted': 'hsl(var(--text-muted) / <alpha-value>)',
+          surface: 'hsl(var(--surface) / <alpha-value>)',
+          'surface-2': 'hsl(var(--surface-2) / <alpha-value>)',
+          border: 'hsl(var(--border) / <alpha-value>)',
+          accent: 'hsl(var(--accent) / <alpha-value>)',
+        },
       },
 
       spacing: { header: '4.5rem' },
@@ -104,9 +114,9 @@ const config: Config = {
               fontWeight: 600,
               '&:hover': { color: theme('colors.accent.700') as string },
             },
-            h1: { fontWeight: 800, letterSpacing: '-0.02em' },
-            h2: { fontWeight: 700, letterSpacing: '-0.01em' },
-            h3: { fontWeight: 700 },
+            h1: { fontFamily: String(theme('fontFamily.heading')), fontWeight: 800, letterSpacing: '-0.02em' },
+            h2: { fontFamily: String(theme('fontFamily.heading')), fontWeight: 700, letterSpacing: '-0.01em' },
+            h3: { fontFamily: String(theme('fontFamily.heading')), fontWeight: 700 },
             code: {
               backgroundColor: theme('colors.surface.muted') as string,
               padding: '0.15rem 0.35rem',
@@ -134,7 +144,7 @@ const config: Config = {
     scrollbar,
 
     plugin((api: PluginAPI) => {
-      const { addUtilities, theme } = api
+      const { addUtilities, addComponents, theme } = api
 
       addUtilities({
         '.glass': {
@@ -181,6 +191,22 @@ const config: Config = {
             'linear-gradient(90deg, rgba(0,0,0,0.06) 25%, rgba(0,0,0,0.12) 37%, rgba(0,0,0,0.06) 63%)',
           backgroundSize: '400% 100%',
           animation: 'shimmer 1.2s linear infinite',
+        },
+
+        // Anneau conique premium (comme dans nos cartes)
+        '.ring-conic': {
+          background: 'conic-gradient(from 140deg, rgba(59,130,246,.35), transparent 35%, rgba(14,165,233,.35), transparent 75%)',
+        },
+      })
+
+      // Composants utilitaires (plus sémantique dans JSX)
+      addComponents({
+        '.motion-section': {
+          animation: String(theme('animation.fade-up')),
+          willChange: 'transform, opacity',
+        },
+        '.overlay-hero': {
+          background: 'radial-gradient(80% 60% at 50% 40%, transparent, rgba(0,0,0,.55))',
         },
       })
     }),
