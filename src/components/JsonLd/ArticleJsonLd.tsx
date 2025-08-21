@@ -1,39 +1,35 @@
 'use client'
 
-import Head from 'next/head'
 import type { BlogPost } from '@/types/blog'
+import React from 'react'
 
 interface ArticleJsonLdProps {
   post: BlogPost
 }
 
+function iso(d?: unknown): string | undefined {
+  if (!d) return undefined
+  const x = d instanceof Date ? d : new Date(d as any)
+  return Number.isFinite(x.getTime()) ? x.toISOString() : undefined
+}
+
 export default function ArticleJsonLd({ post }: ArticleJsonLdProps) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.techplay.fr'
-
-  const createdDate =
-    typeof post.createdAt === 'string' || post.createdAt instanceof Date
-      ? new Date(post.createdAt).toISOString()
-      : new Date().toISOString()
-
-  const modifiedDate =
-    typeof (post as any).updatedAt === 'string' || (post as any).updatedAt instanceof Date
-      ? new Date((post as any).updatedAt).toISOString()
-      : createdDate
 
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: post.title,
     description: post.description || '',
-    datePublished: createdDate,
-    dateModified: modifiedDate,
+    datePublished: iso((post as any).createdAt) || iso(Date.now()),
+    dateModified: iso((post as any).updatedAt) || iso((post as any).createdAt) || iso(Date.now()),
     author: {
       '@type': 'Person',
-      name: post.author || 'TechPlay',
+      name: (post as any).author || 'TechPlay',
     },
     image: {
       '@type': 'ImageObject',
-      url: post.image || `${siteUrl}/placeholder.png`,
+      url: (post as any).image || `${siteUrl}/placeholder.png`,
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
@@ -50,13 +46,9 @@ export default function ArticleJsonLd({ post }: ArticleJsonLdProps) {
   }
 
   return (
-    <Head>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(structuredData),
-        }}
-      />
-    </Head>
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+    />
   )
 }

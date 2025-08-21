@@ -1,12 +1,18 @@
 'use client'
 
-import Head from 'next/head'
 import type { BlogPost } from '@/types/blog'
+import React from 'react'
 
 interface BlogJsonLdProps {
   posts: BlogPost[]
   locale?: string
   siteUrl?: string
+}
+
+function iso(d?: unknown): string | undefined {
+  if (!d) return undefined
+  const x = d instanceof Date ? d : new Date(d as any)
+  return Number.isFinite(x.getTime()) ? x.toISOString() : undefined
 }
 
 export default function BlogJsonLd({
@@ -25,25 +31,16 @@ export default function BlogJsonLd({
       locale === 'fr'
         ? 'Actualités, conseils et tendances high-tech sélectionnés par l’équipe TechPlay.'
         : 'Tech news, advice, and trending topics curated by the TechPlay team.',
-    blogPost: posts.map((post) => {
-      const date =
-        typeof post.createdAt === 'string'
-          ? post.createdAt
-          : post.createdAt instanceof Date
-            ? post.createdAt.toISOString()
-            : undefined
-
-      return {
-        '@type': 'BlogPosting',
-        headline: post.title,
-        url: `${siteUrl}/${locale}/blog/${post.slug}`,
-        ...(date && { datePublished: date }),
-        author: {
-          '@type': 'Person',
-          name: post.author || 'TechPlay',
-        },
-      }
-    }),
+    blogPost: posts.map((post) => ({
+      '@type': 'BlogPosting',
+      headline: post.title,
+      url: `${siteUrl}/${locale}/blog/${post.slug}`,
+      ...(iso((post as any).createdAt) && { datePublished: iso((post as any).createdAt) }),
+      author: {
+        '@type': 'Person',
+        name: (post as any).author || 'TechPlay',
+      },
+    })),
     publisher: {
       '@type': 'Organization',
       name: 'TechPlay',
@@ -58,8 +55,9 @@ export default function BlogJsonLd({
   }
 
   return (
-    <Head>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-    </Head>
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
   )
 }
