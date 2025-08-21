@@ -30,12 +30,18 @@ function load(): State {
 }
 function save(s: State) {
   try {
-    if (typeof localStorage !== 'undefined')
+    if (typeof localStorage !== 'undefined') {
       localStorage.setItem(KEY, JSON.stringify(s))
+    }
   } catch {}
 }
 
-export function getUserScore(): number {
+/**
+ * Récupère le score utilisateur.
+ * `_userId` est optionnel et ignoré pour l’instant (compat route API).
+ * Côté serveur (où localStorage n’existe pas), on retourne 0.
+ */
+export function getUserScore(_userId?: string): number {
   return load().score
 }
 
@@ -49,7 +55,7 @@ export function grant(event: GamEvent, qty = 1): number {
 }
 
 export function level(score = getUserScore()) {
-  // palier simple : 0-99 bronze, 100-249 silver, 250+ gold
+  // paliers simples : 0-99 bronze, 100-249 silver, 250+ gold
   if (score >= 250) return 'gold'
   if (score >= 100) return 'silver'
   return 'bronze'
