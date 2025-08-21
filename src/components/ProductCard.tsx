@@ -1,4 +1,4 @@
-// src/components/ProductCard.tsx
+// src/components/ProductCard.tsx — Ultra premium
 'use client'
 
 import {
@@ -99,7 +99,7 @@ export default function ProductCard({
       : undefined
   const lowStock = typeof stock === 'number' && stock > 0 && stock <= 5
 
-  /* -------------------------- Impression de la carte ------------------------- */
+  /* Impression de la carte */
   useEffect(() => {
     if (!cardRef.current || viewedRef.current) return
     const el = cardRef.current
@@ -108,7 +108,6 @@ export default function ProductCard({
         for (const e of entries) {
           if (e.isIntersecting && !viewedRef.current) {
             viewedRef.current = true
-            // Event custom (tolérant)
             try {
               logEvent({
                 action: 'product_card_view',
@@ -117,7 +116,6 @@ export default function ProductCard({
                 value: price,
               })
             } catch {}
-            // DataLayer (utile si GTM/GA4 via GTM)
             try {
               pushDataLayer({
                 event: 'view_item_card',
@@ -133,7 +131,7 @@ export default function ProductCard({
     return () => io.disconnect()
   }, [_id, title, price])
 
-  /* ---------------------------- Click tracking ------------------------------- */
+  /* Click tracking */
   const handleClick = useCallback(() => {
     try {
       logEvent({
@@ -152,7 +150,7 @@ export default function ProductCard({
     } catch {}
   }, [_id, title, price])
 
-  /* ------------------------------- Tilt 3D ----------------------------------- */
+  /* Tilt 3D */
   const onMouseMove = (e: MouseEvent<HTMLDivElement>) => {
     if (prefersReducedMotion) return
     if (window.matchMedia && !window.matchMedia('(hover:hover)').matches) return
@@ -182,8 +180,8 @@ export default function ProductCard({
       itemType="https://schema.org/Product"
       className={cn(
         'group relative rounded-3xl p-[1px]',
-        // bordure gradient “anneau” physique
-        'bg-[conic-gradient(from_140deg,rgba(59,130,246,.35),transparent_35%,rgba(14,165,233,.35),transparent_75%)]',
+        // Anneau conique premium (cohérent tokens)
+        'ring-conic',
         'shadow-sm hover:shadow-2xl transition-shadow',
         className
       )}
@@ -203,8 +201,8 @@ export default function ProductCard({
 
       <motion.div
         className={cn(
-          'relative rounded-[inherit] overflow-hidden',
-          'bg-white/80 dark:bg-zinc-900/80 backdrop-blur',
+          'relative overflow-hidden rounded-[inherit]',
+          'bg-white/80 dark:bg-zinc-900/80 supports-[backdrop-filter]:backdrop-blur',
           'border border-white/40 dark:border-white/10 ring-1 ring-gray-200/60 dark:ring-gray-800/60'
         )}
         style={
@@ -216,7 +214,7 @@ export default function ProductCard({
         {/* Shine subtil sur hover */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
           style={{
             background:
               'radial-gradient(700px 220px at 12% -10%, rgba(255,255,255,0.35), transparent 60%)',
@@ -227,12 +225,12 @@ export default function ProductCard({
         <Link
           href={productUrl}
           prefetch
-          className="block focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/60 rounded-[inherit]"
+          className="block rounded-[inherit] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.60)]"
           aria-label={`Voir la fiche produit : ${title}`}
           onClick={handleClick}
         >
           {/* Image */}
-          <div className="relative w-full aspect-[4/3] bg-gray-100 dark:bg-zinc-800" aria-busy={!imgLoaded}>
+          <div className="relative aspect-[4/3] w-full bg-gray-100 dark:bg-zinc-800" aria-busy={!imgLoaded}>
             <Image
               src={mainImage}
               alt={`Image du produit ${title}`}
@@ -262,27 +260,27 @@ export default function ProductCard({
             )}
 
             {/* Badges */}
-            <div className="absolute top-3 left-3 flex flex-col gap-2 z-10 select-none pointer-events-none">
+            <div className="pointer-events-none absolute left-3 top-3 z-10 flex select-none flex-col gap-2">
               {isNew && (
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-white bg-green-600 shadow">
+                <span className="rounded-full bg-green-600 px-2.5 py-0.5 text-[11px] font-semibold text-white shadow">
                   Nouveau
                 </span>
               )}
               {isBestSeller && (
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-black bg-yellow-400 shadow">
+                <span className="rounded-full bg-yellow-400 px-2.5 py-0.5 text-[11px] font-semibold text-black shadow">
                   Best Seller
                 </span>
               )}
               {discount && (
                 <span
-                  className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-white bg-red-600 shadow"
+                  className="rounded-full bg-red-600 px-2.5 py-0.5 text-[11px] font-semibold text-white shadow"
                   aria-label={`${discount}% de réduction`}
                 >
                   -{discount}%
                 </span>
               )}
               {lowStock && (
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-amber-900 bg-amber-300/90 shadow">
+                <span className="rounded-full bg-amber-300/90 px-2.5 py-0.5 text-[11px] font-semibold text-amber-900 shadow">
                   Stock faible
                 </span>
               )}
@@ -291,7 +289,7 @@ export default function ProductCard({
             {/* Note */}
             {hasRating && (
               <div
-                className="absolute top-3 right-3 bg-white/90 dark:bg-zinc-900/90 border border-gray-200/60 dark:border-zinc-800 text-xs px-2.5 py-1 rounded-full shadow backdrop-blur-sm"
+                className="absolute right-3 top-3 rounded-full border border-gray-200/60 bg-white/90 px-2.5 py-1 text-xs shadow backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/90"
                 aria-label={`Note moyenne : ${rating!.toFixed(1)} étoiles`}
               >
                 <span className="text-yellow-500">★</span> {rating!.toFixed(1)}
@@ -302,7 +300,7 @@ export default function ProductCard({
             {typeof stock === 'number' && stock <= 0 && (
               <div
                 aria-hidden
-                className="absolute inset-0 grid place-items-center bg-black/45 text-white text-sm font-semibold"
+                className="absolute inset-0 grid place-items-center bg-black/45 text-sm font-semibold text-white"
               >
                 Rupture
               </div>
@@ -314,25 +312,25 @@ export default function ProductCard({
 
           {/* Contenu */}
           <div className="p-4 sm:p-5">
-            <h3 className="font-semibold text-base sm:text-lg line-clamp-2 text-gray-900 dark:text-white" title={title}>
+            <h3 className="line-clamp-2 text-base font-semibold text-gray-900 dark:text-white sm:text-lg" title={title}>
               {title}
             </h3>
 
             {/* Tags (optionnels) */}
             {Array.isArray(tags) && tags.length > 0 && (
-              <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400 line-clamp-1">
+              <p className="mt-1 line-clamp-1 text-[11px] text-gray-500 dark:text-gray-400">
                 {tags.slice(0, 3).join(' • ')}
               </p>
             )}
 
             <div
-              className="mt-2 sm:mt-3 flex items-center gap-3"
+              className="mt-2 flex items-center gap-3 sm:mt-3"
               itemProp="offers"
               itemScope
               itemType="https://schema.org/Offer"
             >
               <span
-                className="text-brand font-extrabold text-lg sm:text-xl"
+                className="text-lg font-extrabold text-brand sm:text-xl"
                 aria-label={`Prix : ${formatPrice(price)}`}
               >
                 <meta itemProp="priceCurrency" content="EUR" />
@@ -342,7 +340,7 @@ export default function ProductCard({
               </span>
 
               {typeof oldPrice === 'number' && oldPrice > price && (
-                <span className="line-through text-sm text-gray-400 dark:text-gray-500" aria-label="Ancien prix">
+                <span className="text-sm text-gray-400 line-through dark:text-gray-500" aria-label="Ancien prix">
                   {formatPrice(oldPrice)}
                 </span>
               )}
@@ -354,7 +352,7 @@ export default function ProductCard({
               )}
             </div>
 
-            {/* AggregateRating (optionnel pour SEO) */}
+            {/* AggregateRating (optionnel) */}
             {hasRating && (
               <span
                 itemProp="aggregateRating"
@@ -363,7 +361,6 @@ export default function ProductCard({
                 className="sr-only"
               >
                 <meta itemProp="ratingValue" content={rating!.toFixed(1)} />
-                {/* Remplace 12 si tu as la vraie donnée */}
                 <meta itemProp="reviewCount" content="12" />
               </span>
             )}

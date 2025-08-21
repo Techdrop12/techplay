@@ -1,4 +1,4 @@
-// src/app/page.tsx
+// src/app/page.tsx — Home Ultra Premium
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -12,19 +12,22 @@ import TrustBadges from '@/components/TrustBadges'
 import ScrollTopButton from '@/components/ui/ScrollTopButton'
 import ClientTrackingScript from '@components/ClientTrackingScript'
 
-// ✅ Dynamic import des blocs lourds
+/* ───────────────────────────── Dynamic chunks ───────────────────────────── */
 const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'))
-const BestProducts = dynamic(() => import('@/components/BestProducts'), {
-  loading: () => <SectionSkeleton title="Nos Meilleures Ventes" />,
-})
-const PacksSection = dynamic(() => import('@/components/PacksSection'), {
-  loading: () => <SectionSkeleton title="Packs recommandés" />,
-})
-const FAQ = dynamic(() => import('@/components/FAQ'), {
-  loading: () => <SectionSkeleton title="Questions fréquentes" />,
-})
+const BestProducts = dynamic(
+  () => import('@/components/BestProducts'),
+  { loading: () => <SectionSkeleton title="Nos Meilleures Ventes" /> }
+)
+const PacksSection = dynamic(
+  () => import('@/components/PacksSection'),
+  { loading: () => <SectionSkeleton title="Packs recommandés" /> }
+)
+const FAQ = dynamic(
+  () => import('@/components/FAQ'),
+  { loading: () => <SectionSkeleton title="Questions fréquentes" /> }
+)
 
-/* ------------------------------ Metadata page ----------------------------- */
+/* ────────────────────────────── Page metadata ───────────────────────────── */
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://techplay.example.com'
 const OG_IMAGE = `${SITE_URL}/og-image.jpg`
 
@@ -55,65 +58,67 @@ export const metadata: Metadata = {
   alternates: { canonical: SITE_URL },
 }
 
-/* ---------------------------- Revalidation ISR ---------------------------- */
+/* ───────────────────────────── ISR revalidation ─────────────────────────── */
 export const revalidate = 300 // 5 minutes
 
-/* ---------- Mini composants de présentation ---------- */
+/* ─────────────────────── UI helpers (section header…) ───────────────────── */
 function SectionHeader({
   kicker,
   title,
   sub,
   center = true,
+  as = 'h2',
 }: {
   kicker?: string
   title: string
   sub?: string
   center?: boolean
+  as?: 'h2' | 'h3'
 }) {
+  const Tag = as
   return (
     <header className={center ? 'text-center max-w-3xl mx-auto' : ''}>
-      {kicker ? (
-        <p className="text-xs tracking-widest uppercase font-bold text-accent/90">{kicker}</p>
-      ) : null}
-      <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight">
-        <span className="text-brand dark:text-brand-light">{title}</span>
-        <span className="text-accent">.</span>
-      </h2>
-      {sub ? (
-        <p className="mt-3 text-sm sm:text-base text-gray-600 dark:text-gray-400">{sub}</p>
-      ) : null}
+      {kicker && (
+        <p className="text-xs tracking-widest uppercase font-bold text-[hsl(var(--accent))]/90">
+          {kicker}
+        </p>
+      )}
+      <Tag className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight">
+        <span className="text-gradient">{title}</span>
+      </Tag>
+      {sub && (
+        <p className="mt-3 text-sm sm:text-base text-token-text/70">
+          {sub}
+        </p>
+      )}
     </header>
   )
 }
 
 function FeaturedCategories() {
   const CATS: Array<{ label: string; href: string; emoji: string; desc: string }> = [
-    { label: 'Casques', href: '/categorie/casques', emoji: '🎧', desc: 'Audio immersif' },
-    { label: 'Claviers', href: '/categorie/claviers', emoji: '⌨️', desc: 'Réactivité ultime' },
-    { label: 'Souris', href: '/categorie/souris', emoji: '🖱️', desc: 'Précision chirurgicale' },
-    { label: 'Webcams', href: '/categorie/webcams', emoji: '📷', desc: 'Visio en HD' },
+    { label: 'Casques',   href: '/categorie/casques',   emoji: '🎧', desc: 'Audio immersif' },
+    { label: 'Claviers',  href: '/categorie/claviers',  emoji: '⌨️', desc: 'Réactivité ultime' },
+    { label: 'Souris',    href: '/categorie/souris',    emoji: '🖱️', desc: 'Précision chirurgicale' },
+    { label: 'Webcams',   href: '/categorie/webcams',   emoji: '📷', desc: 'Visio en HD' },
     { label: 'Batteries', href: '/categorie/batteries', emoji: '🔋', desc: 'Autonomie boost' },
-    { label: 'Packs', href: '/pack', emoji: '🎁', desc: 'Offres combinées' },
+    { label: 'Packs',     href: '/pack',                 emoji: '🎁', desc: 'Offres combinées' },
   ]
   return (
     <section id="categories" aria-label="Catégories vedettes" className="motion-section">
-      <SectionHeader
-        kicker="Explorer"
-        title="Catégories incontournables"
-        sub="Des sélections pointues pour aller droit au but."
-      />
-      <ul role="list" className="mt-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
+      <SectionHeader kicker="Explorer" title="Catégories incontournables" sub="Des sélections pointues pour aller droit au but." />
+      <ul role="list" className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-6">
         {CATS.map((c) => (
           <li key={c.href}>
             <Link
               href={c.href}
               prefetch={false}
-              className="group block rounded-2xl p-4 sm:p-5 border border-gray-200/70 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-sm hover:shadow-xl transition focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40"
+              className="group block rounded-2xl border border-token-border bg-token-surface/70 backdrop-blur shadow-sm transition hover:shadow-elevated focus-ring p-4 sm:p-5"
             >
               <div className="text-3xl sm:text-4xl">{c.emoji}</div>
               <div className="mt-3 font-semibold">{c.label}</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">{c.desc}</div>
-              <div className="mt-3 text-xs text-accent font-semibold opacity-0 group-hover:opacity-100 transition">
+              <div className="text-xs text-token-text/60">{c.desc}</div>
+              <div className="mt-3 text-xs font-semibold text-[hsl(var(--accent))] opacity-0 transition group-hover:opacity-100">
                 Voir →
               </div>
             </Link>
@@ -128,38 +133,38 @@ function SplitCTA() {
   return (
     <section
       aria-label="Appel à l’action"
-      className="relative motion-section overflow-hidden rounded-3xl border border-gray-200/70 dark:border-zinc-800 bg-gradient-to-br from-accent/10 via-transparent to-brand/10 p-6 sm:p-10 shadow-xl"
+      className="motion-section relative overflow-hidden rounded-3xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.10)] via-transparent to-token-surface p-6 sm:p-10 shadow-elevated"
     >
-      <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-accent/20 blur-3xl" />
-      <div aria-hidden className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-brand/20 blur-3xl" />
-      <div className="relative grid gap-6 lg:grid-cols-2 items-center">
+      <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[hsl(var(--accent)/.20)] blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-token-text/10 blur-3xl" />
+      <div className="relative grid items-center gap-6 lg:grid-cols-2">
         <div>
-          <p className="text-xs uppercase tracking-widest font-bold text-accent/90">Offre du moment</p>
+          <p className="text-xs uppercase tracking-widest font-bold text-[hsl(var(--accent))]/90">Offre du moment</p>
           <h3 className="mt-2 text-2xl sm:text-3xl font-extrabold">
-            Boostez votre setup en <span className="text-accent">un clic</span>
+            Boostez votre setup en <span className="text-gradient">un clic</span>
           </h3>
-          <p className="mt-3 text-sm sm:text-base text-gray-600 dark:text-gray-400">
+          <p className="mt-3 text-sm sm:text-base text-token-text/70">
             Packs optimisés, meilleurs prix, livraison rapide.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Link
               href="/pack"
               prefetch={false}
-              className="inline-flex items-center rounded-xl bg-accent text-white px-5 py-3 font-semibold shadow hover:bg-accent/90 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40"
+              className="inline-flex items-center rounded-xl bg-[hsl(var(--accent))] px-5 py-3 font-semibold text-white shadow hover:bg-[hsl(var(--accent)/.92)] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
             >
               Découvrir les packs
             </Link>
             <Link
               href="/produit"
               prefetch={false}
-              className="inline-flex items-center rounded-xl bg-white dark:bg-zinc-900 border border-gray-200/70 dark:border-zinc-800 px-5 py-3 font-semibold hover:shadow focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/30"
+              className="inline-flex items-center rounded-xl border border-token-border bg-token-surface px-5 py-3 font-semibold hover:shadow focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
             >
               Voir les produits
             </Link>
           </div>
         </div>
-        {/* Espace visuel (image/3D/particles) si souhaité */}
-        <div className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/50 dark:bg-zinc-900/50 min-h-[180px] shadow-xl" />
+        {/* Slot visuel (image/3D/particles) prêt si tu veux le brancher plus tard */}
+        <div className="min-h-[180px] rounded-2xl border border-token-border bg-token-surface/60 shadow-elevated" />
       </div>
     </section>
   )
@@ -167,9 +172,9 @@ function SplitCTA() {
 
 function Testimonials() {
   const items = [
-    { name: 'Léa', text: 'Livraison rapide et clavier incroyable, je recommande !' },
+    { name: 'Léa',    text: 'Livraison rapide et clavier incroyable, je recommande !' },
     { name: 'Maxime', text: 'Service client réactif, pack super rentable.' },
-    { name: 'Amine', text: 'Qualité au top, site fluide et clair.' },
+    { name: 'Amine',  text: 'Qualité au top, site fluide et clair.' },
   ]
   return (
     <section aria-label="Témoignages clients" className="motion-section">
@@ -178,9 +183,9 @@ function Testimonials() {
         {items.map((t, i) => (
           <li
             key={i}
-            className="rounded-2xl border border-gray-200/70 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/70 p-5 shadow-sm"
+            className="rounded-2xl border border-token-border bg-token-surface/70 p-5 shadow-soft"
           >
-            <p className="text-sm text-gray-700 dark:text-gray-300">“{t.text}”</p>
+            <p className="text-sm text-token-text/90">“{t.text}”</p>
             <p className="mt-3 text-sm font-semibold">— {t.name}</p>
           </li>
         ))}
@@ -189,30 +194,34 @@ function Testimonials() {
   )
 }
 
-// Fallback visuel léger pour Suspense
+/* Skeleton doux pour Suspense */
 function SectionSkeleton({ title }: { title: string }) {
   return (
     <section className="motion-section">
       <SectionHeader title={title} />
-      <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="animate-pulse rounded-2xl h-40 bg-gray-200/60 dark:bg-zinc-800/60" />
+          <div key={i} className="skeleton h-40 rounded-2xl" />
         ))}
       </div>
     </section>
   )
 }
 
-/* --------------------------------- PAGE ---------------------------------- */
+/* ───────────────────────────────── Page ─────────────────────────────────── */
 export default async function HomePage() {
   let bestProducts: Product[] = []
   let recommendedPacks: Pack[] = []
   try {
-    ;[bestProducts, recommendedPacks] = await Promise.all([getBestProducts(), getRecommendedPacks()])
+    ;[bestProducts, recommendedPacks] = await Promise.all([
+      getBestProducts(),
+      getRecommendedPacks(),
+    ])
   } catch {
-    // soft-fail : on laisse les sections se squeletonner élégamment
+    // soft-fail : les sections afficheront des skeletons
   }
 
+  /* JSON-LD ItemList pour SEO produits */
   const itemListJsonLd =
     Array.isArray(bestProducts) && bestProducts.length > 0
       ? {
@@ -227,31 +236,44 @@ export default async function HomePage() {
         }
       : null
 
+  /* JSON-LD WebSite (sitelinks search box) */
+  const websiteJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    url: SITE_URL,
+    name: 'TechPlay',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${SITE_URL}/products?q={search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    },
+  }
+
   return (
     <>
       <h1 className="sr-only">TechPlay – Boutique high-tech & packs exclusifs</h1>
       <ClientTrackingScript event="homepage_view" />
 
-      {/* 🔥 Hero / Promo — unique, tout en haut */}
+      {/* Promo/hero au-dessus du fold (LCP friendly si bannière légère) */}
       <BannerPromo />
 
-      {/* Glow décoratif global (light + dark) */}
+      {/* Glow décoratif global */}
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute left-1/2 top-[-120px] h-[420px] w-[620px] -translate-x-1/2 rounded-full bg-accent/20 blur-3xl" />
+        <div className="absolute left-1/2 -top-24 h-[420px] w-[620px] -translate-x-1/2 rounded-full bg-[hsl(var(--accent)/.20)] blur-3xl" />
       </div>
 
-      <main className="space-y-28 px-4 sm:px-6 max-w-screen-xl mx-auto scroll-smooth" role="main" tabIndex={-1}>
-        {/* 🎥 Carrousel produits vedettes */}
+      <main className="mx-auto max-w-screen-xl scroll-smooth space-y-28 px-4 sm:px-6" role="main" tabIndex={-1}>
+        {/* Hero carousel */}
         <section aria-label="Carrousel des produits en vedette" className="motion-section" id="hero">
-          <Suspense fallback={<div className="h-40 sm:h-56 lg:h-72 animate-pulse rounded-2xl bg-gray-200/60 dark:bg-zinc-800/60" />}>
+          <Suspense fallback={<div className="h-40 sm:h-56 lg:h-72 rounded-2xl skeleton" />}>
             <HeroCarousel />
           </Suspense>
         </section>
 
-        {/* 🗂️ Catégories vedettes */}
+        {/* Catégories */}
         <FeaturedCategories />
 
-        {/* 🏆 Meilleures ventes */}
+        {/* Meilleures ventes */}
         <section aria-label="Meilleures ventes TechPlay" className="motion-section" id="best-products">
           <SectionHeader
             kicker="Top ventes"
@@ -265,7 +287,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* 🎁 Packs recommandés */}
+        {/* Packs */}
         <section aria-label="Packs TechPlay recommandés" className="motion-section" id="packs">
           <SectionHeader
             kicker="Bundle"
@@ -279,13 +301,13 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* 💬 Témoignages */}
+        {/* Témoignages */}
         <Testimonials />
 
-        {/* ⚡ CTA premium (court, non redondant avec le Hero) */}
+        {/* CTA premium */}
         <SplitCTA />
 
-        {/* ❓ FAQ */}
+        {/* FAQ */}
         <section aria-label="Questions fréquentes de nos clients" className="motion-section">
           <SectionHeader kicker="FAQ" title="Questions fréquentes" />
           <div className="mt-8">
@@ -295,15 +317,14 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ✅ Badges de confiance — unique, en bas */}
+        {/* Badges de confiance */}
         <TrustBadges variant="premium" className="mt-10" />
       </main>
 
+      {/* JSON-LD */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
       {itemListJsonLd ? (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
       ) : null}
 
       <ScrollTopButton />

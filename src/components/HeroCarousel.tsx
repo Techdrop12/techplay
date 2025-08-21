@@ -1,4 +1,4 @@
-// src/components/HeroCarousel.tsx
+// src/components/HeroCarousel.tsx — Ultra Premium (fix swipe overlay + tokens + a11y)
 'use client'
 
 import {
@@ -21,27 +21,18 @@ import {
 } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
-/* -------------------------------------------------------------------------- */
-/*                                    Types                                   */
-/* -------------------------------------------------------------------------- */
+/* -------------------------------- Types ---------------------------------- */
 
 export interface Slide {
   id: number | string
-  /** Image principale (fallback si pas de videoUrl) */
-  image?: string
-  /** Pour accessibilité / SEO */
-  alt?: string
-  /** Texte headline (optionnel) */
-  text?: string
-  /** CTA (optionnel) */
+  image?: string              // Image principale (fallback si pas de videoUrl)
+  alt?: string                // Accessibilité / SEO
+  text?: string               // Headline (optionnel)
   ctaLabel?: string
   ctaLink?: string
-  /** (Optionnel) Vidéo muette: mp4/webm (autoplay si actif) */
-  videoUrl?: string
-  /** Poster vidéo (sinon image utilisée) */
-  poster?: string
-  /** Badge optionnel (ex: “-30% AUJOURD’HUI”) */
-  badge?: string
+  videoUrl?: string           // (Optionnel) Vidéo muette
+  poster?: string             // Poster vidéo
+  badge?: string              // Badge optionnel (“-30% AUJOURD’HUI”)
 }
 
 interface HeroCarouselProps {
@@ -52,21 +43,14 @@ interface HeroCarouselProps {
   textSize?: 'sm' | 'md' | 'lg' | 'xl'
   autoplay?: boolean
   className?: string
-  /** Afficher les miniatures (desktop) */
-  showThumbnails?: boolean
-  /** Effet de parallaxe vertical (px max) — 0 pour désactiver */
-  parallaxPx?: number
-  /** Masques latéraux (fade) */
-  edgeFade?: boolean
-  /** Bouton Play/Pause */
+  showThumbnails?: boolean    // Miniatures (desktop)
+  parallaxPx?: number         // Effet de parallaxe vertical (px max) — 0 = off
+  edgeFade?: boolean          // Masques latéraux (fade)
   showPlayPause?: boolean
-  /** Callback slide change */
   onSlideChange?: (index: number, slide: Slide) => void
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                Config / UI                                 */
-/* -------------------------------------------------------------------------- */
+/* -------------------------------- Config --------------------------------- */
 
 const DEFAULT_SLIDES: Slide[] = [
   {
@@ -94,7 +78,7 @@ const DEFAULT_SLIDES: Slide[] = [
     ctaLabel: 'Voir plus',
     ctaLink: '/produit/clavier-mecanique',
   },
-]
+] as const
 
 const TEXT_SIZES = {
   sm: 'text-xl sm:text-2xl',
@@ -103,16 +87,14 @@ const TEXT_SIZES = {
   xl: 'text-6xl sm:text-7xl',
 } as const
 
-// Blur tiny placeholder (évite dépendance à un fichier externe)
+// Blur tiny placeholder
 const BLUR_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+'
 
-/* -------------------------------------------------------------------------- */
-/*                                  Component                                 */
-/* -------------------------------------------------------------------------- */
+/* ------------------------------- Component ------------------------------- */
 
 export default function HeroCarousel({
-  slides = DEFAULT_SLIDES,
+  slides = DEFAULT_SLIDES as unknown as Slide[],
   intervalMs = 7000,
   showOverlay = true,
   overlayOpacity = 0.35,
@@ -133,14 +115,14 @@ export default function HeroCarousel({
   const touchStartX = useRef<number | null>(null)
   const prefersReducedMotion = useReducedMotion()
   const srId = useId()
-  const containerRef = useRef<HTMLElement | null>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
 
   const effectiveAutoplay = autoplay && !prefersReducedMotion && total > 1
 
-  /* ------------------------------ Derived slide ----------------------------- */
+  /* Derived slide */
   const current = useMemo(() => slides[index], [slides, index])
 
-  /* -------------------------------- Parallaxe ------------------------------- */
+  /* Parallaxe */
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end start'],
@@ -148,7 +130,7 @@ export default function HeroCarousel({
   const y = useTransform(scrollYProgress, [0, 1], [0, parallaxPx])
   const parallaxStyle = parallaxPx > 0 ? { y } : undefined
 
-  /* --------------------------------- Timer --------------------------------- */
+  /* Timer */
   const clearTimer = () => {
     if (timerRef.current) {
       clearInterval(timerRef.current)
@@ -187,14 +169,14 @@ export default function HeroCarousel({
     return clearTimer
   }, [startTimer])
 
-  /* ------------------------- Pause si onglet non focus ---------------------- */
+  /* Pause si onglet non focus */
   useEffect(() => {
     const onVis = () => (document.hidden ? pause() : resume())
     document.addEventListener('visibilitychange', onVis)
     return () => document.removeEventListener('visibilitychange', onVis)
   }, [pause, resume])
 
-  /* ----------------------- Prefetch des images voisines --------------------- */
+  /* Prefetch images voisines */
   useEffect(() => {
     if (typeof window === 'undefined' || total <= 1) return
     const nextIdx = (index + 1) % total
@@ -209,7 +191,7 @@ export default function HeroCarousel({
     })
   }, [index, slides, total])
 
-  /* --------------------- Annonce SR “Diapo X sur Y: alt” -------------------- */
+  /* Annonce SR “Diapo X sur Y” */
   useEffect(() => {
     onSlideChange?.(index, current)
     try {
@@ -218,43 +200,36 @@ export default function HeroCarousel({
     } catch {}
   }, [index, current, total, onSlideChange, srId])
 
-  /* --------------------------------- Swipe --------------------------------- */
-  const onTouchStart: React.TouchEventHandler = (e) => {
+  /* Swipe tactile (⚠️ handlers sur le container, pas sur un overlay bloquant) */
+  const onTouchStart: React.TouchEventHandler<HTMLDivElement> = (e) => {
     touchStartX.current = e.touches[0].clientX
     pause()
   }
-  const onTouchEnd: React.TouchEventHandler = (e) => {
+  const onTouchEnd: React.TouchEventHandler<HTMLDivElement> = (e) => {
     if (touchStartX.current == null) return resume()
     const delta = e.changedTouches[0].clientX - touchStartX.current
     touchStartX.current = null
-    if (Math.abs(delta) > 50) (delta > 0 ? prev : next)()
+    if (Math.abs(delta) > 50) (delta > 0 ? prev() : next())
     resume()
   }
 
-  /* ------------------------------ Keyboard nav ------------------------------ */
+  /* Keyboard nav */
   const onKeyDown: React.KeyboardEventHandler = (e) => {
-    if (e.key === 'ArrowRight') {
-      pause(); next(); resume()
-    } else if (e.key === 'ArrowLeft') {
-      pause(); prev(); resume()
-    } else if (e.key === 'Home') {
-      pause(); setIndex(0); resume()
-    } else if (e.key === 'End') {
-      pause(); setIndex(total - 1); resume()
-    } else if (e.key.toLowerCase() === ' ') {
-      e.preventDefault()
-      isPaused ? resume() : pause()
-    }
+    if (e.key === 'ArrowRight') { pause(); next(); resume() }
+    else if (e.key === 'ArrowLeft') { pause(); prev(); resume() }
+    else if (e.key === 'Home') { pause(); setIndex(0); resume() }
+    else if (e.key === 'End') { pause(); setIndex(total - 1); resume() }
+    else if (e.key.toLowerCase() === ' ') { e.preventDefault(); isPaused ? resume() : pause() }
   }
 
   if (total === 0) return null
 
   return (
     <section
-      ref={containerRef as any}
+      ref={containerRef}
       className={cn(
         'relative h-[60vh] sm:h-[72vh] lg:h-[88vh] w-full overflow-hidden rounded-none sm:rounded-3xl shadow-2xl select-none',
-        'bg-black/10 dark:bg-zinc-900 will-change-transform',
+        'bg-token-surface/5 will-change-transform',
         className
       )}
       role="region"
@@ -266,6 +241,8 @@ export default function HeroCarousel({
       onFocus={pause}
       onBlur={resume}
       onKeyDown={onKeyDown}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
       tabIndex={0}
     >
       {/* Live region SR */}
@@ -275,11 +252,11 @@ export default function HeroCarousel({
       {edgeFade && (
         <>
           <div
-            className="pointer-events-none absolute inset-y-0 left-0 w-24 sm:w-36 z-[2] bg-gradient-to-r from-black/40 to-transparent dark:from-black/60"
+            className="pointer-events-none absolute inset-y-0 left-0 z-[2] w-24 bg-gradient-to-r from-black/40 to-transparent dark:from-black/60"
             aria-hidden
           />
           <div
-            className="pointer-events-none absolute inset-y-0 right-0 w-24 sm:w-36 z-[2] bg-gradient-to-l from-black/40 to-transparent dark:from-black/60"
+            className="pointer-events-none absolute inset-y-0 right-0 z-[2] w-24 bg-gradient-to-l from-black/40 to-transparent dark:from-black/60"
             aria-hidden
           />
         </>
@@ -288,7 +265,7 @@ export default function HeroCarousel({
       {/* Slide layer */}
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
-          key={current.id}
+          key={String(current.id)}
           initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, scale: 1.01 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0.25, scale: 0.99 }}
@@ -298,9 +275,9 @@ export default function HeroCarousel({
           aria-roledescription="slide"
           aria-label={`${index + 1} / ${total}${current?.alt ? ` — ${current.alt}` : ''}`}
         >
-          {/* Ken Burns doux sur le média */}
+          {/* Ken Burns doux */}
           <motion.div
-            key={`kb-${current.id}`}
+            key={`kb-${String(current.id)}`}
             initial={{ scale: 1.02 }}
             animate={prefersReducedMotion ? { scale: 1 } : { scale: 1.07 }}
             transition={{ duration: intervalMs / 1000, ease: 'linear' }}
@@ -316,11 +293,10 @@ export default function HeroCarousel({
                 autoPlay={effectiveAutoplay}
                 preload="metadata"
                 poster={current.poster || current.image}
-                onPlay={(e: SyntheticEvent<HTMLVideoElement>) => {
-                  if (isPaused) e.currentTarget.pause()
-                }}
+                onPlay={(e: SyntheticEvent<HTMLVideoElement>) => { if (isPaused) e.currentTarget.pause() }}
               >
-                <source src={current.videoUrl} />
+                {/* Ajout type explicite pour compatibilité */}
+                <source src={current.videoUrl} type="video/mp4" />
               </video>
             ) : (
               <Image
@@ -341,17 +317,19 @@ export default function HeroCarousel({
       </AnimatePresence>
 
       {/* Vignette + overlay */}
-      <div className="absolute inset-0 z-[1] pointer-events-none" aria-hidden="true">
-        <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_40%,transparent,rgba(0,0,0,0.55))]" />
+      <div className="pointer-events-none absolute inset-0 z-[1]" aria-hidden="true">
+        <div className="overlay-hero absolute inset-0" />
         {showOverlay && (
           <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity})` }} />
         )}
+        {/* halo conique doux via util perso */}
+        <div className="ring-conic absolute inset-0 opacity-60 mix-blend-overlay dark:mix-blend-screen" />
       </div>
 
       {/* Badge header (optionnel) */}
       {current.badge && (
-        <div className="absolute top-5 left-5 z-20">
-          <span className="rounded-full bg-white/90 dark:bg-black/60 text-black dark:text-white px-3 py-1 text-xs font-semibold shadow">
+        <div className="absolute left-5 top-5 z-20">
+          <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-black shadow dark:bg-black/60 dark:text-white">
             {current.badge}
           </span>
         </div>
@@ -359,8 +337,8 @@ export default function HeroCarousel({
 
       {/* Contenu texte + CTA */}
       {(current.text || (current.ctaLabel && current.ctaLink)) && (
-        <div className="absolute inset-0 z-10 grid place-items-center px-6 sm:px-12 text-center">
-          <div className="max-w-5xl mx-auto">
+        <div className="absolute inset-0 z-10 grid place-items-center px-6 text-center sm:px-12">
+          <div className="mx-auto max-w-5xl">
             {current.text && (
               <h2
                 className={cn(
@@ -379,10 +357,10 @@ export default function HeroCarousel({
                   href={current.ctaLink}
                   prefetch
                   className={cn(
-                    'inline-flex items-center gap-2 rounded-2xl px-6 sm:px-8 py-3 text-base sm:text-lg font-semibold text-white',
-                    'bg-accent shadow-lg transition-all duration-200',
-                    'hover:scale-[1.03] hover:bg-accent/90 active:scale-95',
-                    'focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/50'
+                    'inline-flex items-center gap-2 rounded-2xl px-6 py-3 text-base font-semibold text-white sm:px-8 sm:text-lg',
+                    'bg-[hsl(var(--accent))] shadow-lg transition-all duration-200',
+                    'hover:scale-[1.03] hover:bg-[hsl(var(--accent)/.92)] active:scale-95',
+                    'focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.50)]'
                   )}
                   aria-label={`${current.ctaLabel} — ${current.alt || ''}`}
                 >
@@ -404,10 +382,7 @@ export default function HeroCarousel({
             type="button"
             aria-label="Diapositive précédente"
             className={cn(
-              'absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20',
-              'rounded-full bg-black/35 hover:bg-black/50 text-white backdrop-blur',
-              'w-11 h-11 sm:w-12 sm:h-12 grid place-items-center',
-              'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60'
+              'supports-backdrop:glass absolute left-2 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-token-surface/70 text-white shadow-soft hover:bg-token-surface focus-ring sm:left-4 sm:h-12 sm:w-12'
             )}
             onClick={() => { pause(); prev(); resume() }}
           >
@@ -420,10 +395,7 @@ export default function HeroCarousel({
             type="button"
             aria-label="Diapositive suivante"
             className={cn(
-              'absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20',
-              'rounded-full bg-black/35 hover:bg-black/50 text-white backdrop-blur',
-              'w-11 h-11 sm:w-12 sm:h-12 grid place-items-center',
-              'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60'
+              'supports-backdrop:glass absolute right-2 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-token-surface/70 text-white shadow-soft hover:bg-token-surface focus-ring sm:right-4 sm:h-12 sm:w-12'
             )}
             onClick={() => { pause(); next(); resume() }}
           >
@@ -441,9 +413,8 @@ export default function HeroCarousel({
           onClick={() => (isPaused ? resume() : pause())}
           aria-label={isPaused ? 'Lancer le carrousel' : 'Mettre le carrousel en pause'}
           className={cn(
-            'absolute top-3 right-3 z-20 rounded-full px-3 py-2 text-xs font-semibold',
-            'bg-black/40 text-white backdrop-blur hover:bg-black/55',
-            'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60'
+            'supports-backdrop:glass absolute right-3 top-3 z-20 rounded-full px-3 py-2 text-xs font-semibold text-white',
+            'bg-black/40 backdrop-blur hover:bg-black/55 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60'
           )}
         >
           {isPaused ? '▶︎ Lire' : '⏸ Pause'}
@@ -453,12 +424,12 @@ export default function HeroCarousel({
       {/* Progress bar */}
       {effectiveAutoplay && (
         <div
-          className="absolute bottom-6 left-1/2 w-[68%] max-w-3xl -translate-x-1/2 rounded-full bg-white/25 h-1.5 overflow-hidden z-20"
+          className="absolute bottom-6 left-1/2 z-20 h-1.5 w-[68%] max-w-3xl -translate-x-1/2 overflow-hidden rounded-full bg-white/25"
           role="presentation"
         >
           <motion.div
             key={index}
-            className="bg-accent h-full rounded-full"
+            className="h-full rounded-full bg-[hsl(var(--accent))]"
             initial={{ width: 0 }}
             animate={{ width: '100%' }}
             transition={{ duration: intervalMs / 1000, ease: 'linear' }}
@@ -469,36 +440,35 @@ export default function HeroCarousel({
       {/* Bullets (mobile) */}
       {total > 1 && (
         <nav
-          className="sm:hidden absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-3"
+          className="absolute bottom-3 left-1/2 z-20 -translate-x-1/2 sm:hidden"
           aria-label="Navigation du carrousel"
         >
-          {slides.map((s, i) => {
-            const active = i === index
-            return (
-              <button
-                key={s.id ?? i}
-                type="button"
-                className={cn(
-                  'relative w-3.5 h-3.5 rounded-full transition',
-                  active
-                    ? 'bg-white shadow ring-2 ring-accent/70 scale-110'
-                    : 'bg-white/60 hover:bg-white'
-                )}
-                aria-label={`Aller à la diapositive ${i + 1} : ${s.alt || ''}`}
-                aria-current={active ? 'true' : undefined}
-                onClick={() => { pause(); setIndex(i); resume() }}
-              />
-            )
-          })}
+          <ul className="flex gap-3">
+            {slides.map((s, i) => {
+              const active = i === index
+              return (
+                <li key={s.id ?? i}>
+                  <button
+                    type="button"
+                    className={cn(
+                      'h-3.5 w-3.5 rounded-full transition',
+                      active ? 'scale-110 bg-white ring-2 ring-[hsl(var(--accent)/.70)] shadow'
+                             : 'bg-white/60 hover:bg-white'
+                    )}
+                    aria-label={`Aller à la diapositive ${i + 1} : ${s.alt || ''}`}
+                    aria-current={active ? 'true' : undefined}
+                    onClick={() => { pause(); setIndex(i); resume() }}
+                  />
+                </li>
+              )
+            })}
+          </ul>
         </nav>
       )}
 
       {/* Miniatures (desktop) */}
       {showThumbnails && total > 1 && (
-        <div
-          className="hidden sm:block absolute bottom-4 left-1/2 -translate-x-1/2 z-20"
-          aria-label="Miniatures du carrousel"
-        >
+        <div className="absolute bottom-4 left-1/2 z-20 hidden -translate-x-1/2 sm:block" aria-label="Miniatures du carrousel">
           <ul className="flex gap-3">
             {slides.map((s, i) => {
               const active = i === index
@@ -508,8 +478,9 @@ export default function HeroCarousel({
                   <button
                     type="button"
                     className={cn(
-                      'relative w-16 h-10 sm:w-20 sm:h-12 rounded-lg overflow-hidden border shadow',
-                      active ? 'border-accent ring-2 ring-accent' : 'border-white/60 hover:border-white'
+                      'relative h-10 w-16 overflow-hidden rounded-lg border shadow sm:h-12 sm:w-20',
+                      active ? 'border-[hsl(var(--accent))] ring-2 ring-[hsl(var(--accent))]'
+                             : 'border-white/60 hover:border-white'
                     )}
                     aria-label={`Aller à la diapositive ${i + 1}`}
                     aria-current={active ? 'true' : undefined}
@@ -532,14 +503,6 @@ export default function HeroCarousel({
           </ul>
         </div>
       )}
-
-      {/* Zone tactile pour swipe (mobile) */}
-      <div
-        className="absolute inset-0 z-30"
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
-        aria-hidden="true"
-      />
     </section>
   )
 }

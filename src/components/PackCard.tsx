@@ -1,4 +1,4 @@
-// src/components/PackCard.tsx
+// src/components/PackCard.tsx — Ultra premium
 'use client'
 
 import Link from 'next/link'
@@ -33,7 +33,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
     oldPrice,
   } = pack
 
-  // Champs “étendus” optionnels (tolérants au schéma réel)
+  // Champs “étendus” optionnels
   const extra = pack as any
   const images: string[] | undefined = extra?.images
   const compareAtPrice: number | undefined =
@@ -123,7 +123,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
       itemType="https://schema.org/Product"
       className={cn(
         'group relative rounded-3xl p-[1px]',
-        'bg-[conic-gradient(from_140deg,rgba(59,130,246,.35),transparent_35%,rgba(14,165,233,.35),transparent_75%)]',
+        'ring-conic',
         'shadow-sm hover:shadow-2xl transition-shadow',
         className
       )}
@@ -141,8 +141,8 @@ export default function PackCard({ pack, priority = false, className }: PackCard
 
       <motion.div
         className={cn(
-          'relative rounded-[inherit] overflow-hidden',
-          'bg-white/80 dark:bg-zinc-900/80 backdrop-blur',
+          'relative overflow-hidden rounded-[inherit]',
+          'bg-white/80 dark:bg-zinc-900/80 supports-[backdrop-filter]:backdrop-blur',
           'border border-white/40 dark:border-white/10 ring-1 ring-gray-200/60 dark:ring-gray-800/60'
         )}
         style={
@@ -154,31 +154,32 @@ export default function PackCard({ pack, priority = false, className }: PackCard
         {/* Shine */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
           style={{ background: 'radial-gradient(700px 220px at 12% -10%, rgba(255,255,255,0.35), transparent 60%)' }}
         />
 
         <Link
           href={packUrl}
           prefetch
-          className="block focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/60 rounded-[inherit]"
+          className="block rounded-[inherit] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.60)]"
           aria-label={`Voir le pack : ${title}`}
           onClick={handleClick}
         >
           {/* Media */}
-          <div className="relative w-full aspect-[4/3] sm:aspect-[16/9] bg-gray-100 dark:bg-zinc-800">
+          <div className="relative w-full aspect-[4/3] bg-gray-100 dark:bg-zinc-800 sm:aspect-[16/9]">
             <Image
               src={mainImage}
               alt={`Image du pack ${title}`}
               fill
               sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
-              className="object-cover transition-transform duration-600 will-change-transform group-hover:scale-105"
+              className="object-cover transition-transform duration-700 will-change-transform group-hover:scale-105"
               priority={priority}
               placeholder="blur"
               blurDataURL={BLUR_DATA_URL}
               quality={85}
               onLoadingComplete={() => setImgLoaded(true)}
               onError={() => setImgError(true)}
+              decoding="async"
               draggable={false}
             />
 
@@ -187,27 +188,27 @@ export default function PackCard({ pack, priority = false, className }: PackCard
             )}
 
             {/* Badges */}
-            <div className="absolute top-3 left-3 flex flex-col gap-2 z-10 select-none pointer-events-none">
-              {isNew && <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-white bg-green-600 shadow">Nouveau</span>}
-              {isBestSeller && <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-black bg-yellow-400 shadow">Best Seller</span>}
+            <div className="pointer-events-none absolute left-3 top-3 z-10 flex select-none flex-col gap-2">
+              {isNew && <span className="rounded-full bg-green-600 px-2.5 py-0.5 text-[11px] font-semibold text-white shadow">Nouveau</span>}
+              {isBestSeller && <span className="rounded-full bg-yellow-400 px-2.5 py-0.5 text-[11px] font-semibold text-black shadow">Best Seller</span>}
               {typeof discountPct === 'number' && (
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-white bg-red-600 shadow" aria-label={`${discountPct}% d’économie`}>
+                <span className="rounded-full bg-red-600 px-2.5 py-0.5 text-[11px] font-semibold text-white shadow" aria-label={`${discountPct}% d’économie`}>
                   -{discountPct}%
                 </span>
               )}
-              {lowStock && <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-amber-900 bg-amber-300/90 shadow">Stock faible</span>}
+              {lowStock && <span className="rounded-full bg-amber-300/90 px-2.5 py-0.5 text-[11px] font-semibold text-amber-900 shadow">Stock faible</span>}
             </div>
 
             {/* Rating si dispo */}
             {hasRating && (
-              <div className="absolute top-3 right-3 bg-white/90 dark:bg-zinc-900/90 border border-gray-200/60 dark:border-zinc-800 text-xs px-2.5 py-1 rounded-full shadow backdrop-blur-sm" aria-label={`Note moyenne : ${rating!.toFixed(1)} étoiles`}>
+              <div className="absolute right-3 top-3 rounded-full border border-gray-200/60 bg-white/90 px-2.5 py-1 text-xs shadow backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/90" aria-label={`Note moyenne : ${rating!.toFixed(1)} étoiles`}>
                 <span className="text-yellow-500">★</span> {rating!.toFixed(1)}
               </div>
             )}
 
             {/* Rupture */}
             {typeof stock === 'number' && stock <= 0 && (
-              <div className="absolute inset-0 grid place-items-center bg-black/45 text-white text-sm font-semibold" aria-hidden>
+              <div className="absolute inset-0 grid place-items-center bg-black/45 text-sm font-semibold text-white" aria-hidden>
                 Rupture
               </div>
             )}
@@ -217,7 +218,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
 
           {/* Contenu */}
           <div className="p-5 sm:p-6">
-            <h3 className="text-lg sm:text-xl font-semibold line-clamp-2 text-gray-900 dark:text-white" title={title}>
+            <h3 className="line-clamp-2 text-lg font-semibold text-gray-900 dark:text-white sm:text-xl" title={title}>
               {title}
             </h3>
 
@@ -228,11 +229,11 @@ export default function PackCard({ pack, priority = false, className }: PackCard
             )}
 
             {description && (
-              <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-3 mt-2">{description}</p>
+              <p className="mt-2 line-clamp-3 text-sm text-gray-600 dark:text-gray-400">{description}</p>
             )}
 
-            <div className="mt-3 sm:mt-4 flex items-center flex-wrap gap-x-3 gap-y-2" itemProp="offers" itemScope itemType="https://schema.org/Offer">
-              <span className="text-brand font-extrabold text-lg sm:text-xl" aria-label={`Prix : ${formatPrice(price)}`}>
+            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 sm:mt-4" itemProp="offers" itemScope itemType="https://schema.org/Offer">
+              <span className="text-lg font-extrabold text-brand sm:text-xl" aria-label={`Prix : ${formatPrice(price)}`}>
                 <meta itemProp="priceCurrency" content="EUR" />
                 <meta itemProp="price" content={Math.max(0, Number(price || 0)).toFixed(2)} />
                 {formatPrice(price)}
@@ -240,7 +241,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
 
               {typeof refPrice === 'number' && refPrice > price && (
                 <>
-                  <span className="line-through text-sm text-gray-400 dark:text-gray-500" aria-label="Prix de référence">
+                  <span className="text-sm text-gray-400 line-through dark:text-gray-500" aria-label="Prix de référence">
                     {formatPrice(refPrice)}
                   </span>
                   {typeof discountPct === 'number' && (
@@ -251,7 +252,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
             </div>
 
             {typeof savingsEuro === 'number' && savingsEuro > 0 && (
-              <p className="mt-1 text-xs text-emerald-700 dark:text-emerald-300 font-medium">
+              <p className="mt-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
                 Vous économisez {formatPrice(savingsEuro)}
               </p>
             )}

@@ -1,4 +1,4 @@
-// src/components/layout/MobileNav.tsx
+// src/components/layout/MobileNav.tsx — Ultra Premium Fusion (framer-motion + tokens + a11y)
 'use client'
 
 import Link from 'next/link'
@@ -37,7 +37,7 @@ const track = (args: { action: string; category?: string; label?: string; value?
 }
 
 export default function MobileNav() {
-  const pathname = usePathname()
+  const pathname = usePathname() || '/'
   const router = useRouter()
   const reducedMotion = useReducedMotion()
   const dialogId = useId()
@@ -46,15 +46,33 @@ export default function MobileNav() {
   // 🛒 Panier (safe)
   let cartCount = 0
   try {
-    const { cart } = useCart()
-    cartCount = useMemo(() => (Array.isArray(cart) ? cart.reduce((t, i: any) => t + (i?.quantity || 1), 0) : 0), [JSON.stringify(cart)])
+    const { cart } = useCart() as any
+    cartCount = useMemo(
+      () =>
+        Array.isArray(cart)
+          ? cart.reduce((t, i: any) => t + (i?.quantity || 1), 0)
+          : Array.isArray(cart?.items)
+          ? cart.items.reduce((t: number, i: any) => t + (i?.quantity || 1), 0)
+          : Number(cart?.count ?? cart?.size ?? 0) || 0,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [JSON.stringify(cart)]
+    )
   } catch { cartCount = 0 }
 
   // ❤ Wishlist (safe)
   let wishlistCount = 0
   try {
     const { wishlist } = useWishlist() as any
-    wishlistCount = useMemo(() => (Array.isArray(wishlist) ? wishlist.length : 0), [JSON.stringify(wishlist)])
+    wishlistCount = useMemo(
+      () =>
+        Array.isArray(wishlist)
+          ? wishlist.length
+          : Array.isArray(wishlist?.items)
+          ? wishlist.items.length
+          : Number(wishlist?.count ?? wishlist?.size ?? 0) || 0,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [JSON.stringify(wishlist)]
+    )
   } catch { wishlistCount = 0 }
 
   const [open, setOpen] = useState(false)
@@ -169,7 +187,7 @@ export default function MobileNav() {
   // Fermer à la navigation
   useEffect(() => { if (open) closeMenu('route_change') }, [pathname])
 
-  // Gestes (swipe down to close)
+  // Gestes (swipe down)
   const startY = useRef<number | null>(null)
   const onTouchStart = (e: React.TouchEvent) => { startY.current = e.touches[0].clientY }
   const onTouchMove = (e: React.TouchEvent) => {
@@ -179,7 +197,7 @@ export default function MobileNav() {
   }
   const onTouchEnd = () => { startY.current = null }
 
-  // Variants anim
+  // Variants
   const overlayVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { duration: reducedMotion ? 0 : 0.18 } },
@@ -191,11 +209,10 @@ export default function MobileNav() {
     exit: { y: reducedMotion ? 0 : '10%', opacity: 0, transition: { duration: 0.16 } },
   }
 
-  const isActive = (href: string) => (pathname ? pathname === href || pathname.startsWith(href + '/') : false)
+  const isActive = (href: string) =>
+    href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/')
 
-  const prefetchOnPointerDown = (href: string) => {
-    try { if (href && !isActive(href)) router.prefetch(href) } catch {}
-  }
+  const prefetchOnPointerDown = (href: string) => { try { if (href && !isActive(href)) router.prefetch(href) } catch {} }
 
   // Placeholder rotatif
   useEffect(() => {
@@ -215,6 +232,7 @@ export default function MobileNav() {
 
   return (
     <>
+      {/* Trigger */}
       <button
         ref={triggerRef}
         onClick={openMenu}
@@ -222,7 +240,7 @@ export default function MobileNav() {
         aria-expanded={open}
         aria-controls={dialogId}
         aria-label="Ouvrir le menu mobile"
-        className="md:hidden p-2 text-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
+        className="md:hidden grid h-10 w-10 place-items-center rounded-xl hover:bg-token-surface-2 focus-ring"
       >
         ☰
       </button>
@@ -236,7 +254,7 @@ export default function MobileNav() {
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center"
+            className="fixed inset-0 z-[9999] flex items-end justify-center sm:items-center"
             initial="hidden"
             animate="visible"
             exit="exit"
@@ -255,7 +273,7 @@ export default function MobileNav() {
             {/* Sheet */}
             <motion.div
               ref={panelRef}
-              className="relative w-full sm:max-w-md sm:rounded-2xl overflow-hidden bg-white/90 dark:bg-zinc-950/90 supports-[backdrop-filter]:backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-2xl will-change-transform"
+              className="supports-backdrop:glass supports-backdrop:bg-token-surface/80 relative w-full overflow-hidden border border-token-border bg-token-surface/90 shadow-2xl sm:max-w-md sm:rounded-2xl will-change-transform"
               variants={sheetVariants}
               drag={reducedMotion ? false : 'y'}
               dragConstraints={{ top: 0, bottom: 0 }}
@@ -266,12 +284,12 @@ export default function MobileNav() {
               <div className="pt-[env(safe-area-inset-top)]" />
 
               {/* Handle + Header */}
-              <div className="mx-auto mt-3 h-1.5 w-14 rounded-full bg-gray-300/80 dark:bg-zinc-700/80" aria-hidden="true" />
+              <div className="mx-auto mt-3 h-1.5 w-14 rounded-full bg-token-text/20" aria-hidden="true" />
               <div className="flex items-center justify-between px-4 py-3">
                 <h2 id={titleId} className="text-lg font-semibold">Menu</h2>
                 <button
                   onClick={() => closeMenu('close_btn')}
-                  className="rounded px-3 py-2 text-sm hover:bg-gray-100/70 dark:hover:bg-zinc-800/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  className="rounded px-3 py-2 text-sm hover:bg-token-surface-2 focus-ring"
                   aria-label="Fermer le menu mobile"
                 >
                   ✕
@@ -294,7 +312,7 @@ export default function MobileNav() {
                     name="q"
                     placeholder={`Rechercher… ex: ${placeholder}`}
                     list="mobile-search-suggestions"
-                    className="w-full rounded-xl border border-gray-300 bg-white/80 px-4 py-3 pr-12 text-base placeholder:text-gray-400 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 dark:border-gray-700 dark:bg-black/40 dark:placeholder:text-gray-500"
+                    className="w-full rounded-xl border border-token-border bg-token-surface px-4 py-3 pr-12 text-base placeholder:text-token-text/50 focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/.30)]"
                     autoComplete="off"
                     enterKeyHint="search"
                   />
@@ -303,7 +321,7 @@ export default function MobileNav() {
                   </datalist>
                   <button
                     type="submit"
-                    className="absolute right-1.5 top-1.5 inline-flex h-10 w-10 items-center justify-center rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                    className="absolute right-1.5 top-1.5 inline-flex h-10 w-10 items-center justify-center rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
                     aria-label="Lancer la recherche"
                     title="Rechercher"
                   >
@@ -313,14 +331,14 @@ export default function MobileNav() {
               </form>
 
               {/* Quick actions */}
-              <div className="px-4 pb-3 flex items-center gap-2">
+              <div className="flex items-center gap-2 px-4 pb-3">
                 <ThemeToggle size="md" />
                 <Link
                   href="/wishlist"
                   prefetch={false}
                   onPointerDown={() => prefetchOnPointerDown('/wishlist')}
                   onClick={() => { track({ action: 'mobile_nav_quick_wishlist' }); closeMenu('quick_wishlist') }}
-                  className="relative inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-zinc-700 px-3 py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  className="relative inline-flex items-center gap-2 rounded-lg border border-token-border px-3 py-2 text-sm font-medium hover:bg-token-surface-2 focus-ring"
                   aria-label="Voir la wishlist"
                 >
                   🤍
@@ -335,7 +353,7 @@ export default function MobileNav() {
                   prefetch={false}
                   onPointerDown={() => prefetchOnPointerDown('/login')}
                   onClick={() => { track({ action: 'mobile_nav_quick_account' }); closeMenu('quick_account') }}
-                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-zinc-700 px-3 py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  className="inline-flex items-center gap-2 rounded-lg border border-token-border px-3 py-2 text-sm font-medium hover:bg-token-surface-2 focus-ring"
                   aria-label="Espace client"
                 >
                   👤
@@ -354,7 +372,7 @@ export default function MobileNav() {
 
               {/* Grid de liens */}
               <nav aria-label="Navigation mobile" className="px-5 pb-4">
-                <ul className="grid grid-cols-1 gap-2 text-lg text-gray-800 dark:text-gray-100">
+                <ul className="grid grid-cols-1 gap-2 text-lg">
                   {NAV.map(({ href, label }) => {
                     const active = isActive(href)
                     const promo = href === '/promo'
@@ -368,12 +386,12 @@ export default function MobileNav() {
                           onClick={onClick}
                           aria-current={active ? 'page' : undefined}
                           className={[
-                            'block rounded-xl px-4 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+                            'block rounded-xl px-4 py-3 transition focus-ring',
                             promo
                               ? 'bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-white font-semibold shadow-md hover:shadow-lg text-center'
                               : active
-                                ? 'bg-accent/10 text-accent font-semibold border border-accent/30'
-                                : 'hover:bg-gray-100/70 dark:hover:bg-zinc-800/70 border border-transparent',
+                                ? 'bg-[hsl(var(--accent)/.10)] text-[hsl(var(--accent))] font-semibold border border-[hsl(var(--accent)/.30)]'
+                                : 'hover:bg-token-surface-2 border border-transparent',
                           ].join(' ')}
                         >
                           {label}
@@ -385,13 +403,13 @@ export default function MobileNav() {
               </nav>
 
               {/* Footer: Panier */}
-              <div className="border-t border-gray-200/70 dark:border-zinc-800/70 px-4 py-3 flex items-center gap-3">
+              <div className="border-token-border px-4 py-3 flex items-center gap-3 border-t">
                 <Link
                   href="/commande"
                   prefetch={false}
                   onPointerDown={() => prefetchOnPointerDown('/commande')}
                   onClick={() => { track({ action: 'mobile_nav_cart_click', label: 'cart', value: cartCount || 1 }); closeMenu('cart') }}
-                  className="relative inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-zinc-700 px-4 py-2 text-base font-semibold hover:bg-gray-50 dark:hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  className="relative inline-flex items-center justify-center rounded-lg border border-token-border px-4 py-2 text-base font-semibold hover:bg-token-surface-2 focus-ring"
                   aria-label="Voir le panier"
                 >
                   🛒
@@ -405,7 +423,7 @@ export default function MobileNav() {
 
                 <button
                   onClick={() => closeMenu('close_btn')}
-                  className="ml-auto text-sm text-gray-600 hover:underline focus:outline-none dark:text-gray-400"
+                  className="ml-auto text-sm text-token-text/70 hover:underline focus:outline-none"
                   aria-label="Fermer le menu mobile"
                 >
                   Fermer

@@ -2,9 +2,10 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, cn } from '@/lib/utils'
 import WishlistButton from '@/components/WishlistButton'
 import FreeShippingBadge from '@/components/FreeShippingBadge'
 import QuantitySelector from '@/components/QuantitySelector'
@@ -34,6 +35,10 @@ interface Props {
 
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n))
 
+// très petit blur inline (évite un asset supplémentaire)
+const BLUR_DATA_URL =
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+'
+
 export default function ProductDetail({ product, locale = 'fr' }: Props) {
   const prefersReducedMotion = useReducedMotion()
 
@@ -42,6 +47,11 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
   const [activeIdx, setActiveIdx] = useState(0)
   const viewedRef = useRef(false)
   const sectionRef = useRef<HTMLElement | null>(null)
+
+  // zoom/tilt image
+  const mediaRef = useRef<HTMLDivElement | null>(null)
+  const [zoomed, setZoomed] = useState(false)
+  const [origin, setOrigin] = useState<{ x: number; y: number }>({ x: 50, y: 50 })
 
   // Unpack produit
   const {
@@ -61,10 +71,10 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     brand,
   } = product ?? {}
 
-  // Galerie (images[] -> max 6)
+  // Galerie (images[] -> max 8)
   const gallery: string[] = useMemo(() => {
     const arr = Array.isArray(images) && images.length ? images : [image].filter(Boolean)
-    return Array.from(new Set(arr)).slice(0, 6)
+    return Array.from(new Set(arr)).slice(0, 8)
   }, [images, image])
 
   const hasRating = typeof rating === 'number' && !Number.isNaN(rating)
@@ -82,6 +92,10 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
       : 'https://schema.org/InStock'
   const lowStock = typeof stock === 'number' && stock > 0 && stock <= 5
   const total = useMemo(() => price * quantity, [price, quantity])
+
+  /* ------------------------------------------------------------------------ */
+  /*                           Tracking / Recently viewed                     */
+  /* ------------------------------------------------------------------------ */
 
   // GA4 view_item (une fois visible)
   useEffect(() => {
@@ -101,13 +115,20 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
               items: [mapProductToGaItem(product, { quantity: 1 })],
             })
           } catch {}
+          // Ajout "vu récemment" (tolérant)
+          try {
+            const key = 'recent:products'
+            const prev = JSON.parse(localStorage.getItem(key) || '[]') as any[]
+            const next = [{ _id, slug, title, price, image: gallery[0] ?? image }, ...prev.filter(p => p?._id !== _id)].slice(0, 16)
+            localStorage.setItem(key, JSON.stringify(next))
+          } catch {}
         }
       },
       { threshold: 0.35 }
     )
     io.observe(el)
     return () => io.disconnect()
-  }, [product, title, price])
+  }, [product, title, price, _id, image, gallery])
 
   // Raccourcis clavier
   useEffect(() => {
@@ -174,7 +195,9 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     } catch {}
   }
 
-  // JSON-LD
+  /* ------------------------------------------------------------------------ */
+  /*                                  JSON-LD                                 */
+  /* ------------------------------------------------------------------------ */
   const jsonLd = useMemo(() => {
     const data: any = {
       '@context': 'https://schema.org',
@@ -215,6 +238,34 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     return data
   }, [gallery, _id, title, image, description, brand, priceStr, availability, hasRating, rating])
 
+  /* ------------------------------------------------------------------------ */
+  /*                              Image interactions                           */
+  /* ------------------------------------------------------------------------ */
+  const onPointerMove: React.PointerEventHandler<HTMLDivElement> = (e) => {
+    if (!mediaRef.current) return
+    if (!zoomed) return
+    const rect = mediaRef.current.getBoundingClientRect()
+    const x = ((e.clientX - rect.left) / rect.width) * 100
+    const y = ((e.clientY - rect.top) / rect.height) * 100
+    setOrigin({ x: clamp(x, 0, 100), y: clamp(y, 0, 100) })
+  }
+
+  const toggleZoom = () => {
+    if (prefersReducedMotion) return
+    setZoomed((z) => !z)
+  }
+
+  // Prefetch next/prev images (très léger)
+  useEffect(() => {
+    if (typeof window === 'undefined' || gallery.length <= 1) return
+    const n = (activeIdx + 1) % gallery.length
+    const p = (activeIdx - 1 + gallery.length) % gallery.length
+    ;[gallery[n], gallery[p]].filter(Boolean).forEach((src) => {
+      const img = new window.Image()
+      img.src = src!
+    })
+  }, [activeIdx, gallery])
+
   return (
     <motion.section
       ref={sectionRef}
@@ -230,27 +281,49 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
       itemScope
       itemType="https://schema.org/Product"
     >
-      {/* Galerie */}
+      {/* -------------------------------------------------------------------- */}
+      {/*                                Galerie                                */}
+      {/* -------------------------------------------------------------------- */}
       <div className="grid gap-4">
-        <div className="relative w-full aspect-square rounded-3xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700">
+        <div
+          ref={mediaRef}
+          className={cn(
+            'relative w-full aspect-square rounded-3xl overflow-hidden border',
+            'border-gray-200 dark:border-gray-700 shadow-xl bg-gray-50 dark:bg-zinc-900'
+          )}
+          onPointerMove={onPointerMove}
+          onPointerLeave={() => setZoomed(false)}
+          onClick={toggleZoom}
+          role="img"
+          aria-label={`Image ${activeIdx + 1} sur ${gallery.length} : ${title}`}
+          tabIndex={0}
+        >
           <Image
             key={gallery[activeIdx] ?? image}
             src={gallery[activeIdx] ?? image}
             alt={`Image ${activeIdx + 1} de ${title}`}
             fill
-            className="object-cover transition-transform duration-700 hover:scale-105"
+            className={cn(
+              'object-cover transition-transform duration-700 will-change-transform',
+              zoomed ? 'scale-125 cursor-zoom-out' : 'hover:scale-[1.03] cursor-zoom-in'
+            )}
+            style={{ transformOrigin: `${origin.x}% ${origin.y}%` }}
             sizes="(min-width: 1024px) 50vw, 100vw"
             priority
             placeholder="blur"
-            blurDataURL="/placeholder-blur.png"
+            blurDataURL={BLUR_DATA_URL}
             onLoadingComplete={() => setImgLoaded(true)}
             itemProp="image"
             draggable={false}
           />
           {!imgLoaded && (
-            <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-200/70 to-gray-100/40 dark:from-zinc-800/60 dark:to-zinc-900/40" aria-hidden="true" />
+            <div
+              className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-200/70 to-gray-100/40 dark:from-zinc-800/60 dark:to-zinc-900/40"
+              aria-hidden="true"
+            />
           )}
 
+          {/* Badges & pricing overlays */}
           <div className="absolute bottom-4 right-4 z-10">
             <PricingBadge price={price} oldPrice={oldPrice} showDiscountLabel showOldPrice />
           </div>
@@ -260,7 +333,8 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             {discount && <span className="bg-red-600 text-white px-3 py-1 rounded-full font-semibold text-sm shadow-md">-{discount}%</span>}
           </div>
 
-          <div className="absolute top-4 right-4 flex gap-2">
+          {/* Actions coin droit */}
+          <div className="absolute top-4 right-4 flex gap-2 z-10">
             <button
               onClick={share}
               className="rounded-full bg-white/90 dark:bg-black/60 border border-gray-200 dark:border-gray-700 px-3 py-1 text-sm shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
@@ -273,35 +347,54 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         </div>
 
         {gallery.length > 1 && (
-          <ul role="list" className="grid grid-cols-5 sm:grid-cols-6 gap-3">
-            {gallery.map((src, i) => {
-              const active = i === activeIdx
-              return (
-                <li key={`${src}-${i}`}>
-                  <button
-                    onClick={() => onThumbSelect(i)}
-                    className={[
-                      'relative block aspect-square rounded-xl overflow-hidden border',
-                      active
-                        ? 'border-accent ring-2 ring-accent'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-accent/60',
-                    ].join(' ')}
-                    aria-label={`Voir l’image ${i + 1}`}
-                    aria-current={active ? 'true' : 'false'}
-                  >
-                    <Image src={src} alt="" fill sizes="96px" className="object-cover" loading="lazy" />
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
+          <nav aria-label="Miniatures du produit">
+            <ul role="list" className="grid grid-cols-5 sm:grid-cols-6 gap-3">
+              {gallery.map((src, i) => {
+                const active = i === activeIdx
+                return (
+                  <li key={`${src}-${i}`}>
+                    <button
+                      onClick={() => onThumbSelect(i)}
+                      onMouseEnter={() => !prefersReducedMotion && setActiveIdx(i)}
+                      className={cn(
+                        'relative block aspect-square rounded-xl overflow-hidden border transition',
+                        active
+                          ? 'border-accent ring-2 ring-accent'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-accent/60'
+                      )}
+                      aria-label={`Voir l’image ${i + 1}`}
+                      aria-current={active ? 'true' : 'false'}
+                    >
+                      <Image
+                        src={src}
+                        alt=""
+                        fill
+                        sizes="96px"
+                        className="object-cover"
+                        loading="lazy"
+                        placeholder="blur"
+                        blurDataURL={BLUR_DATA_URL}
+                      />
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          </nav>
         )}
       </div>
 
-      {/* Infos + actions */}
+      {/* -------------------------------------------------------------------- */}
+      {/*                           Infos + actions                             */}
+      {/* -------------------------------------------------------------------- */}
       <div className="flex flex-col justify-between space-y-8">
         <div>
-          <h1 id="product-title" className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white" tabIndex={-1} itemProp="name">
+          <h1
+            id="product-title"
+            className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white"
+            tabIndex={-1}
+            itemProp="name"
+          >
             {title}
           </h1>
 
@@ -310,13 +403,14 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             <FreeShippingBadge price={price} minimal />
             {typeof stock === 'number' && (
               <span
-                className={`text-xs px-2 py-1 rounded-full border ${
+                className={cn(
+                  'text-xs px-2 py-1 rounded-full border',
                   stock > 0
                     ? lowStock
                       ? 'border-amber-300 text-amber-700 dark:text-amber-300'
                       : 'border-emerald-300 text-emerald-700 dark:text-emerald-300'
                     : 'border-red-300 text-red-600 dark:text-red-400'
-                }`}
+                )}
                 aria-live="polite"
               >
                 {stock > 0 ? (lowStock ? `Plus que ${stock} en stock` : 'En stock') : 'Rupture'}
@@ -338,7 +432,13 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           )}
 
           <div className="mt-4 flex flex-wrap items-end gap-3" aria-live="polite">
-            <span className="text-3xl font-extrabold text-brand" aria-label={`Prix : ${formatPrice(price)}`} itemProp="offers" itemScope itemType="https://schema.org/Offer">
+            <span
+              className="text-3xl font-extrabold text-brand"
+              aria-label={`Prix : ${formatPrice(price)}`}
+              itemProp="offers"
+              itemScope
+              itemType="https://schema.org/Offer"
+            >
               <meta itemProp="priceCurrency" content="EUR" />
               <meta itemProp="price" content={priceStr} />
               <meta itemProp="availability" content={availability} />
@@ -364,7 +464,10 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           </div>
 
           {description && (
-            <p className="mt-6 text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed text-lg" itemProp="description">
+            <p
+              className="mt-6 text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed text-lg"
+              itemProp="description"
+            >
               {description}
             </p>
           )}
@@ -374,6 +477,19 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
               <ProductTags tags={tags} />
             </div>
           )}
+
+          {/* Garanties & infos (légères, sans deps) */}
+          <div className="mt-6 grid gap-3 text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex items-center gap-2">
+              <span aria-hidden>✅</span> Garantie 2 ans & retours sous 30 jours
+            </div>
+            <div className="flex items-center gap-2">
+              <span aria-hidden>🔒</span> Paiement 100% sécurisé (CB/PayPal)
+            </div>
+            <div className="flex items-center gap-2">
+              <span aria-hidden>⚡</span> Expédition en 24h ouvrées
+            </div>
+          </div>
         </div>
 
         {/* Actions */}
@@ -399,13 +515,23 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
               aria-label={`Ajouter ${title} au panier`}
             />
           ) : (
-            <div className="inline-flex items-center justify-center rounded-lg border border-red-300 px-4 py-3 text-red-700 dark:text-red-300" role="alert">
+            <div
+              className="inline-flex items-center justify-center rounded-lg border border-red-300 px-4 py-3 text-red-700 dark:text-red-300"
+              role="alert"
+            >
               Indisponible actuellement
+              <button
+                type="button"
+                onClick={() => toast('🔔 Nous pouvons vous prévenir quand il revient !')}
+                className="ml-3 underline underline-offset-2"
+              >
+                Me prévenir
+              </button>
             </div>
           )}
 
-          {/* WishlistButton ne possède pas de prop onClick → on entoure d’un wrapper cliquable */}
-          <div className="flex gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* WishlistButton ne possède pas de prop onClick → on entoure d’un wrapper cliquable */}
             <div className="inline-block" onClick={onAddWishlist}>
               <WishlistButton
                 product={{ _id, slug, title, price, image: gallery[0] ?? image }}
@@ -422,11 +548,37 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             >
               Partager
             </button>
+
+            {/* Paiements “confiance” (juste visuel, pas de dépendances) */}
+            <div className="mt-2 ml-auto flex items-center gap-2 opacity-80">
+              <span className="text-xs">Paiements :</span>
+              <span aria-hidden>💳</span>
+              <span aria-hidden>🅿️</span>
+              <span aria-hidden>🏦</span>
+            </div>
           </div>
 
           {/* Simulateur d’expédition — props requis */}
           <div className="mt-2">
             <ShippingSimulator minDays={2} maxDays={3} businessDaysOnly />
+          </div>
+
+          {/* Infos supplémentaires en <details> (0 deps) */}
+          <div className="mt-2 grid gap-2">
+            <details className="rounded-xl border border-gray-200 dark:border-gray-700 p-3">
+              <summary className="cursor-pointer font-semibold">Livraison & retours</summary>
+              <ul className="mt-2 list-disc pl-5 text-sm text-gray-600 dark:text-gray-400">
+                <li>Livraison 48–72h en France métropolitaine</li>
+                <li>Retour gratuit sous 30 jours</li>
+                <li>Suivi colis temps réel</li>
+              </ul>
+            </details>
+            <details className="rounded-xl border border-gray-200 dark:border-gray-700 p-3">
+              <summary className="cursor-pointer font-semibold">Spécifications</summary>
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                {brand ? <>Marque&nbsp;: <strong>{String(brand)}</strong></> : 'Caractéristiques détaillées disponibles sur la fiche.'}
+              </p>
+            </details>
           </div>
         </div>
       </div>

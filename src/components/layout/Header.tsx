@@ -1,4 +1,4 @@
-// src/components/layout/Header.tsx
+// src/components/layout/Header.tsx — Ultra Premium Fusion (tokens + mega + prefetch + a11y)
 'use client'
 
 import Link from 'next/link'
@@ -15,7 +15,7 @@ type NavLink = { href: string; label: string }
 
 const LINKS: NavLink[] = [
   { href: '/', label: 'Accueil' },
-  { href: '/categorie', label: 'Catégories' }, // mega menu
+  { href: '/categorie', label: 'Catégories' }, // mégamenu
   { href: '/produit', label: 'Produits' },
   { href: '/pack', label: 'Packs' },
   { href: '/wishlist', label: 'Wishlist' },
@@ -47,19 +47,28 @@ const CATEGORIES: Array<{ label: string; href: string; emoji: string; desc: stri
 ]
 
 export default function Header() {
-  const pathname = usePathname()
+  const pathname = usePathname() || '/'
   const router = useRouter()
 
+  // Comptages robustes (peu importe la forme du store)
   let cartCount = 0
   try {
-    const { cart } = useCart()
-    cartCount = Array.isArray(cart) ? cart.reduce((t, it: any) => t + (it?.quantity || 1), 0) : 0
+    const { cart } = useCart() as any
+    cartCount = Array.isArray(cart)
+      ? cart.reduce((t: number, it: any) => t + (it?.quantity || 1), 0)
+      : Array.isArray(cart?.items)
+      ? cart.items.reduce((t: number, it: any) => t + (it?.quantity || 1), 0)
+      : Number(cart?.count ?? cart?.size ?? 0) || 0
   } catch {}
 
   let wishlistCount = 0
   try {
     const { wishlist } = useWishlist() as any
-    wishlistCount = Array.isArray(wishlist) ? wishlist.length : 0
+    wishlistCount = Array.isArray(wishlist)
+      ? wishlist.length
+      : Array.isArray(wishlist?.items)
+      ? wishlist.items.length
+      : Number(wishlist?.count ?? wishlist?.size ?? 0) || 0
   } catch {}
 
   const [hidden, setHidden] = useState(false)
@@ -73,6 +82,7 @@ export default function Header() {
   const searchRef = useRef<HTMLInputElement | null>(null)
   const [placeholder, setPlaceholder] = useState(SEARCH_TRENDS[0])
 
+  // Mega menu Catégories (hover/focus + ESC + clickAway)
   const [catOpen, setCatOpen] = useState(false)
   const catBtnRef = useRef<HTMLButtonElement | null>(null)
   const catPanelRef = useRef<HTMLDivElement | null>(null)
@@ -142,18 +152,18 @@ export default function Header() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  // Raccourcis / & Cmd/Ctrl+K → focus recherche
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName
       const editable =
         tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable
-      const cmdK = (e.key.toLowerCase() === 'k' && (e.metaKey || e.ctrlKey))
+      const cmdK = e.key.toLowerCase() === 'k' && (e.metaKey || e.ctrlKey)
       const slash = e.key === '/'
       if (!editable && (cmdK || slash)) {
         e.preventDefault()
-        const el = searchRef.current
-        el?.focus()
-        el?.select()
+        searchRef.current?.focus()
+        searchRef.current?.select()
       }
       if (e.key === 'Escape' && searchRef.current === document.activeElement) {
         (e.target as HTMLInputElement)?.blur()
@@ -163,6 +173,7 @@ export default function Header() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
+  // Placeholder rotatif
   useEffect(() => {
     let i = 0
     const id = window.setInterval(() => {
@@ -172,8 +183,10 @@ export default function Header() {
     return () => clearInterval(id)
   }, [])
 
-  const isActive = (href: string) => (pathname ? pathname === href || pathname.startsWith(href + '/') : false)
+  const isActive = (href: string) =>
+    href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/')
 
+  // Prefetch “intelligent” au hover
   const smartPrefetchStart = (href: string) => {
     if (!href || isActive(href)) return
     if (prefetchTimers.current.has(href)) return
@@ -207,21 +220,27 @@ export default function Header() {
       data-hidden={hidden ? 'true' : 'false'}
       data-scrolled={scrolled ? 'true' : 'false'}
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 w-full',
-        'supports-[backdrop-filter]:backdrop-blur-md backdrop-saturate-150',
-        'border-b transition-all',
-        'motion-safe:duration-300 motion-safe:ease-out motion-safe:transition-transform motion-reduce:transition-none',
+        'fixed top-0 left-0 right-0 z-[80] w-full',
+        'supports-backdrop:glass supports-backdrop:bg-transparent',
+        'border-b transition-all motion-safe:duration-300 motion-safe:ease-out motion-safe:transition-transform',
         scrolled
-          ? 'bg-white/95 border-gray-200 dark:bg-black/80 dark:border-gray-800 shadow-[0_6px_30px_-12px_rgba(0,0,0,0.35)] dark:shadow-[0_12px_40px_-20px_rgba(0,0,0,0.8)]'
-          : 'bg-white/70 border-transparent dark:bg-black/60',
+          ? 'bg-token-surface/85 border-token-border shadow-soft'
+          : 'bg-token-surface/65 border-transparent',
         hidden ? '-translate-y-full' : 'translate-y-0'
       )}
     >
-      <div className="mx-auto flex h-16 md:h-20 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-10">
-        <Link href="/" prefetch={false} aria-label="Retour à l’accueil" className="flex shrink-0 items-center gap-3">
+      <div className="container-app flex h-16 md:h-20 items-center justify-between gap-4">
+        {/* Logo */}
+        <Link
+          href="/"
+          prefetch={false}
+          aria-label="Retour à l’accueil"
+          className="flex shrink-0 items-center gap-3 hocus:opacity-90"
+        >
           <Logo className="h-8 w-auto md:h-10" />
         </Link>
 
+        {/* Recherche */}
         <form
           action="/products"
           method="get"
@@ -237,9 +256,10 @@ export default function Header() {
             placeholder={`Rechercher… ex: ${placeholder}`}
             list="header-search-suggestions"
             className={cn(
-              'w-full rounded-full border border-gray-300 bg-white/70 px-4 py-2.5 pr-12 text-sm',
-              'placeholder:text-gray-400 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30',
-              'dark:border-gray-700 dark:bg-black/50 dark:placeholder:text-gray-500'
+              'w-full rounded-full border px-4 py-2.5 pr-12 text-sm',
+              // tokens
+              'border-token-border bg-token-surface/70 placeholder:text-token-text/40',
+              'focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/.30)]'
             )}
             autoComplete="off"
             enterKeyHint="search"
@@ -252,11 +272,19 @@ export default function Header() {
           <div id="search-hint" className="sr-only">Raccourcis : « / » ou « Ctrl/⌘ K » pour rechercher.</div>
           <div id="search-status" aria-live="polite" aria-atomic="true" className="sr-only" />
           <div className="absolute inset-y-0 right-1.5 flex items-center">
-            <button type="submit" className="inline-flex h-8 w-8 items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-accent" aria-label="Lancer la recherche" title="Rechercher">🔎</button>
+            <button
+              type="submit"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+              aria-label="Lancer la recherche"
+              title="Rechercher"
+            >
+              🔎
+            </button>
           </div>
         </form>
 
-        <nav className="hidden md:flex gap-6 lg:gap-8 tracking-tight font-medium text-gray-800 dark:text-gray-100" aria-label="Navigation principale">
+        {/* Desktop nav */}
+        <nav className="hidden md:flex gap-6 lg:gap-8 tracking-tight font-medium text-token-text" aria-label="Navigation principale">
           {LINKS.map(({ href, label }) => {
             const active = isActive(href)
 
@@ -274,15 +302,15 @@ export default function Header() {
                     onFocus={openCats}
                     onBlur={() => closeCats(80)}
                     className={cn(
-                      'relative transition-colors duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm px-0.5',
+                      'relative transition-colors duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded-sm px-0.5',
                       active
-                        ? 'text-accent font-semibold after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-accent'
-                        : 'hover:text-accent focus-visible:text-accent'
+                        ? 'text-[hsl(var(--accent))] font-semibold after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-[hsl(var(--accent))]'
+                        : 'hover:text-[hsl(var(--accent))] focus-visible:text-[hsl(var(--accent))]'
                     )}
                   >
                     Catégories
                     {!active && (
-                      <span className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-accent transition-all duration-300 group-hover:w-full" aria-hidden="true" />
+                      <span className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-[hsl(var(--accent))] transition-all duration-300 group-hover:w-full" aria-hidden="true" />
                     )}
                   </button>
 
@@ -293,16 +321,15 @@ export default function Header() {
                     aria-labelledby={catBtnId}
                     className={cn(
                       'absolute left-1/2 top-[calc(100%+10px)] z-50 w-[min(860px,92vw)] -translate-x-1/2 rounded-2xl border',
-                      'border-gray-200/80 bg-white/90 shadow-2xl backdrop-blur supports-[backdrop-filter]:bg-white/80',
-                      'dark:border-gray-800/70 dark:bg-black/80',
+                      'border-token-border bg-token-surface/90 shadow-2xl supports-backdrop:bg-token-surface/80 backdrop-blur',
                       'transition-all duration-200',
                       catOpen ? 'pointer-events-auto opacity-100 translate-y-0' : 'pointer-events-none opacity-0 -translate-y-1'
                     )}
                     onFocus={openCats}
                     onBlur={() => closeCats(80)}
                   >
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 p-3 md:p-4">
-                      <ul className="md:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-2 md:gap-3" role="none">
+                    <div className="grid grid-cols-1 gap-2 p-3 md:grid-cols-3 md:p-4">
+                      <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:col-span-2 md:gap-3" role="none">
                         {CATEGORIES.map((c) => (
                           <li key={c.href} role="none">
                             <Link
@@ -312,15 +339,15 @@ export default function Header() {
                               onPointerEnter={() => smartPrefetchStart(c.href)}
                               onPointerLeave={() => smartPrefetchCancel(c.href)}
                               className={cn(
-                                'group flex items-center gap-3 rounded-xl border border-transparent transform-gpu',
-                                'bg-white/80 dark:bg-zinc-900/60 hover:bg-white dark:hover:bg-zinc-900',
-                                'hover:border-accent/30 hover:-translate-y-0.5 transition p-3 shadow-sm hover:shadow-md'
+                                'group flex items-center gap-3 rounded-xl border transform-gpu p-3 transition',
+                                'border-transparent bg-token-surface/80 hover:bg-token-surface shadow-sm hover:shadow-md',
+                                'hover:border-[hsl(var(--accent)/.30)] hover:-translate-y-0.5'
                               )}
                             >
                               <span className="text-xl select-none" aria-hidden="true">{c.emoji}</span>
                               <span className="flex-1">
-                                <span className="block font-semibold text-sm">{c.label}</span>
-                                <span className="block text-xs text-gray-500 dark:text-gray-400">{c.desc}</span>
+                                <span className="block text-sm font-semibold">{c.label}</span>
+                                <span className="block text-xs text-token-text/60">{c.desc}</span>
                               </span>
                               <svg width="18" height="18" viewBox="0 0 24 24" className="opacity-50 group-hover:opacity-90" aria-hidden="true">
                                 <path fill="currentColor" d="M9 18l6-6-6-6v12z" />
@@ -331,10 +358,10 @@ export default function Header() {
                       </ul>
 
                       <div className="md:col-span-1">
-                        <div className="h-full rounded-xl border border-gray-200/70 dark:border-gray-800/70 bg-gradient-to-br from-accent/10 via-transparent to-brand/10 p-4 md:p-5 shadow-md">
-                          <p className="text-xs uppercase tracking-widest font-bold text-accent/90">Sélection</p>
+                        <div className="h-full rounded-xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.10)] via-transparent to-token-surface p-4 md:p-5 shadow-md">
+                          <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent)/.90)]">Sélection</p>
                           <h3 className="mt-1 text-lg font-extrabold">Packs recommandés</h3>
-                          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                          <p className="mt-2 text-sm text-token-text/70">
                             Les meilleures combinaisons pour booster ton setup.
                           </p>
                           <div className="mt-3 flex flex-wrap gap-2">
@@ -344,7 +371,7 @@ export default function Header() {
                               onPointerEnter={() => smartPrefetchStart('/pack')}
                               onPointerLeave={() => smartPrefetchCancel('/pack')}
                               role="menuitem"
-                              className="inline-flex items-center rounded-lg bg-accent text-white px-3 py-1.5 text-sm font-semibold shadow hover:bg-accent/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                              className="inline-flex items-center rounded-lg bg-[hsl(var(--accent))] px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-[hsl(var(--accent)/.92)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
                             >
                               Voir les packs
                             </Link>
@@ -354,7 +381,7 @@ export default function Header() {
                               onPointerEnter={() => smartPrefetchStart('/categorie')}
                               onPointerLeave={() => smartPrefetchCancel('/categorie')}
                               role="menuitem"
-                              className="inline-flex items-center rounded-lg border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-1.5 text-sm font-semibold hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
+                              className="inline-flex items-center rounded-lg border border-token-border bg-token-surface px-3 py-1.5 text-sm font-semibold hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.30)]"
                             >
                               Toutes les catégories
                             </Link>
@@ -376,22 +403,23 @@ export default function Header() {
                 onPointerLeave={() => smartPrefetchCancel(href)}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'relative transition-colors duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm',
+                  'relative group rounded-sm transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]',
                   active
-                    ? 'text-accent font-semibold after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-accent'
-                    : 'hover:text-accent focus-visible:text-accent'
+                    ? 'text-[hsl(var(--accent))] font-semibold after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-[hsl(var(--accent))]'
+                    : 'hover:text-[hsl(var(--accent))] focus-visible:text-[hsl(var(--accent))]'
                 )}
               >
                 {label}
                 {!active && (
-                  <span className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-accent transition-all duration-300 group-hover:w-full" aria-hidden="true" />
+                  <span className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-[hsl(var(--accent))] transition-all duration-300 group-hover:w-full" aria-hidden="true" />
                 )}
               </Link>
             )
           })}
         </nav>
 
-        <div className="hidden md:flex items-center gap-2 sm:gap-3">
+        {/* Actions droites */}
+        <div className="hidden items-center gap-2 sm:gap-3 md:flex">
           <ThemeToggle />
 
           <Link
@@ -399,7 +427,7 @@ export default function Header() {
             prefetch={false}
             onPointerEnter={() => smartPrefetchStart('/promo')}
             onPointerLeave={() => smartPrefetchCancel('/promo')}
-            className="group inline-flex items-center gap-2 rounded-full border border-gray-300/80 dark:border-zinc-700/80 bg-white/60 dark:bg-zinc-900/50 px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-white dark:hover:bg-zinc-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+            className="group inline-flex items-center gap-2 rounded-full border border-token-border bg-token-surface/60 px-3 py-1.5 text-sm font-medium text-token-text hover:bg-token-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
             aria-label="Voir les offres du jour"
             title="Offres du jour"
           >
@@ -416,13 +444,13 @@ export default function Header() {
               prefetch={false}
               onPointerEnter={() => smartPrefetchStart('/wishlist')}
               onPointerLeave={() => smartPrefetchCancel('/wishlist')}
-              className="relative text-gray-800 hover:text-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:text-white"
+              className="relative text-token-text hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
               aria-label={wishlistCount > 0 ? `Voir la wishlist (${wishlistCount} article${wishlistCount > 1 ? 's' : ''})` : 'Voir la wishlist'}
             >
               <span className="sr-only">Wishlist</span>
               <span className="text-2xl" aria-hidden="true">🤍</span>
             </Link>
-            <div aria-live="polite" aria-atomic="true" className="absolute -top-2 -right-2">
+            <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
               {wishlistCount > 0 && (
                 <span className="rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm">
                   <span className="sr-only">Articles dans la wishlist&nbsp;:</span>
@@ -438,15 +466,15 @@ export default function Header() {
               prefetch={false}
               onPointerEnter={() => smartPrefetchStart('/commande')}
               onPointerLeave={() => smartPrefetchCancel('/commande')}
-              className="relative text-gray-800 hover:text-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:text-white"
+              className="relative text-token-text hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
               aria-label={cartCount > 0 ? `Voir le panier (${cartCount} article${cartCount > 1 ? 's' : ''})` : 'Voir le panier'}
             >
               <span className="sr-only">Panier</span>
               <span className="text-2xl" aria-hidden="true">🛒</span>
             </Link>
-            <div aria-live="polite" aria-atomic="true" className="absolute -top-2 -right-2">
+            <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
               {cartCount > 0 && (
-                <span className="rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm animate-[pulse_2s_ease-in-out_infinite]">
+                <span className="animate-[pulse_2s_ease-in-out_infinite] rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm">
                   <span className="sr-only">Articles dans le panier&nbsp;:</span>
                   {cartCount}
                 </span>
@@ -459,7 +487,7 @@ export default function Header() {
             prefetch={false}
             onPointerEnter={() => smartPrefetchStart('/login')}
             onPointerLeave={() => smartPrefetchCancel('/login')}
-            className="hidden lg:inline-flex items-center justify-center rounded-full border border-transparent px-3 py-2 text-sm font-medium text-gray-800 hover:text-accent focus-visible:ring-2 focus-visible:ring-accent dark:text-gray-100"
+            className="hidden lg:inline-flex items-center justify-center rounded-full border border-transparent px-3 py-2 text-sm font-medium text-token-text hover:text-[hsl(var(--accent))] focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
             aria-label="Espace client"
             title="Espace client"
           >
@@ -467,10 +495,12 @@ export default function Header() {
           </Link>
         </div>
 
+        {/* Bouton + panel mobile intégrés (Framer inclus dedans) */}
         <MobileNav />
       </div>
 
-      <div aria-hidden className="pointer-events-none h-[2px] w-full bg-gradient-to-r from-transparent via-accent/40 to-transparent" />
+      {/* Liseré subtil */}
+      <div aria-hidden className="pointer-events-none h-[2px] w-full bg-gradient-to-r from-transparent via-[hsl(var(--accent)/.40)] to-transparent" />
     </header>
   )
 }

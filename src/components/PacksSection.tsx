@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { useId } from 'react'
 import PackCard from '@/components/PackCard'
 import type { Pack } from '@/types/product'
@@ -27,19 +27,24 @@ const itemVariants = {
 }
 
 export default function PacksSection({ packs, className }: Props) {
-  const isEmpty = !packs || packs.length === 0
   const headingId = useId()
   const subId = `${headingId}-sub`
+  const reduceMotion = useReducedMotion()
+
+  const isEmpty = !Array.isArray(packs) || packs.length === 0
 
   if (isEmpty) {
     return (
-      <div
-        className="max-w-6xl mx-auto px-6 py-16 text-center text-gray-500 dark:text-gray-400"
-        role="status"
-        aria-live="polite"
-      >
-        Aucun pack recommandé actuellement.
-      </div>
+      <section className={['max-w-6xl mx-auto px-6 py-16', className].filter(Boolean).join(' ')}>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="skeleton h-48 rounded-2xl" aria-hidden="true" />
+          ))}
+        </div>
+        <p className="mt-6 text-center text-sm text-token-text/70" role="status" aria-live="polite">
+          Chargement des packs recommandés…
+        </p>
+      </section>
     )
   }
 
@@ -50,15 +55,12 @@ export default function PacksSection({ packs, className }: Props) {
       role="region"
     >
       {/* Header + CTA */}
-      <div className="mb-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="mb-10 flex flex-col items-center justify-between gap-4 sm:flex-row">
         <div className="text-center sm:text-left">
-          <h2
-            id={headingId}
-            className="text-3xl font-extrabold text-brand dark:text-brand-light animate-fadeIn"
-          >
+          <h2 id={headingId} className="text-3xl font-extrabold text-brand dark:text-white">
             🎁 Nos Packs Recommandés
           </h2>
-          <p id={subId} className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p id={subId} className="mt-2 text-sm text-token-text/70">
             Équipez-vous malin : bundles optimisés pour la perf’ et le budget.
             <span className="sr-only"> {packs.length} packs disponibles.</span>
           </p>
@@ -66,7 +68,8 @@ export default function PacksSection({ packs, className }: Props) {
 
         <Link
           href="/pack"
-          className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg hover:bg-accent/90 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40 transition"
+          prefetch={false}
+          className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] px-5 py-2 text-sm font-semibold text-white shadow-md transition hover:shadow-lg hover:bg-[hsl(var(--accent)/.90)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
           aria-label="Voir tous les packs TechPlay"
         >
           Voir tous les packs
@@ -78,21 +81,21 @@ export default function PacksSection({ packs, className }: Props) {
 
       {/* Grid */}
       <motion.ul
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="show"
+        {...(!reduceMotion
+          ? { variants: containerVariants, initial: 'hidden', whileInView: 'show' }
+          : {})}
         viewport={{ once: true, amount: 0.2 }}
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8"
+        className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3"
         role="list"
         aria-describedby={subId}
       >
         {packs.map((pack, i) => {
-          const key = (pack as any)?.slug ?? (pack as any)?._id ?? i
+          const key = (pack as any)?.slug ?? (pack as any)?._id ?? `pk-${i}`
           return (
             <motion.li
               key={key}
-              variants={itemVariants}
-              whileHover={{ y: -4 }}
+              {...(!reduceMotion ? { variants: itemVariants } : {})}
+              {...(!reduceMotion ? { whileHover: { y: -4 } } : {})}
               transition={{ type: 'spring', stiffness: 260, damping: 20 }}
             >
               <PackCard pack={pack} />

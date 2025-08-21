@@ -1,37 +1,53 @@
-/* DOIT être tout en haut pour éviter le warning postcss-import */
+/* DOIT rester tout en haut pour éviter le warning postcss-import */
 @import '../styles/design-tokens.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* =============== Base =============== */
+/* ===================== Base ===================== */
 @layer base {
   html {
+    /* lissage & comportement */
     scroll-behavior: smooth;
     text-rendering: optimizeLegibility;
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
-    @apply min-h-screen antialiased;
+    @apply min-h-dvh antialiased;
     background-color: hsl(var(--bg));
     color: hsl(var(--text));
     font-family: var(--font-sans);
+    line-height: 1.6;
   }
 
+  /* Titres : typographie fluide + balance */
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
-    @apply tracking-tight font-semibold text-gray-900 dark:text-white text-balance;
+    @apply tracking-tight font-semibold text-balance;
+    color: hsl(var(--text));
   }
+  h1 { font-size: var(--step-5); line-height: 1.05; }
+  h2 { font-size: var(--step-4); line-height: 1.10; }
+  h3 { font-size: var(--step-3); line-height: 1.15; }
 
-  :is(p, li, dt, dd) {
-    @apply text-gray-700 dark:text-gray-300;
+  /* Texte courant */
+  :is(p, li, dt, dd) { color: hsl(var(--text)); opacity: .88; }
+
+  /* Médias responsives par défaut */
+  :where(img, video) {
+    display: block;
+    max-width: 100%;
+    height: auto;
   }
+  :where(svg) { shape-rendering: geometricPrecision; text-rendering: optimizeLegibility; }
 
+  /* Liens premium */
   a {
     color: hsl(var(--accent));
     text-underline-offset: 2px;
-    transition: color .18s ease, opacity .18s ease, text-decoration-color .18s ease;
+    transition: color var(--dur-fast) ease, opacity var(--dur-fast) ease, text-decoration-color var(--dur-fast) ease;
   }
   a:hover {
     color: hsl(var(--accent-600));
@@ -41,10 +57,19 @@
   a:focus-visible {
     outline: none;
     box-shadow:
-      0 0 0 2px hsl(var(--surface)),
-      0 0 0 4px hsl(var(--accent));
+      0 0 0 var(--ring-offset) hsl(var(--surface)),
+      0 0 0 calc(var(--ring-offset) + 2px) hsl(var(--accent));
     border-radius: .5rem;
   }
+
+  /* Formulaires – le plugin @tailwindcss/forms fait le gros du travail,
+     on calibre juste les couleurs via tokens */
+  input, textarea, select {
+    color: hsl(var(--text));
+    background-color: hsl(var(--surface));
+    border-color: hsl(var(--border));
+  }
+  input::placeholder, textarea::placeholder { color: hsl(var(--text) / .5); }
 
   /* Scrollbars (plugin tailwind-scrollbar actif) */
   html {
@@ -59,58 +84,87 @@
   }
 }
 
-/* =============== Components =============== */
+/* ================== Components ================== */
 @layer components {
+  /* Conteneur app cohérent avec container Tailwind */
   .container-app {
-    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-10;
+    @apply w-full mx-auto px-4 sm:px-6 lg:px-10;
+    max-width: var(--container-max);
   }
 
+  /* Cartes premium (cohérent avec .card/.card-pressable du plugin Tailwind) */
   .card {
-    @apply rounded-xl border border-gray-200/80 dark:border-zinc-800
-           bg-white dark:bg-zinc-900 shadow-sm;
+    background: hsl(var(--surface));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-sm);
   }
   .card-hover {
-    @apply transition-shadow hover:shadow-lg;
+    transition: box-shadow var(--dur) var(--ease-out), transform var(--dur) var(--ease-out);
   }
+  .card-hover:hover { box-shadow: var(--shadow-md); }
 
+  /* Boutons – variantes basiques */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl
-           font-semibold px-4 py-2 transition active:scale-[0.98]
-           focus:outline-none focus-visible:ring-2 focus-visible:ring-accent;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold px-4 py-2
+           transition active:scale-[0.98] focus:outline-none;
   }
+  .btn:focus-visible { @apply focus-ring; } /* utilitaire du plugin Tailwind */
+
   .btn-primary {
-    @apply btn text-white bg-[hsl(var(--accent))]
-           hover:bg-[hsl(var(--accent-600))];
+    @apply btn text-white;
+    background: hsl(var(--accent));
   }
+  .btn-primary:hover { background: hsl(var(--accent-600)); }
+
   .btn-ghost {
-    @apply btn border border-gray-300 dark:border-zinc-700 bg-transparent
-           hover:bg-gray-50 dark:hover:bg-zinc-800;
+    @apply btn border bg-transparent;
+    border-color: hsl(var(--border));
+  }
+  .btn-ghost:hover { background: hsl(var(--surface-2)); }
+
+  .btn-outline {
+    @apply btn border;
+    color: hsl(var(--text));
+    border-color: hsl(var(--border));
+    background: transparent;
+  }
+  .btn-outline:hover { background: hsl(var(--surface-2)); }
+
+  /* Badges / chips */
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium;
+    background: hsl(var(--surface-2));
+    color: hsl(var(--text));
+    border: 1px solid hsl(var(--border));
   }
 
-  .badge {
-    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px]
-           font-medium bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-200
-           border border-gray-200 dark:border-zinc-700;
+  /* Text gradient utilitaire (pour titres “wow”) */
+  .text-gradient {
+    background: linear-gradient(90deg, hsl(var(--accent)), hsl(var(--accent-700)));
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
   }
 }
 
-/* =============== Utilities =============== */
+/* ================== Utilities =================== */
 @layer utilities {
-  .shadow-soft   { box-shadow: var(--shadow-sm); }
-  .shadow-soft-lg{ box-shadow: var(--shadow-lg); }
+  .shadow-soft    { box-shadow: var(--shadow-sm); }
+  .shadow-soft-lg { box-shadow: var(--shadow-lg); }
 
-  /* ✅ Fallback sécurité : ne jamais rendre les sections invisibles */
-  .motion-section { opacity: 1 !important; transform: none !important; will-change: transform, opacity; }
-
-  /* ✅ Animation douce seulement quand autorisée (fill-mode: both) */
+  /* Motion : on anime seulement quand autorisé */
   @media (prefers-reduced-motion: no-preference) {
     .motion-section {
-      animation: fadeUp 0.45s var(--ease, ease-out) both;
+      animation: fadeUp 0.45s var(--ease-out) both;
+      will-change: transform, opacity;
     }
   }
+
+  /* Accessibilité */
+  .sr-only { @apply visually-hidden; } /* alias pratique */
 }
 
-/* Keyframes pour le skeleton (et fadeUp est défini dans tailwind.config aussi) */
+/* =============== Keyframes locaux =============== */
 @keyframes shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }

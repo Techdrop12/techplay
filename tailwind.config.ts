@@ -1,4 +1,4 @@
-// tailwind.config.ts
+// tailwind.config.ts — Ultra Premium V2++
 import type { Config } from 'tailwindcss'
 import plugin from 'tailwindcss/plugin'
 import forms from '@tailwindcss/forms'
@@ -8,48 +8,37 @@ import type { PluginAPI } from 'tailwindcss/types/config'
 
 const config: Config = {
   darkMode: 'class',
-
   content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
 
   theme: {
     container: {
       center: true,
       padding: { DEFAULT: '1rem', sm: '1.25rem', lg: '2rem', xl: '2.5rem', '2xl': '3rem' },
+      screens: { sm: '640px', md: '768px', lg: '1024px', xl: '1280px', '2xl': '1440px' },
     },
 
     extend: {
       screens: { xs: '480px' },
 
       fontFamily: {
-        // le body est piloté par --font-inter (via globals)
         sans: ['InterVariable', 'Inter', 'ui-sans-serif', 'system-ui'],
         heading: ['SoraVariable', 'var(--font-sora)', 'Inter', 'ui-sans-serif', 'system-ui'],
       },
 
-      // Palette hybride : valeurs hex + accès aux tokens CSS (hsl(var(--...)))
       colors: {
-        brand: { DEFAULT: '#0f172a', light: '#1e293b', dark: '#0e1116' },
+        brand: { DEFAULT: '#0f172a', light: '#1e293b', dark: '#0b0f14' },
         accent: {
           DEFAULT: '#2563eb',
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
+          50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa',
+          500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a',
         },
         success: '#16a34a',
         warning: '#eab308',
-        danger: '#dc2626',
+        danger:  '#dc2626',
 
         surface: { DEFAULT: '#ffffff', muted: '#f8fafc', dark: '#0b0f14' },
-        border: { DEFAULT: '#e5e7eb', dark: '#262b35' },
+        border:  { DEFAULT: '#e5e7eb',  dark: '#262b35' },
 
-        // Accès direct aux tokens CSS (pour bg-[var] avec alpha)
         token: {
           bg: 'hsl(var(--bg) / <alpha-value>)',
           text: 'hsl(var(--text) / <alpha-value>)',
@@ -62,7 +51,6 @@ const config: Config = {
       },
 
       spacing: { header: '4.5rem' },
-
       borderRadius: { xl: '1rem', '2xl': '1.25rem', '3xl': '1.75rem' },
 
       boxShadow: {
@@ -75,9 +63,19 @@ const config: Config = {
       transitionTimingFunction: {
         'in-expo': 'cubic-bezier(0.95, 0.05, 0.795, 0.035)',
         'out-expo': 'cubic-bezier(0.19, 1, 0.22, 1)',
+        'soft-spring': 'cubic-bezier(.2,.8,.2,1)',
       },
 
       zIndex: { header: '60', overlay: '70', modal: '80', toast: '90' },
+
+      backgroundImage: {
+        'radial-faded': 'radial-gradient(80% 60% at 50% 40%, transparent, rgba(0,0,0,.55))',
+        'conic-accent':
+          'conic-gradient(from 140deg, rgba(59,130,246,.35), transparent 35%, rgba(14,165,233,.35), transparent 75%)',
+        'gloss-top': 'linear-gradient(to bottom, rgba(255,255,255,.45), transparent)',
+        'grid-surface':
+          'linear-gradient(var(--grid-color,rgba(0,0,0,.06)) 1px,transparent 1px),linear-gradient(90deg,var(--grid-color,rgba(0,0,0,.06)) 1px,transparent 1px)',
+      },
 
       animation: {
         fadeIn: 'fadeIn 0.4s ease-in-out',
@@ -90,48 +88,45 @@ const config: Config = {
         'accordion-down': 'accordionDown 0.25s ease-out',
         'accordion-up': 'accordionUp 0.25s ease-out',
         shimmer: 'shimmer 1.2s linear infinite',
+        float: 'float 6s ease-in-out infinite',
+        'tilt-subtle': 'tilt 12s ease-in-out infinite',
+        'marquee-slow': 'marquee 22s linear infinite',
       },
       keyframes: {
         fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
         slideUp: { '0%': { transform: 'translateY(10px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
-        pulse: { '0%, 100%': { opacity: '1' }, '50%': { opacity: '.5' } },
-        shake: { '0%, 100%': { transform: 'translateX(0)' }, '25%, 75%': { transform: 'translateX(-5px)' }, '50%': { transform: 'translateX(5px)' } },
-        bounce: { '0%, 100%': { transform: 'translateY(-5%)' }, '50%': { transform: 'translateY(0)' } },
+        pulse: { '0%,100%': { opacity: '1' }, '50%': { opacity: '.5' } },
+        shake: { '0%,100%': { transform: 'translateX(0)' }, '25%,75%': { transform: 'translateX(-5px)' }, '50%': { transform: 'translateX(5px)' } },
+        bounce: { '0%,100%': { transform: 'translateY(-5%)' }, '50%': { transform: 'translateY(0)' } },
         fadeUp: { '0%': { transform: 'translateY(8px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
         scaleIn: { '0%': { transform: 'scale(0.98)', opacity: '0' }, '100%': { transform: 'scale(1)', opacity: '1' } },
         accordionDown: { from: { height: '0' }, to: { height: 'var(--radix-accordion-content-height)' } },
         accordionUp: { from: { height: 'var(--radix-accordion-content-height)' }, to: { height: '0' } },
         shimmer: { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } },
+        float: { '0%,100%': { transform: 'translate3d(0,0,0)' }, '50%': { transform: 'translate3d(0,-6px,0)' } },
+        tilt: { '0%,100%': { transform: 'rotate(-.3deg)' }, '50%': { transform: 'rotate(.3deg)' } },
+        marquee: { from: { transform: 'translateX(0)' }, to: { transform: 'translateX(-50%)' } },
       },
 
-      typography: ({ theme }: { theme: (path: string) => string | number | undefined }) => ({
+      typography: ({ theme }: { theme: (path: string) => any }) => ({
         DEFAULT: {
           css: {
             color: theme('colors.brand.DEFAULT') as string,
-            a: {
-              color: theme('colors.accent.600') as string,
-              textDecoration: 'none',
-              fontWeight: 600,
-              '&:hover': { color: theme('colors.accent.700') as string },
-            },
+            a: { color: theme('colors.accent.600') as string, textDecoration: 'none', fontWeight: 600, '&:hover': { color: theme('colors.accent.700') as string } },
             h1: { fontFamily: String(theme('fontFamily.heading')), fontWeight: 800, letterSpacing: '-0.02em' },
             h2: { fontFamily: String(theme('fontFamily.heading')), fontWeight: 700, letterSpacing: '-0.01em' },
             h3: { fontFamily: String(theme('fontFamily.heading')), fontWeight: 700 },
-            code: {
-              backgroundColor: theme('colors.surface.muted') as string,
-              padding: '0.15rem 0.35rem',
-              borderRadius: '0.4rem',
-            },
+            code: { backgroundColor: theme('colors.surface.muted') as string, padding: '0.15rem 0.35rem', borderRadius: '0.4rem' },
+            'code::before, code::after': { content: 'none' },
+            blockquote: { borderLeftColor: theme('colors.accent.300') as string, color: '#334155' },
           },
         },
         invert: {
           css: {
             color: '#e5e7eb',
-            a: {
-              color: theme('colors.accent.400') as string,
-              '&:hover': { color: theme('colors.accent.300') as string },
-            },
+            a: { color: theme('colors.accent.400') as string, '&:hover': { color: theme('colors.accent.300') as string } },
             code: { backgroundColor: '#0f172a' },
+            blockquote: { borderLeftColor: theme('colors.accent.500') as string, color: '#cbd5e1' },
           },
         },
       }),
@@ -141,11 +136,22 @@ const config: Config = {
   plugins: [
     forms,
     typography,
-    scrollbar,
+    scrollbar({ nocompatible: true }), // scrollbars modernes, fins et stylables
 
     plugin((api: PluginAPI) => {
-      const { addUtilities, addComponents, theme } = api
+      const { addUtilities, addComponents, addVariant, theme } = api
 
+      // Variantes premium
+      addVariant('hocus', '&:where(:hover, :focus-visible)')
+      addVariant('group-hocus', ':merge(.group):where(:hover, :focus-within) &')
+      addVariant('aria-expanded', '&[aria-expanded="true"]')
+      addVariant('aria-pressed', '&[aria-pressed="true"]')
+      addVariant('data-open', '&[data-state="open"]')
+      addVariant('data-closed', '&[data-state="closed"]')
+      addVariant('disabled', '&:disabled')
+      addVariant('supports-backdrop', '@supports(backdrop-filter: blur(2px)) &')
+
+      // Utilitaires
       addUtilities({
         '.glass': {
           backdropFilter: 'blur(8px)',
@@ -159,7 +165,31 @@ const config: Config = {
           backgroundColor: 'rgba(9,12,16,0.65)',
           border: '1px solid rgba(255,255,255,0.08)',
         },
+        '.skeleton': {
+          background:
+            'linear-gradient(90deg, rgba(0,0,0,0.06) 25%, rgba(0,0,0,0.12) 37%, rgba(0,0,0,0.06) 63%)',
+          backgroundSize: '400% 100%',
+          animation: 'shimmer 1.2s linear infinite',
+        },
+        '.ring-conic': {
+          background:
+            'conic-gradient(from 140deg, rgba(59,130,246,.35), transparent 35%, rgba(14,165,233,.35), transparent 75%)',
+        },
+        '.bg-grid': {
+          backgroundImage:
+            'linear-gradient(var(--grid-color,rgba(0,0,0,.06)) 1px,transparent 1px),linear-gradient(90deg,var(--grid-color,rgba(0,0,0,.06)) 1px,transparent 1px)',
+          backgroundSize: '24px 24px, 24px 24px',
+          backgroundPosition: 'center center',
+        },
+        // 3D / motion helpers
+        '.preserve-3d': { transformStyle: 'preserve-3d' },
+        '.backface-hidden': { backfaceVisibility: 'hidden' },
+        '.perspective-1000': { perspective: '1000px' },
+        '.will-change-transform': { willChange: 'transform' },
+      })
 
+      // Composants sémantiques
+      addComponents({
         '.card': {
           backgroundColor: String(theme('colors.surface.DEFAULT')),
           border: `1px solid ${String(theme('colors.border.DEFAULT'))}`,
@@ -172,6 +202,16 @@ const config: Config = {
           borderRadius: String(theme('borderRadius.2xl')),
           boxShadow: String(theme('boxShadow.card')),
         },
+        '.card-pressable': {
+          backgroundColor: String(theme('colors.surface.DEFAULT')),
+          border: `1px solid ${String(theme('colors.border.DEFAULT'))}`,
+          borderRadius: String(theme('borderRadius.2xl')),
+          boxShadow: String(theme('boxShadow.card')),
+          transition: 'transform 250ms var(--ease, cubic-bezier(.2,.8,.2,1)), box-shadow 250ms',
+          willChange: 'transform',
+        },
+        '.card-pressable:hover': { transform: 'translateY(-2px) scale(1.01)' },
+        '.card-pressable:active': { transform: 'translateY(0) scale(0.985)' },
 
         '.focus-ring': {
           outline: 'none',
@@ -185,28 +225,12 @@ const config: Config = {
             theme('colors.accent.500')
           )}`,
         },
-
-        '.skeleton': {
-          background:
-            'linear-gradient(90deg, rgba(0,0,0,0.06) 25%, rgba(0,0,0,0.12) 37%, rgba(0,0,0,0.06) 63%)',
-          backgroundSize: '400% 100%',
-          animation: 'shimmer 1.2s linear infinite',
-        },
-
-        // Anneau conique premium (comme dans nos cartes)
-        '.ring-conic': {
-          background: 'conic-gradient(from 140deg, rgba(59,130,246,.35), transparent 35%, rgba(14,165,233,.35), transparent 75%)',
-        },
-      })
-
-      // Composants utilitaires (plus sémantique dans JSX)
-      addComponents({
         '.motion-section': {
           animation: String(theme('animation.fade-up')),
           willChange: 'transform, opacity',
         },
         '.overlay-hero': {
-          background: 'radial-gradient(80% 60% at 50% 40%, transparent, rgba(0,0,0,.55))',
+          background: String(theme('backgroundImage.radial-faded')),
         },
       })
     }),
@@ -217,6 +241,7 @@ const config: Config = {
   safelist: [
     { pattern: /(bg|text|border)-accent-(50|100|200|300|400|500|600|700|800|900)/ },
     { pattern: /(from|via|to)-accent-(400|500|600|700)/ },
+    { pattern: /(bg|text|border)-token-(bg|text|text-muted|surface|surface-2|border|accent)/ },
   ],
 }
 
