@@ -4,7 +4,7 @@
 
 import nodemailer from "nodemailer";
 import type Mail from "nodemailer/lib/mailer";
-import { renderTemplate, RenderedEmail } from "./emailTemplates";
+import { renderTemplate, type RenderedEmail } from "./emailTemplates";
 
 const SMTP_URL = process.env.SMTP_URL; // ex: smtp://user:pass@smtp.mailgun.org:587
 const SMTP_HOST = process.env.SMTP_HOST;
@@ -115,6 +115,9 @@ export async function sendEmailRaw({
     messageId,
   });
 }
+
+/** 🔁 Alias pour compat : les imports `sendEmail` continueront à fonctionner */
+export { sendEmailRaw as sendEmail };
 
 // Helpers pour tes templates
 export async function sendTemplate<K extends Parameters<typeof renderTemplate>[0]>(
