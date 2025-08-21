@@ -1,7 +1,7 @@
 // src/components/layout/Layout.tsx — Ultimate ++ (CLS-safe, ARIA, progress, theme-color)
 'use client'
 
-import { type ReactNode, useEffect, Suspense, useRef, useState } from 'react'
+import { type ReactNode, useEffect, Suspense, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Header from './Header'
 import { usePathname } from 'next/navigation'
@@ -97,7 +97,9 @@ export default function Layout({
 
   // Progressive enhancement: View Transitions (if supported)
   useEffect(() => {
+    // @ts-ignore
     if (document.startViewTransition) {
+      // @ts-ignore
       document.startViewTransition(() => {})
     }
   }, [pathname])
@@ -143,8 +145,10 @@ export default function Layout({
         tabIndex={-1}
         data-theme={theme}
         data-pathname={pathname ?? ''}
-        className="relative min-h-[calc(var(--vh,1vh)*100)] pt-[var(--header-offset,4.5rem)] md:pt-20 bg-token-surface text-token-text transition-colors px-[max(0px,env(safe-area-inset-left))] pb-[max(0px,env(safe-area-inset-bottom))] pr-[max(0px,env(safe-area-inset-right))] motion-section"
+        // ⚠️ on retire "motion-section" pour éviter un masquage global
+        className="relative min-h-[calc(var(--vh,1vh)*100)] pt-[var(--header-offset,4.5rem)] md:pt-20 bg-token-surface text-token-text transition-colors px-[max(0px,env(safe-area-inset-left))] pb-[max(0px,env(safe-area-inset-bottom))] pr-[max(0px,env(safe-area-inset-right))]"
         aria-label="Contenu principal"
+        style={{ opacity: 1, visibility: 'visible' }}
       >
         <Suspense fallback={<div className="px-4 py-8 text-sm text-token-text/70">Chargement…</div>}>
           {children}
