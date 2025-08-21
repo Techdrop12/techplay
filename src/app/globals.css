@@ -1,9 +1,9 @@
+/* DOIT être tout en haut pour éviter le warning postcss-import */
+@import '../styles/design-tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Design tokens (couleurs, rayons, ombres, etc.) */
-@import '../styles/design-tokens.css';
 
 /* =============== Base =============== */
 @layer base {
@@ -60,7 +60,6 @@
 
 /* =============== Components =============== */
 @layer components {
-  /* conteneur global pour remplacer les "mx-auto px-4 ..." */
   .container-app {
     @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-10;
   }
@@ -93,7 +92,6 @@
            border border-gray-200 dark:border-zinc-700;
   }
 
-  /* Skeleton (shimmer) */
   .skeleton {
     background: linear-gradient(90deg,
       hsl(var(--surface-2)) 25%,

@@ -1,8 +1,16 @@
 // src/lib/abandon-cart.ts
 // ✅ Envoi “panier abandonné” avec retry, backoff, AbortController, dédup 24h
 
-type CartItem = { id: string; title: string; price: number; quantity: number; imageUrl?: string }
-type Payload = { email: string; cart: CartItem[] }
+export type CartItem = {
+  id: string
+  title: string
+  price: number
+  quantity: number
+  image?: string
+  imageUrl?: string
+}
+
+type Payload = { email: string; cart: Array<Omit<CartItem, 'image'> & { imageUrl?: string }> }
 
 const DEDUP_KEY = 'abandon_cart_last_send'
 const DEDUP_MS = 24 * 60 * 60 * 1000
@@ -28,7 +36,14 @@ export async function sendAbandonCartReminder(email: string, cart: CartItem[]) {
   if (!canSend()) return
 
   const controller = new AbortController()
-  const body: Payload = { email, cart }
+
+  // normalise image -> imageUrl pour l’API
+  const normalizedCart: Payload['cart'] = cart.map(({ image, imageUrl, ...rest }) => ({
+    ...rest,
+    ...(imageUrl ? { imageUrl } : image ? { imageUrl: image } : {}),
+  }))
+
+  const body: Payload = { email, cart: normalizedCart }
 
   const doFetch = async (attempt: number): Promise<Response> => {
     const timeout = setTimeout(() => controller.abort(), 8000)
@@ -54,7 +69,7 @@ export async function sendAbandonCartReminder(email: string, cart: CartItem[]) {
       return await res.json().catch(() => ({}))
     } catch (e) {
       lastErr = e
-      await new Promise(r => setTimeout(r, 400 * (i + 1)))
+      await new Promise((r) => setTimeout(r, 400 * (i + 1)))
     }
   }
   // eslint-disable-next-line no-console

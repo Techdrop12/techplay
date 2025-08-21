@@ -11,7 +11,6 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "type-check": "tsc --noEmit",
     "analyze": "cross-env ANALYZE=true next build",
-    "prepare": "husky install",
     "format": "prettier --write .",
     "test": "echo \"Tests à venir\"",
     "clean": "rimraf .next",
@@ -43,7 +42,6 @@
     "react-icons": "^5.5.0",
     "react-rating-stars-component": "^2.2.0",
     "react-toastify": "^11.0.5",
-    "sib-api-v3-sdk": "^8.5.0",
     "stripe": "^14.16.0",
     "swr": "^2.2.4",
     "ts-node": "^10.9.2",
@@ -78,8 +76,8 @@
     "typescript": "^5.8.3"
   },
   "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
+    "node": "20.x",
+    "npm": "10.x"
   },
   "lint-staged": {
     "**/*.{js,ts,tsx,jsx,json,css,md}": [
