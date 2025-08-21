@@ -5,8 +5,7 @@ import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 
 import { getBestProducts, getRecommendedPacks } from '@/lib/data'
-import type { Product } from '@/types/product'
-import type { Pack } from '@/types/product' // si Pack est ailleurs, ajuste l’import
+import type { Product, Pack } from '@/types/product'
 
 import BannerPromo from '@/components/BannerPromo'
 import TrustBadges from '@/components/TrustBadges'
@@ -27,7 +26,7 @@ const FAQ = dynamic(() => import('@/components/FAQ'), {
 
 /* ------------------------------ Metadata page ----------------------------- */
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://techplay.example.com'
-const OG_IMAGE = `${SITE_URL}/og-image.jpg` // présent dans /public d’après ta capture
+const OG_IMAGE = `${SITE_URL}/og-image.jpg`
 
 export const metadata: Metadata = {
   title: 'TechPlay – Boutique high-tech & packs exclusifs',
@@ -53,9 +52,7 @@ export const metadata: Metadata = {
     creator: '@TechPlay',
     images: [OG_IMAGE],
   },
-  alternates: {
-    canonical: SITE_URL,
-  },
+  alternates: { canonical: SITE_URL },
 }
 
 /* ---------------------------- Revalidation ISR ---------------------------- */

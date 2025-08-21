@@ -98,10 +98,19 @@
 @layer utilities {
   .shadow-soft   { box-shadow: var(--shadow-sm); }
   .shadow-soft-lg{ box-shadow: var(--shadow-lg); }
-  .motion-section { @apply motion-safe:animate-fade-up; }
+
+  /* ✅ Fallback sécurité : ne jamais rendre les sections invisibles */
+  .motion-section { opacity: 1 !important; transform: none !important; will-change: transform, opacity; }
+
+  /* ✅ Animation douce seulement quand autorisée (fill-mode: both) */
+  @media (prefers-reduced-motion: no-preference) {
+    .motion-section {
+      animation: fadeUp 0.45s var(--ease, ease-out) both;
+    }
+  }
 }
 
-/* Keyframes pour le skeleton */
+/* Keyframes pour le skeleton (et fadeUp est défini dans tailwind.config aussi) */
 @keyframes shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
