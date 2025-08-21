@@ -1,3 +1,4 @@
+// src/components/ProductGrid.tsx
 'use client'
 
 import { useEffect, useMemo, useRef } from 'react'
@@ -5,6 +6,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import ProductCard from '@/components/ProductCard'
 import ProductSkeleton from '@/components/ProductSkeleton'
 import type { Product } from '@/types/product'
+import { pushDataLayer } from '@/lib/ga'
 
 type Cols = { base?: number; sm?: number; md?: number; lg?: number; xl?: number }
 
@@ -27,6 +29,10 @@ interface ProductGridProps {
   columns?: Cols
   /** Classe(s) sur le conteneur grid */
   className?: string
+  /** Nom de liste (analytics) — ex. "category_page" */
+  listName?: string
+  /** ID aria optionnel de la grille */
+  id?: string
 }
 
 function colsToClass(cols?: Cols) {
@@ -51,13 +57,16 @@ export default function ProductGrid({
   showWishlistIcon = false,
   columns,
   className = '',
+  listName = 'product_grid',
+  id,
 }: ProductGridProps) {
   const prefersReducedMotion = useReducedMotion()
   const sentinelRef = useRef<HTMLDivElement | null>(null)
   const loadingGateRef = useRef(false) // évite les multi-calls consécutifs
   const statusRef = useRef<HTMLParagraphElement | null>(null)
+  const gridRef = useRef<HTMLDivElement | null>(null)
 
-  // Observe la sentinelle pour charger automatiquement la suite
+  // === Infinite scroll (sentinelle) ===
   useEffect(() => {
     if (!observeMore || !hasMore || !onLoadMore || !sentinelRef.current) return
     const el = sentinelRef.current
@@ -71,7 +80,6 @@ export default function ProductGrid({
         try {
           onLoadMore()
         } finally {
-          // on laisse une petite fenêtre pour éviter spam IO (ou on attendra isLoading=false)
           setTimeout(() => {
             loadingGateRef.current = false
           }, 500)
@@ -84,19 +92,99 @@ export default function ProductGrid({
     return () => io.disconnect()
   }, [observeMore, hasMore, onLoadMore])
 
-  // Quand le chargement se termine, on rouvre la gate
+  // Réouvre la gate lorsque le chargement se termine
   useEffect(() => {
     if (!isLoading) loadingGateRef.current = false
   }, [isLoading])
 
   const isEmpty = useMemo(() => !products || products.length === 0, [products])
 
-  // Message de statut ARIA (nombre de produits, état de chargement)
+  // === Message de statut ARIA (nombre de produits, état de chargement) ===
   const countMsg = useMemo(() => {
     if (isLoading && products.length === 0) return 'Chargement des produits…'
     if (isEmpty) return emptyMessage || 'Aucun produit trouvé.'
     return `${products.length} produit${products.length > 1 ? 's' : ''} affiché${products.length > 1 ? 's' : ''}.`
   }, [isLoading, isEmpty, products.length, emptyMessage])
+
+  // === JSON-LD ItemList (SEO) ===
+  const itemListJsonLd = useMemo(() => {
+    if (!products?.length) return null
+    const base =
+      (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      itemListElement: products.slice(0, 12).map((p, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        url: p?.slug ? `${base}/produit/${p.slug}` : `${base}/produit`,
+        name: p?.title || 'Produit',
+      })),
+    }
+  }, [products])
+
+  // === GA4/GTM: view_item_list + impressions au scroll ===
+  const seenRef = useRef<Set<string>>(new Set())
+  const batchRef = useRef<{ id: string; name: string; price?: number }[]>([])
+  const flushTimeout = useRef<number | null>(null)
+
+  const flushBatch = () => {
+    if (!batchRef.current.length) return
+    try {
+      pushDataLayer({
+        event: 'view_item_list',
+        item_list_name: listName,
+        items: batchRef.current.map((it) => ({
+          item_id: it.id,
+          item_name: it.name,
+          price: it.price,
+        })),
+      })
+    } catch {}
+    batchRef.current = []
+    if (flushTimeout.current) {
+      window.clearTimeout(flushTimeout.current)
+      flushTimeout.current = null
+    }
+  }
+
+  useEffect(() => {
+    // Reset des impressions quand la liste change
+    seenRef.current.clear()
+    batchRef.current = []
+    if (!gridRef.current) return
+
+    // Observe chaque card visible
+    const nodes = Array.from(
+      gridRef.current.querySelectorAll<HTMLElement>('[data-product-id]')
+    )
+    if (!nodes.length) return
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return
+          const id = e.target.getAttribute('data-product-id') || ''
+          const name = e.target.getAttribute('aria-label')?.replace(/^Produit : /, '') || ''
+          if (!id || seenRef.current.has(id)) return
+          seenRef.current.add(id)
+          const prod = products.find((p) => String(p._id) === id)
+          batchRef.current.push({ id, name, price: prod?.price })
+        })
+        if (!flushTimeout.current && batchRef.current.length) {
+          flushTimeout.current = window.setTimeout(flushBatch, 250)
+        }
+      },
+      { threshold: 0.35, rootMargin: '0px 0px 100px 0px' }
+    )
+
+    nodes.forEach((n) => io.observe(n))
+    return () => {
+      io.disconnect()
+      flushBatch()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products, listName])
 
   if (isEmpty && !isLoading) {
     return (
@@ -109,31 +197,24 @@ export default function ProductGrid({
   return (
     <>
       {/* Région live pour lecteurs d’écran */}
-      <p
-        ref={statusRef}
-        className="sr-only"
-        role="status"
-        aria-live="polite"
-      >
+      <p ref={statusRef} className="sr-only" role="status" aria-live="polite">
         {countMsg}
       </p>
 
       <AnimatePresence mode={prefersReducedMotion ? 'sync' : 'popLayout'}>
         <motion.div
           key="grid"
+          ref={gridRef}
           layout={!prefersReducedMotion}
           className={`grid ${colsToClass(columns) || 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4'} gap-6 ${className}`}
           aria-live="polite"
           aria-busy={isLoading ? 'true' : 'false'}
           role="list"
+          id={id}
         >
           {/* Produits */}
           {products.map((product) => (
-            <motion.div
-              key={product._id}
-              layout={!prefersReducedMotion}
-              role="listitem"
-            >
+            <motion.div key={product._id} layout={!prefersReducedMotion} role="listitem">
               <ProductCard product={product} showWishlistIcon={showWishlistIcon} />
             </motion.div>
           ))}
@@ -165,6 +246,15 @@ export default function ProductGrid({
 
       {/* Sentinelle pour l’infinite scroll (non visible) */}
       {observeMore && hasMore && <div ref={sentinelRef} className="h-1" aria-hidden="true" />}
+
+      {/* JSON-LD ItemList */}
+      {itemListJsonLd && (
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+        />
+      )}
     </>
   )
 }

@@ -20,7 +20,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply tracking-tight font-semibold text-gray-900 dark:text-white;
+    @apply tracking-tight font-semibold text-gray-900 dark:text-white text-balance;
   }
 
   :is(p, li, dt, dd) {
@@ -91,22 +91,14 @@
            font-medium bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-200
            border border-gray-200 dark:border-zinc-700;
   }
-
-  .skeleton {
-    background: linear-gradient(90deg,
-      hsl(var(--surface-2)) 25%,
-      hsl(var(--surface)) 37%,
-      hsl(var(--surface-2)) 63%);
-    background-size: 400% 100%;
-    animation: shimmer 1.25s ease-in-out infinite;
-    @apply rounded-md;
-  }
 }
 
 /* =============== Utilities =============== */
 @layer utilities {
   .shadow-soft   { box-shadow: var(--shadow-sm); }
   .shadow-soft-lg{ box-shadow: var(--shadow-lg); }
+  /* Section animée quand elle apparaît */
+  .motion-section { @apply motion-safe:animate-fade-up; }
 }
 
 /* Keyframes pour le skeleton */
