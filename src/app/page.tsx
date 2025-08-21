@@ -11,10 +11,8 @@ import TrustBadges from '@/components/TrustBadges'
 import ScrollTopButton from '@/components/ui/ScrollTopButton'
 import ClientTrackingScript from '@components/ClientTrackingScript'
 
-// ✅ Dynamic import des blocs lourds (meilleur TTI sans sacrifier SEO)
-const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'), {
-  // le hero reste SSR (pas de ssr:false) pour conserver le LCP/SEO
-})
+// ✅ Dynamic import des blocs lourds
+const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'))
 const BestProducts = dynamic(() => import('@/components/BestProducts'), {
   loading: () => <SectionSkeleton title="Nos Meilleures Ventes" />,
 })
@@ -55,10 +53,9 @@ export const metadata: Metadata = {
 }
 
 /* ---------------------------- Revalidation ISR ---------------------------- */
-// Contenu reconstruit côté serveur toutes les X minutes (sans rebuild complet)
 export const revalidate = 300 // 5 minutes
 
-/* ---------- Mini composants purement présentations (pas d’état) ---------- */
+/* ---------- Mini composants de présentation ---------- */
 function SectionHeader({
   kicker,
   title,
@@ -124,16 +121,16 @@ function SplitCTA() {
       aria-label="Appel à l’action"
       className="relative motion-section overflow-hidden rounded-3xl border border-gray-200/70 dark:border-zinc-800 bg-gradient-to-br from-accent/10 via-transparent to-brand/10 p-6 sm:p-10 shadow-xl"
     >
-      <div aria-hidden="true" className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-accent/20 blur-3xl" />
-      <div aria-hidden="true" className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-brand/20 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-accent/20 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-brand/20 blur-3xl" />
       <div className="relative grid gap-6 lg:grid-cols-2 items-center">
         <div>
-          <p className="text-xs uppercase tracking-widest font-bold text-accent/90">Promo du jour</p>
+          <p className="text-xs uppercase tracking-widest font-bold text-accent/90">Offre du moment</p>
           <h3 className="mt-2 text-2xl sm:text-3xl font-extrabold">
             Boostez votre setup en <span className="text-accent">un clic</span>
           </h3>
           <p className="mt-3 text-sm sm:text-base text-gray-600 dark:text-gray-400">
-            Nos packs combinent les meilleurs accessoires au meilleur prix, avec livraison rapide et support 7j/7.
+            Packs optimisés, meilleurs prix, livraison rapide.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Link
@@ -152,15 +149,8 @@ function SplitCTA() {
             </Link>
           </div>
         </div>
-        <ul className="grid sm:grid-cols-2 gap-3 text-sm">
-          {['Paiement sécurisé (Stripe, PayPal)', 'Livraison 48–72h', 'Support client 7j/7', 'Satisfait ou remboursé'].map(
-            (t) => (
-              <li key={t} className="rounded-xl border border-gray-200/70 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/70 px-4 py-3">
-                ✅ {t}
-              </li>
-            )
-          )}
-        </ul>
+        {/* image / visuel libre si tu veux ici */}
+        <div className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/50 dark:bg-zinc-900/50 min-h-[180px] shadow-soft" />
       </div>
     </section>
   )
@@ -203,16 +193,12 @@ function SectionSkeleton({ title }: { title: string }) {
 
 /* --------------------------------- PAGE ---------------------------------- */
 export default async function HomePage() {
-  // Récup data robuste (aucun crash si l’API tombe)
   let bestProducts: any[] = []
   let recommendedPacks: any[] = []
   try {
     ;[bestProducts, recommendedPacks] = await Promise.all([getBestProducts(), getRecommendedPacks()])
-  } catch {
-    // on garde des listes vides → UI skeletons visibles
-  }
+  } catch {}
 
-  // JSON-LD ItemList (meilleures ventes)
   const itemListJsonLd =
     Array.isArray(bestProducts) && bestProducts.length > 0
       ? {
@@ -229,13 +215,8 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* H1 accessible (si le Hero n’en expose pas) */}
       <h1 className="sr-only">TechPlay – Boutique high-tech & packs exclusifs</h1>
-
-      {/* 🎯 Tracking Google Analytics côté client */}
       <ClientTrackingScript event="homepage_view" />
-
-      {/* 🔥 Bandeau promo */}
       <BannerPromo />
 
       {/* Décor doux (glow) */}
@@ -254,17 +235,17 @@ export default async function HomePage() {
         {/* 🗂️ Catégories vedettes */}
         <FeaturedCategories />
 
-        {/* 🏆 Meilleures ventes (stream + skeleton) */}
+        {/* 🏆 Meilleures ventes (sans doublon de titre) */}
         <section aria-label="Meilleures ventes TechPlay" className="motion-section" id="best-products">
           <SectionHeader kicker="Top ventes" title="Nos Meilleures Ventes" sub="Les favoris de la communauté – stock limité." />
           <div className="mt-8">
             <Suspense fallback={<SectionSkeleton title="Nos Meilleures Ventes" />}>
-              <BestProducts products={bestProducts} />
+              <BestProducts products={bestProducts} showTitle={false} />
             </Suspense>
           </div>
         </section>
 
-        {/* 🎁 Packs recommandés (stream + skeleton) */}
+        {/* 🎁 Packs recommandés */}
         <section aria-label="Packs TechPlay recommandés" className="motion-section" id="packs">
           <SectionHeader kicker="Bundle" title="Packs recommandés" sub="Des combinaisons pensées pour la performance et l’économie." />
           <div className="mt-8">
@@ -277,12 +258,7 @@ export default async function HomePage() {
         {/* 💬 Témoignages simples */}
         <Testimonials />
 
-        {/* ✅ Badges de confiance */}
-        <section aria-label="Nos garanties de confiance" className="motion-section">
-          <TrustBadges />
-        </section>
-
-        {/* ⚡ CTA premium */}
+        {/* ⚡ CTA premium (allégé) */}
         <SplitCTA />
 
         {/* ❓ Foire aux questions */}
@@ -294,18 +270,18 @@ export default async function HomePage() {
             </Suspense>
           </div>
         </section>
+
+        {/* ✅ Badges de confiance — version premium, unique et en bas */}
+        <TrustBadges variant="premium" className="mt-10" />
       </main>
 
-      {/* JSON-LD (ItemList) */}
       {itemListJsonLd ? (
         <script
           type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
         />
       ) : null}
 
-      {/* ⬆️ Retour haut */}
       <ScrollTopButton />
     </>
   )

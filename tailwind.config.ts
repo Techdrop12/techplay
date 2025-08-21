@@ -9,11 +9,8 @@ import type { PluginAPI } from 'tailwindcss/types/config'
 const config: Config = {
   darkMode: 'class',
 
-  // Couvre tout le code source (app, components, storybook, etc. sont sous /src)
   content: [
     './src/**/*.{js,ts,jsx,tsx,mdx}',
-    // Optionnel : si tu as des snippets HTML hors src
-    // './public/**/*.html',
   ],
 
   theme: {
@@ -26,11 +23,12 @@ const config: Config = {
       screens: { xs: '480px' },
 
       fontFamily: {
+        // le body est piloté par --font-inter (via globals)
+        // on garde une famille Tailwind “sécurité”
         sans: ['InterVariable', 'Inter', 'ui-sans-serif', 'system-ui'],
       },
 
       colors: {
-        // Palette sémantique
         brand: { DEFAULT: '#0f172a', light: '#1e293b', dark: '#0e1116' },
         accent: {
           DEFAULT: '#2563eb',
@@ -49,7 +47,6 @@ const config: Config = {
         warning: '#eab308',
         danger: '#dc2626',
 
-        // Surfaces & bordures
         surface: { DEFAULT: '#ffffff', muted: '#f8fafc', dark: '#0b0f14' },
         border: { DEFAULT: '#e5e7eb', dark: '#262b35' },
       },
@@ -72,7 +69,6 @@ const config: Config = {
 
       zIndex: { header: '60', overlay: '70', modal: '80', toast: '90' },
 
-      // Animations
       animation: {
         fadeIn: 'fadeIn 0.4s ease-in-out',
         slideUp: 'slideUp 0.5s ease-in-out',
@@ -98,7 +94,6 @@ const config: Config = {
         shimmer: { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } },
       },
 
-      // Typo améliorée
       typography: ({ theme }: { theme: (path: string) => string | number | undefined }) => ({
         DEFAULT: {
           css: {
@@ -138,12 +133,10 @@ const config: Config = {
     typography,
     scrollbar,
 
-    // Utilitaires maison (typage strict du PluginAPI)
     plugin((api: PluginAPI) => {
       const { addUtilities, theme } = api
 
       addUtilities({
-        /* Verre dépoli */
         '.glass': {
           backdropFilter: 'blur(8px)',
           WebkitBackdropFilter: 'blur(8px)',
@@ -157,7 +150,6 @@ const config: Config = {
           border: '1px solid rgba(255,255,255,0.08)',
         },
 
-        /* Carte (source unique, évite les doublons) */
         '.card': {
           backgroundColor: String(theme('colors.surface.DEFAULT')),
           border: `1px solid ${String(theme('colors.border.DEFAULT'))}`,
@@ -171,7 +163,6 @@ const config: Config = {
           boxShadow: String(theme('boxShadow.card')),
         },
 
-        /* Anneau d’accessibilité cohérent */
         '.focus-ring': {
           outline: 'none',
           boxShadow: `0 0 0 2px ${String(theme('colors.surface.DEFAULT'))}, 0 0 0 4px ${String(
@@ -185,7 +176,6 @@ const config: Config = {
           )}`,
         },
 
-        /* Shimmer skeleton */
         '.skeleton': {
           background:
             'linear-gradient(90deg, rgba(0,0,0,0.06) 25%, rgba(0,0,0,0.12) 37%, rgba(0,0,0,0.06) 63%)',
@@ -196,10 +186,8 @@ const config: Config = {
     }),
   ],
 
-  // Option Tailwind moderne : ne survoler que si supporté
   future: { hoverOnlyWhenSupported: true },
 
-  // Safelist utile si tu génères des classes dynamiques côté JS (ex: bg-accent-*)
   safelist: [
     { pattern: /(bg|text|border)-accent-(50|100|200|300|400|500|600|700|800|900)/ },
     { pattern: /(from|via|to)-accent-(400|500|600|700)/ },

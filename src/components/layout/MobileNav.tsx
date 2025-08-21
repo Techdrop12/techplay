@@ -7,7 +7,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { useCart } from '@/hooks/useCart'
 import { useWishlist } from '@/hooks/useWishlist'
-import DarkToggle from '@/components/DarkToggle'
+import ThemeToggle from '@/components/ui/ThemeToggle'
 import { event as gaEvent, logEvent } from '@/lib/ga'
 
 type NavItem = { href: string; label: string }
@@ -19,10 +19,9 @@ const NAV: Readonly<NavItem[]> = [
   { href: '/wishlist', label: 'Wishlist' },
   { href: '/blog', label: 'Blog' },
   { href: '/contact', label: 'Contact' },
-  { href: '/promo', label: '🎁 Promo du jour' },
+  { href: '/promo', label: '🎁 Offres' },
 ]
 
-// Suggestions de recherche (rotatives)
 const SEARCH_TRENDS = [
   'écouteurs bluetooth',
   'casque gaming',
@@ -32,7 +31,6 @@ const SEARCH_TRENDS = [
   'souris sans fil',
 ]
 
-// Analytics helper
 const track = (args: { action: string; category?: string; label?: string; value?: number; [k: string]: any }) => {
   try { gaEvent?.({ category: 'navigation', label: args.label ?? args.action, value: args.value ?? 1, ...args }) } catch {}
   try { logEvent?.(args.action, args) } catch {}
@@ -93,7 +91,7 @@ export default function MobileNav() {
     } catch {}
   }
 
-  // Scroll locking (iOS-safe) + inert du contenu
+  // Scroll locking + inert
   const savedScrollY = useRef(0)
   const lockScroll = () => {
     savedScrollY.current = window.scrollY || document.documentElement.scrollTop
@@ -106,7 +104,6 @@ export default function MobileNav() {
     body.style.overflow = 'hidden'
     body.style.width = '100%'
     if (sbw > 0) body.style.paddingRight = `${sbw}px`
-    // inert sur #main si présent
     const main = document.getElementById('main') as HTMLElement | null
     if (main) {
       mainRef.current = main
@@ -160,7 +157,6 @@ export default function MobileNav() {
     if (open) {
       lockScroll()
       window.addEventListener('keydown', onKey)
-      // Focus la recherche par défaut
       setTimeout(() => { searchRef.current?.focus() }, 0)
     } else {
       unlockScroll()
@@ -168,14 +164,10 @@ export default function MobileNav() {
       triggerRef.current?.focus()
     }
     return () => { window.removeEventListener('keydown', onKey); unlockScroll() }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
   // Fermer à la navigation
-  useEffect(() => {
-    if (open) closeMenu('route_change')
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname])
+  useEffect(() => { if (open) closeMenu('route_change') }, [pathname])
 
   // Gestes (swipe down to close)
   const startY = useRef<number | null>(null)
@@ -201,7 +193,6 @@ export default function MobileNav() {
 
   const isActive = (href: string) => (pathname ? pathname === href || pathname.startsWith(href + '/') : false)
 
-  // Prefetch sur "tap intent" (pointerdown) pour accélérer les transitions mobile
   const prefetchOnPointerDown = (href: string) => {
     try { if (href && !isActive(href)) router.prefetch(href) } catch {}
   }
@@ -323,7 +314,7 @@ export default function MobileNav() {
 
               {/* Quick actions */}
               <div className="px-4 pb-3 flex items-center gap-2">
-                <DarkToggle />
+                <ThemeToggle size="md" />
                 <Link
                   href="/wishlist"
                   prefetch={false}
@@ -393,7 +384,7 @@ export default function MobileNav() {
                 </ul>
               </nav>
 
-              {/* Footer: Panier + Total items + Fermer */}
+              {/* Footer: Panier */}
               <div className="border-t border-gray-200/70 dark:border-zinc-800/70 px-4 py-3 flex items-center gap-3">
                 <Link
                   href="/commande"

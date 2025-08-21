@@ -1,15 +1,21 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useId } from 'react'
 import type { Product } from '@/types/product'
 import ProductCard from '@/components/ProductCard'
 
 interface BestProductsProps {
   products: Product[]
+  /** affiche le titre interne (par défaut: false pour éviter les doublons) */
+  showTitle?: boolean
+  /** titre personnalisé si showTitle=true */
+  title?: string
 }
 
-export default function BestProducts({ products }: BestProductsProps) {
+export default function BestProducts({ products, showTitle = false, title = '⭐ Nos Meilleures Ventes' }: BestProductsProps) {
   const isEmpty = !products || products.length === 0
+  const headingId = useId()
 
   if (isEmpty) {
     return (
@@ -26,15 +32,17 @@ export default function BestProducts({ products }: BestProductsProps) {
   return (
     <section
       className="max-w-6xl mx-auto px-4 py-10"
-      aria-labelledby="best-products-heading"
+      aria-labelledby={showTitle ? headingId : undefined}
       role="region"
     >
-      <h2
-        id="best-products-heading"
-        className="text-3xl sm:text-4xl font-extrabold mb-8 text-center text-brand dark:text-brand-light animate-fadeIn"
-      >
-        ⭐ Nos Meilleures Ventes
-      </h2>
+      {showTitle && (
+        <h2
+          id={headingId}
+          className="text-3xl sm:text-4xl font-extrabold mb-8 text-center text-brand dark:text-brand-light animate-fadeIn"
+        >
+          {title}
+        </h2>
+      )}
 
       <motion.ul
         initial={{ opacity: 0, y: 30 }}
@@ -51,7 +59,7 @@ export default function BestProducts({ products }: BestProductsProps) {
                 product={{
                   ...product,
                   title: product.title ?? 'Produit sans titre',
-                  image: product.image ?? '/placeholder.png',
+                  image: (product as any).image ?? (product as any).images?.[0] ?? '/placeholder.png',
                 }}
               />
             </li>

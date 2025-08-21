@@ -20,6 +20,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
     @apply tracking-tight font-semibold text-gray-900 dark:text-white text-balance;
   }
 
@@ -97,7 +98,6 @@
 @layer utilities {
   .shadow-soft   { box-shadow: var(--shadow-sm); }
   .shadow-soft-lg{ box-shadow: var(--shadow-lg); }
-  /* Section animée quand elle apparaît */
   .motion-section { @apply motion-safe:animate-fade-up; }
 }
 

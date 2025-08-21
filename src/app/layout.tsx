@@ -1,7 +1,7 @@
 // src/app/layout.tsx
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Sora } from 'next/font/google'
 import { Suspense } from 'react'
 
 import Layout from '@/components/layout/Layout'
@@ -27,6 +27,12 @@ const inter = Inter({
   display: 'swap',
   variable: '--font-inter',
   adjustFontFallback: true,
+})
+
+const sora = Sora({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-sora',
 })
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://techplay.example.com'
@@ -91,7 +97,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" dir="ltr" className={`${inter.variable} scroll-smooth`} suppressHydrationWarning>
+    <html lang="fr" dir="ltr" className={`${inter.variable} ${sora.variable} scroll-smooth`} suppressHydrationWarning>
       <head>
         {/* Consent Mode v2 par défaut */}
         <script
@@ -147,7 +153,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div id="main" tabIndex={-1} />
 
         <RootLayoutClient>
-          {/* Déférer le JS non critique jusqu’à l’idle */}
           <AfterIdleClient>
             <Suspense fallback={null}><Analytics /></Suspense>
             <Suspense fallback={null}><MetaPixel /></Suspense>

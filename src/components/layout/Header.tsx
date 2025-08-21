@@ -15,7 +15,7 @@ type NavLink = { href: string; label: string }
 
 const LINKS: NavLink[] = [
   { href: '/', label: 'Accueil' },
-  { href: '/categorie', label: 'Catégories' }, // ⬅️ racine catégories (mega menu)
+  { href: '/categorie', label: 'Catégories' }, // mega menu
   { href: '/produit', label: 'Produits' },
   { href: '/pack', label: 'Packs' },
   { href: '/wishlist', label: 'Wishlist' },
@@ -35,7 +35,6 @@ const SEARCH_TRENDS = [
   'souris sans fil',
 ]
 
-// Données du mega-menu
 const CATEGORIES: Array<{ label: string; href: string; emoji: string; desc: string }> = [
   { label: 'Casques', href: '/categorie/casques', emoji: '🎧', desc: 'Audio immersif' },
   { label: 'Claviers', href: '/categorie/claviers', emoji: '⌨️', desc: 'Mécas & low-profile' },
@@ -51,14 +50,12 @@ export default function Header() {
   const pathname = usePathname()
   const router = useRouter()
 
-  // 🛒 Panier (safe)
   let cartCount = 0
   try {
     const { cart } = useCart()
     cartCount = Array.isArray(cart) ? cart.reduce((t, it: any) => t + (it?.quantity || 1), 0) : 0
   } catch {}
 
-  // ❤ Wishlist (safe)
   let wishlistCount = 0
   try {
     const { wishlist } = useWishlist() as any
@@ -68,17 +65,14 @@ export default function Header() {
   const [hidden, setHidden] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
-  // Refs / perf
   const lastY = useRef(0)
   const ticking = useRef(false)
   const reducedMotion = useRef(false)
   const prefetchTimers = useRef<Map<string, number>>(new Map())
 
-  // Recherche
   const searchRef = useRef<HTMLInputElement | null>(null)
   const [placeholder, setPlaceholder] = useState(SEARCH_TRENDS[0])
 
-  // ===== Mega menu Catégories (desktop) =====
   const [catOpen, setCatOpen] = useState(false)
   const catBtnRef = useRef<HTMLButtonElement | null>(null)
   const catPanelRef = useRef<HTMLDivElement | null>(null)
@@ -95,7 +89,6 @@ export default function Header() {
     catTimer.current = window.setTimeout(() => setCatOpen(false), delay) as unknown as number
   }
 
-  // Gestion clavier sur le bouton/zone
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!catOpen) return
@@ -109,7 +102,6 @@ export default function Header() {
     return () => window.removeEventListener('keydown', onKey)
   }, [catOpen])
 
-  // Fermeture si clic extérieur
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       if (!catOpen) return
@@ -121,7 +113,6 @@ export default function Header() {
     return () => window.removeEventListener('mousedown', onClick)
   }, [catOpen])
 
-  // Respecte prefers-reduced-motion
   useEffect(() => {
     const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)')
     reducedMotion.current = !!mq?.matches
@@ -133,7 +124,6 @@ export default function Header() {
     return () => mq?.removeEventListener?.('change', onChange)
   }, [])
 
-  // Hide-on-scroll + état scrolled
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY
@@ -152,7 +142,6 @@ export default function Header() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Raccourcis clavier : `/` ou ⌘/Ctrl K -> focus recherche
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName
@@ -174,7 +163,6 @@ export default function Header() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  // Placeholder rotatif
   useEffect(() => {
     let i = 0
     const id = window.setInterval(() => {
@@ -184,12 +172,8 @@ export default function Header() {
     return () => clearInterval(id)
   }, [])
 
-  const isActive = (href: string) => {
-    if (!pathname) return false
-    return pathname === href || pathname.startsWith(href + '/')
-  }
+  const isActive = (href: string) => (pathname ? pathname === href || pathname.startsWith(href + '/') : false)
 
-  // Prefetch intelligent
   const smartPrefetchStart = (href: string) => {
     if (!href || isActive(href)) return
     if (prefetchTimers.current.has(href)) return
@@ -228,18 +212,16 @@ export default function Header() {
         'border-b transition-all',
         'motion-safe:duration-300 motion-safe:ease-out motion-safe:transition-transform motion-reduce:transition-none',
         scrolled
-          ? 'bg-white/95 shadow-md border-gray-200 dark:bg-black/80 dark:border-gray-800'
+          ? 'bg-white/95 border-gray-200 dark:bg-black/80 dark:border-gray-800 shadow-[0_6px_30px_-12px_rgba(0,0,0,0.35)] dark:shadow-[0_12px_40px_-20px_rgba(0,0,0,0.8)]'
           : 'bg-white/70 border-transparent dark:bg-black/60',
         hidden ? '-translate-y-full' : 'translate-y-0'
       )}
     >
       <div className="mx-auto flex h-16 md:h-20 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-10">
-        {/* Logo */}
         <Link href="/" prefetch={false} aria-label="Retour à l’accueil" className="flex shrink-0 items-center gap-3">
           <Logo className="h-8 w-auto md:h-10" />
         </Link>
 
-        {/* Barre de recherche (desktop) */}
         <form
           action="/products"
           method="get"
@@ -269,26 +251,18 @@ export default function Header() {
           </datalist>
           <div id="search-hint" className="sr-only">Raccourcis : « / » ou « Ctrl/⌘ K » pour rechercher.</div>
           <div id="search-status" aria-live="polite" aria-atomic="true" className="sr-only" />
-          <div className="absolute inset-y-0 right-1.5 flex items-center gap-1">
-            <kbd className="hidden lg:inline-flex items-center rounded-md border border-gray-300 bg-white/70 px-1.5 text-[10px] font-medium text-gray-500 dark:border-gray-700 dark:bg-black/50" aria-hidden="true">⌘K</kbd>
+          <div className="absolute inset-y-0 right-1.5 flex items-center">
             <button type="submit" className="inline-flex h-8 w-8 items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-accent" aria-label="Lancer la recherche" title="Rechercher">🔎</button>
           </div>
         </form>
 
-        {/* Navigation desktop */}
         <nav className="hidden md:flex gap-6 lg:gap-8 tracking-tight font-medium text-gray-800 dark:text-gray-100" aria-label="Navigation principale">
           {LINKS.map(({ href, label }) => {
             const active = isActive(href)
 
-            // Remplacement par un déclencheur pour "Catégories"
             if (label === 'Catégories') {
               return (
-                <div
-                  key="mega-cats"
-                  className="relative"
-                  onMouseEnter={openCats}
-                  onMouseLeave={() => closeCats()}
-                >
+                <div key="mega-cats" className="relative" onMouseEnter={openCats} onMouseLeave={() => closeCats()}>
                   <button
                     ref={catBtnRef}
                     id={catBtnId}
@@ -312,7 +286,6 @@ export default function Header() {
                     )}
                   </button>
 
-                  {/* Panel mega-menu */}
                   <div
                     ref={catPanelRef}
                     id={catPanelId}
@@ -329,7 +302,6 @@ export default function Header() {
                     onBlur={() => closeCats(80)}
                   >
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2 p-3 md:p-4">
-                      {/* Colonne 1-2: catégories */}
                       <ul className="md:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-2 md:gap-3" role="none">
                         {CATEGORIES.map((c) => (
                           <li key={c.href} role="none">
@@ -340,9 +312,9 @@ export default function Header() {
                               onPointerEnter={() => smartPrefetchStart(c.href)}
                               onPointerLeave={() => smartPrefetchCancel(c.href)}
                               className={cn(
-                                'group flex items-center gap-3 rounded-xl border border-transparent',
+                                'group flex items-center gap-3 rounded-xl border border-transparent transform-gpu',
                                 'bg-white/80 dark:bg-zinc-900/60 hover:bg-white dark:hover:bg-zinc-900',
-                                'hover:border-accent/30 transition p-3 shadow-sm hover:shadow-md'
+                                'hover:border-accent/30 hover:-translate-y-0.5 transition p-3 shadow-sm hover:shadow-md'
                               )}
                             >
                               <span className="text-xl select-none" aria-hidden="true">{c.emoji}</span>
@@ -358,7 +330,6 @@ export default function Header() {
                         ))}
                       </ul>
 
-                      {/* Colonne 3: highlight / voir tout */}
                       <div className="md:col-span-1">
                         <div className="h-full rounded-xl border border-gray-200/70 dark:border-gray-800/70 bg-gradient-to-br from-accent/10 via-transparent to-brand/10 p-4 md:p-5 shadow-md">
                           <p className="text-xs uppercase tracking-widest font-bold text-accent/90">Sélection</p>
@@ -396,7 +367,6 @@ export default function Header() {
               )
             }
 
-            // Liens classiques
             return (
               <Link
                 key={href}
@@ -421,7 +391,6 @@ export default function Header() {
           })}
         </nav>
 
-        {/* Actions droites (desktop) */}
         <div className="hidden md:flex items-center gap-2 sm:gap-3">
           <ThemeToggle />
 
@@ -430,13 +399,17 @@ export default function Header() {
             prefetch={false}
             onPointerEnter={() => smartPrefetchStart('/promo')}
             onPointerLeave={() => smartPrefetchCancel('/promo')}
-            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40"
-            aria-label="Voir la promotion du jour"
+            className="group inline-flex items-center gap-2 rounded-full border border-gray-300/80 dark:border-zinc-700/80 bg-white/60 dark:bg-zinc-900/50 px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-white dark:hover:bg-zinc-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+            aria-label="Voir les offres du jour"
+            title="Offres du jour"
           >
-            🎁 <span className="hidden lg:inline">Promo du jour</span>
+            <span className="relative inline-flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gradient-to-r from-pink-500 to-yellow-500 opacity-60"></span>
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-gradient-to-r from-pink-500 to-yellow-500"></span>
+            </span>
+            <span className="hidden lg:inline">Offres</span>
           </Link>
 
-          {/* Wishlist */}
           <div className="relative">
             <Link
               href="/wishlist"
@@ -459,7 +432,6 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Panier */}
           <div className="relative">
             <Link
               href="/commande"
@@ -482,7 +454,6 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Compte */}
           <Link
             href="/login"
             prefetch={false}
@@ -496,12 +467,10 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Menu mobile (le mega-menu est volontairement desktop-only) */}
         <MobileNav />
       </div>
 
-      {/* Liseré dégradé fin */}
-      <div aria-hidden="true" className="pointer-events-none h-[2px] w-full bg-gradient-to-r from-transparent via-accent/40 to-transparent" />
+      <div aria-hidden className="pointer-events-none h-[2px] w-full bg-gradient-to-r from-transparent via-accent/40 to-transparent" />
     </header>
   )
 }
