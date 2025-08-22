@@ -1,25 +1,33 @@
+// src/context/themeContext.tsx
 'use client'
 
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode
+} from 'react'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
 
 export interface ThemeContextValue {
-  /** Valeur choisie par l'utilisateur ('light' | 'dark' | 'system') */
+  /** Valeur choisie ('light' | 'dark' | 'system') */
   theme: ThemeMode
-  /** Valeur réellement appliquée ('light' | 'dark') après résolution du mode 'system' */
+  /** Valeur appliquée après résolution de 'system' */
   resolvedTheme: Exclude<ThemeMode, 'system'>
   /** Raccourci pratique */
   isDark: boolean
   /** Forcer un thème */
   setTheme: (mode: ThemeMode) => void
-  /** Bascule rapide light/dark (si 'system', bascule par rapport au thème résolu) */
+  /** Bascule rapide light/dark (si 'system', bascule par rapport au résolu) */
   toggleTheme: () => void
 }
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined)
 
-const THEME_KEY = 'theme' as const // partagé avec RootLayoutClient
+export const THEME_KEY = 'theme' as const
 
 function applyTheme(mode: Exclude<ThemeMode, 'system'>) {
   const root = document.documentElement
@@ -36,28 +44,35 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   // Résout la préférence OS
   const getSystemTheme = () =>
-    window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    typeof window !== 'undefined' &&
+    window.matchMedia &&
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light'
 
   // Lecture initiale + application immédiate
   useEffect(() => {
-    const saved = ((): ThemeMode => {
+    const saved: ThemeMode = (() => {
       try {
         const v = localStorage.getItem(THEME_KEY)
-        return (v === 'light' || v === 'dark' || v === 'system') ? v : 'system'
+        return v === 'light' || v === 'dark' || v === 'system' ? v : 'system'
       } catch {
         return 'system'
       }
     })()
 
-    const initialResolved = saved === 'system' ? getSystemTheme() : (saved as Exclude<ThemeMode, 'system'>)
+    const initialResolved =
+      saved === 'system' ? getSystemTheme() : (saved as Exclude<ThemeMode, 'system'>)
+
     setThemeState(saved)
     setResolved(initialResolved)
     applyTheme(initialResolved)
 
+    // Suivre la préférence OS si l'utilisateur est en 'system'
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
     const onScheme = () => {
       if (saved === 'system') {
-        const next = mq.matches ? 'dark' : 'light'
+        const next = getSystemTheme()
         setResolved(next)
         applyTheme(next)
       }
@@ -84,7 +99,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   // Setter public
   const setTheme = (mode: ThemeMode) => {
-    try { localStorage.setItem(THEME_KEY, mode) } catch {}
+    try {
+      localStorage.setItem(THEME_KEY, mode)
+    } catch {}
     const nextResolved = mode === 'system' ? getSystemTheme() : mode
     setThemeState(mode)
     setResolved(nextResolved)
@@ -98,7 +115,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }
 
   const value = useMemo<ThemeContextValue>(
-    () => ({ theme, resolvedTheme: resolved, isDark: resolved === 'dark', setTheme, toggleTheme }),
+    () => ({
+      theme,
+      resolvedTheme: resolved,
+      isDark: resolved === 'dark',
+      setTheme,
+      toggleTheme
+    }),
     [theme, resolved]
   )
 
@@ -110,3 +133,6 @@ export function useTheme() {
   if (!ctx) throw new Error('useTheme must be used within a ThemeProvider')
   return ctx
 }
+
+/** Export par défaut pour compat éventuels imports default */
+export default ThemeProvider

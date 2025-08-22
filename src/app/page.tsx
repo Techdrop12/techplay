@@ -1,4 +1,4 @@
-// src/app/page.tsx — Home Ultra Premium
+// src/app/page.tsx — Home Ultra Premium (révisé)
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -9,8 +9,7 @@ import type { Product, Pack } from '@/types/product'
 
 import BannerPromo from '@/components/BannerPromo'
 import TrustBadges from '@/components/TrustBadges'
-import ScrollTopButton from '@/components/ui/ScrollTopButton'
-import ClientTrackingScript from '@components/ClientTrackingScript'
+import ClientTrackingScript from '@/components/ClientTrackingScript'
 
 /* ───────────────────────────── Dynamic chunks ───────────────────────────── */
 const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'))
@@ -56,6 +55,7 @@ export const metadata: Metadata = {
     images: [OG_IMAGE],
   },
   alternates: { canonical: SITE_URL },
+  robots: { index: true, follow: true },
 }
 
 /* ───────────────────────────── ISR revalidation ─────────────────────────── */
@@ -96,13 +96,14 @@ function SectionHeader({
 }
 
 function FeaturedCategories() {
+  // ⚠️ On route vers /produit avec filtre de catégorie pour éviter les 404 tant que /categorie/* n'est pas prêt
   const CATS: Array<{ label: string; href: string; emoji: string; desc: string }> = [
-    { label: 'Casques',   href: '/categorie/casques',   emoji: '🎧', desc: 'Audio immersif' },
-    { label: 'Claviers',  href: '/categorie/claviers',  emoji: '⌨️', desc: 'Réactivité ultime' },
-    { label: 'Souris',    href: '/categorie/souris',    emoji: '🖱️', desc: 'Précision chirurgicale' },
-    { label: 'Webcams',   href: '/categorie/webcams',   emoji: '📷', desc: 'Visio en HD' },
-    { label: 'Batteries', href: '/categorie/batteries', emoji: '🔋', desc: 'Autonomie boost' },
-    { label: 'Packs',     href: '/pack',                 emoji: '🎁', desc: 'Offres combinées' },
+    { label: 'Casques',   href: '/produit?cat=casques',   emoji: '🎧', desc: 'Audio immersif' },
+    { label: 'Claviers',  href: '/produit?cat=claviers',  emoji: '⌨️', desc: 'Réactivité ultime' },
+    { label: 'Souris',    href: '/produit?cat=souris',    emoji: '🖱️', desc: 'Précision chirurgicale' },
+    { label: 'Webcams',   href: '/produit?cat=webcams',   emoji: '📷', desc: 'Visio en HD' },
+    { label: 'Batteries', href: '/produit?cat=batteries', emoji: '🔋', desc: 'Autonomie boost' },
+    { label: 'Packs',     href: '/pack',                  emoji: '🎁', desc: 'Offres combinées' },
   ]
   return (
     <section id="categories" aria-label="Catégories vedettes" className="motion-section">
@@ -114,6 +115,8 @@ function FeaturedCategories() {
               href={c.href}
               prefetch={false}
               className="group block rounded-2xl border border-token-border bg-token-surface/70 backdrop-blur shadow-sm transition hover:shadow-elevated focus-ring p-4 sm:p-5"
+              data-gtm="home_cat_card"
+              data-cat={c.label}
             >
               <div className="text-3xl sm:text-4xl">{c.emoji}</div>
               <div className="mt-3 font-semibold">{c.label}</div>
@@ -151,6 +154,7 @@ function SplitCTA() {
               href="/pack"
               prefetch={false}
               className="inline-flex items-center rounded-xl bg-[hsl(var(--accent))] px-5 py-3 font-semibold text-white shadow hover:bg-[hsl(var(--accent)/.92)] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
+              data-gtm="home_cta_packs"
             >
               Découvrir les packs
             </Link>
@@ -158,6 +162,7 @@ function SplitCTA() {
               href="/produit"
               prefetch={false}
               className="inline-flex items-center rounded-xl border border-token-border bg-token-surface px-5 py-3 font-semibold hover:shadow focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
+              data-gtm="home_cta_products"
             >
               Voir les produits
             </Link>
@@ -244,7 +249,7 @@ export default async function HomePage() {
     name: 'TechPlay',
     potentialAction: {
       '@type': 'SearchAction',
-      target: `${SITE_URL}/products?q={search_term_string}`,
+      target: `${SITE_URL}/produit?q={search_term_string}`, // ✅ aligne avec la route existante
       'query-input': 'required name=search_term_string',
     },
   }
@@ -266,7 +271,12 @@ export default async function HomePage() {
         {/* Hero carousel */}
         <section aria-label="Carrousel des produits en vedette" className="motion-section" id="hero">
           <Suspense fallback={<div className="h-40 sm:h-56 lg:h-72 rounded-2xl skeleton" />}>
+            {/* ℹ️ Si le CTA du Hero pointe sur une fiche manquante, penser à le régler côté <HeroCarousel /> */}
             <HeroCarousel />
+            {/* Fallback noscript (CTA safe vers /produit) */}
+            <noscript>
+              <p><a href="/produit">Voir les produits</a></p>
+            </noscript>
           </Suspense>
         </section>
 
@@ -326,8 +336,6 @@ export default async function HomePage() {
       {itemListJsonLd ? (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
       ) : null}
-
-      <ScrollTopButton />
     </>
   )
 }

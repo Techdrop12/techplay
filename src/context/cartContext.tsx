@@ -45,7 +45,10 @@ export type Coupon =
   | { code: string; type: 'fixed'; value: number; freeShipping?: boolean; expiresAt?: string };
 
 export interface CartContextValue {
+  /** Liste canonique */
   cart: CartItem[];
+  /** Alias pratique */
+  items: CartItem[];
   cartId: string;
   // actions
   addToCart: (item: CartInput) => void;
@@ -61,7 +64,8 @@ export interface CartContextValue {
   removeCoupon: () => void;
   // sélecteurs
   count: number;
-  total: number; // sous-total HT/TTC selon usage (ici TTC si TAX_RATE>0)
+  /** Sous-total (hors remise), taxes non incluses. */
+  total: number;
   isInCart: (id: string) => boolean;
   getItemQuantity: (id: string) => number;
   getItem: (id: string) => CartItem | undefined;
@@ -86,7 +90,7 @@ const ensureItemShape = (it: Partial<CartItem>): CartItem => ({
   slug: String(it.slug ?? ''),
   title: String(it.title ?? 'Produit'),
   image: String(it.image ?? '/placeholder.png'),
-  price: Number(it.price ?? 0),
+  price: Number.isFinite(Number(it.price)) ? Number(it.price) : 0,
   quantity: clamp(Number(it.quantity ?? 1), MIN_QTY, MAX_QTY),
   sku: it.sku ? String(it.sku) : undefined,
 });
@@ -113,7 +117,7 @@ function writeCart(cart: CartItem[]) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     window.dispatchEvent(new CustomEvent('cart-updated', { detail: cart }));
   } catch {
-    console.warn("Impossible d'enregistrer le panier.");
+    // no-op
   }
 }
 
@@ -174,7 +178,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     hydrated.current = true;
   }, []);
 
-  // Persistance (débouonçage léger pour éviter d'écrire à chaque frapppe)
+  // Persistance (débouonçage léger pour éviter d'écrire à chaque frappe)
   useEffect(() => {
     if (!hydrated.current) return;
     if (writeTimer.current) window.clearTimeout(writeTimer.current);
@@ -217,10 +221,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [cart]
   );
 
+  // % robuste : accepte 0.2 ou 20 (-> 20%)
   const discount = useMemo(() => {
     if (!coupon) return 0;
-    if (coupon.type === 'percent') return round2(subtotal * Math.max(0, Math.min(1, coupon.value)));
-    return round2(Math.max(0, Math.min(subtotal, coupon.value)));
+    if (coupon.type === 'percent') {
+      const rateRaw = Number(coupon.value);
+      const rate = rateRaw > 1 ? rateRaw / 100 : rateRaw; // 20 -> .20
+      return round2(subtotal * clamp(rate, 0, 1));
+    }
+    return round2(Math.max(0, Math.min(subtotal, Number(coupon.value))));
   }, [coupon, subtotal]);
 
   const shipping = useMemo(() => {
@@ -233,7 +242,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const tax = useMemo(() => round2(taxableBase * Math.max(0, TAX_RATE)), [taxableBase]);
   const grandTotal = useMemo(() => round2(taxableBase + tax + shipping), [taxableBase, tax, shipping]);
 
-  // Pour compat API existante : "total" = sous-total (arrondi)
+  // total = sous-total (pré-remises & hors taxes) — conservé pour compat
   const total = useMemo(() => round2(subtotal), [subtotal]);
 
   const amountToFreeShipping = useMemo(() => {
@@ -251,7 +260,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const getItem = (id: string) => cart.find((it) => it._id === id);
   const getLineTotal = (id: string) => {
     const it = getItem(id);
-    return it ? round2(it.price * it.quantity) : 0;
+    const p = Number(it?.price ?? 0);
+    const q = Number(it?.quantity ?? 0);
+    return round2(p * q);
   };
 
   /** ----------------------- Actions ----------------------- */
@@ -345,6 +356,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const value: CartContextValue = {
     cart,
+    items: cart, // alias
     cartId,
     addToCart,
     removeFromCart,

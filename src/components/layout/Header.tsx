@@ -1,4 +1,4 @@
-// src/components/layout/Header.tsx — Ultra Premium Fusion (tokens + mega + prefetch + a11y)
+// src/components/layout/Header.tsx — Ultra Premium FINAL++
 'use client'
 
 import Link from 'next/link'
@@ -25,6 +25,7 @@ const LINKS: NavLink[] = [
 
 const SCROLL_HIDE_OFFSET = 80
 const HOVER_PREFETCH_DELAY = 120
+const SEARCH_ACTION = '/produit'
 
 const SEARCH_TRENDS = [
   'écouteurs bluetooth',
@@ -50,7 +51,7 @@ export default function Header() {
   const pathname = usePathname() || '/'
   const router = useRouter()
 
-  // Comptages robustes (peu importe la forme du store)
+  // Comptages robustes
   let cartCount = 0
   try {
     const { cart } = useCart() as any
@@ -81,8 +82,9 @@ export default function Header() {
 
   const searchRef = useRef<HTMLInputElement | null>(null)
   const [placeholder, setPlaceholder] = useState(SEARCH_TRENDS[0])
+  const [searchFocused, setSearchFocused] = useState(false)
 
-  // Mega menu Catégories (hover/focus + ESC + clickAway)
+  // Mega menu
   const [catOpen, setCatOpen] = useState(false)
   const catBtnRef = useRef<HTMLButtonElement | null>(null)
   const catPanelRef = useRef<HTMLDivElement | null>(null)
@@ -152,7 +154,7 @@ export default function Header() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Raccourcis / & Cmd/Ctrl+K → focus recherche
+  // Hotkeys: "/" ou Ctrl/Cmd+K → focus recherche
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName
@@ -173,25 +175,55 @@ export default function Header() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  // Placeholder rotatif
+  // Placeholder rotatif (pause quand input focus)
   useEffect(() => {
     let i = 0
-    const id = window.setInterval(() => {
-      i = (i + 1) % SEARCH_TRENDS.length
-      setPlaceholder(SEARCH_TRENDS[i])
-    }, 4000)
-    return () => clearInterval(id)
+    let id: number | null = null
+    const start = () => {
+      if (id) return
+      id = window.setInterval(() => {
+        i = (i + 1) % SEARCH_TRENDS.length
+        setPlaceholder(SEARCH_TRENDS[i])
+      }, 4000)
+    }
+    const stop = () => { if (id) { clearInterval(id); id = null } }
+
+    if (!searchFocused) start()
+    else stop()
+
+    return () => stop()
+  }, [searchFocused])
+
+  // Cleanup des timeouts de prefetch au unmount
+  useEffect(() => {
+    return () => {
+      for (const t of prefetchTimers.current.values()) clearTimeout(t)
+      prefetchTimers.current.clear()
+      if (catTimer.current) clearTimeout(catTimer.current)
+    }
   }, [])
 
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/')
 
-  // Prefetch “intelligent” au hover
+  // Prefetch “intelligent” au hover/focus (fallback si API router.prefetch absente)
+  const prefetchViaLink = (href: string) => {
+    try {
+      const el = document.createElement('link')
+      el.rel = 'prefetch'
+      el.href = href
+      document.head.appendChild(el)
+      setTimeout(() => el.remove(), 5000)
+    } catch {}
+  }
+
   const smartPrefetchStart = (href: string) => {
     if (!href || isActive(href)) return
+    if (document.visibilityState !== 'visible') return
     if (prefetchTimers.current.has(href)) return
     const t = window.setTimeout(() => {
-      try { router.prefetch(href) } catch {}
+      if (typeof router.prefetch === 'function') { try { router.prefetch(href) } catch {} }
+      else prefetchViaLink(href)
       prefetchTimers.current.delete(href)
     }, HOVER_PREFETCH_DELAY)
     prefetchTimers.current.set(href, t)
@@ -221,7 +253,7 @@ export default function Header() {
       data-scrolled={scrolled ? 'true' : 'false'}
       className={cn(
         'fixed top-0 left-0 right-0 z-[80] w-full',
-        'supports-backdrop:glass supports-backdrop:bg-transparent',
+        'backdrop-blur supports-backdrop:bg-transparent',
         'border-b transition-all motion-safe:duration-300 motion-safe:ease-out motion-safe:transition-transform',
         scrolled
           ? 'bg-token-surface/85 border-token-border shadow-soft'
@@ -236,13 +268,15 @@ export default function Header() {
           prefetch={false}
           aria-label="Retour à l’accueil"
           className="flex shrink-0 items-center gap-3 hocus:opacity-90"
+          onFocus={() => smartPrefetchStart('/')}
+          onBlur={() => smartPrefetchCancel('/')}
         >
           <Logo className="h-8 w-auto md:h-10" />
         </Link>
 
         {/* Recherche */}
         <form
-          action="/products"
+          action={SEARCH_ACTION}
           method="get"
           role="search"
           aria-label="Recherche produits"
@@ -257,19 +291,23 @@ export default function Header() {
             list="header-search-suggestions"
             className={cn(
               'w-full rounded-full border px-4 py-2.5 pr-12 text-sm',
-              // tokens
               'border-token-border bg-token-surface/70 placeholder:text-token-text/40',
               'focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/.30)]'
             )}
             autoComplete="off"
             enterKeyHint="search"
+            aria-keyshortcuts="/ Control+K Meta+K"
             aria-controls="search-status"
             aria-describedby="search-hint"
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setSearchFocused(false)}
           />
           <datalist id="header-search-suggestions">
             {SEARCH_TRENDS.map((s) => (<option value={s} key={s} />))}
           </datalist>
-          <div id="search-hint" className="sr-only">Raccourcis : « / » ou « Ctrl/⌘ K » pour rechercher.</div>
+          <div id="search-hint" className="sr-only">
+            Raccourcis : « / » ou « Ctrl/⌘ K » pour rechercher.
+          </div>
           <div id="search-status" aria-live="polite" aria-atomic="true" className="sr-only" />
           <div className="absolute inset-y-0 right-1.5 flex items-center">
             <button
@@ -277,6 +315,7 @@ export default function Header() {
               className="inline-flex h-8 w-8 items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
               aria-label="Lancer la recherche"
               title="Rechercher"
+              data-gtm="header_search_submit"
             >
               🔎
             </button>
@@ -284,13 +323,21 @@ export default function Header() {
         </form>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex gap-6 lg:gap-8 tracking-tight font-medium text-token-text" aria-label="Navigation principale">
+        <nav
+          className="hidden md:flex gap-6 lg:gap-8 tracking-tight font-medium text-token-text"
+          aria-label="Navigation principale"
+        >
           {LINKS.map(({ href, label }) => {
             const active = isActive(href)
 
             if (label === 'Catégories') {
               return (
-                <div key="mega-cats" className="relative" onMouseEnter={openCats} onMouseLeave={() => closeCats()}>
+                <div
+                  key="mega-cats"
+                  className="relative"
+                  onMouseEnter={openCats}
+                  onMouseLeave={() => closeCats()}
+                >
                   <button
                     ref={catBtnRef}
                     id={catBtnId}
@@ -307,10 +354,14 @@ export default function Header() {
                         ? 'text-[hsl(var(--accent))] font-semibold after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-[hsl(var(--accent))]'
                         : 'hover:text-[hsl(var(--accent))] focus-visible:text-[hsl(var(--accent))]'
                     )}
+                    data-gtm="header_mega_btn"
                   >
                     Catégories
                     {!active && (
-                      <span className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-[hsl(var(--accent))] transition-all duration-300 group-hover:w-full" aria-hidden="true" />
+                      <span
+                        className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-[hsl(var(--accent))] transition-all duration-300 group-hover:w-full"
+                        aria-hidden="true"
+                      />
                     )}
                   </button>
 
@@ -321,7 +372,7 @@ export default function Header() {
                     aria-labelledby={catBtnId}
                     className={cn(
                       'absolute left-1/2 top-[calc(100%+10px)] z-50 w-[min(860px,92vw)] -translate-x-1/2 rounded-2xl border',
-                      'border-token-border bg-token-surface/90 shadow-2xl supports-backdrop:bg-token-surface/80 backdrop-blur',
+                      'border-token-border bg-token-surface/90 shadow-2xl backdrop-blur supports-backdrop:bg-token-surface/80',
                       'transition-all duration-200',
                       catOpen ? 'pointer-events-auto opacity-100 translate-y-0' : 'pointer-events-none opacity-0 -translate-y-1'
                     )}
@@ -338,11 +389,14 @@ export default function Header() {
                               prefetch={false}
                               onPointerEnter={() => smartPrefetchStart(c.href)}
                               onPointerLeave={() => smartPrefetchCancel(c.href)}
+                              onFocus={() => smartPrefetchStart(c.href)}
+                              onBlur={() => smartPrefetchCancel(c.href)}
                               className={cn(
                                 'group flex items-center gap-3 rounded-xl border transform-gpu p-3 transition',
                                 'border-transparent bg-token-surface/80 hover:bg-token-surface shadow-sm hover:shadow-md',
                                 'hover:border-[hsl(var(--accent)/.30)] hover:-translate-y-0.5'
                               )}
+                              data-gtm="header_mega_cat"
                             >
                               <span className="text-xl select-none" aria-hidden="true">{c.emoji}</span>
                               <span className="flex-1">
@@ -370,8 +424,11 @@ export default function Header() {
                               prefetch={false}
                               onPointerEnter={() => smartPrefetchStart('/pack')}
                               onPointerLeave={() => smartPrefetchCancel('/pack')}
+                              onFocus={() => smartPrefetchStart('/pack')}
+                              onBlur={() => smartPrefetchCancel('/pack')}
                               role="menuitem"
                               className="inline-flex items-center rounded-lg bg-[hsl(var(--accent))] px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-[hsl(var(--accent)/.92)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
+                              data-gtm="header_mega_cta_packs"
                             >
                               Voir les packs
                             </Link>
@@ -380,8 +437,11 @@ export default function Header() {
                               prefetch={false}
                               onPointerEnter={() => smartPrefetchStart('/categorie')}
                               onPointerLeave={() => smartPrefetchCancel('/categorie')}
+                              onFocus={() => smartPrefetchStart('/categorie')}
+                              onBlur={() => smartPrefetchCancel('/categorie')}
                               role="menuitem"
                               className="inline-flex items-center rounded-lg border border-token-border bg-token-surface px-3 py-1.5 text-sm font-semibold hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.30)]"
+                              data-gtm="header_mega_cta_all"
                             >
                               Toutes les catégories
                             </Link>
@@ -401,6 +461,8 @@ export default function Header() {
                 prefetch={false}
                 onPointerEnter={() => smartPrefetchStart(href)}
                 onPointerLeave={() => smartPrefetchCancel(href)}
+                onFocus={() => smartPrefetchStart(href)}
+                onBlur={() => smartPrefetchCancel(href)}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
                   'relative group rounded-sm transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]',
@@ -408,10 +470,14 @@ export default function Header() {
                     ? 'text-[hsl(var(--accent))] font-semibold after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-[hsl(var(--accent))]'
                     : 'hover:text-[hsl(var(--accent))] focus-visible:text-[hsl(var(--accent))]'
                 )}
+                data-gtm={'header_nav_' + label.toLowerCase()}
               >
                 {label}
                 {!active && (
-                  <span className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-[hsl(var(--accent))] transition-all duration-300 group-hover:w-full" aria-hidden="true" />
+                  <span
+                    className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-[hsl(var(--accent))] transition-all duration-300 group-hover:w-full"
+                    aria-hidden="true"
+                  />
                 )}
               </Link>
             )
@@ -427,13 +493,16 @@ export default function Header() {
             prefetch={false}
             onPointerEnter={() => smartPrefetchStart('/promo')}
             onPointerLeave={() => smartPrefetchCancel('/promo')}
+            onFocus={() => smartPrefetchStart('/promo')}
+            onBlur={() => smartPrefetchCancel('/promo')}
             className="group inline-flex items-center gap-2 rounded-full border border-token-border bg-token-surface/60 px-3 py-1.5 text-sm font-medium text-token-text hover:bg-token-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
             aria-label="Voir les offres du jour"
             title="Offres du jour"
+            data-gtm="header_deals"
           >
             <span className="relative inline-flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gradient-to-r from-pink-500 to-yellow-500 opacity-60"></span>
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-gradient-to-r from-pink-500 to-yellow-500"></span>
+              <span className="absolute inline-flex h-full w-full motion-safe:animate-ping rounded-full bg-gradient-to-r from-pink-500 to-yellow-500 opacity-60" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-gradient-to-r from-pink-500 to-yellow-500" />
             </span>
             <span className="hidden lg:inline">Offres</span>
           </Link>
@@ -444,8 +513,15 @@ export default function Header() {
               prefetch={false}
               onPointerEnter={() => smartPrefetchStart('/wishlist')}
               onPointerLeave={() => smartPrefetchCancel('/wishlist')}
+              onFocus={() => smartPrefetchStart('/wishlist')}
+              onBlur={() => smartPrefetchCancel('/wishlist')}
               className="relative text-token-text hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-              aria-label={wishlistCount > 0 ? `Voir la wishlist (${wishlistCount} article${wishlistCount > 1 ? 's' : ''})` : 'Voir la wishlist'}
+              aria-label={
+                wishlistCount > 0
+                  ? `Voir la wishlist (${wishlistCount} article${wishlistCount > 1 ? 's' : ''})`
+                  : 'Voir la wishlist'
+              }
+              data-gtm="header_wishlist"
             >
               <span className="sr-only">Wishlist</span>
               <span className="text-2xl" aria-hidden="true">🤍</span>
@@ -466,8 +542,15 @@ export default function Header() {
               prefetch={false}
               onPointerEnter={() => smartPrefetchStart('/commande')}
               onPointerLeave={() => smartPrefetchCancel('/commande')}
+              onFocus={() => smartPrefetchStart('/commande')}
+              onBlur={() => smartPrefetchCancel('/commande')}
               className="relative text-token-text hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-              aria-label={cartCount > 0 ? `Voir le panier (${cartCount} article${cartCount > 1 ? 's' : ''})` : 'Voir le panier'}
+              aria-label={
+                cartCount > 0
+                  ? `Voir le panier (${cartCount} article${cartCount > 1 ? 's' : ''})`
+                  : 'Voir le panier'
+              }
+              data-gtm="header_cart"
             >
               <span className="sr-only">Panier</span>
               <span className="text-2xl" aria-hidden="true">🛒</span>
@@ -487,15 +570,18 @@ export default function Header() {
             prefetch={false}
             onPointerEnter={() => smartPrefetchStart('/login')}
             onPointerLeave={() => smartPrefetchCancel('/login')}
+            onFocus={() => smartPrefetchStart('/login')}
+            onBlur={() => smartPrefetchCancel('/login')}
             className="hidden lg:inline-flex items-center justify-center rounded-full border border-transparent px-3 py-2 text-sm font-medium text-token-text hover:text-[hsl(var(--accent))] focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
             aria-label="Espace client"
             title="Espace client"
+            data-gtm="header_account"
           >
             👤
           </Link>
         </div>
 
-        {/* Bouton + panel mobile intégrés (Framer inclus dedans) */}
+        {/* Bouton + panel mobile (géré dans MobileNav) */}
         <MobileNav />
       </div>
 

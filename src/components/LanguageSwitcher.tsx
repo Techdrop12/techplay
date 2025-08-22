@@ -1,26 +1,43 @@
 // src/components/LanguageSwitcher.tsx
 'use client'
 
-import { useLocale } from 'next-intl'
 import { usePathname, useRouter } from 'next/navigation'
 
 const SUPPORTED = ['fr', 'en'] as const
 type Locale = (typeof SUPPORTED)[number]
+const DEFAULT_LOCALE: Locale = 'fr'
 
+// Déduit la locale depuis l’URL (si pas de préfixe => fr par défaut)
+function getLocaleFromPath(pathname: string): Locale {
+  const seg = pathname.split('/').filter(Boolean)[0]
+  return (SUPPORTED as readonly string[]).includes(seg as string) ? (seg as Locale) : DEFAULT_LOCALE
+}
+
+/**
+ * Construit le chemin pour la nouvelle locale :
+ * - fr (locale par défaut) => retire tout préfixe de locale
+ * - en (locale non-défaut) => ajoute /en comme premier segment
+ */
 function buildPathWithLocale(pathname: string, newLocale: Locale) {
   const segments = pathname.split('/').filter(Boolean)
-  if (segments.length > 0 && SUPPORTED.includes(segments[0] as Locale)) {
-    segments[0] = newLocale
-  } else {
+
+  // Enlève le préfixe existant s'il y en a un
+  if (segments.length > 0 && (SUPPORTED as readonly string[]).includes(segments[0] as string)) {
+    segments.shift()
+  }
+
+  // Ajoute le préfixe uniquement si locale ≠ défaut
+  if (newLocale !== DEFAULT_LOCALE) {
     segments.unshift(newLocale)
   }
+
   return '/' + segments.join('/')
 }
 
 export default function LanguageSwitcher() {
-  const locale = (useLocale() as Locale) ?? 'fr'
   const pathname = usePathname() || '/'
   const router = useRouter()
+  const locale = getLocaleFromPath(pathname)
 
   const changeLanguage = (newLocale: Locale) => {
     if (newLocale === locale) return

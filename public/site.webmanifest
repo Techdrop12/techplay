@@ -1,14 +1,42 @@
 {
-  "name": "TechPlay",
+  "name": "TechPlay – Boutique High-Tech Premium",
   "short_name": "TechPlay",
-  "start_url": "/",
+  "description": "Boutique ultra premium de gadgets high-tech : innovation, IA, performance et expérience utilisateur.",
+  "lang": "fr",
+  "dir": "ltr",
+  "id": "/fr/?source=pwa",
+  "start_url": "/fr/?source=pwa",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "browser"],
+  "orientation": "portrait",
   "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "theme_color": "#0f172a",
   "icons": [
-    { "src": "/favicon-32x32.png", "sizes": "32x32", "type": "image/png" },
-    { "src": "/favicon-16x16.png", "sizes": "16x16", "type": "image/png" },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+    { "src": "/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/maskable-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "categories": ["shopping", "technology"],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Packs",
+      "short_name": "Packs",
+      "url": "/pack",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Wishlist",
+      "short_name": "Wishlist",
+      "url": "/wishlist",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Offres du jour",
+      "short_name": "Offres",
+      "url": "/promo",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png" }]
+    }
   ]
 }

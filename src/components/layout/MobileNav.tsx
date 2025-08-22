@@ -1,4 +1,4 @@
-// src/components/layout/MobileNav.tsx — Ultra Premium Fusion (framer-motion + tokens + a11y)
+// src/components/layout/MobileNav.tsx — ULTIME++ (bugfix TS, recent searches, a11y, prefetch, tweaks)
 'use client'
 
 import Link from 'next/link'
@@ -16,6 +16,7 @@ const NAV: Readonly<NavItem[]> = [
   { href: '/', label: 'Accueil' },
   { href: '/produit', label: 'Produits' },
   { href: '/pack', label: 'Packs' },
+  { href: '/categorie', label: 'Catégories' },
   { href: '/wishlist', label: 'Wishlist' },
   { href: '/blog', label: 'Blog' },
   { href: '/contact', label: 'Contact' },
@@ -31,9 +32,33 @@ const SEARCH_TRENDS = [
   'souris sans fil',
 ]
 
+const CATEGORIES: Array<{ label: string; href: string; emoji: string; desc: string }> = [
+  { label: 'Casques', href: '/categorie/casques', emoji: '🎧', desc: 'Audio immersif' },
+  { label: 'Claviers', href: '/categorie/claviers', emoji: '⌨️', desc: 'Mécas & low-profile' },
+  { label: 'Souris', href: '/categorie/souris', emoji: '🖱️', desc: 'Précision & confort' },
+  { label: 'Webcams', href: '/categorie/webcams', emoji: '📷', desc: 'Visio en HD' },
+  { label: 'Batteries', href: '/categorie/batteries', emoji: '🔋', desc: 'Power & hubs' },
+  { label: 'Audio', href: '/categorie/audio', emoji: '🔊', desc: 'Enceintes & DAC' },
+  { label: 'Stockage', href: '/categorie/stockage', emoji: '💾', desc: 'SSD & cartes' },
+  { label: 'Écrans', href: '/categorie/ecrans', emoji: '🖥️', desc: '144Hz et +' },
+]
+
+const SEARCH_ACTION = '/produit'
+
+/* Utils robustes */
+const safeParseArray = <T,>(raw: string | null): T[] => {
+  if (!raw) return []
+  try { const v = JSON.parse(raw); return Array.isArray(v) ? (v as T[]) : [] } catch { return [] }
+}
+const norm = (s: string) => s.trim().replace(/\s+/g, ' ')
+const same = (a: string, b: string) => a.toLocaleLowerCase() === b.toLocaleLowerCase()
+
+/* Tracking tolérant */
 const track = (args: { action: string; category?: string; label?: string; value?: number; [k: string]: any }) => {
-  try { gaEvent?.({ category: 'navigation', label: args.label ?? args.action, value: args.value ?? 1, ...args }) } catch {}
-  try { logEvent?.(args.action, args) } catch {}
+  const { action, category, label, value, ...rest } = args
+  const payload = { action, category: category ?? 'navigation', label: label ?? action, value: value ?? 1, ...rest }
+  try { gaEvent?.(payload) } catch {}
+  try { (logEvent as any)?.(action, payload) } catch {}
 }
 
 export default function MobileNav() {
@@ -43,37 +68,31 @@ export default function MobileNav() {
   const dialogId = useId()
   const titleId = `${dialogId}-title`
 
-  // 🛒 Panier (safe)
-  let cartCount = 0
-  try {
-    const { cart } = useCart() as any
-    cartCount = useMemo(
-      () =>
-        Array.isArray(cart)
-          ? cart.reduce((t, i: any) => t + (i?.quantity || 1), 0)
-          : Array.isArray(cart?.items)
-          ? cart.items.reduce((t: number, i: any) => t + (i?.quantity || 1), 0)
-          : Number(cart?.count ?? cart?.size ?? 0) || 0,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [JSON.stringify(cart)]
-    )
-  } catch { cartCount = 0 }
+  // Stores (hooks inconditionnels)
+  const cartStore = (() => { try { return useCart() as any } catch { return {} } })()
+  const wishlistStore = (() => { try { return useWishlist() as any } catch { return {} } })()
+  const cart = cartStore?.cart
+  const wishlist = wishlistStore?.wishlist
 
-  // ❤ Wishlist (safe)
-  let wishlistCount = 0
-  try {
-    const { wishlist } = useWishlist() as any
-    wishlistCount = useMemo(
-      () =>
-        Array.isArray(wishlist)
-          ? wishlist.length
-          : Array.isArray(wishlist?.items)
-          ? wishlist.items.length
-          : Number(wishlist?.count ?? wishlist?.size ?? 0) || 0,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [JSON.stringify(wishlist)]
-    )
-  } catch { wishlistCount = 0 }
+  const cartCount = useMemo(() => {
+    try {
+      return Array.isArray(cart)
+        ? cart.reduce((t: number, i: any) => t + (i?.quantity || 1), 0)
+        : Array.isArray(cart?.items)
+        ? cart.items.reduce((t: number, i: any) => t + (i?.quantity || 1), 0)
+        : Number(cart?.count ?? cart?.size ?? 0) || 0
+    } catch { return 0 }
+  }, [cart])
+
+  const wishlistCount = useMemo(() => {
+    try {
+      return Array.isArray(wishlist)
+        ? wishlist.length
+        : Array.isArray(wishlist?.items)
+        ? wishlist.items.length
+        : Number(wishlist?.count ?? wishlist?.size ?? 0) || 0
+    } catch { return 0 }
+  }, [wishlist])
 
   const [open, setOpen] = useState(false)
   const triggerRef = useRef<HTMLButtonElement | null>(null)
@@ -84,18 +103,22 @@ export default function MobileNav() {
   // Recherche
   const searchRef = useRef<HTMLInputElement | null>(null)
   const [placeholder, setPlaceholder] = useState(SEARCH_TRENDS[0])
+  const [searchFocused, setSearchFocused] = useState(false)
+  const [recentQs, setRecentQs] = useState<string[]>([])
+  const [catsOpen, setCatsOpen] = useState(false)
 
-  // PWA install
+  // PWA
   const deferredPrompt = useRef<any>(null)
   const [canInstall, setCanInstall] = useState(false)
   useEffect(() => {
-    const onBeforeInstall = (e: any) => {
-      e.preventDefault()
-      deferredPrompt.current = e
-      setCanInstall(true)
-    }
+    const onBeforeInstall = (e: any) => { e.preventDefault(); deferredPrompt.current = e; setCanInstall(true) }
+    const onInstalled = () => setCanInstall(false)
     window.addEventListener('beforeinstallprompt', onBeforeInstall)
-    return () => window.removeEventListener('beforeinstallprompt', onBeforeInstall)
+    window.addEventListener('appinstalled', onInstalled)
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onBeforeInstall)
+      window.removeEventListener('appinstalled', onInstalled)
+    }
   }, [])
   const handleInstall = async () => {
     try {
@@ -109,7 +132,7 @@ export default function MobileNav() {
     } catch {}
   }
 
-  // Scroll locking + inert
+  // Scroll lock + inert
   const savedScrollY = useRef(0)
   const lockScroll = () => {
     savedScrollY.current = window.scrollY || document.documentElement.scrollTop
@@ -146,15 +169,8 @@ export default function MobileNav() {
     }
   }
 
-  const openMenu = () => {
-    setOpen(true)
-    try { navigator.vibrate?.(8) } catch {}
-    track({ action: 'mobile_nav_open', label: 'hamburger' })
-  }
-  const closeMenu = (reason: string = 'close_btn') => {
-    setOpen(false)
-    track({ action: 'mobile_nav_close', label: reason })
-  }
+  const openMenu = () => { setOpen(true); try { navigator.vibrate?.(8) } catch {}; track({ action: 'mobile_nav_open', label: 'hamburger' }) }
+  const closeMenu = (reason: string = 'close_btn') => { setOpen(false); track({ action: 'mobile_nav_close', label: reason }) }
 
   // Focus trap + ESC
   useEffect(() => {
@@ -180,14 +196,15 @@ export default function MobileNav() {
       unlockScroll()
       window.removeEventListener('keydown', onKey)
       triggerRef.current?.focus()
+      setCatsOpen(false)
     }
     return () => { window.removeEventListener('keydown', onKey); unlockScroll() }
   }, [open])
 
-  // Fermer à la navigation
+  // Fermer à la nav
   useEffect(() => { if (open) closeMenu('route_change') }, [pathname])
 
-  // Gestes (swipe down)
+  // Gestes
   const startY = useRef<number | null>(null)
   const onTouchStart = (e: React.TouchEvent) => { startY.current = e.touches[0].clientY }
   const onTouchMove = (e: React.TouchEvent) => {
@@ -198,36 +215,65 @@ export default function MobileNav() {
   const onTouchEnd = () => { startY.current = null }
 
   // Variants
-  const overlayVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: reducedMotion ? 0 : 0.18 } },
-    exit: { opacity: 0, transition: { duration: 0.12 } },
-  }
-  const sheetVariants = {
-    hidden: { y: reducedMotion ? 0 : '10%', opacity: 0.001 },
-    visible: { y: 0, opacity: 1, transition: { duration: reducedMotion ? 0 : 0.22, ease: 'easeOut' } },
-    exit: { y: reducedMotion ? 0 : '10%', opacity: 0, transition: { duration: 0.16 } },
-  }
+  const overlayVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { duration: reducedMotion ? 0 : 0.18 } }, exit: { opacity: 0, transition: { duration: 0.12 } } }
+  const sheetVariants = { hidden: { y: reducedMotion ? 0 : '10%', opacity: 0.001 }, visible: { y: 0, opacity: 1, transition: { duration: reducedMotion ? 0 : 0.22, ease: 'easeOut' } }, exit: { y: reducedMotion ? 0 : '10%', opacity: 0, transition: { duration: 0.16 } } }
 
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/')
 
-  const prefetchOnPointerDown = (href: string) => { try { if (href && !isActive(href)) router.prefetch(href) } catch {} }
+  const prefetchOnPointer = (href: string) => { try { if (href && !isActive(href)) router.prefetch(href) } catch {} }
 
-  // Placeholder rotatif
+  // Placeholder (pause on focus + onglet masqué) + récentes
   useEffect(() => {
     let i = 0
-    const id = window.setInterval(() => { i = (i + 1) % SEARCH_TRENDS.length; setPlaceholder(SEARCH_TRENDS[i]) }, 3500)
-    return () => clearInterval(id)
+    let id: number | null = null
+    const start = () => {
+      if (id || searchFocused || document.visibilityState !== 'visible') return
+      id = window.setInterval(() => { i = (i + 1) % SEARCH_TRENDS.length; setPlaceholder(SEARCH_TRENDS[i]) }, 3500)
+    }
+    const stop = () => { if (id) { clearInterval(id); id = null } }
+    const onVis = () => { if (document.visibilityState === 'visible' && !searchFocused) start(); else stop() }
+
+    onVis()
+    document.addEventListener('visibilitychange', onVis)
+    return () => { document.removeEventListener('visibilitychange', onVis); stop() }
+  }, [searchFocused])
+
+  useEffect(() => {
+    try {
+      const arr = safeParseArray<string>(localStorage.getItem('recent:q'))
+      if (arr.length) setRecentQs(arr.slice(0, 6))
+    } catch {}
   }, [])
+
+  const pushRecent = (q: string) => {
+    const cleaned = norm(q)
+    if (!cleaned) return
+    try {
+      const arr = safeParseArray<string>(localStorage.getItem('recent:q'))
+      const next = [cleaned, ...arr.filter((x) => !same(x, cleaned))].slice(0, 6)
+      localStorage.setItem('recent:q', JSON.stringify(next))
+      setRecentQs(next)
+    } catch {}
+  }
 
   const onSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     const form = e.currentTarget
     const data = new FormData(form)
-    const q = String(data.get('q') || '').trim()
+    const q = norm(String(data.get('q') || ''))
     if (!q) { e.preventDefault(); searchRef.current?.focus(); return }
     try { localStorage.setItem('last:q', q) } catch {}
+    pushRecent(q)
     track({ action: 'search_submit', label: q })
+  }
+
+  const goSearch = (q: string) => {
+    const cleaned = norm(q)
+    if (!cleaned) return
+    pushRecent(cleaned)
+    track({ action: 'search_chip_click', label: cleaned })
+    closeMenu('search_chip')
+    router.push(`${SEARCH_ACTION}?q=${encodeURIComponent(cleaned)}`)
   }
 
   return (
@@ -240,6 +286,8 @@ export default function MobileNav() {
         aria-expanded={open}
         aria-controls={dialogId}
         aria-label="Ouvrir le menu mobile"
+        aria-keyshortcuts="Alt+M"
+        type="button"
         className="md:hidden grid h-10 w-10 place-items-center rounded-xl hover:bg-token-surface-2 focus-ring"
       >
         ☰
@@ -254,7 +302,7 @@ export default function MobileNav() {
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            className="fixed inset-0 z-[9999] flex items-end justify-center sm:items-center"
+            className="fixed inset-0 z-[9999] flex items-end justify-center sm:items-center overscroll-contain"
             initial="hidden"
             animate="visible"
             exit="exit"
@@ -280,15 +328,13 @@ export default function MobileNav() {
               dragElastic={0.04}
               onDragEnd={(_, info) => { if (info.offset.y > 80) closeMenu('drag_close') }}
             >
-              {/* Safe areas top */}
               <div className="pt-[env(safe-area-inset-top)]" />
-
-              {/* Handle + Header */}
               <div className="mx-auto mt-3 h-1.5 w-14 rounded-full bg-token-text/20" aria-hidden="true" />
               <div className="flex items-center justify-between px-4 py-3">
                 <h2 id={titleId} className="text-lg font-semibold">Menu</h2>
                 <button
                   onClick={() => closeMenu('close_btn')}
+                  type="button"
                   className="rounded px-3 py-2 text-sm hover:bg-token-surface-2 focus-ring"
                   aria-label="Fermer le menu mobile"
                 >
@@ -296,9 +342,9 @@ export default function MobileNav() {
                 </button>
               </div>
 
-              {/* Barre recherche */}
+              {/* Recherche */}
               <form
-                action="/products"
+                action={SEARCH_ACTION}
                 method="get"
                 role="search"
                 aria-label="Recherche produits"
@@ -315,6 +361,10 @@ export default function MobileNav() {
                     className="w-full rounded-xl border border-token-border bg-token-surface px-4 py-3 pr-12 text-base placeholder:text-token-text/50 focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/.30)]"
                     autoComplete="off"
                     enterKeyHint="search"
+                    inputMode="search"
+                    aria-keyshortcuts="/ Control+K Meta+K"
+                    onFocus={() => setSearchFocused(true)}
+                    onBlur={() => setSearchFocused(false)}
                   />
                   <datalist id="mobile-search-suggestions">
                     {SEARCH_TRENDS.map((s) => <option value={s} key={s} />)}
@@ -330,13 +380,42 @@ export default function MobileNav() {
                 </div>
               </form>
 
+              {/* Récentes */}
+              {recentQs.length > 0 && (
+                <div className="px-4 pb-3">
+                  <div className="mb-2 text-xs font-semibold text-token-text/60">Recherches récentes</div>
+                  <div className="flex flex-wrap gap-2">
+                    {recentQs.map((q) => (
+                      <button
+                        key={q}
+                        type="button"
+                        onClick={() => goSearch(q)}
+                        className="rounded-full border border-token-border bg-token-surface px-3 py-1.5 text-sm hover:bg-token-surface-2 focus-ring"
+                        aria-label={`Rechercher ${q}`}
+                      >
+                        {q.length > 26 ? `${q.slice(0, 24)}…` : q}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => { try { localStorage.removeItem('recent:q') } catch {}; setRecentQs([]) }}
+                      className="ml-2 rounded-full bg-token-surface-2 px-3 py-1.5 text-xs text-token-text/70 hover:bg-token-surface focus-ring"
+                      aria-label="Effacer l’historique de recherche"
+                    >
+                      Effacer
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Quick actions */}
               <div className="flex items-center gap-2 px-4 pb-3">
                 <ThemeToggle size="md" />
                 <Link
                   href="/wishlist"
                   prefetch={false}
-                  onPointerDown={() => prefetchOnPointerDown('/wishlist')}
+                  onPointerDown={() => prefetchOnPointer('/wishlist')}
+                  onFocus={() => prefetchOnPointer('/wishlist')}
                   onClick={() => { track({ action: 'mobile_nav_quick_wishlist' }); closeMenu('quick_wishlist') }}
                   className="relative inline-flex items-center gap-2 rounded-lg border border-token-border px-3 py-2 text-sm font-medium hover:bg-token-surface-2 focus-ring"
                   aria-label="Voir la wishlist"
@@ -351,7 +430,8 @@ export default function MobileNav() {
                 <Link
                   href="/login"
                   prefetch={false}
-                  onPointerDown={() => prefetchOnPointerDown('/login')}
+                  onPointerDown={() => prefetchOnPointer('/login')}
+                  onFocus={() => prefetchOnPointer('/login')}
                   onClick={() => { track({ action: 'mobile_nav_quick_account' }); closeMenu('quick_account') }}
                   className="inline-flex items-center gap-2 rounded-lg border border-token-border px-3 py-2 text-sm font-medium hover:bg-token-surface-2 focus-ring"
                   aria-label="Espace client"
@@ -361,6 +441,7 @@ export default function MobileNav() {
                 {canInstall && (
                   <button
                     onClick={handleInstall}
+                    type="button"
                     className="ml-auto inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-lime-500 to-emerald-500 px-3 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
                     aria-label="Installer l’application"
                     title="Installer l’application"
@@ -370,7 +451,55 @@ export default function MobileNav() {
                 )}
               </div>
 
-              {/* Grid de liens */}
+              {/* Catégories */}
+              <div className="px-4 pb-3">
+                <button
+                  type="button"
+                  onClick={() => setCatsOpen((v) => !v)}
+                  aria-expanded={catsOpen}
+                  className="flex w-full items-center justify-between rounded-xl border border-token-border bg-token-surface px-4 py-3 text-base font-semibold hover:bg-token-surface-2 focus-ring"
+                >
+                  Catégories
+                  <span aria-hidden className={`transition-transform ${catsOpen ? 'rotate-180' : ''}`}>▾</span>
+                </button>
+                <AnimatePresence initial={false}>
+                  {catsOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: reducedMotion ? 0 : 0.22, ease: 'easeOut' }}
+                      className="overflow-hidden"
+                    >
+                      <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                        {CATEGORIES.map((c) => (
+                          <li key={c.href}>
+                            <Link
+                              href={c.href}
+                              prefetch={false}
+                              onPointerDown={() => prefetchOnPointer(c.href)}
+                              onFocus={() => prefetchOnPointer(c.href)}
+                              onClick={() => { track({ action: 'mobile_nav_cat', label: c.href }); closeMenu('cat_click') }}
+                              className="group flex items-center gap-3 rounded-xl border border-transparent bg-token-surface/80 p-3 transition hover:-translate-y-0.5 hover:border-[hsl(var(--accent)/.30)] hover:bg-token-surface shadow-sm hover:shadow-md focus-ring"
+                            >
+                              <span className="text-xl select-none" aria-hidden="true">{c.emoji}</span>
+                              <span className="flex-1">
+                                <span className="block text-sm font-semibold">{c.label}</span>
+                                <span className="block text-xs text-token-text/60">{c.desc}</span>
+                              </span>
+                              <svg width="18" height="18" viewBox="0 0 24 24" className="opacity-50 group-hover:opacity-90" aria-hidden="true">
+                                <path fill="currentColor" d="M9 18l6-6-6-6v12z" />
+                              </svg>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Liens */}
               <nav aria-label="Navigation mobile" className="px-5 pb-4">
                 <ul className="grid grid-cols-1 gap-2 text-lg">
                   {NAV.map(({ href, label }) => {
@@ -382,7 +511,8 @@ export default function MobileNav() {
                         <Link
                           href={href}
                           prefetch={false}
-                          onPointerDown={() => prefetchOnPointerDown(href)}
+                          onPointerDown={() => prefetchOnPointer(href)}
+                          onFocus={() => prefetchOnPointer(href)}
                           onClick={onClick}
                           aria-current={active ? 'page' : undefined}
                           className={[
@@ -407,7 +537,8 @@ export default function MobileNav() {
                 <Link
                   href="/commande"
                   prefetch={false}
-                  onPointerDown={() => prefetchOnPointerDown('/commande')}
+                  onPointerDown={() => prefetchOnPointer('/commande')}
+                  onFocus={() => prefetchOnPointer('/commande')}
                   onClick={() => { track({ action: 'mobile_nav_cart_click', label: 'cart', value: cartCount || 1 }); closeMenu('cart') }}
                   className="relative inline-flex items-center justify-center rounded-lg border border-token-border px-4 py-2 text-base font-semibold hover:bg-token-surface-2 focus-ring"
                   aria-label="Voir le panier"
@@ -423,6 +554,7 @@ export default function MobileNav() {
 
                 <button
                   onClick={() => closeMenu('close_btn')}
+                  type="button"
                   className="ml-auto text-sm text-token-text/70 hover:underline focus:outline-none"
                   aria-label="Fermer le menu mobile"
                 >
@@ -430,7 +562,6 @@ export default function MobileNav() {
                 </button>
               </div>
 
-              {/* Safe areas bottom */}
               <div className="pb-[env(safe-area-inset-bottom)]" />
             </motion.div>
           </motion.div>

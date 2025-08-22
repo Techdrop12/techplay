@@ -1,10 +1,10 @@
-// src/components/layout/Layout.tsx — Ultimate ++ (CLS-safe, ARIA, progress, theme-color)
+// src/components/layout/Layout.tsx — Ultra Premium FINAL (CLS-safe, A11y+, VT, idle-prefetch)
 'use client'
 
-import { type ReactNode, useEffect, Suspense, useState } from 'react'
+import { type ReactNode, useEffect, Suspense, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Header from './Header'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { pageview } from '@/lib/ga'
 import LiveChat from '../LiveChat'
 import { useTheme } from '@/context/themeContext'
@@ -27,43 +27,47 @@ export default function Layout({
   pwaPrompt = true,
 }: LayoutProps) {
   const pathname = usePathname()
+  const router = useRouter()
   const { theme } = useTheme()
 
   const [isNavigating, setIsNavigating] = useState(false)
   const [routeAnnouncement, setRouteAnnouncement] = useState('')
+  const mountedRef = useRef(false)
 
-  // Pageview
+  /** ───────────────────── Analytics pageview */
   useEffect(() => {
     if (!analytics || !pathname) return
     try { pageview(pathname) } catch {}
   }, [pathname, analytics])
 
-  // Focus main after nav
+  /** ───────────────────── Focus main after nav */
   useEffect(() => {
-    document.getElementById('main')?.focus()
+    // petit rAF pour laisser le DOM s’appliquer avant le focus
+    requestAnimationFrame(() => { document.getElementById('main')?.focus() })
   }, [pathname])
 
-  // Minimal progress bar on route change
+  /** ───────────────────── Top progress + aria-busy (skip first mount) */
   useEffect(() => {
     if (!pathname) return
+    if (!mountedRef.current) { mountedRef.current = true; return }
     setIsNavigating(true)
-    const t = setTimeout(() => setIsNavigating(false), 650)
-    return () => clearTimeout(t)
+    const t = window.setTimeout(() => setIsNavigating(false), 650)
+    return () => window.clearTimeout(t)
   }, [pathname])
 
-  // Announce route change for SR users
+  /** ───────────────────── SR route announcement */
   useEffect(() => {
     const label = document.title?.trim() || `Chargement de ${pathname}`
     setRouteAnnouncement(label)
   }, [pathname])
 
-  // Update --header-offset using ResizeObserver (prevents CLS)
+  /** ───────────────────── Header offset (CLS guard) */
   useEffect(() => {
     const header =
       (document.querySelector('header[role="banner"]') as HTMLElement) ||
       (document.querySelector('header') as HTMLElement)
     if (!header || typeof ResizeObserver === 'undefined') return
-    const ro = new ResizeObserver(entries => {
+    const ro = new ResizeObserver((entries) => {
       const h = entries[0]?.contentRect?.height ?? header.offsetHeight
       document.documentElement.style.setProperty('--header-offset', `${h}px`)
     })
@@ -71,38 +75,60 @@ export default function Layout({
     return () => ro.disconnect()
   }, [])
 
-  // Mobile viewport fix (iOS 100vh)
+  /** ───────────────────── Dynamic theme-color (status bar) */
   useEffect(() => {
-    const setVh = () => {
-      document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`)
+    const ensureMeta = (): HTMLMetaElement => {
+      const found = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null
+      if (found) return found
+      const el = document.createElement('meta')
+      el.setAttribute('name', 'theme-color')
+      document.head.appendChild(el)
+      return el
     }
-    setVh()
-    window.addEventListener('resize', setVh)
-    window.addEventListener('orientationchange', setVh)
-    return () => {
-      window.removeEventListener('resize', setVh)
-      window.removeEventListener('orientationchange', setVh)
-    }
-  }, [])
-
-  // Dynamic theme-color (status bar)
-  useEffect(() => {
-    const meta: HTMLMetaElement =
-      (document.querySelector('meta[name="theme-color"]') as HTMLMetaElement) ||
-      (document.head.appendChild(Object.assign(document.createElement('meta'), { name: 'theme-color' })) as HTMLMetaElement)
-
-    const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()
-    if (bg) meta.setAttribute('content', `hsl(${bg})`)
+    const meta = ensureMeta()
+    // essaie d’utiliser un token HSL s’il existe, sinon fallback variable --bg
+    const rootStyle = getComputedStyle(document.documentElement)
+    const hsl = rootStyle.getPropertyValue('--bg').trim() || rootStyle.getPropertyValue('--token-surface').trim()
+    if (hsl) meta.setAttribute('content', `hsl(${hsl})`)
   }, [theme, pathname])
 
-  // Progressive enhancement: View Transitions (if supported)
+  /** ───────────────────── View Transitions (guarded) */
   useEffect(() => {
-    // @ts-ignore
-    if (document.startViewTransition) {
-      // @ts-ignore
-      document.startViewTransition(() => {})
+    const anyDoc = document as Document & { startViewTransition?: (cb: () => void) => void }
+    if (typeof anyDoc.startViewTransition === 'function') {
+      anyDoc.startViewTransition(() => {})
+      document.getElementById('main')?.style.setProperty('view-transition-name', 'main')
     }
   }, [pathname])
+
+  /** ───────────────────── Idle prefetch (réseaux rapides, no save-data) */
+  useEffect(() => {
+    const ric: ((cb: IdleRequestCallback, opts?: IdleRequestOptions) => number) =
+      (window as any).requestIdleCallback ||
+      ((cb: IdleRequestCallback) => window.setTimeout(() => cb({ didTimeout: false, timeRemaining: () => 0 } as any), 350))
+    const clearRic: (id: number) => void = (window as any).cancelIdleCallback || window.clearTimeout
+
+    const canPrefetch = () => {
+      const nav: any = navigator
+      return (
+        !nav?.connection ||
+        (!nav.connection.saveData &&
+          (!nav.connection.effectiveType || nav.connection.effectiveType === '4g'))
+      )
+    }
+
+    const id = ric(() => {
+      if (!canPrefetch()) return
+      try {
+        router.prefetch('/produit')
+        router.prefetch('/pack')
+        router.prefetch('/wishlist')
+      } catch {}
+    }, { timeout: 1200 })
+
+    return () => clearRic(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <>
@@ -128,7 +154,9 @@ export default function Layout({
       {/* Top progress bar */}
       <div
         aria-hidden
-        className={`fixed left-0 right-0 top-[env(safe-area-inset-top)] z-[90] h-[2px] overflow-hidden ${isNavigating ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200`}
+        className={`fixed left-0 right-0 top-[env(safe-area-inset-top)] z-[90] h-[2px] overflow-hidden transition-opacity duration-200 ${
+          isNavigating ? 'opacity-100' : 'opacity-0'
+        } motion-reduce:hidden`}
       >
         <div className="h-full w-1/3 animate-marquee-slow bg-[hsl(var(--accent))] rounded-r-full" />
       </div>
@@ -143,10 +171,10 @@ export default function Layout({
         id="main"
         role="main"
         tabIndex={-1}
+        aria-busy={isNavigating || undefined}
         data-theme={theme}
         data-pathname={pathname ?? ''}
-        // ⚠️ on retire "motion-section" pour éviter un masquage global
-        className="relative min-h-[calc(var(--vh,1vh)*100)] pt-[var(--header-offset,4.5rem)] md:pt-20 bg-token-surface text-token-text transition-colors px-[max(0px,env(safe-area-inset-left))] pb-[max(0px,env(safe-area-inset-bottom))] pr-[max(0px,env(safe-area-inset-right))]"
+        className="relative min-h-[calc(var(--vh,1vh)*100)] pt-[var(--header-offset,4.5rem)] bg-token-surface text-token-text transition-colors px-[max(0px,env(safe-area-inset-left))] pb-[max(0px,env(safe-area-inset-bottom))] pr-[max(0px,env(safe-area-inset-right))]"
         aria-label="Contenu principal"
         style={{ opacity: 1, visibility: 'visible' }}
       >

@@ -1,4 +1,4 @@
-// tailwind.config.ts — Ultra Premium V2++
+// tailwind.config.ts — Ultra Premium FINAL
 import type { Config } from 'tailwindcss'
 import plugin from 'tailwindcss/plugin'
 import forms from '@tailwindcss/forms'
@@ -8,6 +8,8 @@ import type { PluginAPI } from 'tailwindcss/types/config'
 
 const config: Config = {
   darkMode: 'class',
+
+  // Couvre tout le code source (app, components, pages, mdx, storybook sont sous /src)
   content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
 
   theme: {
@@ -21,10 +23,12 @@ const config: Config = {
       screens: { xs: '480px' },
 
       fontFamily: {
+        // Les variables next/font sont exposées via CSS vars (fallbacks inclus)
         sans: ['InterVariable', 'Inter', 'ui-sans-serif', 'system-ui'],
         heading: ['SoraVariable', 'var(--font-sora)', 'Inter', 'ui-sans-serif', 'system-ui'],
       },
 
+      // Palette utilitaire (hex) + mapping tokens HSL (pilotés par design-tokens.css)
       colors: {
         brand: { DEFAULT: '#0f172a', light: '#1e293b', dark: '#0b0f14' },
         accent: {
@@ -92,6 +96,7 @@ const config: Config = {
         'tilt-subtle': 'tilt 12s ease-in-out infinite',
         'marquee-slow': 'marquee 22s linear infinite',
       },
+
       keyframes: {
         fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
         slideUp: { '0%': { transform: 'translateY(10px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
@@ -136,12 +141,12 @@ const config: Config = {
   plugins: [
     forms,
     typography,
-    scrollbar({ nocompatible: true }), // scrollbars modernes, fins et stylables
+    scrollbar({ nocompatible: true }),
 
     plugin((api: PluginAPI) => {
-      const { addUtilities, addComponents, addVariant, theme } = api
+      const { addUtilities, addComponents, addVariant } = api
 
-      // Variantes premium
+      // Variantes premium (utilisées partout dans ton UI)
       addVariant('hocus', '&:where(:hover, :focus-visible)')
       addVariant('group-hocus', ':merge(.group):where(:hover, :focus-within) &')
       addVariant('aria-expanded', '&[aria-expanded="true"]')
@@ -151,35 +156,10 @@ const config: Config = {
       addVariant('disabled', '&:disabled')
       addVariant('supports-backdrop', '@supports(backdrop-filter: blur(2px)) &')
 
-      // Utilitaires
+      // Utils (sans doublonner ce qui est déjà dans globals.css)
       addUtilities({
-        '.glass': {
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          backgroundColor: 'rgba(255,255,255,0.75)',
-          border: '1px solid rgba(255,255,255,0.35)',
-        },
-        '.glass-dark': {
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          backgroundColor: 'rgba(9,12,16,0.65)',
-          border: '1px solid rgba(255,255,255,0.08)',
-        },
-        '.skeleton': {
-          background:
-            'linear-gradient(90deg, rgba(0,0,0,0.06) 25%, rgba(0,0,0,0.12) 37%, rgba(0,0,0,0.06) 63%)',
-          backgroundSize: '400% 100%',
-          animation: 'shimmer 1.2s linear infinite',
-        },
         '.ring-conic': {
-          background:
-            'conic-gradient(from 140deg, rgba(59,130,246,.35), transparent 35%, rgba(14,165,233,.35), transparent 75%)',
-        },
-        '.bg-grid': {
-          backgroundImage:
-            'linear-gradient(var(--grid-color,rgba(0,0,0,.06)) 1px,transparent 1px),linear-gradient(90deg,var(--grid-color,rgba(0,0,0,.06)) 1px,transparent 1px)',
-          backgroundSize: '24px 24px, 24px 24px',
-          backgroundPosition: 'center center',
+          background: 'var(--ring-conic)',
         },
         // 3D / motion helpers
         '.preserve-3d': { transformStyle: 'preserve-3d' },
@@ -188,60 +168,43 @@ const config: Config = {
         '.will-change-transform': { willChange: 'transform' },
       })
 
-      // Composants sémantiques
+      // Composants (on conserve seulement pressable qui n’existe pas en CSS)
       addComponents({
-        '.card': {
-          backgroundColor: String(theme('colors.surface.DEFAULT')),
-          border: `1px solid ${String(theme('colors.border.DEFAULT'))}`,
-          borderRadius: String(theme('borderRadius.2xl')),
-          boxShadow: String(theme('boxShadow.card')),
-        },
-        '.card-dark': {
-          backgroundColor: String(theme('colors.brand.dark')),
-          border: `1px solid ${String(theme('colors.border.dark'))}`,
-          borderRadius: String(theme('borderRadius.2xl')),
-          boxShadow: String(theme('boxShadow.card')),
-        },
         '.card-pressable': {
-          backgroundColor: String(theme('colors.surface.DEFAULT')),
-          border: `1px solid ${String(theme('colors.border.DEFAULT'))}`,
-          borderRadius: String(theme('borderRadius.2xl')),
-          boxShadow: String(theme('boxShadow.card')),
+          backgroundColor: 'hsl(var(--surface))',
+          border: '1px solid hsl(var(--border))',
+          borderRadius: '1.25rem', // = var(--radius-2xl)
+          boxShadow: '0 1px 2px rgba(0,0,0,0.04), 0 6px 16px rgba(0,0,0,0.06)',
           transition: 'transform 250ms var(--ease, cubic-bezier(.2,.8,.2,1)), box-shadow 250ms',
           willChange: 'transform',
         },
         '.card-pressable:hover': { transform: 'translateY(-2px) scale(1.01)' },
         '.card-pressable:active': { transform: 'translateY(0) scale(0.985)' },
-
-        '.focus-ring': {
-          outline: 'none',
-          boxShadow: `0 0 0 2px ${String(theme('colors.surface.DEFAULT'))}, 0 0 0 4px ${String(
-            theme('colors.accent.500')
-          )}`,
-        },
-        '.focus-ring-dark': {
-          outline: 'none',
-          boxShadow: `0 0 0 2px ${String(theme('colors.brand.dark'))}, 0 0 0 4px ${String(
-            theme('colors.accent.500')
-          )}`,
-        },
-        '.motion-section': {
-          animation: String(theme('animation.fade-up')),
-          willChange: 'transform, opacity',
-        },
-        '.overlay-hero': {
-          background: String(theme('backgroundImage.radial-faded')),
-        },
       })
     }),
   ],
 
   future: { hoverOnlyWhenSupported: true },
 
+  // Génère les classes utilisées dynamiquement / par tokens
   safelist: [
+    // Accent palette
     { pattern: /(bg|text|border)-accent-(50|100|200|300|400|500|600|700|800|900)/ },
     { pattern: /(from|via|to)-accent-(400|500|600|700)/ },
+
+    // Mapping tokens (HSL via CSS vars)
     { pattern: /(bg|text|border)-token-(bg|text|text-muted|surface|surface-2|border|accent)/ },
+
+    // Variantes d’opacité les plus fréquentes (utilisées dans le Header/Layout)
+    'bg-token-surface/60',
+    'bg-token-surface/65',
+    'bg-token-surface/70',
+    'bg-token-surface/80',
+    'bg-token-surface/85',
+    'bg-token-surface/90',
+    'text-token-text/40',
+    'text-token-text/60',
+    'text-token-text/70',
   ],
 }
 

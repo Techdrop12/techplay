@@ -1,4 +1,4 @@
-// src/components/ProductCard.tsx — Ultra premium
+// src/components/ProductCard.tsx — ULTIME++ (futuriste, a11y/SEO/UX/Perf max)
 'use client'
 
 import {
@@ -39,6 +39,28 @@ const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(mi
 const BLUR_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+'
 
+function Stars({ rating, count }: { rating?: number; count?: number }) {
+  if (!(typeof rating === 'number') || Number.isNaN(rating)) return null
+  const full = Math.max(0, Math.min(5, Math.round(rating)))
+  return (
+    <div className="flex items-center gap-1 text-[12px]" aria-label={String(rating) + '/5'}>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <svg
+          key={i}
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          className={i < full ? 'opacity-100' : 'opacity-30'}
+        >
+          <path fill="currentColor" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+        </svg>
+      ))}
+      {typeof count === 'number' && <span className="text-token-text/60 ml-1">({count})</span>}
+    </div>
+  )
+}
+
 export default function ProductCard({
   product,
   priority = false,
@@ -62,6 +84,16 @@ export default function ProductCard({
     tags,
   } = product ?? {}
 
+  // Champs étendus tolérants
+  const x = product as any
+  const reviewsCount: number | undefined =
+    typeof x?.reviewsCount === 'number'
+      ? x.reviewsCount
+      : typeof x?.reviews === 'number'
+      ? x.reviews
+      : undefined
+  const sku: string | undefined = typeof x?.sku === 'string' ? x.sku : (x?.id ? String(x.id) : undefined)
+
   const prefersReducedMotion = useReducedMotion()
 
   const [imgError, setImgError] = useState(false)
@@ -74,12 +106,17 @@ export default function ProductCard({
   const [tilt, setTilt] = useState<{ rx: number; ry: number }>({ rx: 0, ry: 0 })
   const ticking = useRef(false)
 
-  // Image finale (images[0] > image > placeholder)
+  // Images: principale + hover
   const mainImage = useMemo(() => {
     const first = Array.isArray(images) && images.length ? images[0] : image
     return imgError ? '/placeholder.png' : (first || '/placeholder.png')
   }, [images, image, imgError])
+  const hoverImage = useMemo(() => {
+    const second = Array.isArray(images) && images.length > 1 ? images[1] : undefined
+    return second || null
+  }, [images])
 
+  // Prix, remises, stock
   const discount = useMemo(
     () =>
       typeof oldPrice === 'number' && oldPrice > price
@@ -87,9 +124,13 @@ export default function ProductCard({
         : null,
     [oldPrice, price]
   )
+  const savingsEuro = useMemo(
+    () => (typeof oldPrice === 'number' && oldPrice > price ? Math.max(0, oldPrice - price) : null),
+    [oldPrice, price]
+  )
 
   const hasRating = typeof rating === 'number' && !Number.isNaN(rating)
-  const productUrl = useMemo(() => (slug ? `/produit/${slug}` : '#'), [slug])
+  const productUrl = useMemo(() => (slug ? '/produit/' + slug : '#'), [slug])
   const priceContent = useMemo(() => Math.max(0, Number(price || 0)).toFixed(2), [price])
   const availability =
     typeof stock === 'number'
@@ -98,6 +139,15 @@ export default function ProductCard({
         : 'https://schema.org/OutOfStock'
       : undefined
   const lowStock = typeof stock === 'number' && stock > 0 && stock <= 5
+  const outOfStock = typeof stock === 'number' && stock <= 0
+
+  // A11y announce composition
+  const srId = useRef('sr-' + Math.random().toString(36).slice(2)).current
+  const describes: string[] = []
+  if (typeof discount === 'number') describes.push('Économie ' + String(discount) + '%')
+  if (lowStock) describes.push('Stock faible')
+  if (outOfStock) describes.push('Rupture')
+  const ariaDescribedBy = describes.length ? srId : undefined
 
   /* Impression de la carte */
   useEffect(() => {
@@ -119,7 +169,7 @@ export default function ProductCard({
             try {
               pushDataLayer({
                 event: 'view_item_card',
-                items: [{ item_id: _id, item_name: title, price }],
+                items: [{ item_id: _id || sku, item_name: title, price }],
               })
             } catch {}
           }
@@ -129,10 +179,11 @@ export default function ProductCard({
     )
     io.observe(el)
     return () => io.disconnect()
-  }, [_id, title, price])
+  }, [_id, sku, title, price])
 
-  /* Click tracking */
-  const handleClick = useCallback(() => {
+  /* Click tracking + safety no-slug */
+  const handleClick = useCallback((e?: React.MouseEvent) => {
+    if (!slug) { if (e) e.preventDefault() }
     try {
       logEvent({
         action: 'product_card_click',
@@ -145,15 +196,17 @@ export default function ProductCard({
       pushDataLayer({
         event: 'select_item',
         item_list_name: 'product_grid',
-        items: [{ item_id: _id, item_name: title, price }],
+        items: [{ item_id: _id || sku, item_name: title, price }],
       })
     } catch {}
-  }, [_id, title, price])
+  }, [_id, sku, slug, title, price])
 
   /* Tilt 3D */
   const onMouseMove = (e: MouseEvent<HTMLDivElement>) => {
     if (prefersReducedMotion) return
-    if (window.matchMedia && !window.matchMedia('(hover:hover)').matches) return
+    try {
+      if (window.matchMedia && !window.matchMedia('(hover:hover)').matches) return
+    } catch {}
     const el = e.currentTarget
     const r = el.getBoundingClientRect()
     const cx = r.left + r.width / 2
@@ -175,7 +228,8 @@ export default function ProductCard({
     <motion.article
       ref={cardRef}
       role="listitem"
-      aria-label={`Produit : ${title}`}
+      aria-label={'Produit : ' + title}
+      aria-describedby={ariaDescribedBy}
       itemScope
       itemType="https://schema.org/Product"
       className={cn(
@@ -192,12 +246,27 @@ export default function ProductCard({
       onMouseLeave={resetTilt}
       data-product-id={_id}
       data-product-slug={slug}
+      data-gtm="product_card"
     >
-      {/* Microdonnées simples */}
+      {/* Microdonnées enrichies */}
       <meta itemProp="name" content={title} />
       <meta itemProp="image" content={mainImage} />
       {slug && <meta itemProp="url" content={productUrl} />}
       {brand && <meta itemProp="brand" content={String(brand)} />}
+      {sku && <meta itemProp="sku" content={sku} />}
+      {hasRating && (
+        <span
+          itemProp="aggregateRating"
+          itemScope
+          itemType="https://schema.org/AggregateRating"
+          className="sr-only"
+        >
+          <meta itemProp="ratingValue" content={rating!.toFixed(1)} />
+          {typeof reviewsCount === 'number' && (
+            <meta itemProp="reviewCount" content={String(Math.max(0, reviewsCount))} />
+          )}
+        </span>
+      )}
 
       <motion.div
         className={cn(
@@ -226,19 +295,20 @@ export default function ProductCard({
           href={productUrl}
           prefetch
           className="block rounded-[inherit] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.60)]"
-          aria-label={`Voir la fiche produit : ${title}`}
+          aria-label={'Voir la fiche produit : ' + title}
           onClick={handleClick}
         >
-          {/* Image */}
+          {/* Image (double couche pour swap au hover si images[1]) */}
           <div className="relative aspect-[4/3] w-full bg-gray-100 dark:bg-zinc-800" aria-busy={!imgLoaded}>
+            {/* Image principale */}
             <Image
               src={mainImage}
-              alt={`Image du produit ${title}`}
+              alt={'Image du produit ' + title}
               fill
               sizes="(min-width:1024px) 25vw, (min-width:640px) 33vw, 100vw"
               className={cn(
                 'object-cover transition-transform duration-700 will-change-transform',
-                'group-hover:scale-105'
+                hoverImage ? 'opacity-100 group-hover:opacity-0' : 'group-hover:scale-105'
               )}
               priority={priority}
               loading={priority ? 'eager' : 'lazy'}
@@ -250,6 +320,22 @@ export default function ProductCard({
               decoding="async"
               draggable={false}
             />
+            {/* Image hover (si dispo) */}
+            {hoverImage && (
+              <Image
+                src={hoverImage}
+                alt=""
+                fill
+                sizes="(min-width:1024px) 25vw, (min-width:640px) 33vw, 100vw"
+                className="object-cover opacity-0 transition-opacity duration-500 will-change-auto group-hover:opacity-100"
+                aria-hidden="true"
+                placeholder="blur"
+                blurDataURL={BLUR_DATA_URL}
+                quality={85}
+                decoding="async"
+                draggable={false}
+              />
+            )}
 
             {/* Skeleton / shimmer */}
             {!imgLoaded && (
@@ -271,12 +357,12 @@ export default function ProductCard({
                   Best Seller
                 </span>
               )}
-              {discount && (
+              {typeof discount === 'number' && (
                 <span
                   className="rounded-full bg-red-600 px-2.5 py-0.5 text-[11px] font-semibold text-white shadow"
-                  aria-label={`${discount}% de réduction`}
+                  aria-label={String(discount) + '% de réduction'}
                 >
-                  -{discount}%
+                  {'-' + String(discount) + '%'}
                 </span>
               )}
               {lowStock && (
@@ -287,17 +373,22 @@ export default function ProductCard({
             </div>
 
             {/* Note */}
-            {hasRating && (
-              <div
-                className="absolute right-3 top-3 rounded-full border border-gray-200/60 bg-white/90 px-2.5 py-1 text-xs shadow backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/90"
-                aria-label={`Note moyenne : ${rating!.toFixed(1)} étoiles`}
-              >
-                <span className="text-yellow-500">★</span> {rating!.toFixed(1)}
+            {(hasRating || typeof reviewsCount === 'number') && (
+              <div className="absolute right-3 top-3 grid gap-1 text-right">
+                {hasRating && (
+                  <div
+                    className="rounded-full border border-gray-200/60 bg-white/90 px-2.5 py-1 text-xs shadow backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/90"
+                    aria-label={'Note moyenne : ' + rating!.toFixed(1) + ' étoiles'}
+                  >
+                    <span className="text-yellow-500">★</span> {rating!.toFixed(1)}
+                  </div>
+                )}
+                <Stars rating={rating} count={reviewsCount} />
               </div>
             )}
 
             {/* Overlay rupture */}
-            {typeof stock === 'number' && stock <= 0 && (
+            {outOfStock && (
               <div
                 aria-hidden
                 className="absolute inset-0 grid place-items-center bg-black/45 text-sm font-semibold text-white"
@@ -306,7 +397,7 @@ export default function ProductCard({
               </div>
             )}
 
-            {/* Vignette subtil bas */}
+            {/* Vignette subtile bas */}
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/35 to-transparent" aria-hidden />
           </div>
 
@@ -324,18 +415,20 @@ export default function ProductCard({
             )}
 
             <div
-              className="mt-2 flex items-center gap-3 sm:mt-3"
+              className="mt-2 flex flex-wrap items-center gap-3 sm:mt-3"
               itemProp="offers"
               itemScope
               itemType="https://schema.org/Offer"
             >
+              <meta itemProp="priceCurrency" content="EUR" />
+              <meta itemProp="price" content={priceContent} />
+              {availability && <link itemProp="availability" href={availability} />}
+              <meta itemProp="itemCondition" content="https://schema.org/NewCondition" />
+
               <span
                 className="text-lg font-extrabold text-brand sm:text-xl"
-                aria-label={`Prix : ${formatPrice(price)}`}
+                aria-label={'Prix : ' + formatPrice(price)}
               >
-                <meta itemProp="priceCurrency" content="EUR" />
-                <meta itemProp="price" content={priceContent} />
-                {availability && <meta itemProp="availability" content={availability} />}
                 {formatPrice(price)}
               </span>
 
@@ -345,24 +438,18 @@ export default function ProductCard({
                 </span>
               )}
 
-              {discount && typeof oldPrice === 'number' && (
+              {typeof discount === 'number' && typeof oldPrice === 'number' && (
                 <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-                  –{discount}%
+                  {'-' + String(discount) + '%'}
                 </span>
               )}
             </div>
 
-            {/* AggregateRating (optionnel) */}
-            {hasRating && (
-              <span
-                itemProp="aggregateRating"
-                itemScope
-                itemType="https://schema.org/AggregateRating"
-                className="sr-only"
-              >
-                <meta itemProp="ratingValue" content={rating!.toFixed(1)} />
-                <meta itemProp="reviewCount" content="12" />
-              </span>
+            {/* Économies (si dispo) */}
+            {typeof savingsEuro === 'number' && savingsEuro > 0 && (
+              <p className="mt-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                Vous économisez {formatPrice(savingsEuro)}
+              </p>
             )}
 
             <FreeShippingBadge price={price} minimal className="mt-2" />
@@ -373,8 +460,8 @@ export default function ProductCard({
         {showWishlistIcon && (
           <div className="absolute bottom-4 right-4 z-20">
             <WishlistButton
-              product={{ _id, slug: slug ?? '', title, price, image: mainImage }}
-              aria-label={`Ajouter ${title} à la liste de souhaits`}
+              product={{ _id, slug: slug || '', title, price, image: mainImage }}
+              aria-label={'Ajouter ' + title + ' à la liste de souhaits'}
             />
           </div>
         )}
@@ -382,14 +469,21 @@ export default function ProductCard({
         {showAddToCart && (
           <div className="absolute bottom-4 left-4 z-20">
             <AddToCartButton
-              product={{ _id, slug: slug ?? '', title, price, image: mainImage }}
+              product={{ _id, slug: slug || '', title, price, image: mainImage }}
               size="sm"
-              aria-label={`Ajouter ${title} au panier`}
-              disabled={typeof stock === 'number' && stock <= 0}
+              aria-label={'Ajouter ' + title + ' au panier'}
+              disabled={outOfStock}
             />
           </div>
         )}
       </motion.div>
+
+      {/* SR live attaché si nécessaire */}
+      {ariaDescribedBy && (
+        <p id={srId} className="sr-only" aria-live="polite">
+          {describes.join('. ')}
+        </p>
+      )}
     </motion.article>
   )
 }

@@ -149,10 +149,9 @@ function gtagSafe(...args: any[]) {
   if (!isGaEnabled() || !isBrowser || !isSampledIn()) return
   // Ajoute debug_mode automatiquement
   if (typeof args[0] === 'string' && args[0] === 'event') {
-    const name = args[1]
     const params = (args[2] = args[2] || {})
     if (debugMode && typeof params === 'object') {
-      if (!('debug_mode' in params)) params.debug_mode = true
+      if (!('debug_mode' in params)) (params as any).debug_mode = true
     }
   }
   if (navigator.onLine) {
@@ -235,6 +234,31 @@ export function consent(modeOrUpdate: 'grant' | 'deny' | ConsentUpdate, update?:
     return modeOrUpdate === 'grant' ? grantConsent(update) : denyConsent(update)
   }
   gtagSafe('consent', 'update', modeOrUpdate)
+}
+
+/** Pratique pour une bannière (booleans → consent strings) */
+export function consentUpdateBooleans(p: {
+  analytics?: boolean
+  ads?: boolean
+  ad_user_data?: boolean
+  ad_personalization?: boolean
+  functionality?: boolean
+}) {
+  if (!isBrowser) return
+  const analytics = !!p.analytics
+  const ads = !!p.ads
+  const ad_user_data = p.ad_user_data ?? ads
+  const ad_personalization = p.ad_personalization ?? ads
+  const functionality = p.functionality ?? true
+
+  gtagSafe('consent', 'update', {
+    analytics_storage: analytics ? 'granted' : 'denied',
+    ad_storage: ads ? 'granted' : 'denied',
+    ad_user_data: ad_user_data ? 'granted' : 'denied',
+    ad_personalization: ad_personalization ? 'granted' : 'denied',
+    functionality_storage: functionality ? 'granted' : 'denied',
+    security_storage: 'granted',
+  })
 }
 
 /* ============================== Init & Config ============================= */
@@ -407,7 +431,11 @@ export function trackRefund(payload: { transaction_id: string; value?: number; c
 
 export function setUserId(userId: string | null) {
   if (!isGaEnabled() || !isBrowser) return
-  if (userId) gtagSafe('set', { user_id: String(userId) })
+  if (userId) {
+    gtagSafe('config', GA_TRACKING_ID, { user_id: String(userId) })
+  } else {
+    gtagSafe('config', GA_TRACKING_ID, { user_id: undefined })
+  }
 }
 
 export function setUserProperties(props: Record<string, unknown>) {

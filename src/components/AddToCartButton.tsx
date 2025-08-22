@@ -1,8 +1,7 @@
-// src/components/AddToCartButton.tsx — fixed
+// src/components/AddToCartButton.tsx — ultra premium (compat + a11y + analytics safe)
 'use client'
 
-import type React from 'react'
-import { useRef, useState, useId, useCallback, useEffect } from 'react'
+import { useRef, useState, useId, useCallback, useEffect, useMemo } from 'react'
 import { useCart } from '@/hooks/useCart'
 import type { Product } from '@/types/product'
 import Button from '@/components/Button'
@@ -43,6 +42,7 @@ interface Props {
 }
 
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n))
+const isClient = typeof window !== 'undefined'
 
 /** ripple visuel sans CSS global (WAAPI) */
 function spawnRipple(e: React.MouseEvent<HTMLElement>) {
@@ -62,7 +62,7 @@ function spawnRipple(e: React.MouseEvent<HTMLElement>) {
   span.style.pointerEvents = 'none'
   span.style.background = 'rgba(255,255,255,0.35)'
   span.style.mixBlendMode = 'overlay'
-  target.style.position ||= 'relative'
+  if (!target.style.position) target.style.position = 'relative'
   target.appendChild(span)
 
   const anim = span.animate(
@@ -141,21 +141,27 @@ export default function AddToCartButton({
   const prefersReduced = useReducedMotion()
   const lastClickRef = useRef<number>(0)
   const labelId = useId()
-  const wrapperRef = useRef<HTMLDivElement | null>(null) // <-- ref sur le wrapper (pas sur <Button>)
+  const wrapperRef = useRef<HTMLDivElement | null>(null)
 
-  const sizeClasses =
-    size === 'sm'
-      ? 'py-2 px-3 text-sm rounded-lg'
-      : size === 'lg'
-      ? 'py-5 px-6 text-lg rounded-2xl'
-      : 'py-4 px-4 text-base rounded-xl'
+  const sizeClasses = useMemo(
+    () =>
+      size === 'sm'
+        ? 'py-2 px-3 text-sm rounded-lg'
+        : size === 'lg'
+        ? 'py-5 px-6 text-lg rounded-2xl'
+        : 'py-4 px-4 text-base rounded-xl',
+    [size]
+  )
 
-  const variantClasses =
-    variant === 'outline'
-      ? 'bg-transparent text-[hsl(var(--accent))] border border-[hsl(var(--accent)/.4)] hover:bg-[hsl(var(--accent)/.08)]'
-      : variant === 'glass'
-      ? 'bg-white/15 text-white border border-white/20 backdrop-blur-md hover:bg-white/20 dark:bg-zinc-900/30 dark:border-white/10'
-      : 'bg-[hsl(var(--accent))] text-white hover:bg-[hsl(var(--accent)/.90)]'
+  const variantClasses = useMemo(
+    () =>
+      variant === 'outline'
+        ? 'bg-transparent text-[hsl(var(--accent))] border border-[hsl(var(--accent)/.4)] hover:bg-[hsl(var(--accent)/.08)]'
+        : variant === 'glass'
+        ? 'bg-white/15 text-white border border-white/20 backdrop-blur-md hover:bg-white/20 dark:bg-zinc-900/30 dark:border-white/10'
+        : 'bg-[hsl(var(--accent))] text-white hover:bg-[hsl(var(--accent)/.90)]',
+    [variant]
+  )
 
   const Spinner = () => (
     <svg className="animate-spin -ml-0.5 mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
@@ -174,7 +180,7 @@ export default function AddToCartButton({
 
   const doDataLayerPush = useCallback(
     (detail: Record<string, unknown>) => {
-      if (disableDataLayer) return
+      if (disableDataLayer || !isClient) return
       try {
         ;(window as any).dataLayer = (window as any).dataLayer || []
         ;(window as any).dataLayer.push({
@@ -202,6 +208,7 @@ export default function AddToCartButton({
   )
 
   const focusCartIcon = () => {
+    if (!isClient) return
     try {
       const target = document.querySelector<HTMLElement>(flyToCartSelector)
       target?.focus?.()
@@ -237,12 +244,12 @@ export default function AddToCartButton({
       setLoading(true)
 
       try {
-        // ajout direct (plus de condition toujours vraie)
         const result = addToCart({ _id: id, slug, title, image, price, quantity })
         await Promise.resolve(result)
 
+        // analytics
         try {
-          logEvent?.({ action: 'add_to_cart', category: 'ecommerce', label: title, value: price * quantity })
+          ;(logEvent as any)?.({ action: 'add_to_cart', category: 'ecommerce', label: title, value: price * quantity })
         } catch {}
         try {
           trackAddToCart?.({
@@ -253,11 +260,15 @@ export default function AddToCartButton({
         } catch {}
         doDataLayerPush({ id, title, price, quantity, value: price * quantity, slug })
 
-        if (haptic && typeof window !== 'undefined' && 'vibrate' in navigator) {
-          try { navigator.vibrate?.(prefersReduced ? 10 : [8, 12, 8]) } catch {}
+        // haptique
+        if (haptic && isClient && 'vibrate' in navigator) {
+          try {
+            navigator.vibrate?.(prefersReduced ? 10 : [8, 12, 8])
+          } catch {}
         }
 
-        if (flyToCart && wrapperRef.current) {
+        // fly-to-cart
+        if (flyToCart && isClient && wrapperRef.current) {
           const target = document.querySelector(flyToCartSelector) as HTMLElement | null
           if (target) flyTo(wrapperRef.current, target, !!prefersReduced)
         }
@@ -272,7 +283,7 @@ export default function AddToCartButton({
         setSrMessage(`${title} ajouté au panier`)
         setAdded(true)
 
-        if (scrollToStickyOnMobile && typeof window !== 'undefined' && window.innerWidth < 768) {
+        if (scrollToStickyOnMobile && isClient && window.innerWidth < 768) {
           const sticky =
             document.querySelector('aside[role="region"][data-visible="true"]') ||
             document.querySelector('aside[role="region"]')
@@ -280,7 +291,7 @@ export default function AddToCartButton({
         }
 
         try {
-          window.dispatchEvent(new CustomEvent('cart-added', { detail: { id, title, price, quantity, slug } }))
+          isClient && window.dispatchEvent(new CustomEvent('cart-added', { detail: { id, title, price, quantity, slug } }))
         } catch {}
 
         if (afterAddFocus === 'cart') focusCartIcon()
@@ -336,22 +347,21 @@ export default function AddToCartButton({
       >
         <Button
           onMouseDown={(e) => {
-            if (ripple && !prefersReduced) spawnRipple(e)
+            if (!prefersReduced && ripple && isClient) spawnRipple(e)
           }}
           onClick={handleClick}
-          aria-labelledby={labelId}
-          aria-label={ariaLabel}
+          {...(ariaLabel ? { 'aria-label': ariaLabel } : { 'aria-labelledby': labelId })}
           aria-disabled={loading || disabled ? true : undefined}
           type="button"
           data-loading={loading ? 'true' : 'false'}
           aria-busy={loading ? 'true' : 'false'}
           className={[
             fullWidth ? 'w-full' : '',
-            'font-extrabold shadow-lg transition-colors focus:outline-none focus-visible:ring-4 active:scale-95',
+            'font-extrabold shadow-lg transition-colors active:scale-95 focus:outline-none focus-visible:ring-4',
             'focus-visible:ring-[hsl(var(--accent)/.55)]',
             variantClasses,
             sizeClasses,
-            (loading || disabled) ? 'opacity-80 cursor-not-allowed' : 'cursor-pointer',
+            loading || disabled ? 'opacity-80 cursor-not-allowed' : 'cursor-pointer',
             added ? 'ring-4 ring-emerald-400/40' : '',
             className || '',
           ].join(' ')}

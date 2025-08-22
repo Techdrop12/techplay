@@ -92,7 +92,7 @@
     max-width: var(--container-max);
   }
 
-  /* Cartes premium (cohérent avec .card/.card-pressable du plugin Tailwind) */
+  /* Cartes premium */
   .card {
     background: hsl(var(--surface));
     border: 1px solid hsl(var(--border));
@@ -109,7 +109,7 @@
     @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold px-4 py-2
            transition active:scale-[0.98] focus:outline-none;
   }
-  .btn:focus-visible { @apply focus-ring; } /* utilitaire du plugin Tailwind (fallback en utilities) */
+  .btn:focus-visible { @apply focus-ring; }
 
   .btn-primary {
     @apply btn text-white;
@@ -166,15 +166,22 @@
   .shadow-elevated { box-shadow: 0 14px 28px hsl(var(--elev-c) / var(--elev-a2)); }
 
   /* ===== Utilitaires tokens utilisés partout ===== */
-  .bg-token-surface { background-color: hsl(var(--bg)); }
-  .text-token-text  { color:            hsl(var(--text)); }
-  .border-token-border { border-color:  hsl(var(--border)); }
+  /* NOTE: la variante "plein" mappe au fond global (--bg) pour le body */
+  .bg-token-surface       { background-color: hsl(var(--bg)); }
+  .text-token-text        { color:            hsl(var(--text)); }
+  .border-token-border    { border-color:     hsl(var(--border)); }
 
-  /* Variants les plus utilisés (escapes pour le /) */
-  .bg-token-surface\/70 { background-color: hsl(var(--surface) / .70); }
+  /* Variants (avec alpha) — basées sur la surface UI (--surface) */
   .bg-token-surface\/60 { background-color: hsl(var(--surface) / .60); }
-  .text-token-text\/70  { color:            hsl(var(--text) / .70); }
-  .text-token-text\/60  { color:            hsl(var(--text) / .60); }
+  .bg-token-surface\/65 { background-color: hsl(var(--surface) / .65); }
+  .bg-token-surface\/70 { background-color: hsl(var(--surface) / .70); }
+  .bg-token-surface\/80 { background-color: hsl(var(--surface) / .80); }
+  .bg-token-surface\/85 { background-color: hsl(var(--surface) / .85); }
+  .bg-token-surface\/90 { background-color: hsl(var(--surface) / .90); }
+
+  .text-token-text\/70  { color: hsl(var(--text) / .70); }
+  .text-token-text\/60  { color: hsl(var(--text) / .60); }
+  .text-token-text\/40  { color: hsl(var(--text) / .40); } /* ← utilisé par le placeholder header */
 
   /* Couleurs brand */
   .bg-brand  { background-color: hsl(var(--brand)); }
@@ -199,11 +206,19 @@
   }
   .overlay-hero { background: var(--overlay-hero); }
 
-  /* ===== Motion : visible par défaut (FIN du bug) ===== */
-  .motion-section { opacity: 1; transform: none; } /* ← plus jamais caché par défaut */
+  /* Effet "verre" optionnel (utilisé avec supports-backdrop) */
+  .glass {
+    background-color: hsl(var(--surface) / .6);
+    -webkit-backdrop-filter: saturate(180%) blur(10px);
+    backdrop-filter: saturate(180%) blur(10px);
+    border: 1px solid hsl(var(--border));
+  }
+
+  /* ===== Motion : visible par défaut ===== */
+  .motion-section { opacity: 1; transform: none; } /* plus jamais caché par défaut */
 
   @media (prefers-reduced-motion: no-preference) {
-    /* Utilise la keyframe existante 'fadeInUp' (définie dans design-tokens.css) */
+    /* Utilise la keyframe 'fadeInUp' (définie dans design-tokens.css) */
     .motion-section {
       animation: fadeInUp 0.45s var(--ease-out) both;
       will-change: transform, opacity;

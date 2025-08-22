@@ -1,24 +1,24 @@
-import { defaultLocale, type Locale, isLocale } from './config';
+// src/i18n/loadMessages.ts
+import { defaultLocale, type Locale, isLocale } from './config'
+import type { AbstractIntlMessages } from 'next-intl'
 
-export type Messages = Record<string, unknown>;
+export type Messages = AbstractIntlMessages
 
 export default async function loadMessages(locale: string): Promise<Messages> {
-  const loc: Locale = isLocale(locale) ? (locale as any) : defaultLocale;
+  const loc: Locale = isLocale(locale) ? (locale as Locale) : defaultLocale
 
   try {
-    // Next/TS sait importer les JSON dynamiques
-    const mod = (await import(`../../messages/${loc}.json`)) as { default: Messages };
-    return mod.default;
+    const mod = (await import(`../../messages/${loc}.json`)) as { default: Messages }
+    return mod.default
   } catch {
     if (loc !== defaultLocale) {
       try {
-        const fallback = (await import(`../../messages/${defaultLocale}.json`)) as { default: Messages };
-        return fallback.default;
+        const fallback = (await import(`../../messages/${defaultLocale}.json`)) as { default: Messages }
+        return fallback.default
       } catch {
-        // aucun fichier dispo
-        return {};
+        return {} as Messages
       }
     }
-    return {};
+    return {} as Messages
   }
 }

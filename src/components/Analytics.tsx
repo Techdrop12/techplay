@@ -1,4 +1,4 @@
-// src/components/Analytics.tsx
+// src/components/Analytics.tsx — Ultra Premium FINAL (GA4 + Consent Mode v2)
 'use client'
 
 import { useEffect } from 'react'
@@ -23,17 +23,68 @@ export default function Analytics() {
     pageview(`${pathname}${qs}`, title, { send_page_view: false })
   }, [pathname, search, shouldLoad])
 
+  // Expose une API pour MAJ le consentement depuis ta bannière
+  useEffect(() => {
+    if (!shouldLoad) return
+
+    const update = (p: {
+      analytics?: boolean
+      ads?: boolean
+      ad_user_data?: boolean
+      ad_personalization?: boolean
+      functionality?: boolean
+    }) => {
+      const gtag = (window as any).gtag as undefined | ((...args: any[]) => void)
+
+      // valeurs par défaut prudentes
+      const analytics = !!p.analytics
+      const ads = !!p.ads
+      const ad_user_data = p.ad_user_data ?? ads
+      const ad_personalization = p.ad_personalization ?? ads
+      const functionality = p.functionality ?? true
+
+      gtag?.('consent', 'update', {
+        analytics_storage: analytics ? 'granted' : 'denied',
+        ad_storage: ads ? 'granted' : 'denied',
+        ad_user_data: ad_user_data ? 'granted' : 'denied',
+        ad_personalization: ad_personalization ? 'granted' : 'denied',
+        functionality_storage: functionality ? 'granted' : 'denied',
+        security_storage: 'granted',
+      })
+
+      try {
+        localStorage.setItem('consent:analytics', analytics ? '1' : '0')
+        localStorage.setItem('consent:ads', ads ? '1' : '0')
+      } catch {}
+    }
+
+    ;(window as any).tpConsentUpdate = update
+
+    // Optionnel : écoute un CustomEvent('tp:consent', {detail:{...}})
+    const onEvt = (e: Event) => {
+      const detail = (e as CustomEvent).detail || {}
+      update(detail)
+    }
+    window.addEventListener('tp:consent', onEvt as EventListener)
+
+    return () => {
+      delete (window as any).tpConsentUpdate
+      window.removeEventListener('tp:consent', onEvt as EventListener)
+    }
+  }, [shouldLoad])
+
   if (!shouldLoad) return null
 
   return (
     <>
+      {/* Loader GA4 (après interaction) */}
       <Script
         id="ga4-src"
         src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(GA_ID)}`}
         strategy="afterInteractive"
       />
 
-      {/* Init idempotent + DNT/opt-out + Consent Mode v2 par défaut (sécurité) */}
+      {/* Init idempotente + DNT/opt-out + Consent Mode v2 par défaut (sécurisé) */}
       <Script id="ga4-init" strategy="afterInteractive">
         {`
           (function() {
@@ -50,13 +101,15 @@ export default function Analytics() {
             function gtag(){ window.dataLayer.push(arguments); }
             window.gtag = window.gtag || gtag;
 
-            // Consent default (doublé par prudence même si déjà posé dans <head>)
+            // Consent par défaut (sera mis à jour par la bannière)
             if (!window.__ga_consent_default) {
               gtag('consent', 'default', {
                 ad_storage: 'denied',
                 analytics_storage: 'denied',
                 ad_user_data: 'denied',
                 ad_personalization: 'denied',
+                functionality_storage: 'granted',
+                security_storage: 'granted',
                 wait_for_update: 500
               });
               window.__ga_consent_default = true;
@@ -66,9 +119,11 @@ export default function Analytics() {
             gtag('config', '${GA_ID}', {
               send_page_view: false,
               allow_google_signals: false,
-              anonymize_ip: true, // ignoré par GA4 mais safe
+              allow_ad_personalization_signals: false,
               debug_mode: ${DEBUG_MODE ? 'true' : 'false'},
-              page_path: location.pathname + location.search
+              ads_data_redaction: true,
+              page_path: location.pathname + location.search,
+              page_title: document.title || undefined
             });
           })();
         `}

@@ -5,6 +5,10 @@ import { Inter, Sora } from 'next/font/google'
 import { Suspense } from 'react'
 import type React from 'react'
 
+// NEW: langue depuis cookie NEXT_LOCALE
+import { cookies } from 'next/headers'
+import { DEFAULT_LOCALE, isLocale } from '@/lib/language'
+
 import Layout from '@/components/layout/Layout'
 import RootLayoutClient from '@/components/RootLayoutClient'
 import AfterIdleClient from '@/components/AfterIdleClient'
@@ -96,48 +100,59 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Lang dynamique (aligne <html lang> avec la locale courante)
+  const cookieStore = await cookies()
+  const cookieLocale = cookieStore.get('NEXT_LOCALE')?.value
+  const htmlLang = isLocale(cookieLocale || '') ? (cookieLocale as string) : DEFAULT_LOCALE
+
   return (
     <html
-      lang="fr"
+      lang={htmlLang}
       dir="ltr"
       className={`${inter.variable} ${sora.variable} scroll-smooth`}
       suppressHydrationWarning
     >
       <head>
-        {/* Anti-FOUC thème: appliquer le mode sombre le plus tôt possible */}
+        {/* Activer le DNS prefetch partout (perfs) */}
+        <meta httpEquiv="x-dns-prefetch-control" content="on" />
+
+        {/* Anti-FOUC + préférence système + indicateur "js" très tôt */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `
+            __html: `(() => {
               try {
+                var d = document.documentElement;
+                d.classList.add('js');
                 var t = localStorage.getItem('theme');
-                if (t === 'dark') document.documentElement.classList.add('dark');
-              } catch(e) {}
-            `,
+                if (!t) { t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
+                if (t === 'dark') d.classList.add('dark'); else d.classList.remove('dark');
+              } catch(_) {}
+            })();`,
           }}
         />
 
-        {/* Consent Mode v2 par défaut */}
+        {/* Consent Mode v2 par défaut (respect DNT et MAJ possible côté client) */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
               window.gtag = function(){ dataLayer.push(arguments); };
               gtag('consent', 'default', {
-                'ad_storage': 'denied',
-                'analytics_storage': 'denied',
-                'functionality_storage': 'granted',
-                'security_storage': 'granted',
-                'wait_for_update': 500
+                ad_storage: 'denied',
+                analytics_storage: 'denied',
+                functionality_storage: 'granted',
+                security_storage: 'granted',
+                wait_for_update: 500
               });
             `,
           }}
         />
 
-        {/* Perf: préconnect (avec CORS lorsque utile) */}
-        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="" />
-        <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="" />
-        <link rel="preconnect" href="https://connect.facebook.net" crossOrigin="" />
+        {/* Perf: préconnect/dns-prefetch (CORS correct) */}
+        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://connect.facebook.net" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
         <link rel="dns-prefetch" href="https://connect.facebook.net" />
@@ -149,9 +164,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
       </head>
 
-      {/* Utilisation des tokens tailwind (bg-token-\* / text-token-\*) */}
+      {/* Utilisation des design tokens (bg-token-*, text-token-*) */}
       <body className="min-h-screen bg-token-surface text-token-text antialiased dark:[color-scheme:dark]">
-        {/* Décor global premium */}
+        {/* Décor global premium (masqué aux AT) */}
         <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
           <div className="absolute left-1/2 top-[-120px] h-[420px] w-[620px] -translate-x-1/2 rounded-full bg-accent/25 blur-3xl dark:bg-accent/30" />
           <div className="absolute right-[-120px] bottom-[-140px] h-[360px] w-[360px] rounded-full bg-brand/10 blur-3xl dark:bg-brand/20" />
@@ -190,6 +205,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         {/* JSON-LD Organization */}
         <script
+          id="ld-org"
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
@@ -208,6 +224,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         {/* JSON-LD WebSite + SearchAction */}
         <script
+          id="ld-website"
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({

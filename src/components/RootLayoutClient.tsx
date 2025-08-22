@@ -1,3 +1,4 @@
+// src/components/RootLayoutClient.tsx
 'use client'
 
 import type { ReactNode } from 'react'
@@ -7,90 +8,76 @@ import { ThemeProvider } from '@/context/themeContext'
 
 type Props = { children: ReactNode }
 
-const THEME_KEY = 'theme' // 'light' | 'dark' | 'system'
-
-/** Applique le thème à <html> (classe, data, color-scheme) */
-function applyTheme(mode: 'light' | 'dark') {
-  const root = document.documentElement
-  const isDark = mode === 'dark'
-  root.classList.toggle('dark', isDark)
-  root.setAttribute('data-theme', mode)
-  // pour que les UA styles (scrollbar, form controls) suivent
-  root.style.colorScheme = isDark ? 'dark' : 'light'
-}
-
 export default function RootLayoutClient({ children }: Props) {
-  // ———————————— THEME BOOTSTRAP + SYNC ————————————
+  // ——— Attributs UA (motion/contrast/pointer/gamut/online) ———
   useEffect(() => {
-    const mqDark = window.matchMedia?.('(prefers-color-scheme: dark)')
-    const mqReduce = window.matchMedia?.('(prefers-reduced-motion: reduce)')
+    const root = document.documentElement
 
-    // expose quelques infos utiles aux CSS/JS
-    const setMotionAttr = () => {
-      document.documentElement.setAttribute(
-        'data-reduced-motion',
-        mqReduce?.matches ? 'reduce' : 'no-preference'
-      )
-    }
+    const mqReduce = window.matchMedia?.('(prefers-reduced-motion: reduce)') ?? null
+    const mqContrast = window.matchMedia?.('(prefers-contrast: more)') ?? null
+    const mqPointerCoarse = window.matchMedia?.('(pointer: coarse)') ?? null
+    const mqGamutP3 = window.matchMedia?.('(color-gamut: p3)') ?? null
 
-    const getSaved = () => {
-      try {
-        return (localStorage.getItem(THEME_KEY) || 'system') as 'light' | 'dark' | 'system'
-      } catch {
-        return 'system'
-      }
-    }
+    const setMotionAttr  = () => root.setAttribute('data-reduced-motion', mqReduce?.matches ? 'reduce' : 'no-preference')
+    const setContrastAttr = () => root.setAttribute('data-contrast', mqContrast?.matches ? 'more' : 'standard')
+    const setPointerAttr  = () => root.setAttribute('data-pointer', mqPointerCoarse?.matches ? 'coarse' : 'fine')
+    const setGamutAttr    = () => root.setAttribute('data-gamut', mqGamutP3?.matches ? 'p3' : 'srgb')
+    const setOnlineAttr   = () => root.setAttribute('data-online', navigator.onLine ? 'true' : 'false')
 
-    const resolveMode = (pref: 'light' | 'dark' | 'system') =>
-      pref === 'system' ? (mqDark?.matches ? 'dark' : 'light') : pref
+    setMotionAttr(); setContrastAttr(); setPointerAttr(); setGamutAttr(); setOnlineAttr()
 
-    // Initial
-    setMotionAttr()
-    applyTheme(resolveMode(getSaved()))
-
-    // Si le user n’a pas figé un thème (ou choisit "system"), on suit l’OS
-    const onSchemeChange = () => {
-      const saved = getSaved()
-      if (saved === 'system') applyTheme(resolveMode(saved))
-    }
-
-    // Synchronise entre onglets/fenêtres
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === THEME_KEY) {
-        const next = (e.newValue || 'system') as 'light' | 'dark' | 'system'
-        applyTheme(resolveMode(next))
-      }
-    }
-
-    mqDark?.addEventListener?.('change', onSchemeChange)
     mqReduce?.addEventListener?.('change', setMotionAttr)
-    window.addEventListener('storage', onStorage)
+    mqContrast?.addEventListener?.('change', setContrastAttr)
+    mqPointerCoarse?.addEventListener?.('change', setPointerAttr)
+    mqGamutP3?.addEventListener?.('change', setGamutAttr)
+    window.addEventListener('online', setOnlineAttr)
+    window.addEventListener('offline', setOnlineAttr)
 
     return () => {
-      mqDark?.removeEventListener?.('change', onSchemeChange)
       mqReduce?.removeEventListener?.('change', setMotionAttr)
-      window.removeEventListener('storage', onStorage)
+      mqContrast?.removeEventListener?.('change', setContrastAttr)
+      mqPointerCoarse?.removeEventListener?.('change', setPointerAttr)
+      mqGamutP3?.removeEventListener?.('change', setGamutAttr)
+      window.removeEventListener('online', setOnlineAttr)
+      window.removeEventListener('offline', setOnlineAttr)
     }
   }, [])
 
-  // ———————————— 100svh mobile (iOS safe) ————————————
+  // ——— 100svh mobile (iOS & clavier virtuel) ———
   useEffect(() => {
+    const root = document.documentElement
     const setVH = () => {
-      const vh = window.innerHeight * 0.01
-      document.documentElement.style.setProperty('--vh', `${vh}px`)
+      const vv = window.visualViewport
+      const height = vv ? vv.height : window.innerHeight
+      root.style.setProperty('--vh', `${(height * 0.01).toString()}px`)
     }
     setVH()
+    const vv = window.visualViewport
+    vv?.addEventListener('resize', setVH)
+    vv?.addEventListener('scroll', setVH)
     window.addEventListener('resize', setVH)
     window.addEventListener('orientationchange', setVH)
     return () => {
+      vv?.removeEventListener('resize', setVH)
+      vv?.removeEventListener('scroll', setVH)
       window.removeEventListener('resize', setVH)
       window.removeEventListener('orientationchange', setVH)
     }
   }, [])
 
+  // ——— Portal root (modals, toasts custom, etc.) ———
+  useEffect(() => {
+    const id = 'portal-root'
+    if (!document.getElementById(id)) {
+      const el = document.createElement('div')
+      el.id = id
+      el.setAttribute('data-portal-root', 'true')
+      document.body.appendChild(el)
+    }
+  }, [])
+
   return (
     <ThemeProvider>
-      {/* ✅ Fournit le contexte panier à TOUTE l’app (Header, StickyCart, etc.) */}
       <CartProvider>{children}</CartProvider>
     </ThemeProvider>
   )
