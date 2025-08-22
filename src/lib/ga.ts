@@ -360,54 +360,69 @@ export const mapProductToGaItem = (p: any, overrides: Partial<Ga4Item> = {}): Ga
   ...overrides,
 })
 
-export function trackViewItem(payload: Ga4Payload) {
+/* ------------------ Anti-doublon doux pour les events ecom ---------------- */
+
+const SEEN = new Map<string, number>()
+const DEDUPE_MS = 1200
+
+function emit(eventName: string, params: Record<string, any>) {
   if (!isGaEnabled() || !isBrowser) return
-  gtagSafe('event', 'view_item', payload)
+  // signature compacte basée sur items et value
+  const sig = JSON.stringify({
+    e: eventName,
+    v: params?.value ?? null,
+    i: Array.isArray(params?.items)
+      ? params.items.map((it: any) => [it.item_id, it.quantity, it.price])
+      : null,
+    l: params?.item_list_id ?? params?.item_list_name ?? undefined,
+  })
+  const now = Date.now()
+  const last = SEEN.get(sig) ?? 0
+  if (now - last < DEDUPE_MS) return
+  SEEN.set(sig, now)
+  gtagSafe('event', eventName, params)
+}
+
+/* ------------------------------ Trackers E-com ---------------------------- */
+
+export function trackViewItem(payload: Ga4Payload) {
+  emit('view_item', payload)
 }
 
 export function trackViewItemList(payload: Ga4Payload & { item_list_id?: string; item_list_name?: string }) {
-  if (!isGaEnabled() || !isBrowser) return
-  gtagSafe('event', 'view_item_list', payload)
+  emit('view_item_list', payload)
 }
 
 export function trackSelectItem(payload: Ga4Payload & { item_list_id?: string; item_list_name?: string }) {
-  if (!isGaEnabled() || !isBrowser) return
-  gtagSafe('event', 'select_item', payload)
+  emit('select_item', payload)
 }
 
 export function trackAddToCart(payload: Ga4Payload) {
-  if (!isGaEnabled() || !isBrowser) return
-  gtagSafe('event', 'add_to_cart', payload)
+  emit('add_to_cart', payload)
 }
 
 export function trackRemoveFromCart(payload: Ga4Payload) {
-  if (!isGaEnabled() || !isBrowser) return
-  gtagSafe('event', 'remove_from_cart', payload)
+  emit('remove_from_cart', payload)
 }
 
 export function trackViewCart(payload: Ga4Payload) {
-  if (!isGaEnabled() || !isBrowser) return
-  gtagSafe('event', 'view_cart', payload)
+  emit('view_cart', payload)
 }
 
 export function trackAddToWishlist(payload: Ga4Payload) {
-  if (!isGaEnabled() || !isBrowser) return
-  gtagSafe('event', 'add_to_wishlist', payload)
+  emit('add_to_wishlist', payload)
 }
 
 export function trackBeginCheckout(payload: Ga4Payload & { coupon?: string }) {
-  if (!isGaEnabled() || !isBrowser) return
-  gtagSafe('event', 'begin_checkout', payload)
+  emit('begin_checkout', payload)
 }
 
 export function trackAddShippingInfo(payload: Ga4Payload & { shipping_tier?: string; coupon?: string }) {
-  if (!isGaEnabled() || !isBrowser) return
-  gtagSafe('event', 'add_shipping_info', payload)
+  emit('add_shipping_info', payload)
 }
 
 export function trackAddPaymentInfo(payload: Ga4Payload & { payment_type?: string; coupon?: string }) {
-  if (!isGaEnabled() || !isBrowser) return
-  gtagSafe('event', 'add_payment_info', payload)
+  emit('add_payment_info', payload)
 }
 
 export function trackPurchase(
@@ -418,13 +433,11 @@ export function trackPurchase(
     coupon?: string
   }
 ) {
-  if (!isGaEnabled() || !isBrowser) return
-  gtagSafe('event', 'purchase', payload)
+  emit('purchase', payload)
 }
 
 export function trackRefund(payload: { transaction_id: string; value?: number; currency?: string; items?: Ga4Item[] }) {
-  if (!isGaEnabled() || !isBrowser) return
-  gtagSafe('event', 'refund', payload)
+  emit('refund', payload as any)
 }
 
 /* ================================ Users =================================== */

@@ -1,9 +1,9 @@
-// src/components/layout/Header.tsx — Ultra Premium FINAL (responsive fit fix)
+// src/components/layout/Header.tsx — Ultra Premium FINAL (hooks fix, prefetch safe, catégories alignées)
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useId, useRef, useState } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useId, useRef, useState, useMemo } from 'react'
+import { usePathname } from 'next/navigation'
 import Logo from '../Logo'
 import MobileNav from './MobileNav'
 import { cn } from '@/lib/utils'
@@ -15,7 +15,7 @@ type NavLink = { href: string; label: string }
 
 const LINKS: NavLink[] = [
   { href: '/', label: 'Accueil' },
-  { href: '/categorie', label: 'Catégories' }, // mégamenu
+  { href: '/categorie', label: 'Catégories' }, // mégamenu (liens internes pointent vers /produit?cat=…)
   { href: '/produit', label: 'Produits' },
   { href: '/pack', label: 'Packs' },
   { href: '/wishlist', label: 'Wishlist' },
@@ -36,42 +36,40 @@ const SEARCH_TRENDS = [
   'souris sans fil',
 ]
 
+// ⚠️ on route vers /produit?cat=… (cohérent avec la Home)
 const CATEGORIES: Array<{ label: string; href: string; emoji: string; desc: string }> = [
-  { label: 'Casques', href: '/categorie/casques', emoji: '🎧', desc: 'Audio immersif' },
-  { label: 'Claviers', href: '/categorie/claviers', emoji: '⌨️', desc: 'Mécas & low-profile' },
-  { label: 'Souris', href: '/categorie/souris', emoji: '🖱️', desc: 'Précision & confort' },
-  { label: 'Webcams', href: '/categorie/webcams', emoji: '📷', desc: 'Visio en HD' },
-  { label: 'Batteries', href: '/categorie/batteries', emoji: '🔋', desc: 'Power & hubs' },
-  { label: 'Audio', href: '/categorie/audio', emoji: '🔊', desc: 'Enceintes & DAC' },
-  { label: 'Stockage', href: '/categorie/stockage', emoji: '💾', desc: 'SSD & cartes' },
-  { label: 'Écrans', href: '/categorie/ecrans', emoji: '🖥️', desc: '144Hz et +' },
+  { label: 'Casques',   href: '/produit?cat=casques',   emoji: '🎧', desc: 'Audio immersif' },
+  { label: 'Claviers',  href: '/produit?cat=claviers',  emoji: '⌨️', desc: 'Mécas & low-profile' },
+  { label: 'Souris',    href: '/produit?cat=souris',    emoji: '🖱️', desc: 'Précision & confort' },
+  { label: 'Webcams',   href: '/produit?cat=webcams',   emoji: '📷', desc: 'Visio en HD' },
+  { label: 'Batteries', href: '/produit?cat=batteries', emoji: '🔋', desc: 'Power & hubs' },
+  { label: 'Audio',     href: '/produit?cat=audio',     emoji: '🔊', desc: 'Enceintes & DAC' },
+  { label: 'Stockage',  href: '/produit?cat=stockage',  emoji: '💾', desc: 'SSD & cartes' },
+  { label: 'Écrans',    href: '/produit?cat=ecrans',    emoji: '🖥️', desc: '144Hz et +' },
 ]
 
 export default function Header() {
   const pathname = usePathname() || '/'
-  const router = useRouter()
 
-  // Comptages robustes
-  let cartCount = 0
-  try {
-    const { cart } = useCart() as any
-    cartCount = Array.isArray(cart)
-      ? cart.reduce((t: number, it: any) => t + (it?.quantity || 1), 0)
-      : Array.isArray(cart?.items)
-      ? cart.items.reduce((t: number, it: any) => t + (it?.quantity || 1), 0)
-      : Number(cart?.count ?? cart?.size ?? 0) || 0
-  } catch {}
+  // ----------------------- Comptages (hooks au top) ------------------------
+  const { cart } = useCart() as any
+  const { wishlist } = useWishlist() as any
 
-  let wishlistCount = 0
-  try {
-    const { wishlist } = useWishlist() as any
-    wishlistCount = Array.isArray(wishlist)
-      ? wishlist.length
-      : Array.isArray(wishlist?.items)
-      ? wishlist.items.length
-      : Number(wishlist?.count ?? wishlist?.size ?? 0) || 0
-  } catch {}
+  const cartCount = useMemo(() => {
+    if (Array.isArray(cart)) return cart.reduce((t: number, it: any) => t + (it?.quantity || 1), 0)
+    if (Array.isArray(cart?.items)) return cart.items.reduce((t: number, it: any) => t + (it?.quantity || 1), 0)
+    const n = Number(cart?.count ?? cart?.size ?? 0)
+    return Number.isFinite(n) ? n : 0
+  }, [cart])
 
+  const wishlistCount = useMemo(() => {
+    if (Array.isArray(wishlist)) return wishlist.length
+    if (Array.isArray(wishlist?.items)) return wishlist.items.length
+    const n = Number(wishlist?.count ?? wishlist?.size ?? 0)
+    return Number.isFinite(n) ? n : 0
+  }, [wishlist])
+
+  // ------------------------------ State UI ---------------------------------
   const [hidden, setHidden] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
@@ -184,10 +182,18 @@ export default function Header() {
     return () => clearInterval(id)
   }, [])
 
+  // Nettoyage des timers de prefetch au unmount
+  useEffect(() => {
+    return () => {
+      prefetchTimers.current.forEach((t) => clearTimeout(t))
+      prefetchTimers.current.clear()
+    }
+  }, [])
+
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/')
 
-  // Prefetch “intelligent” au hover/focus
+  // Prefetch “intelligent” au hover/focus (via <link rel="prefetch">)
   const prefetchViaLink = (href: string) => {
     try {
       const el = document.createElement('link')
@@ -203,8 +209,7 @@ export default function Header() {
     if (!href || isActive(href)) return
     if (prefetchTimers.current.has(href)) return
     const t = window.setTimeout(() => {
-      if (typeof router.prefetch === 'function') { try { router.prefetch(href) } catch {} }
-      else prefetchViaLink(href)
+      prefetchViaLink(href)
       prefetchTimers.current.delete(href)
     }, HOVER_PREFETCH_DELAY)
     prefetchTimers.current.set(href, t)
@@ -255,7 +260,7 @@ export default function Header() {
           <Logo className="h-8 w-auto md:h-10" />
         </Link>
 
-        {/* Recherche (compressible) */}
+        {/* Recherche */}
         <form
           action={SEARCH_ACTION}
           method="get"
@@ -301,7 +306,7 @@ export default function Header() {
           </div>
         </form>
 
-        {/* Desktop nav (moins large, police ajustée) */}
+        {/* Desktop nav */}
         <nav
           className="hidden lg:flex gap-5 xl:gap-7 tracking-tight font-medium text-token-text text-[15px] xl:text-base whitespace-nowrap"
           aria-label="Navigation principale"
@@ -412,17 +417,17 @@ export default function Header() {
                               Voir les packs
                             </Link>
                             <Link
-                              href="/categorie"
+                              href="/produit"
                               prefetch={false}
-                              onPointerEnter={() => smartPrefetchStart('/categorie')}
-                              onPointerLeave={() => smartPrefetchCancel('/categorie')}
-                              onFocus={() => smartPrefetchStart('/categorie')}
-                              onBlur={() => smartPrefetchCancel('/categorie')}
+                              onPointerEnter={() => smartPrefetchStart('/produit')}
+                              onPointerLeave={() => smartPrefetchCancel('/produit')}
+                              onFocus={() => smartPrefetchStart('/produit')}
+                              onBlur={() => smartPrefetchCancel('/produit')}
                               role="menuitem"
                               className="inline-flex items-center rounded-lg border border-token-border bg-token-surface px-3 py-1.5 text-sm font-semibold hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.30)]"
                               data-gtm="header_mega_cta_all"
                             >
-                              Toutes les catégories
+                              Tous les produits
                             </Link>
                           </div>
                         </div>

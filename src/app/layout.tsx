@@ -1,14 +1,15 @@
-// src/app/layout.tsx
+// src/app/layout.tsx — RootLayout ultra-premium (SEO/PWA/Consent/a11y/perf polis)
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
 import { Inter, Sora } from 'next/font/google'
 import { Suspense } from 'react'
 import type React from 'react'
 
-// NEW: langue depuis cookie NEXT_LOCALE
+// Langue depuis cookie NEXT_LOCALE
 import { cookies } from 'next/headers'
 import { DEFAULT_LOCALE, isLocale } from '@/lib/language'
 
+// Shell & clients
 import Layout from '@/components/layout/Layout'
 import RootLayoutClient from '@/components/RootLayoutClient'
 import AfterIdleClient from '@/components/AfterIdleClient'
@@ -44,6 +45,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://techplay.example.c
 const SITE_NAME = 'TechPlay'
 const DEFAULT_OG = '/og-image.jpg'
 
+/* ----------------------------- Static metadata ---------------------------- */
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   applicationName: SITE_NAME,
@@ -57,8 +59,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'TechPlay – Boutique high-tech innovante',
-    description:
-      'TechPlay, votre boutique high-tech : audio, gaming, accessoires et packs exclusifs.',
+    description: 'TechPlay, votre boutique high-tech : audio, gaming, accessoires et packs exclusifs.',
     url: SITE_URL,
     siteName: SITE_NAME,
     images: [{ url: DEFAULT_OG, width: 1200, height: 630, alt: 'TechPlay – Boutique high-tech' }],
@@ -81,6 +82,7 @@ export const metadata: Metadata = {
     apple: [{ url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' }],
     other: [{ rel: 'mask-icon', url: '/icons/maskable-icon.png', color: '#000000' }],
   },
+  // ⚠️ Garde UNE SEULE webmanifest dans /public (préférer /site.webmanifest)
   manifest: '/site.webmanifest',
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: SITE_NAME },
   formatDetection: { telephone: false, address: false, email: false },
@@ -100,8 +102,8 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 }
 
+/* --------------------------------- Layout -------------------------------- */
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // Lang dynamique (aligne <html lang> avec la locale courante)
   const cookieStore = await cookies()
   const cookieLocale = cookieStore.get('NEXT_LOCALE')?.value
   const htmlLang = isLocale(cookieLocale || '') ? (cookieLocale as string) : DEFAULT_LOCALE
@@ -114,26 +116,20 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       suppressHydrationWarning
     >
       <head>
-        {/* Activer le DNS prefetch partout (perfs) */}
+        {/* DNS prefetch global */}
         <meta httpEquiv="x-dns-prefetch-control" content="on" />
 
-        {/* Anti-FOUC + préférence système + indicateur "js" très tôt */}
+        {/* Anti-FOUC + thème (respecte prefers-color-scheme et localStorage) */}
         <script
+          id="boot-theme"
           dangerouslySetInnerHTML={{
-            __html: `(() => {
-              try {
-                var d = document.documentElement;
-                d.classList.add('js');
-                var t = localStorage.getItem('theme');
-                if (!t) { t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
-                if (t === 'dark') d.classList.add('dark'); else d.classList.remove('dark');
-              } catch(_) {}
-            })();`,
+            __html: `(()=>{try{var d=document.documentElement;d.classList.add('js');var t=localStorage.getItem('theme');if(!t){t=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'};d.classList.toggle('dark',t==='dark')}catch(_){}})();`,
           }}
         />
 
-        {/* Consent Mode v2 par défaut (respect DNT et MAJ possible côté client) */}
+        {/* Consent Mode v2 par défaut (opt-out) */}
         <script
+          id="consent-default"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
@@ -149,24 +145,23 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           }}
         />
 
-        {/* Perf: préconnect/dns-prefetch (CORS correct) */}
-        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://connect.facebook.net" crossOrigin="anonymous" />
+        {/* Perf: preconnect/dns-prefetch */}
+        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="" />
+        <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="" />
+        <link rel="preconnect" href="https://connect.facebook.net" crossOrigin="" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
         <link rel="dns-prefetch" href="https://connect.facebook.net" />
         <link rel="preconnect" href="https://static.hotjar.com" />
         <link rel="dns-prefetch" href="https://static.hotjar.com" />
 
-        {/* LCP: précharge la 1ère image du hero */}
+        {/* LCP: précharger une image clé du hero */}
         <link rel="preload" as="image" href="/carousel1.jpg" />
         <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
       </head>
 
-      {/* Utilisation des design tokens (bg-token-*, text-token-*) */}
       <body className="min-h-screen bg-token-surface text-token-text antialiased dark:[color-scheme:dark]">
-        {/* Décor global premium (masqué aux AT) */}
+        {/* Décor global (non-interactif) */}
         <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
           <div className="absolute left-1/2 top-[-120px] h-[420px] w-[620px] -translate-x-1/2 rounded-full bg-accent/25 blur-3xl dark:bg-accent/30" />
           <div className="absolute right-[-120px] bottom-[-140px] h-[360px] w-[360px] rounded-full bg-brand/10 blur-3xl dark:bg-brand/20" />
@@ -184,7 +179,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </div>
 
         <AccessibilitySkip />
-        {/* Sentinelle pour focus (évite un doublon d'ID avec <main id="main">) */}
         <div id="focus-sentinel" tabIndex={-1} />
 
         <RootLayoutClient>
@@ -199,11 +193,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <Toaster position="top-right" />
           </AfterIdleClient>
 
-          {/* Shell UI */}
           <Layout>{children}</Layout>
         </RootLayoutClient>
 
-        {/* JSON-LD Organization */}
+        {/* JSON-LD Organization + WebSite (global, unique) */}
         <script
           id="ld-org"
           type="application/ld+json"
@@ -222,7 +215,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             }),
           }}
         />
-        {/* JSON-LD WebSite + SearchAction */}
         <script
           id="ld-website"
           type="application/ld+json"

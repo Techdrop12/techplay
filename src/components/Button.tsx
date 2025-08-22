@@ -1,5 +1,7 @@
+// src/components/Button.tsx
 'use client'
 
+import * as React from 'react'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
@@ -14,7 +16,8 @@ type Variant =
 
 type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
-export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'disabled'> {
+export interface ButtonProps
+  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'disabled'> {
   variant?: Variant
   size?: Size
   fullWidth?: boolean
@@ -25,7 +28,9 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
 }
 
 const base =
-  'inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-60 disabled:cursor-not-allowed'
+  'inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition ' +
+  'active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ' +
+  'disabled:opacity-60 disabled:cursor-not-allowed'
 
 const sizes: Record<Size, string> = {
   xs: 'px-2.5 py-1.5 text-[12px]',
@@ -53,35 +58,39 @@ const variants: Record<Variant, string> = {
 
 function Spinner() {
   return (
-    <svg
-      className="animate-spin h-4 w-4 opacity-90"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-    >
+    <svg className="animate-spin h-4 w-4 opacity-90" viewBox="0 0 24 24" aria-hidden="true">
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
       <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4z" />
     </svg>
   )
 }
 
-export default function Button({
-  variant = 'accent',
-  size = 'md',
-  className,
-  fullWidth,
-  loading = false,
-  leadingIcon,
-  trailingIcon,
-  disabled,
-  children,
-  ...props
-}: ButtonProps) {
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  {
+    variant = 'accent',
+    size = 'md',
+    className,
+    fullWidth,
+    loading = false,
+    leadingIcon,
+    trailingIcon,
+    disabled,
+    type = 'button', // ✅ évite les submit involontaires dans un <form>
+    children,
+    ...props
+  },
+  ref
+) {
   const isDisabled = disabled || loading
 
   return (
     <button
+      ref={ref}
+      type={type}
       data-variant={variant}
       data-size={size}
+      data-loading={loading ? 'true' : 'false'}
+      aria-busy={loading ? 'true' : undefined}
       className={cn(
         base,
         sizes[size],
@@ -107,4 +116,6 @@ export default function Button({
       )}
     </button>
   )
-}
+})
+
+export default Button

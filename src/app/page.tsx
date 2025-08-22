@@ -1,4 +1,4 @@
-// src/app/page.tsx — Home Ultra Premium (polish + bannière retirée)
+// src/app/page.tsx — Home ultra-premium (perf/a11y/SEO sans doublons de JSON-LD)
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -6,28 +6,20 @@ import dynamic from 'next/dynamic'
 
 import { getBestProducts, getRecommendedPacks } from '@/lib/data'
 import type { Product, Pack } from '@/types/product'
-
-// ⛔️ Bannière retirée (gardée en option via UI flag si tu veux la réactiver)
-// import BannerPromo from '@/components/BannerPromo'
 import TrustBadges from '@/components/TrustBadges'
 import ClientTrackingScript from '@/components/ClientTrackingScript'
 
-/* ───────────────────────────── Dynamic chunks ───────────────────────────── */
 const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'))
-const BestProducts = dynamic(
-  () => import('@/components/BestProducts'),
-  { loading: () => <SectionSkeleton title="Nos Meilleures Ventes" /> }
-)
-const PacksSection = dynamic(
-  () => import('@/components/PacksSection'),
-  { loading: () => <SectionSkeleton title="Packs recommandés" /> }
-)
-const FAQ = dynamic(
-  () => import('@/components/FAQ'),
-  { loading: () => <SectionSkeleton title="Questions fréquentes" /> }
-)
+const BestProducts = dynamic(() => import('@/components/BestProducts'), {
+  loading: () => <SectionSkeleton title="Nos Meilleures Ventes" />,
+})
+const PacksSection = dynamic(() => import('@/components/PacksSection'), {
+  loading: () => <SectionSkeleton title="Packs recommandés" />,
+})
+const FAQ = dynamic(() => import('@/components/FAQ'), {
+  loading: () => <SectionSkeleton title="Questions fréquentes" />,
+})
 
-/* ────────────────────────────── Page metadata ───────────────────────────── */
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://techplay.example.com'
 const OG_IMAGE = `${SITE_URL}/og-image.jpg`
 
@@ -59,22 +51,14 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 }
 
-/* ───────────────────────────── ISR revalidation ─────────────────────────── */
-export const revalidate = 300 // 5 minutes
+// ISR revalidation
+export const revalidate = 300
 
-/* ─────────────────────── UI helpers (section header…) ───────────────────── */
+/* -------------------------- UI helpers (section) -------------------------- */
 function SectionHeader({
-  kicker,
-  title,
-  sub,
-  center = true,
-  as = 'h2',
+  kicker, title, sub, center = true, as = 'h2',
 }: {
-  kicker?: string
-  title: string
-  sub?: string
-  center?: boolean
-  as?: 'h2' | 'h3'
+  kicker?: string; title: string; sub?: string; center?: boolean; as?: 'h2' | 'h3'
 }) {
   const Tag = as
   return (
@@ -87,17 +71,12 @@ function SectionHeader({
       <Tag className="mt-2 text-balance font-extrabold tracking-tight text-[clamp(1.75rem,3vw+1rem,2.5rem)]">
         <span className="text-gradient">{title}</span>
       </Tag>
-      {sub && (
-        <p className="mt-3 text-sm sm:text-base text-token-text/70">
-          {sub}
-        </p>
-      )}
+      {sub && <p className="mt-3 text-sm sm:text-base text-token-text/70">{sub}</p>}
     </header>
   )
 }
 
 function FeaturedCategories() {
-  // ⚠️ On route vers /produit avec filtre de catégorie pour éviter les 404 tant que /categorie/* n'est pas prêt
   const CATS: Array<{ label: string; href: string; emoji: string; desc: string }> = [
     { label: 'Casques',   href: '/produit?cat=casques',   emoji: '🎧', desc: 'Audio immersif' },
     { label: 'Claviers',  href: '/produit?cat=claviers',  emoji: '⌨️', desc: 'Réactivité ultime' },
@@ -118,8 +97,9 @@ function FeaturedCategories() {
               className="group block rounded-2xl border border-token-border bg-token-surface/70 backdrop-blur shadow-sm transition hover:shadow-elevated focus-ring p-4 sm:p-5"
               data-gtm="home_cat_card"
               data-cat={c.label}
+              aria-label={`Voir la catégorie ${c.label} — ${c.desc}`}
             >
-              <div className="text-3xl sm:text-4xl">{c.emoji}</div>
+              <span role="img" aria-hidden className="text-3xl sm:text-4xl">{c.emoji}</span>
               <div className="mt-3 font-semibold">{c.label}</div>
               <div className="text-xs text-token-text/60">{c.desc}</div>
               <div className="mt-3 text-xs font-semibold text-[hsl(var(--accent))] opacity-0 transition group-hover:opacity-100">
@@ -170,7 +150,6 @@ function SplitCTA() {
             </Link>
           </div>
         </div>
-        {/* Slot visuel (image/3D/particles) prêt si tu veux le brancher plus tard */}
         <div className="min-h-[180px] rounded-2xl border border-token-border bg-token-surface/60 shadow-elevated" />
       </div>
     </section>
@@ -188,10 +167,7 @@ function Testimonials() {
       <SectionHeader kicker="Avis" title="Les clients en parlent" sub="Une communauté exigeante et satisfaite." />
       <ul role="list" className="mt-8 grid gap-4 sm:grid-cols-3">
         {items.map((t, i) => (
-          <li
-            key={i}
-            className="rounded-2xl border border-token-border bg-token-surface/70 p-5 shadow-soft"
-          >
+          <li key={i} className="rounded-2xl border border-token-border bg-token-surface/70 p-5 shadow-soft">
             <p className="text-sm text-token-text/90">“{t.text}”</p>
             <p className="mt-3 text-sm font-semibold">— {t.name}</p>
           </li>
@@ -201,7 +177,6 @@ function Testimonials() {
   )
 }
 
-/* Skeleton doux pour Suspense */
 function SectionSkeleton({ title }: { title: string }) {
   return (
     <section className="motion-section">
@@ -215,7 +190,7 @@ function SectionSkeleton({ title }: { title: string }) {
   )
 }
 
-/* ───────────────────────────────── Page ─────────────────────────────────── */
+/* --------------------------------- Page ---------------------------------- */
 export default async function HomePage() {
   let bestProducts: Product[] = []
   let recommendedPacks: Pack[] = []
@@ -225,10 +200,10 @@ export default async function HomePage() {
       getRecommendedPacks(),
     ])
   } catch {
-    // soft-fail : les sections afficheront des skeletons
+    // soft-fail : skeletons
   }
 
-  /* JSON-LD ItemList pour SEO produits */
+  // JSON-LD ItemList (uniquement ici ; WebSite est injecté globalement dans le layout)
   const itemListJsonLd =
     Array.isArray(bestProducts) && bestProducts.length > 0
       ? {
@@ -243,38 +218,17 @@ export default async function HomePage() {
         }
       : null
 
-  /* JSON-LD WebSite (sitelinks search box) */
-  const websiteJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    url: SITE_URL,
-    name: 'TechPlay',
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: `${SITE_URL}/produit?q={search_term_string}`, // ✅ aligne avec la route existante
-      'query-input': 'required name=search_term_string',
-    },
-  }
-
   return (
     <>
       <h1 className="sr-only">TechPlay – Boutique high-tech & packs exclusifs</h1>
       <ClientTrackingScript event="homepage_view" />
-
-      {/* ⛔️ Bandeau promo retiré */}
-      {/* <BannerPromo /> */}
 
       {/* Glow décoratif global */}
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute left-1/2 -top-24 h-[420px] w-[620px] -translate-x-1/2 rounded-full bg-[hsl(var(--accent)/.20)] blur-3xl" />
       </div>
 
-      <main
-        className="mx-auto max-w-screen-xl scroll-smooth px-4 sm:px-6 space-y-24 md:space-y-28"
-        role="main"
-        tabIndex={-1}
-      >
-        {/* Hero carousel */}
+      <main id="main" className="mx-auto max-w-screen-xl scroll-smooth px-4 sm:px-6 space-y-24 md:space-y-28" role="main" tabIndex={-1}>
         <section aria-label="Carrousel des produits en vedette" className="motion-section" id="hero">
           <Suspense fallback={<div className="h-40 sm:h-56 lg:h-72 rounded-2xl skeleton" />}>
             <HeroCarousel />
@@ -282,10 +236,8 @@ export default async function HomePage() {
           </Suspense>
         </section>
 
-        {/* Catégories */}
         <FeaturedCategories />
 
-        {/* Meilleures ventes */}
         <section
           aria-label="Meilleures ventes TechPlay"
           className="motion-section"
@@ -304,7 +256,6 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Packs */}
         <section
           aria-label="Packs TechPlay recommandés"
           className="motion-section"
@@ -323,18 +274,10 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Témoignages */}
         <Testimonials />
-
-        {/* CTA premium */}
         <SplitCTA />
 
-        {/* FAQ */}
-        <section
-          aria-label="Questions fréquentes de nos clients"
-          className="motion-section"
-          style={{ contentVisibility: 'auto', containIntrinsicSize: '500px' } as any}
-        >
+        <section aria-label="Questions fréquentes de nos clients" className="motion-section" style={{ contentVisibility: 'auto', containIntrinsicSize: '500px' } as any}>
           <SectionHeader kicker="FAQ" title="Questions fréquentes" />
           <div className="mt-8">
             <Suspense fallback={<SectionSkeleton title="Questions fréquentes" />}>
@@ -343,12 +286,9 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Badges de confiance */}
         <TrustBadges variant="premium" className="mt-10" />
       </main>
 
-      {/* JSON-LD */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
       {itemListJsonLd ? (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
       ) : null}

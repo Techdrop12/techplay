@@ -1,4 +1,3 @@
-// src/components/ProductGrid.tsx
 'use client'
 
 import { useEffect, useMemo, useRef } from 'react'
@@ -13,29 +12,20 @@ type Cols = { base?: number; sm?: number; md?: number; lg?: number; xl?: number 
 interface ProductGridProps {
   products: Product[]
   emptyMessage?: string
-  /** Affiche des squelettes pendant un fetch */
   isLoading?: boolean
-  /** S’il reste des produits à charger (pagination) */
   hasMore?: boolean
-  /** Callback appelé pour charger la suite */
   onLoadMore?: () => void
-  /** Active l’auto load (sentinelle en bas de liste) */
   observeMore?: boolean
-  /** Nombre de squelettes à afficher quand isLoading */
   loadingCount?: number
-  /** Ajoute l’icône wishlist sur les cards */
   showWishlistIcon?: boolean
-  /** Personnalisation du nombre de colonnes par breakpoint */
   columns?: Cols
-  /** Classe(s) sur le conteneur grid */
   className?: string
-  /** Nom de liste (analytics) — ex. "category_page" */
   listName?: string
-  /** ID aria optionnel de la grille */
   id?: string
 }
 
 function colsToClass(cols?: Cols) {
+  // ⚠️ pense à safelister ces classes dans tailwind.config si tu utilises d'autres nombres
   const c = { base: 2, sm: 3, lg: 4, ...(cols || {}) }
   const parts: string[] = []
   if (c.base) parts.push(`grid-cols-${c.base}`)
@@ -62,7 +52,7 @@ export default function ProductGrid({
 }: ProductGridProps) {
   const prefersReducedMotion = useReducedMotion()
   const sentinelRef = useRef<HTMLDivElement | null>(null)
-  const loadingGateRef = useRef(false) // évite les multi-calls consécutifs
+  const loadingGateRef = useRef(false)
   const statusRef = useRef<HTMLParagraphElement | null>(null)
   const gridRef = useRef<HTMLDivElement | null>(null)
 
@@ -74,15 +64,10 @@ export default function ProductGrid({
     const io = new IntersectionObserver(
       (entries) => {
         const hit = entries.some((e) => e.isIntersecting)
-        if (!hit) return
-        if (loadingGateRef.current) return
+        if (!hit || loadingGateRef.current) return
         loadingGateRef.current = true
-        try {
-          onLoadMore()
-        } finally {
-          setTimeout(() => {
-            loadingGateRef.current = false
-          }, 500)
+        try { onLoadMore() } finally {
+          setTimeout(() => { loadingGateRef.current = false }, 500)
         }
       },
       { rootMargin: '200px 0px 400px 0px', threshold: 0.01 }
@@ -99,7 +84,7 @@ export default function ProductGrid({
 
   const isEmpty = useMemo(() => !products || products.length === 0, [products])
 
-  // === Message de statut ARIA (nombre de produits, état de chargement) ===
+  // === Message de statut ARIA ===
   const countMsg = useMemo(() => {
     if (isLoading && products.length === 0) return 'Chargement des produits…'
     if (isEmpty) return emptyMessage || 'Aucun produit trouvé.'
@@ -109,8 +94,7 @@ export default function ProductGrid({
   // === JSON-LD ItemList (SEO) ===
   const itemListJsonLd = useMemo(() => {
     if (!products?.length) return null
-    const base =
-      (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
+    const base = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
     return {
       '@context': 'https://schema.org',
       '@type': 'ItemList',
@@ -149,12 +133,10 @@ export default function ProductGrid({
   }
 
   useEffect(() => {
-    // Reset des impressions quand la liste change
     seenRef.current.clear()
     batchRef.current = []
     if (!gridRef.current) return
 
-    // Observe chaque card visible
     const nodes = Array.from(
       gridRef.current.querySelectorAll<HTMLElement>('[data-product-id]')
     )
@@ -168,7 +150,7 @@ export default function ProductGrid({
           const name = e.target.getAttribute('aria-label')?.replace(/^Produit : /, '') || ''
           if (!id || seenRef.current.has(id)) return
           seenRef.current.add(id)
-          const prod = products.find((p) => String(p._id) === id)
+          const prod = products.find((p) => String(p._id) === id || p.slug === id)
           batchRef.current.push({ id, name, price: prod?.price })
         })
         if (!flushTimeout.current && batchRef.current.length) {
@@ -183,7 +165,6 @@ export default function ProductGrid({
       io.disconnect()
       flushBatch()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [products, listName])
 
   if (isEmpty && !isLoading) {
@@ -196,7 +177,6 @@ export default function ProductGrid({
 
   return (
     <>
-      {/* Région live pour lecteurs d’écran */}
       <p ref={statusRef} className="sr-only" role="status" aria-live="polite">
         {countMsg}
       </p>
@@ -212,14 +192,18 @@ export default function ProductGrid({
           role="list"
           id={id}
         >
-          {/* Produits */}
-          {products.map((product) => (
-            <motion.div key={product._id} layout={!prefersReducedMotion} role="listitem">
-              <ProductCard product={product} showWishlistIcon={showWishlistIcon} />
+          {products.map((product, i) => (
+            // ⚠️ pas de role="listitem" ici : c’est la carte qui l’a
+            <motion.div key={String(product._id ?? product.slug ?? i)} layout={!prefersReducedMotion}>
+              <ProductCard
+                product={product}
+                showWishlistIcon={showWishlistIcon}
+                // Boost LCP sur la première rangée
+                priority={i < 4}
+              />
             </motion.div>
           ))}
 
-          {/* Squelettes pendant chargement */}
           {isLoading &&
             Array.from({ length: loadingCount }).map((_, i) => (
               <div key={`skeleton-${i}`} aria-hidden="true">
@@ -229,7 +213,6 @@ export default function ProductGrid({
         </motion.div>
       </AnimatePresence>
 
-      {/* Bouton “Charger plus” (fallback / accessibilité) */}
       {(hasMore || isLoading) && onLoadMore && (
         <div className="flex items-center justify-center mt-8">
           <button
@@ -244,16 +227,10 @@ export default function ProductGrid({
         </div>
       )}
 
-      {/* Sentinelle pour l’infinite scroll (non visible) */}
       {observeMore && hasMore && <div ref={sentinelRef} className="h-1" aria-hidden="true" />}
 
-      {/* JSON-LD ItemList */}
       {itemListJsonLd && (
-        <script
-          type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
       )}
     </>
   )
