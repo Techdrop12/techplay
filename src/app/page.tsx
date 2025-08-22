@@ -1,4 +1,4 @@
-// src/app/page.tsx — Home Ultra Premium (révisé)
+// src/app/page.tsx — Home Ultra Premium (polish + bannière retirée)
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -7,7 +7,8 @@ import dynamic from 'next/dynamic'
 import { getBestProducts, getRecommendedPacks } from '@/lib/data'
 import type { Product, Pack } from '@/types/product'
 
-import BannerPromo from '@/components/BannerPromo'
+// ⛔️ Bannière retirée (gardée en option via UI flag si tu veux la réactiver)
+// import BannerPromo from '@/components/BannerPromo'
 import TrustBadges from '@/components/TrustBadges'
 import ClientTrackingScript from '@/components/ClientTrackingScript'
 
@@ -83,7 +84,7 @@ function SectionHeader({
           {kicker}
         </p>
       )}
-      <Tag className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight">
+      <Tag className="mt-2 text-balance font-extrabold tracking-tight text-[clamp(1.75rem,3vw+1rem,2.5rem)]">
         <span className="text-gradient">{title}</span>
       </Tag>
       {sub && (
@@ -137,6 +138,7 @@ function SplitCTA() {
     <section
       aria-label="Appel à l’action"
       className="motion-section relative overflow-hidden rounded-3xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.10)] via-transparent to-token-surface p-6 sm:p-10 shadow-elevated"
+      style={{ contentVisibility: 'auto', containIntrinsicSize: '300px' } as any}
     >
       <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[hsl(var(--accent)/.20)] blur-3xl" />
       <div aria-hidden className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-token-text/10 blur-3xl" />
@@ -259,24 +261,24 @@ export default async function HomePage() {
       <h1 className="sr-only">TechPlay – Boutique high-tech & packs exclusifs</h1>
       <ClientTrackingScript event="homepage_view" />
 
-      {/* Promo/hero au-dessus du fold (LCP friendly si bannière légère) */}
-      <BannerPromo />
+      {/* ⛔️ Bandeau promo retiré */}
+      {/* <BannerPromo /> */}
 
       {/* Glow décoratif global */}
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute left-1/2 -top-24 h-[420px] w-[620px] -translate-x-1/2 rounded-full bg-[hsl(var(--accent)/.20)] blur-3xl" />
       </div>
 
-      <main className="mx-auto max-w-screen-xl scroll-smooth space-y-28 px-4 sm:px-6" role="main" tabIndex={-1}>
+      <main
+        className="mx-auto max-w-screen-xl scroll-smooth px-4 sm:px-6 space-y-24 md:space-y-28"
+        role="main"
+        tabIndex={-1}
+      >
         {/* Hero carousel */}
         <section aria-label="Carrousel des produits en vedette" className="motion-section" id="hero">
           <Suspense fallback={<div className="h-40 sm:h-56 lg:h-72 rounded-2xl skeleton" />}>
-            {/* ℹ️ Si le CTA du Hero pointe sur une fiche manquante, penser à le régler côté <HeroCarousel /> */}
             <HeroCarousel />
-            {/* Fallback noscript (CTA safe vers /produit) */}
-            <noscript>
-              <p><a href="/produit">Voir les produits</a></p>
-            </noscript>
+            <noscript><p><a href="/produit">Voir les produits</a></p></noscript>
           </Suspense>
         </section>
 
@@ -284,7 +286,12 @@ export default async function HomePage() {
         <FeaturedCategories />
 
         {/* Meilleures ventes */}
-        <section aria-label="Meilleures ventes TechPlay" className="motion-section" id="best-products">
+        <section
+          aria-label="Meilleures ventes TechPlay"
+          className="motion-section"
+          id="best-products"
+          style={{ contentVisibility: 'auto', containIntrinsicSize: '600px' } as any}
+        >
           <SectionHeader
             kicker="Top ventes"
             title="Nos Meilleures Ventes"
@@ -298,7 +305,12 @@ export default async function HomePage() {
         </section>
 
         {/* Packs */}
-        <section aria-label="Packs TechPlay recommandés" className="motion-section" id="packs">
+        <section
+          aria-label="Packs TechPlay recommandés"
+          className="motion-section"
+          id="packs"
+          style={{ contentVisibility: 'auto', containIntrinsicSize: '600px' } as any}
+        >
           <SectionHeader
             kicker="Bundle"
             title="Packs recommandés"
@@ -318,7 +330,11 @@ export default async function HomePage() {
         <SplitCTA />
 
         {/* FAQ */}
-        <section aria-label="Questions fréquentes de nos clients" className="motion-section">
+        <section
+          aria-label="Questions fréquentes de nos clients"
+          className="motion-section"
+          style={{ contentVisibility: 'auto', containIntrinsicSize: '500px' } as any}
+        >
           <SectionHeader kicker="FAQ" title="Questions fréquentes" />
           <div className="mt-8">
             <Suspense fallback={<SectionSkeleton title="Questions fréquentes" />}>
