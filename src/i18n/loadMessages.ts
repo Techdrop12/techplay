@@ -1,24 +1,24 @@
 // src/i18n/loadMessages.ts
-import { defaultLocale, type Locale, isLocale } from './config'
-import type { AbstractIntlMessages } from 'next-intl'
+import type { Locale } from './config';
 
-export type Messages = AbstractIntlMessages
+export type Messages = Record<string, unknown>;
 
+/**
+ * Chargement des messages i18n avec mapping explicite (évite les context modules dynamiques).
+ * Compatible RSC / Next 15 et sécurisé niveau bundling.
+ */
 export default async function loadMessages(locale: string): Promise<Messages> {
-  const loc: Locale = isLocale(locale) ? (locale as Locale) : defaultLocale
+  const l: Locale = (locale === 'en' || locale === 'fr') ? (locale as Locale) : 'fr';
 
-  try {
-    const mod = (await import(`../../messages/${loc}.json`)) as { default: Messages }
-    return mod.default
-  } catch {
-    if (loc !== defaultLocale) {
-      try {
-        const fallback = (await import(`../../messages/${defaultLocale}.json`)) as { default: Messages }
-        return fallback.default
-      } catch {
-        return {} as Messages
-      }
+  switch (l) {
+    case 'en': {
+      const mod = await import('@/messages/en.json');
+      return (mod.default ?? mod) as Messages;
     }
-    return {} as Messages
+    case 'fr':
+    default: {
+      const mod = await import('@/messages/fr.json');
+      return (mod.default ?? mod) as Messages;
+    }
   }
 }
