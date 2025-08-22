@@ -1,4 +1,4 @@
-// src/components/layout/Header.tsx — Ultra Premium FINAL++
+// src/components/layout/Header.tsx — Ultra Premium FINAL (responsive fit fix)
 'use client'
 
 import Link from 'next/link'
@@ -82,7 +82,6 @@ export default function Header() {
 
   const searchRef = useRef<HTMLInputElement | null>(null)
   const [placeholder, setPlaceholder] = useState(SEARCH_TRENDS[0])
-  const [searchFocused, setSearchFocused] = useState(false)
 
   // Mega menu
   const [catOpen, setCatOpen] = useState(false)
@@ -175,43 +174,26 @@ export default function Header() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  // Placeholder rotatif (pause quand input focus)
+  // Placeholder rotatif
   useEffect(() => {
     let i = 0
-    let id: number | null = null
-    const start = () => {
-      if (id) return
-      id = window.setInterval(() => {
-        i = (i + 1) % SEARCH_TRENDS.length
-        setPlaceholder(SEARCH_TRENDS[i])
-      }, 4000)
-    }
-    const stop = () => { if (id) { clearInterval(id); id = null } }
-
-    if (!searchFocused) start()
-    else stop()
-
-    return () => stop()
-  }, [searchFocused])
-
-  // Cleanup des timeouts de prefetch au unmount
-  useEffect(() => {
-    return () => {
-      for (const t of prefetchTimers.current.values()) clearTimeout(t)
-      prefetchTimers.current.clear()
-      if (catTimer.current) clearTimeout(catTimer.current)
-    }
+    const id = window.setInterval(() => {
+      i = (i + 1) % SEARCH_TRENDS.length
+      setPlaceholder(SEARCH_TRENDS[i])
+    }, 4000)
+    return () => clearInterval(id)
   }, [])
 
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/')
 
-  // Prefetch “intelligent” au hover/focus (fallback si API router.prefetch absente)
+  // Prefetch “intelligent” au hover/focus
   const prefetchViaLink = (href: string) => {
     try {
       const el = document.createElement('link')
       el.rel = 'prefetch'
       el.href = href
+      el.as = 'document'
       document.head.appendChild(el)
       setTimeout(() => el.remove(), 5000)
     } catch {}
@@ -219,7 +201,6 @@ export default function Header() {
 
   const smartPrefetchStart = (href: string) => {
     if (!href || isActive(href)) return
-    if (document.visibilityState !== 'visible') return
     if (prefetchTimers.current.has(href)) return
     const t = window.setTimeout(() => {
       if (typeof router.prefetch === 'function') { try { router.prefetch(href) } catch {} }
@@ -261,7 +242,7 @@ export default function Header() {
         hidden ? '-translate-y-full' : 'translate-y-0'
       )}
     >
-      <div className="container-app flex h-16 md:h-20 items-center justify-between gap-4">
+      <div className="container-app flex h-16 md:h-20 items-center justify-between gap-2 sm:gap-3">
         {/* Logo */}
         <Link
           href="/"
@@ -274,14 +255,14 @@ export default function Header() {
           <Logo className="h-8 w-auto md:h-10" />
         </Link>
 
-        {/* Recherche */}
+        {/* Recherche (compressible) */}
         <form
           action={SEARCH_ACTION}
           method="get"
           role="search"
           aria-label="Recherche produits"
           onSubmit={onSearchSubmit}
-          className="relative hidden min-w-[260px] max-w-sm flex-1 items-center md:flex"
+          className="relative hidden md:flex min-w-0 flex-1 items-center lg:max-w-md xl:max-w-lg"
         >
           <input
             ref={searchRef}
@@ -299,8 +280,6 @@ export default function Header() {
             aria-keyshortcuts="/ Control+K Meta+K"
             aria-controls="search-status"
             aria-describedby="search-hint"
-            onFocus={() => setSearchFocused(true)}
-            onBlur={() => setSearchFocused(false)}
           />
           <datalist id="header-search-suggestions">
             {SEARCH_TRENDS.map((s) => (<option value={s} key={s} />))}
@@ -322,9 +301,9 @@ export default function Header() {
           </div>
         </form>
 
-        {/* Desktop nav */}
+        {/* Desktop nav (moins large, police ajustée) */}
         <nav
-          className="hidden md:flex gap-6 lg:gap-8 tracking-tight font-medium text-token-text"
+          className="hidden lg:flex gap-5 xl:gap-7 tracking-tight font-medium text-token-text text-[15px] xl:text-base whitespace-nowrap"
           aria-label="Navigation principale"
         >
           {LINKS.map(({ href, label }) => {
@@ -486,7 +465,23 @@ export default function Header() {
 
         {/* Actions droites */}
         <div className="hidden items-center gap-2 sm:gap-3 md:flex">
-          <ThemeToggle />
+          <ThemeToggle size="sm" />
+
+          {/* Offres : icône <xl, libellé en >=xl */}
+          <Link
+            href="/promo"
+            prefetch={false}
+            onPointerEnter={() => smartPrefetchStart('/promo')}
+            onPointerLeave={() => smartPrefetchCancel('/promo')}
+            onFocus={() => smartPrefetchStart('/promo')}
+            onBlur={() => smartPrefetchCancel('/promo')}
+            className="xl:hidden inline-flex items-center justify-center rounded-full border border-token-border bg-token-surface/60 h-9 w-9 text-base hover:bg-token-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
+            aria-label="Voir les offres du jour"
+            title="Offres du jour"
+            data-gtm="header_deals_icon"
+          >
+            🔥
+          </Link>
 
           <Link
             href="/promo"
@@ -495,16 +490,16 @@ export default function Header() {
             onPointerLeave={() => smartPrefetchCancel('/promo')}
             onFocus={() => smartPrefetchStart('/promo')}
             onBlur={() => smartPrefetchCancel('/promo')}
-            className="group inline-flex items-center gap-2 rounded-full border border-token-border bg-token-surface/60 px-3 py-1.5 text-sm font-medium text-token-text hover:bg-token-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
+            className="group hidden xl:inline-flex items-center gap-2 rounded-full border border-token-border bg-token-surface/60 px-3 py-1.5 text-sm font-medium text-token-text hover:bg-token-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
             aria-label="Voir les offres du jour"
             title="Offres du jour"
             data-gtm="header_deals"
           >
             <span className="relative inline-flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full motion-safe:animate-ping rounded-full bg-gradient-to-r from-pink-500 to-yellow-500 opacity-60" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gradient-to-r from-pink-500 to-yellow-500 opacity-60" />
               <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-gradient-to-r from-pink-500 to-yellow-500" />
             </span>
-            <span className="hidden lg:inline">Offres</span>
+            <span>Offres</span>
           </Link>
 
           <div className="relative">
@@ -572,7 +567,7 @@ export default function Header() {
             onPointerLeave={() => smartPrefetchCancel('/login')}
             onFocus={() => smartPrefetchStart('/login')}
             onBlur={() => smartPrefetchCancel('/login')}
-            className="hidden lg:inline-flex items-center justify-center rounded-full border border-transparent px-3 py-2 text-sm font-medium text-token-text hover:text-[hsl(var(--accent))] focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+            className="hidden xl:inline-flex items-center justify-center rounded-full border border-transparent px-3 py-2 text-sm font-medium text-token-text hover:text-[hsl(var(--accent))] focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
             aria-label="Espace client"
             title="Espace client"
             data-gtm="header_account"
@@ -581,7 +576,7 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Bouton + panel mobile (géré dans MobileNav) */}
+        {/* Bouton + panel mobile */}
         <MobileNav />
       </div>
 
