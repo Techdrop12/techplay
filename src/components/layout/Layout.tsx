@@ -8,6 +8,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { pageview } from '@/lib/ga'
 import LiveChat from '../LiveChat'
 import { useTheme } from '@/context/themeContext'
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
 const PWAInstall = dynamic(() => import('./PWAInstall'), { ssr: false })
 const ScrollTopButton = dynamic(() => import('../ui/ScrollTopButton'), { ssr: false })
@@ -26,9 +27,10 @@ export default function Layout({
   chat = false,
   pwaPrompt = true,
 }: LayoutProps) {
-  const pathname = usePathname()
+  const pathname = usePathname() || '/'
   const router = useRouter()
   const { theme } = useTheme()
+  const locale = getCurrentLocale(pathname)
 
   const [isNavigating, setIsNavigating] = useState(false)
   const [routeAnnouncement, setRouteAnnouncement] = useState('')
@@ -120,15 +122,15 @@ export default function Layout({
     const id = ric(() => {
       if (!canPrefetch()) return
       try {
-        router.prefetch('/produit')
-        router.prefetch('/pack')
-        router.prefetch('/wishlist')
+        router.prefetch(localizePath('/products', locale))
+        router.prefetch(localizePath('/products/packs', locale))
+        router.prefetch(localizePath('/wishlist', locale))
       } catch {}
     }, { timeout: 1200 })
 
     return () => clearRic(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [locale, router])
 
   return (
     <>

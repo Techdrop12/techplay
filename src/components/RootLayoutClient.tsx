@@ -1,4 +1,4 @@
-// src/components/RootLayoutClient.tsx
+// src/components/RootLayoutClient.tsx — FINAL (UA & env attrs + providers)
 'use client'
 
 import type { ReactNode } from 'react'
@@ -18,7 +18,7 @@ export default function RootLayoutClient({ children }: Props) {
     const mqPointerCoarse = window.matchMedia?.('(pointer: coarse)') ?? null
     const mqGamutP3 = window.matchMedia?.('(color-gamut: p3)') ?? null
 
-    const setMotionAttr  = () => root.setAttribute('data-reduced-motion', mqReduce?.matches ? 'reduce' : 'no-preference')
+    const setMotionAttr   = () => root.setAttribute('data-reduced-motion', mqReduce?.matches ? 'reduce' : 'no-preference')
     const setContrastAttr = () => root.setAttribute('data-contrast', mqContrast?.matches ? 'more' : 'standard')
     const setPointerAttr  = () => root.setAttribute('data-pointer', mqPointerCoarse?.matches ? 'coarse' : 'fine')
     const setGamutAttr    = () => root.setAttribute('data-gamut', mqGamutP3?.matches ? 'p3' : 'srgb')
@@ -49,7 +49,7 @@ export default function RootLayoutClient({ children }: Props) {
     const setVH = () => {
       const vv = window.visualViewport
       const height = vv ? vv.height : window.innerHeight
-      root.style.setProperty('--vh', `${(height * 0.01).toString()}px`)
+      root.style.setProperty('--vh', `${height * 0.01}px`)
     }
     setVH()
     const vv = window.visualViewport

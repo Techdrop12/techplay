@@ -1,4 +1,4 @@
-// src/components/AfterIdleClient.tsx
+// src/components/AfterIdleClient.tsx — FINAL
 'use client'
 
 import { ReactNode, useEffect, useState } from 'react'

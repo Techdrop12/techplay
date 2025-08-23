@@ -1,8 +1,8 @@
-// src/components/Footer.tsx — Ultra Premium FINAL (tokens + a11y + SEO + newsletter durcie)
+// src/components/Footer.tsx — Ultra Premium FINAL (i18n, tokens, SEO, newsletter durcie)
 'use client'
 
 import { useId, useMemo, useState } from 'react'
-import Link from 'next/link'
+import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   FaFacebookF,
@@ -19,6 +19,8 @@ import {
 } from 'react-icons/fa'
 import { event as gaEvent, logEvent } from '@/lib/ga'
 import { toast } from 'react-hot-toast'
+import Link from '@/components/LocalizedLink'
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
 type FooterLink = { label: string; href: string; external?: boolean }
 type NavGroup = { title: string; links: FooterLink[] }
@@ -51,14 +53,23 @@ const DEFAULT_LEGAL: FooterLink[] = [
   { label: 'CGV', href: '/cgv' },
 ]
 
+// ⚠️ normalisation d’anciennes routes -> nouvelles routes canoniques
+const normalizeHref = (href: string) => {
+  if (!href.startsWith('/')) return href
+  return href
+    .replace(/^\/produit(?!s)/, '/products')
+    .replace(/^\/pack(?!s)/, '/products/packs')
+    .replace(/^\/promo$/, '/products?promo=1')
+}
+
 const DEFAULT_GROUPS: NavGroup[] = [
   {
     title: 'Boutique',
     links: [
       { label: 'Accueil', href: '/' },
-      { label: 'Catégories', href: '/categorie/accessoires' },
-      { label: 'Produits', href: '/produit' },
-      { label: 'Packs', href: '/pack' },
+      { label: 'Catégories', href: '/categorie' },
+      { label: 'Produits', href: '/products' },
+      { label: 'Packs', href: '/products/packs' },
       { label: 'Wishlist', href: '/wishlist' },
     ],
   },
@@ -69,7 +80,7 @@ const DEFAULT_GROUPS: NavGroup[] = [
       { label: 'FAQ', href: '/faq' },
       { label: 'Suivi de commande', href: '/commande' },
       { label: 'Blog', href: '/blog' },
-      { label: 'Promo du jour', href: '/promo' },
+      { label: 'Promo du jour', href: '/products?promo=1' },
     ],
   },
   { title: 'Légal', links: DEFAULT_LEGAL },
@@ -108,7 +119,6 @@ export default function Footer({
   compact = false,
   children,
   subscribeEndpoint = '/api/notifications/subscribe',
-  // Cohérent avec le site : privilégie l’ENV, fallback en .example.com (même base que layout.tsx)
   siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://techplay.example.com',
   contact = {
     email: 'support@techplay.fr',
@@ -122,15 +132,22 @@ export default function Footer({
   },
 }: FooterProps) {
   const pathname = usePathname() || '/'
+  const locale = getCurrentLocale(pathname)
   const origin = (siteUrl || '').replace(/\/$/, '')
 
-  // Remplace la colonne "Légal" si props.links fourni
+  // Remplace la colonne "Légal" si props.links fourni + normalise hrefs
   const navGroups = useMemo<NavGroup[]>(() => {
-    if (!links) return groups
-    const clone = [...groups]
+    const normalizeGroup = (g: NavGroup): NavGroup => ({
+      title: g.title,
+      links: g.links.map((l) => ({ ...l, href: normalizeHref(l.href) })),
+    })
+    const base = groups.map(normalizeGroup)
+    if (!links) return base
+    const clone = [...base]
     const idx = clone.findIndex((g) => g.title.toLowerCase().includes('légal'))
-    if (idx >= 0) clone[idx] = { title: clone[idx].title, links }
-    else clone.push({ title: 'Légal', links })
+    const normalizedLegal = links.map((l) => ({ ...l, href: normalizeHref(l.href) }))
+    if (idx >= 0) clone[idx] = { title: clone[idx].title, links: normalizedLegal }
+    else clone.push({ title: 'Légal', links: normalizedLegal })
     return clone
   }, [groups, links])
 
@@ -179,15 +196,11 @@ export default function Footer({
       setStatus('success')
       setMessage('Inscription confirmée. Bienvenue chez TechPlay !')
       setEmail('')
-      try {
-        toast.success('Vous êtes inscrit(e) 🎉')
-      } catch {}
+      try { toast.success('Vous êtes inscrit(e) 🎉') } catch {}
     } catch (err: any) {
       setStatus('error')
       setMessage(err?.message || 'Une erreur est survenue. Réessayez.')
-      try {
-        toast.error('Inscription impossible pour le moment')
-      } catch {}
+      try { toast.error('Inscription impossible pour le moment') } catch {}
     }
   }
 
@@ -211,9 +224,7 @@ export default function Footer({
       <div className="absolute inset-0 backdrop-blur-[2px]" aria-hidden="true" />
 
       <div className="relative mx-auto max-w-screen-xl px-6 pt-12 pb-6">
-        <h2 className="sr-only" id="footer-heading">
-          Informations et navigation secondaire
-        </h2>
+        <h2 className="sr-only" id="footer-heading">Informations et navigation secondaire</h2>
 
         <div className="grid grid-cols-1 gap-10 md:grid-cols-12">
           {/* Col 1 — brand + garanties + contacts */}
@@ -291,16 +302,19 @@ export default function Footer({
                 </h3>
                 <ul className="space-y-2">
                   {group.links.map(({ href, label, external }) => {
+                    const finalHref = localizePath(href, locale)
                     const active =
                       href === '/'
                         ? pathname === '/'
-                        : pathname === href || pathname.startsWith(href + '/')
+                        : pathname === finalHref || pathname.startsWith(finalHref + '/')
+
                     const item = (
                       <>
                         {group.title.toLowerCase().includes('légal') ? <LegalIcon label={label} /> : null}
                         <span>{label}</span>
                       </>
                     )
+
                     return (
                       <li key={`${group.title}-${href}`}>
                         {external ? (
@@ -342,9 +356,7 @@ export default function Footer({
                   aria-busy={status === 'loading'}
                   aria-describedby={message ? msgId : undefined}
                 >
-                  <h3 className="text-sm font-semibold uppercase tracking-wide text-token-text/60">
-                    Newsletter
-                  </h3>
+                  <h3 className="text-sm font-semibold uppercase tracking-wide text-token-text/60">Newsletter</h3>
                   <div className="flex gap-2">
                     <input
                       id={emailId}
@@ -371,10 +383,7 @@ export default function Footer({
                     </button>
                   </div>
 
-                  <label
-                    htmlFor={consentId}
-                    className="flex items-start gap-2 text-[12px] text-token-text/70"
-                  >
+                  <label htmlFor={consentId} className="flex items-start gap-2 text-[12px] text-token-text/70">
                     <input
                       id={consentId}
                       type="checkbox"
@@ -384,11 +393,7 @@ export default function Footer({
                     />
                     <span>
                       J’accepte de recevoir vos emails et la{' '}
-                      <Link
-                        href="/confidentialite"
-                        prefetch={false}
-                        className="underline hover:text-[hsl(var(--accent))]"
-                      >
+                      <Link href="/confidentialite" prefetch={false} className="underline hover:text-[hsl(var(--accent))]">
                         politique de confidentialité
                       </Link>
                       .
@@ -464,9 +469,7 @@ export default function Footer({
         {/* Sous-footer */}
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-token-border pt-5 text-sm md:flex-row">
           <p className="text-token-text/70">
-            © {currentYear}{' '}
-            <span className="font-semibold text-token-text">{companyName}</span>. Tous droits
-            réservés.
+            © {currentYear} <span className="font-semibold text-token-text">{companyName}</span>. Tous droits réservés.
           </p>
 
           <ul className="flex flex-wrap items-center gap-3 text-[12px] text-token-text/60">
@@ -482,7 +485,6 @@ export default function Footer({
       {/* JSON-LD Organization + SiteNavigationElement */}
       <script
         type="application/ld+json"
-        // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             '@context': 'https://schema.org',
@@ -497,20 +499,10 @@ export default function Footer({
             ],
             contactPoint: [
               contact?.email
-                ? {
-                    '@type': 'ContactPoint',
-                    email: contact.email,
-                    contactType: 'customer support',
-                    availableLanguage: ['fr', 'en'],
-                  }
+                ? { '@type': 'ContactPoint', email: contact.email, contactType: 'customer support', availableLanguage: ['fr', 'en'] }
                 : undefined,
               contact?.phone
-                ? {
-                    '@type': 'ContactPoint',
-                    telephone: contact.phone,
-                    contactType: 'customer support',
-                    availableLanguage: ['fr', 'en'],
-                  }
+                ? { '@type': 'ContactPoint', telephone: contact.phone, contactType: 'customer support', availableLanguage: ['fr', 'en'] }
                 : undefined,
             ].filter(Boolean),
             address:
@@ -528,7 +520,6 @@ export default function Footer({
       />
       <script
         type="application/ld+json"
-        // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             '@context': 'https://schema.org',
@@ -539,7 +530,7 @@ export default function Footer({
               g.links.map((l) => ({
                 '@type': 'WebPage',
                 name: l.label,
-                url: l.href.startsWith('http') ? l.href : `${origin}${l.href}`,
+                url: l.href.startsWith('http') ? l.href : `${origin}${localizePath(l.href, locale)}`,
               }))
             ),
           }),

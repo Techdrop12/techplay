@@ -1,12 +1,13 @@
-// src/components/ui/StickyFreeShippingBar.tsx — FINAL
+// src/components/ui/StickyFreeShippingBar.tsx — FINAL (i18n + routes harmonisées)
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { useCart } from '@/hooks/useCart'
 import FreeShippingBadge from '@/components/FreeShippingBadge'
+import Link from '@/components/LocalizedLink'
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
 type Position = 'bottom' | 'top'
 
@@ -40,7 +41,7 @@ export default function StickyFreeShippingBar({
   autoShowDelayMs = 4000,
   minScrollY = 120,
   dismissKey = 'freeShippingBarDismissed',
-  hideOnRoutes = ['/commande', '/checkout', '/success'],
+  hideOnRoutes = ['/commande', '/checkout', '/success', '/cart'],
   position = 'bottom',
   showOnEmptyCart = false,
   showWhenReached = true,
@@ -49,7 +50,8 @@ export default function StickyFreeShippingBar({
   policyHref,
   className,
 }: Props) {
-  const pathname = usePathname()
+  const pathname = usePathname() || '/'
+  const locale = getCurrentLocale(pathname)
   const { cart } = useCart() as any
 
   // ── State
@@ -75,8 +77,8 @@ export default function StickyFreeShippingBar({
 
   // ── Hide by route
   const hiddenByRoute = useMemo(
-    () => hideOnRoutes.some((r) => pathname?.startsWith(r)),
-    [pathname, hideOnRoutes]
+    () => hideOnRoutes.some((r) => pathname?.startsWith(localizePath(r, locale))),
+    [pathname, hideOnRoutes, locale]
   )
 
   // ── Subtotal (robuste)
@@ -136,9 +138,9 @@ export default function StickyFreeShippingBar({
   }, [visible, reached, subtotal, threshold])
 
   // ── Locale & libellés
-  const locale =
-    typeof document !== 'undefined' ? document.documentElement.lang || 'fr-FR' : 'fr-FR'
-  const isFr = String(locale).toLowerCase().startsWith('fr')
+  const isFr = String(typeof document !== 'undefined' ? document.documentElement.lang : 'fr-FR')
+    .toLowerCase()
+    .startsWith('fr')
   const labelCart = ctaLabel ?? (isFr ? 'Voir le panier' : 'View cart')
 
   // ── Conditions d’affichage
@@ -167,7 +169,6 @@ export default function StickyFreeShippingBar({
         )}
       >
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 px-3 sm:px-4 py-2">
-          {/* Badge + progression (centralise toute la logique d’éligibilité) */}
           <FreeShippingBadge
             price={subtotal}
             threshold={threshold}
@@ -179,7 +180,7 @@ export default function StickyFreeShippingBar({
 
           <div className="flex items-center gap-2">
             <Link
-              href={ctaHref}
+              href={localizePath(ctaHref, locale)}
               className={cn(
                 'hidden sm:inline-flex items-center rounded-full px-4 py-1.5 text-sm font-semibold shadow',
                 reached
@@ -189,10 +190,7 @@ export default function StickyFreeShippingBar({
               aria-label={labelCart}
               onClick={() => {
                 try {
-                  ;(window as any).dataLayer?.push({
-                    event: 'free_shipping_bar_cta',
-                    reached,
-                  })
+                  ;(window as any).dataLayer?.push({ event: 'free_shipping_bar_cta', reached })
                 } catch {}
               }}
             >

@@ -16,9 +16,9 @@ type NavLink = { href: string; label: string }
 
 const LINKS: NavLink[] = [
   { href: '/', label: 'Accueil' },
-  { href: '/categorie', label: 'Catégories' }, // mégamenu (liens internes pointent vers /produit?cat=…)
-  { href: '/produit', label: 'Produits' },
-  { href: '/pack', label: 'Packs' },
+  { href: '/categorie', label: 'Catégories' }, // mégamenu (liens internes pointent vers /products?cat=…)
+  { href: '/products', label: 'Produits' },
+  { href: '/products/packs', label: 'Packs' },
   { href: '/wishlist', label: 'Wishlist' },
   { href: '/blog', label: 'Blog' },
   { href: '/contact', label: 'Contact' },
@@ -36,22 +36,22 @@ const SEARCH_TRENDS = [
   'souris sans fil',
 ]
 
-// ⚠️ on route vers /produit?cat=… (cohérent avec la Home)
+// ⚠️ on route vers /products?cat=… (cohérent avec la Home & l’arbo)
 const CATEGORIES: Array<{ label: string; href: string; emoji: string; desc: string }> = [
-  { label: 'Casques',   href: '/produit?cat=casques',   emoji: '🎧', desc: 'Audio immersif' },
-  { label: 'Claviers',  href: '/produit?cat=claviers',  emoji: '⌨️', desc: 'Mécas & low-profile' },
-  { label: 'Souris',    href: '/produit?cat=souris',    emoji: '🖱️', desc: 'Précision & confort' },
-  { label: 'Webcams',   href: '/produit?cat=webcams',   emoji: '📷', desc: 'Visio en HD' },
-  { label: 'Batteries', href: '/produit?cat=batteries', emoji: '🔋', desc: 'Power & hubs' },
-  { label: 'Audio',     href: '/produit?cat=audio',     emoji: '🔊', desc: 'Enceintes & DAC' },
-  { label: 'Stockage',  href: '/produit?cat=stockage',  emoji: '💾', desc: 'SSD & cartes' },
-  { label: 'Écrans',    href: '/produit?cat=ecrans',    emoji: '🖥️', desc: '144Hz et +' },
+  { label: 'Casques',   href: '/products?cat=casques',   emoji: '🎧', desc: 'Audio immersif' },
+  { label: 'Claviers',  href: '/products?cat=claviers',  emoji: '⌨️', desc: 'Mécas & low-profile' },
+  { label: 'Souris',    href: '/products?cat=souris',    emoji: '🖱️', desc: 'Précision & confort' },
+  { label: 'Webcams',   href: '/products?cat=webcams',   emoji: '📷', desc: 'Visio en HD' },
+  { label: 'Batteries', href: '/products?cat=batteries', emoji: '🔋', desc: 'Power & hubs' },
+  { label: 'Audio',     href: '/products?cat=audio',     emoji: '🔊', desc: 'Enceintes & DAC' },
+  { label: 'Stockage',  href: '/products?cat=stockage',  emoji: '💾', desc: 'SSD & cartes' },
+  { label: 'Écrans',    href: '/products?cat=ecrans',    emoji: '🖥️', desc: '144Hz et +' },
 ]
 
 export default function Header() {
   const pathname = usePathname() || '/'
   const locale = getCurrentLocale(pathname)
-  const SEARCH_ACTION = localizePath('/produit', locale)
+  const SEARCH_ACTION = localizePath('/products', locale)
 
   // ----------------------- Comptages (hooks au top) ------------------------
   const { cart } = useCart() as any
@@ -410,12 +410,12 @@ export default function Header() {
                           </p>
                           <div className="mt-3 flex flex-wrap gap-2">
                             <Link
-                              href="/pack"
+                              href="/products/packs"
                               prefetch={false}
-                              onPointerEnter={() => smartPrefetchStart('/pack')}
-                              onPointerLeave={() => smartPrefetchCancel('/pack')}
-                              onFocus={() => smartPrefetchStart('/pack')}
-                              onBlur={() => smartPrefetchCancel('/pack')}
+                              onPointerEnter={() => smartPrefetchStart('/products/packs')}
+                              onPointerLeave={() => smartPrefetchCancel('/products/packs')}
+                              onFocus={() => smartPrefetchStart('/products/packs')}
+                              onBlur={() => smartPrefetchCancel('/products/packs')}
                               role="menuitem"
                               className="inline-flex items-center rounded-lg bg-[hsl(var(--accent))] px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-[hsl(var(--accent)/.92)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
                               data-gtm="header_mega_cta_packs"
@@ -423,12 +423,12 @@ export default function Header() {
                               Voir les packs
                             </Link>
                             <Link
-                              href="/produit"
+                              href="/products"
                               prefetch={false}
-                              onPointerEnter={() => smartPrefetchStart('/produit')}
-                              onPointerLeave={() => smartPrefetchCancel('/produit')}
-                              onFocus={() => smartPrefetchStart('/produit')}
-                              onBlur={() => smartPrefetchCancel('/produit')}
+                              onPointerEnter={() => smartPrefetchStart('/products')}
+                              onPointerLeave={() => smartPrefetchCancel('/products')}
+                              onFocus={() => smartPrefetchStart('/products')}
+                              onBlur={() => smartPrefetchCancel('/products')}
                               role="menuitem"
                               className="inline-flex items-center rounded-lg border border-token-border bg-token-surface px-3 py-1.5 text-sm font-semibold hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.30)]"
                               data-gtm="header_mega_cta_all"
@@ -480,12 +480,12 @@ export default function Header() {
 
           {/* Offres : icône <xl, libellé en >=xl */}
           <Link
-            href="/promo"
+            href="/products?promo=1"
             prefetch={false}
-            onPointerEnter={() => smartPrefetchStart('/promo')}
-            onPointerLeave={() => smartPrefetchCancel('/promo')}
-            onFocus={() => smartPrefetchStart('/promo')}
-            onBlur={() => smartPrefetchCancel('/promo')}
+            onPointerEnter={() => smartPrefetchStart('/products?promo=1')}
+            onPointerLeave={() => smartPrefetchCancel('/products?promo=1')}
+            onFocus={() => smartPrefetchStart('/products?promo=1')}
+            onBlur={() => smartPrefetchCancel('/products?promo=1')}
             className="xl:hidden inline-flex items-center justify-center rounded-full border border-token-border bg-token-surface/60 h-9 w-9 text-base hover:bg-token-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
             aria-label="Voir les offres du jour"
             title="Offres du jour"
@@ -495,12 +495,12 @@ export default function Header() {
           </Link>
 
           <Link
-            href="/promo"
+            href="/products?promo=1"
             prefetch={false}
-            onPointerEnter={() => smartPrefetchStart('/promo')}
-            onPointerLeave={() => smartPrefetchCancel('/promo')}
-            onFocus={() => smartPrefetchStart('/promo')}
-            onBlur={() => smartPrefetchCancel('/promo')}
+            onPointerEnter={() => smartPrefetchStart('/products?promo=1')}
+            onPointerLeave={() => smartPrefetchCancel('/products?promo=1')}
+            onFocus={() => smartPrefetchStart('/products?promo=1')}
+            onBlur={() => smartPrefetchCancel('/products?promo=1')}
             className="group hidden xl:inline-flex items-center gap-2 rounded-full border border-token-border bg-token-surface/60 px-3 py-1.5 text-sm font-medium text-token-text hover:bg-token-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
             aria-label="Voir les offres du jour"
             title="Offres du jour"

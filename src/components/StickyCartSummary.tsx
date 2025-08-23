@@ -1,23 +1,27 @@
-// src/components/StickyCartSummary.tsx
-'use client';
+// src/components/StickyCartSummary.tsx — FINAL (types stricts + i18n paths + accent tokens + a11y)
+'use client'
 
-import Link from 'next/link';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { useCart } from '@/context/cartContext';
-import { formatPrice, cn } from '@/lib/utils';
-import { event, logEvent } from '@/lib/ga';
-import { useTranslations } from 'next-intl';
+import Link from '@/components/LocalizedLink'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { usePathname } from 'next/navigation'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { useCart } from '@/context/cartContext'
+import { formatPrice, cn } from '@/lib/utils'
+import { event, logEvent } from '@/lib/ga'
+import { useTranslations } from 'next-intl'
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
+
+// Locale stricte attendue par localizePath()
+type AppLocale = 'fr' | 'en'
 
 type Props = {
-  locale?: string;
-  cartHref?: string;        // ex: '/cart' ou '/panier'
-  checkoutHref?: string;    // ex: '/commande'
-  excludePaths?: string[];
-  freeShippingThreshold?: number; // si non fourni, on prend le contexte/env
-  className?: string;
-};
+  locale?: AppLocale
+  cartHref?: string // ex: '/cart'
+  checkoutHref?: string // ex: '/commande'
+  excludePaths?: string[]
+  freeShippingThreshold?: number
+  className?: string
+}
 
 /**
  * StickyCartSummary — résumé panier mobile
@@ -29,27 +33,28 @@ type Props = {
  * - Tracking GA4 + logEvent custom
  */
 export default function StickyCartSummary({
-  locale = 'fr',
+  locale,
   cartHref,
   checkoutHref,
   excludePaths = ['/checkout', '/commande', '/cart', '/panier', '/404', '/_not-found'],
   freeShippingThreshold,
   className,
 }: Props) {
-  const pathname = usePathname() || '';
-  const prefersReduced = useReducedMotion();
+  const pathname = usePathname() || ''
+  const detectedLocale = getCurrentLocale(pathname) as AppLocale
+  const loc: AppLocale = locale ?? detectedLocale
+  const prefersReduced = useReducedMotion()
 
   // ⛔️ Ne rien monter sur les routes exclues
-  const isExcluded = excludePaths.some((p) => pathname.includes(p));
-  if (isExcluded) return null;
+  const isExcluded = excludePaths.some((p) => pathname.startsWith(localizePath(p, loc)))
+  if (isExcluded) return null
 
   // i18n (fallback safe si provider indisponible)
-  let t: any;
+  let t: any
   try {
-    t = useTranslations('cart');
+    t = useTranslations('cart')
   } catch {
     t = ((key: string, _v?: Record<string, any>) => {
-      // fallback minimal FR
       const dict: Record<string, string> = {
         mobile_summary: 'Résumé de votre panier',
         show: 'Afficher',
@@ -69,17 +74,17 @@ export default function StickyCartSummary({
         discount: 'Remise',
         vat: 'TVA (est.)',
         shipping: 'Livraison',
-      };
-      return dict[key] ?? key;
-    }) as any;
+      }
+      return dict[key] ?? key
+    }) as any
   }
   const tx = (key: string, fallback: string, values?: Record<string, any>) => {
     try {
-      return values ? t(key as any, values as any) : (t(key as any) as any);
+      return values ? t(key as any, values as any) : (t(key as any) as any)
     } catch {
-      return fallback;
+      return fallback
     }
-  };
+  }
 
   // ✅ Panier (totaux du contexte)
   const {
@@ -93,77 +98,70 @@ export default function StickyCartSummary({
     amountToFreeShipping,
     progressToFreeShipping,
     freeShippingThreshold: ctxThreshold,
-  } = useCart();
+  } = useCart()
 
   // Seuil livraison offerte (prop > contexte > env > fallback)
   const FREE_SHIP = useMemo(() => {
-    if (typeof freeShippingThreshold === 'number' && freeShippingThreshold > 0) return freeShippingThreshold;
-    if (typeof ctxThreshold === 'number' && ctxThreshold > 0) return ctxThreshold;
-    const env = Number(process.env.NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD);
-    return Number.isFinite(env) && env > 0 ? env : 50;
-  }, [freeShippingThreshold, ctxThreshold]);
+    if (typeof freeShippingThreshold === 'number' && freeShippingThreshold > 0) return freeShippingThreshold
+    if (typeof ctxThreshold === 'number' && ctxThreshold > 0) return ctxThreshold
+    const env = Number(process.env.NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD)
+    return Number.isFinite(env) && env > 0 ? env : 50
+  }, [freeShippingThreshold, ctxThreshold])
 
   // Compat si certaines valeurs de contexte sont absentes
-  const subtotal = Number.isFinite(total) ? total : (cart ?? []).reduce((s, it: any) => s + (it?.price || 0) * (it?.quantity || 1), 0);
-  const remaining = Number.isFinite(amountToFreeShipping)
-    ? amountToFreeShipping
-    : Math.max(0, FREE_SHIP - subtotal);
+  const subtotal = Number.isFinite(total)
+    ? total
+    : (cart ?? []).reduce((s, it: any) => s + (it?.price || 0) * (it?.quantity || 1), 0)
+
+  const remaining = Number.isFinite(amountToFreeShipping) ? amountToFreeShipping : Math.max(0, FREE_SHIP - subtotal)
   const progress = Number.isFinite(progressToFreeShipping)
     ? progressToFreeShipping
-    : Math.min(100, Math.round((subtotal / FREE_SHIP) * 100));
-  const payable = Number.isFinite(grandTotal) ? grandTotal : subtotal + (Number.isFinite(shipping) ? shipping : 0) + (Number.isFinite(tax) ? tax : 0);
+    : Math.min(100, Math.round((subtotal / FREE_SHIP) * 100))
+  const payable = Number.isFinite(grandTotal)
+    ? grandTotal
+    : subtotal + (Number.isFinite(shipping) ? shipping : 0) + (Number.isFinite(tax) ? tax : 0)
 
   // Mémorisation UI (plié/déplié)
-  const [mounted, setMounted] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const [mounted, setMounted] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
   useEffect(() => {
-    setMounted(true);
+    setMounted(true)
     try {
-      const saved = localStorage.getItem('tp_cart_sticky_collapsed');
-      if (saved === '1') setCollapsed(true);
+      const saved = localStorage.getItem('tp_cart_sticky_collapsed')
+      if (saved === '1') setCollapsed(true)
     } catch {}
-  }, []);
+  }, [])
   const setCollapsedPersist = (v: boolean) => {
-    setCollapsed(v);
+    setCollapsed(v)
     try {
-      localStorage.setItem('tp_cart_sticky_collapsed', v ? '1' : '0');
+      localStorage.setItem('tp_cart_sticky_collapsed', v ? '1' : '0')
     } catch {}
-  };
+  }
 
   // Affichage uniquement si items
-  const visible = mounted && (count ?? 0) > 0;
-  const gotoCart = cartHref || (locale === 'fr' ? '/cart' : '/cart');
-  const gotoCheckout = checkoutHref || '/commande';
+  const visible = mounted && (count ?? 0) > 0
+  const gotoCart = localizePath(cartHref || '/cart', loc)
+  const gotoCheckout = localizePath(checkoutHref || '/commande', loc)
 
   // Tracking à l’apparition
-  const trackedRef = useRef(false);
+  const trackedRef = useRef(false)
   useEffect(() => {
     if (visible && !trackedRef.current) {
-      trackedRef.current = true;
+      trackedRef.current = true
       try {
-        event({
-          action: 'sticky_cart_visible',
-          category: 'engagement',
-          label: 'sticky_cart',
-          value: count,
-        });
+        event({ action: 'sticky_cart_visible', category: 'engagement', label: 'sticky_cart', value: count })
       } catch {}
     }
-  }, [visible, count]);
+  }, [visible, count])
 
   const onCta = (label: string) => {
     try {
-      event({ action: 'sticky_cart_click', category: 'engagement', label, value: subtotal });
-      logEvent?.('sticky_cart_click', {
-        page: pathname,
-        cart_count: count,
-        total_price: subtotal,
-        label,
-      });
+      event({ action: 'sticky_cart_click', category: 'engagement', label, value: subtotal })
+      logEvent?.('sticky_cart_click', { page: pathname, cart_count: count, total_price: subtotal, label })
     } catch {}
-  };
+  }
 
-  if (!visible) return null;
+  if (!visible) return null
 
   return (
     <AnimatePresence mode="wait">
@@ -189,7 +187,7 @@ export default function StickyCartSummary({
           <button
             type="button"
             onClick={() => setCollapsedPersist(!collapsed)}
-            className="text-sm font-semibold text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-accent rounded-md px-1 -mx-1"
+            className="text-sm font-semibold text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] rounded-md px-1 -mx-1"
             aria-expanded={!collapsed}
             aria-controls="sticky-cart-panel"
           >
@@ -216,12 +214,12 @@ export default function StickyCartSummary({
             >
               {/* Progress “livraison offerte” */}
               <div className="px-4 pt-1">
-                <div className="flex items-center justify-between text-[11px] text-gray-600 dark:text-gray-300 mb-1">
+                <div className="mb-1 flex items-center justify-between text-[11px] text-gray-600 dark:text-gray-300">
                   <span>{tx('free_shipping', 'Livraison offerte')}</span>
                   <span aria-hidden="true">{progress}%</span>
                 </div>
                 <div
-                  className="h-2 w-full rounded-full bg-gray-200/70 dark:bg-zinc-800 overflow-hidden"
+                  className="h-2 w-full overflow-hidden rounded-full bg-gray-200/70 dark:bg-zinc-800"
                   aria-label={tx('free_shipping_progress', 'Progression vers la livraison offerte')}
                   role="progressbar"
                   aria-valuemin={0}
@@ -229,7 +227,7 @@ export default function StickyCartSummary({
                   aria-valuenow={progress}
                 >
                   <motion.div
-                    className={cn('h-full rounded-full', progress >= 100 ? 'bg-green-500' : 'bg-accent')}
+                    className={cn('h-full rounded-full', progress >= 100 ? 'bg-green-500' : 'bg-[hsl(var(--accent))]')}
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}
                     transition={{ duration: 0.35 }}
@@ -239,9 +237,7 @@ export default function StickyCartSummary({
                 <p
                   className={cn(
                     'mt-2 text-xs',
-                    remaining > 0
-                      ? 'text-gray-600 dark:text-gray-300'
-                      : 'text-green-600 dark:text-green-400 font-semibold'
+                    remaining > 0 ? 'text-gray-600 dark:text-gray-300' : 'text-green-600 dark:text-green-400 font-semibold'
                   )}
                   aria-live="polite"
                 >
@@ -256,12 +252,10 @@ export default function StickyCartSummary({
               {/* Lignes montants (rapide) */}
               <div className="px-4 pt-2 text-[13px] text-gray-700 dark:text-gray-300 space-y-1">
                 <Line label={tx('subtotal', 'Sous-total')} value={formatPrice(subtotal)} />
-                {discount > 0 && (
-                  <Line label={tx('discount', 'Remise')} value={`- ${formatPrice(discount)}`} accent />
-                )}
+                {discount > 0 && <Line label={tx('discount', 'Remise')} value={`- ${formatPrice(discount)}`} accent />}
                 <Line label={tx('vat', 'TVA (est.)')} value={tax > 0 ? formatPrice(tax) : '—'} />
                 <Line label={tx('shipping', 'Livraison')} value={shipping === 0 ? 'Offerte' : formatPrice(shipping)} />
-                <div className="border-t border-gray-300 dark:border-zinc-700 my-2" />
+                <div className="my-2 border-t border-gray-300 dark:border-zinc-700" />
                 <Line label={tx('total', 'Total')} value={formatPrice(payable)} bold />
               </div>
 
@@ -270,7 +264,7 @@ export default function StickyCartSummary({
                 <Link
                   href={gotoCart}
                   onClick={() => onCta('voir_panier')}
-                  className="inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-zinc-700 px-3 py-2 text-sm font-semibold text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-accent"
+                  className="inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-zinc-700 px-3 py-2 text-sm font-semibold text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
                   aria-label={tx('view_cart', 'Voir le panier')}
                 >
                   {tx('view_cart', 'Voir le panier')}
@@ -278,7 +272,7 @@ export default function StickyCartSummary({
                 <Link
                   href={gotoCheckout}
                   onClick={() => onCta('commander')}
-                  className="inline-flex items-center justify-center rounded-lg bg-accent text-white px-3 py-2 text-sm font-extrabold shadow-md hover:bg-accent/90 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-accent"
+                  className="inline-flex items-center justify-center rounded-lg bg-[hsl(var(--accent))] text-white px-3 py-2 text-sm font-extrabold shadow-md hover:opacity-90 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
                   aria-label={tx('checkout', 'Commander')}
                 >
                   {tx('checkout', 'Commander')} →
@@ -298,10 +292,20 @@ export default function StickyCartSummary({
         </AnimatePresence>
       </motion.aside>
     </AnimatePresence>
-  );
+  )
 }
 
-function Line({ label, value, bold = false, accent = false }: { label: string; value: string; bold?: boolean; accent?: boolean }) {
+function Line({
+  label,
+  value,
+  bold = false,
+  accent = false,
+}: {
+  label: string
+  value: string
+  bold?: boolean
+  accent?: boolean
+}) {
   return (
     <div className="flex items-center justify-between">
       <span className={cn('text-gray-700 dark:text-gray-300', bold && 'font-semibold')}>{label}</span>
@@ -316,5 +320,5 @@ function Line({ label, value, bold = false, accent = false }: { label: string; v
         {value}
       </span>
     </div>
-  );
+  )
 }

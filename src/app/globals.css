@@ -7,11 +7,15 @@
 
 /* ===================== Base ===================== */
 @layer base {
+  :root { color-scheme: light dark; }
+
   html {
     /* lissage & comportement */
     scroll-behavior: smooth;
     text-rendering: optimizeLegibility;
     -webkit-text-size-adjust: 100%;
+    /* ancrages -> tient compte du header sticky */
+    scroll-padding-top: calc(var(--header-offset, 4.5rem) + 0.5rem);
   }
 
   body {
@@ -20,6 +24,8 @@
     color: hsl(var(--text));
     font-family: var(--font-sans);
     line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   /* Titres : typographie fluide + balance */
@@ -31,6 +37,9 @@
   h1 { font-size: var(--step-5); line-height: 1.05; }
   h2 { font-size: var(--step-4); line-height: 1.10; }
   h3 { font-size: var(--step-3); line-height: 1.15; }
+
+  /* Quand on navigue par #ancre, éviter que le titre soit caché par le header */
+  h1[id], h2[id], h3[id], h4[id], h5[id], h6[id] { scroll-margin-top: calc(var(--header-offset, 4.5rem) + 0.5rem); }
 
   /* Texte courant */
   :is(p, li, dt, dd) { color: hsl(var(--text)); opacity: .88; }
@@ -214,6 +223,9 @@
     backdrop-filter: saturate(180%) blur(10px);
     border: 1px solid hsl(var(--border));
   }
+  @media (prefers-reduced-motion: reduce) {
+    .glass { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  }
 
   /* ===== Motion : visible par défaut ===== */
   .motion-section { opacity: 1; transform: none; } /* plus jamais caché par défaut */
@@ -234,14 +246,33 @@
     outline: none !important;
   }
 
-  /* Accessibilité */
-  .sr-only { @apply visually-hidden; } /* alias pratique */
+  /* A11y : alias sr-only robuste (évite @apply vers une class inconnue) */
+  .sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0,0,0,0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
+  /* Barre de progression (top) — utilisée dans Layout */
+  .animate-marquee-slow { animation: progress-slide 1.8s cubic-bezier(.2,.65,.3,1) infinite; }
 }
 
 /* =============== Keyframes locaux =============== */
 @keyframes shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+/* Slide latéral pour la barre de progression */
+@keyframes progress-slide {
+  from { transform: translateX(-120%); }
+  to   { transform: translateX(320%); }
 }
 
 /* (La keyframe 'fadeInUp' est définie dans styles/design-tokens.css et réutilisée ici) */
