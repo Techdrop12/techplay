@@ -9,3 +9,6 @@ export function normalizeLocale(x: string | null | undefined): Locale {
   return isLocale(x) ? x : DEFAULT_LOCALE
 }
 export const localeLabels: Record<Locale, string> = { fr: 'Français', en: 'English' }
+
+/** 🔁 Alias pour compatibilité avec les composants qui importent AppLocale */
+export type AppLocale = Locale

@@ -27,9 +27,11 @@ import {
   trackSelectItem,
   mapProductToGaItem,
 } from '@/lib/ga'
+import { DEFAULT_LOCALE, isLocale, type AppLocale } from '@/lib/language'
 
 interface Props {
   product: Product
+  /** string tolérée ici, on normalise juste avant usage */
   locale?: string
 }
 
@@ -265,6 +267,9 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
       img.src = src!
     })
   }, [activeIdx, gallery])
+
+  // ✅ Normalisation de la locale → AppLocale
+  const safeLocale: AppLocale = isLocale(locale) ? (locale as AppLocale) : DEFAULT_LOCALE
 
   return (
     <motion.section
@@ -584,7 +589,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
       </div>
 
       {/* Résumé sticky (mobile) */}
-      <StickyCartSummary locale={locale} />
+      <StickyCartSummary locale={safeLocale} />
 
       {/* Avis */}
       <div className="lg:col-span-2 mt-12">
