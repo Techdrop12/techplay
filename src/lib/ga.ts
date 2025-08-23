@@ -68,9 +68,26 @@ function storageOptOut(): boolean {
   }
 }
 
+// Désactivation via variable globale officielle `ga-disable-<ID>`
+function windowDisableFlag(): boolean {
+  if (!isBrowser || !GA_TRACKING_ID) return false
+  try {
+    const key = `ga-disable-${GA_TRACKING_ID}`
+    return (window as any)[key] === true
+  } catch {
+    return false
+  }
+}
+
 // GA activé globalement
 function isGaEnabled(): boolean {
-  return !!GA_TRACKING_ID && !doNotTrack && !envOptOut && !storageOptOut()
+  return (
+    !!GA_TRACKING_ID &&
+    !doNotTrack &&
+    !envOptOut &&
+    !storageOptOut() &&
+    !windowDisableFlag()
+  )
 }
 
 function canTrack(): boolean {

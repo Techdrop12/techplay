@@ -7,47 +7,40 @@ import AddToCartButton from '@/components/AddToCartButton'
 import ReviewForm from '@/components/ReviewForm'
 import ProductJsonLd from '@/components/JsonLd/ProductJsonLd'
 
-interface Props {
-  params: { slug: string }
-  searchParams: { [key: string]: string | string[] | undefined }
-}
+export const revalidate = 1800
+
+const SITE = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const product = await getProductBySlug(params.slug)
 
-  if (!product) return { title: 'Produit introuvable – TechPlay' }
+  if (!product) return { title: 'Produit introuvable – TechPlay', robots: { index: false, follow: true } }
 
   return {
     title: `${product.title} | TechPlay`,
     description: product.description || 'Détail du produit TechPlay',
-    alternates: {
-      canonical: `${process.env.NEXT_PUBLIC_SITE_URL}/products/${params.slug}`,
-    },
+    alternates: { canonical: `${SITE}/products/${params.slug}` },
     openGraph: {
       title: product.title,
       description: product.description || '',
-      type: 'website', // ✅ corrigé
-      url: `${process.env.NEXT_PUBLIC_SITE_URL}/products/${params.slug}`,
+      type: 'website',
+      url: `${SITE}/products/${params.slug}`,
       images: product.image
         ? [{ url: product.image, alt: product.title }]
-        : [{ url: '/placeholder.png', alt: 'Produit TechPlay' }],
+        : [{ url: `${SITE}/placeholder.png`, alt: 'Produit TechPlay' }],
     },
   }
 }
 
 export default async function ProductPage({ params }: { params: { slug: string } }) {
   const product = await getProductBySlug(params.slug)
-
   if (!product) return notFound()
 
   const safeProduct = product as Product
 
   return (
     <>
-      <main
-        className="max-w-6xl mx-auto px-4 py-10"
-        aria-label={`Page produit : ${safeProduct.title}`}
-      >
+      <main className="max-w-6xl mx-auto px-4 py-10" aria-label={`Page produit : ${safeProduct.title}`}>
         <ProductDetail product={safeProduct} />
         <div className="mt-8">
           <AddToCartButton product={{ ...safeProduct, quantity: 1 }} />

@@ -1,4 +1,4 @@
-// next.config.mjs — Ultra Premium FINAL
+// next.config.mjs — Ultra Premium FINAL (+ redirects produits/packs)
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
 import withPWA from 'next-pwa'
@@ -67,6 +67,29 @@ export default withNextIntl(
     compiler: {
       removeConsole: { exclude: ['error', 'warn'] },
       // reactRemoveProperties: true, // décommente si tu veux virer data-testid en prod
+    },
+
+    // 🔁 Redirects SEO — fusion produits/packs
+    async redirects() {
+      return [
+        // Sans locale
+        { source: '/produit', destination: '/products', permanent: true },
+        { source: '/produit/', destination: '/products', permanent: true },
+        { source: '/produit/:slug', destination: '/products/:slug', permanent: true },
+
+        { source: '/pack', destination: '/products/packs', permanent: true },
+        { source: '/pack/', destination: '/products/packs', permanent: true },
+        { source: '/pack/:slug', destination: '/products/packs/:slug', permanent: true },
+
+        // Avec préfixe de locale (next-intl)
+        { source: '/:locale/produit', destination: '/:locale/products', permanent: true },
+        { source: '/:locale/produit/', destination: '/:locale/products', permanent: true },
+        { source: '/:locale/produit/:slug', destination: '/:locale/products/:slug', permanent: true },
+
+        { source: '/:locale/pack', destination: '/:locale/products/packs', permanent: true },
+        { source: '/:locale/pack/', destination: '/:locale/products/packs', permanent: true },
+        { source: '/:locale/pack/:slug', destination: '/:locale/products/packs/:slug', permanent: true },
+      ]
     },
 
     // Caching & sécurité fine-grainée

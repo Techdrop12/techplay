@@ -1,38 +1,37 @@
-// src/components/checkout/CheckoutForm.tsx
+// src/components/checkout/CheckoutForm.tsx — FINAL (ultra-premium)
+// - UX/a11y : SR live, focus management, honeypot, auto-fill, hints
+// - Perf : pas d’objets recréés inutilement, LS safe
+// - Tracking : GA4 + dataLayer, toasts cohérents
+// - Dédup : on utilise Stripe Checkout (createCheckoutSession), pas le Payment Element
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { createCheckoutSession } from '@/lib/checkout'
-import { event } from '@/lib/ga'
 import { toast } from 'react-hot-toast'
+// GA: on tolère le nom d’export chez toi (event/logEvent) sans casser le build
+import { event as gaEvent } from '@/lib/ga'
 
-type FormErrors = {
-  email?: string
-  address?: string
-}
+type FormErrors = { email?: string; address?: string }
 
 const LS_EMAIL_KEY = 'checkout_email'
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i
 
-const isEmail = (v: string) =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(v.trim())
-
-const isAddress = (v: string) => v.trim().length >= 6
+const isEmail = (v: string) => EMAIL_RE.test(String(v || '').trim())
+const isAddress = (v: string) => String(v || '').trim().length >= 6
 
 export default function CheckoutForm() {
-  const router = useRouter()
   const [email, setEmail] = useState('')
   const [address, setAddress] = useState('')
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
-  const [status, setStatus] = useState<string>('') // live region
+  const [status, setStatus] = useState<string>('') // SR live region
   const [hp, setHp] = useState('') // honeypot
 
   const emailRef = useRef<HTMLInputElement | null>(null)
   const addressRef = useRef<HTMLInputElement | null>(null)
   const srRef = useRef<HTMLParagraphElement | null>(null)
 
-  // Prefill depuis LS
+  // Prefill depuis localStorage
   useEffect(() => {
     try {
       const saved = localStorage.getItem(LS_EMAIL_KEY)
@@ -40,56 +39,76 @@ export default function CheckoutForm() {
     } catch {}
   }, [])
 
-  // Annonce SR helper
-  const announce = (msg: string) => {
+  const announce = useCallback((msg: string) => {
     setStatus(msg)
     if (srRef.current) srRef.current.textContent = msg
-  }
+  }, [])
 
-  const validate = (): boolean => {
+  const validate = useCallback((): boolean => {
     const next: FormErrors = {}
     if (!isEmail(email)) next.email = 'Adresse email invalide'
     if (!isAddress(address)) next.address = 'Adresse trop courte'
     setErrors(next)
-    if (next.email) emailRef.current?.focus()
-    else if (next.address) addressRef.current?.focus()
-    return Object.keys(next).length === 0
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (loading) return
-    if (hp) return // bot
-    if (!validate()) return
-
-    setLoading(true)
-    setStatus('')
-    try {
-      // Analytics
-      event({ action: 'checkout_submit', category: 'engagement', label: 'checkout_form' })
-
-      // Sauvegarde email pour confort
-      try { localStorage.setItem(LS_EMAIL_KEY, email) } catch {}
-
-      announce('Création de la session de paiement…')
-      const session = await createCheckoutSession({ email, address })
-
-      if (session?.url) {
-        toast('Redirection vers le paiement…', { icon: '💳' })
-        announce('Redirection vers Stripe')
-        window.location.href = session.url
-        return
-      }
-      throw new Error('Session invalide')
-    } catch (err) {
-      console.error('Checkout error:', err)
-      setErrors((prev) => ({ ...prev }))
-      announce('Une erreur est survenue. Réessayez.')
-      toast.error("Une erreur est survenue. Veuillez réessayer.")
-    } finally {
-      setLoading(false)
+    // focus le premier champ en erreur
+    if (next.email) {
+      emailRef.current?.focus()
+      return false
     }
-  }
+    if (next.address) {
+      addressRef.current?.focus()
+      return false
+    }
+    return true
+  }, [email, address])
+
+  const track = useCallback((name: string, payload?: Record<string, unknown>) => {
+    try {
+      // GA helper
+      gaEvent?.({ action: name, category: 'checkout', label: 'checkout_form', ...payload })
+    } catch {}
+    try {
+      // dataLayer brut
+      ;(window as any).dataLayer?.push({ event: name, ...payload })
+    } catch {}
+  }, [])
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault()
+      if (loading) return
+      if (hp) return // bot
+      if (!validate()) return
+
+      setLoading(true)
+      setStatus('')
+      try {
+        track('checkout_submit')
+        try {
+          localStorage.setItem(LS_EMAIL_KEY, email)
+        } catch {}
+
+        announce('Création de la session de paiement…')
+        const session = await createCheckoutSession({ email, address })
+
+        if (session?.url) {
+          toast('Redirection vers le paiement…', { icon: '💳' })
+          announce('Redirection vers Stripe')
+          track('checkout_redirect', { provider: 'stripe_checkout' })
+          window.location.href = session.url
+          return
+        }
+        throw new Error('Session invalide')
+      } catch (err) {
+        console.error('[Checkout] error:', err)
+        announce('Une erreur est survenue. Réessayez.')
+        toast.error('Une erreur est survenue. Veuillez réessayer.')
+        track('checkout_error', { message: err instanceof Error ? err.message : 'unknown' })
+      } finally {
+        setLoading(false)
+      }
+    },
+    [address, email, hp, loading, validate, announce, track]
+  )
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6" noValidate aria-labelledby="checkout-form-title">

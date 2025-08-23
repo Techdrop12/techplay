@@ -1,7 +1,7 @@
-// src/components/layout/Header.tsx — Ultra Premium FINAL (hooks fix, prefetch safe, catégories alignées)
+// src/components/layout/Header.tsx — Ultra Premium FINAL (i18n-aware links, smart prefetch)
 'use client'
 
-import Link from 'next/link'
+import Link from '@/components/LocalizedLink'
 import { useEffect, useId, useRef, useState, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
 import Logo from '../Logo'
@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils'
 import { useCart } from '@/hooks/useCart'
 import { useWishlist } from '@/hooks/useWishlist'
 import ThemeToggle from '@/components/ui/ThemeToggle'
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
 type NavLink = { href: string; label: string }
 
@@ -25,7 +26,6 @@ const LINKS: NavLink[] = [
 
 const SCROLL_HIDE_OFFSET = 80
 const HOVER_PREFETCH_DELAY = 120
-const SEARCH_ACTION = '/produit'
 
 const SEARCH_TRENDS = [
   'écouteurs bluetooth',
@@ -50,6 +50,8 @@ const CATEGORIES: Array<{ label: string; href: string; emoji: string; desc: stri
 
 export default function Header() {
   const pathname = usePathname() || '/'
+  const locale = getCurrentLocale(pathname)
+  const SEARCH_ACTION = localizePath('/produit', locale)
 
   // ----------------------- Comptages (hooks au top) ------------------------
   const { cart } = useCart() as any
@@ -190,8 +192,10 @@ export default function Header() {
     }
   }, [])
 
-  const isActive = (href: string) =>
-    href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/')
+  const isActive = (href: string) => {
+    const localized = localizePath(href, locale)
+    return localized === pathname || pathname.startsWith(localized + '/')
+  }
 
   // Prefetch “intelligent” au hover/focus (via <link rel="prefetch">)
   const prefetchViaLink = (href: string) => {
@@ -206,17 +210,19 @@ export default function Header() {
   }
 
   const smartPrefetchStart = (href: string) => {
-    if (!href || isActive(href)) return
-    if (prefetchTimers.current.has(href)) return
+    const target = localizePath(href, locale)
+    if (!target || isActive(href)) return
+    if (prefetchTimers.current.has(target)) return
     const t = window.setTimeout(() => {
-      prefetchViaLink(href)
-      prefetchTimers.current.delete(href)
+      prefetchViaLink(target)
+      prefetchTimers.current.delete(target)
     }, HOVER_PREFETCH_DELAY)
-    prefetchTimers.current.set(href, t)
+    prefetchTimers.current.set(target, t)
   }
   const smartPrefetchCancel = (href: string) => {
-    const t = prefetchTimers.current.get(href)
-    if (t) { clearTimeout(t); prefetchTimers.current.delete(href) }
+    const target = localizePath(href, locale)
+    const t = prefetchTimers.current.get(target)
+    if (t) { clearTimeout(t); prefetchTimers.current.delete(target) }
   }
 
   const onSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {

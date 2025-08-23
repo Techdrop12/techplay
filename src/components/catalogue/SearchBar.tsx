@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import Fuse from 'fuse.js'
 import type { FuseResultMatch, FuseResult } from 'fuse.js'
 import type { Product } from '@/types/product'
-import { cn } from '@/lib/utils'
+import { cn, formatPrice } from '@/lib/utils'
 import { event as gaEvent, logEvent } from '@/lib/ga'
 
 interface Props {
@@ -18,6 +18,11 @@ interface Props {
   /** Id facultatif (utile si plusieurs barres) */
   id?: string
   className?: string
+  /** Personnalisation du formatage */
+  locale?: string
+  currency?: string
+  /** Limite de résultats affichés */
+  limit?: number
 }
 
 const RECENTS_KEY = 'tp:search:recents'
@@ -53,7 +58,16 @@ function useDebounced<T>(value: T, delay = 180) {
   return debounced
 }
 
-export default function SearchBar({ products, query, setQuery, id = 'search', className }: Props) {
+export default function SearchBar({
+  products,
+  query,
+  setQuery,
+  id = 'search',
+  className,
+  locale = 'fr-FR',
+  currency = 'EUR',
+  limit = 8,
+}: Props) {
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement | null>(null)
   const listboxId = `${id}-listbox`
@@ -65,7 +79,7 @@ export default function SearchBar({ products, query, setQuery, id = 'search', cl
   // Fuse instance mémoïsée
   const fuse = useMemo(
     () =>
-      new Fuse(products, {
+      new Fuse(products ?? [], {
         keys: ['title', 'description', 'tags'],
         threshold: 0.3,
         ignoreLocation: true,
@@ -77,14 +91,16 @@ export default function SearchBar({ products, query, setQuery, id = 'search', cl
 
   // Résultats (avec matches pour <mark>)
   const results: FuseResult<Product>[] = useMemo(() => {
-    if (!debouncedQuery.trim()) return []
-    return fuse.search(debouncedQuery, { limit: 8 }) as FuseResult<Product>[]
-  }, [fuse, debouncedQuery])
+    const q = debouncedQuery.trim()
+    if (!q) return []
+    return (fuse.search(q, { limit }) as FuseResult<Product>[]) ?? []
+  }, [fuse, debouncedQuery, limit])
 
   // Ouvrir/fermer la liste
   useEffect(() => {
-    setOpen(Boolean(debouncedQuery.trim()) && results.length > 0)
-    setHighlighted(results.length ? 0 : -1)
+    const has = results.length > 0
+    setOpen(Boolean(debouncedQuery.trim()) && has)
+    setHighlighted(has ? 0 : -1)
   }, [debouncedQuery, results.length])
 
   // Récupère recherches récentes
@@ -117,7 +133,7 @@ export default function SearchBar({ products, query, setQuery, id = 'search', cl
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  // Clic/touch extérieur pour fermer (handler typé Event → OK pour mousedown & touchstart)
+  // Clic/touch extérieur pour fermer
   useEffect(() => {
     const onDown = (e: Event) => {
       const target = e.target as Node
@@ -143,30 +159,32 @@ export default function SearchBar({ products, query, setQuery, id = 'search', cl
     router.push(`/produit/${slug}`)
   }
 
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (highlighted >= 0 && results[highlighted]) {
-      const p = results[highlighted].item
-      goToProduct(p.slug, p.title)
-      return
-    }
-    if (results[0]) {
-      const p = results[0].item
-      goToProduct(p.slug, p.title)
-      return
-    }
-    // fallback : page catalogue filtrée
-    saveRecent(query)
+  const submitToListing = (q: string) => {
+    saveRecent(q)
     try {
-      gaEvent?.({ action: 'search_submit', category: 'search', label: query, value: results.length })
-      logEvent?.('search_submit', { query, count: results.length })
+      gaEvent?.({ action: 'search_submit', category: 'search', label: q, value: results.length })
+      logEvent?.('search_submit', { query: q, count: results.length })
     } catch {}
-    router.push(`/produit?search=${encodeURIComponent(query.trim())}`)
+    router.push(`/produit?search=${encodeURIComponent(q.trim())}`)
     setOpen(false)
   }
 
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (results.length > 0) {
+      // Priorité à l'élément surligné
+      const index = highlighted >= 0 ? highlighted : 0
+      const p = results[index]?.item
+      if (p) return goToProduct(p.slug, p.title)
+    }
+    // fallback : page catalogue filtrée
+    submitToListing(query)
+  }
+
   const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
+    // Ouvre si on a des résultats et que l’utilisateur navigue
     if (!open && results.length) setOpen(true)
+    if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && results.length === 0) return
     if (e.key === 'ArrowDown') {
       e.preventDefault()
       setHighlighted((h) => (h + 1) % results.length)
@@ -187,7 +205,7 @@ export default function SearchBar({ products, query, setQuery, id = 'search', cl
       className={cn('relative w-full max-w-xl mx-auto', className)}
       role="search"
     >
-      <form onSubmit={onSubmit} role="searchbox" aria-label="Recherche produits">
+      <form onSubmit={onSubmit} aria-label="Recherche produits">
         <div className="relative">
           {/* Icône loupe */}
           <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
@@ -210,7 +228,6 @@ export default function SearchBar({ products, query, setQuery, id = 'search', cl
             aria-autocomplete="list"
             aria-controls={listboxId}
             aria-expanded={open}
-            // on ne passe l’attribut que s’il existe → évite l’erreur TS
             {...(activeDescId ? { 'aria-activedescendant': activeDescId } : {})}
             className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 pl-10 pr-10 py-2.5 text-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent transition"
           />
@@ -243,7 +260,7 @@ export default function SearchBar({ products, query, setQuery, id = 'search', cl
                 const active = i === highlighted
                 return (
                   <li
-                    key={p._id}
+                    key={p._id ?? p.slug ?? i}
                     id={`${listboxId}-opt-${i}`}
                     role="option"
                     aria-selected={active}
@@ -257,8 +274,8 @@ export default function SearchBar({ products, query, setQuery, id = 'search', cl
                   >
                     <span className="truncate">{highlight(p.title ?? '', res.matches)}</span>
                     <span className="ml-3 text-xs text-gray-400 dark:text-gray-500 truncate max-w-[40%]">
-                      {p.price != null
-                        ? Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(p.price)
+                      {Number.isFinite(p.price as any)
+                        ? formatPrice(Number(p.price), { locale, currency, stripZeros: true })
                         : ''}
                     </span>
                   </li>
@@ -267,11 +284,7 @@ export default function SearchBar({ products, query, setQuery, id = 'search', cl
               <li className="border-t border-gray-200 dark:border-gray-800">
                 <button
                   type="button"
-                  onClick={() => {
-                    saveRecent(query)
-                    router.push(`/produit?search=${encodeURIComponent(query.trim())}`)
-                    setOpen(false)
-                  }}
+                  onClick={() => submitToListing(query)}
                   className="w-full text-left px-3 py-2 text-sm text-accent hover:bg-accent/10"
                 >
                   Voir plus de résultats pour « {query} »

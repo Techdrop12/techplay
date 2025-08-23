@@ -14,6 +14,10 @@ import Layout from '@/components/layout/Layout'
 import RootLayoutClient from '@/components/RootLayoutClient'
 import AfterIdleClient from '@/components/AfterIdleClient'
 
+// Thème (canon)
+import ThemeProvider from '@/context/themeContext'
+import DarkModeScript from '@/components/DarkModeScript'
+
 // UX / UI (client)
 import AccessibilitySkip from '@/components/AccessibilitySkip'
 import StickyFreeShippingBar from '@/components/ui/StickyFreeShippingBar'
@@ -120,12 +124,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta httpEquiv="x-dns-prefetch-control" content="on" />
 
         {/* Anti-FOUC + thème (respecte prefers-color-scheme et localStorage) */}
-        <script
-          id="boot-theme"
-          dangerouslySetInnerHTML={{
-            __html: `(()=>{try{var d=document.documentElement;d.classList.add('js');var t=localStorage.getItem('theme');if(!t){t=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'};d.classList.toggle('dark',t==='dark')}catch(_){}})();`,
-          }}
-        />
+        <DarkModeScript />
 
         {/* Consent Mode v2 par défaut (opt-out) */}
         <script
@@ -181,20 +180,23 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <AccessibilitySkip />
         <div id="focus-sentinel" tabIndex={-1} />
 
-        <RootLayoutClient>
-          <AfterIdleClient>
-            <Suspense fallback={null}><Analytics /></Suspense>
-            <Suspense fallback={null}><MetaPixel /></Suspense>
-            <Suspense fallback={null}><Hotjar /></Suspense>
+        {/* ✅ Thème source de vérité tout en haut */}
+        <ThemeProvider>
+          <RootLayoutClient>
+            <AfterIdleClient>
+              <Suspense fallback={null}><Analytics /></Suspense>
+              <Suspense fallback={null}><MetaPixel /></Suspense>
+              <Suspense fallback={null}><Hotjar /></Suspense>
 
-            <AppInstallPrompt />
-            <StickyFreeShippingBar />
-            <StickyCartSummary />
-            <Toaster position="top-right" />
-          </AfterIdleClient>
+              <AppInstallPrompt />
+              <StickyFreeShippingBar />
+              <StickyCartSummary />
+              <Toaster position="top-right" />
+            </AfterIdleClient>
 
-          <Layout>{children}</Layout>
-        </RootLayoutClient>
+            <Layout>{children}</Layout>
+          </RootLayoutClient>
+        </ThemeProvider>
 
         {/* JSON-LD Organization + WebSite (global, unique) */}
         <script
@@ -226,7 +228,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               name: SITE_NAME,
               potentialAction: {
                 '@type': 'SearchAction',
-                target: `${SITE_URL}/produit?q={search_term_string}`,
+                // ✅ on cible /products (canon), plus /produit
+                target: `${SITE_URL}/products?q={search_term_string}`,
                 'query-input': 'required name=search_term_string',
               },
             }),

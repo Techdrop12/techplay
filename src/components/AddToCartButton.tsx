@@ -1,7 +1,8 @@
-// src/components/AddToCartButton.tsx — ultra premium (compat + a11y + analytics safe)
+// src/components/AddToCartButton.tsx — ultra premium (compat + a11y + analytics + AB-ready)
 'use client'
 
 import { useRef, useState, useId, useCallback, useEffect, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { useCart } from '@/hooks/useCart'
 import type { Product } from '@/types/product'
 import Button from '@/components/Button'
@@ -34,11 +35,18 @@ interface Props {
 
   pendingText?: string
   successText?: string
+  /** (nouveau) — remplace le libellé par défaut du bouton */
+  idleText?: string
   debounceMs?: number
   ariaLabel?: string
 
   disableDataLayer?: boolean
   gtmExtra?: Record<string, unknown>
+
+  /** (nouveau) — A/B: redirige vers /:locale/commande après l'ajout */
+  instantCheckout?: boolean
+  /** (nouveau) — locale pour la redirection instantCheckout */
+  locale?: string
 }
 
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n))
@@ -128,12 +136,17 @@ export default function AddToCartButton({
 
   pendingText = 'Ajout en cours…',
   successText = 'Produit ajouté au panier 🎉',
+  idleText,
   debounceMs = 350,
   ariaLabel,
 
   disableDataLayer = false,
   gtmExtra,
+
+  instantCheckout = false,
+  locale = 'fr',
 }: Props) {
+  const router = useRouter()
   const { addToCart } = useCart()
   const [loading, setLoading] = useState(false)
   const [added, setAdded] = useState(false)
@@ -173,7 +186,7 @@ export default function AddToCartButton({
     <svg className={className} width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
       <path
         fill="currentColor"
-        d="M7 18a2 2 0 1 0 0 4a2 2 0 0 0 0-4m10 0a2 2 0 1 0 0 4a2 2 0 0 0 0-4M6.2 6l.63 3H20a1 1 0 0 1 .98 1.2l-1.2 6A2 2 0 0 1 17.83 16H9a2 2 0 0 1-1.96-1.6L5 4H3a1 1 0 0 1 0-2h2.72a1 1 0 0 1 .98.8L7 6z"
+        d="M7 18a2 2 0 1 0 0 4a2 2 0 0 0 0-4M6.2 6l.63 3H20a1 1 0 0 1 .98 1.2l-1.2 6A2 2 0 0 1 17.83 16H9a2 2 0 0 1-1.96-1.6L5 4H3a1 1 0 0 1 0-2h2.72a1 1 0 0 1 .98.8L7 6z"
       />
     </svg>
   )
@@ -298,6 +311,16 @@ export default function AddToCartButton({
         else if (afterAddFocus === 'button') (wrapperRef.current as HTMLElement | null)?.focus?.()
 
         onAdd?.()
+
+        // (nouveau) — "Buy now" / instant checkout
+        if (instantCheckout) {
+          const path = `/${locale}/commande`
+          try {
+            router.push(path)
+          } catch {
+            if (isClient) window.location.href = path
+          }
+        }
       } catch (err) {
         toast.error("Impossible d'ajouter au panier. Réessayez.")
         onError?.(err)
@@ -329,10 +352,15 @@ export default function AddToCartButton({
       onError,
       doDataLayerPush,
       addToCart,
+      instantCheckout,
+      locale,
+      router,
     ]
   )
 
   useEffect(() => () => setSrMessage(''), [])
+
+  const idleLabel = idleText ?? 'Ajouter au panier'
 
   return (
     <>
@@ -374,7 +402,7 @@ export default function AddToCartButton({
           <span id={labelId} className="inline-flex items-center gap-2">
             {loading && <Spinner />}
             {!loading && withIcon && <CartIcon className="-ml-0.5" />}
-            {loading ? pendingText : added ? 'Ajouté ✅' : 'Ajouter au panier'}
+            {loading ? pendingText : added ? 'Ajouté ✅' : idleLabel}
           </span>
         </Button>
       </motion.div>

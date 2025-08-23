@@ -4,54 +4,25 @@
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Script from 'next/script'
+import { eligibleHotjar, hjStateChange } from '@/lib/hotjar'
 
 const HOTJAR_ID = Number(process.env.NEXT_PUBLIC_HOTJAR_ID ?? 0)
 const HOTJAR_SV = Number(process.env.NEXT_PUBLIC_HOTJAR_SV ?? 6)
-const ENABLE_IN_DEV = process.env.NEXT_PUBLIC_HOTJAR_IN_DEV === 'true'
-
-function eligibleNow(): boolean {
-  if (!HOTJAR_ID) return false
-  if (typeof window === 'undefined') return false
-
-  const dnt =
-    (navigator as any).doNotTrack === '1' ||
-    (window as any).doNotTrack === '1' ||
-    (navigator as any).msDoNotTrack === '1'
-
-  let optedOut = false
-  try {
-    optedOut =
-      localStorage.getItem('hotjar:disabled') === '1' ||
-      localStorage.getItem('analytics:disabled') === '1'
-  } catch {}
-
-  // On ne veut charger Hotjar qu’avec consentement analytics
-  let consentAnalytics = '0'
-  try {
-    consentAnalytics = localStorage.getItem('consent:analytics') || '0'
-  } catch {}
-
-  if (dnt || optedOut) return false
-  if (process.env.NODE_ENV !== 'production' && !ENABLE_IN_DEV) return false
-  if (consentAnalytics !== '1') return false
-
-  return true
-}
 
 export default function Hotjar() {
   const pathname = usePathname() || '/'
   const [shouldLoad, setShouldLoad] = useState(false)
 
-  // Initial eligibility
+  // Éligible à l’arrivée
   useEffect(() => {
-    setShouldLoad(eligibleNow())
+    setShouldLoad(eligibleHotjar(HOTJAR_ID))
   }, [])
 
-  // Réagit aux changements de consentement
+  // Réagit aux changements de consentement (CustomEvent 'tp:consent')
   useEffect(() => {
     const onConsent = (e: Event) => {
       const detail = (e as CustomEvent).detail || {}
-      if (detail.analytics && eligibleNow()) {
+      if (detail.analytics && eligibleHotjar(HOTJAR_ID)) {
         setShouldLoad(true)
       }
     }
@@ -62,15 +33,14 @@ export default function Hotjar() {
   // SPA: notifier Hotjar sur changement de route
   useEffect(() => {
     if (!shouldLoad) return
-    try {
-      ;(window as any).hj?.('stateChange', pathname)
-    } catch {}
+    hjStateChange(pathname)
   }, [pathname, shouldLoad])
 
   if (!shouldLoad) return null
 
   return (
     <>
+      {/* Init idempotente (ne ré-injecte pas si déjà présent) */}
       <Script id="hotjar-init" strategy="afterInteractive">
         {`
           (function(h,o,t,j,a,r){

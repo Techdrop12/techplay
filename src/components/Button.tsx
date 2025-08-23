@@ -14,14 +14,20 @@ type Variant =
   | 'danger'      // action destructive
   | 'link'        // lien déguisé en bouton
 
+type LegacyVariant = 'primary' | 'secondary' | 'danger'
 type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
 export interface ButtonProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'disabled'> {
-  variant?: Variant
+  /** Variants modernes + compat héritée ('primary') */
+  variant?: Variant | LegacyVariant
   size?: Size
   fullWidth?: boolean
+  /** alias rétro-compat éventuel */
+  block?: boolean
   loading?: boolean
+  /** i18n du libellé pendant chargement */
+  loadingLabel?: string
   leadingIcon?: ReactNode
   trailingIcon?: ReactNode
   disabled?: boolean
@@ -56,11 +62,36 @@ const variants: Record<Variant, string> = {
     'bg-transparent text-accent hover:text-accent/80 underline underline-offset-2 decoration-2',
 }
 
+function normalizeVariant(v?: Variant | LegacyVariant): Variant {
+  if (!v) return 'accent'
+  if (v === 'primary') return 'accent'      // compat ancienne API
+  if (v === 'secondary') return 'secondary' // compat ancienne API
+  if (v === 'danger') return 'danger'       // compat ancienne API
+  return v
+}
+
 function Spinner() {
   return (
-    <svg className="animate-spin h-4 w-4 opacity-90" viewBox="0 0 24 24" aria-hidden="true">
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-      <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4z" />
+    <svg
+      className="animate-spin h-4 w-4 opacity-90"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+        fill="none"
+      />
+      <path
+        className="opacity-90"
+        fill="currentColor"
+        d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4z"
+      />
     </svg>
   )
 }
@@ -71,31 +102,35 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function Button(
     size = 'md',
     className,
     fullWidth,
+    block,
     loading = false,
+    loadingLabel = 'Patientez…',
     leadingIcon,
     trailingIcon,
     disabled,
-    type = 'button', // ✅ évite les submit involontaires dans un <form>
+    type = 'button', // ✅ évite les submit involontaires
     children,
     ...props
   },
   ref
 ) {
   const isDisabled = disabled || loading
+  const v = normalizeVariant(variant)
+  const isFull = fullWidth ?? block
 
   return (
     <button
       ref={ref}
       type={type}
-      data-variant={variant}
+      data-variant={v}
       data-size={size}
       data-loading={loading ? 'true' : 'false'}
-      aria-busy={loading ? 'true' : undefined}
+      aria-busy={loading || undefined}
       className={cn(
         base,
         sizes[size],
-        variants[variant],
-        fullWidth && 'w-full',
+        variants[v],
+        isFull && 'w-full',
         loading && 'cursor-progress',
         className
       )}
@@ -105,7 +140,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function Button(
       {loading ? (
         <>
           <Spinner />
-          <span>Patientez…</span>
+          <span>{loadingLabel}</span>
         </>
       ) : (
         <>

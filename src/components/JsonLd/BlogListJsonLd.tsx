@@ -6,14 +6,16 @@ import type { BlogPost } from '@/types/blog'
 
 interface BlogListJsonLdProps {
   posts: BlogPost[]
-  locale?: string
+  locale?: 'fr' | 'en'
   siteUrl?: string
 }
+
+const ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com'
 
 export default function BlogListJsonLd({
   posts = [],
   locale = 'fr',
-  siteUrl = 'https://www.techplay.fr',
+  siteUrl = ORIGIN,
 }: BlogListJsonLdProps) {
   if (!Array.isArray(posts) || posts.length === 0) return null
 
@@ -23,7 +25,7 @@ export default function BlogListJsonLd({
     itemListElement: posts.map((post, index) => ({
       '@type': 'ListItem',
       position: index + 1,
-      url: `${siteUrl}/${locale}/blog/${post.slug}`,
+      url: new URL(`/${locale}/blog/${post.slug}`, siteUrl).toString(),
     })),
   }
 

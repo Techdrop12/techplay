@@ -1,59 +1,36 @@
-// src/components/WishlistButton.tsx — ultimate: ripple + shake-on-limit + sizes + safe-in-card
+// src/components/WishlistButton.tsx — ultimate (hook-based, no direct LS)
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Heart } from 'lucide-react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { toast } from 'react-hot-toast'
 import { logEvent } from '@/lib/logEvent'
 import { trackAddToWishlist } from '@/lib/ga'
 import { cn } from '@/lib/utils'
+import { useWishlist } from '@/hooks/useWishlist'
 
 interface WishlistProduct {
-  _id: string
-  slug: string
-  title: string
-  price: number
-  image: string
+  _id?: string
+  id?: string
+  slug?: string
+  title?: string
+  price?: number
+  image?: string
+  [k: string]: any
 }
 
 interface WishlistButtonProps {
   product: WishlistProduct
-  /** Position flottante (coin de carte) */
   floating?: boolean
   className?: string
   disabled?: boolean
-  /** Empêche la propagation pour ne pas cliquer le parent (Link/Card) */
   stopPropagation?: boolean
-  /** Taille de l’icône/bouton */
   size?: 'sm' | 'md' | 'lg'
-  /** Affiche un libellé “Wishlist” à côté de l’icône (mode inline) */
   withLabel?: boolean
 }
 
-const STORAGE_KEY = 'wishlist'
-const WISHLIST_LIMIT = Number(process.env.NEXT_PUBLIC_WISHLIST_LIMIT ?? 50)
-
-function safeParse<T>(raw: string | null, fallback: T): T {
-  try {
-    return raw ? (JSON.parse(raw) as T) : fallback
-  } catch {
-    return fallback
-  }
-}
-
-function readWishlist(): WishlistProduct[] {
-  if (typeof window === 'undefined') return []
-  return safeParse<WishlistProduct[]>(localStorage.getItem(STORAGE_KEY), [])
-}
-
-function writeWishlist(list: WishlistProduct[]) {
-  if (typeof window === 'undefined') return
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(list))
-    window.dispatchEvent(new CustomEvent('wishlist-updated', { detail: list }))
-  } catch {}
-}
+const WISHLIST_LIMIT = Number.parseInt(process.env.NEXT_PUBLIC_WISHLIST_LIMIT ?? '50', 10)
 
 export default function WishlistButton({
   product,
@@ -65,76 +42,15 @@ export default function WishlistButton({
   withLabel = false,
 }: WishlistButtonProps) {
   const prefersReduced = useReducedMotion()
-  const [isWishlisted, setIsWishlisted] = useState(false)
-  const [srMsg, setSrMsg] = useState('')
-  const [rippler, setRippler] = useState(0) // pour relancer l’anim ripple
-  const [shake, setShake] = useState(false)
   const btnRef = useRef<HTMLButtonElement | null>(null)
+  const [rippler, setRippler] = useState(0)
+  const [shake, setShake] = useState(false)
 
-  const valid = useMemo(
-    () => !!product && typeof product._id === 'string' && product._id.length > 0,
-    [product]
-  )
+  const { has, add, remove, count } = useWishlist()
 
-  // Hydrate + sync inter-onglets
-  useEffect(() => {
-    if (!valid) return
-    const init = () => {
-      const list = readWishlist()
-      setIsWishlisted(list.some((p) => p._id === product._id))
-    }
-    init()
-    const onStorage = (e: StorageEvent) => { if (e.key === STORAGE_KEY) init() }
-    const onCustom = () => init()
-    window.addEventListener('storage', onStorage)
-    window.addEventListener('wishlist-updated', onCustom as EventListener)
-    return () => {
-      window.removeEventListener('storage', onStorage)
-      window.removeEventListener('wishlist-updated', onCustom as EventListener)
-    }
-  }, [valid, product?._id])
-
-  const toggleWishlist = () => {
-    if (!valid || disabled) return
-
-    try { navigator.vibrate?.(8) } catch {}
-
-    const list = readWishlist()
-    const existsIdx = list.findIndex((p) => p._id === product._id)
-
-    if (existsIdx >= 0) {
-      const next = list.filter((p) => p._id !== product._id)
-      writeWishlist(next)
-      setIsWishlisted(false)
-      setSrMsg(`${product.title} retiré de la wishlist`)
-      toast('💔 Retiré de la wishlist', { icon: '💔' })
-      try { logEvent({ action: 'wishlist_remove', category: 'wishlist', label: `product_${product._id}`, value: 1 }) } catch {}
-    } else {
-      if (list.length >= WISHLIST_LIMIT) {
-        // Limite atteinte -> shake + toast
-        setShake(true)
-        setTimeout(() => setShake(false), 420)
-        toast.error('Limite de wishlist atteinte', { icon: '⚠️' })
-        return
-      }
-      const next = [product, ...list.filter((p) => p._id !== product._id)].slice(0, WISHLIST_LIMIT)
-      writeWishlist(next)
-      setIsWishlisted(true)
-      setSrMsg(`${product.title} ajouté à la wishlist`)
-      toast('❤️ Ajouté à la wishlist', { icon: '❤️' })
-      setRippler((k) => k + 1) // relance l’anim ripple
-      try { logEvent({ action: 'wishlist_add', category: 'wishlist', label: `product_${product._id}`, value: 1 }) } catch {}
-      try {
-        trackAddToWishlist?.({
-          currency: 'EUR',
-          value: Number(product.price) || 0,
-          items: [{ item_id: product._id, item_name: product.title, price: product.price, quantity: 1 }],
-        })
-      } catch {}
-    }
-
-    setTimeout(() => setSrMsg(''), 1800)
-  }
+  const pid = useMemo(() => String(product?._id ?? product?.id ?? ''), [product])
+  const valid = pid.length > 0
+  const isWishlisted = valid ? has(pid) : false
 
   const dim = size === 'sm' ? 28 : size === 'lg' ? 40 : 32
   const iconSize = size === 'sm' ? 18 : size === 'lg' ? 22 : 20
@@ -147,28 +63,54 @@ export default function WishlistButton({
     'inline-flex items-center justify-center rounded-full text-red-600 hover:text-red-700 transition ' +
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]'
 
+  const onToggle = () => {
+    if (!valid || disabled) return
+    try { navigator.vibrate?.(8) } catch {}
+
+    if (isWishlisted) {
+      remove(pid)
+      toast('💔 Retiré de la wishlist', { icon: '💔' })
+      try { logEvent({ action: 'wishlist_remove', category: 'wishlist', label: `product_${pid}`, value: 1 }) } catch {}
+      return
+    }
+
+    if (count >= WISHLIST_LIMIT) {
+      setShake(true); setTimeout(() => setShake(false), 420)
+      toast.error('Limite de wishlist atteinte', { icon: '⚠️' })
+      return
+    }
+
+    const canonical = { ...product, id: pid } // on garantit id pour le hook
+    add(canonical as any)
+    toast('❤️ Ajouté à la wishlist', { icon: '❤️' })
+    setRippler((k) => k + 1)
+
+    try {
+      logEvent({ action: 'wishlist_add', category: 'wishlist', label: `product_${pid}`, value: 1 })
+    } catch {}
+    try {
+      trackAddToWishlist?.({
+        currency: 'EUR',
+        value: Number(product?.price) || 0,
+        items: [{ item_id: pid, item_name: String(product?.title ?? ''), price: Number(product?.price) || 0, quantity: 1 }],
+      })
+    } catch {}
+  }
+
   return (
     <>
-      {/* Live region a11y */}
       <span className="sr-only" role="status" aria-live="polite">
-        {srMsg}
+        {/* messages live gérés via toasts => rien ici pour éviter le spam */}
       </span>
 
       <motion.button
         ref={btnRef}
         type="button"
-        onClick={(e) => {
-          if (stopPropagation) { e.preventDefault(); e.stopPropagation() }
-          toggleWishlist()
-        }}
+        onClick={(e) => { if (stopPropagation) { e.preventDefault(); e.stopPropagation() } onToggle() }}
         whileTap={prefersReduced ? undefined : { scale: 0.92 }}
         animate={shake ? { x: [-3, 3, -2, 2, 0] } : undefined}
         transition={{ duration: 0.42 }}
-        className={cn(
-          floating ? baseFloating : baseInline,
-          'relative transition-colors',
-          className
-        )}
+        className={cn(floating ? baseFloating : baseInline, 'relative transition-colors', className)}
         style={{ width: dim, height: dim }}
         aria-label={isWishlisted ? 'Retirer de la wishlist' : 'Ajouter à la wishlist'}
         aria-pressed={isWishlisted}
@@ -176,7 +118,6 @@ export default function WishlistButton({
         title={isWishlisted ? 'Retirer de la wishlist' : 'Ajouter à la wishlist'}
         data-wishlisted={isWishlisted ? 'true' : 'false'}
       >
-        {/* Ripple à l’ajout */}
         {!prefersReduced && isWishlisted && (
           <motion.span
             key={rippler}
@@ -189,7 +130,6 @@ export default function WishlistButton({
           />
         )}
 
-        {/* Halo accent quand wishlisted */}
         {isWishlisted && <span aria-hidden className="pointer-events-none absolute inset-0 rounded-full shadow-glow-accent" />}
 
         <Heart

@@ -15,7 +15,6 @@ import ScrollToTop from '@/components/ScrollToTop'
 import BackToTopButton from '@/components/BackToTopButton'
 import Analytics from '@/components/Analytics'
 import MetaPixel from '@/components/MetaPixel'
-import HeatmapScript from '@/components/HeatmapScript'
 
 type Props = {
   products: Product[]
@@ -62,7 +61,6 @@ export default function ProductCatalogue({ products }: Props) {
     <>
       <Analytics />
       <MetaPixel />
-      <HeatmapScript />
       <ScrollToTop />
       <BackToTopButton />
 

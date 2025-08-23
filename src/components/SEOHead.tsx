@@ -1,7 +1,7 @@
 'use client'
 
-// NOTE: Garder ceci pour les rares pages qui n'utilisent pas l'API Metadata de Next.
-// Dans l'app router, privilégier `export const metadata` par page/layout.
+// NOTE: À n’utiliser que sur les rares pages qui n’emploient pas l’API Metadata.
+// Avec l’App Router, privilégie `export const metadata` par page/layout.
 
 import Head from 'next/head'
 
@@ -25,19 +25,29 @@ interface Props {
 }
 
 const ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com'
-const SITE_NAME = 'TechPlay'
-const TWITTER_HANDLE = '@techplay'
+const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || 'TechPlay'
+const TWITTER_HANDLE = process.env.NEXT_PUBLIC_TWITTER_HANDLE || '@techplay'
 
 function absUrl(input?: string): string | undefined {
   if (!input) return undefined
-  try { return new URL(input).toString() } catch {
-    try { return new URL(input.startsWith('/') ? input : `/${input}`, ORIGIN).toString() } catch { return undefined }
+  try {
+    return new URL(input).toString()
+  } catch {
+    try {
+      return new URL(input.startsWith('/') ? input : `/${input}`, ORIGIN).toString()
+    } catch {
+      return undefined
+    }
   }
 }
 
 function currentPathname(): string {
   if (typeof window === 'undefined') return '/'
-  try { return window.location.pathname + window.location.search } catch { return '/' }
+  try {
+    return window.location.pathname + window.location.search
+  } catch {
+    return '/'
+  }
 }
 
 function stripLocalePrefix(pathname: string): string {
@@ -49,7 +59,7 @@ function detectLocaleFromPath(pathname: string): Locale {
 }
 
 export default function SEOHead({
-  title = 'TechPlay – Boutique high-tech',
+  title = `${SITE_NAME} – Boutique high-tech`,
   description = 'Découvrez les meilleurs gadgets et accessoires technologiques.',
   image = '/og-image.jpg',
   url,
@@ -61,12 +71,12 @@ export default function SEOHead({
   modifiedTime,
   prevUrl,
   nextUrl,
-  imageAlt = 'TechPlay – Boutique high-tech',
+  imageAlt = `${SITE_NAME} – Boutique high-tech`,
 }: Props) {
   const pathname = currentPathname()
   const loc: Locale = locale ?? detectLocaleFromPath(pathname)
 
-  const fullTitle = title.includes('TechPlay') ? title : `${title} | ${SITE_NAME}`
+  const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`
   const canonicalAbs = absUrl(url) ?? new URL(pathname, ORIGIN).toString()
 
   // Hreflang FR/EN + x-default
@@ -84,6 +94,9 @@ export default function SEOHead({
     'max-image-preview:large',
     'max-video-preview:-1',
   ].join(', ')
+
+  const ogLocale = loc === 'en' ? 'en_US' : 'fr_FR'
+  const ogLocaleAlt = loc === 'en' ? 'fr_FR' : 'en_US'
 
   return (
     <Head>
@@ -111,7 +124,8 @@ export default function SEOHead({
       <meta key="og:url" property="og:url" content={canonicalAbs} />
       <meta key="og:type" property="og:type" content={type} />
       <meta key="og:site_name" property="og:site_name" content={SITE_NAME} />
-      <meta key="og:locale" property="og:locale" content={loc === 'en' ? 'en_US' : 'fr_FR'} />
+      <meta key="og:locale" property="og:locale" content={ogLocale} />
+      <meta key="og:locale:alt" property="og:locale:alternate" content={ogLocaleAlt} />
 
       {/* Article meta si pertinent */}
       {type === 'article' && publishedTime && (

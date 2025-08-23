@@ -1,10 +1,10 @@
-// src/components/Analytics.tsx — Ultra Premium FINAL (GA4 + Consent Mode v2)
+// src/components/Analytics.tsx — Ultra Premium (GA4 + Consent Mode v2, propre)
 'use client'
 
 import { useEffect } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import Script from 'next/script'
-import { pageview } from '@/lib/ga'
+import { pageview, initAnalytics, consentUpdateBooleans } from '@/lib/ga'
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID ?? ''
 const ENABLE_IN_DEV = process.env.NEXT_PUBLIC_ANALYTICS_IN_DEV === 'true'
@@ -13,7 +13,7 @@ const DEBUG_MODE = process.env.NEXT_PUBLIC_GA_DEBUG === 'true'
 export default function Analytics() {
   const pathname = usePathname() || '/'
   const search = useSearchParams()
-  const shouldLoad = GA_ID && (process.env.NODE_ENV === 'production' || ENABLE_IN_DEV)
+  const shouldLoad = !!GA_ID && (process.env.NODE_ENV === 'production' || ENABLE_IN_DEV)
 
   // Pageview à chaque navigation (y compris changement de querystring)
   useEffect(() => {
@@ -34,37 +34,15 @@ export default function Analytics() {
       ad_personalization?: boolean
       functionality?: boolean
     }) => {
-      const gtag = (window as any).gtag as undefined | ((...args: any[]) => void)
-
-      // valeurs par défaut prudentes
-      const analytics = !!p.analytics
-      const ads = !!p.ads
-      const ad_user_data = p.ad_user_data ?? ads
-      const ad_personalization = p.ad_personalization ?? ads
-      const functionality = p.functionality ?? true
-
-      gtag?.('consent', 'update', {
-        analytics_storage: analytics ? 'granted' : 'denied',
-        ad_storage: ads ? 'granted' : 'denied',
-        ad_user_data: ad_user_data ? 'granted' : 'denied',
-        ad_personalization: ad_personalization ? 'granted' : 'denied',
-        functionality_storage: functionality ? 'granted' : 'denied',
-        security_storage: 'granted',
-      })
-
+      consentUpdateBooleans(p)
       try {
-        localStorage.setItem('consent:analytics', analytics ? '1' : '0')
-        localStorage.setItem('consent:ads', ads ? '1' : '0')
+        localStorage.setItem('consent:analytics', p.analytics ? '1' : '0')
+        localStorage.setItem('consent:ads', p.ads ? '1' : '0')
       } catch {}
     }
 
     ;(window as any).tpConsentUpdate = update
-
-    // Optionnel : écoute un CustomEvent('tp:consent', {detail:{...}})
-    const onEvt = (e: Event) => {
-      const detail = (e as CustomEvent).detail || {}
-      update(detail)
-    }
+    const onEvt = (e: Event) => update((e as CustomEvent).detail || {})
     window.addEventListener('tp:consent', onEvt as EventListener)
 
     return () => {
@@ -73,18 +51,34 @@ export default function Analytics() {
     }
   }, [shouldLoad])
 
+  // Initialise GA (config) une fois gtag présent
+  useEffect(() => {
+    if (!shouldLoad) return
+    initAnalytics({
+      disableSignals: true,
+      nonPersonalizedAds: true,
+      config: {
+        debug_mode: DEBUG_MODE || undefined,
+        ads_data_redaction: true,
+        page_path: typeof location !== 'undefined' ? location.pathname + location.search : undefined,
+        page_title: typeof document !== 'undefined' ? document.title : undefined,
+        send_page_view: false,
+      },
+    })
+  }, [shouldLoad])
+
   if (!shouldLoad) return null
 
   return (
     <>
-      {/* Loader GA4 (après interaction) */}
+      {/* Chargeur GA4 (après interaction) */}
       <Script
         id="ga4-src"
         src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(GA_ID)}`}
         strategy="afterInteractive"
       />
 
-      {/* Init idempotente + DNT/opt-out + Consent Mode v2 par défaut (sécurisé) */}
+      {/* Init minimale + Consent Mode par défaut TRES TÔT (avant tout event) */}
       <Script id="ga4-init" strategy="afterInteractive">
         {`
           (function() {
@@ -101,7 +95,7 @@ export default function Analytics() {
             function gtag(){ window.dataLayer.push(arguments); }
             window.gtag = window.gtag || gtag;
 
-            // Consent par défaut (sera mis à jour par la bannière)
+            // Consent par défaut ("denied") - sera mis à jour par la bannière
             if (!window.__ga_consent_default) {
               gtag('consent', 'default', {
                 ad_storage: 'denied',
@@ -115,16 +109,9 @@ export default function Analytics() {
               window.__ga_consent_default = true;
             }
 
+            // Horodatage GA
             gtag('js', new Date());
-            gtag('config', '${GA_ID}', {
-              send_page_view: false,
-              allow_google_signals: false,
-              allow_ad_personalization_signals: false,
-              debug_mode: ${DEBUG_MODE ? 'true' : 'false'},
-              ads_data_redaction: true,
-              page_path: location.pathname + location.search,
-              page_title: document.title || undefined
-            });
+            // ⚠️ Pas de 'config' ici : on délègue à initAnalytics() (lib/ga) pour centraliser la logique.
           })();
         `}
       </Script>

@@ -4,10 +4,23 @@ import Head from 'next/head'
 
 interface BreadcrumbJsonLdProps {
   items: { name: string; path: string }[]
+  siteUrl?: string
 }
 
-export default function BreadcrumbJsonLd({ items }: BreadcrumbJsonLdProps) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || ''
+const ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com'
+
+export default function BreadcrumbJsonLd({ items, siteUrl = ORIGIN }: BreadcrumbJsonLdProps) {
+  if (!items?.length) return null
+
+  const abs = (p: string) => {
+    try {
+      // si déjà absolu, garde
+      new URL(p)
+      return p
+    } catch {
+      return new URL(p.startsWith('/') ? p : `/${p}`, siteUrl).toString()
+    }
+  }
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -16,7 +29,7 @@ export default function BreadcrumbJsonLd({ items }: BreadcrumbJsonLdProps) {
       '@type': 'ListItem',
       position: index + 1,
       name: item.name,
-      item: `${siteUrl}${item.path}`,
+      item: abs(item.path),
     })),
   }
 
@@ -24,9 +37,7 @@ export default function BreadcrumbJsonLd({ items }: BreadcrumbJsonLdProps) {
     <Head>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(jsonLd),
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
     </Head>
   )

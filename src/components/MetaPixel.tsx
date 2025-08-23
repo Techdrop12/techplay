@@ -1,9 +1,10 @@
-// src/components/MetaPixel.tsx — FINAL (Consent-aware, SPA pageviews, no double-init)
+// src/components/MetaPixel.tsx — FINAL (Consent-aware, SPA pageviews dedup, no double-init)
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Script from 'next/script'
+import { pixelPageView, isPixelReady } from '@/lib/meta-pixel'
 
 const PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID ?? ''
 const ENABLE_IN_DEV = process.env.NEXT_PUBLIC_PIXEL_IN_DEV === 'true'
@@ -26,7 +27,7 @@ function eligibleNow(): boolean {
       localStorage.getItem('analytics:disabled') === '1'
   } catch {}
 
-  // Consent local (défini par Analytics.tsx)
+  // Consent local (défini par Analytics.tsx / ta bannière)
   let consentAds = '0'
   try {
     consentAds = localStorage.getItem('consent:ads') || '0'
@@ -42,6 +43,7 @@ function eligibleNow(): boolean {
 export default function MetaPixel() {
   const pathname = usePathname() || '/'
   const [shouldLoad, setShouldLoad] = useState(false)
+  const lastPathRef = useRef<string>('')
 
   // Évalue à l’arrivée
   useEffect(() => {
@@ -56,18 +58,28 @@ export default function MetaPixel() {
       if ((detail.ads || detail.analytics) && eligibleNow()) {
         setShouldLoad(true)
       }
-      // Si l’utilisateur refuse ensuite, on n’essaye pas de décharger le pixel (Meta ne fournit pas d’API pour “unload”)
+      // Si l’utilisateur refuse ensuite, on ne "décharge" pas le pixel (Meta ne prévoit pas d'API)
     }
     window.addEventListener('tp:consent', onConsent as EventListener)
     return () => window.removeEventListener('tp:consent', onConsent as EventListener)
   }, [])
 
-  // SPA: track PageView à chaque navigation, quand fbq est prêt
+  // SPA: track PageView à chaque navigation, quand le pixel est prêt (dedupe)
   useEffect(() => {
     if (!shouldLoad) return
-    try {
-      (window as any).fbq?.('track', 'PageView')
-    } catch {}
+    if (lastPathRef.current === pathname) return
+    lastPathRef.current = pathname
+
+    // Le snippet initialise fbq (stub) immédiatement ; si jamais il n'est pas prêt,
+    // on tente à nouveau au prochain tick.
+    const fire = () => {
+      if (isPixelReady()) {
+        pixelPageView()
+      } else {
+        setTimeout(() => isPixelReady() && pixelPageView(), 0)
+      }
+    }
+    fire()
   }, [pathname, shouldLoad])
 
   if (!shouldLoad) return null
@@ -85,7 +97,7 @@ export default function MetaPixel() {
             t.src=v; s=b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t,s);
           })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
           fbq('init', '${PIXEL_ID}');
-          // Pas de fbq('track','PageView') ici : on le fait manuellement à chaque navigation.
+          // Pas de 'PageView' ici : on le fait manuellement (SPA-friendly).
         `}
       </Script>
 
