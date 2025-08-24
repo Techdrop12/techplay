@@ -1,4 +1,4 @@
-// src/components/layout/Header.tsx — Ultra Premium FINAL (i18n-aware links, smart prefetch)
+// src/components/layout/Header.tsx — Ultra Premium FINAL (i18n-aware links, smart prefetch, logo /public)
 'use client'
 
 import Link from '@/components/LocalizedLink'
@@ -16,7 +16,7 @@ type NavLink = { href: string; label: string }
 
 const LINKS: NavLink[] = [
   { href: '/', label: 'Accueil' },
-  { href: '/categorie', label: 'Catégories' }, // mégamenu (liens internes pointent vers /products?cat=…)
+  { href: '/categorie', label: 'Catégories' },
   { href: '/products', label: 'Produits' },
   { href: '/products/packs', label: 'Packs' },
   { href: '/wishlist', label: 'Wishlist' },
@@ -36,7 +36,7 @@ const SEARCH_TRENDS = [
   'souris sans fil',
 ]
 
-// ⚠️ on route vers /products?cat=… (cohérent avec la Home & l’arbo)
+// ⚠️ on route vers /products?cat=…
 const CATEGORIES: Array<{ label: string; href: string; emoji: string; desc: string }> = [
   { label: 'Casques',   href: '/products?cat=casques',   emoji: '🎧', desc: 'Audio immersif' },
   { label: 'Claviers',  href: '/products?cat=claviers',  emoji: '⌨️', desc: 'Mécas & low-profile' },
@@ -203,7 +203,6 @@ export default function Header() {
       const el = document.createElement('link')
       el.rel = 'prefetch'
       el.href = href
-      el.as = 'document'
       document.head.appendChild(el)
       setTimeout(() => el.remove(), 5000)
     } catch {}
@@ -254,7 +253,7 @@ export default function Header() {
       )}
     >
       <div className="container-app flex h-16 md:h-20 items-center justify-between gap-2 sm:gap-3">
-        {/* Logo */}
+        {/* Logo → utilise /public/logo.svg (+ /public/logo-dark.svg si présent) */}
         <Link
           href="/"
           prefetch={false}
@@ -262,8 +261,16 @@ export default function Header() {
           className="flex shrink-0 items-center gap-3 hocus:opacity-90"
           onFocus={() => smartPrefetchStart('/')}
           onBlur={() => smartPrefetchCancel('/')}
+          data-gtm="header_logo"
         >
-          <Logo className="h-8 w-auto md:h-10" />
+          <Logo
+            className="h-8 w-auto md:h-10"
+            withText
+            // Si /public/logo-dark.svg existe, il sera utilisé automatiquement en dark mode :
+            srcLight="/logo.svg"
+            srcDark="/logo-dark.svg"
+            ariaLabel="TechPlay"
+          />
         </Link>
 
         {/* Recherche */}
@@ -596,3 +603,4 @@ export default function Header() {
     </header>
   )
 }
+

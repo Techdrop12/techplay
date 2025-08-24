@@ -2,41 +2,45 @@
   "name": "TechPlay – Boutique High-Tech Premium",
   "short_name": "TechPlay",
   "description": "Boutique ultra premium de gadgets high-tech : innovation, IA, performance et expérience utilisateur.",
-  "lang": "fr",
+  "lang": "fr-FR",
   "dir": "ltr",
-  "id": "/fr/?source=pwa",
-  "start_url": "/fr/?source=pwa",
+
+  "id": "/?source=pwa",
+  "start_url": "/?source=pwa",
   "scope": "/",
+
   "display": "standalone",
-  "display_override": ["standalone", "browser"],
+  "display_override": ["standalone", "minimal-ui", "browser", "window-controls-overlay"],
+  "launch_handler": { "client_mode": "focus-existing" },
+  "handle_links": "preferred",
   "orientation": "portrait",
+
   "background_color": "#ffffff",
   "theme_color": "#0f172a",
+
   "icons": [
     { "src": "/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/icons/icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "/icons/maskable-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
-  "categories": ["shopping", "technology"],
+
+  "screenshots": [
+    { "src": "/og-image.jpg", "type": "image/jpeg", "sizes": "1200x630", "form_factor": "wide", "label": "TechPlay – Accueil" }
+  ],
+
+  "categories": ["shopping", "electronics", "technology"],
   "prefer_related_applications": false,
+
   "shortcuts": [
-    {
-      "name": "Packs",
-      "short_name": "Packs",
-      "url": "/pack",
-      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png" }]
-    },
-    {
-      "name": "Wishlist",
-      "short_name": "Wishlist",
-      "url": "/wishlist",
-      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png" }]
-    },
-    {
-      "name": "Offres du jour",
-      "short_name": "Offres",
-      "url": "/promo",
-      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png" }]
-    }
+    { "name": "Produits", "short_name": "Produits", "url": "/products", "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Packs", "short_name": "Packs", "url": "/products/packs", "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Wishlist", "short_name": "Favoris", "url": "/wishlist", "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Panier", "short_name": "Panier", "url": "/cart", "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Blog", "short_name": "Blog", "url": "/blog", "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png" }] }
+  ],
+
+  "protocol_handlers": [
+    { "protocol": "web+techplay", "url": "/products?ref=%s" }
   ]
 }
+

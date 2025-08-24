@@ -1,4 +1,4 @@
-// src/app/layout.tsx — RootLayout ultra-premium (SEO/PWA/Consent/a11y/perf polis)
+// src/app/layout.tsx — RootLayout ultra-premium (SEO/PWA/Consent/a11y/perf)
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
 import { Inter, Sora } from 'next/font/google'
@@ -83,10 +83,12 @@ export const metadata: Metadata = {
       { url: '/icons/icon-192x192.png', type: 'image/png', sizes: '192x192' },
       { url: '/icons/icon-512x512.png', type: 'image/png', sizes: '512x512' },
     ],
+    // Tu n’as pas d’icône 180x180 dédiée : on pointe sur 192x192 (OK mais pas optimal).
     apple: [{ url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' }],
-    other: [{ rel: 'mask-icon', url: '/icons/maskable-icon.png', color: '#000000' }],
+    // Safari pinned tab → nécessite un SVG : on utilise ton logo.svg (monochrome conseillé)
+    other: [{ rel: 'mask-icon', url: '/logo.svg', color: '#111111' }],
   },
-  // ⚠️ Garde UNE SEULE webmanifest dans /public (préférer /site.webmanifest)
+  // ✅ Une SEULE webmanifest : /site.webmanifest (garde-la dans /public)
   manifest: '/site.webmanifest',
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: SITE_NAME },
   formatDetection: { telephone: false, address: false, email: false },
@@ -154,8 +156,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="preconnect" href="https://static.hotjar.com" />
         <link rel="dns-prefetch" href="https://static.hotjar.com" />
 
-        {/* LCP: précharger une image clé du hero */}
-        <link rel="preload" as="image" href="/carousel1.jpg" />
+        {/* LCP: précharge les visuels clés du hero (mobile + desktop) */}
+        <link rel="preload" as="image" href="/carousel/hero-1-mobile.jpg" media="(max-width: 639px)" />
+        <link rel="preload" as="image" href="/carousel/hero-1-desktop.jpg" media="(min-width: 640px)" />
+
         <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
       </head>
 
@@ -228,8 +232,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               name: SITE_NAME,
               potentialAction: {
                 '@type': 'SearchAction',
-                // ✅ on cible /products (canon), plus /produit
-                target: `${SITE_URL}/products?q={search_term_string}`,
+                target: `${SITE_URL}/products?q={search_term_string}`, // canon
                 'query-input': 'required name=search_term_string',
               },
             }),
