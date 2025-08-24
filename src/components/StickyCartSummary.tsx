@@ -1,36 +1,35 @@
-// src/components/StickyCartSummary.tsx — FINAL (types stricts + i18n paths + accent tokens + a11y)
+// src/components/StickyCartSummary.tsx — FINAL (imports fix + types stricts + i18n + a11y)
 'use client'
 
 import Link from '@/components/LocalizedLink'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { useCart } from '@/context/cartContext'
-import { formatPrice, cn } from '@/lib/utils'
+import { useCart } from '@/hooks/useCart'                 // ✅ unifie l’import
+import { cn } from '@/lib/utils'
+import { formatPrice } from '@/lib/formatPrice'           // ✅ import correct
 import { event, logEvent } from '@/lib/ga'
 import { useTranslations } from 'next-intl'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
-// Locale stricte attendue par localizePath()
 type AppLocale = 'fr' | 'en'
 
 type Props = {
   locale?: AppLocale
-  cartHref?: string // ex: '/cart'
-  checkoutHref?: string // ex: '/commande'
+  cartHref?: string      // ex: '/cart'
+  checkoutHref?: string  // ex: '/commande'
   excludePaths?: string[]
   freeShippingThreshold?: number
   className?: string
 }
 
 /**
- * StickyCartSummary — résumé panier mobile
- * - Mobile only (md:hidden), safe-area iOS, blur, spring anim
+ * StickyCartSummary — résumé panier mobile (barre collante en bas)
+ * - Mobile only (md:hidden), safe-area iOS, animations spring
  * - Masqué sur /checkout, /commande, /cart, /panier, /404, /_not-found (configurable)
- * - État plié/déplié persistant (localStorage)
+ * - État plié/déplié persistant via localStorage
  * - Utilise les totaux du CartContext (remise, TVA, livraison, total)
- * - a11y + aria-live
- * - Tracking GA4 + logEvent custom
+ * - a11y + aria-live, i18n, tracking GA4
  */
 export default function StickyCartSummary({
   locale,
@@ -45,7 +44,7 @@ export default function StickyCartSummary({
   const loc: AppLocale = locale ?? detectedLocale
   const prefersReduced = useReducedMotion()
 
-  // ⛔️ Ne rien monter sur les routes exclues
+  // ⛔️ Ne rien monter sur les routes exclues (évite tout coût + bugs)
   const isExcluded = excludePaths.some((p) => pathname.startsWith(localizePath(p, loc)))
   if (isExcluded) return null
 
@@ -79,11 +78,7 @@ export default function StickyCartSummary({
     }) as any
   }
   const tx = (key: string, fallback: string, values?: Record<string, any>) => {
-    try {
-      return values ? t(key as any, values as any) : (t(key as any) as any)
-    } catch {
-      return fallback
-    }
+    try { return values ? t(key as any, values as any) : (t(key as any) as any) } catch { return fallback }
   }
 
   // ✅ Panier (totaux du contexte)
@@ -126,16 +121,11 @@ export default function StickyCartSummary({
   const [collapsed, setCollapsed] = useState(false)
   useEffect(() => {
     setMounted(true)
-    try {
-      const saved = localStorage.getItem('tp_cart_sticky_collapsed')
-      if (saved === '1') setCollapsed(true)
-    } catch {}
+    try { const saved = localStorage.getItem('tp_cart_sticky_collapsed'); if (saved === '1') setCollapsed(true) } catch {}
   }, [])
   const setCollapsedPersist = (v: boolean) => {
     setCollapsed(v)
-    try {
-      localStorage.setItem('tp_cart_sticky_collapsed', v ? '1' : '0')
-    } catch {}
+    try { localStorage.setItem('tp_cart_sticky_collapsed', v ? '1' : '0') } catch {}
   }
 
   // Affichage uniquement si items
@@ -148,9 +138,7 @@ export default function StickyCartSummary({
   useEffect(() => {
     if (visible && !trackedRef.current) {
       trackedRef.current = true
-      try {
-        event({ action: 'sticky_cart_visible', category: 'engagement', label: 'sticky_cart', value: count })
-      } catch {}
+      try { event({ action: 'sticky_cart_visible', category: 'engagement', label: 'sticky_cart', value: count }) } catch {}
     }
   }, [visible, count])
 
@@ -249,7 +237,7 @@ export default function StickyCartSummary({
                 </p>
               </div>
 
-              {/* Lignes montants (rapide) */}
+              {/* Lignes montants */}
               <div className="px-4 pt-2 text-[13px] text-gray-700 dark:text-gray-300 space-y-1">
                 <Line label={tx('subtotal', 'Sous-total')} value={formatPrice(subtotal)} />
                 {discount > 0 && <Line label={tx('discount', 'Remise')} value={`- ${formatPrice(discount)}`} accent />}

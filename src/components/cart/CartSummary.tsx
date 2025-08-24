@@ -1,10 +1,10 @@
-// src/components/cart/CartSummary.tsx
-'use client';
+'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { formatPrice, cn } from '@/lib/utils';
-import type { Product } from '@/types/product';
-import FreeShippingBadge from '@/components/FreeShippingBadge';
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { cn } from '@/lib/utils'
+import { formatPrice } from '@/lib/formatPrice'   // ✅ ici aussi
+import type { Product } from '@/types/product'
+import FreeShippingBadge from '@/components/FreeShippingBadge'
 
 type CouponSpec =
   | { type: 'percent'; value: number } // ex: 10 = -10%
