@@ -1,13 +1,13 @@
-// src/components/StickyCartSummary.tsx — FINAL (imports fix + types stricts + i18n + a11y)
+// src/components/StickyCartSummary.tsx — FINAL (hooks order fixed + i18n safe + imports OK)
 'use client'
 
 import Link from '@/components/LocalizedLink'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { useCart } from '@/hooks/useCart'                 // ✅ unifie l’import
+import { useCart } from '@/hooks/useCart'
 import { cn } from '@/lib/utils'
-import { formatPrice } from '@/lib/formatPrice'           // ✅ import correct
+import { formatPrice } from '@/lib/formatPrice'
 import { event, logEvent } from '@/lib/ga'
 import { useTranslations } from 'next-intl'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
@@ -16,21 +16,13 @@ type AppLocale = 'fr' | 'en'
 
 type Props = {
   locale?: AppLocale
-  cartHref?: string      // ex: '/cart'
-  checkoutHref?: string  // ex: '/commande'
+  cartHref?: string        // ex: '/cart'
+  checkoutHref?: string    // ex: '/commande'
   excludePaths?: string[]
   freeShippingThreshold?: number
   className?: string
 }
 
-/**
- * StickyCartSummary — résumé panier mobile (barre collante en bas)
- * - Mobile only (md:hidden), safe-area iOS, animations spring
- * - Masqué sur /checkout, /commande, /cart, /panier, /404, /_not-found (configurable)
- * - État plié/déplié persistant via localStorage
- * - Utilise les totaux du CartContext (remise, TVA, livraison, total)
- * - a11y + aria-live, i18n, tracking GA4
- */
 export default function StickyCartSummary({
   locale,
   cartHref,
@@ -39,16 +31,13 @@ export default function StickyCartSummary({
   freeShippingThreshold,
   className,
 }: Props) {
+  // ── TOUS les hooks sont appelés inconditionnellement (pas d’early return avant)
   const pathname = usePathname() || ''
   const detectedLocale = getCurrentLocale(pathname) as AppLocale
   const loc: AppLocale = locale ?? detectedLocale
   const prefersReduced = useReducedMotion()
 
-  // ⛔️ Ne rien monter sur les routes exclues (évite tout coût + bugs)
-  const isExcluded = excludePaths.some((p) => pathname.startsWith(localizePath(p, loc)))
-  if (isExcluded) return null
-
-  // i18n (fallback safe si provider indisponible)
+  // i18n (fallback si pas de provider)
   let t: any
   try {
     t = useTranslations('cart')
@@ -81,11 +70,11 @@ export default function StickyCartSummary({
     try { return values ? t(key as any, values as any) : (t(key as any) as any) } catch { return fallback }
   }
 
-  // ✅ Panier (totaux du contexte)
+  // Panier (du contexte)
   const {
     cart,
     count,
-    total, // sous-total
+    total,
     discount,
     tax,
     shipping,
@@ -95,7 +84,7 @@ export default function StickyCartSummary({
     freeShippingThreshold: ctxThreshold,
   } = useCart()
 
-  // Seuil livraison offerte (prop > contexte > env > fallback)
+  // Seuil livraison offerte
   const FREE_SHIP = useMemo(() => {
     if (typeof freeShippingThreshold === 'number' && freeShippingThreshold > 0) return freeShippingThreshold
     if (typeof ctxThreshold === 'number' && ctxThreshold > 0) return ctxThreshold
@@ -103,20 +92,25 @@ export default function StickyCartSummary({
     return Number.isFinite(env) && env > 0 ? env : 50
   }, [freeShippingThreshold, ctxThreshold])
 
-  // Compat si certaines valeurs de contexte sont absentes
-  const subtotal = Number.isFinite(total)
-    ? total
-    : (cart ?? []).reduce((s, it: any) => s + (it?.price || 0) * (it?.quantity || 1), 0)
+  // Totaux dérivés (avec garde-fous)
+  const subtotal = useMemo(
+    () => (Number.isFinite(total) ? total : (cart ?? []).reduce((s, it: any) => s + (it?.price || 0) * (it?.quantity || 1), 0)),
+    [total, cart]
+  )
+  const remaining = useMemo(
+    () => (Number.isFinite(amountToFreeShipping) ? amountToFreeShipping : Math.max(0, FREE_SHIP - subtotal)),
+    [amountToFreeShipping, FREE_SHIP, subtotal]
+  )
+  const progress = useMemo(
+    () => (Number.isFinite(progressToFreeShipping) ? progressToFreeShipping : Math.min(100, Math.round((subtotal / FREE_SHIP) * 100))),
+    [progressToFreeShipping, subtotal, FREE_SHIP]
+  )
+  const payable = useMemo(
+    () => (Number.isFinite(grandTotal) ? grandTotal : subtotal + (Number.isFinite(shipping) ? shipping : 0) + (Number.isFinite(tax) ? tax : 0)),
+    [grandTotal, subtotal, shipping, tax]
+  )
 
-  const remaining = Number.isFinite(amountToFreeShipping) ? amountToFreeShipping : Math.max(0, FREE_SHIP - subtotal)
-  const progress = Number.isFinite(progressToFreeShipping)
-    ? progressToFreeShipping
-    : Math.min(100, Math.round((subtotal / FREE_SHIP) * 100))
-  const payable = Number.isFinite(grandTotal)
-    ? grandTotal
-    : subtotal + (Number.isFinite(shipping) ? shipping : 0) + (Number.isFinite(tax) ? tax : 0)
-
-  // Mémorisation UI (plié/déplié)
+  // État UI + persistance
   const [mounted, setMounted] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
   useEffect(() => {
@@ -128,12 +122,16 @@ export default function StickyCartSummary({
     try { localStorage.setItem('tp_cart_sticky_collapsed', v ? '1' : '0') } catch {}
   }
 
-  // Affichage uniquement si items
+  // Visibilité + routes exclues (évaluées APRÈS tous les hooks)
   const visible = mounted && (count ?? 0) > 0
-  const gotoCart = localizePath(cartHref || '/cart', loc)
-  const gotoCheckout = localizePath(checkoutHref || '/commande', loc)
+  const gotoCart = useMemo(() => localizePath(cartHref || '/cart', loc), [cartHref, loc])
+  const gotoCheckout = useMemo(() => localizePath(checkoutHref || '/commande', loc), [checkoutHref, loc])
+  const isExcluded = useMemo(
+    () => excludePaths.some((p) => pathname.startsWith(localizePath(p, loc))),
+    [excludePaths, pathname, loc]
+  )
 
-  // Tracking à l’apparition
+  // Tracking apparition
   const trackedRef = useRef(false)
   useEffect(() => {
     if (visible && !trackedRef.current) {
@@ -149,7 +147,8 @@ export default function StickyCartSummary({
     } catch {}
   }
 
-  if (!visible) return null
+  // ⛔️ Masquage APRÈS les hooks → pas d’erreur React #300
+  if (!visible || isExcluded) return null
 
   return (
     <AnimatePresence mode="wait">
@@ -170,7 +169,7 @@ export default function StickyCartSummary({
         aria-label={tx('mobile_summary', 'Résumé de votre panier', { count })}
         data-visible="true"
       >
-        {/* Barre supérieure : toggle + total à payer */}
+        {/* Barre supérieure */}
         <div className="flex items-center justify-between px-4 py-2">
           <button
             type="button"
@@ -288,12 +287,7 @@ function Line({
   value,
   bold = false,
   accent = false,
-}: {
-  label: string
-  value: string
-  bold?: boolean
-  accent?: boolean
-}) {
+}: { label: string; value: string; bold?: boolean; accent?: boolean }) {
   return (
     <div className="flex items-center justify-between">
       <span className={cn('text-gray-700 dark:text-gray-300', bold && 'font-semibold')}>{label}</span>
