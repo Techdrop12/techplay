@@ -4,11 +4,6 @@ import { useEffect, useMemo, useState } from 'react';
 
 /**
  * ProductFilter — filtre côté client (recherche, catégorie, prix, rating, promo, nouveautés, tri)
- *
- * Props:
- *  - products: Array<ProductLike>
- *  - onFilter: (filtered: ProductLike[]) => void
- *  - initial?: valeurs initiales des filtres (optionnel)
  */
 export default function ProductFilter({ products = [], onFilter, initial = {} }) {
   // --------- état des filtres
@@ -25,9 +20,14 @@ export default function ProductFilter({ products = [], onFilter, initial = {} })
   const [onlyPromo, setOnlyPromo] = useState(Boolean(initial.onlyPromo));
   const [sort, setSort] = useState(initial.sort ?? 'new'); // 'new' | 'price_asc' | 'price_desc' | 'rating' | 'promo'
 
-  // --------- dérivés
+  // --------- catégories uniques triées (stable)
   const categories = useMemo(() => {
-    return Array.from(new Set(products.map((p) => (p?.category ?? '').trim()))).filter(Boolean);
+    const set = new Set(
+      (products || [])
+        .map((p) => (p?.category ?? '').trim())
+        .filter(Boolean)
+    );
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [products]);
 
   // --------- calcul filtré + trié

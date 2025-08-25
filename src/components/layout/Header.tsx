@@ -1,4 +1,4 @@
-// src/components/layout/Header.tsx — Ultra Premium FINAL (i18n-aware links, smart prefetch, logo /public)
+// src/components/layout/Header.tsx — Premium, clean nav (no Accueil/Packs, pro icons)
 'use client'
 
 import Link from '@/components/LocalizedLink'
@@ -14,11 +14,10 @@ import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
 type NavLink = { href: string; label: string }
 
+// On retire "Accueil" et "Packs" du top nav
 const LINKS: NavLink[] = [
-  { href: '/', label: 'Accueil' },
   { href: '/categorie', label: 'Catégories' },
   { href: '/products', label: 'Produits' },
-  { href: '/products/packs', label: 'Packs' },
   { href: '/wishlist', label: 'Wishlist' },
   { href: '/blog', label: 'Blog' },
   { href: '/contact', label: 'Contact' },
@@ -36,16 +35,62 @@ const SEARCH_TRENDS = [
   'souris sans fil',
 ]
 
-// ⚠️ on route vers /products?cat=…
-const CATEGORIES: Array<{ label: string; href: string; emoji: string; desc: string }> = [
-  { label: 'Casques',   href: '/products?cat=casques',   emoji: '🎧', desc: 'Audio immersif' },
-  { label: 'Claviers',  href: '/products?cat=claviers',  emoji: '⌨️', desc: 'Mécas & low-profile' },
-  { label: 'Souris',    href: '/products?cat=souris',    emoji: '🖱️', desc: 'Précision & confort' },
-  { label: 'Webcams',   href: '/products?cat=webcams',   emoji: '📷', desc: 'Visio en HD' },
-  { label: 'Batteries', href: '/products?cat=batteries', emoji: '🔋', desc: 'Power & hubs' },
-  { label: 'Audio',     href: '/products?cat=audio',     emoji: '🔊', desc: 'Enceintes & DAC' },
-  { label: 'Stockage',  href: '/products?cat=stockage',  emoji: '💾', desc: 'SSD & cartes' },
-  { label: 'Écrans',    href: '/products?cat=ecrans',    emoji: '🖥️', desc: '144Hz et +' },
+/* ---------- Icônes SVG modernes ---------- */
+const Icon = {
+  Headphones: (p: React.SVGProps<SVGSVGElement>) => (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}>
+      <path fill="currentColor" d="M12 3a9 9 0 0 0-9 9v6a3 3 0 0 0 3 3h1a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H5a7 7 0 0 1 14 0h-2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h1a3 3 0 0 0 3-3v-6a9 9 0 0 0-9-9z"/>
+    </svg>
+  ),
+  Keyboard: (p: React.SVGProps<SVGSVGElement>) => (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}>
+      <path fill="currentColor" d="M3 6h18a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Zm2 3h2v2H5V9Zm3 0h2v2H8V9Zm3 0h2v2h-2V9Zm3 0h2v2h-2V9Zm3 0h2v2h-2V9ZM5 12h2v2H5v-2Zm3 0h2v2H8v-2Zm3 0h5v2h-5v-2Z"/>
+    </svg>
+  ),
+  Mouse: (p: React.SVGProps<SVGSVGElement>) => (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}>
+      <path fill="currentColor" d="M12 2a6 6 0 0 1 6 6v8a6 6 0 0 1-12 0V8a6 6 0 0 1 6-6Zm0 2a4 4 0 0 0-4 4v2h8V8a4 4 0 0 0-4-4Zm-.5 1h1v3h-1V5Z"/>
+    </svg>
+  ),
+  Camera: (p: React.SVGProps<SVGSVGElement>) => (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}>
+      <path fill="currentColor" d="M9 4h6l1.5 2H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3L9 4Zm3 4a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"/>
+    </svg>
+  ),
+  Battery: (p: React.SVGProps<SVGSVGElement>) => (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}>
+      <path fill="currentColor" d="M2 8a3 3 0 0 1 3-3h11a3 3 0 0 1 3 3v1h1a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-1v1a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V8Zm9 1-3 5h2v3l3-5h-2V9Z"/>
+    </svg>
+  ),
+  Speaker: (p: React.SVGProps<SVGSVGElement>) => (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}>
+      <path fill="currentColor" d="M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm5 2a2 2 0 1 0 .001 3.999A2 2 0 0 0 12 6Zm0 6a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/>
+    </svg>
+  ),
+  Drive: (p: React.SVGProps<SVGSVGElement>) => (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}>
+      <path fill="currentColor" d="M4 7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7Zm3 1h10v3H7V8Zm0 5h6v4H7v-4Z"/>
+    </svg>
+  ),
+  Monitor: (p: React.SVGProps<SVGSVGElement>) => (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}>
+      <path fill="currentColor" d="M3 5h18a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7v2h3v2H7v-2h3v-2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/>
+    </svg>
+  ),
+}
+
+type CatItem = { label: string; href: string; desc: string; Icon: (p: any) => JSX.Element }
+
+// ⚠️ routes vers /products?cat=…
+const CATEGORIES: CatItem[] = [
+  { label: 'Casques',   href: '/products?cat=casques',   desc: 'Audio immersif',         Icon: Icon.Headphones },
+  { label: 'Claviers',  href: '/products?cat=claviers',  desc: 'Mécas & low-profile',    Icon: Icon.Keyboard },
+  { label: 'Souris',    href: '/products?cat=souris',    desc: 'Précision & confort',    Icon: Icon.Mouse },
+  { label: 'Webcams',   href: '/products?cat=webcams',   desc: 'Visio en HD',            Icon: Icon.Camera },
+  { label: 'Batteries', href: '/products?cat=batteries', desc: 'Power & hubs',           Icon: Icon.Battery },
+  { label: 'Audio',     href: '/products?cat=audio',     desc: 'Enceintes & DAC',        Icon: Icon.Speaker },
+  { label: 'Stockage',  href: '/products?cat=stockage',  desc: 'SSD & cartes',           Icon: Icon.Drive },
+  { label: 'Écrans',    href: '/products?cat=ecrans',    desc: '144Hz et +',             Icon: Icon.Monitor },
 ]
 
 export default function Header() {
@@ -153,7 +198,7 @@ export default function Header() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Hotkeys: "/" ou Ctrl/Cmd+K → focus recherche
+  // Hotkeys
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName
@@ -174,7 +219,6 @@ export default function Header() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  // Placeholder rotatif
   useEffect(() => {
     let i = 0
     const id = window.setInterval(() => {
@@ -184,7 +228,6 @@ export default function Header() {
     return () => clearInterval(id)
   }, [])
 
-  // Nettoyage des timers de prefetch au unmount
   useEffect(() => {
     return () => {
       prefetchTimers.current.forEach((t) => clearTimeout(t))
@@ -197,7 +240,6 @@ export default function Header() {
     return localized === pathname || pathname.startsWith(localized + '/')
   }
 
-  // Prefetch “intelligent” au hover/focus (via <link rel="prefetch">)
   const prefetchViaLink = (href: string) => {
     try {
       const el = document.createElement('link')
@@ -253,7 +295,7 @@ export default function Header() {
       )}
     >
       <div className="container-app flex h-16 md:h-20 items-center justify-between gap-2 sm:gap-3">
-        {/* Logo → utilise /public/logo.svg (+ /public/logo-dark.svg si présent) */}
+        {/* Logo — on garde UN SEUL libellé cliquable (pas de doublon) */}
         <Link
           href="/"
           prefetch={false}
@@ -265,8 +307,7 @@ export default function Header() {
         >
           <Logo
             className="h-8 w-auto md:h-10"
-            withText
-            // Si /public/logo-dark.svg existe, il sera utilisé automatiquement en dark mode :
+            withText={false}       // <- évite le texte "TechPlay" doublé si ton SVG l’intègre
             srcLight="/logo.svg"
             srcDark="/logo-dark.svg"
             ariaLabel="TechPlay"
@@ -314,7 +355,10 @@ export default function Header() {
               title="Rechercher"
               data-gtm="header_search_submit"
             >
-              🔎
+              {/* loupe vectorielle statt emoji */}
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path fill="currentColor" d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5-5-5ZM10 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10Z"/>
+              </svg>
             </button>
           </div>
         </form>
@@ -395,7 +439,7 @@ export default function Header() {
                               )}
                               data-gtm="header_mega_cat"
                             >
-                              <span className="text-xl select-none" aria-hidden="true">{c.emoji}</span>
+                              <c.Icon className="opacity-80" />
                               <span className="flex-1">
                                 <span className="block text-sm font-semibold">{c.label}</span>
                                 <span className="block text-xs text-token-text/60">{c.desc}</span>
@@ -485,7 +529,7 @@ export default function Header() {
         <div className="hidden items-center gap-2 sm:gap-3 md:flex">
           <ThemeToggle size="sm" />
 
-          {/* Offres : icône <xl, libellé en >=xl */}
+          {/* Offres */}
           <Link
             href="/products?promo=1"
             prefetch={false}
@@ -603,4 +647,3 @@ export default function Header() {
     </header>
   )
 }
-

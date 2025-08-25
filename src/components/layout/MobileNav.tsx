@@ -1,4 +1,4 @@
-// src/components/layout/MobileNav.tsx — ULTIME++ (bugfix TS, recent searches, a11y, prefetch, tweaks)
+// src/components/layout/MobileNav.tsx — clean nav (no Accueil/Packs), icons & routes unifiés
 'use client'
 
 import Link from 'next/link'
@@ -12,15 +12,14 @@ import { event as gaEvent, logEvent } from '@/lib/ga'
 
 type NavItem = { href: string; label: string }
 
+// Retire "Accueil" et "Packs"; harmonise /products
 const NAV: Readonly<NavItem[]> = [
-  { href: '/', label: 'Accueil' },
-  { href: '/produit', label: 'Produits' },
-  { href: '/pack', label: 'Packs' },
+  { href: '/products', label: 'Produits' },
   { href: '/categorie', label: 'Catégories' },
   { href: '/wishlist', label: 'Wishlist' },
   { href: '/blog', label: 'Blog' },
   { href: '/contact', label: 'Contact' },
-  { href: '/promo', label: '🎁 Offres' },
+  { href: '/products?promo=1', label: '🎁 Offres' },
 ]
 
 const SEARCH_TRENDS = [
@@ -32,18 +31,33 @@ const SEARCH_TRENDS = [
   'souris sans fil',
 ]
 
-const CATEGORIES: Array<{ label: string; href: string; emoji: string; desc: string }> = [
-  { label: 'Casques', href: '/categorie/casques', emoji: '🎧', desc: 'Audio immersif' },
-  { label: 'Claviers', href: '/categorie/claviers', emoji: '⌨️', desc: 'Mécas & low-profile' },
-  { label: 'Souris', href: '/categorie/souris', emoji: '🖱️', desc: 'Précision & confort' },
-  { label: 'Webcams', href: '/categorie/webcams', emoji: '📷', desc: 'Visio en HD' },
-  { label: 'Batteries', href: '/categorie/batteries', emoji: '🔋', desc: 'Power & hubs' },
-  { label: 'Audio', href: '/categorie/audio', emoji: '🔊', desc: 'Enceintes & DAC' },
-  { label: 'Stockage', href: '/categorie/stockage', emoji: '💾', desc: 'SSD & cartes' },
-  { label: 'Écrans', href: '/categorie/ecrans', emoji: '🖥️', desc: '144Hz et +' },
+// Icônes pro (inline)
+const Icon = {
+  Headphones: (p: any) => (<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}><path fill="currentColor" d="M12 3a9 9 0 0 0-9 9v6a3 3 0 0 0 3 3h1a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H5a7 7 0 0 1 14 0h-2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h1a3 3 0 0 0 3-3v-6a9 9 0 0 0-9-9z"/></svg>),
+  Keyboard: (p: any) => (<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}><path fill="currentColor" d="M3 6h18a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Zm2 3h2v2H5V9Zm3 0h2v2H8V9Zm3 0h2v2h-2V9Zm3 0h2v2h-2V9Zm3 0h2v2h-2V9ZM5 12h2v2H5v-2Zm3 0h2v2H8v-2Zm3 0h5v2h-5v-2Z"/></svg>),
+  Mouse: (p: any) => (<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}><path fill="currentColor" d="M12 2a6 6 0 0 1 6 6v8a6 6 0 0 1-12 0V8a6 6 0 0 1 6-6Zm0 2a4 4 0 0 0-4 4v2h8V8a4 4 0 0 0-4-4Zm-.5 1h1v3h-1V5Z"/></svg>),
+  Camera: (p: any) => (<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}><path fill="currentColor" d="M9 4h6l1.5 2H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3L9 4Zm3 4a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"/></svg>),
+  Battery: (p: any) => (<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}><path fill="currentColor" d="M2 8a3 3 0 0 1 3-3h11a3 3 0 0 1 3 3v1h1a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-1v1a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V8Zm9 1-3 5h2v3l3-5h-2V9Z"/></svg>),
+  Speaker: (p: any) => (<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}><path fill="currentColor" d="M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm5 2a2 2 0 1 0 .001 3.999A2 2 0 0 0 12 6Zm0 6a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/></svg>),
+  Drive: (p: any) => (<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}><path fill="currentColor" d="M4 7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7Zm3 1h10v3H7V8Zm0 5h6v4H7v-4Z"/></svg>),
+  Monitor: (p: any) => (<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}><path fill="currentColor" d="M3 5h18a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7v2h3v2H7v-2h3v-2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/></svg>),
+}
+
+type CatItem = { label: string; href: string; desc: string; Icon: (p: any) => JSX.Element }
+
+// Unifie vers /products?cat=...
+const CATEGORIES: CatItem[] = [
+  { label: 'Casques', href: '/products?cat=casques', desc: 'Audio immersif', Icon: Icon.Headphones },
+  { label: 'Claviers', href: '/products?cat=claviers', desc: 'Mécas & low-profile', Icon: Icon.Keyboard },
+  { label: 'Souris', href: '/products?cat=souris', desc: 'Précision & confort', Icon: Icon.Mouse },
+  { label: 'Webcams', href: '/products?cat=webcams', desc: 'Visio en HD', Icon: Icon.Camera },
+  { label: 'Batteries', href: '/products?cat=batteries', desc: 'Power & hubs', Icon: Icon.Battery },
+  { label: 'Audio', href: '/products?cat=audio', desc: 'Enceintes & DAC', Icon: Icon.Speaker },
+  { label: 'Stockage', href: '/products?cat=stockage', desc: 'SSD & cartes', Icon: Icon.Drive },
+  { label: 'Écrans', href: '/products?cat=ecrans', desc: '144Hz et +', Icon: Icon.Monitor },
 ]
 
-const SEARCH_ACTION = '/produit'
+const SEARCH_ACTION = '/products'
 
 /* Utils robustes */
 const safeParseArray = <T,>(raw: string | null): T[] => {
@@ -451,7 +465,7 @@ export default function MobileNav() {
                 )}
               </div>
 
-              {/* Catégories */}
+              {/* Catégories (icônes) */}
               <div className="px-4 pb-3">
                 <button
                   type="button"
@@ -482,7 +496,7 @@ export default function MobileNav() {
                               onClick={() => { track({ action: 'mobile_nav_cat', label: c.href }); closeMenu('cat_click') }}
                               className="group flex items-center gap-3 rounded-xl border border-transparent bg-token-surface/80 p-3 transition hover:-translate-y-0.5 hover:border-[hsl(var(--accent)/.30)] hover:bg-token-surface shadow-sm hover:shadow-md focus-ring"
                             >
-                              <span className="text-xl select-none" aria-hidden="true">{c.emoji}</span>
+                              <c.Icon className="opacity-80" />
                               <span className="flex-1">
                                 <span className="block text-sm font-semibold">{c.label}</span>
                                 <span className="block text-xs text-token-text/60">{c.desc}</span>
@@ -504,7 +518,7 @@ export default function MobileNav() {
                 <ul className="grid grid-cols-1 gap-2 text-lg">
                   {NAV.map(({ href, label }) => {
                     const active = isActive(href)
-                    const promo = href === '/promo'
+                    const promo = href.includes('promo=1')
                     const onClick = () => { track({ action: 'mobile_nav_link_click', label: href }); closeMenu('link_click') }
                     return (
                       <li key={href}>
