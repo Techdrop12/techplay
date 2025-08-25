@@ -1,43 +1,76 @@
 // src/app/products/page.tsx
-import type { Metadata } from 'next'
+import type { Metadata, ResolvingMetadata } from 'next'
 import Link from 'next/link'
 import { getProductsPage } from '@/lib/data'
 import ProductGrid from '@/components/ProductGrid'
 import type { Product } from '@/types/product'
 
-export const revalidate = 900 // 15 min
+export const revalidate = 900
 
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
 
-export const metadata: Metadata = {
-  title: 'Tous les produits – TechPlay',
-  description: 'Parcourez notre catalogue complet de produits TechPlay. Livraison rapide, innovation garantie.',
-  alternates: { canonical: `${SITE}/products` },
-  openGraph: {
-    title: 'Tous les produits – TechPlay',
-    description: 'Parcourez notre catalogue complet de produits TechPlay. Livraison rapide, innovation garantie.',
-    type: 'website',
-    url: `${SITE}/products`,
-    images: [{ url: `${SITE}/og-image.jpg`, width: 1200, height: 630, alt: 'Catalogue TechPlay' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Tous les produits – TechPlay',
-    description: 'Parcourez notre catalogue complet de produits TechPlay. Livraison rapide, innovation garantie.',
-  },
-}
-
 type SortKey = 'price_asc' | 'price_desc' | 'rating' | 'new' | 'promo'
-const SORT_VALUES: SortKey[] = ['price_asc', 'price_desc', 'rating', 'new', 'promo']
+type Query = { q?: string; sort?: string; min?: string; max?: string; page?: string }
 
-type Query = {
-  q?: string
-  sort?: string
-  min?: string
-  max?: string
-  page?: string
+function buildQS(params: Query) {
+  const sp = new URLSearchParams()
+  if (params.q) sp.set('q', params.q)
+  if (params.sort && params.sort !== 'new') sp.set('sort', params.sort)
+  if (params.min) sp.set('min', params.min)
+  if (params.max) sp.set('max', params.max)
+  if (params.page && Number(params.page) > 1) sp.set('page', String(params.page))
+  const s = sp.toString()
+  return s ? `?${s}` : ''
 }
 
+/** 🔥 Metadata dynamique + OG auto */
+export async function generateMetadata(
+  { searchParams }: { searchParams?: Query },
+  _parent: ResolvingMetadata
+): Promise<Metadata> {
+  const q = (searchParams?.q ?? '').trim()
+  const sort = (searchParams?.sort ?? 'new') as SortKey
+  const page = Math.max(1, Number(searchParams?.page ?? 1))
+  const min = searchParams?.min
+  const max = searchParams?.max
+
+  const baseTitle = 'Tous les produits – TechPlay'
+  const bits: string[] = []
+  if (q) bits.push(`“${q}”`)
+  if (min) bits.push(`min ${min}€`)
+  if (max) bits.push(`max ${max}€`)
+  if (sort && sort !== 'new') bits.push(`tri ${sort}`)
+  if (page > 1) bits.push(`page ${page}`)
+
+  const title = bits.length ? `${baseTitle} | ${bits.join(' · ')}` : baseTitle
+  const description =
+    'Parcourez notre catalogue complet de produits TechPlay. Livraison rapide, innovation garantie.'
+
+  const qs = buildQS({ q, sort, min, max, page: String(page) })
+  const url = `${SITE}/products${qs}`
+  const og = `${SITE}/api/og${qs}` // ✅ image OG dynamique
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      url,
+      images: [{ url: og, width: 1200, height: 630, alt: 'Catalogue TechPlay' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [og],
+    },
+  }
+}
+
+const SORT_VALUES: SortKey[] = ['price_asc', 'price_desc', 'rating', 'new', 'promo']
 const PAGE_SIZE = 24
 
 export default async function ProductsPage({ searchParams }: { searchParams?: Query }) {
@@ -48,28 +81,12 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Qu
   const max = Number.isFinite(Number(searchParams?.max)) ? Number(searchParams!.max) : undefined
   const page = Math.max(1, Number(searchParams?.page ?? 1))
 
-  const { items, total, pageCount } = await getProductsPage({
-    q,
-    min,
-    max,
-    sort,
-    page,
-    pageSize: PAGE_SIZE,
-  })
-
+  const { items, pageCount } = await getProductsPage({ q, min, max, sort, page, pageSize: PAGE_SIZE })
   const hasPrev = page > 1
   const hasNext = page < pageCount
 
-  const buildUrl = (nextPage: number) => {
-    const sp = new URLSearchParams()
-    if (q) sp.set('q', q)
-    if (sort && sort !== 'new') sp.set('sort', sort)
-    if (min !== undefined) sp.set('min', String(min))
-    if (max !== undefined) sp.set('max', String(max))
-    if (nextPage > 1) sp.set('page', String(nextPage))
-    const qs = sp.toString()
-    return qs ? `/products?${qs}` : '/products'
-  }
+  const buildUrl = (nextPage: number) =>
+    `/products${buildQS({ q, sort, min: min?.toString(), max: max?.toString(), page: String(nextPage) })}`
 
   return (
     <main id="main" className="max-w-7xl mx-auto px-4 pt-28 pb-16" role="main">
