@@ -130,7 +130,7 @@ export default function ProductCard({
   )
 
   const hasRating = typeof rating === 'number' && !Number.isNaN(rating)
-  const productUrl = useMemo(() => (slug ? '/produit/' + slug : '#'), [slug])
+  const productUrl = useMemo(() => (slug ? '/products/' + slug : '#'), [slug]) // ✅ chemin corrigé
   const priceContent = useMemo(() => Math.max(0, Number(price || 0)).toFixed(2), [price])
   const availability =
     typeof stock === 'number'

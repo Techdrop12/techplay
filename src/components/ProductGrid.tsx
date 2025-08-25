@@ -25,7 +25,6 @@ interface ProductGridProps {
 }
 
 function colsToClass(cols?: Cols) {
-  // ⚠️ pense à safelister ces classes dans tailwind.config si tu utilises d'autres nombres
   const c = { base: 2, sm: 3, lg: 4, ...(cols || {}) }
   const parts: string[] = []
   if (c.base) parts.push(`grid-cols-${c.base}`)
@@ -91,7 +90,7 @@ export default function ProductGrid({
     return `${products.length} produit${products.length > 1 ? 's' : ''} affiché${products.length > 1 ? 's' : ''}.`
   }, [isLoading, isEmpty, products.length, emptyMessage])
 
-  // === JSON-LD ItemList (SEO) ===
+  // === JSON-LD ItemList (SEO) — URL corrigée vers /products/[slug] ===
   const itemListJsonLd = useMemo(() => {
     if (!products?.length) return null
     const base = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
@@ -101,7 +100,7 @@ export default function ProductGrid({
       itemListElement: products.slice(0, 12).map((p, i) => ({
         '@type': 'ListItem',
         position: i + 1,
-        url: p?.slug ? `${base}/produit/${p.slug}` : `${base}/produit`,
+        url: p?.slug ? `${base}/products/${p.slug}` : `${base}/products`,
         name: p?.title || 'Produit',
       })),
     }
@@ -193,12 +192,10 @@ export default function ProductGrid({
           id={id}
         >
           {products.map((product, i) => (
-            // ⚠️ pas de role="listitem" ici : c’est la carte qui l’a
             <motion.div key={String(product._id ?? product.slug ?? i)} layout={!prefersReducedMotion}>
               <ProductCard
                 product={product}
                 showWishlistIcon={showWishlistIcon}
-                // Boost LCP sur la première rangée
                 priority={i < 4}
               />
             </motion.div>

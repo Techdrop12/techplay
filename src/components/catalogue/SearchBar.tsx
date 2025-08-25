@@ -11,23 +11,17 @@ import { event as gaEvent, logEvent } from '@/lib/ga'
 
 interface Props {
   products: Product[]
-  /** Valeur contrôlée depuis le parent (affichée dans l’input) */
   query: string
-  /** Setter contrôlé depuis le parent */
   setQuery: (value: string) => void
-  /** Id facultatif (utile si plusieurs barres) */
   id?: string
   className?: string
-  /** Personnalisation du formatage */
   locale?: string
   currency?: string
-  /** Limite de résultats affichés */
   limit?: number
 }
 
 const RECENTS_KEY = 'tp:search:recents'
 
-/** util — met un <mark> autour des matchs Fuse (sur le title) */
 function highlight(text: string, matches?: ReadonlyArray<FuseResultMatch>) {
   if (!matches?.length) return text
   const m = matches.find((mm) => mm.key === 'title') ?? matches[0]
@@ -76,7 +70,6 @@ export default function SearchBar({
   const [recents, setRecents] = useState<string[]>([])
   const debouncedQuery = useDebounced(query, 180)
 
-  // Fuse instance mémoïsée
   const fuse = useMemo(
     () =>
       new Fuse(products ?? [], {
@@ -89,21 +82,18 @@ export default function SearchBar({
     [products]
   )
 
-  // Résultats (avec matches pour <mark>)
   const results: FuseResult<Product>[] = useMemo(() => {
     const q = debouncedQuery.trim()
     if (!q) return []
     return (fuse.search(q, { limit }) as FuseResult<Product>[]) ?? []
   }, [fuse, debouncedQuery, limit])
 
-  // Ouvrir/fermer la liste
   useEffect(() => {
     const has = results.length > 0
     setOpen(Boolean(debouncedQuery.trim()) && has)
     setHighlighted(has ? 0 : -1)
   }, [debouncedQuery, results.length])
 
-  // Récupère recherches récentes
   useEffect(() => {
     try {
       const raw = localStorage.getItem(RECENTS_KEY)
@@ -119,7 +109,6 @@ export default function SearchBar({
     } catch {}
   }
 
-  // Hotkeys: "/" et Ctrl/⌘+K pour focus
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const isCmdK = e.key.toLowerCase() === 'k' && (e.ctrlKey || e.metaKey)
@@ -133,7 +122,6 @@ export default function SearchBar({
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  // Clic/touch extérieur pour fermer
   useEffect(() => {
     const onDown = (e: Event) => {
       const target = e.target as Node
@@ -156,33 +144,31 @@ export default function SearchBar({
       gaEvent?.({ action: 'search_select', category: 'search', label: title || slug, value: 1 })
       logEvent?.('search_select', { query, slug })
     } catch {}
-    router.push(`/produit/${slug}`)
+    router.push(`/products/${slug}`) // ✅ chemin corrigé
   }
 
   const submitToListing = (q: string) => {
-    saveRecent(q)
+    const val = q.trim()
+    saveRecent(val)
     try {
-      gaEvent?.({ action: 'search_submit', category: 'search', label: q, value: results.length })
-      logEvent?.('search_submit', { query: q, count: results.length })
+      gaEvent?.({ action: 'search_submit', category: 'search', label: val, value: results.length })
+      logEvent?.('search_submit', { query: val, count: results.length })
     } catch {}
-    router.push(`/produit?search=${encodeURIComponent(q.trim())}`)
+    router.push(`/products?${val ? `q=${encodeURIComponent(val)}` : ''}`) // ✅ page & param corrigés
     setOpen(false)
   }
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (results.length > 0) {
-      // Priorité à l'élément surligné
       const index = highlighted >= 0 ? highlighted : 0
       const p = results[index]?.item
       if (p) return goToProduct(p.slug, p.title)
     }
-    // fallback : page catalogue filtrée
     submitToListing(query)
   }
 
   const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
-    // Ouvre si on a des résultats et que l’utilisateur navigue
     if (!open && results.length) setOpen(true)
     if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && results.length === 0) return
     if (e.key === 'ArrowDown') {
@@ -207,7 +193,6 @@ export default function SearchBar({
     >
       <form onSubmit={onSubmit} aria-label="Recherche produits">
         <div className="relative">
-          {/* Icône loupe */}
           <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
             <span aria-hidden>🔍</span>
           </div>
@@ -232,7 +217,6 @@ export default function SearchBar({
             className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 pl-10 pr-10 py-2.5 text-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent transition"
           />
 
-          {/* Bouton clear */}
           {query && (
             <button
               type="button"
@@ -250,7 +234,6 @@ export default function SearchBar({
         </div>
       </form>
 
-      {/* Dropdown : résultats / récents */}
       {(open || showRecents) && (
         <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl">
           {results.length > 0 ? (

@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     description: 'Parcourez notre catalogue complet de produits TechPlay. Livraison rapide, innovation garantie.',
     type: 'website',
     url: `${SITE}/products`,
-    images: [{ url: `${SITE}/og-products.jpg`, width: 1200, height: 630, alt: 'Catalogue TechPlay' }],
+    images: [{ url: `${SITE}/og-image.jpg`, width: 1200, height: 630, alt: 'Catalogue TechPlay' }],
   },
   twitter: {
     card: 'summary_large_image',

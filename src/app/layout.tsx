@@ -83,10 +83,10 @@ export const metadata: Metadata = {
       { url: '/icons/icon-192x192.png', type: 'image/png', sizes: '192x192' },
       { url: '/icons/icon-512x512.png', type: 'image/png', sizes: '512x512' },
     ],
-    // Tu n’as pas d’icône 180x180 dédiée : on pointe sur 192x192 (OK mais pas optimal).
-    apple: [{ url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' }],
-    // Safari pinned tab → nécessite un SVG : on utilise ton logo.svg (monochrome conseillé)
-    other: [{ rel: 'mask-icon', url: '/logo.svg', color: '#111111' }],
+    // iOS attend plutôt 180x180
+    apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+    // Safari pinned tab : svg monochrome conseillé
+    other: [{ rel: 'mask-icon', url: '/icons/safari-pinned-tab.svg', color: '#111111' }],
   },
   // ✅ Une SEULE webmanifest : /site.webmanifest (garde-la dans /public)
   manifest: '/site.webmanifest',
@@ -125,7 +125,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* DNS prefetch global */}
         <meta httpEquiv="x-dns-prefetch-control" content="on" />
 
-        {/* Anti-FOUC + thème (respecte prefers-color-scheme et localStorage) */}
+        {/* Anti-FOUC + thème */}
         <DarkModeScript />
 
         {/* Consent Mode v2 par défaut (opt-out) */}
@@ -153,8 +153,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
         <link rel="dns-prefetch" href="https://connect.facebook.net" />
-        <link rel="preconnect" href="https://static.hotjar.com" />
-        <link rel="dns-prefetch" href="https://static.hotjar.com" />
+        <link rel="preconnect" href="https://script.hotjar.com" />
+        <link rel="dns-prefetch" href="https://script.hotjar.com" />
 
         {/* LCP: précharge les visuels clés du hero (mobile + desktop) */}
         <link rel="preload" as="image" href="/carousel/hero-1-mobile.jpg" media="(max-width: 639px)" />
@@ -213,11 +213,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               name: SITE_NAME,
               url: SITE_URL,
               logo: `${SITE_URL}/logo.png`,
-              sameAs: [
-                'https://facebook.com/techplay',
-                'https://twitter.com/techplay',
-                'https://instagram.com/techplay',
-              ],
+              // sameAs laissé vide pour éviter les faux liens tant que non définis
+              sameAs: [],
             }),
           }}
         />

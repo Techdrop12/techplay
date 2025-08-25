@@ -22,6 +22,19 @@ precacheAndRoute(self.__WB_MANIFEST || [], {
 })
 cleanupOutdatedCaches()
 
+// ——— Assurer la présence du fallback image en cache (si pas injecté)
+const OFFLINE_IMG = '/fallback.png'
+self.addEventListener('install', (event: ExtendableEvent) => {
+  event.waitUntil(
+    (async () => {
+      try {
+        const cache = await caches.open('tp-images')
+        await cache.add(OFFLINE_IMG).catch(() => {})
+      } catch {}
+    })()
+  )
+})
+
 // ——— Pages / navigations
 const pageStrategy = new NetworkFirst({
   cacheName: 'tp-pages',
@@ -133,7 +146,6 @@ registerRoute(
 )
 
 // ——— Fallbacks offline (document + image)
-const OFFLINE_IMG = '/fallback.png'
 setCatchHandler(async ({ request }) => {
   switch (request.destination) {
     case 'document':

@@ -10,7 +10,8 @@ import LiveChat from '../LiveChat'
 import { useTheme } from '@/context/themeContext'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
-const PWAInstall = dynamic(() => import('./PWAInstall'), { ssr: false })
+// ⛔️ supprimé: import('./PWAInstall')
+// (le prompt PWA est désormais géré uniquement par src/app/layout.tsx via <AppInstallPrompt/>)
 const ScrollTopButton = dynamic(() => import('../ui/ScrollTopButton'), { ssr: false })
 const FooterLazy = dynamic(() => import('@/components/Footer'), { ssr: true, loading: () => null })
 
@@ -18,15 +19,9 @@ interface LayoutProps {
   children: ReactNode
   analytics?: boolean
   chat?: boolean
-  pwaPrompt?: boolean
 }
 
-export default function Layout({
-  children,
-  analytics = true,
-  chat = false,
-  pwaPrompt = true,
-}: LayoutProps) {
+export default function Layout({ children, analytics = true, chat = false }: LayoutProps) {
   const pathname = usePathname() || '/'
   const router = useRouter()
   const { theme } = useTheme()
@@ -44,7 +39,6 @@ export default function Layout({
 
   /** ───────────────────── Focus main after nav */
   useEffect(() => {
-    // petit rAF pour laisser le DOM s’appliquer avant le focus
     requestAnimationFrame(() => { document.getElementById('main')?.focus() })
   }, [pathname])
 
@@ -88,7 +82,6 @@ export default function Layout({
       return el
     }
     const meta = ensureMeta()
-    // essaie d’utiliser un token HSL s’il existe, sinon fallback variable --bg
     const rootStyle = getComputedStyle(document.documentElement)
     const hsl = rootStyle.getPropertyValue('--bg').trim() || rootStyle.getPropertyValue('--token-surface').trim()
     if (hsl) meta.setAttribute('content', `hsl(${hsl})`)
@@ -147,7 +140,7 @@ export default function Layout({
         {routeAnnouncement}
       </div>
 
-      {/* Global décor (grid + halo), non interactif */}
+      {/* Global décor */}
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-grid opacity-[0.06] dark:opacity-[0.08]" />
         <div className="absolute inset-0 overlay-hero mix-blend-multiply dark:mix-blend-screen opacity-60" />
@@ -186,7 +179,6 @@ export default function Layout({
       </main>
 
       {/* Auxiliaires */}
-      {pwaPrompt && <PWAInstall />}
       <ScrollTopButton />
       {chat && <LiveChat />}
 
