@@ -23,6 +23,7 @@ const BLUR_DATA_URL =
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
 
 export default function PackCard({ pack, priority = false, className }: PackCardProps) {
+  // Champs sûrs
   const {
     slug,
     title = 'Pack',
@@ -32,6 +33,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
     oldPrice,
   } = pack
 
+  // Champs étendus (robustes à tous les shapes)
   const x = pack as any
   const images: string[] | undefined = Array.isArray(x.images) ? x.images : undefined
   const compareAtPrice: number | undefined =
@@ -54,11 +56,13 @@ export default function PackCard({ pack, priority = false, className }: PackCard
   const [imgLoaded, setImgLoaded] = useState(false)
   const [imgError, setImgError] = useState(false)
 
+  // Image principale
   const mainImage = useMemo(() => {
     const first = Array.isArray(images) && images.length ? images[0] : image
     return imgError ? '/placeholder.png' : (first || '/placeholder.png')
   }, [images, image, imgError])
 
+  // Valeur des items (somme) → économie en €
   const itemsValue = useMemo(() => {
     try {
       if (!Array.isArray(items) || items.length === 0) return undefined
@@ -74,6 +78,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
     }
   }, [items])
 
+  // Prix de référence
   const refPrice = typeof oldPrice === 'number' && oldPrice > price
     ? oldPrice
     : (typeof compareAtPrice === 'number' && compareAtPrice > price ? compareAtPrice : (itemsValue && itemsValue > price ? itemsValue : undefined))
@@ -84,18 +89,18 @@ export default function PackCard({ pack, priority = false, className }: PackCard
 
   const savingsEuro = useMemo(() => (typeof refPrice === 'number' ? Math.max(0, refPrice - price) : null), [refPrice, price])
 
-  // ✅ chemin détaillé des packs corrigé
-  const packUrl = slug ? '/products/packs/' + slug : '#'
-
+  const packUrl = slug ? '/products/packs/' + slug : '#' // ✅ fix route
   const hasRating = typeof rating === 'number' && !Number.isNaN(rating)
   const lowStock = typeof stock === 'number' && stock > 0 && stock <= 5
   const outOfStock = typeof stock === 'number' && stock <= 0
 
+  // Tilt 3D
   const [tilt, setTilt] = useState<{ rx: number; ry: number }>({ rx: 0, ry: 0 })
   const ticking = useRef(false)
   const onMouseMove = (e: MouseEvent<HTMLDivElement>) => {
     if (prefersReducedMotion) return
     try {
+      // skip devices sans hover
       if (window.matchMedia && !window.matchMedia('(hover:hover)').matches) return
     } catch {}
     const r = e.currentTarget.getBoundingClientRect()
@@ -114,6 +119,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
   }
   const resetTilt = () => setTilt({ rx: 0, ry: 0 })
 
+  // Tracking impressions (IO)
   const cardRef = useRef<HTMLDivElement | null>(null)
   const viewedRef = useRef(false)
 
@@ -141,6 +147,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
     try { pushDataLayer({ event: 'select_pack', items: [{ item_id: slug, item_name: title, price }] }) } catch {}
   }, [slug, title, price])
 
+  // A11y helpers
   const srId = useRef('sr-' + Math.random().toString(36).slice(2)).current
   const describe: string[] = []
   if (typeof discountPct === 'number') describe.push('Économie ' + discountPct + '%')
@@ -148,6 +155,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
   if (outOfStock) describe.push('Rupture')
   const ariaDescribedBy = describe.length ? srId : undefined
 
+  // Chips d’items (jusqu’à 3)
   const itemChips: string[] = useMemo(() => {
     if (!Array.isArray(items) || items.length === 0) return []
     const labels: string[] = []
@@ -159,6 +167,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
     return labels
   }, [items])
 
+  // Style conique piloté par économie %
   const conicPercent = typeof discountPct === 'number' ? Math.max(8, Math.min(100, discountPct)) : 0
 
   return (
@@ -189,7 +198,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
     >
       <meta itemProp="name" content={title} />
       <meta itemProp="image" content={mainImage} />
-      {slug && <meta itemProp="url" content={packUrl} />}
+      {slug && <meta itemProp="url" content={packUrl} />} {/* ✅ fix */}
       {brand && <meta itemProp="brand" content={brand} />}
       {sku && <meta itemProp="sku" content={sku} />}
 
@@ -219,7 +228,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
         />
 
         <Link
-          href={packUrl}
+          href={packUrl} // ✅ fix
           prefetch
           className="block rounded-[inherit] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.60)]"
           aria-label={'Voir le pack : ' + title}
@@ -283,15 +292,21 @@ export default function PackCard({ pack, priority = false, className }: PackCard
               </p>
             )}
 
-            {itemChips.length > 0 && (
-              <ul className="mt-2 flex flex-wrap gap-1.5" aria-label="Aperçu des articles">
-                {itemChips.map((n, i) => (
-                  <li key={i} className="rounded-md border border-token-border bg-token-surface px-2 py-1 text-[11px] text-token-text/80">
-                    {n}
-                  </li>
-                ))}
-              </ul>
-            )}
+            {/* Chips des 3 premiers items */}
+            {(() => {
+              const itemChips: string[] = Array.isArray(items)
+                ? items.slice(0, 3).map((it: any) => (it?.title || it?.name || it?.label || '')).filter(Boolean)
+                : []
+              return itemChips.length ? (
+                <ul className="mt-2 flex flex-wrap gap-1.5" aria-label="Aperçu des articles">
+                  {itemChips.map((n, i) => (
+                    <li key={i} className="rounded-md border border-token-border bg-token-surface px-2 py-1 text-[11px] text-token-text/80">
+                      {n}
+                    </li>
+                  ))}
+                </ul>
+              ) : null
+            })()}
 
             {description && (
               <p className="mt-2 line-clamp-3 text-sm text-gray-600 dark:text-gray-400">{description}</p>
@@ -318,6 +333,19 @@ export default function PackCard({ pack, priority = false, className }: PackCard
                 </>
               )}
             </div>
+
+            {typeof savingsEuro === 'number' && savingsEuro > 0 && (
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
+                <p className="font-medium text-emerald-700 dark:text-emerald-300">
+                  Vous économisez {formatPrice(savingsEuro)}
+                </p>
+                {typeof itemsValue === 'number' && (
+                  <span className="text-token-text/60">
+                    Valeur des articles : {formatPrice(itemsValue)}
+                  </span>
+                )}
+              </div>
+            )}
 
             <FreeShippingBadge price={price} minimal className="mt-2" />
           </div>

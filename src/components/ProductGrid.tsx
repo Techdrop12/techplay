@@ -55,7 +55,6 @@ export default function ProductGrid({
   const statusRef = useRef<HTMLParagraphElement | null>(null)
   const gridRef = useRef<HTMLDivElement | null>(null)
 
-  // === Infinite scroll (sentinelle) ===
   useEffect(() => {
     if (!observeMore || !hasMore || !onLoadMore || !sentinelRef.current) return
     const el = sentinelRef.current
@@ -76,21 +75,19 @@ export default function ProductGrid({
     return () => io.disconnect()
   }, [observeMore, hasMore, onLoadMore])
 
-  // Réouvre la gate lorsque le chargement se termine
   useEffect(() => {
     if (!isLoading) loadingGateRef.current = false
   }, [isLoading])
 
   const isEmpty = useMemo(() => !products || products.length === 0, [products])
 
-  // === Message de statut ARIA ===
   const countMsg = useMemo(() => {
     if (isLoading && products.length === 0) return 'Chargement des produits…'
     if (isEmpty) return emptyMessage || 'Aucun produit trouvé.'
     return `${products.length} produit${products.length > 1 ? 's' : ''} affiché${products.length > 1 ? 's' : ''}.`
   }, [isLoading, isEmpty, products.length, emptyMessage])
 
-  // === JSON-LD ItemList (SEO) — URL corrigée vers /products/[slug] ===
+  // ✅ JSON-LD corrige les URLs
   const itemListJsonLd = useMemo(() => {
     if (!products?.length) return null
     const base = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
@@ -100,13 +97,12 @@ export default function ProductGrid({
       itemListElement: products.slice(0, 12).map((p, i) => ({
         '@type': 'ListItem',
         position: i + 1,
-        url: p?.slug ? `${base}/products/${p.slug}` : `${base}/products`,
+        url: p?.slug ? `${base}/products/${p.slug}` : `${base}/products`, // ✅ fix
         name: p?.title || 'Produit',
       })),
     }
   }, [products])
 
-  // === GA4/GTM: view_item_list + impressions au scroll ===
   const seenRef = useRef<Set<string>>(new Set())
   const batchRef = useRef<{ id: string; name: string; price?: number }[]>([])
   const flushTimeout = useRef<number | null>(null)

@@ -129,8 +129,8 @@ export default function SearchBar({
       const root = inputRef.current.closest('[data-search-root="true"]')
       if (root && !root.contains(target)) setOpen(false)
     }
-    document.addEventListener('mousedown', onDown, { passive: true })
-    document.addEventListener('touchstart', onDown, { passive: true })
+    document.addEventListener('mousedown', onDown, { passive: true } as any)
+    document.addEventListener('touchstart', onDown, { passive: true } as any)
     return () => {
       document.removeEventListener('mousedown', onDown as EventListener)
       document.removeEventListener('touchstart', onDown as EventListener)
@@ -144,17 +144,17 @@ export default function SearchBar({
       gaEvent?.({ action: 'search_select', category: 'search', label: title || slug, value: 1 })
       logEvent?.('search_select', { query, slug })
     } catch {}
-    router.push(`/products/${slug}`) // ✅ chemin corrigé
+    router.push(`/products/${slug}`) // ✅ fix route
   }
 
   const submitToListing = (q: string) => {
-    const val = q.trim()
-    saveRecent(val)
+    const value = q.trim()
+    saveRecent(value)
     try {
-      gaEvent?.({ action: 'search_submit', category: 'search', label: val, value: results.length })
-      logEvent?.('search_submit', { query: val, count: results.length })
+      gaEvent?.({ action: 'search_submit', category: 'search', label: value, value: results.length })
+      logEvent?.('search_submit', { query: value, count: results.length })
     } catch {}
-    router.push(`/products?${val ? `q=${encodeURIComponent(val)}` : ''}`) // ✅ page & param corrigés
+    router.push(`/products?q=${encodeURIComponent(value)}`) // ✅ fix route + param
     setOpen(false)
   }
 

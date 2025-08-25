@@ -130,7 +130,7 @@ export default function ProductCard({
   )
 
   const hasRating = typeof rating === 'number' && !Number.isNaN(rating)
-  const productUrl = useMemo(() => (slug ? '/products/' + slug : '#'), [slug]) // ✅ chemin corrigé
+  const productUrl = useMemo(() => (slug ? '/products/' + slug : '#'), [slug]) // ✅ fix route
   const priceContent = useMemo(() => Math.max(0, Number(price || 0)).toFixed(2), [price])
   const availability =
     typeof stock === 'number'
@@ -251,7 +251,7 @@ export default function ProductCard({
       {/* Microdonnées enrichies */}
       <meta itemProp="name" content={title} />
       <meta itemProp="image" content={mainImage} />
-      {slug && <meta itemProp="url" content={productUrl} />}
+      {slug && <meta itemProp="url" content={productUrl} />} {/* ✅ fix */}
       {brand && <meta itemProp="brand" content={String(brand)} />}
       {sku && <meta itemProp="sku" content={sku} />}
       {hasRating && (
@@ -292,7 +292,7 @@ export default function ProductCard({
 
         {/* --- Zone cliquable (image + contenu) --- */}
         <Link
-          href={productUrl}
+          href={productUrl} // ✅ fix
           prefetch
           className="block rounded-[inherit] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.60)]"
           aria-label={'Voir la fiche produit : ' + title}
