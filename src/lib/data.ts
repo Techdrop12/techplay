@@ -43,3 +43,70 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
   const post = await Blog.findOne({ slug }).lean()
   return post ? JSON.parse(JSON.stringify(post)) : null
 }
+
+/* ========= Pagination & tri côté base pour /products ========= */
+
+type SortKey = 'price_asc' | 'price_desc' | 'rating' | 'new' | 'promo'
+
+type GetProductsPageInput = {
+  q?: string
+  min?: number
+  max?: number
+  sort?: SortKey
+  page?: number
+  pageSize?: number
+}
+
+export async function getProductsPage({
+  q,
+  min,
+  max,
+  sort = 'new',
+  page = 1,
+  pageSize = 24,
+}: GetProductsPageInput) {
+  await connectToDatabase()
+
+  const filter: Record<string, any> = {}
+
+  if (q && q.trim()) {
+    const rx = new RegExp(q.trim(), 'i')
+    filter.$or = [
+      { title: rx },
+      { description: rx },
+      { tags: rx }, // si tags est un array de strings, Mongo matchera un élément
+    ]
+  }
+
+  if (typeof min === 'number' || typeof max === 'number') {
+    filter.price = {}
+    if (typeof min === 'number') filter.price.$gte = min
+    if (typeof max === 'number') filter.price.$lte = max
+  }
+
+  const sortMap: Record<SortKey, Record<string, 1 | -1>> = {
+    price_asc: { price: 1 },
+    price_desc: { price: -1 },
+    rating: { rating: -1 },
+    // "promo" sans champ dédié : on approxime par oldPrice desc puis price asc
+    promo: { oldPrice: -1, price: 1 },
+    // nouveautés : isNew desc puis createdAt desc
+    new: { isNew: -1, createdAt: -1 },
+  }
+
+  const total = await Product.countDocuments(filter)
+
+  const items = await Product.find(filter)
+    .sort(sortMap[sort] || { createdAt: -1 })
+    .skip((Math.max(1, page) - 1) * pageSize)
+    .limit(pageSize)
+    .lean()
+
+  return {
+    items: items as unknown as ProductType[],
+    total,
+    page,
+    pageSize,
+    pageCount: Math.max(1, Math.ceil(total / pageSize)),
+  }
+}

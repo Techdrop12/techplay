@@ -154,7 +154,7 @@ export default function SearchBar({
       gaEvent?.({ action: 'search_submit', category: 'search', label: value, value: results.length })
       logEvent?.('search_submit', { query: value, count: results.length })
     } catch {}
-    router.push(`/products?q=${encodeURIComponent(value)}`) // ✅ fix route + param
+    router.push(`/products?q=${encodeURIComponent(q.trim())}`)
     setOpen(false)
   }
 

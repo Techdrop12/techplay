@@ -1,30 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { getAllProducts } from '@/lib/data'
+import { headers } from 'next/headers'
+import { getProductsPage } from '@/lib/data'
 import type { Product } from '@/types/product'
 import ProductGrid from '@/components/ProductGrid'
 
-export const revalidate = 900 // 15 min (bon compromis SEO/fraîcheur)
-
-const SITE = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
-
-export const metadata: Metadata = {
-  title: 'Tous les produits – TechPlay',
-  description: 'Parcourez notre catalogue complet de produits TechPlay. Livraison rapide, innovation garantie.',
-  alternates: { canonical: `${SITE}/products` },
-  openGraph: {
-    title: 'Tous les produits – TechPlay',
-    description: 'Parcourez notre catalogue complet de produits TechPlay. Livraison rapide, innovation garantie.',
-    type: 'website',
-    url: `${SITE}/products`,
-    images: [{ url: `${SITE}/og-image.jpg`, width: 1200, height: 630, alt: 'Catalogue TechPlay' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Tous les produits – TechPlay',
-    description: 'Parcourez notre catalogue complet de produits TechPlay. Livraison rapide, innovation garantie.',
-  },
-}
+export const revalidate = 900 // 15 min (SEO / fraîcheur)
 
 type SortKey = 'price_asc' | 'price_desc' | 'rating' | 'new' | 'promo'
 const SORT_VALUES: SortKey[] = ['price_asc', 'price_desc', 'rating', 'new', 'promo']
@@ -39,6 +20,44 @@ type Query = {
 
 const PAGE_SIZE = 24
 
+// ----- Helpers URL absolue (compatible Preview/Prod) -----
+async function absoluteUrl(path = '') {
+  // Dans ta version, headers() => Promise<ReadonlyHeaders>
+  const h = await headers()
+  const host = h.get('x-forwarded-host') || h.get('host') || ''
+  const proto = h.get('x-forwarded-proto') || 'https'
+  const base =
+    (process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, '') as string | undefined) ||
+    `${proto}://${host}`
+  return `${base}${path.startsWith('/') ? path : `/${path}`}`
+}
+
+// ----- Metadata dynamique (async) -----
+export async function generateMetadata(): Promise<Metadata> {
+  const url = await absoluteUrl('/products')
+  const og = await absoluteUrl('/og-image.jpg')
+  return {
+    title: 'Tous les produits – TechPlay',
+    description:
+      'Parcourez notre catalogue complet de produits TechPlay. Livraison rapide, innovation garantie.',
+    alternates: { canonical: url },
+    openGraph: {
+      title: 'Tous les produits – TechPlay',
+      description:
+        'Parcourez notre catalogue complet de produits TechPlay. Livraison rapide, innovation garantie.',
+      type: 'website',
+      url,
+      images: [{ url: og, width: 1200, height: 630, alt: 'Catalogue TechPlay' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Tous les produits – TechPlay',
+      description:
+        'Parcourez notre catalogue complet de produits TechPlay. Livraison rapide, innovation garantie.',
+    },
+  }
+}
+
 export default async function ProductsPage({ searchParams }: { searchParams?: Query }) {
   const q = (searchParams?.q ?? '').trim().toLowerCase()
 
@@ -49,49 +68,18 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Qu
   const max = Number.isFinite(Number(searchParams?.max)) ? Number(searchParams!.max) : undefined
   const page = Math.max(1, Number(searchParams?.page ?? 1))
 
-  const all = (await getAllProducts()) as Product[]
-  let filtered = all.filter(Boolean)
-
-  if (q) {
-    filtered = filtered.filter((p) => {
-      const hay = `${p.title ?? ''} ${(p as any).description ?? ''} ${
-        Array.isArray((p as any).tags) ? (p as any).tags.join(' ') : ''
-      }`.toLowerCase()
-      return hay.includes(q)
-    })
-  }
-  if (typeof min === 'number') filtered = filtered.filter((p) => (p.price ?? 0) >= min)
-  if (typeof max === 'number') filtered = filtered.filter((p) => (p.price ?? 0) <= max)
-
-  filtered.sort((a, b) => {
-    const pa = a.price ?? 0
-    const pb = b.price ?? 0
-    const ra = (a as any).rating ?? 0
-    const rb = (b as any).rating ?? 0
-    const newA = (a as any).isNew ? 1 : 0
-    const newB = (b as any).isNew ? 1 : 0
-    const discA = a.oldPrice && a.oldPrice > pa ? Math.round(((a.oldPrice - pa) / a.oldPrice) * 100) : 0
-    const discB = b.oldPrice && b.oldPrice > pb ? Math.round(((b.oldPrice - pb) / b.oldPrice) * 100) : 0
-
-    switch (sort) {
-      case 'price_asc':
-        return pa - pb
-      case 'price_desc':
-        return pb - pa
-      case 'rating':
-        return rb - ra
-      case 'promo':
-        return discB - discA
-      case 'new':
-      default:
-        return newB - newA
-    }
+  // Fetch paginé côté base (perf + moins de mémoire)
+  const { items: pageItems, total } = await getProductsPage({
+    q,
+    min,
+    max,
+    sort,
+    page,
+    pageSize: PAGE_SIZE,
   })
 
-  const total = filtered.length
   const start = (page - 1) * PAGE_SIZE
   const end = start + PAGE_SIZE
-  const pageItems = filtered.slice(start, end)
   const hasPrev = page > 1
   const hasNext = end < total
 
@@ -180,7 +168,7 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Qu
         )}
       </form>
 
-      <ProductGrid products={pageItems} emptyMessage="Aucun produit ne correspond à vos filtres." />
+      <ProductGrid products={pageItems as Product[]} emptyMessage="Aucun produit ne correspond à vos filtres." />
 
       <nav aria-label="Pagination" className="mt-10 flex items-center justify-center gap-3 text-sm">
         {hasPrev ? (
