@@ -1,4 +1,4 @@
-// src/components/layout/Header.tsx — Ultimate Premium (logo home fiable, i18n unifiée, a11y/perf)
+// src/components/layout/Header.tsx — Premium nav (logo home fiable + icônes halo)
 'use client'
 
 import Link from '@/components/LocalizedLink'
@@ -40,6 +40,20 @@ const SEARCH_TRENDS = [
   'power bank',
   'souris sans fil',
 ]
+
+/** Badge halo (même rendu que les icônes de catégories) */
+const ActionBadge = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
+  <span
+    className={cn(
+      'inline-flex h-9 w-9 items-center justify-center rounded-xl',
+      'bg-[radial-gradient(120%_120%_at_30%_20%,hsl(var(--accent)/.16),hsl(var(--accent)/.06)_45%,transparent_70%)]',
+      'ring-1 ring-[hsl(var(--accent)/.22)] shadow-[inset_0_1px_0_rgba(255,255,255,.18)]',
+      className
+    )}
+  >
+    {children}
+  </span>
+)
 
 export default function Header() {
   const pathname = usePathname() || '/'
@@ -212,10 +226,7 @@ export default function Header() {
   const smartPrefetchCancel = (href: string) => {
     const target = L(href)
     const t = prefetchTimers.current.get(target)
-    if (t) {
-      clearTimeout(t)
-      prefetchTimers.current.delete(target)
-    }
+    if (t) { clearTimeout(t); prefetchTimers.current.delete(target) }
   }
 
   const onSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -227,9 +238,20 @@ export default function Header() {
       searchRef.current?.focus()
       return
     }
-    try {
-      localStorage.setItem('last:q', q)
-    } catch {}
+    try { localStorage.setItem('last:q', q) } catch {}
+  }
+
+  // Fallback "dur" pour le logo → Accueil (si Next ne déclenche pas la nav)
+  const onLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // ne pas gêner Ctrl/Cmd+clic ou clic molette
+    if (e.metaKey || e.ctrlKey || e.button === 1) return
+    const home = L('/')
+    // laisse Next tenter la nav, puis vérifie
+    setTimeout(() => {
+      try {
+        if (window.location.pathname !== home) window.location.assign(home)
+      } catch {}
+    }, 60)
   }
 
   return (
@@ -249,13 +271,15 @@ export default function Header() {
       )}
     >
       <div className="container-app flex h-16 md:h-20 items-center justify-between gap-2 sm:gap-3">
-        {/* Logo — wrapper Link pour un clic “Accueil” infaillible (i18n-safe) */}
+        {/* Logo — clic Accueil infaillible */}
         <Link
           href={L('/')}
           prefetch={false}
           aria-label="TechPlay — Accueil"
           rel="home"
+          onClick={onLogoClick}
           className="group inline-flex items-center rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+          data-gtm="header_logo_home"
         >
           <Logo
             className="h-8 w-auto md:h-10"
@@ -293,9 +317,7 @@ export default function Header() {
             aria-describedby="search-hint"
           />
           <datalist id="header-search-suggestions">
-            {SEARCH_TRENDS.map((s) => (
-              <option value={s} key={s} />
-            ))}
+            {SEARCH_TRENDS.map((s) => (<option value={s} key={s} />))}
           </datalist>
           <div id="search-hint" className="sr-only">
             Raccourcis : « / » ou « Ctrl/⌘ K » pour rechercher.
@@ -366,9 +388,7 @@ export default function Header() {
                       'absolute left-1/2 top-[calc(100%+10px)] z-50 w-[min(860px,92vw)] -translate-x-1/2 rounded-2xl border',
                       'border-token-border bg-token-surface/90 shadow-2xl backdrop-blur supports-backdrop:bg-token-surface/80',
                       'transition-all duration-200',
-                      catOpen
-                        ? 'pointer-events-auto opacity-100 translate-y-0'
-                        : 'pointer-events-none opacity-0 -translate-y-1'
+                      catOpen ? 'pointer-events-auto opacity-100 translate-y-0' : 'pointer-events-none opacity-0 -translate-y-1'
                     )}
                     onFocus={openCats}
                     onBlur={() => closeCats(80)}
@@ -397,13 +417,7 @@ export default function Header() {
                                 <span className="block text-sm font-semibold">{c.label}</span>
                                 <span className="block text-xs text-token-text/60">{c.desc}</span>
                               </span>
-                              <svg
-                                width="18"
-                                height="18"
-                                viewBox="0 0 24 24"
-                                className="opacity-50 group-hover:opacity-90"
-                                aria-hidden="true"
-                              >
+                              <svg width="18" height="18" viewBox="0 0 24 24" className="opacity-50 group-hover:opacity-90" aria-hidden="true">
                                 <path fill="currentColor" d="M9 18l6-6-6-6v12z" />
                               </svg>
                             </Link>
@@ -413,9 +427,7 @@ export default function Header() {
 
                       <div className="md:col-span-1">
                         <div className="h-full rounded-xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.10)] via-transparent to-token-surface p-4 md:p-5 shadow-md">
-                          <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent)/.90)]">
-                            Sélection
-                          </p>
+                          <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent)/.90)]">Sélection</p>
                           <h3 className="mt-1 text-lg font-extrabold">Packs recommandés</h3>
                           <p className="mt-2 text-sm text-token-text/70">
                             Les meilleures combinaisons pour booster ton setup.
@@ -486,11 +498,11 @@ export default function Header() {
           })}
         </nav>
 
-        {/* Actions droites */}
+        {/* Actions droites — versions halo */}
         <div className="hidden items-center gap-2 sm:gap-3 md:flex">
           <ThemeToggle size="sm" />
 
-          {/* Offres */}
+          {/* Offres (icône halo compacte) */}
           <Link
             href="/products?promo=1"
             prefetch={false}
@@ -503,9 +515,10 @@ export default function Header() {
             title="Offres du jour"
             data-gtm="header_deals_icon"
           >
-            <FlameIcon />
+            <ActionBadge><FlameIcon /></ActionBadge>
           </Link>
 
+          {/* Offres (bouton texte) */}
           <Link
             href="/products?promo=1"
             prefetch={false}
@@ -525,6 +538,7 @@ export default function Header() {
             <span>Offres</span>
           </Link>
 
+          {/* Wishlist */}
           <div className="relative">
             <Link
               href="/wishlist"
@@ -542,7 +556,7 @@ export default function Header() {
               data-gtm="header_wishlist"
             >
               <span className="sr-only">Wishlist</span>
-              <HeartIcon />
+              <ActionBadge><HeartIcon /></ActionBadge>
             </Link>
             <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
               {wishlistCount > 0 && (
@@ -554,6 +568,7 @@ export default function Header() {
             </div>
           </div>
 
+          {/* Panier */}
           <div className="relative">
             <Link
               href="/commande"
@@ -571,7 +586,7 @@ export default function Header() {
               data-gtm="header_cart"
             >
               <span className="sr-only">Panier</span>
-              <CartIcon />
+              <ActionBadge><CartIcon /></ActionBadge>
             </Link>
             <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
               {cartCount > 0 && (
@@ -583,6 +598,7 @@ export default function Header() {
             </div>
           </div>
 
+          {/* Compte */}
           <Link
             href="/login"
             prefetch={false}
@@ -595,7 +611,7 @@ export default function Header() {
             title="Espace client"
             data-gtm="header_account"
           >
-            <UserIcon />
+            <ActionBadge><UserIcon /></ActionBadge>
           </Link>
         </div>
 
@@ -604,10 +620,7 @@ export default function Header() {
       </div>
 
       {/* Liseré subtil */}
-      <div
-        aria-hidden
-        className="pointer-events-none h-[2px] w-full bg-gradient-to-r from-transparent via-[hsl(var(--accent)/.40)] to-transparent"
-      />
+      <div aria-hidden className="pointer-events-none h-[2px] w-full bg-gradient-to-r from-transparent via-[hsl(var(--accent)/.40)] to-transparent" />
     </header>
   )
 }
