@@ -1,4 +1,4 @@
-// src/components/ProductCard.tsx — ULTIME++ (futuriste, a11y/SEO/UX/Perf max)
+// src/components/ProductCard.tsx — ULTIME++ (premium icons, a11y/SEO/UX/Perf max)
 'use client'
 
 import {
@@ -19,6 +19,7 @@ import AddToCartButton from '@/components/AddToCartButton'
 import type { Product } from '@/types/product'
 import { logEvent } from '@/lib/logEvent'
 import { pushDataLayer } from '@/lib/ga'
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
 interface ProductCardProps {
   product: Product
@@ -39,27 +40,34 @@ const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(mi
 const BLUR_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+'
 
+/* ---------- Premium inline icons ---------- */
+function IconStarSolid({ size = 14, className = '' }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className={className}>
+      <path
+        fill="currentColor"
+        d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+      />
+    </svg>
+  )
+}
+
 function Stars({ rating, count }: { rating?: number; count?: number }) {
   if (!(typeof rating === 'number') || Number.isNaN(rating)) return null
   const full = Math.max(0, Math.min(5, Math.round(rating)))
   return (
     <div className="flex items-center gap-1 text-[12px]" aria-label={String(rating) + '/5'}>
       {Array.from({ length: 5 }).map((_, i) => (
-        <svg
-          key={i}
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-          className={i < full ? 'opacity-100' : 'opacity-30'}
-        >
-          <path fill="currentColor" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-        </svg>
+        <IconStarSolid key={i} size={14} className={i < full ? 'opacity-100 text-yellow-500' : 'opacity-30'} />
       ))}
       {typeof count === 'number' && <span className="text-token-text/60 ml-1">({count})</span>}
     </div>
   )
 }
+
+/** URL absolue (pour microdonnées) */
+const toAbs = (u?: string) =>
+  !u ? '' : u.startsWith('http') ? u : (typeof window !== 'undefined' ? window.location.origin + u : u)
 
 export default function ProductCard({
   product,
@@ -130,7 +138,14 @@ export default function ProductCard({
   )
 
   const hasRating = typeof rating === 'number' && !Number.isNaN(rating)
-  const productUrl = useMemo(() => (slug ? '/products/' + slug : '#'), [slug]) // ✅ fix route
+
+  // i18n — URL localisée
+  const locale = getCurrentLocale()
+  const productUrl = useMemo(
+    () => (slug ? localizePath('/products/' + slug, locale) : '#'),
+    [slug, locale]
+  )
+
   const priceContent = useMemo(() => Math.max(0, Number(price || 0)).toFixed(2), [price])
   const availability =
     typeof stock === 'number'
@@ -227,7 +242,6 @@ export default function ProductCard({
   return (
     <motion.article
       ref={cardRef}
-      role="listitem"
       aria-label={'Produit : ' + title}
       aria-describedby={ariaDescribedBy}
       itemScope
@@ -250,7 +264,7 @@ export default function ProductCard({
     >
       {/* Microdonnées enrichies */}
       <meta itemProp="name" content={title} />
-      <meta itemProp="image" content={mainImage} />
+      <meta itemProp="image" content={toAbs(mainImage)} />
       {slug && <meta itemProp="url" content={productUrl} />} {/* ✅ fix */}
       {brand && <meta itemProp="brand" content={String(brand)} />}
       {sku && <meta itemProp="sku" content={sku} />}
@@ -293,7 +307,7 @@ export default function ProductCard({
         {/* --- Zone cliquable (image + contenu) --- */}
         <Link
           href={productUrl} // ✅ fix
-          prefetch
+          prefetch={false}
           className="block rounded-[inherit] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.60)]"
           aria-label={'Voir la fiche produit : ' + title}
           onClick={handleClick}
@@ -377,10 +391,11 @@ export default function ProductCard({
               <div className="absolute right-3 top-3 grid gap-1 text-right">
                 {hasRating && (
                   <div
-                    className="rounded-full border border-gray-200/60 bg-white/90 px-2.5 py-1 text-xs shadow backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/90"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200/60 bg-white/90 px-2.5 py-1 text-xs shadow backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/90"
                     aria-label={'Note moyenne : ' + rating!.toFixed(1) + ' étoiles'}
                   >
-                    <span className="text-yellow-500">★</span> {rating!.toFixed(1)}
+                    <IconStarSolid className="text-yellow-500" size={14} />
+                    <span>{rating!.toFixed(1)}</span>
                   </div>
                 )}
                 <Stars rating={rating} count={reviewsCount} />

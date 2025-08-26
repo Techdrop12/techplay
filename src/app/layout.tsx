@@ -1,4 +1,4 @@
-// src/app/layout.tsx — RootLayout ultra-premium (SEO/PWA/Consent/a11y/perf)
+// src/app/layout.tsx — RootLayout ultra-premium (SEO/PWA/Consent/a11y/perf) — FINAL
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
 import { Inter, Sora } from 'next/font/google'
@@ -83,12 +83,10 @@ export const metadata: Metadata = {
       { url: '/icons/icon-192x192.png', type: 'image/png', sizes: '192x192' },
       { url: '/icons/icon-512x512.png', type: 'image/png', sizes: '512x512' },
     ],
-    // iOS attend plutôt 180x180
-    apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
-    // Safari pinned tab : svg monochrome conseillé
-    other: [{ rel: 'mask-icon', url: '/icons/safari-pinned-tab.svg', color: '#111111' }],
+    // iOS : si apple-touch-icon 180x180 n’existe pas, on retombe sur l’icône 192.
+    apple: [{ url: '/icons/icon-192x192.png', sizes: '180x180', type: 'image/png' }],
   },
-  // ✅ Une SEULE webmanifest : /site.webmanifest (garde-la dans /public)
+  // ✅ une seule webmanifest
   manifest: '/site.webmanifest',
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: SITE_NAME },
   formatDetection: { telephone: false, address: false, email: false },
@@ -156,7 +154,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="preconnect" href="https://script.hotjar.com" />
         <link rel="dns-prefetch" href="https://script.hotjar.com" />
 
-        {/* LCP: précharge les visuels clés du hero (mobile + desktop) */}
+        {/* LCP: précharge visuels clés du hero (mobile + desktop) */}
         <link rel="preload" as="image" href="/carousel/hero-1-mobile.jpg" media="(max-width: 639px)" />
         <link rel="preload" as="image" href="/carousel/hero-1-desktop.jpg" media="(min-width: 640px)" />
 
@@ -213,7 +211,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               name: SITE_NAME,
               url: SITE_URL,
               logo: `${SITE_URL}/logo.png`,
-              // sameAs laissé vide pour éviter les faux liens tant que non définis
               sameAs: [],
             }),
           }}
@@ -229,7 +226,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               name: SITE_NAME,
               potentialAction: {
                 '@type': 'SearchAction',
-                target: `${SITE_URL}/products?q={search_term_string}`, // canon
+                target: `${SITE_URL}/products?q={search_term_string}`,
                 'query-input': 'required name=search_term_string',
               },
             }),

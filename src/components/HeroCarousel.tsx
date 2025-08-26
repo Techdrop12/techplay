@@ -1,4 +1,4 @@
-// src/components/HeroCarousel.tsx — ULTIME+++ (branché /public, art-direction mobile/desktop)
+// src/components/HeroCarousel.tsx — ULTIME+++ (premium play/pause icons)
 'use client'
 
 import {
@@ -22,22 +22,36 @@ import {
 import { cn } from '@/lib/utils'
 import '@/styles/hero-carousel.css' // ← styles overlay/fx
 
+/* ------------------------ Premium inline icons ------------------------ */
+function IconPlay({ size = 14, className = '' }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className={className}>
+      <path fill="currentColor" d="M8 5v14l11-7z" />
+    </svg>
+  )
+}
+function IconPause({ size = 14, className = '' }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className={className}>
+      <path fill="currentColor" d="M6 5h4v14H6zM14 5h4v14h-4z" />
+    </svg>
+  )
+}
+
 /* -------------------------------- Types ---------------------------------- */
 
 export interface Slide {
   id: number | string
-  /** Image unique (fallback rétro-compat) */
   image?: string
-  /** Art-direction : fichiers dédiés mobile/desktop */
   imageMobile?: string
   imageDesktop?: string
-  alt?: string                 // Accessibilité / SEO
-  text?: string                // Headline (optionnel)
+  alt?: string
+  text?: string
   ctaLabel?: string
   ctaLink?: string
-  videoUrl?: string            // (Optionnel) Vidéo muette (mp4 conseillé)
-  poster?: string              // Poster vidéo
-  badge?: string               // Badge optionnel (“-30% AUJOURD’HUI”)
+  videoUrl?: string
+  poster?: string
+  badge?: string
 }
 
 interface HeroCarouselProps {
@@ -48,22 +62,21 @@ interface HeroCarouselProps {
   textSize?: 'sm' | 'md' | 'lg' | 'xl'
   autoplay?: boolean
   className?: string
-  showThumbnails?: boolean    // Miniatures (desktop)
-  showBullets?: boolean       // Bullets (mobile)
-  showCounter?: boolean       // Compteur 1/5
-  parallaxPx?: number         // Effet de parallaxe vertical (px max) — 0 = off
-  edgeFade?: boolean          // Masques latéraux (fade)
+  showThumbnails?: boolean
+  showBullets?: boolean
+  showCounter?: boolean
+  parallaxPx?: number
+  edgeFade?: boolean
   showPlayPause?: boolean
   pauseOnHover?: boolean
-  pauseWhenHidden?: boolean   // Pause si le carrousel sort du viewport
-  progressClickable?: boolean // Cliquer la barre de progression pour naviguer
-  swipeThreshold?: number     // px
+  pauseWhenHidden?: boolean
+  progressClickable?: boolean
+  swipeThreshold?: number
   onSlideChange?: (index: number, slide: Slide) => void
 }
 
 /* -------------------------------- Config --------------------------------- */
 
-// ✅ Par défaut on pointe sur tes fichiers /public/carousel/*
 const DEFAULT_SLIDES: ReadonlyArray<Slide> = [
   {
     id: 1,
@@ -102,7 +115,6 @@ const TEXT_SIZES = {
   xl: 'text-6xl sm:text-7xl',
 } as const
 
-// Blur tiny placeholder (1x1)
 const BLUR_DATA_URL =
   'data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA='
 
@@ -188,13 +200,10 @@ export default function HeroCarousel({
 
   const current = useMemo(() => slides[index], [slides, index])
 
-  // Clamp si la liste change
   useEffect(() => {
     if (index > Math.max(0, slides.length - 1)) setIndex(0)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slides.length])
+  }, [slides.length, index])
 
-  /* Parallaxe (désactivée si parallaxPx = 0) */
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end start'],
@@ -202,7 +211,6 @@ export default function HeroCarousel({
   const y = useTransform(scrollYProgress, [0, 1], [0, parallaxPx])
   const parallaxStyle = parallaxPx > 0 ? { y } : undefined
 
-  /* Timer */
   const clearTimer = () => {
     if (timerRef.current) {
       clearInterval(timerRef.current)
@@ -240,14 +248,12 @@ export default function HeroCarousel({
     return clearTimer
   }, [startTimer])
 
-  // Pause si onglet non focus
   useEffect(() => {
     const onVis = () => (document.hidden ? pause() : resume())
     document.addEventListener('visibilitychange', onVis)
     return () => document.removeEventListener('visibilitychange', onVis)
   }, [pause, resume])
 
-  // Pause quand le carrousel sort du viewport
   useEffect(() => {
     if (!pauseWhenHidden || typeof window === 'undefined') return
     const el = containerRef.current
@@ -264,7 +270,6 @@ export default function HeroCarousel({
     return () => io.disconnect()
   }, [pauseWhenHidden, pause, resume])
 
-  // Prefetch images voisines
   useEffect(() => {
     if (typeof window === 'undefined' || total <= 1) return
     const nextIdx = (index + 1) % total
@@ -283,7 +288,6 @@ export default function HeroCarousel({
     })
   }, [index, slides, total])
 
-  // Annonce SR “Diapo X sur Y”
   useEffect(() => {
     onSlideChange?.(index, current)
     try {
@@ -299,7 +303,6 @@ export default function HeroCarousel({
     } catch {}
   }, [index, current, total, onSlideChange, srId, t, lang])
 
-  /* Gestes tactiles */
   const onTouchStart: React.TouchEventHandler<HTMLDivElement> = (e) => {
     touchStartX.current = e.touches[0].clientX
     if (pauseOnHover) pause()
@@ -312,29 +315,16 @@ export default function HeroCarousel({
     resume()
   }
 
-  /* Keyboard nav */
   const onKeyDown: React.KeyboardEventHandler = (e) => {
     if (e.key === 'ArrowRight') {
-      pause()
-      next()
-      resume()
+      pause(); next(); resume()
     } else if (e.key === 'ArrowLeft') {
-      pause()
-      prev()
-      resume()
+      pause(); prev(); resume()
     } else if (e.key === 'Home') {
-      pause()
-      setIndex(0)
-      resume()
+      pause(); setIndex(total ? 0 : 0); resume()
     } else if (e.key === 'End') {
-      pause()
-      setIndex(total - 1)
-      resume()
-    } else if (
-      e.key === ' ' ||
-      e.key === 'Spacebar' ||
-      e.key === 'Space'
-    ) {
+      pause(); setIndex(total ? total - 1 : 0); resume()
+    } else if (e.key === ' ' || e.key === 'Spacebar' || e.key === 'Space') {
       e.preventDefault()
       isPaused ? resume() : pause()
     }
@@ -342,18 +332,13 @@ export default function HeroCarousel({
 
   if (total === 0) return null
 
-  // Helpers sûrs
-  const safeCtaHref = (href?: string) => {
-    if (!href) return '/products'
-    return href
-  }
+  const safeCtaHref = (href?: string) => (href ? href : '/products')
   const slideAria =
     index + 1 + ' / ' + total + (current?.alt ? ' — ' + current.alt : '')
   const ctaAria =
     (current?.ctaLabel ? current.ctaLabel : '') +
     (current?.alt ? ' — ' + current.alt : '')
 
-  // Sources images (art-direction)
   const desktopSrc =
     current?.imageDesktop || current?.image || current?.poster || '/og-image.jpg'
   const mobileSrc =
@@ -385,7 +370,6 @@ export default function HeroCarousel({
       onTouchEnd={onTouchEnd}
       tabIndex={0}
     >
-      {/* Live region SR */}
       <span
         id={srId}
         className="sr-only"
@@ -397,7 +381,6 @@ export default function HeroCarousel({
         {t.instructions}
       </p>
 
-      {/* Edge fades */}
       {edgeFade && (
         <>
           <div
@@ -411,7 +394,6 @@ export default function HeroCarousel({
         </>
       )}
 
-      {/* Slide layer */}
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={String(current?.id)}
@@ -424,7 +406,6 @@ export default function HeroCarousel({
           aria-roledescription="slide"
           aria-label={slideAria}
         >
-          {/* Ken Burns doux synchronisé avec l’intervalle */}
           <motion.div
             key={'kb-' + String(current?.id)}
             initial={{ scale: 1.02 }}
@@ -450,7 +431,6 @@ export default function HeroCarousel({
               </video>
             ) : (
               <>
-                {/* Mobile */}
                 <Image
                   src={mobileSrc}
                   alt={current?.alt || ''}
@@ -466,7 +446,6 @@ export default function HeroCarousel({
                     ;(e.currentTarget as any).style.display = 'none'
                   }}
                 />
-                {/* Desktop */}
                 <Image
                   src={desktopSrc}
                   alt={current?.alt || ''}
@@ -488,7 +467,6 @@ export default function HeroCarousel({
         </motion.div>
       </AnimatePresence>
 
-      {/* Vignette + overlay (ne bloque PAS les interactions) */}
       <div className="pointer-events-none absolute inset-0 z-[1]" aria-hidden="true">
         <div className="overlay-hero absolute inset-0" />
         {showOverlay && (
@@ -503,7 +481,6 @@ export default function HeroCarousel({
         />
       </div>
 
-      {/* Badge header (optionnel) */}
       {current?.badge && (
         <div className="absolute left-5 top-5 z-20">
           <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-black shadow dark:bg-black/60 dark:text-white">
@@ -512,14 +489,12 @@ export default function HeroCarousel({
         </div>
       )}
 
-      {/* Compteur 1/5 (optionnel) */}
       {showCounter && total > 1 && (
         <div className="supports-backdrop:glass absolute left-1/2 top-4 z-20 -translate-x-1/2 rounded-full bg-black/35 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
           {index + 1 + ' / ' + total}
         </div>
       )}
 
-      {/* Contenu texte + CTA */}
       {(current?.text || current?.ctaLabel) && (
         <div className="absolute inset-0 z-10 grid place-items-center px-6 text-center sm:px-12">
           <div className="mx-auto max-w-5xl">
@@ -562,7 +537,6 @@ export default function HeroCarousel({
         </div>
       )}
 
-      {/* Prev / Next */}
       {total > 1 && (
         <>
           <button
@@ -605,7 +579,6 @@ export default function HeroCarousel({
         </>
       )}
 
-      {/* Play / Pause */}
       {showPlayPause && total > 1 && (
         <button
           type="button"
@@ -618,11 +591,13 @@ export default function HeroCarousel({
           )}
           data-gtm="hero_toggle"
         >
-          {isPaused ? '▶︎ ' + (lang.startsWith('en') ? 'Play' : 'Lire') : '⏸ ' + (lang.startsWith('en') ? 'Pause' : 'Pause')}
+          <span className="inline-flex items-center gap-1.5">
+            {isPaused ? <IconPlay /> : <IconPause />}
+            <span>{isPaused ? (lang.startsWith('en') ? 'Play' : 'Lire') : (lang.startsWith('en') ? 'Pause' : 'Pause')}</span>
+          </span>
         </button>
       )}
 
-      {/* Progress bar */}
       {effectiveAutoplay && (
         <div
           ref={progressRef}
@@ -651,7 +626,6 @@ export default function HeroCarousel({
         </div>
       )}
 
-      {/* Bullets (mobile) */}
       {showBullets && total > 1 && (
         <nav className="absolute bottom-3 left-1/2 z-20 -translate-x-1/2 sm:hidden" aria-label={t.nav}>
           <ul className="flex gap-3">
@@ -685,7 +659,6 @@ export default function HeroCarousel({
         </nav>
       )}
 
-      {/* Miniatures (desktop) */}
       {showThumbnails && total > 1 && (
         <div className="absolute bottom-4 left-1/2 z-20 hidden -translate-x-1/2 sm:block" aria-label={t.thumbs}>
           <ul className="flex gap-3">

@@ -1,3 +1,4 @@
+// src/components/LocalizedLink.tsx — FINAL (i18n-safe + absolus intacts)
 'use client'
 
 import NextLink, { type LinkProps } from 'next/link'
@@ -13,6 +14,10 @@ type Props = Omit<LinkProps, 'href'> &
     keepQuery?: boolean
   }
 
+function isAbsolute(href: string) {
+  return /^https?:\/\//i.test(href) || href.startsWith('mailto:') || href.startsWith('tel:')
+}
+
 function normalizeHref(
   href: string | UrlObject,
   locale?: Locale,
@@ -20,12 +25,12 @@ function normalizeHref(
 ): string | UrlObject {
   const loc = locale ?? getCurrentLocale()
   if (typeof href === 'string') {
-    return localizePath(href, loc, { keepQuery })
+    return isAbsolute(href) ? href : localizePath(href, loc, { keepQuery })
   }
   // UrlObject -> on localise le pathname si présent
   const next: UrlObject = { ...href }
   const p = typeof href.pathname === 'string' ? href.pathname : '/'
-  next.pathname = localizePath(p, loc, { keepQuery })
+  next.pathname = isAbsolute(p) ? p : localizePath(p, loc, { keepQuery })
   return next
 }
 

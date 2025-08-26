@@ -1,8 +1,7 @@
-// src/components/Footer.tsx — Ultra Premium FINAL (i18n, tokens, SEO, newsletter durcie)
+// src/components/Footer.tsx — Ultra Premium FINAL (i18n, tokens, SEO, newsletter) — sans doublon JSON-LD
 'use client'
 
 import { useId, useMemo, useState } from 'react'
-import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   FaFacebookF,
@@ -53,7 +52,7 @@ const DEFAULT_LEGAL: FooterLink[] = [
   { label: 'CGV', href: '/cgv' },
 ]
 
-// ⚠️ normalisation d’anciennes routes -> nouvelles routes canoniques
+// normalisation d’anciennes routes -> nouvelles routes canoniques
 const normalizeHref = (href: string) => {
   if (!href.startsWith('/')) return href
   return href
@@ -67,7 +66,7 @@ const DEFAULT_GROUPS: NavGroup[] = [
     title: 'Boutique',
     links: [
       { label: 'Accueil', href: '/' },
-      { label: 'Catégories', href: '/categorie' },
+      { label: 'Catégories', href: '/#categories' }, // évite 404
       { label: 'Produits', href: '/products' },
       { label: 'Packs', href: '/products/packs' },
       { label: 'Wishlist', href: '/wishlist' },
@@ -77,7 +76,7 @@ const DEFAULT_GROUPS: NavGroup[] = [
     title: 'Support',
     links: [
       { label: 'Contact', href: '/contact' },
-      { label: 'FAQ', href: '/faq' },
+      { label: 'FAQ', href: '/#faq' }, // ancre home
       { label: 'Suivi de commande', href: '/commande' },
       { label: 'Blog', href: '/blog' },
       { label: 'Promo du jour', href: '/products?promo=1' },
@@ -482,42 +481,7 @@ export default function Footer({
         </div>
       </div>
 
-      {/* JSON-LD Organization + SiteNavigationElement */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'Organization',
-            name: companyName,
-            url: origin,
-            logo: `${origin}/logo.png`,
-            sameAs: [
-              'https://facebook.com/techplay',
-              'https://twitter.com/techplay',
-              'https://instagram.com/techplay',
-            ],
-            contactPoint: [
-              contact?.email
-                ? { '@type': 'ContactPoint', email: contact.email, contactType: 'customer support', availableLanguage: ['fr', 'en'] }
-                : undefined,
-              contact?.phone
-                ? { '@type': 'ContactPoint', telephone: contact.phone, contactType: 'customer support', availableLanguage: ['fr', 'en'] }
-                : undefined,
-            ].filter(Boolean),
-            address:
-              contact?.address && Object.values(contact.address).some(Boolean)
-                ? {
-                    '@type': 'PostalAddress',
-                    streetAddress: contact.address.streetAddress,
-                    postalCode: contact.address.postalCode,
-                    addressLocality: contact.address.addressLocality,
-                    addressCountry: contact.address.addressCountry,
-                  }
-                : undefined,
-          }),
-        }}
-      />
+      {/* JSON-LD SiteNavigationElement (✅ pas d’Organization ici pour éviter le doublon avec le layout) */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -527,11 +491,10 @@ export default function Footer({
             name: 'Footer Navigation',
             url: origin,
             hasPart: navGroups.flatMap((g) =>
-              g.links.map((l) => ({
-                '@type': 'WebPage',
-                name: l.label,
-                url: l.href.startsWith('http') ? l.href : `${origin}${localizePath(l.href, locale)}`,
-              }))
+              g.links.map((l) => (l.external
+                ? { '@type': 'WebPage', name: l.label, url: l.href }
+                : { '@type': 'WebPage', name: l.label, url: `${origin}${localizePath(l.href, locale)}` }
+              ))
             ),
           }),
         }}

@@ -1,6 +1,7 @@
-// src/components/layout/Header.tsx — Logo → Accueil garanti + badges premium
+// src/components/layout/Header.tsx — Logo → Accueil garanti + icônes premium + a11y/perf — FINAL
 'use client'
 
+import NextLink from 'next/link' // logo
 import Link from '@/components/LocalizedLink'
 import { useEffect, useId, useRef, useState, useMemo } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
@@ -12,6 +13,13 @@ import { useWishlist } from '@/hooks/useWishlist'
 import ThemeToggle from '@/components/ui/ThemeToggle'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 import { CATEGORIES } from '@/lib/categories'
+import {
+  SearchIcon as Search,
+  FlameIcon as Flame,
+  HeartIcon as Heart,
+  CartIcon as Cart,
+  UserIcon as User,
+} from '@/components/ui/premium-icons'
 
 type NavLink = { href: string; label: string }
 const LINKS: NavLink[] = [
@@ -34,36 +42,7 @@ const SEARCH_TRENDS = [
   'souris sans fil',
 ]
 
-/* ---------- Icônes ---------- */
-const Icon = {
-  Search: () => (
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-      <path fill="currentColor" d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5-5-5ZM10 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10Z"/>
-    </svg>
-  ),
-  Flame: () => (
-    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-      <path fill="currentColor" d="M12 2s5 4 5 9a5 5 0 1 1-10 0c0-2 1-4 3-6-1 3 2 4 2 6 0 1.7-1 3-2.5 3.5A4.5 4.5 0 0 0 16.5 9C16.5 5.5 12 2 12 2Z"/>
-    </svg>
-  ),
-  Heart: () => (
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-      <path fill="currentColor" d="M12 21s-7-4.6-9.3-8.3C1.3 9.9 3 6 6.9 6c2.2 0 3.4 1.2 4.1 2 0.7-0.8 1.9-2 4.1-2C19 6 20.7 9.9 21.3 12.7 19 16.4 12 21 12 21z"/>
-    </svg>
-  ),
-  Cart: () => (
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-      <path fill="currentColor" d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM6 5h14l-1.5 8.5a2 2 0 0 1-2 1.6H9a2 2 0 0 1-2-1.6L5.3 3H2V1h4a2 2 0 0 1 2 1.7L8.3 5Z"/>
-    </svg>
-  ),
-  User: () => (
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-      <path fill="currentColor" d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.4 0-8 2.2-8 5v2h16v-2c0-2.8-3.6-5-8-5Z"/>
-    </svg>
-  ),
-}
-
-/** Badge premium (halo dégradé + anneau) */
+/** Badge premium */
 const ActionBadge = ({ children, className }: { children: React.ReactNode; className?: string }) => (
   <span
     className={cn(
@@ -84,7 +63,7 @@ export default function Header() {
   const L = (p: string) => localizePath(p, locale)
   const SEARCH_ACTION = L('/products')
 
-  // ----------------------- Comptages ------------------------
+  // stores
   const { cart } = useCart() as any
   const { wishlist } = useWishlist() as any
 
@@ -102,19 +81,17 @@ export default function Header() {
     return Number.isFinite(n) ? n : 0
   }, [wishlist])
 
-  // ------------------------------ State UI ---------------------------------
+  // ui state
   const [hidden, setHidden] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-
   const lastY = useRef(0)
   const ticking = useRef(false)
   const reducedMotion = useRef(false)
   const prefetchTimers = useRef<Map<string, number>>(new Map())
-
   const searchRef = useRef<HTMLInputElement | null>(null)
   const [placeholder, setPlaceholder] = useState(SEARCH_TRENDS[0])
 
-  // Mega menu
+  // mega menu
   const [catOpen, setCatOpen] = useState(false)
   const catBtnRef = useRef<HTMLButtonElement | null>(null)
   const catPanelRef = useRef<HTMLDivElement | null>(null)
@@ -228,6 +205,8 @@ export default function Header() {
 
   const prefetchViaLink = (href: string) => {
     try {
+      // Next/router prefetch (quand possible), sinon <link rel="prefetch">
+      router.prefetch?.(href)
       const el = document.createElement('link')
       el.rel = 'prefetch'
       el.href = href
@@ -266,17 +245,15 @@ export default function Header() {
 
   /** LOGO → ACCUEIL (garanti) */
   const onLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    // Laisser passer click milieu / Cmd+clic
-    if (e.metaKey || e.ctrlKey || e.button === 1) return
+    if (e.metaKey || e.ctrlKey || e.button === 1) return // middle/Cmd click ok
     e.preventDefault()
     const url = L('/')
     try { router.push(url) } catch {}
-    // Fallback dur si la navigation client est bloquée
     setTimeout(() => {
       try {
         if (window.location.pathname !== url) window.location.assign(url)
       } catch {}
-    }, 120)
+    }, 80)
   }
 
   return (
@@ -297,7 +274,7 @@ export default function Header() {
     >
       <div className="container-app flex h-16 md:h-20 items-center justify-between gap-2 sm:gap-3">
         {/* Logo — clique → Accueil */}
-        <Link
+        <NextLink
           href={L('/')}
           prefetch={false}
           aria-label="TechPlay — Accueil"
@@ -313,7 +290,7 @@ export default function Header() {
             srcDark="/logo-dark.svg"
             ariaLabel="TechPlay"
           />
-        </Link>
+        </NextLink>
 
         {/* Recherche */}
         <form
@@ -354,7 +331,7 @@ export default function Header() {
               title="Rechercher"
               data-gtm="header_search_submit"
             >
-              <Icon.Search />
+              <Search />
             </button>
           </div>
         </form>
@@ -507,7 +484,7 @@ export default function Header() {
             title="Offres du jour"
             data-gtm="header_deals_icon"
           >
-            <ActionBadge><Icon.Flame /></ActionBadge>
+            <ActionBadge><Flame /></ActionBadge>
           </Link>
 
           {/* Offres bouton texte */}
@@ -543,7 +520,7 @@ export default function Header() {
               aria-label={wishlistCount > 0 ? `Voir la wishlist (${wishlistCount})` : 'Voir la wishlist'}
               data-gtm="header_wishlist"
             >
-              <ActionBadge><Icon.Heart /></ActionBadge>
+              <ActionBadge><Heart /></ActionBadge>
             </Link>
             {wishlistCount > 0 && (
               <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
@@ -567,7 +544,7 @@ export default function Header() {
               aria-label={cartCount > 0 ? `Voir le panier (${cartCount})` : 'Voir le panier'}
               data-gtm="header_cart"
             >
-              <ActionBadge><Icon.Cart /></ActionBadge>
+              <ActionBadge><Cart /></ActionBadge>
             </Link>
             {cartCount > 0 && (
               <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
@@ -591,7 +568,7 @@ export default function Header() {
             title="Espace client"
             data-gtm="header_account"
           >
-            <ActionBadge><Icon.User /></ActionBadge>
+            <ActionBadge><User /></ActionBadge>
           </Link>
         </div>
 

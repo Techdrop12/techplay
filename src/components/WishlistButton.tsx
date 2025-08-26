@@ -1,8 +1,8 @@
-// src/components/WishlistButton.tsx — ultimate (hook-based, no direct LS)
+// src/components/WishlistButton.tsx — premium (hook-based, no emoji)
 'use client'
 
 import { useMemo, useRef, useState } from 'react'
-import { Heart } from 'lucide-react'
+import { Heart, HeartCrack, AlertTriangle } from 'lucide-react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { toast } from 'react-hot-toast'
 import { logEvent } from '@/lib/logEvent'
@@ -69,20 +69,20 @@ export default function WishlistButton({
 
     if (isWishlisted) {
       remove(pid)
-      toast('💔 Retiré de la wishlist', { icon: '💔' })
+      toast('Retiré de la wishlist', { icon: <HeartCrack size={18} className="text-gray-600" /> })
       try { logEvent({ action: 'wishlist_remove', category: 'wishlist', label: `product_${pid}`, value: 1 }) } catch {}
       return
     }
 
     if (count >= WISHLIST_LIMIT) {
       setShake(true); setTimeout(() => setShake(false), 420)
-      toast.error('Limite de wishlist atteinte', { icon: '⚠️' })
+      toast.error('Limite de wishlist atteinte', { icon: <AlertTriangle size={18} className="text-amber-500" /> })
       return
     }
 
-    const canonical = { ...product, id: pid } // on garantit id pour le hook
+    const canonical = { ...product, id: pid }
     add(canonical as any)
-    toast('❤️ Ajouté à la wishlist', { icon: '❤️' })
+    toast.success('Ajouté à la wishlist', { icon: <Heart size={18} className="text-red-500" /> })
     setRippler((k) => k + 1)
 
     try {
@@ -99,9 +99,7 @@ export default function WishlistButton({
 
   return (
     <>
-      <span className="sr-only" role="status" aria-live="polite">
-        {/* messages live gérés via toasts => rien ici pour éviter le spam */}
-      </span>
+      <span className="sr-only" role="status" aria-live="polite" />
 
       <motion.button
         ref={btnRef}

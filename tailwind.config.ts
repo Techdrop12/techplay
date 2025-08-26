@@ -31,10 +31,20 @@ const config: Config = {
       // Palette utilitaire (hex) + mapping tokens HSL (pilotés par design-tokens.css)
       colors: {
         brand: { DEFAULT: '#0f172a', light: '#1e293b', dark: '#0b0f14' },
+
+        // ✅ DEFAULT piloté par --accent (réagit au thème). Steps 50..900 conservés.
         accent: {
-          DEFAULT: '#2563eb',
-          50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa',
-          500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a',
+          DEFAULT: 'hsl(var(--accent) / <alpha-value>)',
+          50: '#eff6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd',
+          400: '#60a5fa',
+          500: '#3b82f6',
+          600: '#2563eb',
+          700: '#1d4ed8',
+          800: '#1e40af',
+          900: '#1e3a8a',
         },
         success: '#16a34a',
         warning: '#eab308',

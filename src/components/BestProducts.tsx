@@ -80,7 +80,7 @@ function isInStock(p: AnyProduct): boolean {
 export default function BestProducts({
   products,
   showTitle = false,
-  title = '⭐ Nos Meilleures Ventes',
+  title = 'Nos Meilleures Ventes', // ← plus d’emoji
   limit = 8,
   className,
   showControls = true,
@@ -210,68 +210,66 @@ export default function BestProducts({
       )}
 
       {/* Barre de contrôle (tri / filtres) */}
-      {showControls && (
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-          <div className="text-xs text-token-text/70">
-            Affichage&nbsp;
-            <span className="font-semibold">{visibleCount}</span>
-            &nbsp;/&nbsp;
-            <span>{totalCount}</span>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Filtres */}
-            <button
-              type="button"
-              onClick={() => { setFilterPromo((v) => !v); pushDL('best_products_filter', { promo: !filterPromo }) }}
-              className={cn(
-                'rounded-full border px-3 py-1.5 text-xs font-semibold transition',
-                filterPromo
-                  ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent)/.12)] text-[hsl(var(--accent))]'
-                  : 'border-token-border bg-token-surface hover:shadow'
-              )}
-              aria-pressed={filterPromo}
-              aria-label="Filtrer: en promotion"
-            >
-              Promo
-            </button>
-
-            <button
-              type="button"
-              onClick={() => { setFilterStock((v) => !v); pushDL('best_products_filter', { stock: !filterStock }) }}
-              className={cn(
-                'rounded-full border px-3 py-1.5 text-xs font-semibold transition',
-                filterStock
-                  ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent)/.12)] text-[hsl(var(--accent))]'
-                  : 'border-token-border bg-token-surface hover:shadow'
-              )}
-              aria-pressed={filterStock}
-              aria-label="Filtrer: en stock"
-            >
-              En stock
-            </button>
-
-            {/* Tri */}
-            <label className="sr-only" htmlFor={headingId + '-sort'}>Trier</label>
-            <select
-              id={headingId + '-sort'}
-              className="rounded-xl border border-token-border bg-token-surface px-3 py-1.5 text-xs font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
-              value={sortBy}
-              onChange={(e) => {
-                const v = e.target.value as BestProductsProps['initialSort']
-                setSortBy(v || 'popular')
-                pushDL('best_products_sort', { sort: v })
-              }}
-              aria-label="Trier les produits"
-            >
-              <option value="popular">Popularité</option>
-              <option value="priceAsc">Prix ↑</option>
-              <option value="priceDesc">Prix ↓</option>
-              <option value="rating">Note</option>
-            </select>
-          </div>
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="text-xs text-token-text/70">
+          Affichage&nbsp;
+          <span className="font-semibold">{visibleCount}</span>
+          &nbsp;/&nbsp;
+          <span>{totalCount}</span>
         </div>
-      )}
+
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Filtres */}
+          <button
+            type="button"
+            onClick={() => { setFilterPromo((v) => !v); pushDL('best_products_filter', { promo: !filterPromo }) }}
+            className={cn(
+              'rounded-full border px-3 py-1.5 text-xs font-semibold transition',
+              filterPromo
+                ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent)/.12)] text-[hsl(var(--accent))]'
+                : 'border-token-border bg-token-surface hover:shadow'
+            )}
+            aria-pressed={filterPromo}
+            aria-label="Filtrer: en promotion"
+          >
+            Promo
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { setFilterStock((v) => !v); pushDL('best_products_filter', { stock: !filterStock }) }}
+            className={cn(
+              'rounded-full border px-3 py-1.5 text-xs font-semibold transition',
+              filterStock
+                ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent)/.12)] text-[hsl(var(--accent))]'
+                : 'border-token-border bg-token-surface hover:shadow'
+            )}
+            aria-pressed={filterStock}
+            aria-label="Filtrer: en stock"
+          >
+            En stock
+          </button>
+
+          {/* Tri */}
+          <label className="sr-only" htmlFor={headingId + '-sort'}>Trier</label>
+          <select
+            id={headingId + '-sort'}
+            className="rounded-xl border border-token-border bg-token-surface px-3 py-1.5 text-xs font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
+            value={sortBy}
+            onChange={(e) => {
+              const v = e.target.value as BestProductsProps['initialSort']
+              setSortBy(v || 'popular')
+              pushDL('best_products_sort', { sort: v })
+            }}
+            aria-label="Trier les produits"
+          >
+            <option value="popular">Popularité</option>
+            <option value="priceAsc">Prix ↑</option>
+            <option value="priceDesc">Prix ↓</option>
+            <option value="rating">Note</option>
+          </select>
+        </div>
+      </div>
 
       {/* Grille */}
       <motion.ul

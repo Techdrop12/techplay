@@ -1,38 +1,83 @@
-// src/components/FreeShippingBadge.tsx — ULTIME++ (ring/svg, persist, policy link, a11y/UX)
+// src/components/FreeShippingBadge.tsx — PREMIUM (SVG icons, no emoji) — FINAL
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
 import { cn, formatPrice } from '@/lib/utils';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface FreeShippingBadgeProps {
-  /** Montant pris en compte (ex: prix produit OU total panier) */
   price: number;
-  /** Seuil de livraison gratuite (fallback env or 49€) */
   threshold?: number;
   className?: string;
-  /** Version compacte (pas de barre de progression) */
   minimal?: boolean;
-  /** Forcer l’affichage de la progression (ignoré si minimal) */
   withProgress?: boolean;
-  /** Locale ('fr', 'fr-FR', 'en', etc.) — par défaut <html lang> ou 'fr' */
   locale?: string;
-  /** Style visuel de progression */
   variant?: 'bar' | 'ring';
-  /** Taille du composant */
   size?: 'sm' | 'md';
-  /** Déclenche une petite célébration à l’atteinte du seuil */
   celebrate?: boolean;
-  /** Callback appelé une seule fois lorsqu’on atteint le seuil */
   onReach?: () => void;
-
-  /** Persister le “déjà atteint” (évite de rejouer les confettis) */
   persistKey?: string;
-  /** Afficher un lien vers la politique d’expédition (facultatif) */
   policyHref?: string;
-  /** Mode d’anneau : conic (par défaut) ou svg pour un stroke animé lisse */
   ringMode?: 'conic' | 'svg';
 }
+
+/* ------------------------ Premium inline icons ------------------------ */
+
+function IconCheckCircle({ size = 16, className }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className={className}>
+      <path
+        fill="currentColor"
+        d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2Zm-1.1 13.3-3.2-3.2 1.4-1.4 1.8 1.8 4.8-4.8 1.4 1.4-6.2 6.2Z"
+      />
+    </svg>
+  );
+}
+
+function IconTruck({ size = 16, className }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className={className}>
+      <path
+        fill="currentColor"
+        d="M3 6h11a1 1 0 0 1 1 1v3h3.8c.4 0 .76.24.92.62l1.28 3.02c.06.15.1.31.1.47V18a2 2 0 0 1-2 2h-1a2.5 2.5 0 1 1-5 0H9.5a2.5 2.5 0 1 1-5 0H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Zm12 4V8H4v10h.51a2.5 2.5 0 0 1 4.98 0H15v-5h3.67l-.8-1.9H15Zm2.5 8a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM7 19.5A1.5 1.5 0 1 0 7 16a1.5 1.5 0 0 0 0 3.5Z"
+      />
+    </svg>
+  );
+}
+
+/** Mini confettis vectoriels (sans emoji) */
+function ConfettiSVG() {
+  return (
+    <div aria-hidden className="relative -ml-1">
+      <motion.svg
+        initial={{ y: 4, opacity: 0, rotate: -12 }}
+        animate={{ y: -10, opacity: 1, rotate: -18 }}
+        transition={{ duration: 0.6 }}
+        width="10" height="10" viewBox="0 0 10 10" className="absolute -top-2 left-0"
+      >
+        <circle cx="5" cy="5" r="5" fill="currentColor" className="opacity-80" />
+      </motion.svg>
+      <motion.svg
+        initial={{ y: 4, opacity: 0, rotate: 12 }}
+        animate={{ y: -12, opacity: 1, rotate: 18 }}
+        transition={{ duration: 0.65, delay: 0.05 }}
+        width="10" height="10" viewBox="0 0 10 10" className="absolute -top-1 left-3"
+      >
+        <rect x="1.5" y="1.5" width="7" height="7" rx="1.5" fill="currentColor" className="opacity-70" />
+      </motion.svg>
+      <motion.svg
+        initial={{ y: 4, opacity: 0, rotate: 0 }}
+        animate={{ y: -9, opacity: 1, rotate: 8 }}
+        transition={{ duration: 0.62, delay: 0.08 }}
+        width="10" height="10" viewBox="0 0 10 10" className="absolute -top-2 left-5"
+      >
+        <path d="M5 0l5 10H0L5 0Z" fill="currentColor" className="opacity-60" />
+      </motion.svg>
+    </div>
+  );
+}
+
+/* --------------------------------------------------------------------- */
 
 export default function FreeShippingBadge({
   price,
@@ -54,15 +99,13 @@ export default function FreeShippingBadge({
   if (!Number.isFinite(price) || price < 0) return null;
   if (!Number.isFinite(threshold) || threshold <= 0) return null;
 
-  // Locale auto depuis <html lang> si non fournie
   const autoLocale =
-    locale ||
-    (typeof document !== 'undefined' ? (document.documentElement.lang || 'fr') : 'fr');
+    locale || (typeof document !== 'undefined' ? (document.documentElement.lang || 'fr') : 'fr');
   const isFr = String(autoLocale).toLowerCase().startsWith('fr');
 
   const T = {
-    eligibleShort: isFr ? '✅ Livraison offerte' : '✅ Free shipping',
-    eligibleLong: isFr ? '🚚 Livraison gratuite' : '🚚 Free shipping',
+    eligibleShort: isFr ? 'Livraison offerte' : 'Free shipping',
+    eligibleLong: isFr ? 'Livraison gratuite' : 'Free shipping',
     missing: (amt: number) =>
       isFr
         ? 'Plus que ' + formatPrice(amt) + ' pour la livraison gratuite'
@@ -83,7 +126,6 @@ export default function FreeShippingBadge({
   const isEligible = remaining <= 0;
   const progress = Math.min(100, Math.round((price / threshold) * 100));
 
-  // Persist confetti/reach (session) pour éviter de spam
   const [reachedPersisted, setReachedPersisted] = useState(false);
   useEffect(() => {
     if (!persistKey) return;
@@ -99,9 +141,7 @@ export default function FreeShippingBadge({
       if (!reachedOnce.current) {
         reachedOnce.current = true;
         try { onReach?.() } catch {}
-        // dataLayer pour analytics
         try { (window as any).dataLayer?.push({ event: 'free_shipping_reached', threshold }) } catch {}
-        // persist (session)
         if (persistKey) {
           try { sessionStorage.setItem(persistKey, '1') } catch {}
         }
@@ -111,42 +151,14 @@ export default function FreeShippingBadge({
     }
   }, [isEligible, onReach, threshold, persistKey]);
 
-  // Confetti simple (Motion emojis) désactivé si déjà “vu” (persist)
   const Confetti = () =>
-    celebrate && isEligible && !prefersReduced && !reachedPersisted ? (
-      <div aria-hidden className="relative -ml-1">
-        <motion.span
-          className="absolute -top-2 left-0 text-[10px] select-none"
-          initial={{ y: 4, opacity: 0, rotate: -12 }}
-          animate={{ y: -10, opacity: 1, rotate: -18 }}
-          transition={{ duration: 0.6 }}
-        >
-          🎉
-        </motion.span>
-        <motion.span
-          className="absolute -top-1 left-3 text-[10px] select-none"
-          initial={{ y: 4, opacity: 0, rotate: 12 }}
-          animate={{ y: -12, opacity: 1, rotate: 18 }}
-          transition={{ duration: 0.65, delay: 0.05 }}
-        >
-          ✨
-        </motion.span>
-        <motion.span
-          className="absolute -top-2 left-5 text-[10px] select-none"
-          initial={{ y: 4, opacity: 0, rotate: 0 }}
-          animate={{ y: -9, opacity: 1, rotate: 8 }}
-          transition={{ duration: 0.62, delay: 0.08 }}
-        >
-          🎊
-        </motion.span>
-      </div>
-    ) : null;
+    celebrate && isEligible && !prefersReduced && !reachedPersisted ? <ConfettiSVG /> : null;
 
-  // Tailles ring
+  // Ring sizes
   const ringDim = size === 'sm' ? 36 : 44;
   const ringStroke = size === 'sm' ? 4 : 5;
 
-  // Styles chip
+  // Chip styles
   const baseChip =
     'inline-flex items-center gap-2 px-2.5 py-1 text-xs font-medium rounded-lg transition shadow-sm border';
   const okChip =
@@ -156,7 +168,7 @@ export default function FreeShippingBadge({
 
   const showProgress = withProgress && !minimal;
 
-  /* ───────────── RING variant ───────────── */
+  /* ----------------------- RING variant ----------------------- */
   if (variant === 'ring' && showProgress) {
     const pct = Math.max(0, progress);
 
@@ -207,11 +219,8 @@ export default function FreeShippingBadge({
                 transition={{ duration: 0.6, ease: 'easeOut' }}
               />
             </svg>
-            <div
-              className="absolute inset-1 grid place-items-center rounded-full bg-white dark:bg-zinc-900"
-              aria-hidden
-            >
-              <span className="text-xs">{isEligible ? '✅' : '🚚'}</span>
+            <div className="absolute inset-1 grid place-items-center rounded-full bg-white dark:bg-zinc-900" aria-hidden>
+              {isEligible ? <IconCheckCircle className="text-green-600 dark:text-green-400" /> : <IconTruck className="text-[hsl(var(--accent))]" />}
             </div>
             {isEligible && <span className="absolute inset-0 rounded-full shadow-glow-accent pointer-events-none" aria-hidden />}
           </div>
@@ -243,7 +252,7 @@ export default function FreeShippingBadge({
       );
     }
 
-    // conic-gradient fallback (léger)
+    // conic-gradient fallback
     const ringBg =
       'conic-gradient(hsl(var(--accent)) ' +
       pct +
@@ -272,7 +281,7 @@ export default function FreeShippingBadge({
             style={{ width: ringDim - ringStroke * 2, height: ringDim - ringStroke * 2 }}
             aria-hidden
           >
-            <span className="text-xs">{isEligible ? '✅' : '🚚'}</span>
+            {isEligible ? <IconCheckCircle className="text-green-600 dark:text-green-400" /> : <IconTruck className="text-[hsl(var(--accent))]" />}
           </div>
           {isEligible && <span className="absolute inset-0 rounded-full shadow-glow-accent pointer-events-none" aria-hidden />}
         </div>
@@ -304,7 +313,7 @@ export default function FreeShippingBadge({
     );
   }
 
-  /* ───────────── BAR variant (par défaut) ───────────── */
+  /* ----------------------- BAR variant (default) ----------------------- */
   const text = isEligible ? (minimal ? T.eligibleShort : T.eligibleLong) : T.missing(remaining);
 
   return (
@@ -322,7 +331,9 @@ export default function FreeShippingBadge({
         className={cn(baseChip, isEligible ? okChip : warnChip)}
       >
         <Confetti />
-        <span aria-hidden="true">{isEligible ? '✅' : '🚚'}</span>
+        <span aria-hidden="true" className="inline-flex">
+          {isEligible ? <IconCheckCircle className="text-green-600 dark:text-green-400" /> : <IconTruck className="text-[hsl(var(--accent))]" />}
+        </span>
         <span>{text}</span>
         {policyHref && (
           <a

@@ -10,6 +10,7 @@ import type { Pack } from '@/types/product'
 import FreeShippingBadge from '@/components/FreeShippingBadge'
 import { logEvent } from '@/lib/logEvent'
 import { pushDataLayer } from '@/lib/ga'
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
 interface PackCardProps {
   pack: Pack
@@ -21,6 +22,10 @@ const BLUR_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+'
 
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
+
+/** URL absolue (pour microdonnées) */
+const toAbs = (u?: string) =>
+  !u ? '' : u.startsWith('http') ? u : (typeof window !== 'undefined' ? window.location.origin + u : u)
 
 export default function PackCard({ pack, priority = false, className }: PackCardProps) {
   // Champs sûrs
@@ -89,7 +94,10 @@ export default function PackCard({ pack, priority = false, className }: PackCard
 
   const savingsEuro = useMemo(() => (typeof refPrice === 'number' ? Math.max(0, refPrice - price) : null), [refPrice, price])
 
-  const packUrl = slug ? '/products/packs/' + slug : '#' // ✅ fix route
+  // i18n — URL localisée
+  const locale = getCurrentLocale()
+  const packUrl = slug ? localizePath('/products/packs/' + slug, locale) : '#'
+
   const hasRating = typeof rating === 'number' && !Number.isNaN(rating)
   const lowStock = typeof stock === 'number' && stock > 0 && stock <= 5
   const outOfStock = typeof stock === 'number' && stock <= 0
@@ -173,7 +181,6 @@ export default function PackCard({ pack, priority = false, className }: PackCard
   return (
     <motion.article
       ref={cardRef}
-      role="listitem"
       aria-label={'Pack : ' + title}
       aria-describedby={ariaDescribedBy}
       itemScope
@@ -194,10 +201,9 @@ export default function PackCard({ pack, priority = false, className }: PackCard
       onMouseMove={onMouseMove}
       onMouseLeave={resetTilt}
       data-pack-id={slug}
-      tabIndex={0}
     >
       <meta itemProp="name" content={title} />
-      <meta itemProp="image" content={mainImage} />
+      <meta itemProp="image" content={toAbs(mainImage)} />
       {slug && <meta itemProp="url" content={packUrl} />} {/* ✅ fix */}
       {brand && <meta itemProp="brand" content={brand} />}
       {sku && <meta itemProp="sku" content={sku} />}
@@ -229,12 +235,12 @@ export default function PackCard({ pack, priority = false, className }: PackCard
 
         <Link
           href={packUrl} // ✅ fix
-          prefetch
+          prefetch={false}
           className="block rounded-[inherit] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.60)]"
           aria-label={'Voir le pack : ' + title}
           onClick={handleClick}
         >
-          <div className="relative w-full aspect-[4/3] bg-gray-100 dark:bg-zinc-800 sm:aspect-[16/9]">
+          <div className="relative w-full aspect-[4/3] bg-gray-100 dark:bg-zinc-800 sm:aspect-[16/9]" aria-busy={!imgLoaded}>
             <Image
               src={mainImage}
               alt={'Image du pack ' + title}

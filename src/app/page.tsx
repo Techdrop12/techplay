@@ -1,6 +1,5 @@
-// src/app/page.tsx — Home ultra-premium (perf/a11y/SEO sans doublons de JSON-LD)
+// src/app/page.tsx — Home ultra-premium (perf/a11y/SEO sans doublons) — FINAL
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 
@@ -8,6 +7,7 @@ import { getBestProducts, getRecommendedPacks } from '@/lib/data'
 import type { Product, Pack } from '@/types/product'
 import TrustBadges from '@/components/TrustBadges'
 import ClientTrackingScript from '@/components/ClientTrackingScript'
+import Link from '@/components/LocalizedLink'
 
 const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'))
 const BestProducts = dynamic(() => import('@/components/BestProducts'), {
@@ -44,7 +44,6 @@ export const metadata: Metadata = {
     title: 'TechPlay – Boutique high-tech & packs exclusifs',
     description:
       'Découvrez les meilleures offres et packs TechPlay, sélectionnées pour vous avec passion et innovation.',
-    creator: '@TechPlay',
     images: [OG_IMAGE],
   },
   alternates: { canonical: SITE_URL },
@@ -78,12 +77,12 @@ function SectionHeader({
 
 function FeaturedCategories() {
   const CATS: Array<{ label: string; href: string; emoji: string; desc: string }> = [
-    { label: 'Casques',   href: '/produit?cat=casques',   emoji: '🎧', desc: 'Audio immersif' },
-    { label: 'Claviers',  href: '/produit?cat=claviers',  emoji: '⌨️', desc: 'Réactivité ultime' },
-    { label: 'Souris',    href: '/produit?cat=souris',    emoji: '🖱️', desc: 'Précision chirurgicale' },
-    { label: 'Webcams',   href: '/produit?cat=webcams',   emoji: '📷', desc: 'Visio en HD' },
-    { label: 'Batteries', href: '/produit?cat=batteries', emoji: '🔋', desc: 'Autonomie boost' },
-    { label: 'Packs',     href: '/pack',                  emoji: '🎁', desc: 'Offres combinées' },
+    { label: 'Casques',   href: '/products?cat=casques',   emoji: '🎧', desc: 'Audio immersif' },
+    { label: 'Claviers',  href: '/products?cat=claviers',  emoji: '⌨️', desc: 'Réactivité ultime' },
+    { label: 'Souris',    href: '/products?cat=souris',    emoji: '🖱️', desc: 'Précision chirurgicale' },
+    { label: 'Webcams',   href: '/products?cat=webcams',   emoji: '📷', desc: 'Visio en HD' },
+    { label: 'Batteries', href: '/products?cat=batteries', emoji: '🔋', desc: 'Autonomie boost' },
+    { label: 'Packs',     href: '/products/packs',         emoji: '🎁', desc: 'Offres combinées' },
   ]
   return (
     <section id="categories" aria-label="Catégories vedettes" className="motion-section">
@@ -133,7 +132,7 @@ function SplitCTA() {
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Link
-              href="/pack"
+              href="/products/packs"
               prefetch={false}
               className="inline-flex items-center rounded-xl bg-[hsl(var(--accent))] px-5 py-3 font-semibold text-white shadow hover:bg-[hsl(var(--accent)/.92)] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
               data-gtm="home_cta_packs"
@@ -141,7 +140,7 @@ function SplitCTA() {
               Découvrir les packs
             </Link>
             <Link
-              href="/produit"
+              href="/products"
               prefetch={false}
               className="inline-flex items-center rounded-xl border border-token-border bg-token-surface px-5 py-3 font-semibold hover:shadow focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
               data-gtm="home_cta_products"
@@ -212,7 +211,7 @@ export default async function HomePage() {
           itemListElement: bestProducts.slice(0, 8).map((p: any, idx: number) => ({
             '@type': 'ListItem',
             position: idx + 1,
-            url: p?.slug ? `${SITE_URL}/produit/${p.slug}` : `${SITE_URL}/produit`,
+            url: p?.slug ? `${SITE_URL}/products/${p.slug}` : `${SITE_URL}/products`,
             name: p?.title ?? 'Produit',
           })),
         }
@@ -232,7 +231,7 @@ export default async function HomePage() {
         <section aria-label="Carrousel des produits en vedette" className="motion-section" id="hero">
           <Suspense fallback={<div className="h-40 sm:h-56 lg:h-72 rounded-2xl skeleton" />}>
             <HeroCarousel />
-            <noscript><p><a href="/produit">Voir les produits</a></p></noscript>
+            <noscript><p><a href="/products">Voir les produits</a></p></noscript>
           </Suspense>
         </section>
 

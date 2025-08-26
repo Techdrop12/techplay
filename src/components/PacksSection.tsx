@@ -25,6 +25,16 @@ interface Props {
 
 type AnyPack = Record<string, any>
 
+/* Icône cadeau duotone (premium) */
+function DuotoneGift({ size = 18, className = 'text-[hsl(var(--accent))]' }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className={className}>
+      <path d="M20 7h-3.17a3 3 0 1 0-5.66-2 3 3 0 1 0-5.66 2H2v4h2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9h2V7h-2Zm-9-2a1 1 0 1 1 0 2H8a1 1 0 0 1 0-2h3Zm-5 6h5v9H6v-9Zm7 9v-9h5v9h-5Z" fill="currentColor" className="opacity-90" />
+      <path d="M20 7h-3.17a3 3 0 1 0-5.66-2 3 3 0 1 0-5.66 2H2v4h2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9h2V7h-2Zm-9-2a1 1 0 1 1 0 2H8a1 1 0 0 1 0-2h3Zm-5 6h5v9H6v-9Zm7 9v-9h5v9h-5Z" fill="currentColor" className="opacity-25 blur-[1px]" />
+    </svg>
+  )
+}
+
 const containerVariants = {
   hidden: { opacity: 0, y: 30 },
   show: {
@@ -212,8 +222,9 @@ export default function PacksSection({
       {showHeader && (
         <div className="mb-10 flex flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="text-center sm:text-left">
-            <h2 id={headingId} className="text-3xl font-extrabold text-brand dark:text-white">
-              🎁 Nos Packs Recommandés
+            <h2 id={headingId} className="flex items-center justify-center gap-2 text-3xl font-extrabold text-brand dark:text-white sm:justify-start">
+              <DuotoneGift />
+              <span>Nos Packs Recommandés</span>
             </h2>
             <p id={subId} className="mt-2 text-sm text-token-text/70">
               Équipez-vous malin : bundles optimisés pour la perf’ et le budget.

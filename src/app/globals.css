@@ -175,6 +175,11 @@
   .shadow-soft-lg { box-shadow: var(--shadow-lg); }
   .shadow-elevated { box-shadow: 0 14px 28px hsl(var(--elev-c) / var(--elev-a2)); }
 
+  /* Glow premium autour des éléments validés (wishlist, etc.) */
+  .shadow-glow-accent {
+    box-shadow: 0 0 0 3px hsl(var(--accent) / .25), 0 0 24px hsl(var(--accent) / .45);
+  }
+
   /* ===== Utilitaires tokens utilisés partout ===== */
   /* NOTE: la variante "plein" mappe au fond global (--bg) pour le body */
   .bg-token-surface       { background-color: hsl(var(--bg)); }

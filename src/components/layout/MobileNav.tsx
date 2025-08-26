@@ -1,4 +1,4 @@
-// src/components/layout/MobileNav.tsx — i18n-safe, icônes premium, catégories centralisées
+// src/components/layout/MobileNav.tsx — i18n-safe, icônes premium, catégories centralisées — FINAL
 'use client'
 
 import Link from '@/components/LocalizedLink'
@@ -14,7 +14,6 @@ import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
 type NavItem = { href: string; label: string }
 
-// Retire “Accueil” & “Packs”
 const NAV: Readonly<NavItem[]> = [
   { href: '/products', label: 'Produits' },
   { href: '/categorie', label: 'Catégories' },
@@ -82,7 +81,7 @@ const Icon = {
   ),
 }
 
-/* Utils robustes */
+/* Utils */
 const safeParseArray = <T,>(raw: string | null): T[] => {
   if (!raw) return []
   try { const v = JSON.parse(raw); return Array.isArray(v) ? (v as T[]) : [] } catch { return [] }
@@ -326,7 +325,7 @@ export default function MobileNav() {
       {/* Trigger */}
       <button
         ref={triggerRef}
-        onClick={openMenu}
+        onClick={() => setOpen(true)}
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={dialogId}
@@ -359,7 +358,7 @@ export default function MobileNav() {
             <motion.div
               className="absolute inset-0 bg-black/40 backdrop-blur-sm"
               variants={overlayVariants}
-              onClick={() => closeMenu('backdrop')}
+              onClick={() => setOpen(false)}
               aria-hidden="true"
             />
 
@@ -371,14 +370,14 @@ export default function MobileNav() {
               drag={reducedMotion ? false : 'y'}
               dragConstraints={{ top: 0, bottom: 0 }}
               dragElastic={0.04}
-              onDragEnd={(_, info) => { if (info.offset.y > 80) closeMenu('drag_close') }}
+              onDragEnd={(_, info) => { if (info.offset.y > 80) setOpen(false) }}
             >
               <div className="pt-[env(safe-area-inset-top)]" />
               <div className="mx-auto mt-3 h-1.5 w-14 rounded-full bg-token-text/20" aria-hidden="true" />
               <div className="flex items-center justify-between px-4 py-3">
                 <h2 id={titleId} className="text-lg font-semibold">Menu</h2>
                 <button
-                  onClick={() => closeMenu('close_btn')}
+                  onClick={() => setOpen(false)}
                   type="button"
                   className="rounded px-3 py-2 text-sm hover:bg-token-surface-2 focus-ring"
                   aria-label="Fermer le menu mobile"
@@ -461,7 +460,7 @@ export default function MobileNav() {
                   prefetch={false}
                   onPointerDown={() => prefetchOnPointer('/wishlist')}
                   onFocus={() => prefetchOnPointer('/wishlist')}
-                  onClick={() => { track({ action: 'mobile_nav_quick_wishlist' }); closeMenu('quick_wishlist') }}
+                  onClick={() => { track({ action: 'mobile_nav_quick_wishlist' }); setOpen(false) }}
                   className="relative inline-flex items-center gap-2 rounded-lg border border-token-border px-3 py-2 text-sm font-medium hover:bg-token-surface-2 focus-ring"
                   aria-label="Voir la wishlist"
                 >
@@ -477,12 +476,13 @@ export default function MobileNav() {
                   prefetch={false}
                   onPointerDown={() => prefetchOnPointer('/login')}
                   onFocus={() => prefetchOnPointer('/login')}
-                  onClick={() => { track({ action: 'mobile_nav_quick_account' }); closeMenu('quick_account') }}
+                  onClick={() => { track({ action: 'mobile_nav_quick_account' }); setOpen(false) }}
                   className="inline-flex items-center gap-2 rounded-lg border border-token-border px-3 py-2 text-sm font-medium hover:bg-token-surface-2 focus-ring"
                   aria-label="Espace client"
                 >
                   <Icon.User />
                 </Link>
+                {/* PWA */}
                 {canInstall && (
                   <button
                     onClick={handleInstall}
@@ -496,7 +496,7 @@ export default function MobileNav() {
                 )}
               </div>
 
-              {/* Catégories (icônes premium centralisées) */}
+              {/* Catégories */}
               <div className="px-4 pb-3">
                 <button
                   type="button"
@@ -524,7 +524,7 @@ export default function MobileNav() {
                               prefetch={false}
                               onPointerDown={() => prefetchOnPointer(c.href)}
                               onFocus={() => prefetchOnPointer(c.href)}
-                              onClick={() => { track({ action: 'mobile_nav_cat', label: c.href }); closeMenu('cat_click') }}
+                              onClick={() => { track({ action: 'mobile_nav_cat', label: c.href }); setOpen(false) }}
                               className="group flex items-center gap-3 rounded-xl border border-transparent bg-token-surface/80 p-3 transition hover:-translate-y-0.5 hover:border-[hsl(var(--accent)/.30)] hover:bg-token-surface shadow-sm hover:shadow-md focus-ring"
                             >
                               <c.Icon className="opacity-80" />
@@ -550,7 +550,7 @@ export default function MobileNav() {
                   {NAV.map(({ href, label }) => {
                     const active = isActive(href)
                     const promo = href.includes('promo=1')
-                    const onClick = () => { track({ action: 'mobile_nav_link_click', label: href }); closeMenu('link_click') }
+                    const onClick = () => { track({ action: 'mobile_nav_link_click', label: href }); setOpen(false) }
                     return (
                       <li key={href}>
                         <Link
@@ -585,7 +585,7 @@ export default function MobileNav() {
                   prefetch={false}
                   onPointerDown={() => prefetchOnPointer('/commande')}
                   onFocus={() => prefetchOnPointer('/commande')}
-                  onClick={() => { track({ action: 'mobile_nav_cart_click', label: 'cart', value: cartCount || 1 }); closeMenu('cart') }}
+                  onClick={() => { track({ action: 'mobile_nav_cart_click', label: 'cart', value: cartCount || 1 }); setOpen(false) }}
                   className="relative inline-flex items-center justify-center rounded-lg border border-token-border px-4 py-2 text-base font-semibold hover:bg-token-surface-2 focus-ring"
                   aria-label="Voir le panier"
                 >
@@ -599,7 +599,7 @@ export default function MobileNav() {
                 </Link>
 
                 <button
-                  onClick={() => closeMenu('close_btn')}
+                  onClick={() => setOpen(false)}
                   type="button"
                   className="ml-auto text-sm text-token-text/70 hover:underline focus:outline-none"
                   aria-label="Fermer le menu mobile"
