@@ -1,4 +1,4 @@
-// src/components/layout/Header.tsx — Premium, clean nav (pro icons centralisés)
+// src/components/layout/Header.tsx — Premium, clean nav (i18n, logo OK, icônes pro)
 'use client'
 
 import Link from '@/components/LocalizedLink'
@@ -11,13 +11,10 @@ import { useCart } from '@/hooks/useCart'
 import { useWishlist } from '@/hooks/useWishlist'
 import ThemeToggle from '@/components/ui/ThemeToggle'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
-import { CATEGORIES } from '@/lib/categories' // ✅ chemin corrigé
-import type { SVGProps } from 'react'
+import { CATEGORIES } from '@/lib/categories'
 
+// Nav: on enlève “Accueil” et “Packs”
 type NavLink = { href: string; label: string }
-type CatItem = { label: string; href: string; desc: string; Icon: (p: SVGProps<SVGSVGElement>) => JSX.Element }
-const CAT_LIST = CATEGORIES as readonly CatItem[]
-
 const LINKS: NavLink[] = [
   { href: '/categorie', label: 'Catégories' },
   { href: '/products', label: 'Produits' },
@@ -38,12 +35,41 @@ const SEARCH_TRENDS = [
   'souris sans fil',
 ]
 
+/* ---------- Icônes stroke (pro) ---------- */
+const Icon = {
+  Search: () => (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <path fill="currentColor" d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5-5-5ZM10 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10Z"/>
+    </svg>
+  ),
+  Flame: () => (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <path fill="currentColor" d="M12 2s5 4 5 9a5 5 0 1 1-10 0c0-2 1-4 3-6-1 3 2 4 2 6 0 1.7-1 3-2.5 3.5A4.5 4.5 0 0 0 16.5 9C16.5 5.5 12 2 12 2Z"/>
+    </svg>
+  ),
+  Heart: () => (
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+      <path fill="currentColor" d="M12 21s-7-4.6-9.3-8.3C1.3 9.9 3 6 6.9 6c2.2 0 3.4 1.2 4.1 2 0.7-0.8 1.9-2 4.1-2C19 6 20.7 9.9 21.3 12.7 19 16.4 12 21 12 21z"/>
+    </svg>
+  ),
+  Cart: () => (
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+      <path fill="currentColor" d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM6 5h14l-1.5 8.5a2 2 0 0 1-2 1.6H9a2 2 0 0 1-2-1.6L5.3 3H2V1h4a2 2 0 0 1 2 1.7L8.3 5Z"/>
+    </svg>
+  ),
+  User: () => (
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <path fill="currentColor" d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.4 0-8 2.2-8 5v2h16v-2c0-2.8-3.6-5-8-5Z"/>
+    </svg>
+  ),
+}
+
 export default function Header() {
   const pathname = usePathname() || '/'
   const locale = getCurrentLocale(pathname)
   const SEARCH_ACTION = localizePath('/products', locale)
 
-  // ----------------------- Comptages (hooks au top) ------------------------
+  // ----------------------- Comptages ------------------------
   const { cart } = useCart() as any
   const { wishlist } = useWishlist() as any
 
@@ -143,7 +169,7 @@ export default function Header() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Hotkeys
+  // Hotkeys: "/" ou Ctrl/Cmd+K
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName
@@ -240,24 +266,15 @@ export default function Header() {
       )}
     >
       <div className="container-app flex h-16 md:h-20 items-center justify-between gap-2 sm:gap-3">
-        {/* Logo — UN SEUL lien, i18n-safe */}
-        <Link
+        {/* Logo — 1 seul, cliquable, i18n-aware */}
+        <Logo
           href={localizePath('/', locale)}
-          prefetch={false}
-          aria-label="Retour à l’accueil"
-          className="flex shrink-0 items-center gap-3 hocus:opacity-90"
-          onFocus={() => smartPrefetchStart('/')}
-          onBlur={() => smartPrefetchCancel('/')}
-          data-gtm="header_logo"
-        >
-          <Logo
-            className="h-8 w-auto md:h-10"
-            withText={false}
-            srcLight="/logo.svg"
-            srcDark="/logo-dark.svg"
-            ariaLabel="TechPlay"
-          />
-        </Link>
+          className="h-8 w-auto md:h-10"
+          withText={false}
+          srcLight="/logo.svg"
+          srcDark="/logo-dark.svg"
+          ariaLabel="TechPlay"
+        />
 
         {/* Recherche */}
         <form
@@ -300,9 +317,7 @@ export default function Header() {
               title="Rechercher"
               data-gtm="header_search_submit"
             >
-              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                <path fill="currentColor" d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5-5-5ZM10 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10Z"/>
-              </svg>
+              <Icon.Search />
             </button>
           </div>
         </form>
@@ -366,7 +381,7 @@ export default function Header() {
                   >
                     <div className="grid grid-cols-1 gap-2 p-3 md:grid-cols-3 md:p-4">
                       <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:col-span-2 md:gap-3" role="none">
-                        {CAT_LIST.map((c) => (
+                        {CATEGORIES.map((c) => (
                           <li key={c.href} role="none">
                             <Link
                               role="menuitem"
@@ -473,7 +488,7 @@ export default function Header() {
         <div className="hidden items-center gap-2 sm:gap-3 md:flex">
           <ThemeToggle size="sm" />
 
-          {/* Offres */}
+          {/* Offres (icône vectorielle) */}
           <Link
             href="/products?promo=1"
             prefetch={false}
@@ -486,7 +501,7 @@ export default function Header() {
             title="Offres du jour"
             data-gtm="header_deals_icon"
           >
-            🔥
+            <Icon.Flame />
           </Link>
 
           <Link
@@ -525,7 +540,7 @@ export default function Header() {
               data-gtm="header_wishlist"
             >
               <span className="sr-only">Wishlist</span>
-              <span className="text-2xl" aria-hidden="true">🤍</span>
+              <Icon.Heart />
             </Link>
             <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
               {wishlistCount > 0 && (
@@ -554,7 +569,7 @@ export default function Header() {
               data-gtm="header_cart"
             >
               <span className="sr-only">Panier</span>
-              <span className="text-2xl" aria-hidden="true">🛒</span>
+              <Icon.Cart />
             </Link>
             <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
               {cartCount > 0 && (
@@ -578,7 +593,7 @@ export default function Header() {
             title="Espace client"
             data-gtm="header_account"
           >
-            👤
+            <Icon.User />
           </Link>
         </div>
 
