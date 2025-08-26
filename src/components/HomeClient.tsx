@@ -65,6 +65,14 @@ function GridSkeleton({ count = 12 }: { count?: number }) {
   )
 }
 
+/* ----------------------------- Empty state icon ---------------------------- */
+
+const EmptyIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+    <path fill="currentColor" d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5-5-5ZM10 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10Z"/>
+  </svg>
+)
+
 /* -------------------------------------------------------------------------- */
 /*                                 Component                                  */
 /* -------------------------------------------------------------------------- */
@@ -204,7 +212,7 @@ export default function HomeClient() {
             aria-live="polite"
           >
             <div className="mx-auto mb-3 w-12 h-12 rounded-full bg-[hsl(var(--surface-2))] dark:bg-zinc-800 grid place-items-center">
-              <span className="text-xl">🧐</span>
+              <EmptyIcon />
             </div>
             <p>{tHome('no_products_available')}</p>
           </div>

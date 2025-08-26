@@ -1,4 +1,4 @@
-// src/components/layout/MobileNav.tsx — clean nav (no Accueil/Packs), icons & routes unifiés
+// src/components/layout/MobileNav.tsx — clean nav, icônes premium, catégories centralisées
 'use client'
 
 import Link from 'next/link'
@@ -9,17 +9,21 @@ import { useCart } from '@/hooks/useCart'
 import { useWishlist } from '@/hooks/useWishlist'
 import ThemeToggle from '@/components/ui/ThemeToggle'
 import { event as gaEvent, logEvent } from '@/lib/ga'
+import { CATEGORIES } from '@/lib/categories' // ✅ chemin corrigé
+import type { SVGProps } from 'react'
 
 type NavItem = { href: string; label: string }
+type CatItem = { label: string; href: string; desc: string; Icon: (p: SVGProps<SVGSVGElement>) => JSX.Element }
+const CAT_LIST = CATEGORIES as readonly CatItem[]
 
-// Retire "Accueil" et "Packs"; harmonise /products
+// Retire “Accueil” & “Packs”
 const NAV: Readonly<NavItem[]> = [
   { href: '/products', label: 'Produits' },
   { href: '/categorie', label: 'Catégories' },
   { href: '/wishlist', label: 'Wishlist' },
   { href: '/blog', label: 'Blog' },
   { href: '/contact', label: 'Contact' },
-  { href: '/products?promo=1', label: '🎁 Offres' },
+  { href: '/products?promo=1', label: 'Offres' },
 ]
 
 const SEARCH_TRENDS = [
@@ -31,31 +35,54 @@ const SEARCH_TRENDS = [
   'souris sans fil',
 ]
 
-// Icônes pro (inline)
+/* ----------------------------- Icônes SVG pro ----------------------------- */
 const Icon = {
-  Headphones: (p: any) => (<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}><path fill="currentColor" d="M12 3a9 9 0 0 0-9 9v6a3 3 0 0 0 3 3h1a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H5a7 7 0 0 1 14 0h-2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h1a3 3 0 0 0 3-3v-6a9 9 0 0 0-9-9z"/></svg>),
-  Keyboard: (p: any) => (<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}><path fill="currentColor" d="M3 6h18a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Zm2 3h2v2H5V9Zm3 0h2v2H8V9Zm3 0h2v2h-2V9Zm3 0h2v2h-2V9Zm3 0h2v2h-2V9ZM5 12h2v2H5v-2Zm3 0h2v2H8v-2Zm3 0h5v2h-5v-2Z"/></svg>),
-  Mouse: (p: any) => (<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}><path fill="currentColor" d="M12 2a6 6 0 0 1 6 6v8a6 6 0 0 1-12 0V8a6 6 0 0 1 6-6Zm0 2a4 4 0 0 0-4 4v2h8V8a4 4 0 0 0-4-4Zm-.5 1h1v3h-1V5Z"/></svg>),
-  Camera: (p: any) => (<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}><path fill="currentColor" d="M9 4h6l1.5 2H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3L9 4Zm3 4a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"/></svg>),
-  Battery: (p: any) => (<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}><path fill="currentColor" d="M2 8a3 3 0 0 1 3-3h11a3 3 0 0 1 3 3v1h1a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-1v1a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V8Zm9 1-3 5h2v3l3-5h-2V9Z"/></svg>),
-  Speaker: (p: any) => (<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}><path fill="currentColor" d="M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm5 2a2 2 0 1 0 .001 3.999A2 2 0 0 0 12 6Zm0 6a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/></svg>),
-  Drive: (p: any) => (<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}><path fill="currentColor" d="M4 7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7Zm3 1h10v3H7V8Zm0 5h6v4H7v-4Z"/></svg>),
-  Monitor: (p: any) => (<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...p}><path fill="currentColor" d="M3 5h18a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7v2h3v2H7v-2h3v-2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/></svg>),
+  Menu: () => (
+    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="currentColor" d="M3 6h18v2H3V6Zm0 5h18v2H3v-2Zm0 5h18v2H3v-2Z" />
+    </svg>
+  ),
+  Close: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="currentColor" d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7 4.3 4.3l6.3 6.3 6.3-6.3 1.4 1.4Z"/>
+    </svg>
+  ),
+  Search: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="currentColor" d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5-5-5ZM10 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10Z"/>
+    </svg>
+  ),
+  Heart: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="currentColor" d="M12 21s-7-4.6-9.3-8.3C1.3 9.9 3 6 6.9 6c2.2 0 3.4 1.2 4.1 2 0.7-0.8 1.9-2 4.1-2C19 6 20.7 9.9 21.3 12.7 19 16.4 12 21 12 21z"/>
+    </svg>
+  ),
+  User: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="currentColor" d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.4 0-8 2.2-8 5v2h16v-2c0-2.8-3.6-5-8-5Z"/>
+    </svg>
+  ),
+  Cart: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="currentColor" d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM6 5h14l-1.5 8.5a2 2 0 0 1-2 1.6H9a2 2 0 0 1-2-1.6L5.3 3H2V1h4a2 2 0 0 1 2 1.7L8.3 5Z"/>
+    </svg>
+  ),
+  Chevron: ({open=false}:{open?:boolean}) => (
+    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" className={`transition-transform ${open ? 'rotate-180' : ''}`}>
+      <path fill="currentColor" d="M12 15.5 4.5 8 6 6.5l6 6 6-6L19.5 8 12 15.5z"/>
+    </svg>
+  ),
+  Flame: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="currentColor" d="M12 2s5 4 5 9a5 5 0 1 1-10 0c0-2 1-4 3-6-1 3 2 4 2 6 0 1.7-1 3-2.5 3.5A4.5 4.5 0 0 0 16.5 9C16.5 5.5 12 2 12 2Z"/>
+    </svg>
+  ),
+  Download: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="currentColor" d="M12 3v9l3.5-3.5 1.4 1.4L12 15.8 7.1 9.9l1.4-1.4L12 12V3h0ZM5 19h14v2H5v-2Z"/>
+    </svg>
+  ),
 }
-
-type CatItem = { label: string; href: string; desc: string; Icon: (p: any) => JSX.Element }
-
-// Unifie vers /products?cat=...
-const CATEGORIES: CatItem[] = [
-  { label: 'Casques', href: '/products?cat=casques', desc: 'Audio immersif', Icon: Icon.Headphones },
-  { label: 'Claviers', href: '/products?cat=claviers', desc: 'Mécas & low-profile', Icon: Icon.Keyboard },
-  { label: 'Souris', href: '/products?cat=souris', desc: 'Précision & confort', Icon: Icon.Mouse },
-  { label: 'Webcams', href: '/products?cat=webcams', desc: 'Visio en HD', Icon: Icon.Camera },
-  { label: 'Batteries', href: '/products?cat=batteries', desc: 'Power & hubs', Icon: Icon.Battery },
-  { label: 'Audio', href: '/products?cat=audio', desc: 'Enceintes & DAC', Icon: Icon.Speaker },
-  { label: 'Stockage', href: '/products?cat=stockage', desc: 'SSD & cartes', Icon: Icon.Drive },
-  { label: 'Écrans', href: '/products?cat=ecrans', desc: '144Hz et +', Icon: Icon.Monitor },
-]
 
 const SEARCH_ACTION = '/products'
 
@@ -304,7 +331,7 @@ export default function MobileNav() {
         type="button"
         className="md:hidden grid h-10 w-10 place-items-center rounded-xl hover:bg-token-surface-2 focus-ring"
       >
-        ☰
+        <Icon.Menu />
       </button>
 
       <AnimatePresence>
@@ -352,7 +379,7 @@ export default function MobileNav() {
                   className="rounded px-3 py-2 text-sm hover:bg-token-surface-2 focus-ring"
                   aria-label="Fermer le menu mobile"
                 >
-                  ✕
+                  <Icon.Close />
                 </button>
               </div>
 
@@ -389,7 +416,7 @@ export default function MobileNav() {
                     aria-label="Lancer la recherche"
                     title="Rechercher"
                   >
-                    🔎
+                    <Icon.Search />
                   </button>
                 </div>
               </form>
@@ -422,50 +449,7 @@ export default function MobileNav() {
                 </div>
               )}
 
-              {/* Quick actions */}
-              <div className="flex items-center gap-2 px-4 pb-3">
-                <ThemeToggle size="md" />
-                <Link
-                  href="/wishlist"
-                  prefetch={false}
-                  onPointerDown={() => prefetchOnPointer('/wishlist')}
-                  onFocus={() => prefetchOnPointer('/wishlist')}
-                  onClick={() => { track({ action: 'mobile_nav_quick_wishlist' }); closeMenu('quick_wishlist') }}
-                  className="relative inline-flex items-center gap-2 rounded-lg border border-token-border px-3 py-2 text-sm font-medium hover:bg-token-surface-2 focus-ring"
-                  aria-label="Voir la wishlist"
-                >
-                  🤍
-                  {wishlistCount > 0 && (
-                    <span className="rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-[11px] font-bold text-white">
-                      {wishlistCount}
-                    </span>
-                  )}
-                </Link>
-                <Link
-                  href="/login"
-                  prefetch={false}
-                  onPointerDown={() => prefetchOnPointer('/login')}
-                  onFocus={() => prefetchOnPointer('/login')}
-                  onClick={() => { track({ action: 'mobile_nav_quick_account' }); closeMenu('quick_account') }}
-                  className="inline-flex items-center gap-2 rounded-lg border border-token-border px-3 py-2 text-sm font-medium hover:bg-token-surface-2 focus-ring"
-                  aria-label="Espace client"
-                >
-                  👤
-                </Link>
-                {canInstall && (
-                  <button
-                    onClick={handleInstall}
-                    type="button"
-                    className="ml-auto inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-lime-500 to-emerald-500 px-3 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
-                    aria-label="Installer l’application"
-                    title="Installer l’application"
-                  >
-                    ⤓ Installer l’app
-                  </button>
-                )}
-              </div>
-
-              {/* Catégories (icônes) */}
+              {/* Catégories (icônes premium centralisées) */}
               <div className="px-4 pb-3">
                 <button
                   type="button"
@@ -474,7 +458,7 @@ export default function MobileNav() {
                   className="flex w-full items-center justify-between rounded-xl border border-token-border bg-token-surface px-4 py-3 text-base font-semibold hover:bg-token-surface-2 focus-ring"
                 >
                   Catégories
-                  <span aria-hidden className={`transition-transform ${catsOpen ? 'rotate-180' : ''}`}>▾</span>
+                  <Icon.Chevron open={catsOpen} />
                 </button>
                 <AnimatePresence initial={false}>
                   {catsOpen && (
@@ -486,7 +470,7 @@ export default function MobileNav() {
                       className="overflow-hidden"
                     >
                       <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                        {CATEGORIES.map((c) => (
+                        {CAT_LIST.map((c) => (
                           <li key={c.href}>
                             <Link
                               href={c.href}
@@ -539,6 +523,7 @@ export default function MobileNav() {
                           ].join(' ')}
                         >
                           {label}
+                          {promo && <span className="ml-2 inline-flex align-middle"><Icon.Flame /></span>}
                         </Link>
                       </li>
                     )
@@ -557,7 +542,7 @@ export default function MobileNav() {
                   className="relative inline-flex items-center justify-center rounded-lg border border-token-border px-4 py-2 text-base font-semibold hover:bg-token-surface-2 focus-ring"
                   aria-label="Voir le panier"
                 >
-                  🛒
+                  <Icon.Cart />
                   {cartCount > 0 && (
                     <span className="ml-2 rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white">
                       <span className="sr-only">Articles dans le panier&nbsp;:</span>

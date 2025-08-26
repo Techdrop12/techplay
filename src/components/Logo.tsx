@@ -1,17 +1,23 @@
-// src/components/Logo.tsx — auto light/dark via /public + fallback inline
+// src/components/Logo.tsx — auto light/dark + lien i18n (optionnel)
 'use client'
 
-import Link from 'next/link'
+import NextLink from 'next/link'
+import LocalizedLink from '@/components/LocalizedLink'
 import { cn } from '@/lib/utils'
 import { useId } from 'react'
+import { getCurrentLocale, localizePath, type Locale } from '@/lib/i18n-routing'
 
 interface LogoProps {
   className?: string
   withText?: boolean
   textClassName?: string
   ariaLabel?: string
-  /** Si fourni, le logo devient un lien (ex: "/") — attention, pas i18n-aware */
+  /** Si fourni, le logo devient un lien */
   href?: string
+  /** Active la localisation du lien (par défaut: true) */
+  localized?: boolean
+  /** Forcer la locale (sinon auto) */
+  locale?: Locale
   /** Chemins /public — si absents, fallback inline SVG */
   srcLight?: string  // ex: '/logo.svg'
   srcDark?: string   // ex: '/logo-dark.svg'
@@ -25,6 +31,8 @@ export default function Logo({
   textClassName = 'text-xl sm:text-2xl font-bold tracking-tight text-token-text',
   ariaLabel = 'TechPlay',
   href,
+  localized = true,
+  locale,
   srcLight = '/logo.svg',
   srcDark,
   forceInline = false,
@@ -34,7 +42,6 @@ export default function Logo({
   const gradId = `tp_g_${uid}`
 
   const ImgVariant = () => {
-    // Si on force l’inline, ou si on n’a pas de srcLight, on dessine le logo vectoriel interne
     if (forceInline || !srcLight) {
       return (
         <svg
@@ -60,11 +67,9 @@ export default function Logo({
       )
     }
 
-    // Sinon : on charge les fichiers /public
     const darkSrc = srcDark || srcLight
     return (
       <>
-        {/* version claire */}
         <img
           src={srcLight}
           alt=""
@@ -73,7 +78,6 @@ export default function Logo({
           loading="eager"
           fetchPriority="low"
         />
-        {/* version sombre (si non présent, on retombe sur le même fichier via darkSrc) */}
         <img
           src={darkSrc}
           alt=""
@@ -87,22 +91,29 @@ export default function Logo({
   }
 
   const content = (
-    <div
-      className={cn('inline-flex items-center gap-2', className)}
-      role="img"
-      aria-label={ariaLabel}
-    >
+    <div className={cn('inline-flex items-center gap-2', className)} role="img" aria-label={ariaLabel}>
       <ImgVariant />
       {withText && <span className={textClassName}>TechPlay</span>}
     </div>
   )
 
-  // Optionnel : rendre le logo cliquable localement (non-localisé)
-  return href ? (
-    <Link href={href} prefetch={false} aria-label={ariaLabel} className="inline-flex items-center">
+  if (!href) return content
+
+  // Lien localisé par défaut
+  if (localized) {
+    const loc = locale ?? getCurrentLocale()
+    const to = localizePath(href, loc)
+    return (
+      <LocalizedLink href={to} prefetch={false} aria-label={ariaLabel} className="inline-flex items-center">
+        {content}
+      </LocalizedLink>
+    )
+  }
+
+  // Lien simple non localisé
+  return (
+    <NextLink href={href} prefetch={false} aria-label={ariaLabel} className="inline-flex items-center">
       {content}
-    </Link>
-  ) : (
-    content
+    </NextLink>
   )
 }
