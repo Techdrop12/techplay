@@ -1,4 +1,4 @@
-// src/components/layout/Header.tsx — Premium, clean nav (i18n, logo OK, icônes pro)
+// src/components/layout/Header.tsx — Ultimate Premium (logo home fiable, i18n unifiée, a11y/perf)
 'use client'
 
 import Link from '@/components/LocalizedLink'
@@ -12,8 +12,14 @@ import { useWishlist } from '@/hooks/useWishlist'
 import ThemeToggle from '@/components/ui/ThemeToggle'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 import { CATEGORIES } from '@/lib/categories'
+import {
+  SearchIcon,
+  FlameIcon,
+  HeartIcon,
+  CartIcon,
+  UserIcon,
+} from '@/components/ui/premium-icons'
 
-// Nav: on enlève “Accueil” et “Packs”
 type NavLink = { href: string; label: string }
 const LINKS: NavLink[] = [
   { href: '/categorie', label: 'Catégories' },
@@ -35,39 +41,11 @@ const SEARCH_TRENDS = [
   'souris sans fil',
 ]
 
-/* ---------- Icônes stroke (pro) ---------- */
-const Icon = {
-  Search: () => (
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-      <path fill="currentColor" d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5-5-5ZM10 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10Z"/>
-    </svg>
-  ),
-  Flame: () => (
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-      <path fill="currentColor" d="M12 2s5 4 5 9a5 5 0 1 1-10 0c0-2 1-4 3-6-1 3 2 4 2 6 0 1.7-1 3-2.5 3.5A4.5 4.5 0 0 0 16.5 9C16.5 5.5 12 2 12 2Z"/>
-    </svg>
-  ),
-  Heart: () => (
-    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-      <path fill="currentColor" d="M12 21s-7-4.6-9.3-8.3C1.3 9.9 3 6 6.9 6c2.2 0 3.4 1.2 4.1 2 0.7-0.8 1.9-2 4.1-2C19 6 20.7 9.9 21.3 12.7 19 16.4 12 21 12 21z"/>
-    </svg>
-  ),
-  Cart: () => (
-    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-      <path fill="currentColor" d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM6 5h14l-1.5 8.5a2 2 0 0 1-2 1.6H9a2 2 0 0 1-2-1.6L5.3 3H2V1h4a2 2 0 0 1 2 1.7L8.3 5Z"/>
-    </svg>
-  ),
-  User: () => (
-    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-      <path fill="currentColor" d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.4 0-8 2.2-8 5v2h16v-2c0-2.8-3.6-5-8-5Z"/>
-    </svg>
-  ),
-}
-
 export default function Header() {
   const pathname = usePathname() || '/'
   const locale = getCurrentLocale(pathname)
-  const SEARCH_ACTION = localizePath('/products', locale)
+  const L = (p: string) => localizePath(p, locale)
+  const SEARCH_ACTION = L('/products')
 
   // ----------------------- Comptages ------------------------
   const { cart } = useCart() as any
@@ -183,7 +161,7 @@ export default function Header() {
         searchRef.current?.select()
       }
       if (e.key === 'Escape' && searchRef.current === document.activeElement) {
-        (e.target as HTMLInputElement)?.blur()
+        ;(e.target as HTMLInputElement)?.blur()
       }
     }
     window.addEventListener('keydown', onKey)
@@ -207,7 +185,7 @@ export default function Header() {
   }, [])
 
   const isActive = (href: string) => {
-    const localized = localizePath(href, locale)
+    const localized = L(href)
     return localized === pathname || pathname.startsWith(localized + '/')
   }
 
@@ -222,7 +200,7 @@ export default function Header() {
   }
 
   const smartPrefetchStart = (href: string) => {
-    const target = localizePath(href, locale)
+    const target = L(href)
     if (!target || isActive(href)) return
     if (prefetchTimers.current.has(target)) return
     const t = window.setTimeout(() => {
@@ -232,9 +210,12 @@ export default function Header() {
     prefetchTimers.current.set(target, t)
   }
   const smartPrefetchCancel = (href: string) => {
-    const target = localizePath(href, locale)
+    const target = L(href)
     const t = prefetchTimers.current.get(target)
-    if (t) { clearTimeout(t); prefetchTimers.current.delete(target) }
+    if (t) {
+      clearTimeout(t)
+      prefetchTimers.current.delete(target)
+    }
   }
 
   const onSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -246,7 +227,9 @@ export default function Header() {
       searchRef.current?.focus()
       return
     }
-    try { localStorage.setItem('last:q', q) } catch {}
+    try {
+      localStorage.setItem('last:q', q)
+    } catch {}
   }
 
   return (
@@ -266,15 +249,22 @@ export default function Header() {
       )}
     >
       <div className="container-app flex h-16 md:h-20 items-center justify-between gap-2 sm:gap-3">
-        {/* Logo — 1 seul, cliquable, i18n-aware */}
-        <Logo
-          href={localizePath('/', locale)}
-          className="h-8 w-auto md:h-10"
-          withText={false}
-          srcLight="/logo.svg"
-          srcDark="/logo-dark.svg"
-          ariaLabel="TechPlay"
-        />
+        {/* Logo — wrapper Link pour un clic “Accueil” infaillible (i18n-safe) */}
+        <Link
+          href={L('/')}
+          prefetch={false}
+          aria-label="TechPlay — Accueil"
+          rel="home"
+          className="group inline-flex items-center rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+        >
+          <Logo
+            className="h-8 w-auto md:h-10"
+            withText={false}
+            srcLight="/logo.svg"
+            srcDark="/logo-dark.svg"
+            ariaLabel="TechPlay"
+          />
+        </Link>
 
         {/* Recherche */}
         <form
@@ -303,7 +293,9 @@ export default function Header() {
             aria-describedby="search-hint"
           />
           <datalist id="header-search-suggestions">
-            {SEARCH_TRENDS.map((s) => (<option value={s} key={s} />))}
+            {SEARCH_TRENDS.map((s) => (
+              <option value={s} key={s} />
+            ))}
           </datalist>
           <div id="search-hint" className="sr-only">
             Raccourcis : « / » ou « Ctrl/⌘ K » pour rechercher.
@@ -317,7 +309,7 @@ export default function Header() {
               title="Rechercher"
               data-gtm="header_search_submit"
             >
-              <Icon.Search />
+              <SearchIcon />
             </button>
           </div>
         </form>
@@ -374,7 +366,9 @@ export default function Header() {
                       'absolute left-1/2 top-[calc(100%+10px)] z-50 w-[min(860px,92vw)] -translate-x-1/2 rounded-2xl border',
                       'border-token-border bg-token-surface/90 shadow-2xl backdrop-blur supports-backdrop:bg-token-surface/80',
                       'transition-all duration-200',
-                      catOpen ? 'pointer-events-auto opacity-100 translate-y-0' : 'pointer-events-none opacity-0 -translate-y-1'
+                      catOpen
+                        ? 'pointer-events-auto opacity-100 translate-y-0'
+                        : 'pointer-events-none opacity-0 -translate-y-1'
                     )}
                     onFocus={openCats}
                     onBlur={() => closeCats(80)}
@@ -403,7 +397,13 @@ export default function Header() {
                                 <span className="block text-sm font-semibold">{c.label}</span>
                                 <span className="block text-xs text-token-text/60">{c.desc}</span>
                               </span>
-                              <svg width="18" height="18" viewBox="0 0 24 24" className="opacity-50 group-hover:opacity-90" aria-hidden="true">
+                              <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                className="opacity-50 group-hover:opacity-90"
+                                aria-hidden="true"
+                              >
                                 <path fill="currentColor" d="M9 18l6-6-6-6v12z" />
                               </svg>
                             </Link>
@@ -413,7 +413,9 @@ export default function Header() {
 
                       <div className="md:col-span-1">
                         <div className="h-full rounded-xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.10)] via-transparent to-token-surface p-4 md:p-5 shadow-md">
-                          <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent)/.90)]">Sélection</p>
+                          <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent)/.90)]">
+                            Sélection
+                          </p>
                           <h3 className="mt-1 text-lg font-extrabold">Packs recommandés</h3>
                           <p className="mt-2 text-sm text-token-text/70">
                             Les meilleures combinaisons pour booster ton setup.
@@ -488,7 +490,7 @@ export default function Header() {
         <div className="hidden items-center gap-2 sm:gap-3 md:flex">
           <ThemeToggle size="sm" />
 
-          {/* Offres (icône vectorielle) */}
+          {/* Offres */}
           <Link
             href="/products?promo=1"
             prefetch={false}
@@ -501,7 +503,7 @@ export default function Header() {
             title="Offres du jour"
             data-gtm="header_deals_icon"
           >
-            <Icon.Flame />
+            <FlameIcon />
           </Link>
 
           <Link
@@ -540,7 +542,7 @@ export default function Header() {
               data-gtm="header_wishlist"
             >
               <span className="sr-only">Wishlist</span>
-              <Icon.Heart />
+              <HeartIcon />
             </Link>
             <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
               {wishlistCount > 0 && (
@@ -569,7 +571,7 @@ export default function Header() {
               data-gtm="header_cart"
             >
               <span className="sr-only">Panier</span>
-              <Icon.Cart />
+              <CartIcon />
             </Link>
             <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
               {cartCount > 0 && (
@@ -593,7 +595,7 @@ export default function Header() {
             title="Espace client"
             data-gtm="header_account"
           >
-            <Icon.User />
+            <UserIcon />
           </Link>
         </div>
 
@@ -602,7 +604,10 @@ export default function Header() {
       </div>
 
       {/* Liseré subtil */}
-      <div aria-hidden className="pointer-events-none h-[2px] w-full bg-gradient-to-r from-transparent via-[hsl(var(--accent)/.40)] to-transparent" />
+      <div
+        aria-hidden
+        className="pointer-events-none h-[2px] w-full bg-gradient-to-r from-transparent via-[hsl(var(--accent)/.40)] to-transparent"
+      />
     </header>
   )
 }
