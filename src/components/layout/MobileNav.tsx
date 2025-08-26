@@ -1,7 +1,7 @@
-// src/components/layout/MobileNav.tsx — clean nav, icônes premium, catégories centralisées
+// src/components/layout/MobileNav.tsx — i18n-safe, icônes premium, catégories centralisées
 'use client'
 
-import Link from 'next/link'
+import Link from '@/components/LocalizedLink'
 import { useEffect, useMemo, useRef, useState, useId } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
@@ -10,6 +10,7 @@ import { useWishlist } from '@/hooks/useWishlist'
 import ThemeToggle from '@/components/ui/ThemeToggle'
 import { event as gaEvent, logEvent } from '@/lib/ga'
 import { CATEGORIES } from '@/lib/categories'
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
 type NavItem = { href: string; label: string }
 
@@ -81,8 +82,6 @@ const Icon = {
   ),
 }
 
-const SEARCH_ACTION = '/products'
-
 /* Utils robustes */
 const safeParseArray = <T,>(raw: string | null): T[] => {
   if (!raw) return []
@@ -102,6 +101,10 @@ const track = (args: { action: string; category?: string; label?: string; value?
 export default function MobileNav() {
   const pathname = usePathname() || '/'
   const router = useRouter()
+  const locale = getCurrentLocale(pathname)
+  const L = (p: string) => localizePath(p, locale)
+  const SEARCH_ACTION = L('/products')
+
   const reducedMotion = useReducedMotion()
   const dialogId = useId()
   const titleId = `${dialogId}-title`
@@ -256,10 +259,14 @@ export default function MobileNav() {
   const overlayVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { duration: reducedMotion ? 0 : 0.18 } }, exit: { opacity: 0, transition: { duration: 0.12 } } }
   const sheetVariants = { hidden: { y: reducedMotion ? 0 : '10%', opacity: 0.001 }, visible: { y: 0, opacity: 1, transition: { duration: reducedMotion ? 0 : 0.22, ease: 'easeOut' } }, exit: { y: reducedMotion ? 0 : '10%', opacity: 0, transition: { duration: 0.16 } } }
 
-  const isActive = (href: string) =>
-    href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/')
+  const isActive = (href: string) => {
+    const t = L(href)
+    return pathname === t || pathname.startsWith(t + '/')
+  }
 
-  const prefetchOnPointer = (href: string) => { try { if (href && !isActive(href)) router.prefetch(href) } catch {} }
+  const prefetchOnPointer = (href: string) => {
+    try { const t = L(href); if (t && !isActive(href)) router.prefetch(t) } catch {}
+  }
 
   // Placeholder (pause on focus + onglet masqué) + récentes
   useEffect(() => {

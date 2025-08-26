@@ -1,4 +1,4 @@
-// src/components/Logo.tsx — auto light/dark + lien i18n (optionnel)
+// src/components/Logo.tsx — auto light/dark + lien i18n (home rel)
 'use client'
 
 import NextLink from 'next/link'
@@ -19,10 +19,12 @@ interface LogoProps {
   /** Forcer la locale (sinon auto) */
   locale?: Locale
   /** Chemins /public — si absents, fallback inline SVG */
-  srcLight?: string  // ex: '/logo.svg'
-  srcDark?: string   // ex: '/logo-dark.svg'
+  srcLight?: string
+  srcDark?: string
   /** Forcer l’inline même si srcLight/srcDark fournis */
   forceInline?: boolean
+  /** Attribut rel du lien (ex: "home") */
+  rel?: string
 }
 
 export default function Logo({
@@ -36,8 +38,8 @@ export default function Logo({
   srcLight = '/logo.svg',
   srcDark,
   forceInline = false,
+  rel,
 }: LogoProps) {
-  // id unique pour éviter les collisions <defs> quand le logo apparaît plusieurs fois
   const uid = useId().replace(/[:]/g, '')
   const gradId = `tp_g_${uid}`
 
@@ -99,20 +101,18 @@ export default function Logo({
 
   if (!href) return content
 
-  // Lien localisé par défaut
   if (localized) {
     const loc = locale ?? getCurrentLocale()
     const to = localizePath(href, loc)
     return (
-      <LocalizedLink href={to} prefetch={false} aria-label={ariaLabel} className="inline-flex items-center">
+      <LocalizedLink href={to} prefetch={false} aria-label={ariaLabel} className="inline-flex items-center" rel={rel}>
         {content}
       </LocalizedLink>
     )
   }
 
-  // Lien simple non localisé
   return (
-    <NextLink href={href} prefetch={false} aria-label={ariaLabel} className="inline-flex items-center">
+    <NextLink href={href} prefetch={false} aria-label={ariaLabel} className="inline-flex items-center" rel={rel}>
       {content}
     </NextLink>
   )
