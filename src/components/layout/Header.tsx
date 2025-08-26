@@ -1,9 +1,9 @@
-// src/components/layout/Header.tsx — Premium nav (logo home fiable + icônes halo)
+// src/components/layout/Header.tsx — Logo → Accueil garanti + actions en badges “premium”
 'use client'
 
 import Link from '@/components/LocalizedLink'
 import { useEffect, useId, useRef, useState, useMemo } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Logo from '../Logo'
 import MobileNav from './MobileNav'
 import { cn } from '@/lib/utils'
@@ -12,13 +12,6 @@ import { useWishlist } from '@/hooks/useWishlist'
 import ThemeToggle from '@/components/ui/ThemeToggle'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 import { CATEGORIES } from '@/lib/categories'
-import {
-  SearchIcon,
-  FlameIcon,
-  HeartIcon,
-  CartIcon,
-  UserIcon,
-} from '@/components/ui/premium-icons'
 
 type NavLink = { href: string; label: string }
 const LINKS: NavLink[] = [
@@ -41,8 +34,37 @@ const SEARCH_TRENDS = [
   'souris sans fil',
 ]
 
-/** Badge halo (même rendu que les icônes de catégories) */
-const ActionBadge = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
+/* ---------- Icônes ---------- */
+const Icon = {
+  Search: () => (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <path fill="currentColor" d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5-5-5ZM10 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10Z"/>
+    </svg>
+  ),
+  Heart: () => (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <path fill="currentColor" d="M12 21s-7-4.6-9.3-8.3C1.3 9.9 3 6 6.9 6c2.2 0 3.4 1.2 4.1 2 0.7-0.8 1.9-2 4.1-2C19 6 20.7 9.9 21.3 12.7 19 16.4 12 21 12 21z"/>
+    </svg>
+  ),
+  Cart: () => (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <path fill="currentColor" d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM6 5h14l-1.5 8.5a2 2 0 0 1-2 1.6H9a2 2 0 0 1-2-1.6L5.3 3H2V1h4a2 2 0 0 1 2 1.7L8.3 5Z"/>
+    </svg>
+  ),
+  User: () => (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <path fill="currentColor" d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.4 0-8 2.2-8 5v2h16v-2c0-2.8-3.6-5-8-5Z"/>
+    </svg>
+  ),
+  Flame: () => (
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+      <path fill="currentColor" d="M12 2s5 4 5 9a5 5 0 1 1-10 0c0-2 1-4 3-6-1 3 2 4 2 6 0 1.7-1 3-2.5 3.5A4.5 4.5 0 0 0 16.5 9C16.5 5.5 12 2 12 2Z"/>
+    </svg>
+  ),
+}
+
+/** Badge premium (halo dégradé + anneau) */
+const ActionBadge = ({ children, className }: { children: React.ReactNode; className?: string }) => (
   <span
     className={cn(
       'inline-flex h-9 w-9 items-center justify-center rounded-xl',
@@ -57,6 +79,7 @@ const ActionBadge = ({ children, className = '' }: { children: React.ReactNode; 
 
 export default function Header() {
   const pathname = usePathname() || '/'
+  const router = useRouter()
   const locale = getCurrentLocale(pathname)
   const L = (p: string) => localizePath(p, locale)
   const SEARCH_ACTION = L('/products')
@@ -241,17 +264,11 @@ export default function Header() {
     try { localStorage.setItem('last:q', q) } catch {}
   }
 
-  // Fallback "dur" pour le logo → Accueil (si Next ne déclenche pas la nav)
+  /** LOGO → ACCUEIL (garanti) */
   const onLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    // ne pas gêner Ctrl/Cmd+clic ou clic molette
-    if (e.metaKey || e.ctrlKey || e.button === 1) return
-    const home = L('/')
-    // laisse Next tenter la nav, puis vérifie
-    setTimeout(() => {
-      try {
-        if (window.location.pathname !== home) window.location.assign(home)
-      } catch {}
-    }, 60)
+    if (e.metaKey || e.ctrlKey || e.button === 1) return // nouvelle fenêtre/onglet → OK
+    e.preventDefault()
+    router.push(L('/')) // navigation client forcée
   }
 
   return (
@@ -271,7 +288,7 @@ export default function Header() {
       )}
     >
       <div className="container-app flex h-16 md:h-20 items-center justify-between gap-2 sm:gap-3">
-        {/* Logo — clic Accueil infaillible */}
+        {/* Logo — clique → Accueil */}
         <Link
           href={L('/')}
           prefetch={false}
@@ -319,9 +336,7 @@ export default function Header() {
           <datalist id="header-search-suggestions">
             {SEARCH_TRENDS.map((s) => (<option value={s} key={s} />))}
           </datalist>
-          <div id="search-hint" className="sr-only">
-            Raccourcis : « / » ou « Ctrl/⌘ K » pour rechercher.
-          </div>
+          <div id="search-hint" className="sr-only">Raccourcis : « / » ou « Ctrl/⌘ K » pour rechercher.</div>
           <div id="search-status" aria-live="polite" aria-atomic="true" className="sr-only" />
           <div className="absolute inset-y-0 right-1.5 flex items-center">
             <button
@@ -331,7 +346,7 @@ export default function Header() {
               title="Rechercher"
               data-gtm="header_search_submit"
             >
-              <SearchIcon />
+              <Icon.Search />
             </button>
           </div>
         </form>
@@ -346,12 +361,7 @@ export default function Header() {
 
             if (label === 'Catégories') {
               return (
-                <div
-                  key="mega-cats"
-                  className="relative"
-                  onMouseEnter={openCats}
-                  onMouseLeave={() => closeCats()}
-                >
+                <div key="mega-cats" className="relative" onMouseEnter={openCats} onMouseLeave={() => closeCats()}>
                   <button
                     ref={catBtnRef}
                     id={catBtnId}
@@ -372,10 +382,7 @@ export default function Header() {
                   >
                     Catégories
                     {!active && (
-                      <span
-                        className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-[hsl(var(--accent))] transition-all duration-300 group-hover:w-full"
-                        aria-hidden="true"
-                      />
+                      <span className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-[hsl(var(--accent))] transition-all duration-300 group-hover:w-full" aria-hidden="true" />
                     )}
                   </button>
 
@@ -429,34 +436,14 @@ export default function Header() {
                         <div className="h-full rounded-xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.10)] via-transparent to-token-surface p-4 md:p-5 shadow-md">
                           <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent)/.90)]">Sélection</p>
                           <h3 className="mt-1 text-lg font-extrabold">Packs recommandés</h3>
-                          <p className="mt-2 text-sm text-token-text/70">
-                            Les meilleures combinaisons pour booster ton setup.
-                          </p>
+                          <p className="mt-2 text-sm text-token-text/70">Les meilleures combinaisons pour booster ton setup.</p>
                           <div className="mt-3 flex flex-wrap gap-2">
-                            <Link
-                              href="/products/packs"
-                              prefetch={false}
-                              onPointerEnter={() => smartPrefetchStart('/products/packs')}
-                              onPointerLeave={() => smartPrefetchCancel('/products/packs')}
-                              onFocus={() => smartPrefetchStart('/products/packs')}
-                              onBlur={() => smartPrefetchCancel('/products/packs')}
-                              role="menuitem"
-                              className="inline-flex items-center rounded-lg bg-[hsl(var(--accent))] px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-[hsl(var(--accent)/.92)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
-                              data-gtm="header_mega_cta_packs"
-                            >
+                            <Link href="/products/packs" prefetch={false} onPointerEnter={() => smartPrefetchStart('/products/packs')} onPointerLeave={() => smartPrefetchCancel('/products/packs')} onFocus={() => smartPrefetchStart('/products/packs')} onBlur={() => smartPrefetchCancel('/products/packs')}
+                              role="menuitem" className="inline-flex items-center rounded-lg bg-[hsl(var(--accent))] px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-[hsl(var(--accent)/.92)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]">
                               Voir les packs
                             </Link>
-                            <Link
-                              href="/products"
-                              prefetch={false}
-                              onPointerEnter={() => smartPrefetchStart('/products')}
-                              onPointerLeave={() => smartPrefetchCancel('/products')}
-                              onFocus={() => smartPrefetchStart('/products')}
-                              onBlur={() => smartPrefetchCancel('/products')}
-                              role="menuitem"
-                              className="inline-flex items-center rounded-lg border border-token-border bg-token-surface px-3 py-1.5 text-sm font-semibold hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.30)]"
-                              data-gtm="header_mega_cta_all"
-                            >
+                            <Link href="/products" prefetch={false} onPointerEnter={() => smartPrefetchStart('/products')} onPointerLeave={() => smartPrefetchCancel('/products')} onFocus={() => smartPrefetchStart('/products')} onBlur={() => smartPrefetchCancel('/products')}
+                              role="menuitem" className="inline-flex items-center rounded-lg border border-token-border bg-token-surface px-3 py-1.5 text-sm font-semibold hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.30)]">
                               Tous les produits
                             </Link>
                           </div>
@@ -488,21 +475,18 @@ export default function Header() {
               >
                 {label}
                 {!active && (
-                  <span
-                    className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-[hsl(var(--accent))] transition-all duration-300 group-hover:w-full"
-                    aria-hidden="true"
-                  />
+                  <span className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-[hsl(var(--accent))] transition-all duration-300 group-hover:w-full" aria-hidden="true" />
                 )}
               </Link>
             )
           })}
         </nav>
 
-        {/* Actions droites — versions halo */}
+        {/* Actions droites — badges premium (pas de gros cercle terne autour) */}
         <div className="hidden items-center gap-2 sm:gap-3 md:flex">
           <ThemeToggle size="sm" />
 
-          {/* Offres (icône halo compacte) */}
+          {/* Offres compact */}
           <Link
             href="/products?promo=1"
             prefetch={false}
@@ -510,15 +494,15 @@ export default function Header() {
             onPointerLeave={() => smartPrefetchCancel('/products?promo=1')}
             onFocus={() => smartPrefetchStart('/products?promo=1')}
             onBlur={() => smartPrefetchCancel('/products?promo=1')}
-            className="xl:hidden inline-flex items-center justify-center rounded-full border border-token-border bg-token-surface/60 h-9 w-9 text-base hover:bg-token-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
+            className="xl:hidden inline-flex items-center justify-center p-0.5 rounded-lg hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
             aria-label="Voir les offres du jour"
             title="Offres du jour"
             data-gtm="header_deals_icon"
           >
-            <ActionBadge><FlameIcon /></ActionBadge>
+            <ActionBadge><Icon.Flame /></ActionBadge>
           </Link>
 
-          {/* Offres (bouton texte) */}
+          {/* Offres bouton texte */}
           <Link
             href="/products?promo=1"
             prefetch={false}
@@ -547,25 +531,19 @@ export default function Header() {
               onPointerLeave={() => smartPrefetchCancel('/wishlist')}
               onFocus={() => smartPrefetchStart('/wishlist')}
               onBlur={() => smartPrefetchCancel('/wishlist')}
-              className="relative text-token-text hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-              aria-label={
-                wishlistCount > 0
-                  ? `Voir la wishlist (${wishlistCount} article${wishlistCount > 1 ? 's' : ''})`
-                  : 'Voir la wishlist'
-              }
+              className="relative hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 rounded-lg p-0.5"
+              aria-label={wishlistCount > 0 ? `Voir la wishlist (${wishlistCount})` : 'Voir la wishlist'}
               data-gtm="header_wishlist"
             >
-              <span className="sr-only">Wishlist</span>
-              <ActionBadge><HeartIcon /></ActionBadge>
+              <ActionBadge><Icon.Heart /></ActionBadge>
             </Link>
-            <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
-              {wishlistCount > 0 && (
+            {wishlistCount > 0 && (
+              <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
                 <span className="rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm">
-                  <span className="sr-only">Articles dans la wishlist&nbsp;:</span>
                   {wishlistCount}
                 </span>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Panier */}
@@ -577,25 +555,19 @@ export default function Header() {
               onPointerLeave={() => smartPrefetchCancel('/commande')}
               onFocus={() => smartPrefetchStart('/commande')}
               onBlur={() => smartPrefetchCancel('/commande')}
-              className="relative text-token-text hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-              aria-label={
-                cartCount > 0
-                  ? `Voir le panier (${cartCount} article${cartCount > 1 ? 's' : ''})`
-                  : 'Voir le panier'
-              }
+              className="relative hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 rounded-lg p-0.5"
+              aria-label={cartCount > 0 ? `Voir le panier (${cartCount})` : 'Voir le panier'}
               data-gtm="header_cart"
             >
-              <span className="sr-only">Panier</span>
-              <ActionBadge><CartIcon /></ActionBadge>
+              <ActionBadge><Icon.Cart /></ActionBadge>
             </Link>
-            <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
-              {cartCount > 0 && (
+            {cartCount > 0 && (
+              <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
                 <span className="animate-[pulse_2s_ease-in-out_infinite] rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm">
-                  <span className="sr-only">Articles dans le panier&nbsp;:</span>
                   {cartCount}
                 </span>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Compte */}
@@ -606,16 +578,16 @@ export default function Header() {
             onPointerLeave={() => smartPrefetchCancel('/login')}
             onFocus={() => smartPrefetchStart('/login')}
             onBlur={() => smartPrefetchCancel('/login')}
-            className="hidden xl:inline-flex items-center justify-center rounded-full border border-transparent px-3 py-2 text-sm font-medium text-token-text hover:text-[hsl(var(--accent))] focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+            className="hidden xl:inline-flex items-center justify-center rounded-lg p-0.5 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
             aria-label="Espace client"
             title="Espace client"
             data-gtm="header_account"
           >
-            <ActionBadge><UserIcon /></ActionBadge>
+            <ActionBadge><Icon.User /></ActionBadge>
           </Link>
         </div>
 
-        {/* Bouton + panel mobile */}
+        {/* Menu mobile */}
         <MobileNav />
       </div>
 
