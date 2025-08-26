@@ -1,4 +1,4 @@
-// src/components/layout/Header.tsx — Logo → Accueil garanti + actions en badges “premium”
+// src/components/layout/Header.tsx — Logo → Accueil garanti + badges premium
 'use client'
 
 import Link from '@/components/LocalizedLink'
@@ -41,6 +41,11 @@ const Icon = {
       <path fill="currentColor" d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5-5-5ZM10 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10Z"/>
     </svg>
   ),
+  Flame: () => (
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+      <path fill="currentColor" d="M12 2s5 4 5 9a5 5 0 1 1-10 0c0-2 1-4 3-6-1 3 2 4 2 6 0 1.7-1 3-2.5 3.5A4.5 4.5 0 0 0 16.5 9C16.5 5.5 12 2 12 2Z"/>
+    </svg>
+  ),
   Heart: () => (
     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
       <path fill="currentColor" d="M12 21s-7-4.6-9.3-8.3C1.3 9.9 3 6 6.9 6c2.2 0 3.4 1.2 4.1 2 0.7-0.8 1.9-2 4.1-2C19 6 20.7 9.9 21.3 12.7 19 16.4 12 21 12 21z"/>
@@ -54,11 +59,6 @@ const Icon = {
   User: () => (
     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
       <path fill="currentColor" d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.4 0-8 2.2-8 5v2h16v-2c0-2.8-3.6-5-8-5Z"/>
-    </svg>
-  ),
-  Flame: () => (
-    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-      <path fill="currentColor" d="M12 2s5 4 5 9a5 5 0 1 1-10 0c0-2 1-4 3-6-1 3 2 4 2 6 0 1.7-1 3-2.5 3.5A4.5 4.5 0 0 0 16.5 9C16.5 5.5 12 2 12 2Z"/>
     </svg>
   ),
 }
@@ -266,9 +266,17 @@ export default function Header() {
 
   /** LOGO → ACCUEIL (garanti) */
   const onLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (e.metaKey || e.ctrlKey || e.button === 1) return // nouvelle fenêtre/onglet → OK
+    // Laisser passer click milieu / Cmd+clic
+    if (e.metaKey || e.ctrlKey || e.button === 1) return
     e.preventDefault()
-    router.push(L('/')) // navigation client forcée
+    const url = L('/')
+    try { router.push(url) } catch {}
+    // Fallback dur si la navigation client est bloquée
+    setTimeout(() => {
+      try {
+        if (window.location.pathname !== url) window.location.assign(url)
+      } catch {}
+    }, 120)
   }
 
   return (
@@ -482,7 +490,7 @@ export default function Header() {
           })}
         </nav>
 
-        {/* Actions droites — badges premium (pas de gros cercle terne autour) */}
+        {/* Actions droites — badges premium */}
         <div className="hidden items-center gap-2 sm:gap-3 md:flex">
           <ThemeToggle size="sm" />
 
