@@ -9,9 +9,12 @@ import { useCart } from '@/hooks/useCart'
 import { useWishlist } from '@/hooks/useWishlist'
 import ThemeToggle from '@/components/ui/ThemeToggle'
 import { event as gaEvent, logEvent } from '@/lib/ga'
-import { CATEGORIES } from '@/lib/categories'
+import { CATEGORIES } from '@/lib/categories' // ✅ chemin corrigé
+import type { SVGProps } from 'react'
 
 type NavItem = { href: string; label: string }
+type CatItem = { label: string; href: string; desc: string; Icon: (p: SVGProps<SVGSVGElement>) => JSX.Element }
+const CAT_LIST = CATEGORIES as readonly CatItem[]
 
 // Retire “Accueil” & “Packs”
 const NAV: Readonly<NavItem[]> = [
@@ -446,49 +449,6 @@ export default function MobileNav() {
                 </div>
               )}
 
-              {/* Quick actions */}
-              <div className="flex items-center gap-2 px-4 pb-3">
-                <ThemeToggle size="md" />
-                <Link
-                  href="/wishlist"
-                  prefetch={false}
-                  onPointerDown={() => prefetchOnPointer('/wishlist')}
-                  onFocus={() => prefetchOnPointer('/wishlist')}
-                  onClick={() => { track({ action: 'mobile_nav_quick_wishlist' }); closeMenu('quick_wishlist') }}
-                  className="relative inline-flex items-center gap-2 rounded-lg border border-token-border px-3 py-2 text-sm font-medium hover:bg-token-surface-2 focus-ring"
-                  aria-label="Voir la wishlist"
-                >
-                  <Icon.Heart />
-                  {wishlistCount > 0 && (
-                    <span className="rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-[11px] font-bold text-white">
-                      {wishlistCount}
-                    </span>
-                  )}
-                </Link>
-                <Link
-                  href="/login"
-                  prefetch={false}
-                  onPointerDown={() => prefetchOnPointer('/login')}
-                  onFocus={() => prefetchOnPointer('/login')}
-                  onClick={() => { track({ action: 'mobile_nav_quick_account' }); closeMenu('quick_account') }}
-                  className="inline-flex items-center gap-2 rounded-lg border border-token-border px-3 py-2 text-sm font-medium hover:bg-token-surface-2 focus-ring"
-                  aria-label="Espace client"
-                >
-                  <Icon.User />
-                </Link>
-                {canInstall && (
-                  <button
-                    onClick={handleInstall}
-                    type="button"
-                    className="ml-auto inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-lime-500 to-emerald-500 px-3 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
-                    aria-label="Installer l’application"
-                    title="Installer l’application"
-                  >
-                    <Icon.Download /> Installer l’app
-                  </button>
-                )}
-              </div>
-
               {/* Catégories (icônes premium centralisées) */}
               <div className="px-4 pb-3">
                 <button
@@ -510,7 +470,7 @@ export default function MobileNav() {
                       className="overflow-hidden"
                     >
                       <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                        {CATEGORIES.map((c) => (
+                        {CAT_LIST.map((c) => (
                           <li key={c.href}>
                             <Link
                               href={c.href}
