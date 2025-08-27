@@ -102,7 +102,10 @@
     "continue": "← Continue shopping",
     "error": "Payment error",
     "free_shipping_reached": "Free shipping reached!",
-    "add_x_more": "Add {missing} more for free shipping"
+    "add_x_more": "Add {missing} more for free shipping",
+    "summary_mobile_label": "Cart summary",
+    "items_count": "{count, plural, one {# item} other {# items}}",
+    "view_cart": "View cart"
   },
   "success": {
     "title": "Thank you for your order 🎉",
