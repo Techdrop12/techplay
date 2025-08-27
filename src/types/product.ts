@@ -4,20 +4,46 @@
 export interface Product {
   _id: string
   slug: string
+
   title?: string
+  description?: string
+
+  /** Prix courant (déjà calculé côté back si promo active) */
   price: number
+  /** Ancien prix si promo (sinon undefined) */
   oldPrice?: number
+
+  /** Image principale */
   image?: string
-  images?: string[]          // galerie optionnelle
+
+  /** Galerie d’images (alias : certaines collections utilisent `gallery`) */
+  images?: string[]
+  /** Alias pour compat DB existante */
+  gallery?: string[]
+
   rating?: number
+  /** Nombre d’avis (utilisé pour le JSON-LD/affichage) */
+  reviewsCount?: number
+
   isNew?: boolean
   isBestSeller?: boolean
+
   category?: string
-  description?: string
-  tags?: string[]
   brand?: string
   sku?: string
-  stock?: number             // quantité disponible (<=0 = rupture)
+
+  /** Stock disponible (<=0 = rupture) */
+  stock?: number
+
+  /** Promo brute telle que stockée côté DB (optionnelle) */
+  promo?: {
+    price?: number
+    startDate?: string | Date
+    endDate?: string | Date
+  }
+
+  /** Libre : specs/attributs techniques */
+  attributes?: Record<string, string | number | boolean>
 }
 
 // Pour le panier (réutilisé partout)
@@ -32,8 +58,6 @@ export type CartItem = {
 
 /**
  * Pack/bundle de plusieurs produits.
- * On ajoute des champs optionnels utilisés par l’UI pour les badges,
- * remises et états (type-safe et rétrocompatible).
  */
 export interface Pack {
   _id: string
@@ -41,25 +65,19 @@ export interface Pack {
   title: string
   description: string
   price: number
-  oldPrice?: number          // ancien prix (peut servir de prix de référence)
-  /** Prix de référence alternatif (compare-at), si différent d’oldPrice */
+  oldPrice?: number
   compareAtPrice?: number
   rating?: number
+  reviewsCount?: number
   tags?: string[]
 
-  // Média
   image?: string
-  images?: string[]          // galerie optionnelle (cover = images[0] si présent)
+  images?: string[]
 
-  // Badges/états d’affichage
   isNew?: boolean
   isBestSeller?: boolean
-  stock?: number             // quantité disponible pour le pack
+  stock?: number
 
-  /**
-   * Items contenus dans le pack (si exposés) — structure souple.
-   * Tu peux affiner plus tard si tu as un modèle précis.
-   */
   items?: Array<{
     _id?: string
     slug?: string

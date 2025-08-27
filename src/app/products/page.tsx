@@ -10,7 +10,7 @@ export const revalidate = 900
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
 
 type SortKey = 'price_asc' | 'price_desc' | 'rating' | 'new' | 'promo'
-type Query = { q?: string; sort?: string; min?: string; max?: string; page?: string }
+type Query = { q?: string; sort?: string; min?: string; max?: string; page?: string; cat?: string }
 
 function buildQS(params: Query) {
   const sp = new URLSearchParams()
@@ -18,6 +18,7 @@ function buildQS(params: Query) {
   if (params.sort && params.sort !== 'new') sp.set('sort', params.sort)
   if (params.min) sp.set('min', params.min)
   if (params.max) sp.set('max', params.max)
+  if (params.cat) sp.set('cat', params.cat)
   if (params.page && Number(params.page) > 1) sp.set('page', String(params.page))
   const s = sp.toString()
   return s ? `?${s}` : ''
@@ -33,10 +34,12 @@ export async function generateMetadata(
   const page = Math.max(1, Number(searchParams?.page ?? 1))
   const min = searchParams?.min
   const max = searchParams?.max
+  const cat = (searchParams?.cat ?? '').trim()
 
   const baseTitle = 'Tous les produits – TechPlay'
   const bits: string[] = []
   if (q) bits.push(`“${q}”`)
+  if (cat) bits.push(`cat ${cat}`)
   if (min) bits.push(`min ${min}€`)
   if (max) bits.push(`max ${max}€`)
   if (sort && sort !== 'new') bits.push(`tri ${sort}`)
@@ -46,7 +49,7 @@ export async function generateMetadata(
   const description =
     'Parcourez notre catalogue complet de produits TechPlay. Livraison rapide, innovation garantie.'
 
-  const qs = buildQS({ q, sort, min, max, page: String(page) })
+  const qs = buildQS({ q, sort, min, max, cat, page: String(page) })
   const url = `${SITE}/products${qs}`
   const og = `${SITE}/api/og${qs}` // ✅ image OG dynamique
 
@@ -80,27 +83,52 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Qu
   const min = Number.isFinite(Number(searchParams?.min)) ? Number(searchParams!.min) : undefined
   const max = Number.isFinite(Number(searchParams?.max)) ? Number(searchParams!.max) : undefined
   const page = Math.max(1, Number(searchParams?.page ?? 1))
+  const cat = (searchParams?.cat ?? '').trim() || null
 
-  const { items, pageCount } = await getProductsPage({ q, min, max, sort, page, pageSize: PAGE_SIZE })
+  const { items, pageCount, total, categoryCounts } = await getProductsPage({
+    q,
+    min,
+    max,
+    sort,
+    page,
+    pageSize: PAGE_SIZE,
+    category: cat,
+  })
+
   const hasPrev = page > 1
   const hasNext = page < pageCount
-
   const buildUrl = (nextPage: number) =>
-    `/products${buildQS({ q, sort, min: min?.toString(), max: max?.toString(), page: String(nextPage) })}`
+    `/products${buildQS({ q, sort, min: min?.toString(), max: max?.toString(), cat: cat || undefined, page: String(nextPage) })}`
+
+  const categories = Object.keys(categoryCounts || {}).sort((a, b) => categoryCounts[b] - categoryCounts[a])
+
+  // Breadcrumb JSON-LD léger
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Accueil', item: `${SITE}/` },
+      { '@type': 'ListItem', position: 2, name: 'Produits', item: `${SITE}/products` },
+    ],
+  }
 
   return (
     <main id="main" className="max-w-7xl mx-auto px-4 pt-28 pb-16" role="main">
       <header className="text-center mb-8">
         <h1 className="text-4xl font-extrabold tracking-tight text-brand dark:text-brand-light">Tous les produits</h1>
-        <p className="mt-2 text-muted-foreground">Filtrez, triez et trouvez rapidement ce qu’il vous faut.</p>
+        <p className="mt-2 text-muted-foreground">
+          {total} résultat{total > 1 ? 's' : ''}. Filtrez, triez et trouvez rapidement ce qu’il vous faut.
+        </p>
       </header>
 
-      <form method="GET" className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* Barre de filtres SSR (pas d’état client requis) */}
+      <form method="GET" className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
         <input
           type="search" name="q" defaultValue={q} placeholder="Rechercher un produit…"
           className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
           aria-label="Rechercher un produit"
         />
+
         <select
           name="sort" defaultValue={sort}
           className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
@@ -112,6 +140,21 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Qu
           <option value="rating">Meilleures notes</option>
           <option value="promo">Meilleures promos</option>
         </select>
+
+        <select
+          name="cat"
+          defaultValue={cat ?? ''}
+          className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+          aria-label="Filtrer par catégorie"
+        >
+          <option value="">Toutes catégories</option>
+          {categories.map((c) => (
+            <option key={c} value={c}>
+              {c} ({categoryCounts[c]})
+            </option>
+          ))}
+        </select>
+
         <input
           type="number" name="min" inputMode="numeric" defaultValue={min ?? ''} placeholder="Prix min (€)"
           className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
@@ -131,8 +174,8 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Qu
           </button>
         </div>
 
-        {(q || sort !== 'new' || min !== undefined || max !== undefined || page > 1) && (
-          <div className="lg:col-span-4">
+        {(q || sort !== 'new' || min !== undefined || max !== undefined || cat || page > 1) && (
+          <div className="lg:col-span-5">
             <Link href="/products" className="inline-block text-sm text-gray-600 dark:text-gray-400 hover:text-accent" aria-label="Réinitialiser les filtres">
               Réinitialiser les filtres
             </Link>
@@ -155,6 +198,9 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Qu
           <span className="rounded-md border px-3 py-1.5 opacity-40">Suivant →</span>
         )}
       </nav>
+
+      {/* Breadcrumb JSON-LD */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
     </main>
   )
 }

@@ -1,4 +1,4 @@
-// src/components/AddToCartButton.tsx — ultra premium (no emoji, check icon)
+// src/components/AddToCartButton.tsx — ultra premium (compat + a11y + analytics + AB-ready)
 'use client'
 
 import { useRef, useState, useId, useCallback, useEffect, useMemo } from 'react'
@@ -35,7 +35,7 @@ interface Props {
 
   pendingText?: string
   successText?: string
-  /** remplace le libellé par défaut du bouton */
+  /** (nouveau) — remplace le libellé par défaut du bouton */
   idleText?: string
   debounceMs?: number
   ariaLabel?: string
@@ -43,13 +43,16 @@ interface Props {
   disableDataLayer?: boolean
   gtmExtra?: Record<string, unknown>
 
+  /** (nouveau) — A/B: redirige vers /:locale/commande après l'ajout */
   instantCheckout?: boolean
+  /** (nouveau) — locale pour la redirection instantCheckout */
   locale?: string
 }
 
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n))
 const isClient = typeof window !== 'undefined'
 
+/** ripple visuel sans CSS global (WAAPI) */
 function spawnRipple(e: React.MouseEvent<HTMLElement>) {
   const target = e.currentTarget as HTMLElement
   const rect = target.getBoundingClientRect()
@@ -77,6 +80,7 @@ function spawnRipple(e: React.MouseEvent<HTMLElement>) {
   anim.onfinish = () => span.remove()
 }
 
+/** petite bille qui “vole” vers l’icône panier */
 function flyTo(el: HTMLElement, target: HTMLElement, prefersReduced: boolean) {
   const dot = document.createElement('div')
   const { left, top, width, height } = el.getBoundingClientRect()
@@ -110,21 +114,6 @@ function flyTo(el: HTMLElement, target: HTMLElement, prefersReduced: boolean) {
   dot.animate(keyframes, { duration, easing: prefersReduced ? 'linear' : 'cubic-bezier(.2,.8,.2,1)' }).onfinish = () => dot.remove()
 }
 
-/* inline premium icons */
-const CheckIcon = ({ className = '' }: { className?: string }) => (
-  <svg className={className} width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-    <path fill="currentColor" d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2Zm-1.2 12.6-2.9-2.9 1.4-1.4 1.5 1.5 4.6-4.6 1.4 1.4-6 6z" />
-  </svg>
-)
-const CartIcon = ({ className = '' }: { className?: string }) => (
-  <svg className={className} width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-    <path
-      fill="currentColor"
-      d="M7 18a2 2 0 1 0 0 4a2 2 0 0 0 0-4M6.2 6l.63 3H20a1 1 0 0 1 .98 1.2l-1.2 6A2 2 0 0 1 17.83 16H9a2 2 0 0 1-1.96-1.6L5 4H3a1 1 0 0 1 0-2h2.72a1 1 0 0 1 .98.8L7 6z"
-    />
-  </svg>
-)
-
 export default function AddToCartButton({
   product,
   onAdd,
@@ -141,12 +130,13 @@ export default function AddToCartButton({
   haptic = true,
   ripple = true,
   flyToCart = true,
-  flyToCartSelector = '[data-cart-icon], a[href="/commande"]',
+  // 🎯 couvre /commande et /fr/commande, /en/commande, etc.
+  flyToCartSelector = "[data-cart-icon], a[href$='/commande']",
   scrollToStickyOnMobile = true,
   afterAddFocus = 'none',
 
   pendingText = 'Ajout en cours…',
-  successText = 'Produit ajouté au panier',
+  successText = 'Produit ajouté au panier 🎉',
   idleText,
   debounceMs = 350,
   ariaLabel,
@@ -191,6 +181,14 @@ export default function AddToCartButton({
     <svg className="animate-spin -ml-0.5 mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.25" strokeWidth="4" fill="none" />
       <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" fill="none" />
+    </svg>
+  )
+  const CartIcon = ({ className = '' }: { className?: string }) => (
+    <svg className={className} width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M7 18a2 2 0 1 0 0 4a2 2 0 0 0 0-4M6.2 6l.63 3H20a1 1 0 0 1 .98 1.2l-1.2 6A2 2 0 0 1 17.83 16H9a2 2 0 0 1-1.96-1.6L5 4H3a1 1 0 0 1 0-2h2.72a1 1 0 0 1 .98.8L7 6z"
+      />
     </svg>
   )
 
@@ -263,6 +261,7 @@ export default function AddToCartButton({
         const result = addToCart({ _id: id, slug, title, image, price, quantity })
         await Promise.resolve(result)
 
+        // analytics
         try {
           ;(logEvent as any)?.({ action: 'add_to_cart', category: 'ecommerce', label: title, value: price * quantity })
         } catch {}
@@ -275,10 +274,14 @@ export default function AddToCartButton({
         } catch {}
         doDataLayerPush({ id, title, price, quantity, value: price * quantity, slug })
 
+        // haptique
         if (haptic && isClient && 'vibrate' in navigator) {
-          try { navigator.vibrate?.(prefersReduced ? 10 : [8, 12, 8]) } catch {}
+          try {
+            navigator.vibrate?.(prefersReduced ? 10 : [8, 12, 8])
+          } catch {}
         }
 
+        // fly-to-cart
         if (flyToCart && isClient && wrapperRef.current) {
           const target = document.querySelector(flyToCartSelector) as HTMLElement | null
           if (target) flyTo(wrapperRef.current, target, !!prefersReduced)
@@ -310,9 +313,14 @@ export default function AddToCartButton({
 
         onAdd?.()
 
+        // (nouveau) — "Buy now" / instant checkout
         if (instantCheckout) {
           const path = `/${locale}/commande`
-          try { router.push(path) } catch { if (isClient) window.location.href = path }
+          try {
+            router.push(path)
+          } catch {
+            if (isClient) window.location.href = path
+          }
         }
       } catch (err) {
         toast.error("Impossible d'ajouter au panier. Réessayez.")
@@ -324,10 +332,30 @@ export default function AddToCartButton({
       }
     },
     [
-      stopPropagation, loading, disabled, debounceMs,
-      product?._id, product?.slug, product?.title, product?.image, product?.price, product?.quantity,
-      haptic, prefersReduced, flyToCart, flyToCartSelector, scrollToStickyOnMobile, successText,
-      afterAddFocus, onAdd, onError, doDataLayerPush, addToCart, instantCheckout, locale, router
+      stopPropagation,
+      loading,
+      disabled,
+      debounceMs,
+      product?._id,
+      product?.slug,
+      product?.title,
+      product?.image,
+      product?.price,
+      product?.quantity,
+      haptic,
+      prefersReduced,
+      flyToCart,
+      flyToCartSelector,
+      scrollToStickyOnMobile,
+      successText,
+      afterAddFocus,
+      onAdd,
+      onError,
+      doDataLayerPush,
+      addToCart,
+      instantCheckout,
+      locale,
+      router,
     ]
   )
 
@@ -337,11 +365,19 @@ export default function AddToCartButton({
 
   return (
     <>
-      <span className="sr-only" role="status" aria-live="polite">{srMessage}</span>
+      <span className="sr-only" role="status" aria-live="polite">
+        {srMessage}
+      </span>
 
-      <motion.div ref={wrapperRef} whileTap={prefersReduced ? undefined : { scale: 0.96 }} className={fullWidth ? 'w-full' : undefined}>
+      <motion.div
+        ref={wrapperRef}
+        whileTap={prefersReduced ? undefined : { scale: 0.96 }}
+        className={fullWidth ? 'w-full' : undefined}
+      >
         <Button
-          onMouseDown={(e) => { if (!prefersReduced && ripple && isClient) spawnRipple(e) }}
+          onMouseDown={(e) => {
+            if (!prefersReduced && ripple && isClient) spawnRipple(e)
+          }}
           onClick={handleClick}
           {...(ariaLabel ? { 'aria-label': ariaLabel } : { 'aria-labelledby': labelId })}
           aria-disabled={loading || disabled ? true : undefined}
@@ -366,8 +402,8 @@ export default function AddToCartButton({
         >
           <span id={labelId} className="inline-flex items-center gap-2">
             {loading && <Spinner />}
-            {!loading && withIcon && (added ? <CheckIcon className="-ml-0.5" /> : <CartIcon className="-ml-0.5" />)}
-            {loading ? pendingText : added ? 'Ajouté' : idleLabel}
+            {!loading && withIcon && <CartIcon className="-ml-0.5" />}
+            {loading ? pendingText : added ? 'Ajouté ✅' : idleLabel}
           </span>
         </Button>
       </motion.div>

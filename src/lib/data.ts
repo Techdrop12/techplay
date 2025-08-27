@@ -64,7 +64,11 @@ type GetProductsPageInput = {
   sort?: SortKey
   page?: number
   pageSize?: number
+  /** 🔥 nouveau : filtre catégorie (match insensible à la casse) */
+  category?: string | null
 }
+
+const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 /**
  * Normalise le prix selon ta structure:
@@ -74,6 +78,10 @@ type GetProductsPageInput = {
  *   - `price`  = prix courant
  *   - `oldPrice` = ancien prix si promo, sinon null
  *   - `images` = `gallery` (ton schéma) pour matcher le front
+ *
+ * Retour étendu:
+ *   - categoryCounts: Record<cat, count> (calculé AVANT d'appliquer le filtre catégorie)
+ *   - priceRange: { min, max } sur le prix courant (après promo)
  */
 export async function getProductsPage({
   q,
@@ -82,6 +90,7 @@ export async function getProductsPage({
   sort = 'new',
   page = 1,
   pageSize = 24,
+  category = null,
 }: GetProductsPageInput) {
   await connectToDatabase()
 
@@ -89,20 +98,21 @@ export async function getProductsPage({
   const safeSize = Math.min(96, Math.max(1, Number(pageSize) || 24))
   const skip = (safePage - 1) * safeSize
 
-  const match: Record<string, any> = {}
+  // match hors catégorie (sert de base pour les facets: counts)
+  const baseMatch: Record<string, any> = {}
 
   if (q && q.trim()) {
     const rx = new RegExp(q.trim(), 'i')
-    match.$or = [{ title: rx }, { description: rx }, { brand: rx }, { category: rx }]
+    baseMatch.$or = [{ title: rx }, { description: rx }, { brand: rx }, { category: rx }]
   }
 
   if (typeof min === 'number' || typeof max === 'number') {
-    match.price = {}
-    if (typeof min === 'number') match.price.$gte = min
-    if (typeof max === 'number') match.price.$lte = max
+    baseMatch.price = {}
+    if (typeof min === 'number') baseMatch.price.$gte = min
+    if (typeof max === 'number') baseMatch.price.$lte = max
   }
 
-  // Tri par défaut (sera sur prix courant/discountPct via pipeline pour certains cas)
+  // Tri par défaut
   let fallbackSort: Record<string, 1 | -1>
   switch (sort) {
     case 'price_asc':
@@ -118,7 +128,6 @@ export async function getProductsPage({
       fallbackSort = { createdAt: -1 }
       break
     case 'promo':
-      // géré dans pipeline par discountPct
       fallbackSort = { createdAt: -1 }
       break
     default:
@@ -126,28 +135,20 @@ export async function getProductsPage({
   }
 
   const now = new Date()
+  const categoryMatch =
+    category && category.trim()
+      ? { category: { $regex: new RegExp(`^${escapeRegex(category.trim())}$`, 'i') } }
+      : null
 
-  const pipeline: any[] = [
-    { $match: match },
+  const promoAddFields = [
     {
       $addFields: {
-        // promo active si prix promo < prix et dates ok (dates facultatives)
         isPromoActive: {
           $and: [
             { $ifNull: ['$promo.price', false] },
             { $lt: ['$promo.price', '$price'] },
-            {
-              $or: [
-                { $eq: ['$promo.startDate', null] },
-                { $lte: ['$promo.startDate', now] },
-              ],
-            },
-            {
-              $or: [
-                { $eq: ['$promo.endDate', null] },
-                { $gte: ['$promo.endDate', now] },
-              ],
-            },
+            { $or: [{ $eq: ['$promo.startDate', null] }, { $lte: ['$promo.startDate', now] }] },
+            { $or: [{ $eq: ['$promo.endDate', null] }, { $gte: ['$promo.endDate', now] }] },
           ],
         },
       },
@@ -155,9 +156,7 @@ export async function getProductsPage({
     {
       $addFields: {
         currentPrice: { $cond: ['$isPromoActive', '$promo.price', '$price'] },
-        oldPriceOut: {
-          $cond: ['$isPromoActive', '$price', null],
-        },
+        oldPriceOut: { $cond: ['$isPromoActive', '$price', null] },
       },
     },
     {
@@ -181,16 +180,26 @@ export async function getProductsPage({
         },
       },
     },
+  ]
+
+  const itemsSort =
+    sort === 'promo'
+      ? [{ $sort: { discountPct: -1, currentPrice: 1 } }]
+      : sort === 'price_asc'
+      ? [{ $sort: { currentPrice: 1 } }]
+      : sort === 'price_desc'
+      ? [{ $sort: { currentPrice: -1 } }]
+      : [{ $sort: fallbackSort }]
+
+  const pipeline: any[] = [
+    { $match: baseMatch },
     {
       $facet: {
+        // Liste paginée (filtre catégorie appliqué ici uniquement)
         items: [
-          ...(sort === 'promo'
-            ? [{ $sort: { discountPct: -1, currentPrice: 1 } }]
-            : sort === 'price_asc'
-            ? [{ $sort: { currentPrice: 1 } }]
-            : sort === 'price_desc'
-            ? [{ $sort: { currentPrice: -1 } }]
-            : [{ $sort: fallbackSort }]),
+          ...(categoryMatch ? [{ $match: categoryMatch }] : []),
+          ...promoAddFields,
+          ...itemsSort,
           { $skip: skip },
           { $limit: safeSize },
           {
@@ -198,7 +207,6 @@ export async function getProductsPage({
               _id: 1,
               slug: 1,
               title: 1,
-              // normalisation pour le front
               price: '$currentPrice',
               oldPrice: '$oldPriceOut',
               image: 1,
@@ -209,22 +217,49 @@ export async function getProductsPage({
               category: 1,
               brand: 1,
               sku: 1,
-              // utile si tu veux afficher le % direct
               discountPct: 1,
               createdAt: 1,
             },
           },
         ],
-        total: [{ $count: 'value' }],
+
+        // Total (avec filtre catégorie)
+        total: [(categoryMatch ? { $match: categoryMatch } : undefined), { $count: 'value' }].filter(
+          Boolean
+        ) as any[],
+
+        // Comptages par catégorie (⚠️ sans filtre de catégorie, mais avec q/min/max)
+        categoryCounts: [
+          {
+            $group: {
+              _id: { $ifNull: ['$category', 'Autres'] },
+              count: { $sum: 1 },
+            },
+          },
+          { $sort: { count: -1, _id: 1 } },
+        ],
+
+        // Stats de prix courants (après promo)
+        stats: [...promoAddFields, { $group: { _id: null, min: { $min: '$currentPrice' }, max: { $max: '$currentPrice' } } }],
       },
     },
   ]
 
   const agg = await Product.aggregate(pipeline)
-  const facet = agg?.[0] || { items: [], total: [] }
+  const facet = agg?.[0] || { items: [], total: [], categoryCounts: [], stats: [] }
   const items = (facet.items || []) as ProductType[]
   const total = Number(facet.total?.[0]?.value || 0)
   const pageCount = Math.max(1, Math.ceil(total / safeSize))
+
+  const counts: Record<string, number> = {}
+  for (const row of facet.categoryCounts || []) {
+    if (row?._id != null) counts[String(row._id)] = Number(row.count || 0)
+  }
+
+  const priceRange =
+    facet.stats?.[0] && Number.isFinite(facet.stats[0].min) && Number.isFinite(facet.stats[0].max)
+      ? { min: Number(facet.stats[0].min), max: Number(facet.stats[0].max) }
+      : undefined
 
   return {
     items,
@@ -232,5 +267,7 @@ export async function getProductsPage({
     page: safePage,
     pageSize: safeSize,
     pageCount,
+    categoryCounts: counts,
+    priceRange,
   }
 }

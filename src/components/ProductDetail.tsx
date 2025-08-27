@@ -1,8 +1,7 @@
-// src/components/ProductDetail.tsx
+// src/components/ProductDetail.tsx — OPTI MAX (SEO/a11y/UX/Perf) — CENTRAL JSON-LD GÉRÉ EN PAGE
 'use client'
 
 import Image from 'next/image'
-import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { formatPrice, cn } from '@/lib/utils'
@@ -41,6 +40,18 @@ const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(ma
 const BLUR_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+'
 
+/** Icône “share” (inline, pas d’emoji) */
+function IconShare({ size = 18, className = '' }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className={className}>
+      <path
+        fill="currentColor"
+        d="M14 3l7 7-7 7v-4h-1.5A7.5 7.5 0 0 1 5 5.5V4a1 1 0 0 1 1-1h1.5A7.5 7.5 0 0 0 12.5 10H14V3zM6 20h12v2H6z"
+      />
+    </svg>
+  )
+}
+
 export default function ProductDetail({ product, locale = 'fr' }: Props) {
   const prefersReducedMotion = useReducedMotion()
 
@@ -55,7 +66,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
   const [zoomed, setZoomed] = useState(false)
   const [origin, setOrigin] = useState<{ x: number; y: number }>({ x: 50, y: 50 })
 
-  // Unpack produit
+  // Unpack produit — ⚠️ on ne sort PAS `tags` ici (voir plus bas)
   const {
     _id,
     slug = '',
@@ -68,10 +79,13 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     rating,
     isNew,
     isBestSeller,
-    tags,
     stock,
     brand,
   } = product ?? {}
+
+  // ✅ Extraction tolérante de `tags` (corrige l’erreur TS si un ancien type est résolu par l’IDE)
+  const tags: string[] | undefined =
+    (product as Partial<Product> & { tags?: string[] }).tags
 
   // Galerie (images[] -> max 8)
   const gallery: string[] = useMemo(() => {
@@ -198,49 +212,6 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
   }
 
   /* ------------------------------------------------------------------------ */
-  /*                                  JSON-LD                                 */
-  /* ------------------------------------------------------------------------ */
-  const jsonLd = useMemo(() => {
-    const data: any = {
-      '@context': 'https://schema.org',
-      '@type': 'Product',
-      name: title,
-      image: gallery.length ? gallery : [image],
-      description: description || undefined,
-      sku: _id,
-      brand: brand ? { '@type': 'Brand', name: String(brand) } : undefined,
-      offers: {
-        '@type': 'Offer',
-        priceCurrency: 'EUR',
-        price: priceStr,
-        availability,
-        url: typeof window !== 'undefined' ? window.location.href : undefined,
-        itemCondition: 'https://schema.org/NewCondition',
-        seller: { '@type': 'Organization', name: 'TechPlay' },
-        hasMerchantReturnPolicy: {
-          '@type': 'MerchantReturnPolicy',
-          applicableCountry: 'FR',
-          returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
-          merchantReturnDays: 30,
-        },
-        shippingDetails: {
-          '@type': 'OfferShippingDetails',
-          shippingRate: { '@type': 'MonetaryAmount', value: 0, currency: 'EUR' },
-          shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'FR' },
-        },
-      },
-    }
-    if (hasRating) {
-      data.aggregateRating = {
-        '@type': 'AggregateRating',
-        ratingValue: Number(rating!.toFixed(1)),
-        reviewCount: 12, // remplace si tu as la vraie donnée
-      }
-    }
-    return data
-  }, [gallery, _id, title, image, description, brand, priceStr, availability, hasRating, rating])
-
-  /* ------------------------------------------------------------------------ */
   /*                              Image interactions                           */
   /* ------------------------------------------------------------------------ */
   const onPointerMove: React.PointerEventHandler<HTMLDivElement> = (e) => {
@@ -301,6 +272,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           onClick={toggleZoom}
           role="img"
           aria-label={`Image ${activeIdx + 1} sur ${gallery.length} : ${title}`}
+          aria-busy={!imgLoaded}
           tabIndex={0}
         >
           <Image
@@ -346,9 +318,11 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
               aria-label="Partager ce produit"
               title="Partager"
             >
-              🔗
+              <IconShare />
             </button>
           </div>
+
+          <p className="sr-only">Cliquer pour {zoomed ? 'dézoomer' : 'zoomer'} l’image.</p>
         </div>
 
         {gallery.length > 1 && (
@@ -403,6 +377,10 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             {title}
           </h1>
 
+          {/* Microdata extras */}
+          <meta itemProp="sku" content={_id} />
+          {brand && <meta itemProp="brand" content={String(brand)} />}
+
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <RatingStars value={hasRating ? rating! : 4} editable={false} />
             <FreeShippingBadge price={price} minimal />
@@ -425,11 +403,10 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
 
           {lowStock && (
             <div className="mt-2">
-              <div className="h-2 w-full rounded-full bg-amber-100 dark:bg-amber-900/30 overflow-hidden">
+              <div className="h-2 w-full rounded-full bg-amber-100 dark:bg-amber-900/30 overflow-hidden" aria-hidden>
                 <div
                   className="h-full bg-amber-500 transition-all"
                   style={{ width: `${Math.min(100, (stock! / 5) * 100)}%` }}
-                  aria-hidden="true"
                 />
               </div>
               <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">Dépêchez-vous, bientôt épuisé</p>
@@ -547,11 +524,12 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
 
             <button
               onClick={share}
-              className="mt-2 inline-flex items-center rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              className="mt-2 inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               aria-label="Partager"
               title="Partager"
             >
-              Partager
+              <IconShare />
+              <span>Partager</span>
             </button>
 
             {/* Paiements “confiance” (juste visuel, pas de dépendances) */}
@@ -596,12 +574,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         <ReviewForm productId={_id} />
       </div>
 
-      {/* JSON-LD SEO */}
-      <script
-        type="application/ld+json"
-        // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      {/* NOTE: Le JSON-LD est désormais injecté au niveau de la page (/products/[slug]) via <ProductJsonLd /> pour éviter les doublons. */}
     </motion.section>
   )
 }

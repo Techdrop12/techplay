@@ -89,7 +89,7 @@ export default function ProductCard({
     isBestSeller,
     stock,
     brand,
-    tags,
+    // ❌ ne pas déstructurer `tags` (certains envs ont un type Product sans ce champ)
   } = product ?? {}
 
   // Champs étendus tolérants
@@ -101,6 +101,7 @@ export default function ProductCard({
       ? x.reviews
       : undefined
   const sku: string | undefined = typeof x?.sku === 'string' ? x.sku : (x?.id ? String(x.id) : undefined)
+  const tags: string[] | undefined = Array.isArray(x?.tags) ? (x.tags as string[]).filter(Boolean) : undefined
 
   const prefersReducedMotion = useReducedMotion()
 
@@ -260,12 +261,14 @@ export default function ProductCard({
       onMouseLeave={resetTilt}
       data-product-id={_id}
       data-product-slug={slug}
+      data-sku={sku}
+      data-price={price}
       data-gtm="product_card"
     >
       {/* Microdonnées enrichies */}
       <meta itemProp="name" content={title} />
       <meta itemProp="image" content={toAbs(mainImage)} />
-      {slug && <meta itemProp="url" content={productUrl} />} {/* ✅ fix */}
+      {slug && <meta itemProp="url" content={productUrl} />}
       {brand && <meta itemProp="brand" content={String(brand)} />}
       {sku && <meta itemProp="sku" content={sku} />}
       {hasRating && (
@@ -306,7 +309,7 @@ export default function ProductCard({
 
         {/* --- Zone cliquable (image + contenu) --- */}
         <Link
-          href={productUrl} // ✅ fix
+          href={productUrl}
           prefetch={false}
           className="block rounded-[inherit] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.60)]"
           aria-label={'Voir la fiche produit : ' + title}

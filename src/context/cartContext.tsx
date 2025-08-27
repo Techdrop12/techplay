@@ -51,7 +51,7 @@ export interface CartContextValue {
   items: CartItem[];
   cartId: string;
   // actions
-  addToCart: (item: CartInput) => void;
+  addToCart: (item: CartInput) => void | Promise<void>;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   increment: (id: string, step?: number) => void;
@@ -266,7 +266,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   /** ----------------------- Actions ----------------------- */
-  const addToCart = (input: CartInput) => {
+  const addToCart: CartContextValue['addToCart'] = (input) => {
     const item = ensureItemShape({ ...input, quantity: input.quantity ?? 1 });
 
     setCart((curr) => {
@@ -307,14 +307,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   };
 
-  const removeFromCart = (id: string) => {
+  const removeFromCart: CartContextValue['removeFromCart'] = (id) => {
     setCart((curr) => curr.filter((it) => it._id !== id));
     try {
       gaEvent?.({ action: 'remove_from_cart', category: 'ecommerce', label: id, value: 0 });
     } catch {}
   };
 
-  const updateQuantity = (id: string, quantity: number) => {
+  const updateQuantity: CartContextValue['updateQuantity'] = (id, quantity) => {
     if (!Number.isFinite(quantity)) return;
     const q = clamp(Math.trunc(quantity), MIN_QTY, MAX_QTY);
     setCart((curr) => curr.map((it) => (it._id === id ? { ...it, quantity: q } : it)));
@@ -323,7 +323,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   };
 
-  const increment = (id: string, step: number = 1) => {
+  const increment: CartContextValue['increment'] = (id, step = 1) => {
     setCart((curr) =>
       curr.map((it) =>
         it._id === id ? { ...it, quantity: clamp(it.quantity + step, MIN_QTY, MAX_QTY) } : it
@@ -331,7 +331,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  const decrement = (id: string, step: number = 1) => {
+  const decrement: CartContextValue['decrement'] = (id, step = 1) => {
     setCart((curr) =>
       curr.map((it) =>
         it._id === id ? { ...it, quantity: clamp(it.quantity - step, MIN_QTY, MAX_QTY) } : it
@@ -340,19 +340,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  const clearCart = () => {
+  const clearCart: CartContextValue['clearCart'] = () => {
     setCart([]);
     try {
       gaEvent?.({ action: 'clear_cart', category: 'ecommerce', label: 'all', value: 0 });
     } catch {}
   };
 
-  const replaceCart = (items: CartItem[]) => {
+  const replaceCart: CartContextValue['replaceCart'] = (items) => {
     setCart(items.map(ensureItemShape));
   };
 
-  const applyCoupon = (c: Coupon) => setCoupon(c);
-  const removeCoupon = () => setCoupon(null);
+  const applyCoupon: CartContextValue['applyCoupon'] = (c) => setCoupon(c);
+  const removeCoupon: CartContextValue['removeCoupon'] = () => setCoupon(null);
 
   const value: CartContextValue = {
     cart,

@@ -1,10 +1,9 @@
+// src/app/products/[slug]/page.tsx
 import { notFound } from 'next/navigation'
-import { getProductBySlug } from '@/lib/data'
 import type { Metadata } from 'next'
+import { getProductBySlug } from '@/lib/data'
 import type { Product } from '@/types/product'
 import ProductDetail from '@/components/ProductDetail'
-import AddToCartButton from '@/components/AddToCartButton'
-import ReviewForm from '@/components/ReviewForm'
 import ProductJsonLd from '@/components/JsonLd/ProductJsonLd'
 
 export const revalidate = 1800
@@ -14,20 +13,36 @@ const SITE = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com'
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const product = await getProductBySlug(params.slug)
 
-  if (!product) return { title: 'Produit introuvable – TechPlay', robots: { index: false, follow: true } }
+  if (!product) {
+    return {
+      title: 'Produit introuvable – TechPlay',
+      description: 'Le produit demandé est introuvable.',
+      robots: { index: false, follow: true },
+      alternates: { canonical: `${SITE}/products/${params.slug}` },
+    }
+  }
+
+  const title = `${product.title ?? 'Produit'} | TechPlay`
+  const desc = product.description || 'Découvrez ce produit TechPlay.'
+  const url = `${SITE}/products/${params.slug}`
+  const img = product.image || `${SITE}/placeholder.png`
 
   return {
-    title: `${product.title} | TechPlay`,
-    description: product.description || 'Détail du produit TechPlay',
-    alternates: { canonical: `${SITE}/products/${params.slug}` },
+    title,
+    description: desc,
+    alternates: { canonical: url },
     openGraph: {
-      title: product.title,
-      description: product.description || '',
-      type: 'website',
-      url: `${SITE}/products/${params.slug}`,
-      images: product.image
-        ? [{ url: product.image, alt: product.title }]
-        : [{ url: `${SITE}/placeholder.png`, alt: 'Produit TechPlay' }],
+      title,
+      description: desc,
+      type: 'website', // ✅ important
+      url,
+      images: [{ url: img, alt: product.title ?? 'Produit TechPlay' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description: desc,
+      images: [img],
     },
   }
 }
@@ -38,19 +53,30 @@ export default async function ProductPage({ params }: { params: { slug: string }
 
   const safeProduct = product as Product
 
+  // Breadcrumb JSON-LD léger (Home > Products > Product)
+  const breadcrumb = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Accueil', item: `${SITE}/` },
+      { '@type': 'ListItem', position: 2, name: 'Produits', item: `${SITE}/products` },
+      { '@type': 'ListItem', position: 3, name: safeProduct.title ?? 'Produit', item: `${SITE}/products/${safeProduct.slug}` },
+    ],
+  }
+
   return (
     <>
-      <main className="max-w-6xl mx-auto px-4 py-10" aria-label={`Page produit : ${safeProduct.title}`}>
+      <main className="max-w-6xl mx-auto px-4 py-10" aria-label={`Page produit : ${safeProduct.title ?? 'Produit'}`}>
         <ProductDetail product={safeProduct} />
-        <div className="mt-8">
-          <AddToCartButton product={{ ...safeProduct, quantity: 1 }} />
-        </div>
-        <div className="mt-12">
-          <ReviewForm productId={safeProduct._id} />
-        </div>
       </main>
 
       <ProductJsonLd product={safeProduct} />
+
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
+      />
     </>
   )
 }

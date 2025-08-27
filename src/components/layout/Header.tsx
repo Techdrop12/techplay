@@ -205,7 +205,6 @@ export default function Header() {
 
   const prefetchViaLink = (href: string) => {
     try {
-      // Next/router prefetch (quand possible), sinon <link rel="prefetch">
       router.prefetch?.(href)
       const el = document.createElement('link')
       el.rel = 'prefetch'
@@ -245,7 +244,7 @@ export default function Header() {
 
   /** LOGO → ACCUEIL (garanti) */
   const onLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (e.metaKey || e.ctrlKey || e.button === 1) return // middle/Cmd click ok
+    if (e.metaKey || e.ctrlKey || e.button === 1) return
     e.preventDefault()
     const url = L('/')
     try { router.push(url) } catch {}
@@ -543,6 +542,7 @@ export default function Header() {
               className="relative hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 rounded-lg p-0.5"
               aria-label={cartCount > 0 ? `Voir le panier (${cartCount})` : 'Voir le panier'}
               data-gtm="header_cart"
+              data-cart-icon
             >
               <ActionBadge><Cart /></ActionBadge>
             </Link>
