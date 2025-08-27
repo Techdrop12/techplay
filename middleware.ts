@@ -1,4 +1,4 @@
-// middleware.ts — Ultra Premium FINAL
+// middleware.ts — Ultra Premium FINAL (i18n ajusté)
 import { NextRequest, NextResponse } from 'next/server'
 import createMiddleware from 'next-intl/middleware'
 import { getToken } from 'next-auth/jwt'
@@ -8,6 +8,8 @@ const intlMiddleware = createMiddleware({
   locales: ['fr', 'en'],
   defaultLocale: 'fr',
   localePrefix: 'as-needed',
+  // ❗️IMPORTANT: on coupe la détection par Accept-Language
+  localeDetection: false,
 })
 
 /** ──────────────────── Constantes/Helpers ─────────────────── **/
@@ -84,7 +86,7 @@ function ensureAbCookie(response: NextResponse) {
   response.cookies.set('ab', variant, {
     path: '/',
     httpOnly: false,
-    sameSite: 'lax', // ← minuscule (fix typage)
+    sameSite: 'lax',
     secure: !isDev,
     maxAge: 60 * 60 * 24 * 30, // 30j
   })
@@ -99,6 +101,13 @@ export async function middleware(request: NextRequest) {
   if (normalized !== pathname) {
     const url = request.nextUrl.clone()
     url.pathname = normalized
+    return NextResponse.redirect(url, 308)
+  }
+
+  // ✅ 0-bis) Normaliser /fr → / (la locale par défaut ne doit pas être préfixée)
+  if (pathname === '/fr' || pathname.startsWith('/fr/')) {
+    const url = request.nextUrl.clone()
+    url.pathname = pathname.replace(/^\/fr(\/|$)/, '/')
     return NextResponse.redirect(url, 308)
   }
 
@@ -132,9 +141,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // (⚠️ supprimé) 5) plus de redirection / -> /fr, car localePrefix:'as-needed'
-
-  // 6) Maintenance (bypass pour /admin et page maintenance)
+  // 5) Maintenance (bypass pour /admin et page maintenance)
   const isMaintenance = process.env.MAINTENANCE === 'true'
   const isAdminPath = pathname.startsWith('/admin')
   const isMaintenancePage = ['/maintenance', '/fr/maintenance', '/en/maintenance'].includes(pathname)
@@ -144,7 +151,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 307)
   }
 
-  // 7) Admin: protection par JWT (rôle admin)
+  // 6) Admin: protection par JWT (rôle admin)
   if (isAdminPath) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
     if (!token || (token as any)?.role !== 'admin') {
@@ -154,10 +161,23 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 8) i18n
+  // 7) i18n (next-intl) — sans détection Accept-Language
   const response = intlMiddleware(request) as NextResponse
 
-  // 9) En-têtes dynamiques
+  // ✅ 8) Fixer le cookie de locale selon le chemin courant
+  //    - /en… => en, sinon fr (défaut)
+  const derived = pathname === '/en' || pathname.startsWith('/en/') ? 'en' : 'fr'
+  if (request.cookies.get('NEXT_LOCALE')?.value !== derived) {
+    response.cookies.set('NEXT_LOCALE', derived, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: 'lax',
+      secure: !isDev,
+    })
+  }
+
+  // 9) En-têtes dynamiques (SEO/CDN/Perf)
+  response.headers.set('Vary', 'Accept-Language, Cookie')
   if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production') {
     response.headers.set('X-Robots-Tag', 'noindex, nofollow, noimageindex')
   }
@@ -177,10 +197,7 @@ export async function middleware(request: NextRequest) {
   return response
 }
 
-/** ───────────────────────── Matcher ─────────────────────────
- * Exclut Next internals, API, assets publics & fichiers statiques.
- * Laisse tout le reste passer dans le middleware (i18n inclus).
- */
+/** ───────────────────────── Matcher ───────────────────────── **/
 export const config = {
   matcher: [
     '/((?!_next/|_vercel/|api/|favicon\\.ico$|robots\\.txt$|manifest\\.json$|site\\.webmanifest$|sw\\.js$|firebase-messaging-sw\\.js$|icons/|fr/icons/|en/icons/|images/|fonts/|static/).*)',
