@@ -57,7 +57,7 @@ export default function WishlistPage({ params }: { params: { locale: string } })
             {wishlist.map((product, i) =>
               product ? (
                 <ProductCard
-                  key={product._id ?? product.slug ?? i}
+                  key={(product as any)._id ?? (product as any).slug ?? i}
                   product={{
                     ...product,
                     title: product.title ?? (isFr ? 'Produit' : 'Product'),
