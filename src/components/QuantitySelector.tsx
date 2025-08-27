@@ -1,4 +1,3 @@
-// src/components/QuantitySelector.tsx
 'use client'
 
 import {
@@ -20,12 +19,10 @@ interface QuantitySelectorProps {
   value?: number
   defaultValue?: number
   onChange?: (val: number) => void
-  /** Déclenché au blur ou sur ENTER (validation explicite) */
   onCommit?: (val: number) => void
   min?: number
   max?: number
   step?: number
-  /** Aligner la valeur sur le pas par rapport à min (ex: min=1, step=2 ⇒ 1,3,5,...) */
   snapToStep?: boolean
   className?: string
   id?: string
@@ -33,13 +30,11 @@ interface QuantitySelectorProps {
   disabled?: boolean
   readOnly?: boolean
   'aria-describedby'?: string
-  /** Incrément rapide quand Shift est maintenu (par défaut x10) */
   fastMultiplier?: number
 }
 
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
-const alignToStep = (n: number, min: number, step: number) =>
-  min + Math.round((n - min) / step) * step
+const alignToStep = (n: number, min: number, step: number) => min + Math.round((n - min) / step) * step
 
 export default function QuantitySelector({
   value,
@@ -61,36 +56,23 @@ export default function QuantitySelector({
   const prefersReducedMotion = useReducedMotion()
   const isControlled = typeof value === 'number'
 
-  // valeur interne initiale
   const [internal, setInternal] = useState<number>(() => {
-    const base =
-      typeof defaultValue === 'number'
-        ? defaultValue
-        : typeof value === 'number'
-        ? value
-        : min
+    const base = typeof defaultValue === 'number' ? defaultValue : typeof value === 'number' ? value : min
     const aligned = snapToStep ? alignToStep(base, min, step) : base
     return clamp(aligned, min, max)
   })
 
-  // valeur affichée (source de vérité)
-  const qty = isControlled
-    ? clamp(snapToStep ? alignToStep(value!, min, step) : value!, min, max)
-    : internal
+  const qty = isControlled ? clamp(snapToStep ? alignToStep(value!, min, step) : value!, min, max) : internal
 
-  // Re-clamp si min/max changent
   useEffect(() => {
     if (!isControlled) {
       setInternal((v) => clamp(snapToStep ? alignToStep(v, min, step) : v, min, max))
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [min, max, step, snapToStep])
+  }, [min, max, step, snapToStep, isControlled])
 
-  // Suivre value si contrôlé
   useEffect(() => {
     if (isControlled) setInternal(qty)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, qty])
+  }, [value, qty, isControlled])
 
   const emit = useCallback(
     (n: number, commit = false) => {
@@ -103,23 +85,16 @@ export default function QuantitySelector({
     [isControlled, min, max, step, snapToStep, onChange, onCommit]
   )
 
-  const changeBy = useCallback(
-    (delta: number) => emit((qty ?? min) + delta),
-    [emit, qty, min]
-  )
+  const changeBy = useCallback((delta: number) => emit((qty ?? min) + delta), [emit, qty, min])
 
-  // Auto-repeat (maintien appuyé) + arrêt fiable
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pressInterval = useRef<ReturnType<typeof setInterval> | null>(null)
-
   const repeatStop = () => {
     if (pressTimer.current) clearTimeout(pressTimer.current)
     if (pressInterval.current) clearInterval(pressInterval.current)
     pressTimer.current = null
     pressInterval.current = null
   }
-
-  // Nettoyage si le composant démonte pendant un maintien
   useEffect(() => repeatStop, [])
 
   const repeatStart =
@@ -127,34 +102,32 @@ export default function QuantitySelector({
     (e: ReactMouseEvent | ReactPointerEvent): void => {
       e.preventDefault()
       if (disabled || readOnly) return
-
       changeBy(delta)
-
-      // délai avant répétition
       repeatStop()
       let speed = 120
       let count = 0
-
       pressTimer.current = setTimeout(() => {
         pressInterval.current = setInterval(() => {
           changeBy(delta)
           count++
-          if (count % 6 === 0) speed = Math.max(40, speed - 10) // accélération légère
+          if (count % 6 === 0) speed = Math.max(40, speed - 10)
         }, speed)
       }, 350)
 
-      // Arrêt sur relâche / leave / visibility change
       const once = { once: true } as AddEventListenerOptions
       window.addEventListener('pointerup', repeatStop, once)
       window.addEventListener('mouseup', repeatStop, once)
       window.addEventListener('touchend', repeatStop, once)
       window.addEventListener('pointercancel', repeatStop, once)
-      window.addEventListener('visibilitychange', () => {
-        if (document.visibilityState !== 'visible') repeatStop()
-      }, once)
+      window.addEventListener(
+        'visibilitychange',
+        () => {
+          if (document.visibilityState !== 'visible') repeatStop()
+        },
+        once
+      )
     }
 
-  // Saisie directe
   const onInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.trim()
     if (raw === '') {
@@ -166,7 +139,6 @@ export default function QuantitySelector({
     emit(n)
   }
 
-  // Validation au blur
   const onInputBlur = () => emit(qty, true)
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -195,7 +167,6 @@ export default function QuantitySelector({
     }
   }
 
-  // Molette : uniquement quand l’input a le focus
   const onWheel = (e: WheelEvent<HTMLInputElement>) => {
     if (document.activeElement !== e.currentTarget) return
     e.preventDefault()
@@ -209,7 +180,6 @@ export default function QuantitySelector({
 
   return (
     <div className={cn('inline-flex items-center gap-3 select-none', className)}>
-      {/* Région live pour a11y */}
       <span className="sr-only" role="status" aria-live="polite">
         {srText}
       </span>
@@ -233,7 +203,7 @@ export default function QuantitySelector({
       </motion.button>
 
       <motion.input
-        key={qty} // petit bump visuel optionnel
+        key={qty}
         initial={prefersReducedMotion ? false : { scale: 0.98, opacity: 0 }}
         animate={prefersReducedMotion ? undefined : { scale: 1, opacity: 1 }}
         transition={{ duration: 0.12 }}

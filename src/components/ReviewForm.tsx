@@ -1,11 +1,17 @@
+// src/components/ReviewForm.tsx — Premium UX/a11y + DX safe (cooldown, drafts, JSON-LD correct)
+// - A11y: proper radiogroup, inline errors, live counters, keyboard (←/→, Home/End, Ctrl/⌘+Enter)
+// - UX: cooldown, draft autosave/restoration, honeypot, optimistic success state
+// - SEO: JSON-LD built from the *submitted* data (not emptied state)
+// - Perf/Robust: reduced-motion friendly, GA calls guarded
+
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { Star } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { event } from '@/lib/ga'
+import { event as gaEvent } from '@/lib/ga'
 
 interface ReviewFormProps {
   productId: string
@@ -26,6 +32,8 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
     }
   }
 
+  const prefersReducedMotion = useReducedMotion()
+
   // Champs
   const [name, setName] = useState('')
   const [comment, setComment] = useState('')
@@ -33,13 +41,36 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
   const [hover, setHover] = useState<number | null>(null)
   const [sending, setSending] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [submittedData, setSubmittedData] = useState<{
+    rating: number
+    body: string
+    author: string
+  } | null>(null)
   const [hp, setHp] = useState('') // honeypot
 
   // Cooldown
   const cooldownKey = useMemo(() => `tp_review_cd:${productId}`, [productId])
   const lastBodyKey = useMemo(() => `tp_review_body:${productId}`, [productId])
+  const draftKey = useMemo(() => `tp_review_draft:${productId}`, [productId])
+
   const [cooldownLeft, setCooldownLeft] = useState(0)
-  const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const timerRef = useRef<number | null>(null)
+
+  // Restore draft on mount
+  useEffect(() => {
+    try {
+      const draft = localStorage.getItem(draftKey)
+      if (draft) setComment(draft.slice(0, MAX_LEN))
+    } catch {}
+  }, [draftKey])
+
+  // Autosave draft
+  useEffect(() => {
+    try {
+      if (comment.trim()) localStorage.setItem(draftKey, comment)
+      else localStorage.removeItem(draftKey)
+    } catch {}
+  }, [comment, draftKey])
 
   useEffect(() => {
     const endAt = Number(localStorage.getItem(cooldownKey) || 0)
@@ -49,10 +80,10 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
     }
     update()
     if (endAt > Date.now()) {
-      timerRef.current = setInterval(update, 300)
+      timerRef.current = window.setInterval(update, 300) as unknown as number
     }
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current)
+      if (timerRef.current) window.clearInterval(timerRef.current)
     }
   }, [cooldownKey])
 
@@ -60,12 +91,15 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
     const endAt = Date.now() + COOLDOWN_SEC * 1000
     localStorage.setItem(cooldownKey, String(endAt))
     setCooldownLeft(COOLDOWN_SEC)
-    if (timerRef.current) clearInterval(timerRef.current)
-    timerRef.current = setInterval(() => {
+    if (timerRef.current) window.clearInterval(timerRef.current)
+    timerRef.current = window.setInterval(() => {
       const left = Math.max(0, Math.ceil((endAt - Date.now()) / 1000))
       setCooldownLeft(left)
-      if (left <= 0 && timerRef.current) clearInterval(timerRef.current)
-    }, 300)
+      if (left <= 0 && timerRef.current) {
+        window.clearInterval(timerRef.current)
+        timerRef.current = null
+      }
+    }, 300) as unknown as number
   }
 
   // Accessibilité clavier sur les étoiles
@@ -85,9 +119,24 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
     }
   }
 
+  // Submit via Ctrl/⌘+Enter
+  const onTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'enter') {
+      e.preventDefault()
+      // trigger form submit
+      ;(e.currentTarget.form as HTMLFormElement | null)?.requestSubmit()
+    }
+  }
+
   const remaining = Math.max(0, MAX_LEN - comment.length)
   const tooShort = comment.trim().length > 0 && comment.trim().length < MIN_LEN
   const disabled = sending || cooldownLeft > 0
+
+  const track = (payload: { action: string; category?: string; label?: string; value?: number }) => {
+    try {
+      gaEvent?.({ category: 'engagement', ...payload })
+    } catch {}
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -124,6 +173,7 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
 
     setSending(true)
     try {
+      const author = name.trim() || 'Client TechPlay'
       const res = await fetch(`/api/reviews/product/${productId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -131,27 +181,26 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
           productId,
           rating,
           comment: bodyTrim,
-          name: name.trim() || 'Client TechPlay',
+          name: author,
         }),
       })
 
       if (!res.ok) throw new Error('HTTP ' + res.status)
 
       // GA4
-      event({
-        action: 'submit_review',
-        category: 'engagement',
-        label: 'Avis client',
-        value: rating,
-      })
+      track({ action: 'submit_review', label: 'Avis client', value: rating })
 
-      // Optimiste
+      // Optimiste + persist anti-dup & clear draft
       setSubmitted(true)
+      setSubmittedData({ rating, body: bodyTrim, author })
+      localStorage.setItem(lastBodyKey, bodyTrim)
+      try { localStorage.removeItem(draftKey) } catch {}
+
+      // reset champ
       setComment('')
       setName('')
       setRating(5)
 
-      localStorage.setItem(lastBodyKey, bodyTrim)
       startCooldown()
       toast.success(tr('thank_you', 'Merci pour votre avis !'))
     } catch {
@@ -161,9 +210,9 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
     }
   }
 
-  // JSON-LD après succès (améliore le SEO si l’API stocke l’avis)
+  // JSON-LD après succès (basé sur submittedData)
   const jsonLd =
-    submitted
+    submitted && submittedData
       ? {
           '@context': 'https://schema.org',
           '@type': 'Review',
@@ -173,12 +222,12 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
           },
           reviewRating: {
             '@type': 'Rating',
-            ratingValue: rating,
+            ratingValue: submittedData.rating,
             bestRating: 5,
             worstRating: 1,
           },
-          reviewBody: comment || 'Avis envoyé',
-          author: { '@type': 'Person', name: name.trim() || 'Client TechPlay' },
+          reviewBody: submittedData.body,
+          author: { '@type': 'Person', name: submittedData.author },
         }
       : null
 
@@ -187,8 +236,8 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
       <>
         <motion.p
           className="mt-6 text-green-600 dark:text-green-400 font-semibold text-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
+          animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1 }}
           role="status"
           aria-live="polite"
         >
@@ -226,6 +275,8 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             autoComplete="name"
+            maxLength={60}
+            placeholder={tr('name_ph', 'Votre prénom')}
             className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
           />
         </label>
@@ -261,14 +312,16 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
               onClick={() => setRating(val)}
               onMouseEnter={() => setHover(val)}
               onMouseLeave={() => setHover(null)}
-              whileHover={{ scale: 1.12 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={prefersReducedMotion ? undefined : { scale: 1.12 }}
+              whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
               aria-checked={rating === val}
               aria-label={`${val} ${tr('stars', 'étoiles')}`}
               role="radio"
               className={`transition text-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded ${
                 active ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'
               }`}
+              data-gtm="review_star"
+              data-value={val}
             >
               <Star fill={active ? 'currentColor' : 'none'} size={26} />
             </motion.button>
@@ -285,11 +338,15 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
           id="review-text"
           value={comment}
           onChange={(e) => setComment(e.target.value.slice(0, MAX_LEN))}
+          onKeyDown={onTextareaKeyDown}
           placeholder={tr('placeholder', 'Partagez votre expérience…')}
           className="w-full border border-gray-300 dark:border-gray-700 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent dark:bg-zinc-900 dark:text-white"
           rows={5}
           required
-          aria-describedby="review-help review-counter"
+          maxLength={MAX_LEN}
+          enterKeyHint="send"
+          aria-invalid={tooShort ? 'true' : 'false'}
+          aria-describedby={`review-help review-counter${tooShort ? ' review-error' : ''}`}
         />
         <div id="review-help" className="mt-1 text-xs text-gray-500">
           {tr(
@@ -304,6 +361,11 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
         >
           {remaining} / {MAX_LEN}
         </div>
+        {tooShort && (
+          <p id="review-error" className="mt-1 text-xs text-orange-600" role="alert">
+            {tr('minlen_error', `Votre message doit contenir au moins ${MIN_LEN} caractères.`)}
+          </p>
+        )}
       </div>
 
       {/* CTA */}
@@ -311,11 +373,12 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
         type="submit"
         disabled={disabled}
         aria-busy={sending}
-        whileHover={{ scale: disabled ? 1 : 1.03 }}
-        whileTap={{ scale: disabled ? 1 : 0.97 }}
+        whileHover={prefersReducedMotion || disabled ? undefined : { scale: 1.03 }}
+        whileTap={prefersReducedMotion || disabled ? undefined : { scale: 0.97 }}
         className={`w-full rounded-xl bg-accent text-white px-4 py-3 text-base font-extrabold shadow-lg transition-colors focus:outline-none focus:ring-4 focus:ring-accent/50 ${
           disabled ? 'opacity-60 cursor-not-allowed' : 'hover:bg-accent/90'
         }`}
+        data-gtm="review_submit"
       >
         {sending
           ? tr('sending', 'Envoi en cours…')

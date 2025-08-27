@@ -5,14 +5,22 @@ import Link from 'next/link'
 import { motion, useReducedMotion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
-type IconName = 'lock' | 'truck' | 'chat' | 'shield' | 'refund' | 'stripe' | 'paypal' | 'rocket'
+type IconName =
+  | 'lock'
+  | 'truck'
+  | 'chat'
+  | 'shield'
+  | 'refund'
+  | 'stripe'
+  | 'paypal'
+  | 'rocket'
 
 type Badge = {
   /** Libellé affiché (obligatoire) */
   label: string
-  /** (Option) Emoji rétrocompatible */
+  /** (DEPRECATED) — on n’affiche plus d’emoji */
   emoji?: string
-  /** (Option) Icône vectorielle premium */
+  /** Icône vectorielle premium (recommandé) */
   icon?: IconName
   /** (Option) Lien cliquable (ex: /cgv, /contact) */
   href?: string
@@ -36,19 +44,19 @@ function Icon({ name, className }: { name: IconName; className?: string }) {
     case 'lock':
       return (
         <svg viewBox="0 0 24 24" className={cn(common, className)} aria-hidden="true" fill="currentColor">
-          <path d="M17 9h-1V7a4 4 0 10-8 0v2H7a2 2 0 00-2 2v7a2 2 0 002 2h10a2 2 0 002-2v-7a2 2 0 00-2-2Zm-7-2a2 2 0 114 0v2h-4V7Z" />
+          <path d="M12 2a5 5 0 00-5 5v2H6a3 3 0 00-3 3v7a3 3 0 003 3h12a3 3 0 003-3v-7a3 3 0 00-3-3h-1V7a5 5 0 00-5-5Zm-3 7V7a3 3 0 116 0v2H9Z" />
         </svg>
       )
     case 'truck':
       return (
         <svg viewBox="0 0 24 24" className={cn(common, className)} aria-hidden="true" fill="currentColor">
-          <path d="M3 5a1 1 0 011-1h10a1 1 0 011 1v9h2.382a2 2 0 001.789-1.106l.894-1.789A2 2 0 0019.276 9H17V7h2.276a4 4 0 013.577 2.211l.894 1.789A4 4 0 0118.382 15H3a1 1 0 01-1-1V5Zm3 13a2 2 0 114 0 2 2 0 01-4 0Zm9 0a2 2 0 114 0 2 2 0 01-4 0Z" />
+          <path d="M3 6h11a1 1 0 011 1v3h3.8a1 1 0 01.9.6l1.3 3a2 2 0 01.1.8V18a2 2 0 01-2 2h-1a2.5 2.5 0 11-5 0H9.5a2.5 2.5 0 11-5 0H4a2 2 0 01-2-2V8a2 2 0 012-2Zm12 4V8H4v10h.5a2.5 2.5 0 015 0H15v-5h3.7l-.8-1.9H15Zm2.5 8a1.5 1.5 0 100-3 1.5 1.5 0 000 3ZM7 19.5A1.5 1.5 0 107 16a1.5 1.5 0 000 3.5Z" />
         </svg>
       )
     case 'rocket':
       return (
         <svg viewBox="0 0 24 24" className={cn(common, className)} aria-hidden="true" fill="currentColor">
-          <path d="M14 3a8 8 0 00-7.071 4.243L3 11.172l2.828 2.829 3.93-3.93A8 8 0 0014 3Zm7 7a8 8 0 00-8-8h-1l-2 2 4 4 2-2a6 6 0 015 4ZM4 18l2-2 2 2-2 2a2 2 0 01-2-2Zm9.293-6.707l-5.586 5.586a2 2 0 102.828 2.828l5.586-5.586a2 2 0 10-2.828-2.828Z" />
+          <path d="M14.4 2.2a8.5 8.5 0 00-6.6 3.7L5 9.5l2.8 2.8 3.6-2.7a8.5 8.5 0 002.9-7.4ZM4 18l2-2 2 2-2 2a2 2 0 01-2-2Zm9.3-5.7-5.6 5.6a2 2 0 102.8 2.8l5.6-5.6a2 2 0 10-2.8-2.8Z" />
         </svg>
       )
     case 'chat':
@@ -66,19 +74,25 @@ function Icon({ name, className }: { name: IconName; className?: string }) {
     case 'refund':
       return (
         <svg viewBox="0 0 24 24" className={cn(common, className)} aria-hidden="true" fill="currentColor">
-          <path d="M12 2a10 10 0 100 20v-2a8 8 0 110-16V2Zm1 4h-2v6h4v-2h-2V6Z" />
+          <path d="M12 2a10 10 0 100 20v-2a8 8 0 110-16V2Zm3 11h-2.2a1.8 1.8 0 110-3.6H16V7h-2V5l-3 2 3 2v-1h-1.2a3 3 0 100 6H15v2l3-2-3-2v1Z" />
         </svg>
       )
     case 'stripe':
+      // Pictogramme “carte/stripe” générique (pas un logo officiel)
       return (
-        <svg viewBox="0 0 24 24" className={cn(common, className)} aria-hidden="true" fill="currentColor">
-          <path d="M4 6h16v12H4z" opacity=".15" /><path d="M7 10h5a2 2 0 110 4H9v2H7v-6Zm2 2v2h3a1 1 0 000-2H9Z" />
+        <svg viewBox="0 0 24 24" className={cn(common, className)} aria-hidden="true">
+          <rect x="3" y="5" width="18" height="14" rx="2" className="fill-current opacity-15" />
+          <rect x="3" y="8" width="18" height="3" className="fill-current opacity-60" />
+          <rect x="6" y="14" width="5" height="2" className="fill-current opacity-80" />
+          <rect x="13" y="14" width="5" height="2" className="fill-current opacity-40" />
         </svg>
       )
     case 'paypal':
+      // Pictogramme “wallet/ppi” générique (pas un logo officiel)
       return (
-        <svg viewBox="0 0 24 24" className={cn(common, className)} aria-hidden="true" fill="currentColor">
-          <path d="M6 18l1-6h6a4 4 0 000-8H8L7 10h6a2 2 0 010 4H9l-1 4H6Z" />
+        <svg viewBox="0 0 24 24" className={cn(common, className)} aria-hidden="true">
+          <path d="M7 4h8a5 5 0 010 10H9l-1 6H5L7 4Z" className="fill-current opacity-85" />
+          <path d="M9 8h6a2 2 0 010 4H9V8Z" className="fill-current opacity-40" />
         </svg>
       )
   }
@@ -110,16 +124,15 @@ function TrustBadges({
     pill:
       'bg-white/70 dark:bg-gray-800/60 backdrop-blur text-gray-900 dark:text-gray-100 rounded-full shadow-sm ring-1 ring-gray-200/70 dark:ring-gray-700/60 transition-all',
     subtle: 'bg-transparent text-gray-800 dark:text-gray-200',
-    premium:
-      [
-        'relative rounded-xl',
-        'bg-white/70 dark:bg-zinc-900/60 backdrop-blur',
-        'text-gray-900 dark:text-gray-100',
-        'shadow-md hover:shadow-lg',
-        'ring-1 ring-gray-200/70 dark:ring-gray-800/60',
-        'border border-white/30 dark:border-white/10',
-        'transition-all',
-      ].join(' '),
+    premium: [
+      'relative rounded-xl',
+      'bg-white/70 dark:bg-zinc-900/60 backdrop-blur',
+      'text-gray-900 dark:text-gray-100',
+      'shadow-md hover:shadow-lg',
+      'ring-1 ring-gray-200/70 dark:ring-gray-800/60',
+      'border border-white/30 dark:border-white/10',
+      'transition-all',
+    ].join(' '),
   }
 
   const items = useMemo(() => badges.map((b) => ({ ...b })), [badges])
@@ -134,7 +147,7 @@ function TrustBadges({
       </h2>
 
       <ul className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 px-4" role="list">
-        {items.map(({ emoji, icon, label, href, sr }, i) => {
+        {items.map(({ icon, label, href, sr }, i) => {
           const content = (
             <div className={cn(base, variants[variant])} aria-label={label}>
               {/* Anneau conique subtil pour le variant premium */}
@@ -145,14 +158,8 @@ function TrustBadges({
                 />
               )}
 
-              {/* Icône */}
-              {icon ? (
-                <Icon name={icon} className="opacity-90" />
-              ) : (
-                <span className="text-xl" aria-hidden="true">
-                  {emoji ?? '✅'}
-                </span>
-              )}
+              {/* Icône (bouclier par défaut si non spécifiée) */}
+              <Icon name={icon ?? 'shield'} className="opacity-90" />
 
               {/* Libellé + SR */}
               <span className="relative z-10">{label}</span>
@@ -162,7 +169,7 @@ function TrustBadges({
 
           return (
             <motion.li
-              key={label}
+              key={`${label}-${i}`}
               initial={prefersReduced ? false : { opacity: 0, y: 8 }}
               whileInView={prefersReduced ? undefined : { opacity: 1, y: 0 }}
               whileHover={prefersReduced ? undefined : { scale: 1.015 }}

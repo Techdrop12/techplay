@@ -1,6 +1,7 @@
+// src/components/ProductGrid.tsx
 'use client'
 
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, memo } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import ProductCard from '@/components/ProductCard'
 import ProductSkeleton from '@/components/ProductSkeleton'
@@ -35,7 +36,7 @@ function colsToClass(cols?: Cols) {
   return parts.join(' ')
 }
 
-export default function ProductGrid({
+function ProductGrid({
   products,
   emptyMessage,
   isLoading = false,
@@ -54,7 +55,9 @@ export default function ProductGrid({
   const loadingGateRef = useRef(false)
   const statusRef = useRef<HTMLParagraphElement | null>(null)
   const gridRef = useRef<HTMLDivElement | null>(null)
+  const prevLenRef = useRef<number>(0)
 
+  // Intersection observer pour le "load more" (auto)
   useEffect(() => {
     if (!observeMore || !hasMore || !onLoadMore || !sentinelRef.current) return
     const el = sentinelRef.current
@@ -64,8 +67,13 @@ export default function ProductGrid({
         const hit = entries.some((e) => e.isIntersecting)
         if (!hit || loadingGateRef.current) return
         loadingGateRef.current = true
-        try { onLoadMore() } finally {
-          setTimeout(() => { loadingGateRef.current = false }, 500)
+        try {
+          onLoadMore()
+        } finally {
+          // petit throttle pour éviter les rafales
+          window.setTimeout(() => {
+            loadingGateRef.current = false
+          }, 500)
         }
       },
       { rootMargin: '200px 0px 400px 0px', threshold: 0.01 }
@@ -87,7 +95,20 @@ export default function ProductGrid({
     return `${products.length} produit${products.length > 1 ? 's' : ''} affiché${products.length > 1 ? 's' : ''}.`
   }, [isLoading, isEmpty, products.length, emptyMessage])
 
-  // ✅ JSON-LD corrige les URLs
+  // Annonce SR quand de nouveaux items arrivent (scroll infini / bouton)
+  useEffect(() => {
+    const prev = prevLenRef.current
+    const curr = products?.length ?? 0
+    if (curr > prev && prev > 0 && statusRef.current) {
+      const diff = curr - prev
+      statusRef.current.textContent = `${diff} produit${diff > 1 ? 's' : ''} ajouté${diff > 1 ? 's' : ''}.`
+    } else if (prev === 0 && curr > 0 && statusRef.current) {
+      statusRef.current.textContent = countMsg
+    }
+    prevLenRef.current = curr
+  }, [products, countMsg])
+
+  // JSON-LD (ItemList) avec URLs corrigées
   const itemListJsonLd = useMemo(() => {
     if (!products?.length) return null
     const base = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
@@ -97,12 +118,13 @@ export default function ProductGrid({
       itemListElement: products.slice(0, 12).map((p, i) => ({
         '@type': 'ListItem',
         position: i + 1,
-        url: p?.slug ? `${base}/products/${p.slug}` : `${base}/products`, // ✅ fix
+        url: p?.slug ? `${base}/products/${p.slug}` : `${base}/products`,
         name: p?.title || 'Produit',
       })),
     }
   }, [products])
 
+  // Batch view_item_list (GA4) quand les cartes entrent dans le viewport
   const seenRef = useRef<Set<string>>(new Set())
   const batchRef = useRef<{ id: string; name: string; price?: number }[]>([])
   const flushTimeout = useRef<number | null>(null)
@@ -142,7 +164,8 @@ export default function ProductGrid({
         entries.forEach((e) => {
           if (!e.isIntersecting) return
           const id = e.target.getAttribute('data-product-id') || ''
-          const name = e.target.getAttribute('aria-label')?.replace(/^Produit : /, '') || ''
+          const name =
+            e.target.getAttribute('aria-label')?.replace(/^Produit : /, '') || ''
           if (!id || seenRef.current.has(id)) return
           seenRef.current.add(id)
           const prod = products.find((p) => String(p._id) === id || p.slug === id)
@@ -172,6 +195,7 @@ export default function ProductGrid({
 
   return (
     <>
+      {/* Live region pour lecteurs d’écran */}
       <p ref={statusRef} className="sr-only" role="status" aria-live="polite">
         {countMsg}
       </p>
@@ -188,10 +212,15 @@ export default function ProductGrid({
           id={id}
         >
           {products.map((product, i) => (
-            <motion.div key={String(product._id ?? product.slug ?? i)} layout={!prefersReducedMotion}>
+            <motion.div
+              key={String(product._id ?? product.slug ?? i)}
+              layout={!prefersReducedMotion}
+              role="listitem"
+            >
               <ProductCard
                 product={product}
                 showWishlistIcon={showWishlistIcon}
+                /** Boost LCP pour la première rangée */
                 priority={i < 4}
               />
             </motion.div>
@@ -214,6 +243,7 @@ export default function ProductGrid({
             disabled={isLoading}
             className="rounded-lg bg-accent text-white px-5 py-2 font-semibold shadow hover:bg-accent/90 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40 disabled:opacity-60"
             aria-label="Charger plus de produits"
+            data-gtm="grid_load_more"
           >
             {isLoading ? 'Chargement…' : 'Charger plus'}
           </button>
@@ -223,8 +253,13 @@ export default function ProductGrid({
       {observeMore && hasMore && <div ref={sentinelRef} className="h-1" aria-hidden="true" />}
 
       {itemListJsonLd && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+        />
       )}
     </>
   )
 }
+
+export default memo(ProductGrid)

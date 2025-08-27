@@ -6,6 +6,8 @@ import type { Product } from '@/types/product'
 import ProductCard from '@/components/ProductCard'
 import { cn } from '@/lib/utils'
 
+type SortKey = 'popular' | 'priceAsc' | 'priceDesc' | 'rating'
+
 interface BestProductsProps {
   products: Product[]
   showTitle?: boolean
@@ -13,7 +15,7 @@ interface BestProductsProps {
   limit?: number
   className?: string
   showControls?: boolean
-  initialSort?: 'popular' | 'priceAsc' | 'priceDesc' | 'rating'
+  initialSort?: SortKey
   autoLoadOnIntersect?: boolean
 }
 
@@ -74,13 +76,14 @@ export default function BestProducts({
   autoLoadOnIntersect = true,
 }: BestProductsProps) {
   const headingId = useId()
-  const subId = headingId + '-sub'
-  const gridId = headingId + '-grid'
-  const liveId = headingId + '-live'
+  const subId = `${headingId}-sub`
+  const gridId = `${headingId}-grid`
+  const liveId = `${headingId}-live`
 
   const [expanded, setExpanded] = useState(false)
   const [announce, setAnnounce] = useState<string>('')
-  const [sortBy, setSortBy] = useState<'popular' | 'priceAsc' | 'priceDesc' | 'rating'>(initialSort)
+
+  const [sortBy, setSortBy] = useState<SortKey>(initialSort ?? 'popular')
   const [filterPromo, setFilterPromo] = useState(false)
   const [filterStock, setFilterStock] = useState(false)
 
@@ -122,12 +125,14 @@ export default function BestProducts({
     return filteredSorted.slice(0, limit)
   }, [filteredSorted, limit, expanded])
 
+  // annonce SR quand on “voit plus”
   useEffect(() => {
     if (!expanded) return
     const remaining = Math.max(0, filteredSorted.length - (limit || 0))
-    if (remaining > 0) setAnnounce(remaining + ' produits supplémentaires affichés.')
+    if (remaining > 0) setAnnounce(`${remaining} produits supplémentaires affichés.`)
   }, [expanded, filteredSorted.length, limit])
 
+  // auto-load au scroll : sentinel présent dans le flux (h-px/opacity-0)
   useEffect(() => {
     if (!autoLoadOnIntersect || expanded) return
     const el = sentinelRef.current
@@ -165,6 +170,7 @@ export default function BestProducts({
       className={cn('max-w-6xl mx-auto px-4 py-10', className)}
       aria-labelledby={showTitle ? headingId : undefined}
       role="region"
+      style={{ contentVisibility: 'auto', containIntrinsicSize: '800px' } as any}
     >
       {showTitle && (
         <>
@@ -179,57 +185,77 @@ export default function BestProducts({
       )}
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <div className="text-xs text-token-text/70">
+        <div className="text-xs text-token-text/70" aria-live="polite">
           Affichage&nbsp;<span className="font-semibold">{visibleCount}</span>&nbsp;/&nbsp;<span>{totalCount}</span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => { setFilterPromo((v) => !v); pushDL('best_products_filter', { promo: !filterPromo }) }}
-            className={cn(
-              'rounded-full border px-3 py-1.5 text-xs font-semibold transition',
-              filterPromo ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent)/.12)] text-[hsl(var(--accent))]'
-                          : 'border-token-border bg-token-surface hover:shadow'
-            )}
-            aria-pressed={filterPromo}
-            aria-label="Filtrer: en promotion"
-          >
-            Promo
-          </button>
+        {showControls && (
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setFilterPromo((v) => {
+                  const nv = !v
+                  setAnnounce(`Filtre promotion ${nv ? 'activé' : 'désactivé'}.`)
+                  pushDL('best_products_filter', { promo: nv })
+                  return nv
+                })
+              }}
+              className={cn(
+                'rounded-full border px-3 py-1.5 text-xs font-semibold transition',
+                filterPromo ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent)/.12)] text-[hsl(var(--accent))]'
+                            : 'border-token-border bg-token-surface hover:shadow'
+              )}
+              aria-pressed={filterPromo}
+              aria-controls={gridId}
+              aria-label="Filtrer: en promotion"
+            >
+              Promo
+            </button>
 
-          <button
-            type="button"
-            onClick={() => { setFilterStock((v) => !v); pushDL('best_products_filter', { stock: !filterStock }) }}
-            className={cn(
-              'rounded-full border px-3 py-1.5 text-xs font-semibold transition',
-              filterStock ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent)/.12)] text-[hsl(var(--accent))]'
-                          : 'border-token-border bg-token-surface hover:shadow'
-            )}
-            aria-pressed={filterStock}
-            aria-label="Filtrer: en stock"
-          >
-            En stock
-          </button>
+            <button
+              type="button"
+              onClick={() => {
+                setFilterStock((v) => {
+                  const nv = !v
+                  setAnnounce(`Filtre en stock ${nv ? 'activé' : 'désactivé'}.`)
+                  pushDL('best_products_filter', { stock: nv })
+                  return nv
+                })
+              }}
+              className={cn(
+                'rounded-full border px-3 py-1.5 text-xs font-semibold transition',
+                filterStock ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent)/.12)] text-[hsl(var(--accent))]'
+                            : 'border-token-border bg-token-surface hover:shadow'
+              )}
+              aria-pressed={filterStock}
+              aria-controls={gridId}
+              aria-label="Filtrer: en stock"
+            >
+              En stock
+            </button>
 
-          <label className="sr-only" htmlFor={headingId + '-sort'}>Trier</label>
-          <select
-            id={headingId + '-sort'}
-            className="rounded-xl border border-token-border bg-token-surface px-3 py-1.5 text-xs font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
-            value={sortBy}
-            onChange={(e) => {
-              const v = e.target.value as BestProductsProps['initialSort']
-              setSortBy(v || 'popular')
-              pushDL('best_products_sort', { sort: v })
-            }}
-            aria-label="Trier les produits"
-          >
-            <option value="popular">Popularité</option>
-            <option value="priceAsc">Prix ↑</option>
-            <option value="priceDesc">Prix ↓</option>
-            <option value="rating">Note</option>
-          </select>
-        </div>
+            <label className="sr-only" htmlFor={headingId + '-sort'}>Trier</label>
+            <select
+              id={headingId + '-sort'}
+              className="rounded-xl border border-token-border bg-token-surface px-3 py-1.5 text-xs font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
+              value={sortBy}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                const v = (e.currentTarget.value as SortKey) || 'popular'
+                setSortBy(v)
+                setAnnounce(`Tri par ${v === 'popular' ? 'popularité' : v === 'priceAsc' ? 'prix croissant' : v === 'priceDesc' ? 'prix décroissant' : 'note'}.`)
+                pushDL('best_products_sort', { sort: v })
+              }}
+              aria-label="Trier les produits"
+              aria-controls={gridId}
+            >
+              <option value="popular">Popularité</option>
+              <option value="priceAsc">Prix ↑</option>
+              <option value="priceDesc">Prix ↓</option>
+              <option value="rating">Note</option>
+            </select>
+          </div>
+        )}
       </div>
 
       <motion.ul
@@ -241,7 +267,12 @@ export default function BestProducts({
         id={gridId}
       >
         {list.map((product, i) => {
-          const key = (product as any)?._id ?? (product as any)?.slug ?? (product as any)?.id ?? 'bp-' + i
+          const key =
+            (product as any)?._id ??
+            (product as any)?.slug ??
+            (product as any)?.id ??
+            `bp-${i}`
+
           return (
             <motion.li
               key={key}
@@ -253,15 +284,15 @@ export default function BestProducts({
             >
               <ProductCard
                 product={{
-                    ...product,
-                    title: (product as any).title ?? (product as any).name ?? 'Produit sans titre',
-                    image:
-                      (product as any).image ??
-                      (product as any).imageUrl ??
-                      (product as any).images?.[0] ??
-                      '/og-image.jpg',
+                  ...product,
+                  title: (product as any).title ?? (product as any).name ?? 'Produit sans titre',
+                  image:
+                    (product as any).image ??
+                    (product as any).imageUrl ??
+                    (product as any).images?.[0] ??
+                    '/og-image.jpg',
                 }}
-                /** Boost du LCP sur la 1ère rangée */
+                /** Boost LCP: priorité sur la 1ʳᵉ rangée (desktop 4 items) */
                 priority={i < 4}
               />
             </motion.li>
@@ -270,10 +301,10 @@ export default function BestProducts({
       </motion.ul>
 
       {!expanded && limit > 0 && totalCount > limit && (
-        <div className="mt-8 flex justify-center">
+        <div className="mt-8 flex flex-col items-center">
           <button
             type="button"
-            onClick={() => { setExpanded(true); pushDL('best_products_see_more_click') }}
+            onClick={() => { setExpanded(true); setAnnounce('Tous les produits sont affichés.'); pushDL('best_products_see_more_click') }}
             className="inline-flex items-center gap-2 rounded-full border border-token-border bg-token-surface px-5 py-2.5 text-sm font-semibold shadow-sm transition hover:shadow focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
             aria-controls={gridId}
             aria-expanded={expanded ? 'true' : 'false'}
@@ -284,7 +315,14 @@ export default function BestProducts({
             </svg>
           </button>
 
-          {autoLoadOnIntersect && <div ref={sentinelRef} className="sr-only" aria-hidden="true" />}
+          {/* Sentinel pour IntersectionObserver (présent dans le flux, invisible visuellement) */}
+          {autoLoadOnIntersect && (
+            <div
+              ref={sentinelRef}
+              className="h-px w-full opacity-0"
+              aria-hidden="true"
+            />
+          )}
         </div>
       )}
 

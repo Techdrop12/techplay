@@ -1,4 +1,3 @@
-// src/components/PricingBadge.tsx
 'use client'
 
 import * as React from 'react'
@@ -9,27 +8,17 @@ import { cn } from '@/lib/utils'
 type Numeric = number | string
 
 export interface PricingBadgeProps {
-  /** Prix actuel */
   amount?: Numeric
-  /** Alias compat (ancienne prop) */
   price?: Numeric
-  /** Prix d’origine pour calcul remise */
   original?: Numeric
-  /** Alias compat (ancienne prop) */
   oldPrice?: Numeric
-  /** Devise / locale passées à <Price/> */
   currency?: string
   locale?: string
-  /** Afficher l’étiquette -% */
   showDiscountLabel?: boolean
-  /** Afficher le prix barré (prop officielle) */
   showOriginal?: boolean
-  /** Alias compat: même chose que showOriginal */
   showOldPrice?: boolean
-  /** Notation compacte */
   compact?: boolean
   className?: string
-  /** Activer microdata si nécessaire (si parent Offer/Schema) */
   microdata?: boolean
 }
 
@@ -57,13 +46,10 @@ export default function PricingBadge({
   className,
   microdata,
 }: PricingBadgeProps) {
-  // Autorise amount/price et original/oldPrice (compat)
   const current = toNumber(amount ?? price) ?? 0
   const orig = toNumber(original ?? oldPrice)
   const hasDiscount = orig != null && orig > current
   const discount = hasDiscount ? Math.round(((orig - current) / orig) * 100) : null
-
-  // Alias: showOldPrice ≡ showOriginal (priorité à showOldPrice si fourni)
   const effectiveShowOriginal = showOldPrice ?? showOriginal ?? true
 
   return (
@@ -85,7 +71,6 @@ export default function PricingBadge({
         microdata={microdata}
         className="text-base sm:text-lg"
       />
-
       {hasDiscount && showDiscountLabel && (
         <motion.span
           initial={{ scale: 0.95, opacity: 0 }}

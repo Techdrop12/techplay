@@ -1,4 +1,4 @@
-// src/app/products/page.tsx
+// src/app/products/page.tsx — SEO/UX/Perf++
 import type { Metadata, ResolvingMetadata } from 'next'
 import Link from 'next/link'
 import { getProductsPage } from '@/lib/data'
@@ -11,6 +11,17 @@ const SITE = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com'
 
 type SortKey = 'price_asc' | 'price_desc' | 'rating' | 'new' | 'promo'
 type Query = { q?: string; sort?: string; min?: string; max?: string; page?: string; cat?: string }
+
+const SORT_VALUES: SortKey[] = ['price_asc', 'price_desc', 'rating', 'new', 'promo']
+const PAGE_SIZE = 24
+
+const toAbs = (u: string) => {
+  try {
+    return new URL(u).toString()
+  } catch {
+    return new URL(u.startsWith('/') ? u : `/${u}`, SITE).toString()
+  }
+}
 
 function buildQS(params: Query) {
   const sp = new URLSearchParams()
@@ -36,7 +47,6 @@ export async function generateMetadata(
   const max = searchParams?.max
   const cat = (searchParams?.cat ?? '').trim()
 
-  // ❌ plus de "– TechPlay" ici : le template global ajoutera " | TechPlay"
   const baseTitle = 'Tous les produits'
   const bits: string[] = []
   if (q) bits.push(`“${q}”`)
@@ -47,23 +57,30 @@ export async function generateMetadata(
   if (page > 1) bits.push(`page ${page}`)
 
   const title = bits.length ? `${baseTitle} | ${bits.join(' · ')}` : baseTitle
-  const description =
-    'Parcourez notre catalogue complet de produits TechPlay. Livraison rapide, innovation garantie.'
+  const description = 'Parcourez notre catalogue complet de produits TechPlay. Livraison rapide, innovation garantie.'
 
   const qs = buildQS({ q, sort, min, max, cat, page: String(page) })
   const url = `${SITE}/products${qs}`
-  const og = `${SITE}/api/og${qs}` // ✅ image OG dynamique (pense à corriger le nom de fichier de route si besoin)
+  const og = toAbs(`/api/og${qs}`) // ✅ image OG dynamique
 
   return {
     title,
     description,
-    alternates: { canonical: url },
+    alternates: {
+      canonical: url,
+      languages: {
+        'fr-FR': `${SITE}/fr/products${qs}`,
+        'en-US': `${SITE}/en/products${qs}`,
+        'x-default': url,
+      },
+    },
     openGraph: {
       title,
       description,
       type: 'website',
       url,
       images: [{ url: og, width: 1200, height: 630, alt: 'Catalogue TechPlay' }],
+      siteName: 'TechPlay',
     },
     twitter: {
       card: 'summary_large_image',
@@ -74,22 +91,25 @@ export async function generateMetadata(
   }
 }
 
-const SORT_VALUES: SortKey[] = ['price_asc', 'price_desc', 'rating', 'new', 'promo']
-const PAGE_SIZE = 24
-
 export default async function ProductsPage({ searchParams }: { searchParams?: Query }) {
   const q = (searchParams?.q ?? '').trim()
   const rawSort = (searchParams?.sort ?? 'new') as SortKey
   const sort: SortKey = SORT_VALUES.includes(rawSort) ? rawSort : 'new'
-  const min = Number.isFinite(Number(searchParams?.min)) ? Number(searchParams!.min) : undefined
-  const max = Number.isFinite(Number(searchParams?.max)) ? Number(searchParams!.max) : undefined
+
+  const minNum = Number(searchParams?.min)
+  const maxNum = Number(searchParams?.max)
+  const min = Number.isFinite(minNum) && minNum >= 0 ? minNum : undefined
+  const max = Number.isFinite(maxNum) && maxNum >= 0 ? maxNum : undefined
+
   const page = Math.max(1, Number(searchParams?.page ?? 1))
   const cat = (searchParams?.cat ?? '').trim() || null
 
+  const minGreaterThanMax = typeof min === 'number' && typeof max === 'number' && min > max
+
   const { items, pageCount, total, categoryCounts } = await getProductsPage({
     q,
-    min,
-    max,
+    min: minGreaterThanMax ? undefined : min,
+    max: minGreaterThanMax ? undefined : max,
     sort,
     page,
     pageSize: PAGE_SIZE,
@@ -99,11 +119,20 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Qu
   const hasPrev = page > 1
   const hasNext = page < pageCount
   const buildUrl = (nextPage: number) =>
-    `/products${buildQS({ q, sort, min: min?.toString(), max: max?.toString(), cat: cat || undefined, page: String(nextPage) })}`
+    `/products${buildQS({
+      q,
+      sort,
+      min: minGreaterThanMax ? undefined : min?.toString(),
+      max: minGreaterThanMax ? undefined : max?.toString(),
+      cat: cat || undefined,
+      page: String(nextPage),
+    })}`
 
-  const categories = Object.keys(categoryCounts || {}).sort((a, b) => categoryCounts[b] - categoryCounts[a])
+  const categories = Object.keys(categoryCounts || {}).sort(
+    (a, b) => categoryCounts[b] - categoryCounts[a]
+  )
 
-  // Breadcrumb JSON-LD léger
+  // Breadcrumb JSON-LD
   const breadcrumbLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -113,25 +142,60 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Qu
     ],
   }
 
+  // ItemList JSON-LD — top 24 visibles
+  const itemListLd =
+    Array.isArray(items) && items.length
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'ItemList',
+          itemListElement: items.slice(0, PAGE_SIZE).map((p: any, i: number) => ({
+            '@type': 'ListItem',
+            position: (page - 1) * PAGE_SIZE + (i + 1),
+            url: `${SITE}/products/${p?.slug ?? ''}`,
+            name: p?.title ?? 'Produit',
+          })),
+        }
+      : null
+
+  // Filtres actifs (chips)
+  const activeChips: Array<{ label: string; href: string }> = []
+  if (q) activeChips.push({ label: `Recherche : “${q}”`, href: buildUrl(1).replace(/(\?|&)q=[^&]*/,'$1').replace(/\?&/,'?').replace(/\?$/,'') })
+  if (cat) activeChips.push({ label: `Catégorie : ${cat}`, href: `/products${buildQS({ q, sort, min: min?.toString(), max: max?.toString(), page: '1' })}` })
+  if (typeof min === 'number') activeChips.push({ label: `Min ${min}€`, href: `/products${buildQS({ q, sort, max: max?.toString(), cat: cat || undefined, page: '1' })}` })
+  if (typeof max === 'number') activeChips.push({ label: `Max ${max}€`, href: `/products${buildQS({ q, sort, min: min?.toString(), cat: cat || undefined, page: '1' })}` })
+  if (sort !== 'new') activeChips.push({ label: `Tri : ${sort}`, href: `/products${buildQS({ q, min: min?.toString(), max: max?.toString(), cat: cat || undefined, page: '1' })}` })
+
   return (
-    <main id="main" className="max-w-7xl mx-auto px-4 pt-28 pb-16" role="main">
+    <main id="main" className="max-w-7xl mx-auto px-4 pt-28 pb-16" role="main" aria-describedby="result-count">
       <header className="text-center mb-8">
-        <h1 className="text-4xl font-extrabold tracking-tight text-brand dark:text-brand-light">Tous les produits</h1>
-        <p className="mt-2 text-muted-foreground">
+        <h1 className="text-4xl font-extrabold tracking-tight text-brand dark:text-brand-light">
+          Tous les produits
+        </h1>
+        <p id="result-count" className="mt-2 text-muted-foreground" aria-live="polite">
           {total} résultat{total > 1 ? 's' : ''}. Filtrez, triez et trouvez rapidement ce qu’il vous faut.
         </p>
+        {minGreaterThanMax && (
+          <p role="alert" className="mt-2 text-sm text-amber-600">
+            Astuce&nbsp;: le prix minimum est supérieur au prix maximum. Les bornes ont été ignorées.
+          </p>
+        )}
       </header>
 
-      {/* Barre de filtres SSR (pas d’état client requis) */}
-      <form method="GET" className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+      {/* Barre de filtres SSR */}
+      <form method="GET" className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3" aria-label="Filtres catalogue">
         <input
-          type="search" name="q" defaultValue={q} placeholder="Rechercher un produit…"
+          type="search"
+          name="q"
+          defaultValue={q}
+          placeholder="Rechercher un produit…"
           className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
           aria-label="Rechercher un produit"
+          enterKeyHint="search"
         />
 
         <select
-          name="sort" defaultValue={sort}
+          name="sort"
+          defaultValue={sort}
           className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
           aria-label="Trier les produits"
         >
@@ -157,27 +221,55 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Qu
         </select>
 
         <input
-          type="number" name="min" inputMode="numeric" defaultValue={min ?? ''} placeholder="Prix min (€)"
+          type="number"
+          name="min"
+          inputMode="numeric"
+          defaultValue={typeof min === 'number' ? String(min) : ''}
+          placeholder="Prix min (€)"
           className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-          aria-label="Prix minimum" min={0}
+          aria-label="Prix minimum"
+          min={0}
         />
         <div className="flex gap-2">
           <input
-            type="number" name="max" inputMode="numeric" defaultValue={max ?? ''} placeholder="Prix max (€)"
+            type="number"
+            name="max"
+            inputMode="numeric"
+            defaultValue={typeof max === 'number' ? String(max) : ''}
+            placeholder="Prix max (€)"
             className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-            aria-label="Prix maximum" min={0}
+            aria-label="Prix maximum"
+            min={0}
           />
           <button
             type="submit"
             className="shrink-0 rounded-md bg-accent text-white px-4 py-2 text-sm font-semibold hover:bg-accent/90 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40"
+            aria-label="Appliquer les filtres"
           >
             Filtrer
           </button>
         </div>
 
-        {(q || sort !== 'new' || min !== undefined || max !== undefined || cat || page > 1) && (
-          <div className="lg:col-span-5">
-            <Link href="/products" className="inline-block text-sm text-gray-600 dark:text-gray-400 hover:text-accent" aria-label="Réinitialiser les filtres">
+        {(q || sort !== 'new' || typeof min === 'number' || typeof max === 'number' || cat || page > 1) && (
+          <div className="lg:col-span-5 flex flex-wrap items-center gap-2 pt-1">
+            {/* Chips actifs */}
+            {activeChips.map((chip, i) => (
+              <Link
+                key={chip.label + i}
+                href={chip.href}
+                className="inline-flex items-center gap-1 rounded-full border border-gray-300 dark:border-gray-700 px-3 py-1 text-xs hover:bg-gray-50 dark:hover:bg-gray-800"
+                aria-label={`Retirer le filtre ${chip.label}`}
+              >
+                <span>{chip.label}</span>
+                <span aria-hidden>✕</span>
+              </Link>
+            ))}
+
+            <Link
+              href="/products"
+              className="ml-auto inline-block text-sm text-gray-600 dark:text-gray-400 hover:text-accent underline underline-offset-2"
+              aria-label="Réinitialiser les filtres"
+            >
               Réinitialiser les filtres
             </Link>
           </div>
@@ -188,20 +280,29 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Qu
 
       <nav aria-label="Pagination" className="mt-10 flex items-center justify-center gap-3 text-sm">
         {hasPrev ? (
-          <Link className="rounded-md border px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-800" href={buildUrl(page - 1)}>← Précédent</Link>
+          <Link className="rounded-md border px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-800" href={buildUrl(page - 1)} prefetch={false}>
+            ← Précédent
+          </Link>
         ) : (
           <span className="rounded-md border px-3 py-1.5 opacity-40">← Précédent</span>
         )}
-        <span className="px-2">Page <strong>{page}</strong> / {Math.max(1, pageCount)}</span>
+        <span className="px-2">
+          Page <strong>{page}</strong> / {Math.max(1, pageCount)}
+        </span>
         {hasNext ? (
-          <Link className="rounded-md border px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-800" href={buildUrl(page + 1)}>Suivant →</Link>
+          <Link className="rounded-md border px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-800" href={buildUrl(page + 1)} prefetch={false}>
+            Suivant →
+          </Link>
         ) : (
           <span className="rounded-md border px-3 py-1.5 opacity-40">Suivant →</span>
         )}
       </nav>
 
-      {/* Breadcrumb JSON-LD */}
+      {/* JSON-LD */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      {itemListLd ? (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
+      ) : null}
     </main>
   )
 }

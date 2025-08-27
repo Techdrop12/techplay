@@ -1,4 +1,4 @@
-// src/components/StickyCartSummary.tsx — FINAL (hooks order fixed + i18n safe + imports OK)
+// src/components/StickyCartSummary.tsx — PREMIUM (no emoji, SVG icons, a11y/SEO ok)
 'use client'
 
 import Link from '@/components/LocalizedLink'
@@ -23,6 +23,40 @@ type Props = {
   className?: string
 }
 
+/* ------------------------ Inline SVG icons (no emoji) ------------------------ */
+function IconLock({ size = 14, className = '' }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className={className}>
+      <path
+        fill="currentColor"
+        d="M17 9h-1V7a4 4 0 1 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-8-2a3 3 0 1 1 6 0v2H9V7Zm9 12H6v-8h10v8Zm-5-3a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z"
+      />
+    </svg>
+  )
+}
+function IconRocket({ size = 14, className = '' }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className={className}>
+      <path
+        fill="currentColor"
+        d="M14 3c3.31 0 6 2.69 6 6c0 1.66-.67 3.16-1.76 4.24l-.8.8l-2.12-2.12l.8-.8A3.98 3.98 0 0 0 18 9a4 4 0 0 0-4-4c-1.1 0-2.1.45-2.83 1.17l-.8.8L8.24 4.83l.8-.8A5.96 5.96 0 0 1 14 3ZM5.41 6.59 9 10.17L7.59 11.6l-2.83-.71l-.71-2.83l1.36-1.47Zm12.72 12.72L16.83 18L15.4 19.41l.71 2.83l2.83.71l1.47-1.36ZM10.17 15 6.59 18.59l-1.47 1.36l2.83.71l.71 2.83l1.36-1.47L14 13.83L10.17 15Zm6.54-9.71a1.5 1.5 0 1 1-2.12 2.12a1.5 1.5 0 0 1 2.12-2.12Z"
+      />
+    </svg>
+  )
+}
+function IconHeadset({ size = 14, className = '' }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className={className}>
+      <path
+        fill="currentColor"
+        d="M12 3a8 8 0 0 0-8 8v2a2 2 0 0 0 2 2h1v-5a5 5 0 1 1 10 0v5h1a2 2 0 0 0 2-2v-2a8 8 0 0 0-8-8ZM8 15H6a1 1 0 0 1-1-1v-1h3v2Zm11-2v1a1 1 0 0 1-1 1h-2v-2h3Zm-5 4h-2v1a2 2 0 0 1-2 2h-1v2h1a4 4 0 0 0 4-4v-1Z"
+      />
+    </svg>
+  )
+}
+
+/* --------------------------------------------------------------------------- */
+
 export default function StickyCartSummary({
   locale,
   cartHref,
@@ -37,7 +71,7 @@ export default function StickyCartSummary({
   const loc: AppLocale = locale ?? detectedLocale
   const prefersReduced = useReducedMotion()
 
-  // i18n (fallback si pas de provider)
+  // i18n (fallback si pas de provider) — sans emoji
   let t: any
   try {
     t = useTranslations('cart')
@@ -52,7 +86,7 @@ export default function StickyCartSummary({
         free_shipping: 'Livraison offerte',
         free_shipping_progress: 'Progression vers la livraison offerte',
         free_shipping_remaining: 'Plus que {amount} pour la livraison gratuite.',
-        free_shipping_unlocked: 'Bravo ! La livraison est offerte 🎉',
+        free_shipping_unlocked: 'Bravo ! La livraison est offerte.',
         view_cart: 'Voir le panier',
         checkout: 'Commander',
         secure_payment: 'Paiement sécurisé',
@@ -232,7 +266,7 @@ export default function StickyCartSummary({
                     ? tx('free_shipping_remaining', 'Plus que {amount} pour la livraison gratuite.', {
                         amount: formatPrice(remaining),
                       })
-                    : tx('free_shipping_unlocked', 'Bravo ! La livraison est offerte 🎉')}
+                    : tx('free_shipping_unlocked', 'Bravo ! La livraison est offerte.')}
                 </p>
               </div>
 
@@ -266,12 +300,21 @@ export default function StickyCartSummary({
                 </Link>
               </div>
 
-              {/* Trust line */}
+              {/* Trust line (no emoji) */}
               <div className="px-4 pb-3 -mt-1">
                 <ul className="flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
-                  <li className="flex items-center gap-1">✅ {tx('secure_payment', 'Paiement sécurisé')}</li>
-                  <li className="flex items-center gap-1">🚀 {tx('fast_shipping', '48h')}</li>
-                  <li className="flex items-center gap-1">💬 {tx('support', 'Support 7j/7')}</li>
+                  <li className="flex items-center gap-1.5">
+                    <IconLock className="text-gray-600 dark:text-gray-300" />
+                    <span>{tx('secure_payment', 'Paiement sécurisé')}</span>
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <IconRocket className="text-gray-600 dark:text-gray-300" />
+                    <span>{tx('fast_shipping', '48h')}</span>
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <IconHeadset className="text-gray-600 dark:text-gray-300" />
+                    <span>{tx('support', 'Support 7j/7')}</span>
+                  </li>
                 </ul>
               </div>
             </motion.div>

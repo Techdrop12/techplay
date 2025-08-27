@@ -1,6 +1,6 @@
-// src/app/page.tsx — Home ultra-premium (perf/a11y/SEO sans doublons) — FINAL
+// src/app/page.tsx — Home ULTIME++ (perf/a11y/SEO centralisé, sans doublons)
 import type { Metadata } from 'next'
-import { Suspense } from 'react'
+import { Suspense, type ComponentProps } from 'react'
 import dynamic from 'next/dynamic'
 
 import { getBestProducts, getRecommendedPacks } from '@/lib/data'
@@ -8,6 +8,7 @@ import type { Product, Pack } from '@/types/product'
 import TrustBadges from '@/components/TrustBadges'
 import ClientTrackingScript from '@/components/ClientTrackingScript'
 import Link from '@/components/LocalizedLink'
+import { generateMeta } from '@/lib/seo'
 
 const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'))
 const BestProducts = dynamic(() => import('@/components/BestProducts'), {
@@ -21,34 +22,20 @@ const FAQ = dynamic(() => import('@/components/FAQ'), {
 })
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://techplay.example.com'
-const OG_IMAGE = `${SITE_URL}/og-image.jpg`
 
-export const metadata: Metadata = {
-  // 🔒 On fixe un titre "brandé" sans suffixe via absolute
-  title: { absolute: 'TechPlay – Boutique high-tech & packs exclusifs' },
+// SEO: on génère tout via lib/seo puis on force un titre absolute (évite le suffixe du layout)
+const BASE_META = generateMeta({
+  title: 'TechPlay – Boutique high-tech & packs exclusifs',
   description:
     'Découvrez les meilleures offres et packs TechPlay, sélectionnées pour vous avec passion et innovation. Casques, souris, claviers, et accessoires gaming de qualité supérieure.',
-  keywords:
-    'TechPlay, boutique high-tech, gadgets innovants, accessoires gaming, packs exclusifs, technologie, électronique, audio, clavier, souris, casque, innovation',
-  openGraph: {
-    title: 'TechPlay – Boutique high-tech & packs exclusifs',
-    description:
-      'Découvrez les meilleures offres et packs TechPlay, sélectionnées pour vous avec passion et innovation.',
-    url: SITE_URL,
-    siteName: 'TechPlay',
-    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: 'TechPlay – Accueil' }],
-    locale: 'fr_FR',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'TechPlay – Boutique high-tech & packs exclusifs',
-    description:
-      'Découvrez les meilleures offres et packs TechPlay, sélectionnées pour vous avec passion et innovation.',
-    images: [OG_IMAGE],
-  },
-  alternates: { canonical: SITE_URL },
-  robots: { index: true, follow: true },
+  url: '/',
+  image: '/og-image.jpg',
+  type: 'website',
+  locale: 'fr_FR',
+})
+export const metadata: Metadata = {
+  ...BASE_META,
+  title: { absolute: 'TechPlay – Boutique high-tech & packs exclusifs' },
 }
 
 // ISR revalidation
@@ -76,18 +63,92 @@ function SectionHeader({
   )
 }
 
+/* ------------------- Icônes inline (remplace les emojis) ------------------- */
+function CatIcon({
+  name,
+  className = '',
+}: {
+  name: 'headphones' | 'keyboard' | 'mouse' | 'camera' | 'battery' | 'gift'
+  className?: string
+}) {
+  switch (name) {
+    case 'headphones':
+      return (
+        <svg className={className} viewBox="0 0 24 24" width={28} height={28} aria-hidden="true">
+          <path
+            fill="currentColor"
+            d="M12 3a8 8 0 0 0-8 8v7a3 3 0 0 0 3 3h1v-8H7a1 1 0 0 0-1 1v6a2 2 0 1 1 0-4V11a6 6 0 1 1 12 0v5a2 2 0 0 1 0 4v-6a1 1 0 0 0-1-1h-1v8h1a3 3 0 0 0 3-3v-7a8 8 0 0 0-8-8Z"
+          />
+        </svg>
+      )
+    case 'keyboard':
+      return (
+        <svg className={className} viewBox="0 0 24 24" width={28} height={28} aria-hidden="true">
+          <path
+            fill="currentColor"
+            d="M4 6h16a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Zm2 3h2v2H6V9Zm3 0h2v2H9V9Zm3 0h2v2h-2V9Zm3 0h2v2h-2V9ZM6 12h2v2H6v-2Zm3 0h6v2H9v-2Zm7 0h2v2h-2v-2Z"
+          />
+        </svg>
+      )
+    case 'mouse':
+      return (
+        <svg className={className} viewBox="0 0 24 24" width={28} height={28} aria-hidden="true">
+          <path
+            fill="currentColor"
+            d="M12 2a6 6 0 0 1 6 6v8a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8a6 6 0 0 1 6-6Zm0 2a4 4 0 0 0-4 4h4V4Zm0 0v4h4a4 4 0 0 0-4-4Z"
+          />
+        </svg>
+      )
+    case 'camera':
+      return (
+        <svg className={className} viewBox="0 0 24 24" width={28} height={28} aria-hidden="true">
+          <path
+            fill="currentColor"
+            d="M9 4h6l1 2h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3l1-2Zm3 4a6 6 0 1 0 .001 12.001A6 6 0 0 0 12 8Zm0 2a4 4 0 1 1-.001 8.001A4 4 0 0 1 12 10Z"
+          />
+        </svg>
+      )
+    case 'battery':
+      return (
+        <svg className={className} viewBox="0 0 24 24" width={28} height={28} aria-hidden="true">
+          <path
+            fill="currentColor"
+            d="M3 8a3 3 0 0 1 3-3h11a3 3 0 0 1 3 3v1h1v6h-1v1a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V8Zm3-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1H6Z"
+          />
+        </svg>
+      )
+    case 'gift':
+      return (
+        <svg className={className} viewBox="0 0 24 24" width={28} height={28} aria-hidden="true">
+          <path
+            fill="currentColor"
+            d="M20 7h-2.18A3 3 0 1 0 12 5a3 3 0 1 0-5.82 2H4a1 1 0 0 0-1 1v3h9V7h2v4h9V8a1 1 0 0 0-1-1ZM7 5a1 1 0 1 1 2 0 1 1 0 0 1-2 0Zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM3 12v7a2 2 0 0 0 2 2h7v-9H3Zm11 0v9h7a2 2 0 0 0 2-2v-7h-9Z"
+          />
+        </svg>
+      )
+  }
+  return null
+}
+
+type CatName = ComponentProps<typeof CatIcon>['name']
+
 function FeaturedCategories() {
-  const CATS: Array<{ label: string; href: string; emoji: string; desc: string }> = [
-    { label: 'Casques',   href: '/products?cat=casques',   emoji: '🎧', desc: 'Audio immersif' },
-    { label: 'Claviers',  href: '/products?cat=claviers',  emoji: '⌨️', desc: 'Réactivité ultime' },
-    { label: 'Souris',    href: '/products?cat=souris',    emoji: '🖱️', desc: 'Précision chirurgicale' },
-    { label: 'Webcams',   href: '/products?cat=webcams',   emoji: '📷', desc: 'Visio en HD' },
-    { label: 'Batteries', href: '/products?cat=batteries', emoji: '🔋', desc: 'Autonomie boost' },
-    { label: 'Packs',     href: '/products/packs',         emoji: '🎁', desc: 'Offres combinées' },
+  const CATS: ReadonlyArray<{ label: string; href: string; icon: CatName; desc: string }> = [
+    { label: 'Casques',   href: '/products?cat=casques',   icon: 'headphones', desc: 'Audio immersif' },
+    { label: 'Claviers',  href: '/products?cat=claviers',  icon: 'keyboard',   desc: 'Réactivité ultime' },
+    { label: 'Souris',    href: '/products?cat=souris',    icon: 'mouse',      desc: 'Précision chirurgicale' },
+    { label: 'Webcams',   href: '/products?cat=webcams',   icon: 'camera',     desc: 'Visio en HD' },
+    { label: 'Batteries', href: '/products?cat=batteries', icon: 'battery',    desc: 'Autonomie boost' },
+    { label: 'Packs',     href: '/products/packs',         icon: 'gift',       desc: 'Offres combinées' },
   ]
   return (
-    <section id="categories" aria-label="Catégories vedettes" className="motion-section">
-      <SectionHeader kicker="Explorer" title="Catégories incontournables" sub="Des sélections pointues pour aller droit au but." />
+    <section id="categories" aria-labelledby="cats-title" className="motion-section">
+      <SectionHeader
+        kicker="Explorer"
+        title="Catégories incontournables"
+        sub="Des sélections pointues pour aller droit au but."
+      />
+      <h3 id="cats-title" className="sr-only">Catégories vedettes</h3>
       <ul role="list" className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-6">
         {CATS.map((c) => (
           <li key={c.href}>
@@ -99,7 +160,12 @@ function FeaturedCategories() {
               data-cat={c.label}
               aria-label={`Voir la catégorie ${c.label} — ${c.desc}`}
             >
-              <span role="img" aria-hidden className="text-3xl sm:text-4xl">{c.emoji}</span>
+              <span
+                aria-hidden="true"
+                className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent)/.10)] text-[hsl(var(--accent))]"
+              >
+                <CatIcon name={c.icon} />
+              </span>
               <div className="mt-3 font-semibold">{c.label}</div>
               <div className="text-xs text-token-text/60">{c.desc}</div>
               <div className="mt-3 text-xs font-semibold text-[hsl(var(--accent))] opacity-0 transition group-hover:opacity-100">
@@ -203,7 +269,7 @@ export default async function HomePage() {
     // soft-fail : skeletons
   }
 
-  // JSON-LD ItemList (uniquement ici ; WebSite est injecté globalement dans le layout)
+  // JSON-LD ItemList (uniquement ici ; WebSite/Organization sont dans le layout)
   const itemListJsonLd =
     Array.isArray(bestProducts) && bestProducts.length > 0
       ? {
@@ -277,7 +343,11 @@ export default async function HomePage() {
         <Testimonials />
         <SplitCTA />
 
-        <section aria-label="Questions fréquentes de nos clients" className="motion-section" style={{ contentVisibility: 'auto', containIntrinsicSize: '500px' } as any}>
+        <section
+          aria-label="Questions fréquentes de nos clients"
+          className="motion-section"
+          style={{ contentVisibility: 'auto', containIntrinsicSize: '500px' } as any}
+        >
           <SectionHeader kicker="FAQ" title="Questions fréquentes" />
           <div className="mt-8">
             <Suspense fallback={<SectionSkeleton title="Questions fréquentes" />}>

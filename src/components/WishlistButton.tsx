@@ -1,7 +1,7 @@
-// src/components/WishlistButton.tsx — premium (hook-based, no emoji)
+// src/components/WishlistButton.tsx — premium (hook-based, no emoji) — REVISED
 'use client'
 
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState, useEffect } from 'react'
 import { Heart, HeartCrack, AlertTriangle } from 'lucide-react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { toast } from 'react-hot-toast'
@@ -45,6 +45,7 @@ export default function WishlistButton({
   const btnRef = useRef<HTMLButtonElement | null>(null)
   const [rippler, setRippler] = useState(0)
   const [shake, setShake] = useState(false)
+  const [sr, setSr] = useState('')
 
   const { has, add, remove, count } = useWishlist()
 
@@ -57,49 +58,68 @@ export default function WishlistButton({
 
   const baseFloating =
     'absolute top-2 right-2 rounded-full bg-white/90 dark:bg-zinc-800/90 hover:bg-white dark:hover:bg-zinc-700 shadow ' +
-    'focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 ' +
+    'focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 ' +
     'focus-visible:ring-offset-white dark:focus-visible:ring-offset-black'
   const baseInline =
     'inline-flex items-center justify-center rounded-full text-red-600 hover:text-red-700 transition ' +
-    'focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]'
+    'focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent))]'
+
+  useEffect(() => {
+    if (!sr) return
+    const id = window.setTimeout(() => setSr(''), 1600)
+    return () => window.clearTimeout(id)
+  }, [sr])
 
   const onToggle = () => {
     if (!valid || disabled) return
     try { navigator.vibrate?.(8) } catch {}
 
+    const title = String(product?.title ?? 'Produit')
+    const price = Number(product?.price) || 0
+
     if (isWishlisted) {
       remove(pid)
-      toast('Retiré de la wishlist', { icon: <HeartCrack size={18} className="text-gray-600" /> })
+      setSr(`${title} retiré de la wishlist`)
+      toast('Retiré de la wishlist', {
+        icon: <HeartCrack size={18} className="text-gray-600" />,
+        style: { borderRadius: '10px', background: '#111827', color: '#fff' },
+      })
       try { logEvent({ action: 'wishlist_remove', category: 'wishlist', label: `product_${pid}`, value: 1 }) } catch {}
       return
     }
 
     if (count >= WISHLIST_LIMIT) {
       setShake(true); setTimeout(() => setShake(false), 420)
-      toast.error('Limite de wishlist atteinte', { icon: <AlertTriangle size={18} className="text-amber-500" /> })
+      setSr('Limite de wishlist atteinte')
+      toast.error('Limite de wishlist atteinte', {
+        icon: <AlertTriangle size={18} className="text-amber-500" />,
+      })
       return
     }
 
     const canonical = { ...product, id: pid }
     add(canonical as any)
-    toast.success('Ajouté à la wishlist', { icon: <Heart size={18} className="text-red-500" /> })
+    setSr(`${title} ajouté à la wishlist`)
+    toast.success('Ajouté à la wishlist', {
+      icon: <Heart size={18} className="text-red-500" />,
+      style: { borderRadius: '10px', background: '#111827', color: '#fff' },
+    })
     setRippler((k) => k + 1)
 
-    try {
-      logEvent({ action: 'wishlist_add', category: 'wishlist', label: `product_${pid}`, value: 1 })
-    } catch {}
+    try { logEvent({ action: 'wishlist_add', category: 'wishlist', label: `product_${pid}`, value: 1 }) } catch {}
     try {
       trackAddToWishlist?.({
         currency: 'EUR',
-        value: Number(product?.price) || 0,
-        items: [{ item_id: pid, item_name: String(product?.title ?? ''), price: Number(product?.price) || 0, quantity: 1 }],
+        value: price,
+        items: [{ item_id: pid, item_name: title, price, quantity: 1 }],
       })
     } catch {}
   }
 
   return (
     <>
-      <span className="sr-only" role="status" aria-live="polite" />
+      {/* SR live for a11y */}
+      <span className="sr-only" role="status" aria-live="polite">{sr}</span>
 
       <motion.button
         ref={btnRef}

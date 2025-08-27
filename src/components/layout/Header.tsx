@@ -1,4 +1,4 @@
-// src/components/layout/Header.tsx — Logo → Accueil garanti + icônes premium + a11y/perf — FINAL
+// src/components/layout/Header.tsx — ULTIME++ (i18n switch, mega-menu a11y, perf/UX/a11y)
 'use client'
 
 import NextLink from 'next/link' // logo
@@ -32,7 +32,6 @@ const LINKS: NavLink[] = [
 
 const SCROLL_HIDE_OFFSET = 80
 const HOVER_PREFETCH_DELAY = 120
-
 const SEARCH_TRENDS = [
   'écouteurs bluetooth',
   'casque gaming',
@@ -55,6 +54,27 @@ const ActionBadge = ({ children, className }: { children: React.ReactNode; class
     {children}
   </span>
 )
+
+/** Mini sélecteur de langue (local, pour éviter dépendances) */
+function LocaleSwitch({ pathname }: { pathname: string }) {
+  const locale = getCurrentLocale(pathname)
+  const other = locale === 'fr' ? 'en' : 'fr'
+  const to = localizePath(pathname, other as any)
+
+  return (
+    <Link
+      href={to}
+      prefetch={false}
+      className="inline-flex items-center gap-1 rounded-full border border-token-border bg-token-surface/60 px-2.5 py-1.5 text-xs font-semibold hover:bg-token-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.35)]"
+      aria-label={other === 'en' ? 'Switch language to English' : 'Basculer la langue en Français'}
+      data-gtm="header_lang_switch"
+      title={other === 'en' ? 'English' : 'Français'}
+    >
+      <span aria-hidden>🌐</span>
+      <span className="uppercase">{other}</span>
+    </Link>
+  )
+}
 
 export default function Header() {
   const pathname = usePathname() || '/'
@@ -90,6 +110,7 @@ export default function Header() {
   const prefetchTimers = useRef<Map<string, number>>(new Map())
   const searchRef = useRef<HTMLInputElement | null>(null)
   const [placeholder, setPlaceholder] = useState(SEARCH_TRENDS[0])
+  const saveData = useRef<boolean>(false)
 
   // mega menu
   const [catOpen, setCatOpen] = useState(false)
@@ -141,6 +162,14 @@ export default function Header() {
     }
     mq?.addEventListener?.('change', onChange)
     return () => mq?.removeEventListener?.('change', onChange)
+  }, [])
+
+  useEffect(() => {
+    // Détecte Data Saver pour éviter les prefetch agressifs
+    try {
+      const conn = (navigator as any)?.connection
+      saveData.current = !!conn?.saveData
+    } catch {}
   }, [])
 
   useEffect(() => {
@@ -204,6 +233,7 @@ export default function Header() {
   }
 
   const prefetchViaLink = (href: string) => {
+    if (saveData.current) return
     try {
       router.prefetch?.(href)
       const el = document.createElement('link')
@@ -215,6 +245,7 @@ export default function Header() {
   }
 
   const smartPrefetchStart = (href: string) => {
+    if (saveData.current) return
     const target = L(href)
     if (!target || isActive(href)) return
     if (prefetchTimers.current.has(target)) return
@@ -466,9 +497,10 @@ export default function Header() {
           })}
         </nav>
 
-        {/* Actions droites — badges premium */}
+        {/* Actions droites */}
         <div className="hidden items-center gap-2 sm:gap-3 md:flex">
           <ThemeToggle size="sm" />
+          <LocaleSwitch pathname={pathname} />
 
           {/* Offres compact */}
           <Link
@@ -524,7 +556,7 @@ export default function Header() {
             {wishlistCount > 0 && (
               <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
                 <span className="rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm">
-                  {wishlistCount}
+                  <span className="sr-only">Articles en wishlist : </span>{wishlistCount}
                 </span>
               </div>
             )}
@@ -549,7 +581,7 @@ export default function Header() {
             {cartCount > 0 && (
               <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
                 <span className="animate-[pulse_2s_ease-in-out_infinite] rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm">
-                  {cartCount}
+                  <span className="sr-only">Articles au panier : </span>{cartCount}
                 </span>
               </div>
             )}

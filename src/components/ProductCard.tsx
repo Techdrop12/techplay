@@ -1,4 +1,4 @@
-// src/components/ProductCard.tsx — ULTIME+++ (a11y/SEO/Perf max + LCP)
+// src/components/ProductCard.tsx — ULTIME+++ (a11y/SEO/Perf max + LCP) — PATCH
 'use client'
 
 import {
@@ -6,11 +6,12 @@ import {
   useMemo,
   useRef,
   useState,
-  type MouseEvent,
+  type MouseEvent as ReactMouseEvent,
   useCallback,
 } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { usePathname } from 'next/navigation'
 import { motion, useReducedMotion } from 'framer-motion'
 import { cn, formatPrice } from '@/lib/utils'
 import WishlistButton from '@/components/WishlistButton'
@@ -69,6 +70,12 @@ function Stars({ rating, count }: { rating?: number; count?: number }) {
 const toAbs = (u?: string) =>
   !u ? '' : u.startsWith('http') ? u : (typeof window !== 'undefined' ? window.location.origin + u : u)
 
+/** Cast “safe number” (accepte string/number) */
+const toNum = (v: unknown): number | undefined => {
+  const n = typeof v === 'number' ? v : Number(v)
+  return Number.isFinite(n) ? n : undefined
+}
+
 export default function ProductCard({
   product,
   priority = false,
@@ -80,9 +87,9 @@ export default function ProductCard({
     _id = '',
     slug,
     title = 'Produit',
-    price = 0,
-    oldPrice,
-    image = '/placeholder.png',
+    price: priceRaw = 0,
+    oldPrice: oldPriceRaw,
+    image = '/og-image.jpg', // fallback unifié au site
     images,
     rating,
     isNew,
@@ -90,6 +97,10 @@ export default function ProductCard({
     stock,
     brand,
   } = product ?? {}
+
+  // Normalisation prix (tolère string)
+  const price = Math.max(0, toNum(priceRaw) ?? 0)
+  const oldPrice = toNum(oldPriceRaw)
 
   // Champs tolérants
   const x = product as any
@@ -117,7 +128,7 @@ export default function ProductCard({
   // Images
   const mainImage = useMemo(() => {
     const first = Array.isArray(images) && images.length ? images[0] : image
-    return imgError ? '/placeholder.png' : (first || '/placeholder.png')
+    return imgError ? '/og-image.jpg' : (first || '/og-image.jpg')
   }, [images, image, imgError])
   const hoverImage = useMemo(() => {
     const second = Array.isArray(images) && images.length > 1 ? images[1] : undefined
@@ -125,13 +136,13 @@ export default function ProductCard({
   }, [images])
 
   // Prix, remises, stock
-  const discount = useMemo(
-    () =>
-      typeof oldPrice === 'number' && oldPrice > price
-        ? Math.round(((oldPrice - price) / oldPrice) * 100)
-        : null,
-    [oldPrice, price]
-  )
+  const discount = useMemo(() => {
+    if (typeof oldPrice === 'number' && oldPrice > price) {
+      return Math.round(((oldPrice - price) / oldPrice) * 100)
+    }
+    return null
+  }, [oldPrice, price])
+
   const savingsEuro = useMemo(
     () => (typeof oldPrice === 'number' && oldPrice > price ? Math.max(0, oldPrice - price) : null),
     [oldPrice, price]
@@ -139,14 +150,15 @@ export default function ProductCard({
 
   const hasRating = typeof rating === 'number' && !Number.isNaN(rating)
 
-  // i18n — URL localisée
-  const locale = getCurrentLocale()
+  // i18n — URL localisée (depuis le pathname courant)
+  const pathname = usePathname() || '/'
+  const locale = getCurrentLocale(pathname)
   const productUrl = useMemo(
     () => (slug ? localizePath('/products/' + slug, locale) : '#'),
     [slug, locale]
   )
 
-  const priceContent = useMemo(() => Math.max(0, Number(price || 0)).toFixed(2), [price])
+  const priceContent = useMemo(() => price.toFixed(2), [price])
   const availability =
     typeof stock === 'number'
       ? stock > 0
@@ -189,7 +201,7 @@ export default function ProductCard({
   }, [_id, sku, title, price])
 
   /* Click tracking + safety no-slug */
-  const handleClick = useCallback((e?: React.MouseEvent) => {
+  const handleClick = useCallback((e?: ReactMouseEvent) => {
     if (!slug) { if (e) e.preventDefault() }
     try {
       logEvent({ action: 'product_card_click', category: 'engagement', label: title, value: price })
@@ -200,7 +212,7 @@ export default function ProductCard({
   }, [_id, sku, slug, title, price])
 
   /* Tilt 3D */
-  const onMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+  const onMouseMove = (e: ReactMouseEvent<HTMLDivElement>) => {
     if (prefersReducedMotion) return
     try {
       if (window.matchMedia && !window.matchMedia('(hover:hover)').matches) return

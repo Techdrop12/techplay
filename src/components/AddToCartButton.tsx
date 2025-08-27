@@ -114,6 +114,32 @@ function flyTo(el: HTMLElement, target: HTMLElement, prefersReduced: boolean) {
   dot.animate(keyframes, { duration, easing: prefersReduced ? 'linear' : 'cubic-bezier(.2,.8,.2,1)' }).onfinish = () => dot.remove()
 }
 
+/* ---------- Inline icons (modern, no emoji) ---------- */
+const Spinner = () => (
+  <svg className="animate-spin -ml-0.5 mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.25" strokeWidth="4" fill="none" />
+    <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" fill="none" />
+  </svg>
+)
+
+const CartIcon = ({ className = '' }: { className?: string }) => (
+  <svg className={className} width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      fill="currentColor"
+      d="M7 18a2 2 0 1 0 0 4a2 2 0 0 0 0-4M6.2 6l.63 3H20a1 1 0 0 1 .98 1.2l-1.2 6A2 2 0 0 1 17.83 16H9a2 2 0 0 1-1.96-1.6L5 4H3a1 1 0 0 1 0-2h2.72a1 1 0 0 1 .98.8L7 6z"
+    />
+  </svg>
+)
+
+const CheckIcon = ({ className = '' }: { className?: string }) => (
+  <svg className={className} width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      fill="currentColor"
+      d="M9.55 16.6L5.3 12.35l1.4-1.4l2.85 2.85L17.3 6.95l1.4 1.4z"
+    />
+  </svg>
+)
+
 export default function AddToCartButton({
   product,
   onAdd,
@@ -136,7 +162,7 @@ export default function AddToCartButton({
   afterAddFocus = 'none',
 
   pendingText = 'Ajout en cours…',
-  successText = 'Produit ajouté au panier 🎉',
+  successText = 'Produit ajouté au panier',
   idleText,
   debounceMs = 350,
   ariaLabel,
@@ -177,21 +203,6 @@ export default function AddToCartButton({
     [variant]
   )
 
-  const Spinner = () => (
-    <svg className="animate-spin -ml-0.5 mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.25" strokeWidth="4" fill="none" />
-      <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" fill="none" />
-    </svg>
-  )
-  const CartIcon = ({ className = '' }: { className?: string }) => (
-    <svg className={className} width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        fill="currentColor"
-        d="M7 18a2 2 0 1 0 0 4a2 2 0 0 0 0-4M6.2 6l.63 3H20a1 1 0 0 1 .98 1.2l-1.2 6A2 2 0 0 1 17.83 16H9a2 2 0 0 1-1.96-1.6L5 4H3a1 1 0 0 1 0-2h2.72a1 1 0 0 1 .98.8L7 6z"
-      />
-    </svg>
-  )
-
   const doDataLayerPush = useCallback(
     (detail: Record<string, unknown>) => {
       if (disableDataLayer || !isClient) return
@@ -201,7 +212,7 @@ export default function AddToCartButton({
           event: 'add_to_cart',
           ecommerce: {
             currency: 'EUR',
-            value: detail.value,
+            value: (detail as any).value,
             items: [
               {
                 item_id: detail.id,
@@ -402,8 +413,9 @@ export default function AddToCartButton({
         >
           <span id={labelId} className="inline-flex items-center gap-2">
             {loading && <Spinner />}
-            {!loading && withIcon && <CartIcon className="-ml-0.5" />}
-            {loading ? pendingText : added ? 'Ajouté ✅' : idleLabel}
+            {!loading && withIcon && !added && <CartIcon className="-ml-0.5" />}
+            {!loading && added && <CheckIcon className="-ml-0.5 text-emerald-400" />}
+            {loading ? pendingText : added ? 'Ajouté' : idleLabel}
           </span>
         </Button>
       </motion.div>

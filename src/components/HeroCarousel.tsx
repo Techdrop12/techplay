@@ -1,4 +1,4 @@
-// src/components/HeroCarousel.tsx — ULTIME+++ (LCP/a11y tuned + premium play/pause)
+// src/components/HeroCarousel.tsx — ULTIME++++ (LCP, i18n CTA, a11y clean, perf polish)
 'use client'
 
 import {
@@ -11,7 +11,8 @@ import {
   type SyntheticEvent,
 } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import Link from '@/components/LocalizedLink'
 import {
   AnimatePresence,
   motion,
@@ -20,6 +21,7 @@ import {
   useTransform,
 } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 import '@/styles/hero-carousel.css' // ← styles overlay/fx
 
 /* ------------------------ Premium inline icons ------------------------ */
@@ -85,7 +87,7 @@ const DEFAULT_SLIDES: ReadonlyArray<Slide> = [
     alt: 'Casques gaming — immersion totale',
     text: 'Casques Gaming — Immersion totale',
     ctaLabel: 'Découvrir',
-    ctaLink: '/products?cat=casques', // ← FR
+    ctaLink: '/products?cat=casques', // FR
     badge: 'Nouveautés',
   },
   {
@@ -95,7 +97,7 @@ const DEFAULT_SLIDES: ReadonlyArray<Slide> = [
     alt: 'Souris RGB — précision & style',
     text: 'Souris RGB — Précision & Style',
     ctaLabel: 'Explorer',
-    ctaLink: '/products?cat=souris', // ← FR
+    ctaLink: '/products?cat=souris', // FR
   },
   {
     id: 3,
@@ -104,7 +106,7 @@ const DEFAULT_SLIDES: ReadonlyArray<Slide> = [
     alt: 'Claviers mécaniques — réactivité ultime',
     text: 'Claviers Mécaniques — Réactivité ultime',
     ctaLabel: 'Voir plus',
-    ctaLink: '/products?cat=claviers', // ← FR
+    ctaLink: '/products?cat=claviers', // FR
   },
 ] as const
 
@@ -147,6 +149,9 @@ export default function HeroCarousel({
   swipeThreshold = 50,
   onSlideChange,
 }: HeroCarouselProps) {
+  const pathname = usePathname() || '/'
+  const locale = getCurrentLocale(pathname)
+
   const total = Math.max(0, slides.length)
   const [index, setIndex] = useState(0)
   const [isPaused, setPaused] = useState(false)
@@ -204,7 +209,7 @@ export default function HeroCarousel({
 
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ['start start', 'end start'] })
   const y = useTransform(scrollYProgress, [0, 1], [0, parallaxPx])
-  const parallaxStyle = parallaxPx > 0 ? { y } : undefined
+  const parallaxStyle = !prefersReducedMotion && parallaxPx > 0 ? { y } : undefined
 
   const clearTimer = () => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null } }
   const next = useCallback(() => { setIndex((i) => (total ? (i + 1) % total : 0)); pushDL('hero_next', { index: index + 1 }) }, [total, index])
@@ -238,7 +243,7 @@ export default function HeroCarousel({
     return () => io.disconnect()
   }, [pauseWhenHidden, pause, resume])
 
-  // Warm cache of next/prev images (helps smoothness)
+  // Warm cache of next/prev images (desktop + mobile)
   useEffect(() => {
     if (typeof window === 'undefined' || total <= 1) return
     const nextIdx = (index + 1) % total
@@ -246,6 +251,8 @@ export default function HeroCarousel({
     const urls = [
       slides[nextIdx]?.imageDesktop || slides[nextIdx]?.image || slides[nextIdx]?.poster,
       slides[prevIdx]?.imageDesktop || slides[prevIdx]?.image || slides[prevIdx]?.poster,
+      slides[nextIdx]?.imageMobile,
+      slides[prevIdx]?.imageMobile,
     ].filter(Boolean) as string[]
     urls.forEach((src) => { const img = new window.Image(); img.src = src })
   }, [index, slides, total])
@@ -279,9 +286,10 @@ export default function HeroCarousel({
 
   if (total === 0) return null
 
-  const safeCtaHref = (href?: string) => (href ? href : '/products')
+  // i18n: CTA localisé via i18n-routing
+  const localizedHref = (href?: string) => localizePath(href || '/products', locale)
+
   const slideAria = index + 1 + ' / ' + total + (current?.alt ? ' — ' + current.alt : '')
-  const ctaAria = (current?.ctaLabel ? current.ctaLabel : '') + (current?.alt ? ' — ' + current.alt : '')
 
   const desktopSrc = current?.imageDesktop || current?.image || current?.poster || '/og-image.jpg'
   const mobileSrc = current?.imageMobile || current?.imageDesktop || current?.image || current?.poster || '/og-image.jpg'
@@ -290,7 +298,8 @@ export default function HeroCarousel({
     <section
       ref={containerRef}
       className={cn(
-        'relative h：[60vh] sm:h-[72vh] lg:h-[88vh] w-full overflow-hidden rounded-none sm:rounded-3xl shadow-2xl select-none',
+        // fix: la classe Tailwind correcte est h-[60vh] (il y avait un caractère pleine largeur)
+        'relative h-[60vh] sm:h-[72vh] lg:h-[88vh] w-full overflow-hidden rounded-none sm:rounded-3xl shadow-2xl select-none',
         'bg-token-surface/60 will-change-transform touch-pan-y',
         className
       )}
@@ -355,9 +364,10 @@ export default function HeroCarousel({
               </video>
             ) : (
               <>
+                {/* a11y: images décoratives → alt="" pour éviter la double lecture (le slide a déjà aria-label) */}
                 <Image
                   src={mobileSrc}
-                  alt={current?.alt || ''}
+                  alt=""
                   fill
                   sizes="100vw"
                   priority={index === 0}
@@ -371,7 +381,7 @@ export default function HeroCarousel({
                 />
                 <Image
                   src={desktopSrc}
-                  alt={current?.alt || ''}
+                  alt=""
                   fill
                   sizes="100vw"
                   priority={index === 0}
@@ -427,15 +437,15 @@ export default function HeroCarousel({
             {current?.ctaLabel && (
               <div className="mt-6">
                 <Link
-                  href={safeCtaHref(current.ctaLink)}
-                  prefetch
+                  href={localizedHref(current.ctaLink)}
+                  prefetch={false}
                   className={cn(
                     'inline-flex items-center gap-2 rounded-2xl px-6 py-3 text-base font-semibold text-white sm:px-8 sm:text-lg',
                     'bg-[hsl(var(--accent))] shadow-lg transition-all duration-200',
                     'hover:scale-[1.03] hover:bg-[hsl(var(--accent)/.92)] active:scale-95',
                     'focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.50)]'
                   )}
-                  aria-label={ctaAria}
+                  aria-label={(current?.ctaLabel || '') + (current?.alt ? ' — ' + current.alt : '')}
                   data-gtm="home_hero_cta"
                   data-slide-id={String(current.id)}
                   onClick={() => pushDL('hero_cta', { slideId: current.id })}

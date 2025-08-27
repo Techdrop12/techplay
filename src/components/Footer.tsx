@@ -1,4 +1,4 @@
-// src/components/Footer.tsx — Ultra Premium FINAL (i18n, tokens, SEO, newsletter) — sans doublon JSON-LD
+// src/components/Footer.tsx — ULTIME++ (i18n, tokens, SEO, newsletter, CMP, a11y)
 'use client'
 
 import { useId, useMemo, useState } from 'react'
@@ -31,7 +31,7 @@ interface FooterProps {
   companyName?: string
   compact?: boolean
   children?: React.ReactNode
-  /** Endpoint d’inscription : POST { email } */
+  /** Endpoint d’inscription : POST { email, locale, pathname } */
   subscribeEndpoint?: string
   siteUrl?: string
   contact?: {
@@ -50,15 +50,18 @@ const DEFAULT_LEGAL: FooterLink[] = [
   { label: 'Mentions légales', href: '/mentions-legales' },
   { label: 'Confidentialité', href: '/confidentialite' },
   { label: 'CGV', href: '/cgv' },
+  { label: 'Préférences cookies', href: '#cookies' }, // ouvre le CMP (évènement custom)
 ]
 
-// normalisation d’anciennes routes -> nouvelles routes canoniques
+// Normalisation d’anciennes routes -> nouvelles routes canoniques
 const normalizeHref = (href: string) => {
-  if (!href.startsWith('/')) return href
+  if (!href?.startsWith('/')) return href
   return href
     .replace(/^\/produit(?!s)/, '/products')
     .replace(/^\/pack(?!s)/, '/products/packs')
     .replace(/^\/promo$/, '/products?promo=1')
+    .replace(/^\/#?categories$/i, '/#categories')
+    .replace(/^\/#?faq$/i, '/#faq')
 }
 
 const DEFAULT_GROUPS: NavGroup[] = [
@@ -66,7 +69,7 @@ const DEFAULT_GROUPS: NavGroup[] = [
     title: 'Boutique',
     links: [
       { label: 'Accueil', href: '/' },
-      { label: 'Catégories', href: '/#categories' }, // évite 404
+      { label: 'Catégories', href: '/#categories' },
       { label: 'Produits', href: '/products' },
       { label: 'Packs', href: '/products/packs' },
       { label: 'Wishlist', href: '/wishlist' },
@@ -76,7 +79,7 @@ const DEFAULT_GROUPS: NavGroup[] = [
     title: 'Support',
     links: [
       { label: 'Contact', href: '/contact' },
-      { label: 'FAQ', href: '/#faq' }, // ancre home
+      { label: 'FAQ', href: '/#faq' },
       { label: 'Suivi de commande', href: '/commande' },
       { label: 'Blog', href: '/blog' },
       { label: 'Promo du jour', href: '/products?promo=1' },
@@ -85,7 +88,7 @@ const DEFAULT_GROUPS: NavGroup[] = [
   { title: 'Légal', links: DEFAULT_LEGAL },
 ]
 
-const isValidEmail = (v: string) => /^\S+@\S+\.\S+$/.test(v.trim())
+const isValidEmail = (v: string) => /^\S+@\S+\.\S+$/.test(String(v || '').trim())
 
 // GA helper – tolérant
 const track = (action: string, data: Record<string, any> = {}) => {
@@ -132,7 +135,7 @@ export default function Footer({
 }: FooterProps) {
   const pathname = usePathname() || '/'
   const locale = getCurrentLocale(pathname)
-  const origin = (siteUrl || '').replace(/\/$/, '')
+  const origin = String(siteUrl || '').replace(/\/$/, '')
 
   // Remplace la colonne "Légal" si props.links fourni + normalise hrefs
   const navGroups = useMemo<NavGroup[]>(() => {
@@ -164,6 +167,14 @@ export default function Footer({
   const [website, setWebsite] = useState('')
   const [consent, setConsent] = useState(true)
 
+  const openConsentManager = (e?: { preventDefault?: () => void }) => {
+    e?.preventDefault?.()
+    try {
+      window.dispatchEvent(new CustomEvent('open-consent-manager'))
+    } catch {}
+    track('open_consent_manager', { location: 'footer' })
+  }
+
   const onSubscribe = async (e: React.FormEvent) => {
     e.preventDefault()
     if (status === 'loading') return
@@ -185,13 +196,13 @@ export default function Footer({
       const res = await fetch(subscribeEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, locale, pathname }),
       })
       if (!res.ok) {
         const maybe = await res.json().catch(() => null)
         throw new Error(maybe?.message || 'Erreur API')
       }
-      track('newsletter_subscribe', { location: 'footer' })
+      track('newsletter_subscribe', { location: 'footer', params: { locale } })
       setStatus('success')
       setMessage('Inscription confirmée. Bienvenue chez TechPlay !')
       setEmail('')
@@ -206,8 +217,14 @@ export default function Footer({
   const onSocialClick = (network: 'facebook' | 'twitter' | 'instagram') =>
     track('social_click', { network, category: 'social', location: 'footer' })
 
-  const onNavClick = (groupTitle: string, label: string, href: string) =>
+  const onNavClick = (groupTitle: string, label: string, href: string, e?: React.MouseEvent) => {
+    // Si clic sur "Préférences cookies" => ouvre le CMP et ne navigue pas
+    if (label.toLowerCase().includes('cookie')) {
+      openConsentManager(e)
+      return
+    }
     track('footer_nav_click', { group: groupTitle, label, href, from: pathname })
+  }
 
   return (
     <footer
@@ -304,7 +321,7 @@ export default function Footer({
                     const finalHref = localizePath(href, locale)
                     const active =
                       href === '/'
-                        ? pathname === '/'
+                        ? pathname === finalHref || pathname === '/'
                         : pathname === finalHref || pathname.startsWith(finalHref + '/')
 
                     const item = (
@@ -322,7 +339,17 @@ export default function Footer({
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 rounded-sm text-token-text/80 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
-                            onClick={() => onNavClick(group.title, label, href)}
+                            onClick={(e) => onNavClick(group.title, label, href, e)}
+                            data-gtm="footer_link_external"
+                          >
+                            {item}
+                          </a>
+                        ) : label.toLowerCase().includes('cookie') ? (
+                          <a
+                            href="#cookies"
+                            className="inline-flex items-center gap-2 rounded-sm text-token-text/80 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+                            onClick={(e) => onNavClick(group.title, label, '#cookies', e)}
+                            data-gtm="footer_link_cookies"
                           >
                             {item}
                           </a>
@@ -332,7 +359,8 @@ export default function Footer({
                             prefetch={false}
                             aria-current={active ? 'page' : undefined}
                             className="inline-flex items-center gap-2 rounded-sm text-token-text/80 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
-                            onClick={() => onNavClick(group.title, label, href)}
+                            onClick={(e) => onNavClick(group.title, label, href, e)}
+                            data-gtm="footer_link_internal"
                           >
                             {item}
                           </Link>
@@ -377,6 +405,7 @@ export default function Footer({
                       disabled={status === 'loading'}
                       className="rounded-md bg-[hsl(var(--accent))] px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-[hsl(var(--accent)/.92)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)] disabled:opacity-60"
                       aria-label="S’inscrire à la newsletter"
+                      data-gtm="footer_newsletter_submit"
                     >
                       {status === 'loading' ? 'Envoi…' : 'S’inscrire'}
                     </button>
@@ -433,6 +462,7 @@ export default function Footer({
                     aria-label="Facebook"
                     className="rounded-sm transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
                     onClick={() => onSocialClick('facebook')}
+                    data-gtm="footer_social_facebook"
                   >
                     <FaFacebookF />
                   </a>
@@ -443,6 +473,7 @@ export default function Footer({
                     aria-label="Twitter / X"
                     className="rounded-sm transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
                     onClick={() => onSocialClick('twitter')}
+                    data-gtm="footer_social_twitter"
                   >
                     <FaTwitter />
                   </a>
@@ -453,6 +484,7 @@ export default function Footer({
                     aria-label="Instagram"
                     className="rounded-sm transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
                     onClick={() => onSocialClick('instagram')}
+                    data-gtm="footer_social_instagram"
                   >
                     <FaInstagram />
                   </a>
@@ -477,6 +509,16 @@ export default function Footer({
             </li>
             <li className="hidden text-token-text/40 sm:inline">•</li>
             <li>FR • EUR</li>
+            <li className="hidden text-token-text/40 sm:inline">•</li>
+            <li>
+              <a
+                href="#cookies"
+                onClick={(e) => openConsentManager(e)}
+                className="underline decoration-dotted underline-offset-2 hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+              >
+                Préférences cookies
+              </a>
+            </li>
           </ul>
         </div>
       </div>
@@ -491,10 +533,11 @@ export default function Footer({
             name: 'Footer Navigation',
             url: origin,
             hasPart: navGroups.flatMap((g) =>
-              g.links.map((l) => (l.external
-                ? { '@type': 'WebPage', name: l.label, url: l.href }
-                : { '@type': 'WebPage', name: l.label, url: `${origin}${localizePath(l.href, locale)}` }
-              ))
+              g.links.map((l) =>
+                l.external
+                  ? { '@type': 'WebPage', name: l.label, url: l.href }
+                  : { '@type': 'WebPage', name: l.label, url: `${origin}${localizePath(l.href, locale)}` }
+              )
             ),
           }),
         }}

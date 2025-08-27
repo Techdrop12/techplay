@@ -1,4 +1,4 @@
-// src/components/ProductDetail.tsx — OPTI MAX (SEO/a11y/UX/Perf) — CENTRAL JSON-LD GÉRÉ EN PAGE
+// src/components/ProductDetail.tsx — OPTI MAX (SEO/a11y/UX/Perf) — CENTRAL JSON-LD GÉRÉ EN PAGE — FINAL
 'use client'
 
 import Image from 'next/image'
@@ -27,6 +27,7 @@ import {
   mapProductToGaItem,
 } from '@/lib/ga'
 import { DEFAULT_LOCALE, isLocale, type AppLocale } from '@/lib/language'
+import { FaCcVisa, FaCcMastercard, FaCcPaypal } from 'react-icons/fa' // logos paiement
 
 interface Props {
   product: Product
@@ -52,6 +53,12 @@ function IconShare({ size = 18, className = '' }: { size?: number; className?: s
   )
 }
 
+/** Cast “safe number” (accepte string/number) */
+const toNum = (v: unknown): number | undefined => {
+  const n = typeof v === 'number' ? v : Number(v)
+  return Number.isFinite(n) ? n : undefined
+}
+
 export default function ProductDetail({ product, locale = 'fr' }: Props) {
   const prefersReducedMotion = useReducedMotion()
 
@@ -71,9 +78,9 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     _id,
     slug = '',
     title = 'Produit',
-    price = 0,
-    oldPrice,
-    image = '/placeholder.png',
+    price: priceRaw = 0,
+    oldPrice: oldPriceRaw,
+    image = '/og-image.jpg',
     images,
     description = '',
     rating,
@@ -83,7 +90,11 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     brand,
   } = product ?? {}
 
-  // ✅ Extraction tolérante de `tags` (corrige l’erreur TS si un ancien type est résolu par l’IDE)
+  // ✅ Normalisation des prix (tolère string)
+  const price = Math.max(0, toNum(priceRaw) ?? 0)
+  const oldPrice = toNum(oldPriceRaw)
+
+  // ✅ Extraction tolérante de `tags`
   const tags: string[] | undefined =
     (product as Partial<Product> & { tags?: string[] }).tags
 
@@ -99,7 +110,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
       ? Math.round(((oldPrice - price) / oldPrice) * 100)
       : null
 
-  const priceStr = useMemo(() => Math.max(0, Number(price || 0)).toFixed(2), [price])
+  const priceStr = useMemo(() => price.toFixed(2), [price])
   const availability =
     typeof stock === 'number'
       ? stock > 0
@@ -228,6 +239,17 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     setZoomed((z) => !z)
   }
 
+  const onMediaKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      toggleZoom()
+    } else if (e.key === 'ArrowLeft') {
+      setActiveIdx((i) => (i > 0 ? i - 1 : i))
+    } else if (e.key === 'ArrowRight') {
+      setActiveIdx((i) => (i < gallery.length - 1 ? i + 1 : i))
+    }
+  }
+
   // Prefetch next/prev images (très léger)
   useEffect(() => {
     if (typeof window === 'undefined' || gallery.length <= 1) return
@@ -270,6 +292,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           onPointerMove={onPointerMove}
           onPointerLeave={() => setZoomed(false)}
           onClick={toggleZoom}
+          onKeyDown={onMediaKeyDown}
           role="img"
           aria-label={`Image ${activeIdx + 1} sur ${gallery.length} : ${title}`}
           aria-busy={!imgLoaded}
@@ -322,7 +345,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             </button>
           </div>
 
-          <p className="sr-only">Cliquer pour {zoomed ? 'dézoomer' : 'zoomer'} l’image.</p>
+          <p className="sr-only">Cliquer ou appuyer sur Entrée/Espace pour {zoomed ? 'dézoomer' : 'zoomer'} l’image.</p>
         </div>
 
         {gallery.length > 1 && (
@@ -532,12 +555,13 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
               <span>Partager</span>
             </button>
 
-            {/* Paiements “confiance” (juste visuel, pas de dépendances) */}
-            <div className="mt-2 ml-auto flex items-center gap-2 opacity-80">
-              <span className="text-xs">Paiements :</span>
-              <span aria-hidden>💳</span>
-              <span aria-hidden>🅿️</span>
-              <span aria-hidden>🏦</span>
+            {/* Moyens de paiement (logos accessibles, theme-aware) */}
+            <div className="mt-2 ml-auto flex items-center gap-3 text-2xl text-token-text/60">
+              <span className="text-xs font-medium mr-1">Paiements :</span>
+              <FaCcVisa aria-hidden="true" title="Visa" className="transition-opacity hover:opacity-90" />
+              <FaCcMastercard aria-hidden="true" title="Mastercard" className="transition-opacity hover:opacity-90" />
+              <FaCcPaypal aria-hidden="true" title="PayPal" className="transition-opacity hover:opacity-90" />
+              <span className="sr-only" id="pay-methods">Paiements acceptés : Visa, Mastercard, PayPal</span>
             </div>
           </div>
 
@@ -574,7 +598,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         <ReviewForm productId={_id} />
       </div>
 
-      {/* NOTE: Le JSON-LD est désormais injecté au niveau de la page (/products/[slug]) via <ProductJsonLd /> pour éviter les doublons. */}
+      {/* NOTE: Le JSON-LD est injecté au niveau de la page (/products/[slug]) via <ProductJsonLd /> pour éviter les doublons. */}
     </motion.section>
   )
 }

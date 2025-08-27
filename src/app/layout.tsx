@@ -1,4 +1,4 @@
-// src/app/layout.tsx — RootLayout ultra-premium (SEO/PWA/Consent/a11y/perf) — FINAL
+// src/app/layout.tsx — RootLayout ULTIME (SEO/PWA/Consent/a11y/perf) — FINAL++
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
 import { Inter, Sora } from 'next/font/google'
@@ -55,9 +55,10 @@ export const metadata: Metadata = {
   description:
     'TechPlay, votre boutique high-tech : audio, gaming, accessoires et packs exclusifs. Qualité, rapidité, satisfaction garantie.',
   keywords: ['high-tech', 'gaming', 'audio', 'accessoires', 'e-commerce', 'TechPlay', 'packs exclusifs'],
+  // 👉 hreflang cohérent avec tes locales ('fr' et 'en' dans les URLs)
   alternates: {
     canonical: SITE_URL,
-    languages: { 'fr-FR': `${SITE_URL}/`, 'en-US': `${SITE_URL}/en` },
+    languages: { fr: `${SITE_URL}/`, en: `${SITE_URL}/en` },
   },
   openGraph: {
     title: 'TechPlay – Boutique high-tech innovante',
@@ -81,8 +82,10 @@ export const metadata: Metadata = {
       { url: '/icons/icon-192x192.png', type: 'image/png', sizes: '192x192' },
       { url: '/icons/icon-512x512.png', type: 'image/png', sizes: '512x512' },
     ],
+    // Si tu as un apple-touch-icon dédié, remplace l’URL ci-dessous (180x180 conseillé)
     apple: [{ url: '/icons/icon-192x192.png', sizes: '180x180', type: 'image/png' }],
   },
+  // Si ton manifest est /manifest.webmanifest, change ici — sinon garde /site.webmanifest
   manifest: '/site.webmanifest',
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: SITE_NAME },
   formatDetection: { telephone: false, address: false, email: false },
@@ -122,7 +125,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* Anti-FOUC + thème */}
         <DarkModeScript />
 
-        {/* Consent Mode v2 par défaut (opt-out) */}
+        {/* Consent Mode v2 (par défaut: opt-out, compatible App Router) */}
         <script
           id="consent-default"
           dangerouslySetInnerHTML={{
@@ -132,6 +135,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               gtag('consent', 'default', {
                 ad_storage: 'denied',
                 analytics_storage: 'denied',
+                ad_user_data: 'denied',
+                ad_personalization: 'denied',
                 functionality_storage: 'granted',
                 security_storage: 'granted',
                 wait_for_update: 500
@@ -140,7 +145,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           }}
         />
 
-        {/* Perf: preconnect/dns-prefetch */}
+        {/* Perf: preconnect/dns-prefetch (tracking retardé via <Tracking/>) */}
         <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="" />
         <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="" />
         <link rel="preconnect" href="https://connect.facebook.net" crossOrigin="" />
@@ -182,9 +187,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ThemeProvider>
           <RootLayoutClient>
             <AfterIdleClient>
-              {/* 🔭 Tracking unifié */}
+              {/* 🔭 Tracking unifié — chargé en lazy + Suspense */}
               <Suspense fallback={null}><Tracking /></Suspense>
 
+              {/* PWA + bars/overlays */}
               <AppInstallPrompt />
               <StickyFreeShippingBar />
               <StickyCartSummary />
