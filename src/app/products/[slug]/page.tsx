@@ -15,14 +15,13 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
   if (!product) {
     return {
-      title: 'Produit introuvable', // ❌ pas de " | TechPlay" ici (le template s’en occupe pas car 404 noindex)
+      title: 'Produit introuvable',
       description: 'Le produit demandé est introuvable.',
       robots: { index: false, follow: true },
       alternates: { canonical: `${SITE}/products/${params.slug}` },
     }
   }
 
-  // ✅ Laisse le layout ajouter " | TechPlay"
   const title = product.title ?? 'Produit'
   const desc = product.description || 'Découvrez ce produit TechPlay.'
   const url = `${SITE}/products/${params.slug}`
@@ -35,7 +34,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     openGraph: {
       title,
       description: desc,
-      type: 'website',
+      type: 'website', // ← 'product' n'est pas accepté par Next Metadata
       url,
       images: [{ url: img, width: 1200, height: 630, alt: product.title ?? 'Produit TechPlay' }],
     },
@@ -54,7 +53,6 @@ export default async function ProductPage({ params }: { params: { slug: string }
 
   const safeProduct = product as Product
 
-  // Breadcrumb JSON-LD léger (Home > Products > Product)
   const breadcrumb = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -75,7 +73,6 @@ export default async function ProductPage({ params }: { params: { slug: string }
 
       <script
         type="application/ld+json"
-        // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
       />
     </>
