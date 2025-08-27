@@ -47,6 +47,9 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://techplay.example.c
 const SITE_NAME = 'TechPlay'
 const DEFAULT_OG = '/og-image.jpg'
 
+// 🔒 Noindex automatique pour les déploiements Vercel "preview" (ou override via env)
+const IS_PREVIEW = process.env.VERCEL_ENV === 'preview' || process.env.NEXT_PUBLIC_NOINDEX === '1'
+
 /* ----------------------------- Static metadata ---------------------------- */
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -55,10 +58,10 @@ export const metadata: Metadata = {
   description:
     'TechPlay, votre boutique high-tech : audio, gaming, accessoires et packs exclusifs. Qualité, rapidité, satisfaction garantie.',
   keywords: ['high-tech', 'gaming', 'audio', 'accessoires', 'e-commerce', 'TechPlay', 'packs exclusifs'],
-  // 👉 hreflang cohérent avec tes locales ('fr' et 'en' dans les URLs)
+  // 👉 hreflang cohérent avec tes locales ('fr' et 'en')
   alternates: {
     canonical: SITE_URL,
-    languages: { fr: `${SITE_URL}/`, en: `${SITE_URL}/en` },
+    languages: { 'x-default': SITE_URL, fr: `${SITE_URL}/`, en: `${SITE_URL}/en` },
   },
   openGraph: {
     title: 'TechPlay – Boutique high-tech innovante',
@@ -82,14 +85,16 @@ export const metadata: Metadata = {
       { url: '/icons/icon-192x192.png', type: 'image/png', sizes: '192x192' },
       { url: '/icons/icon-512x512.png', type: 'image/png', sizes: '512x512' },
     ],
-    // Si tu as un apple-touch-icon dédié, remplace l’URL ci-dessous (180x180 conseillé)
     apple: [{ url: '/icons/icon-192x192.png', sizes: '180x180', type: 'image/png' }],
   },
-  // Si ton manifest est /manifest.webmanifest, change ici — sinon garde /site.webmanifest
   manifest: '/site.webmanifest',
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: SITE_NAME },
   formatDetection: { telephone: false, address: false, email: false },
-  robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
+  robots: {
+    index: !IS_PREVIEW,
+    follow: !IS_PREVIEW,
+    googleBot: { index: !IS_PREVIEW, follow: !IS_PREVIEW },
+  },
   referrer: 'strict-origin-when-cross-origin',
   verification: {},
 }
@@ -145,7 +150,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           }}
         />
 
-        {/* Perf: preconnect/dns-prefetch (tracking retardé via <Tracking/>) */}
+        {/* Perf: preconnect/dns-prefetch */}
         <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="" />
         <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="" />
         <link rel="preconnect" href="https://connect.facebook.net" crossOrigin="" />

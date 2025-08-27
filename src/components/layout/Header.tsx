@@ -399,8 +399,14 @@ export default function Header() {
           onSubmit={onSearchSubmit}
           className="relative hidden md:flex min-w-0 flex-1 items-center lg:max-w-md xl:max-w-lg"
         >
+          {/* label accessible lié à l'input */}
+          <label htmlFor="header-search" className="sr-only">
+            {t.searchAria}
+          </label>
+
           <input
             ref={searchRef}
+            id="header-search"
             type="search"
             name="q"
             placeholder={`${t.placeholderPrefix} ${placeholder}`}
@@ -411,6 +417,9 @@ export default function Header() {
               'focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/.30)]'
             )}
             autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="none"
+            spellCheck={false}
             enterKeyHint="search"
             aria-keyshortcuts="/ Control+K Meta+K"
             aria-controls="search-status"
@@ -483,6 +492,8 @@ export default function Header() {
                     )}
                     onFocus={openCats}
                     onBlur={() => closeCats(80)}
+                    aria-hidden={catOpen ? 'false' : 'true'}
+                    tabIndex={catOpen ? 0 : -1}
                   >
                     <div className="grid grid-cols-1 gap-2 p-3 md:grid-cols-3 md:p-4">
                       <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:col-span-2 md:gap-3" role="none">
