@@ -5,6 +5,9 @@
 import { locales as SUPPORTED_LOCALES, defaultLocale as DEFAULT_LOCALE } from '@/i18n/config'
 export type { Locale } from '@/i18n/config'
 
+// ⬅️ Ré-exporte pour que les composants puissent importer depuis ici
+export { SUPPORTED_LOCALES, DEFAULT_LOCALE }
+
 const isSupported = (v?: string): v is typeof SUPPORTED_LOCALES[number] =>
   !!v && (SUPPORTED_LOCALES as readonly string[]).includes(v as string)
 
