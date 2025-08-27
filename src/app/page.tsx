@@ -24,7 +24,8 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://techplay.example.c
 const OG_IMAGE = `${SITE_URL}/og-image.jpg`
 
 export const metadata: Metadata = {
-  title: 'TechPlay – Boutique high-tech & packs exclusifs',
+  // 🔒 On fixe un titre "brandé" sans suffixe via absolute
+  title: { absolute: 'TechPlay – Boutique high-tech & packs exclusifs' },
   description:
     'Découvrez les meilleures offres et packs TechPlay, sélectionnées pour vous avec passion et innovation. Casques, souris, claviers, et accessoires gaming de qualité supérieure.',
   keywords:

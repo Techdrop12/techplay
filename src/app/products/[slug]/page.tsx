@@ -15,14 +15,15 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
   if (!product) {
     return {
-      title: 'Produit introuvable – TechPlay',
+      title: 'Produit introuvable', // ❌ pas de " | TechPlay" ici (le template s’en occupe pas car 404 noindex)
       description: 'Le produit demandé est introuvable.',
       robots: { index: false, follow: true },
       alternates: { canonical: `${SITE}/products/${params.slug}` },
     }
   }
 
-  const title = `${product.title ?? 'Produit'} | TechPlay`
+  // ✅ Laisse le layout ajouter " | TechPlay"
+  const title = product.title ?? 'Produit'
   const desc = product.description || 'Découvrez ce produit TechPlay.'
   const url = `${SITE}/products/${params.slug}`
   const img = product.image || `${SITE}/placeholder.png`
@@ -34,9 +35,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     openGraph: {
       title,
       description: desc,
-      type: 'website', // ✅ important
+      type: 'website',
       url,
-      images: [{ url: img, alt: product.title ?? 'Produit TechPlay' }],
+      images: [{ url: img, width: 1200, height: 630, alt: product.title ?? 'Produit TechPlay' }],
     },
     twitter: {
       card: 'summary_large_image',

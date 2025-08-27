@@ -1,4 +1,4 @@
-// src/components/ProductCard.tsx — ULTIME++ (premium icons, a11y/SEO/UX/Perf max)
+// src/components/ProductCard.tsx — ULTIME+++ (a11y/SEO/Perf max + LCP)
 'use client'
 
 import {
@@ -89,10 +89,9 @@ export default function ProductCard({
     isBestSeller,
     stock,
     brand,
-    // ❌ ne pas déstructurer `tags` (certains envs ont un type Product sans ce champ)
   } = product ?? {}
 
-  // Champs étendus tolérants
+  // Champs tolérants
   const x = product as any
   const reviewsCount: number | undefined =
     typeof x?.reviewsCount === 'number'
@@ -115,7 +114,7 @@ export default function ProductCard({
   const [tilt, setTilt] = useState<{ rx: number; ry: number }>({ rx: 0, ry: 0 })
   const ticking = useRef(false)
 
-  // Images: principale + hover
+  // Images
   const mainImage = useMemo(() => {
     const first = Array.isArray(images) && images.length ? images[0] : image
     return imgError ? '/placeholder.png' : (first || '/placeholder.png')
@@ -175,18 +174,10 @@ export default function ProductCard({
           if (e.isIntersecting && !viewedRef.current) {
             viewedRef.current = true
             try {
-              logEvent({
-                action: 'product_card_view',
-                category: 'engagement',
-                label: title,
-                value: price,
-              })
+              logEvent({ action: 'product_card_view', category: 'engagement', label: title, value: price })
             } catch {}
             try {
-              pushDataLayer({
-                event: 'view_item_card',
-                items: [{ item_id: _id || sku, item_name: title, price }],
-              })
+              pushDataLayer({ event: 'view_item_card', items: [{ item_id: _id || sku, item_name: title, price }] })
             } catch {}
           }
         }
@@ -201,19 +192,10 @@ export default function ProductCard({
   const handleClick = useCallback((e?: React.MouseEvent) => {
     if (!slug) { if (e) e.preventDefault() }
     try {
-      logEvent({
-        action: 'product_card_click',
-        category: 'engagement',
-        label: title,
-        value: price,
-      })
+      logEvent({ action: 'product_card_click', category: 'engagement', label: title, value: price })
     } catch {}
     try {
-      pushDataLayer({
-        event: 'select_item',
-        item_list_name: 'product_grid',
-        items: [{ item_id: _id || sku, item_name: title, price }],
-      })
+      pushDataLayer({ event: 'select_item', item_list_name: 'product_grid', items: [{ item_id: _id || sku, item_name: title, price }] })
     } catch {}
   }, [_id, sku, slug, title, price])
 
@@ -229,13 +211,13 @@ export default function ProductCard({
     const cy = r.top + r.height / 2
     const dx = e.clientX - cx
     const dy = e.clientY - cy
-    const ry = clamp((dx / (r.width / 2)) * 6, -8, 8) // rotateY
-    const rx = clamp((-dy / (r.height / 2)) * 6, -8, 8) // rotateX
-    if (ticking.current) return
-    ticking.current = true
+    const ry = clamp((dx / (r.width / 2)) * 6, -8, 8)
+    const rx = clamp((-dy / (r.height / 2)) * 6, -8, 8)
+    if ((ticking as any).current) return
+    ;(ticking as any).current = true
     requestAnimationFrame(() => {
       setTilt({ rx, ry })
-      ticking.current = false
+      ;(ticking as any).current = false
     })
   }
   const resetTilt = () => setTilt({ rx: 0, ry: 0 })
@@ -249,7 +231,6 @@ export default function ProductCard({
       itemType="https://schema.org/Product"
       className={cn(
         'group relative rounded-3xl p-[1px]',
-        // Anneau conique premium (cohérent tokens)
         'ring-conic',
         'shadow-sm hover:shadow-2xl transition-shadow',
         className
@@ -272,16 +253,9 @@ export default function ProductCard({
       {brand && <meta itemProp="brand" content={String(brand)} />}
       {sku && <meta itemProp="sku" content={sku} />}
       {hasRating && (
-        <span
-          itemProp="aggregateRating"
-          itemScope
-          itemType="https://schema.org/AggregateRating"
-          className="sr-only"
-        >
+        <span itemProp="aggregateRating" itemScope itemType="https://schema.org/AggregateRating" className="sr-only">
           <meta itemProp="ratingValue" content={rating!.toFixed(1)} />
-          {typeof reviewsCount === 'number' && (
-            <meta itemProp="reviewCount" content={String(Math.max(0, reviewsCount))} />
-          )}
+          {typeof reviewsCount === 'number' && <meta itemProp="reviewCount" content={String(Math.max(0, reviewsCount))} />}
         </span>
       )}
 
@@ -291,23 +265,16 @@ export default function ProductCard({
           'bg-white/80 dark:bg-zinc-900/80 supports-[backdrop-filter]:backdrop-blur',
           'border border-white/40 dark:border-white/10 ring-1 ring-gray-200/60 dark:ring-gray-800/60'
         )}
-        style={
-          !prefersReducedMotion
-            ? { rotateX: tilt.rx, rotateY: tilt.ry, transformStyle: 'preserve-3d' as const }
-            : {}
-        }
+        style={!prefersReducedMotion ? { rotateX: tilt.rx, rotateY: tilt.ry, transformStyle: 'preserve-3d' as const } : {}}
       >
         {/* Shine subtil sur hover */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
-          style={{
-            background:
-              'radial-gradient(700px 220px at 12% -10%, rgba(255,255,255,0.35), transparent 60%)',
-          }}
+          style={{ background: 'radial-gradient(700px 220px at 12% -10%, rgba(255,255,255,0.35), transparent 60%)' }}
         />
 
-        {/* --- Zone cliquable (image + contenu) --- */}
+        {/* Zone cliquable (image + contenu) */}
         <Link
           href={productUrl}
           prefetch={false}
@@ -315,7 +282,7 @@ export default function ProductCard({
           aria-label={'Voir la fiche produit : ' + title}
           onClick={handleClick}
         >
-          {/* Image (double couche pour swap au hover si images[1]) */}
+          {/* Image (swap sur hover si images[1]) */}
           <div className="relative aspect-[4/3] w-full bg-gray-100 dark:bg-zinc-800" aria-busy={!imgLoaded}>
             {/* Image principale */}
             <Image
@@ -328,6 +295,7 @@ export default function ProductCard({
                 hoverImage ? 'opacity-100 group-hover:opacity-0' : 'group-hover:scale-105'
               )}
               priority={priority}
+              fetchPriority={priority ? 'high' : 'auto'}
               loading={priority ? 'eager' : 'lazy'}
               placeholder="blur"
               blurDataURL={BLUR_DATA_URL}
@@ -350,16 +318,14 @@ export default function ProductCard({
                 blurDataURL={BLUR_DATA_URL}
                 quality={85}
                 decoding="async"
+                loading="lazy"
                 draggable={false}
               />
             )}
 
             {/* Skeleton / shimmer */}
             {!imgLoaded && (
-              <div
-                className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-200/70 to-gray-100/40 dark:from-zinc-800/60 dark:to-zinc-900/40"
-                aria-hidden="true"
-              />
+              <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-200/70 to-gray-100/40 dark:from-zinc-800/60 dark:to-zinc-900/40" aria-hidden="true" />
             )}
 
             {/* Badges */}
@@ -375,10 +341,7 @@ export default function ProductCard({
                 </span>
               )}
               {typeof discount === 'number' && (
-                <span
-                  className="rounded-full bg-red-600 px-2.5 py-0.5 text-[11px] font-semibold text-white shadow"
-                  aria-label={String(discount) + '% de réduction'}
-                >
+                <span className="rounded-full bg-red-600 px-2.5 py-0.5 text-[11px] font-semibold text-white shadow" aria-label={String(discount) + '% de réduction'}>
                   {'-' + String(discount) + '%'}
                 </span>
               )}
@@ -407,10 +370,7 @@ export default function ProductCard({
 
             {/* Overlay rupture */}
             {outOfStock && (
-              <div
-                aria-hidden
-                className="absolute inset-0 grid place-items-center bg-black/45 text-sm font-semibold text-white"
-              >
+              <div aria-hidden className="absolute inset-0 grid place-items-center bg-black/45 text-sm font-semibold text-white">
                 Rupture
               </div>
             )}
@@ -443,10 +403,7 @@ export default function ProductCard({
               {availability && <link itemProp="availability" href={availability} />}
               <meta itemProp="itemCondition" content="https://schema.org/NewCondition" />
 
-              <span
-                className="text-lg font-extrabold text-brand sm:text-xl"
-                aria-label={'Prix : ' + formatPrice(price)}
-              >
+              <span className="text-lg font-extrabold text-brand sm:text-xl" aria-label={'Prix : ' + formatPrice(price)}>
                 {formatPrice(price)}
               </span>
 
@@ -463,13 +420,14 @@ export default function ProductCard({
               )}
             </div>
 
-            {/* Économies (si dispo) */}
+            {/* Économies */}
             {typeof savingsEuro === 'number' && savingsEuro > 0 && (
               <p className="mt-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
                 Vous économisez {formatPrice(savingsEuro)}
               </p>
             )}
 
+            {/* Microcopie seuil livraison (version compacte, évite doublons) */}
             <FreeShippingBadge price={price} minimal className="mt-2" />
           </div>
         </Link>

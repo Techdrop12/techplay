@@ -1,4 +1,4 @@
-// src/components/HeroCarousel.tsx — ULTIME+++ (premium play/pause icons)
+// src/components/HeroCarousel.tsx — ULTIME+++ (LCP/a11y tuned + premium play/pause)
 'use client'
 
 import {
@@ -85,7 +85,7 @@ const DEFAULT_SLIDES: ReadonlyArray<Slide> = [
     alt: 'Casques gaming — immersion totale',
     text: 'Casques Gaming — Immersion totale',
     ctaLabel: 'Découvrir',
-    ctaLink: '/products?cat=headsets',
+    ctaLink: '/products?cat=casques', // ← FR
     badge: 'Nouveautés',
   },
   {
@@ -95,7 +95,7 @@ const DEFAULT_SLIDES: ReadonlyArray<Slide> = [
     alt: 'Souris RGB — précision & style',
     text: 'Souris RGB — Précision & Style',
     ctaLabel: 'Explorer',
-    ctaLink: '/products?cat=mice',
+    ctaLink: '/products?cat=souris', // ← FR
   },
   {
     id: 3,
@@ -104,7 +104,7 @@ const DEFAULT_SLIDES: ReadonlyArray<Slide> = [
     alt: 'Claviers mécaniques — réactivité ultime',
     text: 'Claviers Mécaniques — Réactivité ultime',
     ctaLabel: 'Voir plus',
-    ctaLink: '/products?cat=keyboards',
+    ctaLink: '/products?cat=claviers', // ← FR
   },
 ] as const
 
@@ -115,8 +115,7 @@ const TEXT_SIZES = {
   xl: 'text-6xl sm:text-7xl',
 } as const
 
-const BLUR_DATA_URL =
-  'data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA='
+const BLUR_DATA_URL = 'data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA='
 
 /* ------------------------------- Helpers --------------------------------- */
 
@@ -179,8 +178,7 @@ export default function HeroCarousel({
         thumbs: 'Carousel thumbnails',
         goTo: 'Go to slide ',
         of: ' of ',
-        instructions:
-          'Use left and right arrows to navigate, Space to pause or resume.',
+        instructions: 'Use left and right arrows to navigate, Space to pause or resume.',
       }
     }
     return {
@@ -204,49 +202,22 @@ export default function HeroCarousel({
     if (index > Math.max(0, slides.length - 1)) setIndex(0)
   }, [slides.length, index])
 
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start start', 'end start'],
-  })
+  const { scrollYProgress } = useScroll({ target: containerRef, offset: ['start start', 'end start'] })
   const y = useTransform(scrollYProgress, [0, 1], [0, parallaxPx])
   const parallaxStyle = parallaxPx > 0 ? { y } : undefined
 
-  const clearTimer = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current)
-      timerRef.current = null
-    }
-  }
-  const next = useCallback(() => {
-    setIndex((i) => (total ? (i + 1) % total : 0))
-    pushDL('hero_next', { index: index + 1 })
-  }, [total, index])
-  const prev = useCallback(() => {
-    setIndex((i) => (total ? (i - 1 + total) % total : 0))
-    pushDL('hero_prev', { index: index - 1 })
-  }, [total, index])
+  const clearTimer = () => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null } }
+  const next = useCallback(() => { setIndex((i) => (total ? (i + 1) % total : 0)); pushDL('hero_next', { index: index + 1 }) }, [total, index])
+  const prev = useCallback(() => { setIndex((i) => (total ? (i - 1 + total) % total : 0)); pushDL('hero_prev', { index: index - 1 }) }, [total, index])
   const startTimer = useCallback(() => {
     if (pausedRef.current || !effectiveAutoplay) return
     clearTimer()
     timerRef.current = setInterval(next, intervalMs)
   }, [effectiveAutoplay, intervalMs, next])
-  const pause = useCallback(() => {
-    pausedRef.current = true
-    setPaused(true)
-    clearTimer()
-    pushDL('hero_paused')
-  }, [])
-  const resume = useCallback(() => {
-    pausedRef.current = false
-    setPaused(false)
-    startTimer()
-    pushDL('hero_resumed')
-  }, [startTimer])
+  const pause = useCallback(() => { pausedRef.current = true; setPaused(true); clearTimer(); pushDL('hero_paused') }, [])
+  const resume = useCallback(() => { pausedRef.current = false; setPaused(false); startTimer(); pushDL('hero_resumed') }, [startTimer])
 
-  useEffect(() => {
-    startTimer()
-    return clearTimer
-  }, [startTimer])
+  useEffect(() => { startTimer(); return clearTimer }, [startTimer])
 
   useEffect(() => {
     const onVis = () => (document.hidden ? pause() : resume())
@@ -258,55 +229,38 @@ export default function HeroCarousel({
     if (!pauseWhenHidden || typeof window === 'undefined') return
     const el = containerRef.current
     if (!el) return
-    const io = new IntersectionObserver(
-      (entries) => {
-        const v = entries[0]?.isIntersecting
-        if (v) resume()
-        else pause()
-      },
-      { threshold: 0.4 }
-    )
+    const io = new IntersectionObserver((entries) => {
+      const v = entries[0]?.isIntersecting
+      if (v) resume()
+      else pause()
+    }, { threshold: 0.4 })
     io.observe(el)
     return () => io.disconnect()
   }, [pauseWhenHidden, pause, resume])
 
+  // Warm cache of next/prev images (helps smoothness)
   useEffect(() => {
     if (typeof window === 'undefined' || total <= 1) return
     const nextIdx = (index + 1) % total
     const prevIdx = (index - 1 + total) % total
     const urls = [
-      slides[nextIdx]?.imageDesktop ||
-        slides[nextIdx]?.image ||
-        slides[nextIdx]?.poster,
-      slides[prevIdx]?.imageDesktop ||
-        slides[prevIdx]?.image ||
-        slides[prevIdx]?.poster,
+      slides[nextIdx]?.imageDesktop || slides[nextIdx]?.image || slides[nextIdx]?.poster,
+      slides[prevIdx]?.imageDesktop || slides[prevIdx]?.image || slides[prevIdx]?.poster,
     ].filter(Boolean) as string[]
-    urls.forEach((src) => {
-      const img = new window.Image()
-      img.src = src
-    })
+    urls.forEach((src) => { const img = new window.Image(); img.src = src })
   }, [index, slides, total])
 
   useEffect(() => {
     onSlideChange?.(index, current)
     try {
       const el = document.getElementById(srId)
-      if (el)
-        el.textContent =
-          (lang.startsWith('en') ? 'Slide ' : 'Diapositive ') +
-          (index + 1) +
-          t.of +
-          total +
-          ': ' +
-          (current?.alt || '')
+      if (el) el.textContent =
+        (lang.startsWith('en') ? 'Slide ' : 'Diapositive ') +
+        (index + 1) + t.of + total + ': ' + (current?.alt || '')
     } catch {}
   }, [index, current, total, onSlideChange, srId, t, lang])
 
-  const onTouchStart: React.TouchEventHandler<HTMLDivElement> = (e) => {
-    touchStartX.current = e.touches[0].clientX
-    if (pauseOnHover) pause()
-  }
+  const onTouchStart: React.TouchEventHandler<HTMLDivElement> = (e) => { touchStartX.current = e.touches[0].clientX; if (pauseOnHover) pause() }
   const onTouchEnd: React.TouchEventHandler<HTMLDivElement> = (e) => {
     if (touchStartX.current == null) return resume()
     const delta = e.changedTouches[0].clientX - touchStartX.current
@@ -316,44 +270,28 @@ export default function HeroCarousel({
   }
 
   const onKeyDown: React.KeyboardEventHandler = (e) => {
-    if (e.key === 'ArrowRight') {
-      pause(); next(); resume()
-    } else if (e.key === 'ArrowLeft') {
-      pause(); prev(); resume()
-    } else if (e.key === 'Home') {
-      pause(); setIndex(total ? 0 : 0); resume()
-    } else if (e.key === 'End') {
-      pause(); setIndex(total ? total - 1 : 0); resume()
-    } else if (e.key === ' ' || e.key === 'Spacebar' || e.key === 'Space') {
-      e.preventDefault()
-      isPaused ? resume() : pause()
-    }
+    if (e.key === 'ArrowRight') { pause(); next(); resume() }
+    else if (e.key === 'ArrowLeft') { pause(); prev(); resume() }
+    else if (e.key === 'Home') { pause(); setIndex(total ? 0 : 0); resume() }
+    else if (e.key === 'End') { pause(); setIndex(total ? total - 1 : 0); resume() }
+    else if (e.key === ' ' || e.key === 'Spacebar' || e.key === 'Space') { e.preventDefault(); isPaused ? resume() : pause() }
   }
 
   if (total === 0) return null
 
   const safeCtaHref = (href?: string) => (href ? href : '/products')
-  const slideAria =
-    index + 1 + ' / ' + total + (current?.alt ? ' — ' + current.alt : '')
-  const ctaAria =
-    (current?.ctaLabel ? current.ctaLabel : '') +
-    (current?.alt ? ' — ' + current.alt : '')
+  const slideAria = index + 1 + ' / ' + total + (current?.alt ? ' — ' + current.alt : '')
+  const ctaAria = (current?.ctaLabel ? current.ctaLabel : '') + (current?.alt ? ' — ' + current.alt : '')
 
-  const desktopSrc =
-    current?.imageDesktop || current?.image || current?.poster || '/og-image.jpg'
-  const mobileSrc =
-    current?.imageMobile ||
-    current?.imageDesktop ||
-    current?.image ||
-    current?.poster ||
-    '/og-image.jpg'
+  const desktopSrc = current?.imageDesktop || current?.image || current?.poster || '/og-image.jpg'
+  const mobileSrc = current?.imageMobile || current?.imageDesktop || current?.image || current?.poster || '/og-image.jpg'
 
   return (
     <section
       ref={containerRef}
       className={cn(
-        'relative h-[60vh] sm:h-[72vh] lg:h-[88vh] w-full overflow-hidden rounded-none sm:rounded-3xl shadow-2xl select-none',
-        'bg-token-surface/60 will-change-transform',
+        'relative h：[60vh] sm:h-[72vh] lg:h-[88vh] w-full overflow-hidden rounded-none sm:rounded-3xl shadow-2xl select-none',
+        'bg-token-surface/60 will-change-transform touch-pan-y',
         className
       )}
       role="region"
@@ -370,27 +308,13 @@ export default function HeroCarousel({
       onTouchEnd={onTouchEnd}
       tabIndex={0}
     >
-      <span
-        id={srId}
-        className="sr-only"
-        role="status"
-        aria-live="polite"
-        aria-atomic="true"
-      />
-      <p id={instructionsId} className="sr-only">
-        {t.instructions}
-      </p>
+      <span id={srId} className="sr-only" role="status" aria-live="polite" aria-atomic="true" />
+      <p id={instructionsId} className="sr-only">{t.instructions}</p>
 
       {edgeFade && (
         <>
-          <div
-            className="pointer-events-none absolute inset-y-0 left-0 z-[2] w-24 bg-gradient-to-r from-black/40 to-transparent dark:from-black/60"
-            aria-hidden
-          />
-          <div
-            className="pointer-events-none absolute inset-y-0 right-0 z-[2] w-24 bg-gradient-to-l from-black/40 to-transparent dark:from-black/60"
-            aria-hidden
-          />
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-[2] w-24 bg-gradient-to-r from-black/40 to-transparent dark:from-black/60" aria-hidden />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-[2] w-24 bg-gradient-to-l from-black/40 to-transparent dark:from-black/60" aria-hidden />
         </>
       )}
 
@@ -423,9 +347,9 @@ export default function HeroCarousel({
                 autoPlay={effectiveAutoplay}
                 preload="metadata"
                 poster={current.poster || desktopSrc}
-                onPlay={(e: SyntheticEvent<HTMLVideoElement>) => {
-                  if (isPaused) e.currentTarget.pause()
-                }}
+                disablePictureInPicture
+                controls={false}
+                onPlay={(e: SyntheticEvent<HTMLVideoElement>) => { if (isPaused) e.currentTarget.pause() }}
               >
                 <source src={current.videoUrl} type="video/mp4" />
               </video>
@@ -437,14 +361,13 @@ export default function HeroCarousel({
                   fill
                   sizes="100vw"
                   priority={index === 0}
+                  fetchPriority={index === 0 ? 'high' : 'auto'}
                   quality={85}
                   className="object-cover sm:hidden"
                   placeholder="blur"
                   blurDataURL={BLUR_DATA_URL}
                   draggable={false}
-                  onError={(e) => {
-                    ;(e.currentTarget as any).style.display = 'none'
-                  }}
+                  onError={(e) => { ;(e.currentTarget as any).style.display = 'none' }}
                 />
                 <Image
                   src={desktopSrc}
@@ -452,14 +375,13 @@ export default function HeroCarousel({
                   fill
                   sizes="100vw"
                   priority={index === 0}
+                  fetchPriority={index === 0 ? 'high' : 'auto'}
                   quality={88}
                   className="hidden object-cover sm:block"
                   placeholder="blur"
                   blurDataURL={BLUR_DATA_URL}
                   draggable={false}
-                  onError={(e) => {
-                    ;(e.currentTarget as any).style.display = 'none'
-                  }}
+                  onError={(e) => { ;(e.currentTarget as any).style.display = 'none' }}
                 />
               </>
             )}
@@ -469,16 +391,8 @@ export default function HeroCarousel({
 
       <div className="pointer-events-none absolute inset-0 z-[1]" aria-hidden="true">
         <div className="overlay-hero absolute inset-0" />
-        {showOverlay && (
-          <div
-            className="absolute inset-0"
-            style={{ backgroundColor: 'rgba(0,0,0,' + overlayOpacity + ')' }}
-          />
-        )}
-        <div
-          className="absolute inset-0 opacity-60 mix-blend-overlay dark:mix-blend-screen"
-          style={{ background: 'var(--ring-conic)' }}
-        />
+        {showOverlay && <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,0,0,' + overlayOpacity + ')' }} />}
+        <div className="absolute inset-0 opacity-60 mix-blend-overlay dark:mix-blend-screen" style={{ background: 'var(--ring-conic)' }} />
       </div>
 
       {current?.badge && (
@@ -547,11 +461,7 @@ export default function HeroCarousel({
               'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60 sm:left-4 sm:h-12 sm:w-12'
             )}
             data-gtm="hero_prev"
-            onClick={() => {
-              pause()
-              prev()
-              resume()
-            }}
+            onClick={() => { pause(); prev(); resume() }}
           >
             <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
               <path fill="currentColor" d="M15.78 19.78L8 12l7.78-7.78l1.44 1.44L10.88 12l6.34 6.34z" />
@@ -566,11 +476,7 @@ export default function HeroCarousel({
               'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60 sm:right-4 sm:h-12 sm:w-12'
             )}
             data-gtm="hero_next"
-            onClick={() => {
-              pause()
-              next()
-              resume()
-            }}
+            onClick={() => { pause(); next(); resume() }}
           >
             <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
               <path fill="currentColor" d="M8.22 4.22L16 12l-7.78 7.78l-1.44-1.44L13.12 12L6.78 5.66z" />
@@ -609,9 +515,7 @@ export default function HeroCarousel({
             const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
             const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
             const target = Math.min(total - 1, Math.floor(ratio * total))
-            pause()
-            setIndex(target)
-            resume()
+            pause(); setIndex(target); resume()
             pushDL('hero_seek', { target })
           }}
           style={progressClickable ? { cursor: 'pointer' } : undefined}
@@ -638,19 +542,14 @@ export default function HeroCarousel({
                     type="button"
                     className={cn(
                       'h-3.5 w-3.5 rounded-full transition',
-                      active
-                        ? 'scale-110 bg-white ring-2 ring-[hsl(var(--accent)/.70)] shadow'
-                        : 'bg-white/60 hover:bg-white'
+                      active ? 'scale-110 bg-white ring-2 ring-[hsl(var(--accent)/.70)] shadow'
+                             : 'bg-white/60 hover:bg-white'
                     )}
                     aria-label={bulletLabel}
                     aria-current={active ? 'true' : undefined}
                     data-gtm="hero_bullet"
                     data-idx={i}
-                    onClick={() => {
-                      pause()
-                      setIndex(i)
-                      resume()
-                    }}
+                    onClick={() => { pause(); setIndex(i); resume() }}
                   />
                 </li>
               )
@@ -671,19 +570,14 @@ export default function HeroCarousel({
                     type="button"
                     className={cn(
                       'relative h-10 w-16 overflow-hidden rounded-lg border shadow sm:h-12 sm:w-20',
-                      active
-                        ? 'border-[hsl(var(--accent))] ring-2 ring-[hsl(var(--accent))]'
-                        : 'border-white/60 hover:border-white'
+                      active ? 'border-[hsl(var(--accent))] ring-2 ring-[hsl(var(--accent))]'
+                             : 'border-white/60 hover:border-white'
                     )}
                     aria-label={(lang.startsWith('en') ? 'Go to slide ' : 'Aller à la diapositive ') + (i + 1)}
                     aria-current={active ? 'true' : undefined}
                     data-gtm="hero_thumb"
                     data-idx={i}
-                    onClick={() => {
-                      pause()
-                      setIndex(i)
-                      resume()
-                    }}
+                    onClick={() => { pause(); setIndex(i); resume() }}
                   >
                     <Image
                       src={thumb}

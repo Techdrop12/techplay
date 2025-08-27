@@ -53,6 +53,8 @@ const DEFAULT_OG = '/og-image.jpg'
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   applicationName: SITE_NAME,
+  // ⚠️ Un SEUL template global. Les pages doivent renvoyer des titres SANS " | TechPlay",
+  // sauf si elles utilisent { absolute } pour ne PAS appliquer le template.
   title: { default: 'TechPlay – Boutique high-tech innovante', template: '%s | TechPlay' },
   description:
     'TechPlay, votre boutique high-tech : audio, gaming, accessoires et packs exclusifs. Qualité, rapidité, satisfaction garantie.',
@@ -86,7 +88,6 @@ export const metadata: Metadata = {
     // iOS : si apple-touch-icon 180x180 n’existe pas, on retombe sur l’icône 192.
     apple: [{ url: '/icons/icon-192x192.png', sizes: '180x180', type: 'image/png' }],
   },
-  // ✅ une seule webmanifest
   manifest: '/site.webmanifest',
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: SITE_NAME },
   formatDetection: { telephone: false, address: false, email: false },
@@ -98,7 +99,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#000000' },
+    { media: '(prefers-color-scheme: dark)', color: '#0f172a' }, // aligné sur le manifest
   ],
   width: 'device-width',
   initialScale: 1,

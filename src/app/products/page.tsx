@@ -36,7 +36,8 @@ export async function generateMetadata(
   const max = searchParams?.max
   const cat = (searchParams?.cat ?? '').trim()
 
-  const baseTitle = 'Tous les produits – TechPlay'
+  // ❌ plus de "– TechPlay" ici : le template global ajoutera " | TechPlay"
+  const baseTitle = 'Tous les produits'
   const bits: string[] = []
   if (q) bits.push(`“${q}”`)
   if (cat) bits.push(`cat ${cat}`)
@@ -51,7 +52,7 @@ export async function generateMetadata(
 
   const qs = buildQS({ q, sort, min, max, cat, page: String(page) })
   const url = `${SITE}/products${qs}`
-  const og = `${SITE}/api/og${qs}` // ✅ image OG dynamique
+  const og = `${SITE}/api/og${qs}` // ✅ image OG dynamique (pense à corriger le nom de fichier de route si besoin)
 
   return {
     title,
