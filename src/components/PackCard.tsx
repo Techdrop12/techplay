@@ -1,7 +1,7 @@
 // src/components/PackCard.tsx — ULTIME++ (futuriste, a11y/SEO/UX/Perf max)
 'use client'
 
-import Link from 'next/link'
+import Link from '@/components/LocalizedLink'
 import Image from 'next/image'
 import { formatPrice, cn } from '@/lib/utils'
 import { motion, useReducedMotion } from 'framer-motion'
@@ -53,7 +53,9 @@ export default function PackCard({ pack, priority = false, className }: PackCard
   const stock: number | undefined = typeof x.stock === 'number' ? x.stock : undefined
   const items: any[] = Array.isArray(x.items) ? x.items : Array.isArray(x.contents) ? x.contents : []
   const rating: number | undefined = typeof x.rating === 'number' ? x.rating : undefined
-  const reviewsCount: number | undefined = typeof x.reviewsCount === 'number' ? x.reviewsCount : (typeof x.reviews === 'number' ? x.reviews : undefined)
+  const reviewsCount: number | undefined =
+    typeof x.reviewsCount === 'number' ? x.reviewsCount
+    : (typeof x.reviews === 'number' ? x.reviews : undefined)
   const sku: string | undefined = typeof x.sku === 'string' ? x.sku : (x.id ? String(x.id) : undefined)
   const brand: string | undefined = typeof x.brand === 'string' ? x.brand : undefined
 
@@ -83,20 +85,28 @@ export default function PackCard({ pack, priority = false, className }: PackCard
     }
   }, [items])
 
-  // Prix de référence
-  const refPrice = typeof oldPrice === 'number' && oldPrice > price
-    ? oldPrice
-    : (typeof compareAtPrice === 'number' && compareAtPrice > price ? compareAtPrice : (itemsValue && itemsValue > price ? itemsValue : undefined))
+  // Prix de référence (compare-at, oldPrice, somme des items)
+  const refPrice =
+    typeof oldPrice === 'number' && oldPrice > price
+      ? oldPrice
+      : (typeof compareAtPrice === 'number' && compareAtPrice > price
+          ? compareAtPrice
+          : (itemsValue && itemsValue > price ? itemsValue : undefined))
 
-  const discountPct = useMemo(() => (typeof refPrice === 'number'
-    ? Math.round(((refPrice - price) / refPrice) * 100)
-    : null), [refPrice, price])
+  const discountPct = useMemo(
+    () => (typeof refPrice === 'number' ? Math.round(((refPrice - price) / refPrice) * 100) : null),
+    [refPrice, price]
+  )
+  const savingsEuro = useMemo(
+    () => (typeof refPrice === 'number' ? Math.max(0, refPrice - price) : null),
+    [refPrice, price]
+  )
 
-  const savingsEuro = useMemo(() => (typeof refPrice === 'number' ? Math.max(0, refPrice - price) : null), [refPrice, price])
-
-  // i18n — URL localisée
+  // i18n — URL microdonnées localisée
   const locale = getCurrentLocale()
-  const packUrl = slug ? localizePath('/products/packs/' + slug, locale) : '#'
+  const urlPath = slug
+    ? localizePath('/products/packs/' + slug, locale)
+    : localizePath('/products/packs', locale)
 
   const hasRating = typeof rating === 'number' && !Number.isNaN(rating)
   const lowStock = typeof stock === 'number' && stock > 0 && stock <= 5
@@ -108,7 +118,6 @@ export default function PackCard({ pack, priority = false, className }: PackCard
   const onMouseMove = (e: MouseEvent<HTMLDivElement>) => {
     if (prefersReducedMotion) return
     try {
-      // skip devices sans hover
       if (window.matchMedia && !window.matchMedia('(hover:hover)').matches) return
     } catch {}
     const r = e.currentTarget.getBoundingClientRect()
@@ -147,12 +156,9 @@ export default function PackCard({ pack, priority = false, className }: PackCard
   }, [slug, title, price])
 
   const handleClick = useCallback((e?: React.MouseEvent) => {
-    if (!slug) {
-      if (e) e.preventDefault()
-      return
-    }
     try { logEvent({ action: 'pack_card_click', category: 'engagement', label: title, value: price }) } catch {}
     try { pushDataLayer({ event: 'select_pack', items: [{ item_id: slug, item_name: title, price }] }) } catch {}
+    if (!slug && e) e.preventDefault()
   }, [slug, title, price])
 
   // A11y helpers
@@ -178,11 +184,11 @@ export default function PackCard({ pack, priority = false, className }: PackCard
   // Style conique piloté par économie %
   const conicPercent = typeof discountPct === 'number' ? Math.max(8, Math.min(100, discountPct)) : 0
 
+  const href = slug ? `/products/packs/${slug}` : '/products/packs'
+
   return (
     <motion.article
       ref={cardRef}
-      aria-label={'Pack : ' + title}
-      aria-describedby={ariaDescribedBy}
       itemScope
       itemType="https://schema.org/Product"
       className={cn(
@@ -200,18 +206,21 @@ export default function PackCard({ pack, priority = false, className }: PackCard
       transition={{ duration: prefersReducedMotion ? 0 : 0.25, ease: 'easeOut' }}
       onMouseMove={onMouseMove}
       onMouseLeave={resetTilt}
+      aria-describedby={ariaDescribedBy}
       data-pack-id={slug}
     >
       <meta itemProp="name" content={title} />
       <meta itemProp="image" content={toAbs(mainImage)} />
-      {slug && <meta itemProp="url" content={packUrl} />} {/* ✅ fix */}
+      <meta itemProp="url" content={toAbs(urlPath)} />
       {brand && <meta itemProp="brand" content={brand} />}
       {sku && <meta itemProp="sku" content={sku} />}
 
       {hasRating && (
         <div itemProp="aggregateRating" itemScope itemType="https://schema.org/AggregateRating" className="hidden">
           <meta itemProp="ratingValue" content={rating!.toFixed(1)} />
-          {typeof reviewsCount === 'number' && <meta itemProp="reviewCount" content={String(Math.max(0, reviewsCount))} />}
+          {typeof reviewsCount === 'number' && (
+            <meta itemProp="reviewCount" content={String(Math.max(0, reviewsCount))} />
+          )}
         </div>
       )}
 
@@ -234,16 +243,18 @@ export default function PackCard({ pack, priority = false, className }: PackCard
         />
 
         <Link
-          href={packUrl} // ✅ fix
+          href={href}
           prefetch={false}
           className="block rounded-[inherit] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.60)]"
-          aria-label={'Voir le pack : ' + title}
           onClick={handleClick}
         >
-          <div className="relative w-full aspect-[4/3] bg-gray-100 dark:bg-zinc-800 sm:aspect-[16/9]" aria-busy={!imgLoaded}>
+          <div
+            className="relative w-full aspect-[4/3] bg-gray-100 dark:bg-zinc-800 sm:aspect-[16/9]"
+            aria-busy={!imgLoaded}
+          >
             <Image
               src={mainImage}
-              alt={'Image du pack ' + title}
+              alt="" /* image décorative : le titre porte le nom du produit */
               fill
               sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
               className="object-cover transition-transform duration-700 will-change-transform group-hover:scale-105"
@@ -258,22 +269,43 @@ export default function PackCard({ pack, priority = false, className }: PackCard
             />
 
             {!imgLoaded && (
-              <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-200/70 to-gray-100/40 dark:from-zinc-800/60 dark:to-zinc-900/40" aria-hidden />
+              <div
+                className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-200/70 to-gray-100/40 dark:from-zinc-800/60 dark:to-zinc-900/40"
+                aria-hidden
+              />
             )}
 
             <div className="pointer-events-none absolute left-3 top-3 z-10 flex select-none flex-col gap-2">
-              {isNew && <span className="rounded-full bg-green-600 px-2.5 py-0.5 text-[11px] font-semibold text-white shadow">Nouveau</span>}
-              {isBestSeller && <span className="rounded-full bg-yellow-400 px-2.5 py-0.5 text-[11px] font-semibold text-black shadow">Best Seller</span>}
+              {isNew && (
+                <span className="rounded-full bg-green-600 px-2.5 py-0.5 text-[11px] font-semibold text-white shadow">
+                  Nouveau
+                </span>
+              )}
+              {isBestSeller && (
+                <span className="rounded-full bg-yellow-400 px-2.5 py-0.5 text-[11px] font-semibold text-black shadow">
+                  Best Seller
+                </span>
+              )}
               {typeof discountPct === 'number' && (
-                <span className="rounded-full bg-red-600 px-2.5 py-0.5 text-[11px] font-semibold text-white shadow" aria-label={String(discountPct) + '% d’économie'}>
+                <span
+                  className="rounded-full bg-red-600 px-2.5 py-0.5 text-[11px] font-semibold text-white shadow"
+                  aria-label={String(discountPct) + '% d’économie'}
+                >
                   {'-' + discountPct + '%'}
                 </span>
               )}
-              {lowStock && <span className="rounded-full bg-amber-300/90 px-2.5 py-0.5 text-[11px] font-semibold text-amber-900 shadow">Stock faible</span>}
+              {lowStock && (
+                <span className="rounded-full bg-amber-300/90 px-2.5 py-0.5 text-[11px] font-semibold text-amber-900 shadow">
+                  Stock faible
+                </span>
+              )}
             </div>
 
             {hasRating && (
-              <div className="absolute right-3 top-3 rounded-full border border-gray-200/60 bg-white/90 px-2.5 py-1 text-xs shadow backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/90" aria-label={'Note moyenne : ' + rating!.toFixed(1) + ' étoiles'}>
+              <div
+                className="absolute right-3 top-3 rounded-full border border-gray-200/60 bg-white/90 px-2.5 py-1 text-xs shadow backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/90"
+                aria-label={'Note moyenne : ' + rating!.toFixed(1) + ' étoiles'}
+              >
                 <span className="text-yellow-500">★</span> {rating!.toFixed(1)}
               </div>
             )}
@@ -298,30 +330,35 @@ export default function PackCard({ pack, priority = false, className }: PackCard
               </p>
             )}
 
-            {/* Chips des 3 premiers items */}
-            {(() => {
-              const itemChips: string[] = Array.isArray(items)
-                ? items.slice(0, 3).map((it: any) => (it?.title || it?.name || it?.label || '')).filter(Boolean)
-                : []
-              return itemChips.length ? (
-                <ul className="mt-2 flex flex-wrap gap-1.5" aria-label="Aperçu des articles">
-                  {itemChips.map((n, i) => (
-                    <li key={i} className="rounded-md border border-token-border bg-token-surface px-2 py-1 text-[11px] text-token-text/80">
-                      {n}
-                    </li>
-                  ))}
-                </ul>
-              ) : null
-            })()}
+            {itemChips.length > 0 && (
+              <ul className="mt-2 flex flex-wrap gap-1.5" aria-label="Aperçu des articles">
+                {itemChips.map((n, i) => (
+                  <li
+                    key={i}
+                    className="rounded-md border border-token-border bg-token-surface px-2 py-1 text-[11px] text-token-text/80"
+                  >
+                    {n}
+                  </li>
+                ))}
+              </ul>
+            )}
 
             {description && (
               <p className="mt-2 line-clamp-3 text-sm text-gray-600 dark:text-gray-400">{description}</p>
             )}
 
-            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 sm:mt-4" itemProp="offers" itemScope itemType="https://schema.org/Offer">
+            <div
+              className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 sm:mt-4"
+              itemProp="offers"
+              itemScope
+              itemType="https://schema.org/Offer"
+            >
               <meta itemProp="priceCurrency" content="EUR" />
               <meta itemProp="itemCondition" content="https://schema.org/NewCondition" />
-              <link itemProp="availability" href={outOfStock ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock'} />
+              <link
+                itemProp="availability"
+                href={outOfStock ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock'}
+              />
               <meta itemProp="price" content={Math.max(0, Number(price || 0)).toFixed(2)} />
 
               <span className="text-lg font-extrabold text-brand sm:text-xl" aria-label={'Prix : ' + formatPrice(price)}>
@@ -334,7 +371,9 @@ export default function PackCard({ pack, priority = false, className }: PackCard
                     {formatPrice(refPrice)}
                   </span>
                   {typeof discountPct === 'number' && (
-                    <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">{'-' + discountPct + '%'}</span>
+                    <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                      {'-' + discountPct + '%'}
+                    </span>
                   )}
                 </>
               )}
@@ -346,9 +385,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
                   Vous économisez {formatPrice(savingsEuro)}
                 </p>
                 {typeof itemsValue === 'number' && (
-                  <span className="text-token-text/60">
-                    Valeur des articles : {formatPrice(itemsValue)}
-                  </span>
+                  <span className="text-token-text/60">Valeur des articles : {formatPrice(itemsValue)}</span>
                 )}
               </div>
             )}

@@ -1,6 +1,6 @@
 // src/app/page.tsx — Home ULTIME++ (perf/a11y/SEO centralisé, sans doublons)
 import type { Metadata } from 'next'
-import { Suspense, type ComponentProps } from 'react'
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 
 import { getBestProducts, getRecommendedPacks } from '@/lib/data'
@@ -9,6 +9,7 @@ import TrustBadges from '@/components/TrustBadges'
 import ClientTrackingScript from '@/components/ClientTrackingScript'
 import Link from '@/components/LocalizedLink'
 import { generateMeta } from '@/lib/seo'
+import { CATEGORIES } from '@/lib/categories'
 
 const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'))
 const BestProducts = dynamic(() => import('@/components/BestProducts'), {
@@ -63,84 +64,11 @@ function SectionHeader({
   )
 }
 
-/* ------------------- Icônes inline (remplace les emojis) ------------------- */
-function CatIcon({
-  name,
-  className = '',
-}: {
-  name: 'headphones' | 'keyboard' | 'mouse' | 'camera' | 'battery' | 'gift'
-  className?: string
-}) {
-  switch (name) {
-    case 'headphones':
-      return (
-        <svg className={className} viewBox="0 0 24 24" width={28} height={28} aria-hidden="true">
-          <path
-            fill="currentColor"
-            d="M12 3a8 8 0 0 0-8 8v7a3 3 0 0 0 3 3h1v-8H7a1 1 0 0 0-1 1v6a2 2 0 1 1 0-4V11a6 6 0 1 1 12 0v5a2 2 0 0 1 0 4v-6a1 1 0 0 0-1-1h-1v8h1a3 3 0 0 0 3-3v-7a8 8 0 0 0-8-8Z"
-          />
-        </svg>
-      )
-    case 'keyboard':
-      return (
-        <svg className={className} viewBox="0 0 24 24" width={28} height={28} aria-hidden="true">
-          <path
-            fill="currentColor"
-            d="M4 6h16a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Zm2 3h2v2H6V9Zm3 0h2v2H9V9Zm3 0h2v2h-2V9Zm3 0h2v2h-2V9ZM6 12h2v2H6v-2Zm3 0h6v2H9v-2Zm7 0h2v2h-2v-2Z"
-          />
-        </svg>
-      )
-    case 'mouse':
-      return (
-        <svg className={className} viewBox="0 0 24 24" width={28} height={28} aria-hidden="true">
-          <path
-            fill="currentColor"
-            d="M12 2a6 6 0 0 1 6 6v8a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8a6 6 0 0 1 6-6Zm0 2a4 4 0 0 0-4 4h4V4Zm0 0v4h4a4 4 0 0 0-4-4Z"
-          />
-        </svg>
-      )
-    case 'camera':
-      return (
-        <svg className={className} viewBox="0 0 24 24" width={28} height={28} aria-hidden="true">
-          <path
-            fill="currentColor"
-            d="M9 4h6l1 2h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3l1-2Zm3 4a6 6 0 1 0 .001 12.001A6 6 0 0 0 12 8Zm0 2a4 4 0 1 1-.001 8.001A4 4 0 0 1 12 10Z"
-          />
-        </svg>
-      )
-    case 'battery':
-      return (
-        <svg className={className} viewBox="0 0 24 24" width={28} height={28} aria-hidden="true">
-          <path
-            fill="currentColor"
-            d="M3 8a3 3 0 0 1 3-3h11a3 3 0 0 1 3 3v1h1v6h-1v1a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V8Zm3-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1H6Z"
-          />
-        </svg>
-      )
-    case 'gift':
-      return (
-        <svg className={className} viewBox="0 0 24 24" width={28} height={28} aria-hidden="true">
-          <path
-            fill="currentColor"
-            d="M20 7h-2.18A3 3 0 1 0 12 5a3 3 0 1 0-5.82 2H4a1 1 0 0 0-1 1v3h9V7h2v4h9V8a1 1 0 0 0-1-1ZM7 5a1 1 0 1 1 2 0 1 1 0 0 1-2 0Zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM3 12v7a2 2 0 0 0 2 2h7v-9H3Zm11 0v9h7a2 2 0 0 0 2-2v-7h-9Z"
-          />
-        </svg>
-      )
-  }
-  return null
-}
-
-type CatName = ComponentProps<typeof CatIcon>['name']
-
+/* --------------------- Catégories (icônes premium centrales) -------------------- */
 function FeaturedCategories() {
-  const CATS: ReadonlyArray<{ label: string; href: string; icon: CatName; desc: string }> = [
-    { label: 'Casques',   href: '/products?cat=casques',   icon: 'headphones', desc: 'Audio immersif' },
-    { label: 'Claviers',  href: '/products?cat=claviers',  icon: 'keyboard',   desc: 'Réactivité ultime' },
-    { label: 'Souris',    href: '/products?cat=souris',    icon: 'mouse',      desc: 'Précision chirurgicale' },
-    { label: 'Webcams',   href: '/products?cat=webcams',   icon: 'camera',     desc: 'Visio en HD' },
-    { label: 'Batteries', href: '/products?cat=batteries', icon: 'battery',    desc: 'Autonomie boost' },
-    { label: 'Packs',     href: '/products/packs',         icon: 'gift',       desc: 'Offres combinées' },
-  ]
+  // On affiche les catégories depuis le mapping central (zéro duplication).
+  const items = CATEGORIES.slice(0, 8)
+
   return (
     <section id="categories" aria-labelledby="cats-title" className="motion-section">
       <SectionHeader
@@ -149,8 +77,9 @@ function FeaturedCategories() {
         sub="Des sélections pointues pour aller droit au but."
       />
       <h3 id="cats-title" className="sr-only">Catégories vedettes</h3>
+
       <ul role="list" className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-6">
-        {CATS.map((c) => (
+        {items.map((c) => (
           <li key={c.href}>
             <Link
               href={c.href}
@@ -160,12 +89,7 @@ function FeaturedCategories() {
               data-cat={c.label}
               aria-label={`Voir la catégorie ${c.label} — ${c.desc}`}
             >
-              <span
-                aria-hidden="true"
-                className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent)/.10)] text-[hsl(var(--accent))]"
-              >
-                <CatIcon name={c.icon} />
-              </span>
+              <c.Icon className="opacity-80" />
               <div className="mt-3 font-semibold">{c.label}</div>
               <div className="text-xs text-token-text/60">{c.desc}</div>
               <div className="mt-3 text-xs font-semibold text-[hsl(var(--accent))] opacity-0 transition group-hover:opacity-100">

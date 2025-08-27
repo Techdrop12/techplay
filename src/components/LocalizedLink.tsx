@@ -5,17 +5,19 @@ import NextLink, { type LinkProps } from 'next/link'
 import type { UrlObject } from 'url'
 import { getCurrentLocale, localizePath, type Locale } from '@/lib/i18n-routing'
 import { forwardRef } from 'react'
+import type React from 'react'
 
 type Props = Omit<LinkProps, 'href'> &
   Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> & {
     href: string | UrlObject
     locale?: Locale
-    /** conserve le querystring courant (utile pour garder un tri/filtre) */
+    /** Conserve le querystring courant (utile pour garder un tri/filtre) */
     keepQuery?: boolean
   }
 
+/** Détecte toute URL absolue (http, https, mailto, tel, etc.) ou protocole relatif `//` */
 function isAbsolute(href: string) {
-  return /^https?:\/\//i.test(href) || href.startsWith('mailto:') || href.startsWith('tel:')
+  return /^(?:[a-z][a-z0-9+.-]*:)?\/\//i.test(href) || /^[a-z][a-z0-9+.-]*:/i.test(href)
 }
 
 function normalizeHref(
@@ -24,13 +26,19 @@ function normalizeHref(
   keepQuery?: boolean
 ): string | UrlObject {
   const loc = locale ?? getCurrentLocale()
+
   if (typeof href === 'string') {
+    // Laisse les URLs absolues et les schémas spéciaux intacts
     return isAbsolute(href) ? href : localizePath(href, loc, { keepQuery })
   }
-  // UrlObject -> on localise le pathname si présent
+
+  // UrlObject : on localise seulement si un pathname est défini & relatif
   const next: UrlObject = { ...href }
-  const p = typeof href.pathname === 'string' ? href.pathname : '/'
-  next.pathname = isAbsolute(p) ? p : localizePath(p, loc, { keepQuery })
+  const p = typeof href.pathname === 'string' ? href.pathname : undefined
+
+  if (p && !isAbsolute(p)) {
+    next.pathname = localizePath(p, loc, { keepQuery })
+  }
   return next
 }
 

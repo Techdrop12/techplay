@@ -9,7 +9,7 @@ import {
   type MouseEvent as ReactMouseEvent,
   useCallback,
 } from 'react'
-import Link from 'next/link'
+import Link from '@/components/LocalizedLink'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { motion, useReducedMotion } from 'framer-motion'
@@ -89,7 +89,7 @@ export default function ProductCard({
     title = 'Produit',
     price: priceRaw = 0,
     oldPrice: oldPriceRaw,
-    image = '/og-image.jpg', // fallback unifié au site
+    image = '/og-image.jpg',
     images,
     rating,
     isNew,
@@ -154,7 +154,7 @@ export default function ProductCard({
   const pathname = usePathname() || '/'
   const locale = getCurrentLocale(pathname)
   const productUrl = useMemo(
-    () => (slug ? localizePath('/products/' + slug, locale) : '#'),
+    () => (slug ? localizePath('/products/' + slug, locale) : localizePath('/products', locale)),
     [slug, locale]
   )
 
@@ -207,7 +207,11 @@ export default function ProductCard({
       logEvent({ action: 'product_card_click', category: 'engagement', label: title, value: price })
     } catch {}
     try {
-      pushDataLayer({ event: 'select_item', item_list_name: 'product_grid', items: [{ item_id: _id || sku, item_name: title, price }] })
+      pushDataLayer({
+        event: 'select_item',
+        item_list_name: 'product_grid',
+        items: [{ item_id: _id || sku, item_name: title, price }],
+      })
     } catch {}
   }, [_id, sku, slug, title, price])
 
@@ -233,6 +237,8 @@ export default function ProductCard({
     })
   }
   const resetTilt = () => setTilt({ rx: 0, ry: 0 })
+
+  const href = slug ? `/products/${slug}` : `/products`
 
   return (
     <motion.article
@@ -261,14 +267,16 @@ export default function ProductCard({
       {/* Microdonnées enrichies */}
       <meta itemProp="name" content={title} />
       <meta itemProp="image" content={toAbs(mainImage)} />
-      {slug && <meta itemProp="url" content={productUrl} />}
+      {slug && <meta itemProp="url" content={toAbs(productUrl)} />}
       {brand && <meta itemProp="brand" content={String(brand)} />}
       {sku && <meta itemProp="sku" content={sku} />}
       {hasRating && (
-        <span itemProp="aggregateRating" itemScope itemType="https://schema.org/AggregateRating" className="sr-only">
+        <div itemProp="aggregateRating" itemScope itemType="https://schema.org/AggregateRating" className="hidden">
           <meta itemProp="ratingValue" content={rating!.toFixed(1)} />
-          {typeof reviewsCount === 'number' && <meta itemProp="reviewCount" content={String(Math.max(0, reviewsCount))} />}
-        </span>
+          {typeof reviewsCount === 'number' && (
+            <meta itemProp="reviewCount" content={String(Math.max(0, reviewsCount))} />
+          )}
+        </div>
       )}
 
       <motion.div
@@ -288,18 +296,17 @@ export default function ProductCard({
 
         {/* Zone cliquable (image + contenu) */}
         <Link
-          href={productUrl}
+          href={href}
           prefetch={false}
           className="block rounded-[inherit] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.60)]"
-          aria-label={'Voir la fiche produit : ' + title}
           onClick={handleClick}
         >
           {/* Image (swap sur hover si images[1]) */}
           <div className="relative aspect-[4/3] w-full bg-gray-100 dark:bg-zinc-800" aria-busy={!imgLoaded}>
-            {/* Image principale */}
+            {/* Image principale — décorative (le titre fait le libellé) */}
             <Image
               src={mainImage}
-              alt={'Image du produit ' + title}
+              alt=""
               fill
               sizes="(min-width:1024px) 25vw, (min-width:640px) 33vw, 100vw"
               className={cn(
@@ -439,7 +446,7 @@ export default function ProductCard({
               </p>
             )}
 
-            {/* Microcopie seuil livraison (version compacte, évite doublons) */}
+            {/* Microcopie seuil livraison (version compacte) */}
             <FreeShippingBadge price={price} minimal className="mt-2" />
           </div>
         </Link>

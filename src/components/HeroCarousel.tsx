@@ -150,12 +150,15 @@ export default function HeroCarousel({
   onSlideChange,
 }: HeroCarouselProps) {
   const pathname = usePathname() || '/'
-  const locale = getCurrentLocale(pathname)
+  const locale = getCurrentLocale(pathname) // 'fr' | 'en'
 
   const total = Math.max(0, slides.length)
   const [index, setIndex] = useState(0)
+
+  // Pause states: distinction utilisateur vs auto (hover/IO/visibility)
   const [isPaused, setPaused] = useState(false)
-  const pausedRef = useRef(false)
+  const userPausedRef = useRef(false)
+
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const touchStartX = useRef<number | null>(null)
   const prefersReducedMotion = useReducedMotion()
@@ -166,40 +169,39 @@ export default function HeroCarousel({
 
   const effectiveAutoplay = autoplay && !prefersReducedMotion && total > 1
 
-  const lang =
-    typeof document !== 'undefined'
-      ? document.documentElement.lang || 'fr'
-      : 'fr'
-
   const t = useMemo(() => {
-    if (lang.startsWith('en')) {
-      return {
-        mainLabel: 'TechPlay main carousel',
-        prev: 'Previous slide',
-        next: 'Next slide',
-        pause: 'Pause carousel',
-        play: 'Play carousel',
-        nav: 'Carousel navigation',
-        thumbs: 'Carousel thumbnails',
-        goTo: 'Go to slide ',
-        of: ' of ',
-        instructions: 'Use left and right arrows to navigate, Space to pause or resume.',
-      }
-    }
-    return {
-      mainLabel: 'Carrousel principal TechPlay',
-      prev: 'Diapositive précédente',
-      next: 'Diapositive suivante',
-      pause: 'Mettre le carrousel en pause',
-      play: 'Lancer le carrousel',
-      nav: 'Navigation du carrousel',
-      thumbs: 'Miniatures du carrousel',
-      goTo: 'Aller à la diapositive ',
-      of: ' sur ',
-      instructions:
-        'Utilisez les flèches gauche/droite pour naviguer, Espace pour mettre en pause ou relancer.',
-    }
-  }, [lang])
+    const en = locale === 'en'
+    return en
+      ? {
+          mainLabel: 'TechPlay main carousel',
+          prev: 'Previous slide',
+          next: 'Next slide',
+          pause: 'Pause carousel',
+          play: 'Play carousel',
+          nav: 'Carousel navigation',
+          thumbs: 'Carousel thumbnails',
+          goTo: 'Go to slide ',
+          of: ' of ',
+          instructions: 'Use left and right arrows to navigate, Space to pause or resume.',
+          btnPlay: 'Play',
+          btnPause: 'Pause',
+        }
+      : {
+          mainLabel: 'Carrousel principal TechPlay',
+          prev: 'Diapositive précédente',
+          next: 'Diapositive suivante',
+          pause: 'Mettre le carrousel en pause',
+          play: 'Lancer le carrousel',
+          nav: 'Navigation du carrousel',
+          thumbs: 'Miniatures du carrousel',
+          goTo: 'Aller à la diapositive ',
+          of: ' sur ',
+          instructions:
+            'Utilisez les flèches gauche/droite pour naviguer, Espace pour mettre en pause ou relancer.',
+          btnPlay: 'Lire',
+          btnPause: 'Pause',
+        }
+  }, [locale])
 
   const current = useMemo(() => slides[index], [slides, index])
 
@@ -215,33 +217,59 @@ export default function HeroCarousel({
   const next = useCallback(() => { setIndex((i) => (total ? (i + 1) % total : 0)); pushDL('hero_next', { index: index + 1 }) }, [total, index])
   const prev = useCallback(() => { setIndex((i) => (total ? (i - 1 + total) % total : 0)); pushDL('hero_prev', { index: index - 1 }) }, [total, index])
   const startTimer = useCallback(() => {
-    if (pausedRef.current || !effectiveAutoplay) return
+    if (!effectiveAutoplay) return
     clearTimer()
     timerRef.current = setInterval(next, intervalMs)
   }, [effectiveAutoplay, intervalMs, next])
-  const pause = useCallback(() => { pausedRef.current = true; setPaused(true); clearTimer(); pushDL('hero_paused') }, [])
-  const resume = useCallback(() => { pausedRef.current = false; setPaused(false); startTimer(); pushDL('hero_resumed') }, [startTimer])
 
+  // Pauses
+  const pauseUser = useCallback(() => {
+    userPausedRef.current = true
+    setPaused(true)
+    clearTimer()
+    pushDL('hero_paused_user')
+  }, [])
+  const resumeUser = useCallback(() => {
+    userPausedRef.current = false
+    setPaused(false)
+    startTimer()
+    pushDL('hero_resumed_user')
+  }, [startTimer])
+
+  const autoPause = useCallback(() => {
+    if (userPausedRef.current) return
+    setPaused(true)
+    clearTimer()
+  }, [])
+  const autoResume = useCallback(() => {
+    if (userPausedRef.current) return
+    setPaused(false)
+    startTimer()
+  }, [startTimer])
+
+  // Lifecycle timer
   useEffect(() => { startTimer(); return clearTimer }, [startTimer])
 
+  // Onglet masqué/visible → auto pause/resume (sans casser la pause utilisateur)
   useEffect(() => {
-    const onVis = () => (document.hidden ? pause() : resume())
+    const onVis = () => (document.hidden ? autoPause() : autoResume())
     document.addEventListener('visibilitychange', onVis)
     return () => document.removeEventListener('visibilitychange', onVis)
-  }, [pause, resume])
+  }, [autoPause, autoResume])
 
+  // Hors écran → auto pause/resume
   useEffect(() => {
     if (!pauseWhenHidden || typeof window === 'undefined') return
     const el = containerRef.current
     if (!el) return
     const io = new IntersectionObserver((entries) => {
       const v = entries[0]?.isIntersecting
-      if (v) resume()
-      else pause()
+      if (v) autoResume()
+      else autoPause()
     }, { threshold: 0.4 })
     io.observe(el)
     return () => io.disconnect()
-  }, [pauseWhenHidden, pause, resume])
+  }, [pauseWhenHidden, autoPause, autoResume])
 
   // Warm cache of next/prev images (desktop + mobile)
   useEffect(() => {
@@ -257,31 +285,32 @@ export default function HeroCarousel({
     urls.forEach((src) => { const img = new window.Image(); img.src = src })
   }, [index, slides, total])
 
+  // ARIA live (annonce slide courant)
   useEffect(() => {
     onSlideChange?.(index, current)
     try {
       const el = document.getElementById(srId)
       if (el) el.textContent =
-        (lang.startsWith('en') ? 'Slide ' : 'Diapositive ') +
+        (locale === 'en' ? 'Slide ' : 'Diapositive ') +
         (index + 1) + t.of + total + ': ' + (current?.alt || '')
     } catch {}
-  }, [index, current, total, onSlideChange, srId, t, lang])
+  }, [index, current, total, onSlideChange, srId, t, locale])
 
-  const onTouchStart: React.TouchEventHandler<HTMLDivElement> = (e) => { touchStartX.current = e.touches[0].clientX; if (pauseOnHover) pause() }
+  const onTouchStart: React.TouchEventHandler<HTMLDivElement> = (e) => { touchStartX.current = e.touches[0].clientX; if (pauseOnHover) autoPause() }
   const onTouchEnd: React.TouchEventHandler<HTMLDivElement> = (e) => {
-    if (touchStartX.current == null) return resume()
+    if (touchStartX.current == null) return autoResume()
     const delta = e.changedTouches[0].clientX - touchStartX.current
     touchStartX.current = null
     if (Math.abs(delta) > swipeThreshold) (delta > 0 ? prev() : next())
-    resume()
+    autoResume()
   }
 
   const onKeyDown: React.KeyboardEventHandler = (e) => {
-    if (e.key === 'ArrowRight') { pause(); next(); resume() }
-    else if (e.key === 'ArrowLeft') { pause(); prev(); resume() }
-    else if (e.key === 'Home') { pause(); setIndex(total ? 0 : 0); resume() }
-    else if (e.key === 'End') { pause(); setIndex(total ? total - 1 : 0); resume() }
-    else if (e.key === ' ' || e.key === 'Spacebar' || e.key === 'Space') { e.preventDefault(); isPaused ? resume() : pause() }
+    if (e.key === 'ArrowRight') { autoPause(); next(); autoResume() }
+    else if (e.key === 'ArrowLeft') { autoPause(); prev(); autoResume() }
+    else if (e.key === 'Home') { autoPause(); setIndex(total ? 0 : 0); autoResume() }
+    else if (e.key === 'End') { autoPause(); setIndex(total ? total - 1 : 0); autoResume() }
+    else if (e.key === ' ' || e.key === 'Spacebar' || e.key === 'Space') { e.preventDefault(); isPaused ? resumeUser() : pauseUser() }
   }
 
   if (total === 0) return null
@@ -298,7 +327,6 @@ export default function HeroCarousel({
     <section
       ref={containerRef}
       className={cn(
-        // fix: la classe Tailwind correcte est h-[60vh] (il y avait un caractère pleine largeur)
         'relative h-[60vh] sm:h-[72vh] lg:h-[88vh] w-full overflow-hidden rounded-none sm:rounded-3xl shadow-2xl select-none',
         'bg-token-surface/60 will-change-transform touch-pan-y',
         className
@@ -308,10 +336,10 @@ export default function HeroCarousel({
       aria-label={t.mainLabel}
       aria-describedby={instructionsId}
       aria-live="off"
-      onMouseEnter={pauseOnHover ? pause : undefined}
-      onMouseLeave={pauseOnHover ? resume : undefined}
-      onFocus={pauseOnHover ? pause : undefined}
-      onBlur={pauseOnHover ? resume : undefined}
+      onMouseEnter={pauseOnHover ? autoPause : undefined}
+      onMouseLeave={pauseOnHover ? autoResume : undefined}
+      onFocus={pauseOnHover ? autoPause : undefined}
+      onBlur={pauseOnHover ? autoResume : undefined}
       onKeyDown={onKeyDown}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
@@ -358,13 +386,13 @@ export default function HeroCarousel({
                 poster={current.poster || desktopSrc}
                 disablePictureInPicture
                 controls={false}
-                onPlay={(e: SyntheticEvent<HTMLVideoElement>) => { if (isPaused) e.currentTarget.pause() }}
+                onPlay={(e: SyntheticEvent<HTMLVideoElement>) => { if (userPausedRef.current) e.currentTarget.pause() }}
               >
                 <source src={current.videoUrl} type="video/mp4" />
               </video>
             ) : (
               <>
-                {/* a11y: images décoratives → alt="" pour éviter la double lecture (le slide a déjà aria-label) */}
+                {/* a11y: images décoratives → alt="" (le slide a déjà aria-label) */}
                 <Image
                   src={mobileSrc}
                   alt=""
@@ -471,7 +499,7 @@ export default function HeroCarousel({
               'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60 sm:left-4 sm:h-12 sm:w-12'
             )}
             data-gtm="hero_prev"
-            onClick={() => { pause(); prev(); resume() }}
+            onClick={() => { autoPause(); prev(); autoResume() }}
           >
             <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
               <path fill="currentColor" d="M15.78 19.78L8 12l7.78-7.78l1.44 1.44L10.88 12l6.34 6.34z" />
@@ -486,7 +514,7 @@ export default function HeroCarousel({
               'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60 sm:right-4 sm:h-12 sm:w-12'
             )}
             data-gtm="hero_next"
-            onClick={() => { pause(); next(); resume() }}
+            onClick={() => { autoPause(); next(); autoResume() }}
           >
             <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
               <path fill="currentColor" d="M8.22 4.22L16 12l-7.78 7.78l-1.44-1.44L13.12 12L6.78 5.66z" />
@@ -498,9 +526,9 @@ export default function HeroCarousel({
       {showPlayPause && total > 1 && (
         <button
           type="button"
-          onClick={() => (isPaused ? resume() : pause())}
-          aria-label={isPaused ? t.play : t.pause}
-          aria-pressed={isPaused}
+          onClick={() => (userPausedRef.current ? resumeUser() : pauseUser())}
+          aria-label={userPausedRef.current ? t.play : t.pause}
+          aria-pressed={userPausedRef.current}
           className={cn(
             'supports-backdrop:glass absolute right-3 top-3 z-20 rounded-full px-3 py-2 text-xs font-semibold text-white',
             'bg-black/40 backdrop-blur hover:bg-black/55 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60'
@@ -508,8 +536,8 @@ export default function HeroCarousel({
           data-gtm="hero_toggle"
         >
           <span className="inline-flex items-center gap-1.5">
-            {isPaused ? <IconPlay /> : <IconPause />}
-            <span>{isPaused ? (lang.startsWith('en') ? 'Play' : 'Lire') : (lang.startsWith('en') ? 'Pause' : 'Pause')}</span>
+            {userPausedRef.current ? <IconPlay /> : <IconPause />}
+            <span>{userPausedRef.current ? t.btnPlay : t.btnPause}</span>
           </span>
         </button>
       )}
@@ -525,7 +553,7 @@ export default function HeroCarousel({
             const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
             const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
             const target = Math.min(total - 1, Math.floor(ratio * total))
-            pause(); setIndex(target); resume()
+            autoPause(); setIndex(target); autoResume()
             pushDL('hero_seek', { target })
           }}
           style={progressClickable ? { cursor: 'pointer' } : undefined}
@@ -559,7 +587,7 @@ export default function HeroCarousel({
                     aria-current={active ? 'true' : undefined}
                     data-gtm="hero_bullet"
                     data-idx={i}
-                    onClick={() => { pause(); setIndex(i); resume() }}
+                    onClick={() => { autoPause(); setIndex(i); autoResume() }}
                   />
                 </li>
               )
@@ -583,11 +611,11 @@ export default function HeroCarousel({
                       active ? 'border-[hsl(var(--accent))] ring-2 ring-[hsl(var(--accent))]'
                              : 'border-white/60 hover:border-white'
                     )}
-                    aria-label={(lang.startsWith('en') ? 'Go to slide ' : 'Aller à la diapositive ') + (i + 1)}
+                    aria-label={(locale === 'en' ? 'Go to slide ' : 'Aller à la diapositive ') + (i + 1)}
                     aria-current={active ? 'true' : undefined}
                     data-gtm="hero_thumb"
                     data-idx={i}
-                    onClick={() => { pause(); setIndex(i); resume() }}
+                    onClick={() => { autoPause(); setIndex(i); autoResume() }}
                   >
                     <Image
                       src={thumb}

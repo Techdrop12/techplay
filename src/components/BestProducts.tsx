@@ -2,9 +2,11 @@
 
 import { motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import type { Product } from '@/types/product'
 import ProductCard from '@/components/ProductCard'
 import { cn } from '@/lib/utils'
+import { getCurrentLocale } from '@/lib/i18n-routing'
 
 type SortKey = 'popular' | 'priceAsc' | 'priceDesc' | 'rating'
 
@@ -75,6 +77,63 @@ export default function BestProducts({
   initialSort = 'popular',
   autoLoadOnIntersect = true,
 }: BestProductsProps) {
+  const pathname = usePathname() || '/'
+  const locale = getCurrentLocale(pathname)
+  const t = useMemo(() => {
+    if (locale === 'en') {
+      return {
+        sub: 'Community favorites — limited stock.',
+        display: 'Showing',
+        of: 'of',
+        promo: 'On sale',
+        inStock: 'In stock',
+        filterPromoAria: 'Filter: on sale',
+        filterStockAria: 'Filter: in stock',
+        sortLabel: 'Sort products',
+        sort: {
+          popular: 'Popularity',
+          priceAsc: 'Price ↑',
+          priceDesc: 'Price ↓',
+          rating: 'Rating',
+        },
+        sortAnnounce: (k: SortKey) =>
+          `Sorted by ${k === 'popular' ? 'popularity' : k === 'priceAsc' ? 'price ascending' : k === 'priceDesc' ? 'price descending' : 'rating'}.`,
+        filterPromoAnnounce: (on: boolean) => `Sale filter ${on ? 'enabled' : 'disabled'}.`,
+        filterStockAnnounce: (on: boolean) => `In-stock filter ${on ? 'enabled' : 'disabled'}.`,
+        seeMore: 'Show more',
+        allShown: 'All products are displayed.',
+        moreShown: (n: number) => `${n} additional products displayed.`,
+        loading: 'Loading best sellers…',
+        noscript: 'See all products',
+      }
+    }
+    return {
+      sub: 'Les favoris de la communauté — stock limité.',
+      display: 'Affichage',
+      of: 'sur',
+      promo: 'Promo',
+      inStock: 'En stock',
+      filterPromoAria: 'Filtrer: en promotion',
+      filterStockAria: 'Filtrer: en stock',
+      sortLabel: 'Trier les produits',
+      sort: {
+        popular: 'Popularité',
+        priceAsc: 'Prix ↑',
+        priceDesc: 'Prix ↓',
+        rating: 'Note',
+      },
+      sortAnnounce: (k: SortKey) =>
+        `Tri par ${k === 'popular' ? 'popularité' : k === 'priceAsc' ? 'prix croissant' : k === 'priceDesc' ? 'prix décroissant' : 'note'}.`,
+      filterPromoAnnounce: (on: boolean) => `Filtre promotion ${on ? 'activé' : 'désactivé'}.`,
+      filterStockAnnounce: (on: boolean) => `Filtre en stock ${on ? 'activé' : 'désactivé'}.`,
+      seeMore: 'Voir plus',
+      allShown: 'Tous les produits sont affichés.',
+      moreShown: (n: number) => `${n} produits supplémentaires affichés.`,
+      loading: 'Chargement des meilleures ventes…',
+      noscript: 'Voir tous les produits',
+    }
+  }, [locale])
+
   const headingId = useId()
   const subId = `${headingId}-sub`
   const gridId = `${headingId}-grid`
@@ -129,20 +188,23 @@ export default function BestProducts({
   useEffect(() => {
     if (!expanded) return
     const remaining = Math.max(0, filteredSorted.length - (limit || 0))
-    if (remaining > 0) setAnnounce(`${remaining} produits supplémentaires affichés.`)
-  }, [expanded, filteredSorted.length, limit])
+    if (remaining > 0) setAnnounce(t.moreShown(remaining))
+  }, [expanded, filteredSorted.length, limit, t])
 
-  // auto-load au scroll : sentinel présent dans le flux (h-px/opacity-0)
+  // auto-load au scroll
   useEffect(() => {
     if (!autoLoadOnIntersect || expanded) return
     const el = sentinelRef.current
     if (!el) return
-    const io = new IntersectionObserver((entries) => {
-      if (entries[0]?.isIntersecting) {
-        setExpanded(true)
-        pushDL('best_products_autoload')
-      }
-    }, { threshold: 0.3 })
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setExpanded(true)
+          pushDL('best_products_autoload')
+        }
+      },
+      { threshold: 0.3, rootMargin: '120px' }
+    )
     io.observe(el)
     return () => io.disconnect()
   }, [autoLoadOnIntersect, expanded])
@@ -156,7 +218,7 @@ export default function BestProducts({
           ))}
         </div>
         <p className="mt-6 text-center text-sm text-token-text/70" role="status" aria-live="polite">
-          Chargement des meilleures ventes…
+          {t.loading}
         </p>
       </section>
     )
@@ -178,7 +240,7 @@ export default function BestProducts({
             {title}
           </h2>
           <p id={subId} className="mb-6 text-center text-sm text-token-text/70">
-            Les favoris de la communauté — stock limité.
+            {t.sub}
             <span className="sr-only"> {totalCount} produits disponibles.</span>
           </p>
         </>
@@ -186,7 +248,7 @@ export default function BestProducts({
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div className="text-xs text-token-text/70" aria-live="polite">
-          Affichage&nbsp;<span className="font-semibold">{visibleCount}</span>&nbsp;/&nbsp;<span>{totalCount}</span>
+          {t.display}&nbsp;<span className="font-semibold">{visibleCount}</span>&nbsp;/&nbsp;<span>{totalCount}</span>
         </div>
 
         {showControls && (
@@ -196,7 +258,7 @@ export default function BestProducts({
               onClick={() => {
                 setFilterPromo((v) => {
                   const nv = !v
-                  setAnnounce(`Filtre promotion ${nv ? 'activé' : 'désactivé'}.`)
+                  setAnnounce(t.filterPromoAnnounce(nv))
                   pushDL('best_products_filter', { promo: nv })
                   return nv
                 })
@@ -208,9 +270,9 @@ export default function BestProducts({
               )}
               aria-pressed={filterPromo}
               aria-controls={gridId}
-              aria-label="Filtrer: en promotion"
+              aria-label={t.filterPromoAria}
             >
-              Promo
+              {t.promo}
             </button>
 
             <button
@@ -218,7 +280,7 @@ export default function BestProducts({
               onClick={() => {
                 setFilterStock((v) => {
                   const nv = !v
-                  setAnnounce(`Filtre en stock ${nv ? 'activé' : 'désactivé'}.`)
+                  setAnnounce(t.filterStockAnnounce(nv))
                   pushDL('best_products_filter', { stock: nv })
                   return nv
                 })
@@ -230,12 +292,12 @@ export default function BestProducts({
               )}
               aria-pressed={filterStock}
               aria-controls={gridId}
-              aria-label="Filtrer: en stock"
+              aria-label={t.filterStockAria}
             >
-              En stock
+              {t.inStock}
             </button>
 
-            <label className="sr-only" htmlFor={headingId + '-sort'}>Trier</label>
+            <label className="sr-only" htmlFor={headingId + '-sort'}>{t.sortLabel}</label>
             <select
               id={headingId + '-sort'}
               className="rounded-xl border border-token-border bg-token-surface px-3 py-1.5 text-xs font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
@@ -243,16 +305,16 @@ export default function BestProducts({
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                 const v = (e.currentTarget.value as SortKey) || 'popular'
                 setSortBy(v)
-                setAnnounce(`Tri par ${v === 'popular' ? 'popularité' : v === 'priceAsc' ? 'prix croissant' : v === 'priceDesc' ? 'prix décroissant' : 'note'}.`)
+                setAnnounce(t.sortAnnounce(v))
                 pushDL('best_products_sort', { sort: v })
               }}
-              aria-label="Trier les produits"
+              aria-label={t.sortLabel}
               aria-controls={gridId}
             >
-              <option value="popular">Popularité</option>
-              <option value="priceAsc">Prix ↑</option>
-              <option value="priceDesc">Prix ↓</option>
-              <option value="rating">Note</option>
+              <option value="popular">{t.sort.popular}</option>
+              <option value="priceAsc">{t.sort.priceAsc}</option>
+              <option value="priceDesc">{t.sort.priceDesc}</option>
+              <option value="rating">{t.sort.rating}</option>
             </select>
           </div>
         )}
@@ -304,12 +366,12 @@ export default function BestProducts({
         <div className="mt-8 flex flex-col items-center">
           <button
             type="button"
-            onClick={() => { setExpanded(true); setAnnounce('Tous les produits sont affichés.'); pushDL('best_products_see_more_click') }}
+            onClick={() => { setExpanded(true); setAnnounce(t.allShown); pushDL('best_products_see_more_click') }}
             className="inline-flex items-center gap-2 rounded-full border border-token-border bg-token-surface px-5 py-2.5 text-sm font-semibold shadow-sm transition hover:shadow focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
             aria-controls={gridId}
             aria-expanded={expanded ? 'true' : 'false'}
           >
-            Voir plus
+            {t.seeMore}
             <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" className="opacity-80">
               <path fill="currentColor" d="M7 10l5 5 5-5z" />
             </svg>
@@ -330,7 +392,7 @@ export default function BestProducts({
 
       <noscript>
         <p className="mt-6 text-center">
-          <a href="/products">Voir tous les produits</a>
+          <a href="/products">{t.noscript}</a>
         </p>
       </noscript>
     </section>

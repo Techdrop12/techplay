@@ -1,3 +1,4 @@
+// src/lib/categories.tsx
 import React from 'react'
 import { cn } from '@/lib/utils'
 
@@ -97,8 +98,8 @@ export type CategoryDef = {
   Icon: React.FC<IconProps>
 }
 
-/** Mapping centralisé (réutilisable partout) */
-export const CATEGORIES: Readonly<CategoryDef[]> = [
+/* ============================= Données i18n ============================== */
+const CATS_FR: Readonly<CategoryDef[]> = [
   { slug: 'casques',   label: 'Casques',   desc: 'Audio immersif',       href: '/products?cat=casques',   Icon: HeadphonesIcon },
   { slug: 'claviers',  label: 'Claviers',  desc: 'Mécas & low-profile',  href: '/products?cat=claviers',  Icon: KeyboardIcon },
   { slug: 'souris',    label: 'Souris',    desc: 'Précision & confort',  href: '/products?cat=souris',    Icon: MouseIcon },
@@ -107,4 +108,26 @@ export const CATEGORIES: Readonly<CategoryDef[]> = [
   { slug: 'audio',     label: 'Audio',     desc: 'Enceintes & DAC',      href: '/products?cat=audio',     Icon: SpeakerIcon },
   { slug: 'stockage',  label: 'Stockage',  desc: 'SSD & cartes',         href: '/products?cat=stockage',  Icon: DriveIcon },
   { slug: 'ecrans',    label: 'Écrans',    desc: '144Hz et +',           href: '/products?cat=ecrans',    Icon: MonitorIcon },
-]
+] as const
+
+const CATS_EN: Readonly<CategoryDef[]> = [
+  { slug: 'casques',   label: 'Headphones', desc: 'Immersive audio',    href: '/products?cat=casques',   Icon: HeadphonesIcon },
+  { slug: 'claviers',  label: 'Keyboards',  desc: 'Mech & low-profile', href: '/products?cat=claviers',  Icon: KeyboardIcon },
+  { slug: 'souris',    label: 'Mice',       desc: 'Precision & comfort',href: '/products?cat=souris',    Icon: MouseIcon },
+  { slug: 'webcams',   label: 'Webcams',    desc: 'HD video calls',     href: '/products?cat=webcams',   Icon: CameraIcon },
+  { slug: 'batteries', label: 'Batteries',  desc: 'Power & hubs',       href: '/products?cat=batteries', Icon: BatteryIcon },
+  { slug: 'audio',     label: 'Audio',      desc: 'Speakers & DAC',     href: '/products?cat=audio',     Icon: SpeakerIcon },
+  { slug: 'stockage',  label: 'Storage',    desc: 'SSD & cards',        href: '/products?cat=stockage',  Icon: DriveIcon },
+  { slug: 'ecrans',    label: 'Monitors',   desc: '144Hz and up',       href: '/products?cat=ecrans',    Icon: MonitorIcon },
+] as const
+
+/** Helper i18n — renvoie les catégories localisées (labels/desc). */
+export function getCategories(locale: 'fr' | 'en' = 'fr'): Readonly<CategoryDef[]> {
+  return locale === 'en' ? CATS_EN : CATS_FR
+}
+
+/** Compat : export historique (FR par défaut). */
+export const CATEGORIES: Readonly<CategoryDef[]> = CATS_FR
+
+/** Union pratique des slugs */
+export type CategorySlug = typeof CATS_FR[number]['slug']

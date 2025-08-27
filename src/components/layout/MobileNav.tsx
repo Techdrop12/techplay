@@ -1,4 +1,4 @@
-// src/components/layout/MobileNav.tsx — i18n-safe, icônes premium, catégories centralisées — FINAL
+// src/components/layout/MobileNav.tsx — i18n-safe, icônes premium, catégories centralisées — FINAL++
 'use client'
 
 import Link from '@/components/LocalizedLink'
@@ -9,28 +9,70 @@ import { useCart } from '@/hooks/useCart'
 import { useWishlist } from '@/hooks/useWishlist'
 import ThemeToggle from '@/components/ui/ThemeToggle'
 import { event as gaEvent, logEvent } from '@/lib/ga'
-import { CATEGORIES } from '@/lib/categories'
+import { getCategories } from '@/lib/categories'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
-type NavItem = { href: string; label: string }
-
-const NAV: Readonly<NavItem[]> = [
-  { href: '/products', label: 'Produits' },
-  { href: '/categorie', label: 'Catégories' },
-  { href: '/wishlist', label: 'Wishlist' },
-  { href: '/blog', label: 'Blog' },
-  { href: '/contact', label: 'Contact' },
-  { href: '/products?promo=1', label: 'Offres' },
-]
-
-const SEARCH_TRENDS = [
-  'écouteurs bluetooth',
-  'casque gaming',
-  'chargeur rapide USB-C',
-  'pack starter',
-  'power bank',
-  'souris sans fil',
-]
+/* ----------------------------- i18n strings ------------------------------ */
+const STR = {
+  fr: {
+    nav: [
+      { href: '/products', label: 'Produits' },
+      { href: '/categorie', label: 'Catégories' },
+      { href: '/wishlist', label: 'Wishlist' },
+      { href: '/blog', label: 'Blog' },
+      { href: '/contact', label: 'Contact' },
+      { href: '/products?promo=1', label: 'Offres', promo: true },
+    ],
+    ui: {
+      openMenu: 'Ouvrir le menu mobile',
+      closeMenu: 'Fermer le menu mobile',
+      menu: 'Menu',
+      searchAria: 'Recherche produits',
+      searchBtn: 'Lancer la recherche',
+      placeholderPrefix: 'Rechercher… ex:',
+      recent: 'Recherches récentes',
+      clear: 'Effacer',
+      categories: 'Catégories',
+      wishlist: (n: number) => (n > 0 ? `Voir la wishlist (${n})` : 'Voir la wishlist'),
+      account: 'Espace client',
+      cart: (n: number) => (n > 0 ? `Voir le panier (${n})` : 'Voir le panier'),
+      installApp: 'Installer l’app',
+      installAppTitle: 'Installer l’application',
+      dealsAria: 'Voir les offres du jour',
+      dealsTitle: 'Offres du jour',
+    },
+    trends: ['écouteurs bluetooth', 'casque gaming', 'chargeur rapide USB-C', 'pack starter', 'power bank', 'souris sans fil'],
+  },
+  en: {
+    nav: [
+      { href: '/products', label: 'Products' },
+      { href: '/categorie', label: 'Categories' },
+      { href: '/wishlist', label: 'Wishlist' },
+      { href: '/blog', label: 'Blog' },
+      { href: '/contact', label: 'Contact' },
+      { href: '/products?promo=1', label: 'Deals', promo: true },
+    ],
+    ui: {
+      openMenu: 'Open mobile menu',
+      closeMenu: 'Close mobile menu',
+      menu: 'Menu',
+      searchAria: 'Product search',
+      searchBtn: 'Start search',
+      placeholderPrefix: 'Search… e.g.',
+      recent: 'Recent searches',
+      clear: 'Clear',
+      categories: 'Categories',
+      wishlist: (n: number) => (n > 0 ? `View wishlist (${n})` : 'View wishlist'),
+      account: 'Account',
+      cart: (n: number) => (n > 0 ? `View cart (${n})` : 'View cart'),
+      installApp: 'Install app',
+      installAppTitle: 'Install the app',
+      dealsAria: "See today's deals",
+      dealsTitle: "Today's deals",
+    },
+    trends: ['bluetooth earbuds', 'gaming headset', 'USB-C fast charger', 'starter pack', 'power bank', 'wireless mouse'],
+  },
+} as const
 
 /* ----------------------------- Icônes SVG pro ----------------------------- */
 const Icon = {
@@ -100,9 +142,13 @@ const track = (args: { action: string; category?: string; label?: string; value?
 export default function MobileNav() {
   const pathname = usePathname() || '/'
   const router = useRouter()
-  const locale = getCurrentLocale(pathname)
+  const locale = getCurrentLocale(pathname) as 'fr' | 'en'
+  const t = STR[locale]
   const L = (p: string) => localizePath(p, locale)
   const SEARCH_ACTION = L('/products')
+
+  // catégories localisées
+  const categories = useMemo(() => getCategories(locale), [locale])
 
   const reducedMotion = useReducedMotion()
   const dialogId = useId()
@@ -117,9 +163,9 @@ export default function MobileNav() {
   const cartCount = useMemo(() => {
     try {
       return Array.isArray(cart)
-        ? cart.reduce((t: number, i: any) => t + (i?.quantity || 1), 0)
+        ? cart.reduce((tt: number, i: any) => tt + (i?.quantity || 1), 0)
         : Array.isArray(cart?.items)
-        ? cart.items.reduce((t: number, i: any) => t + (i?.quantity || 1), 0)
+        ? cart.items.reduce((tt: number, i: any) => tt + (i?.quantity || 1), 0)
         : Number(cart?.count ?? cart?.size ?? 0) || 0
     } catch { return 0 }
   }, [cart])
@@ -142,7 +188,8 @@ export default function MobileNav() {
 
   // Recherche
   const searchRef = useRef<HTMLInputElement | null>(null)
-  const [placeholder, setPlaceholder] = useState(SEARCH_TRENDS[0])
+  const trends: string[] = useMemo(() => [...(t.trends as readonly string[])], [t])
+  const [placeholder, setPlaceholder] = useState<string>(() => trends[0] ?? '')
   const [searchFocused, setSearchFocused] = useState(false)
   const [recentQs, setRecentQs] = useState<string[]>([])
   const [catsOpen, setCatsOpen] = useState(false)
@@ -259,12 +306,12 @@ export default function MobileNav() {
   const sheetVariants = { hidden: { y: reducedMotion ? 0 : '10%', opacity: 0.001 }, visible: { y: 0, opacity: 1, transition: { duration: reducedMotion ? 0 : 0.22, ease: 'easeOut' } }, exit: { y: reducedMotion ? 0 : '10%', opacity: 0, transition: { duration: 0.16 } } }
 
   const isActive = (href: string) => {
-    const t = L(href)
-    return pathname === t || pathname.startsWith(t + '/')
+    const tHref = L(href)
+    return pathname === tHref || pathname.startsWith(tHref + '/')
   }
 
   const prefetchOnPointer = (href: string) => {
-    try { const t = L(href); if (t && !isActive(href)) router.prefetch(t) } catch {}
+    try { const tHref = L(href); if (tHref && !isActive(href)) router.prefetch(tHref) } catch {}
   }
 
   // Placeholder (pause on focus + onglet masqué) + récentes
@@ -273,7 +320,7 @@ export default function MobileNav() {
     let id: number | null = null
     const start = () => {
       if (id || searchFocused || document.visibilityState !== 'visible') return
-      id = window.setInterval(() => { i = (i + 1) % SEARCH_TRENDS.length; setPlaceholder(SEARCH_TRENDS[i]) }, 3500)
+      id = window.setInterval(() => { i = (i + 1) % trends.length; setPlaceholder(trends[i] ?? '') }, 3500)
     }
     const stop = () => { if (id) { clearInterval(id); id = null } }
     const onVis = () => { if (document.visibilityState === 'visible' && !searchFocused) start(); else stop() }
@@ -281,7 +328,7 @@ export default function MobileNav() {
     onVis()
     document.addEventListener('visibilitychange', onVis)
     return () => { document.removeEventListener('visibilitychange', onVis); stop() }
-  }, [searchFocused])
+  }, [searchFocused, trends])
 
   useEffect(() => {
     try {
@@ -329,7 +376,7 @@ export default function MobileNav() {
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={dialogId}
-        aria-label="Ouvrir le menu mobile"
+        aria-label={t.ui.openMenu}
         aria-keyshortcuts="Alt+M"
         type="button"
         className="md:hidden grid h-10 w-10 place-items-center rounded-xl hover:bg-token-surface-2 focus-ring"
@@ -375,12 +422,12 @@ export default function MobileNav() {
               <div className="pt-[env(safe-area-inset-top)]" />
               <div className="mx-auto mt-3 h-1.5 w-14 rounded-full bg-token-text/20" aria-hidden="true" />
               <div className="flex items-center justify-between px-4 py-3">
-                <h2 id={titleId} className="text-lg font-semibold">Menu</h2>
+                <h2 id={titleId} className="text-lg font-semibold">{t.ui.menu}</h2>
                 <button
                   onClick={() => setOpen(false)}
                   type="button"
                   className="rounded px-3 py-2 text-sm hover:bg-token-surface-2 focus-ring"
-                  aria-label="Fermer le menu mobile"
+                  aria-label={t.ui.closeMenu}
                 >
                   <Icon.Close />
                 </button>
@@ -391,7 +438,7 @@ export default function MobileNav() {
                 action={SEARCH_ACTION}
                 method="get"
                 role="search"
-                aria-label="Recherche produits"
+                aria-label={t.ui.searchAria}
                 onSubmit={onSearchSubmit}
                 className="px-4 pb-2"
               >
@@ -400,7 +447,7 @@ export default function MobileNav() {
                     ref={searchRef}
                     type="search"
                     name="q"
-                    placeholder={`Rechercher… ex: ${placeholder}`}
+                    placeholder={`${t.ui.placeholderPrefix} ${placeholder}`}
                     list="mobile-search-suggestions"
                     className="w-full rounded-xl border border-token-border bg-token-surface px-4 py-3 pr-12 text-base placeholder:text-token-text/50 focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/.30)]"
                     autoComplete="off"
@@ -411,13 +458,13 @@ export default function MobileNav() {
                     onBlur={() => setSearchFocused(false)}
                   />
                   <datalist id="mobile-search-suggestions">
-                    {SEARCH_TRENDS.map((s) => <option value={s} key={s} />)}
+                    {trends.map((s) => <option value={s} key={s} />)}
                   </datalist>
                   <button
                     type="submit"
                     className="absolute right-1.5 top-1.5 inline-flex h-10 w-10 items-center justify-center rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
-                    aria-label="Lancer la recherche"
-                    title="Rechercher"
+                    aria-label={t.ui.searchBtn}
+                    title={t.ui.searchBtn}
                   >
                     <Icon.Search />
                   </button>
@@ -427,7 +474,7 @@ export default function MobileNav() {
               {/* Récentes */}
               {recentQs.length > 0 && (
                 <div className="px-4 pb-3">
-                  <div className="mb-2 text-xs font-semibold text-token-text/60">Recherches récentes</div>
+                  <div className="mb-2 text-xs font-semibold text-token-text/60">{t.ui.recent}</div>
                   <div className="flex flex-wrap gap-2">
                     {recentQs.map((q) => (
                       <button
@@ -435,7 +482,7 @@ export default function MobileNav() {
                         type="button"
                         onClick={() => goSearch(q)}
                         className="rounded-full border border-token-border bg-token-surface px-3 py-1.5 text-sm hover:bg-token-surface-2 focus-ring"
-                        aria-label={`Rechercher ${q}`}
+                        aria-label={`${t.ui.searchBtn}: ${q}`}
                       >
                         {q.length > 26 ? `${q.slice(0, 24)}…` : q}
                       </button>
@@ -444,9 +491,9 @@ export default function MobileNav() {
                       type="button"
                       onClick={() => { try { localStorage.removeItem('recent:q') } catch {}; setRecentQs([]) }}
                       className="ml-2 rounded-full bg-token-surface-2 px-3 py-1.5 text-xs text-token-text/70 hover:bg-token-surface focus-ring"
-                      aria-label="Effacer l’historique de recherche"
+                      aria-label={t.ui.clear}
                     >
-                      Effacer
+                      {t.ui.clear}
                     </button>
                   </div>
                 </div>
@@ -462,7 +509,7 @@ export default function MobileNav() {
                   onFocus={() => prefetchOnPointer('/wishlist')}
                   onClick={() => { track({ action: 'mobile_nav_quick_wishlist' }); setOpen(false) }}
                   className="relative inline-flex items-center gap-2 rounded-lg border border-token-border px-3 py-2 text-sm font-medium hover:bg-token-surface-2 focus-ring"
-                  aria-label="Voir la wishlist"
+                  aria-label={t.ui.wishlist(wishlistCount)}
                 >
                   <Icon.Heart />
                   {wishlistCount > 0 && (
@@ -478,7 +525,7 @@ export default function MobileNav() {
                   onFocus={() => prefetchOnPointer('/login')}
                   onClick={() => { track({ action: 'mobile_nav_quick_account' }); setOpen(false) }}
                   className="inline-flex items-center gap-2 rounded-lg border border-token-border px-3 py-2 text-sm font-medium hover:bg-token-surface-2 focus-ring"
-                  aria-label="Espace client"
+                  aria-label={t.ui.account}
                 >
                   <Icon.User />
                 </Link>
@@ -488,10 +535,10 @@ export default function MobileNav() {
                     onClick={handleInstall}
                     type="button"
                     className="ml-auto inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-lime-500 to-emerald-500 px-3 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
-                    aria-label="Installer l’application"
-                    title="Installer l’application"
+                    aria-label={t.ui.installAppTitle}
+                    title={t.ui.installAppTitle}
                   >
-                    <Icon.Download /> Installer l’app
+                    <Icon.Download /> {t.ui.installApp}
                   </button>
                 )}
               </div>
@@ -504,7 +551,7 @@ export default function MobileNav() {
                   aria-expanded={catsOpen}
                   className="flex w-full items-center justify-between rounded-xl border border-token-border bg-token-surface px-4 py-3 text-base font-semibold hover:bg-token-surface-2 focus-ring"
                 >
-                  Catégories
+                  {t.ui.categories}
                   <Icon.Chevron open={catsOpen} />
                 </button>
                 <AnimatePresence initial={false}>
@@ -517,7 +564,7 @@ export default function MobileNav() {
                       className="overflow-hidden"
                     >
                       <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                        {CATEGORIES.map((c) => (
+                        {categories.map((c) => (
                           <li key={c.href}>
                             <Link
                               href={c.href}
@@ -547,9 +594,10 @@ export default function MobileNav() {
               {/* Liens */}
               <nav aria-label="Navigation mobile" className="px-5 pb-4">
                 <ul className="grid grid-cols-1 gap-2 text-lg">
-                  {NAV.map(({ href, label }) => {
+                  {t.nav.map((item) => {
+                    const { href, label } = item
+                    const promo = (item as any).promo === true || href.includes('promo=1')
                     const active = isActive(href)
-                    const promo = href.includes('promo=1')
                     const onClick = () => { track({ action: 'mobile_nav_link_click', label: href }); setOpen(false) }
                     return (
                       <li key={href}>
@@ -587,12 +635,12 @@ export default function MobileNav() {
                   onFocus={() => prefetchOnPointer('/commande')}
                   onClick={() => { track({ action: 'mobile_nav_cart_click', label: 'cart', value: cartCount || 1 }); setOpen(false) }}
                   className="relative inline-flex items-center justify-center rounded-lg border border-token-border px-4 py-2 text-base font-semibold hover:bg-token-surface-2 focus-ring"
-                  aria-label="Voir le panier"
+                  aria-label={t.ui.cart(cartCount)}
                 >
                   <Icon.Cart />
                   {cartCount > 0 && (
                     <span className="ml-2 rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white">
-                      <span className="sr-only">Articles dans le panier&nbsp;:</span>
+                      <span className="sr-only">Cart count: </span>
                       {cartCount}
                     </span>
                   )}
@@ -602,9 +650,9 @@ export default function MobileNav() {
                   onClick={() => setOpen(false)}
                   type="button"
                   className="ml-auto text-sm text-token-text/70 hover:underline focus:outline-none"
-                  aria-label="Fermer le menu mobile"
+                  aria-label={t.ui.closeMenu}
                 >
-                  Fermer
+                  {t.ui.closeMenu}
                 </button>
               </div>
 

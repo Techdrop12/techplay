@@ -1,4 +1,4 @@
-// src/components/layout/Header.tsx — ULTIME++ (i18n switch, mega-menu a11y, perf/UX/a11y)
+// src/components/layout/Header.tsx — ULTIME++ (i18n switch FR/EN actif, mega-menu a11y, perf/UX/a11y)
 'use client'
 
 import NextLink from 'next/link' // logo
@@ -12,7 +12,7 @@ import { useCart } from '@/hooks/useCart'
 import { useWishlist } from '@/hooks/useWishlist'
 import ThemeToggle from '@/components/ui/ThemeToggle'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
-import { CATEGORIES } from '@/lib/categories'
+import { getCategories } from '@/lib/categories'
 import {
   SearchIcon as Search,
   FlameIcon as Flame,
@@ -21,25 +21,60 @@ import {
   UserIcon as User,
 } from '@/components/ui/premium-icons'
 
-type NavLink = { href: string; label: string }
+/* ----------------------------- i18n strings ------------------------------ */
+const STR = {
+  fr: {
+    nav: { categories: 'Catégories', products: 'Produits', wishlist: 'Wishlist', blog: 'Blog', contact: 'Contact' },
+    headerNavAria: 'Navigation principale',
+    searchAria: 'Recherche produits',
+    searchHint: 'Raccourcis : « / » ou « Ctrl/⌘ K » pour rechercher.',
+    placeholderPrefix: 'Rechercher… ex:',
+    trends: ['écouteurs bluetooth', 'casque gaming', 'chargeur rapide USB-C', 'pack starter', 'power bank', 'souris sans fil'],
+    deals: { text: 'Offres', title: 'Offres du jour', aria: "Voir les offres du jour" },
+    selection: 'Sélection',
+    packsTitle: 'Packs recommandés',
+    packsDesc: 'Les meilleures combinaisons pour booster ton setup.',
+    viewPacks: 'Voir les packs',
+    allProducts: 'Tous les produits',
+    wishlistAria: (n: number) => (n > 0 ? `Voir la wishlist (${n})` : 'Voir la wishlist'),
+    cartAria: (n: number) => (n > 0 ? `Voir le panier (${n})` : 'Voir le panier'),
+    account: { aria: 'Espace client', title: 'Espace client' },
+    headerAria: 'En-tête du site',
+    logoAria: 'TechPlay — Accueil',
+  },
+  en: {
+    nav: { categories: 'Categories', products: 'Products', wishlist: 'Wishlist', blog: 'Blog', contact: 'Contact' },
+    headerNavAria: 'Primary navigation',
+    searchAria: 'Product search',
+    searchHint: 'Shortcuts: “/” or “Ctrl/⌘ K” to search.',
+    placeholderPrefix: 'Search… e.g.',
+    trends: ['bluetooth earbuds', 'gaming headset', 'USB-C fast charger', 'starter pack', 'power bank', 'wireless mouse'],
+    deals: { text: 'Deals', title: "Today's deals", aria: "See today's deals" },
+    selection: 'Featured',
+    packsTitle: 'Recommended packs',
+    packsDesc: 'Best combos to boost your setup.',
+    viewPacks: 'View packs',
+    allProducts: 'All products',
+    wishlistAria: (n: number) => (n > 0 ? `View wishlist (${n})` : 'View wishlist'),
+    cartAria: (n: number) => (n > 0 ? `View cart (${n})` : 'View cart'),
+    account: { aria: 'Account', title: 'Account' },
+    headerAria: 'Site header',
+    logoAria: 'TechPlay — Home',
+  },
+} as const
+
+type NavLink = { href: string; labelKey: keyof typeof STR['fr']['nav'] }
+
 const LINKS: NavLink[] = [
-  { href: '/categorie', label: 'Catégories' },
-  { href: '/products', label: 'Produits' },
-  { href: '/wishlist', label: 'Wishlist' },
-  { href: '/blog', label: 'Blog' },
-  { href: '/contact', label: 'Contact' },
+  { href: '/categorie', labelKey: 'categories' },
+  { href: '/products', labelKey: 'products' },
+  { href: '/wishlist', labelKey: 'wishlist' },
+  { href: '/blog', labelKey: 'blog' },
+  { href: '/contact', labelKey: 'contact' },
 ]
 
 const SCROLL_HIDE_OFFSET = 80
 const HOVER_PREFETCH_DELAY = 120
-const SEARCH_TRENDS = [
-  'écouteurs bluetooth',
-  'casque gaming',
-  'chargeur rapide USB-C',
-  'pack starter',
-  'power bank',
-  'souris sans fil',
-]
 
 /** Badge premium */
 const ActionBadge = ({ children, className }: { children: React.ReactNode; className?: string }) => (
@@ -55,41 +90,69 @@ const ActionBadge = ({ children, className }: { children: React.ReactNode; class
   </span>
 )
 
-/** Mini sélecteur de langue (local, pour éviter dépendances) */
+/** Sélecteur de langue FR/EN (persiste NEXT_LOCALE + navigation localisée) */
 function LocaleSwitch({ pathname }: { pathname: string }) {
+  const router = useRouter()
   const locale = getCurrentLocale(pathname)
-  const other = locale === 'fr' ? 'en' : 'fr'
-  const to = localizePath(pathname, other as any)
+  const setLang = (newLocale: 'fr' | 'en') => {
+    if (newLocale === locale) return
+    try {
+      document.cookie = `NEXT_LOCALE=${newLocale}; Max-Age=31536000; Path=/; SameSite=Lax`
+    } catch {}
+    const next = localizePath(pathname, newLocale)
+    router.replace(next)
+  }
 
   return (
-    <Link
-      href={to}
-      prefetch={false}
-      className="inline-flex items-center gap-1 rounded-full border border-token-border bg-token-surface/60 px-2.5 py-1.5 text-xs font-semibold hover:bg-token-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.35)]"
-      aria-label={other === 'en' ? 'Switch language to English' : 'Basculer la langue en Français'}
-      data-gtm="header_lang_switch"
-      title={other === 'en' ? 'English' : 'Français'}
+    <div
+      role="group"
+      aria-label="Sélecteur de langue"
+      className="inline-flex items-center rounded-full border border-token-border bg-token-surface/60 p-0.5"
     >
-      <span aria-hidden>🌐</span>
-      <span className="uppercase">{other}</span>
-    </Link>
+      {(['fr', 'en'] as const).map((l) => {
+        const active = locale === l
+        return (
+          <button
+            key={l}
+            type="button"
+            onClick={() => setLang(l)}
+            disabled={active}
+            aria-pressed={active}
+            aria-current={active ? 'true' : undefined}
+            className={cn(
+              'px-2.5 py-1.5 text-xs font-semibold rounded-full transition outline-none focus:ring-2',
+              active
+                ? 'bg-blue-600 text-white cursor-default focus:ring-blue-400'
+                : 'bg-transparent text-token-text hover:opacity-90 focus:ring-blue-400'
+            )}
+            title={l === 'fr' ? 'Français' : 'English'}
+          >
+            {l.toUpperCase()}
+          </button>
+        )
+      })}
+    </div>
   )
 }
 
 export default function Header() {
   const pathname = usePathname() || '/'
   const router = useRouter()
-  const locale = getCurrentLocale(pathname)
+  const locale = getCurrentLocale(pathname) as 'fr' | 'en'
+  const t = STR[locale]
   const L = (p: string) => localizePath(p, locale)
   const SEARCH_ACTION = L('/products')
+
+  // catégories i18n
+  const categories = useMemo(() => getCategories(locale), [locale])
 
   // stores
   const { cart } = useCart() as any
   const { wishlist } = useWishlist() as any
 
   const cartCount = useMemo(() => {
-    if (Array.isArray(cart)) return cart.reduce((t: number, it: any) => t + (it?.quantity || 1), 0)
-    if (Array.isArray(cart?.items)) return cart.items.reduce((t: number, it: any) => t + (it?.quantity || 1), 0)
+    if (Array.isArray(cart)) return cart.reduce((tot: number, it: any) => tot + (it?.quantity || 1), 0)
+    if (Array.isArray(cart?.items)) return cart.items.reduce((tot: number, it: any) => tot + (it?.quantity || 1), 0)
     const n = Number(cart?.count ?? cart?.size ?? 0)
     return Number.isFinite(n) ? n : 0
   }, [cart])
@@ -109,7 +172,10 @@ export default function Header() {
   const reducedMotion = useRef(false)
   const prefetchTimers = useRef<Map<string, number>>(new Map())
   const searchRef = useRef<HTMLInputElement | null>(null)
-  const [placeholder, setPlaceholder] = useState(SEARCH_TRENDS[0])
+
+  // tendances recherche i18n (⚠️ typées en string[] pour éviter les unions littérales)
+  const trends: string[] = useMemo(() => [...(STR[locale].trends as readonly string[])], [locale])
+  const [placeholder, setPlaceholder] = useState<string>(() => trends[0] ?? '')
   const saveData = useRef<boolean>(false)
 
   // mega menu
@@ -145,8 +211,8 @@ export default function Header() {
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       if (!catOpen) return
-      const t = e.target as HTMLElement
-      if (catPanelRef.current?.contains(t) || catBtnRef.current?.contains(t)) return
+      const tEl = e.target as HTMLElement
+      if (catPanelRef.current?.contains(tEl) || catBtnRef.current?.contains(tEl)) return
       setCatOpen(false)
     }
     window.addEventListener('mousedown', onClick)
@@ -211,14 +277,16 @@ export default function Header() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
+  // placeholder tournant selon langue (→ state typé string)
   useEffect(() => {
+    setPlaceholder(trends[0] ?? '')
     let i = 0
     const id = window.setInterval(() => {
-      i = (i + 1) % SEARCH_TRENDS.length
-      setPlaceholder(SEARCH_TRENDS[i])
+      i = (i + 1) % trends.length
+      setPlaceholder(trends[i] ?? '')
     }, 4000)
     return () => clearInterval(id)
-  }, [])
+  }, [trends])
 
   useEffect(() => {
     return () => {
@@ -249,16 +317,16 @@ export default function Header() {
     const target = L(href)
     if (!target || isActive(href)) return
     if (prefetchTimers.current.has(target)) return
-    const t = window.setTimeout(() => {
+    const tmo = window.setTimeout(() => {
       prefetchViaLink(target)
       prefetchTimers.current.delete(target)
     }, HOVER_PREFETCH_DELAY)
-    prefetchTimers.current.set(target, t)
+    prefetchTimers.current.set(target, tmo)
   }
   const smartPrefetchCancel = (href: string) => {
     const target = L(href)
-    const t = prefetchTimers.current.get(target)
-    if (t) { clearTimeout(t); prefetchTimers.current.delete(target) }
+    const tmo = prefetchTimers.current.get(target)
+    if (tmo) { clearTimeout(tmo); prefetchTimers.current.delete(target) }
   }
 
   const onSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -289,7 +357,7 @@ export default function Header() {
   return (
     <header
       role="banner"
-      aria-label="En-tête du site"
+      aria-label={t.headerAria}
       data-hidden={hidden ? 'true' : 'false'}
       data-scrolled={scrolled ? 'true' : 'false'}
       className={cn(
@@ -307,7 +375,7 @@ export default function Header() {
         <NextLink
           href={L('/')}
           prefetch={false}
-          aria-label="TechPlay — Accueil"
+          aria-label={t.logoAria}
           rel="home"
           onClick={onLogoClick}
           className="group inline-flex items-center rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
@@ -327,7 +395,7 @@ export default function Header() {
           action={SEARCH_ACTION}
           method="get"
           role="search"
-          aria-label="Recherche produits"
+          aria-label={t.searchAria}
           onSubmit={onSearchSubmit}
           className="relative hidden md:flex min-w-0 flex-1 items-center lg:max-w-md xl:max-w-lg"
         >
@@ -335,7 +403,7 @@ export default function Header() {
             ref={searchRef}
             type="search"
             name="q"
-            placeholder={`Rechercher… ex: ${placeholder}`}
+            placeholder={`${t.placeholderPrefix} ${placeholder}`}
             list="header-search-suggestions"
             className={cn(
               'w-full rounded-full border px-4 py-2.5 pr-12 text-sm',
@@ -349,16 +417,16 @@ export default function Header() {
             aria-describedby="search-hint"
           />
           <datalist id="header-search-suggestions">
-            {SEARCH_TRENDS.map((s) => (<option value={s} key={s} />))}
+            {trends.map((s) => (<option value={s} key={s} />))}
           </datalist>
-          <div id="search-hint" className="sr-only">Raccourcis : « / » ou « Ctrl/⌘ K » pour rechercher.</div>
+          <div id="search-hint" className="sr-only">{t.searchHint}</div>
           <div id="search-status" aria-live="polite" aria-atomic="true" className="sr-only" />
           <div className="absolute inset-y-0 right-1.5 flex items-center">
             <button
               type="submit"
               className="inline-flex h-8 w-8 items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
-              aria-label="Lancer la recherche"
-              title="Rechercher"
+              aria-label={t.searchAria}
+              title={t.searchAria}
               data-gtm="header_search_submit"
             >
               <Search />
@@ -369,12 +437,13 @@ export default function Header() {
         {/* Desktop nav */}
         <nav
           className="hidden lg:flex gap-5 xl:gap-7 tracking-tight font-medium text-token-text text-[15px] xl:text-base whitespace-nowrap"
-          aria-label="Navigation principale"
+          aria-label={t.headerNavAria}
         >
-          {LINKS.map(({ href, label }) => {
+          {LINKS.map(({ href, labelKey }) => {
+            const label = t.nav[labelKey]
             const active = isActive(href)
 
-            if (label === 'Catégories') {
+            if (labelKey === 'categories') {
               return (
                 <div key="mega-cats" className="relative" onMouseEnter={openCats} onMouseLeave={() => closeCats()}>
                   <button
@@ -395,7 +464,7 @@ export default function Header() {
                     )}
                     data-gtm="header_mega_btn"
                   >
-                    Catégories
+                    {label}
                     {!active && (
                       <span className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-[hsl(var(--accent))] transition-all duration-300 group-hover:w-full" aria-hidden="true" />
                     )}
@@ -417,7 +486,7 @@ export default function Header() {
                   >
                     <div className="grid grid-cols-1 gap-2 p-3 md:grid-cols-3 md:p-4">
                       <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:col-span-2 md:gap-3" role="none">
-                        {CATEGORIES.map((c) => (
+                        {categories.map((c) => (
                           <li key={c.href} role="none">
                             <Link
                               role="menuitem"
@@ -449,17 +518,33 @@ export default function Header() {
 
                       <div className="md:col-span-1">
                         <div className="h-full rounded-xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.10)] via-transparent to-token-surface p-4 md:p-5 shadow-md">
-                          <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent)/.90)]">Sélection</p>
-                          <h3 className="mt-1 text-lg font-extrabold">Packs recommandés</h3>
-                          <p className="mt-2 text-sm text-token-text/70">Les meilleures combinaisons pour booster ton setup.</p>
+                          <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent)/.90)]">{t.selection}</p>
+                          <h3 className="mt-1 text-lg font-extrabold">{t.packsTitle}</h3>
+                          <p className="mt-2 text-sm text-token-text/70">{t.packsDesc}</p>
                           <div className="mt-3 flex flex-wrap gap-2">
-                            <Link href="/products/packs" prefetch={false} onPointerEnter={() => smartPrefetchStart('/products/packs')} onPointerLeave={() => smartPrefetchCancel('/products/packs')} onFocus={() => smartPrefetchStart('/products/packs')} onBlur={() => smartPrefetchCancel('/products/packs')}
-                              role="menuitem" className="inline-flex items-center rounded-lg bg-[hsl(var(--accent))] px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-[hsl(var(--accent)/.92)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]">
-                              Voir les packs
+                            <Link
+                              href="/products/packs"
+                              prefetch={false}
+                              onPointerEnter={() => smartPrefetchStart('/products/packs')}
+                              onPointerLeave={() => smartPrefetchCancel('/products/packs')}
+                              onFocus={() => smartPrefetchStart('/products/packs')}
+                              onBlur={() => smartPrefetchCancel('/products/packs')}
+                              role="menuitem"
+                              className="inline-flex items-center rounded-lg bg-[hsl(var(--accent))] px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-[hsl(var(--accent)/.92)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
+                            >
+                              {t.viewPacks}
                             </Link>
-                            <Link href="/products" prefetch={false} onPointerEnter={() => smartPrefetchStart('/products')} onPointerLeave={() => smartPrefetchCancel('/products')} onFocus={() => smartPrefetchStart('/products')} onBlur={() => smartPrefetchCancel('/products')}
-                              role="menuitem" className="inline-flex items-center rounded-lg border border-token-border bg-token-surface px-3 py-1.5 text-sm font-semibold hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.30)]">
-                              Tous les produits
+                            <Link
+                              href="/products"
+                              prefetch={false}
+                              onPointerEnter={() => smartPrefetchStart('/products')}
+                              onPointerLeave={() => smartPrefetchCancel('/products')}
+                              onFocus={() => smartPrefetchStart('/products')}
+                              onBlur={() => smartPrefetchCancel('/products')}
+                              role="menuitem"
+                              className="inline-flex items-center rounded-lg border border-token-border bg-token-surface px-3 py-1.5 text-sm font-semibold hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.30)]"
+                            >
+                              {t.allProducts}
                             </Link>
                           </div>
                         </div>
@@ -486,7 +571,7 @@ export default function Header() {
                     ? 'text-[hsl(var(--accent))] font-semibold after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-[hsl(var(--accent))]'
                     : 'hover:text-[hsl(var(--accent))] focus-visible:text-[hsl(var(--accent))]'
                 )}
-                data-gtm={'header_nav_' + label.toLowerCase()}
+                data-gtm={'header_nav_' + labelKey}
               >
                 {label}
                 {!active && (
@@ -511,8 +596,8 @@ export default function Header() {
             onFocus={() => smartPrefetchStart('/products?promo=1')}
             onBlur={() => smartPrefetchCancel('/products?promo=1')}
             className="xl:hidden inline-flex items-center justify-center p-0.5 rounded-lg hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
-            aria-label="Voir les offres du jour"
-            title="Offres du jour"
+            aria-label={t.deals.aria}
+            title={t.deals.title}
             data-gtm="header_deals_icon"
           >
             <ActionBadge><Flame /></ActionBadge>
@@ -527,15 +612,15 @@ export default function Header() {
             onFocus={() => smartPrefetchStart('/products?promo=1')}
             onBlur={() => smartPrefetchCancel('/products?promo=1')}
             className="group hidden xl:inline-flex items-center gap-2 rounded-full border border-token-border bg-token-surface/60 px-3 py-1.5 text-sm font-medium text-token-text hover:bg-token-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
-            aria-label="Voir les offres du jour"
-            title="Offres du jour"
+            aria-label={t.deals.aria}
+            title={t.deals.title}
             data-gtm="header_deals"
           >
             <span className="relative inline-flex h-2.5 w-2.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gradient-to-r from-pink-500 to-yellow-500 opacity-60" />
               <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-gradient-to-r from-pink-500 to-yellow-500" />
             </span>
-            <span>Offres</span>
+            <span>{t.deals.text}</span>
           </Link>
 
           {/* Wishlist */}
@@ -548,7 +633,7 @@ export default function Header() {
               onFocus={() => smartPrefetchStart('/wishlist')}
               onBlur={() => smartPrefetchCancel('/wishlist')}
               className="relative hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 rounded-lg p-0.5"
-              aria-label={wishlistCount > 0 ? `Voir la wishlist (${wishlistCount})` : 'Voir la wishlist'}
+              aria-label={t.wishlistAria(wishlistCount)}
               data-gtm="header_wishlist"
             >
               <ActionBadge><Heart /></ActionBadge>
@@ -556,7 +641,7 @@ export default function Header() {
             {wishlistCount > 0 && (
               <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
                 <span className="rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm">
-                  <span className="sr-only">Articles en wishlist : </span>{wishlistCount}
+                  <span className="sr-only">Wishlist count: </span>{wishlistCount}
                 </span>
               </div>
             )}
@@ -572,7 +657,7 @@ export default function Header() {
               onFocus={() => smartPrefetchStart('/commande')}
               onBlur={() => smartPrefetchCancel('/commande')}
               className="relative hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 rounded-lg p-0.5"
-              aria-label={cartCount > 0 ? `Voir le panier (${cartCount})` : 'Voir le panier'}
+              aria-label={t.cartAria(cartCount)}
               data-gtm="header_cart"
               data-cart-icon
             >
@@ -581,7 +666,7 @@ export default function Header() {
             {cartCount > 0 && (
               <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
                 <span className="animate-[pulse_2s_ease-in-out_infinite] rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm">
-                  <span className="sr-only">Articles au panier : </span>{cartCount}
+                  <span className="sr-only">Cart count: </span>{cartCount}
                 </span>
               </div>
             )}
@@ -596,8 +681,8 @@ export default function Header() {
             onFocus={() => smartPrefetchStart('/login')}
             onBlur={() => smartPrefetchCancel('/login')}
             className="hidden xl:inline-flex items-center justify-center rounded-lg p-0.5 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
-            aria-label="Espace client"
-            title="Espace client"
+            aria-label={t.account.aria}
+            title={t.account.title}
             data-gtm="header_account"
           >
             <ActionBadge><User /></ActionBadge>
