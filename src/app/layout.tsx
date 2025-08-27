@@ -5,16 +5,16 @@ import { Inter, Sora } from 'next/font/google'
 import { Suspense } from 'react'
 import type React from 'react'
 
-// Langue depuis cookie NEXT_LOCALE
+// ✅ Langue depuis next-intl (source de vérité)
 import { cookies } from 'next/headers'
-import { DEFAULT_LOCALE, isLocale } from '@/lib/language'
+import { defaultLocale as DEFAULT_LOCALE, isLocale } from '@/i18n/config'
 
 // Shell & clients
 import Layout from '@/components/layout/Layout'
 import RootLayoutClient from '@/components/RootLayoutClient'
 import AfterIdleClient from '@/components/AfterIdleClient'
 
-// Thème (canon)
+// Thème (canon, un seul provider ici)
 import ThemeProvider from '@/context/themeContext'
 import DarkModeScript from '@/components/DarkModeScript'
 
@@ -24,10 +24,8 @@ import StickyFreeShippingBar from '@/components/ui/StickyFreeShippingBar'
 import StickyCartSummary from '@/components/StickyCartSummary'
 import { Toaster } from 'react-hot-toast'
 
-// Analytics (client)
-import Analytics from '@/components/Analytics'
-import MetaPixel from '@/components/MetaPixel'
-import Hotjar from '@/components/Hotjar'
+// 🔭 Tracking unifié (GA + Meta Pixel + Hotjar + Clarity)
+import Tracking from '@/components/Tracking'
 
 // PWA prompt
 import AppInstallPrompt from '@/components/AppInstallPrompt'
@@ -53,8 +51,6 @@ const DEFAULT_OG = '/og-image.jpg'
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   applicationName: SITE_NAME,
-  // ⚠️ Un SEUL template global. Les pages doivent renvoyer des titres SANS " | TechPlay",
-  // sauf si elles utilisent { absolute } pour ne PAS appliquer le template.
   title: { default: 'TechPlay – Boutique high-tech innovante', template: '%s | TechPlay' },
   description:
     'TechPlay, votre boutique high-tech : audio, gaming, accessoires et packs exclusifs. Qualité, rapidité, satisfaction garantie.',
@@ -85,7 +81,6 @@ export const metadata: Metadata = {
       { url: '/icons/icon-192x192.png', type: 'image/png', sizes: '192x192' },
       { url: '/icons/icon-512x512.png', type: 'image/png', sizes: '512x512' },
     ],
-    // iOS : si apple-touch-icon 180x180 n’existe pas, on retombe sur l’icône 192.
     apple: [{ url: '/icons/icon-192x192.png', sizes: '180x180', type: 'image/png' }],
   },
   manifest: '/site.webmanifest',
@@ -99,7 +94,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0f172a' }, // aligné sur le manifest
+    { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
   ],
   width: 'device-width',
   initialScale: 1,
@@ -111,7 +106,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies()
   const cookieLocale = cookieStore.get('NEXT_LOCALE')?.value
-  const htmlLang = isLocale(cookieLocale || '') ? (cookieLocale as string) : DEFAULT_LOCALE
+  const htmlLang = isLocale(cookieLocale || '') ? (cookieLocale as string) : (DEFAULT_LOCALE as string)
 
   return (
     <html
@@ -183,13 +178,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <AccessibilitySkip />
         <div id="focus-sentinel" tabIndex={-1} />
 
-        {/* ✅ Thème source de vérité tout en haut */}
+        {/* ✅ Un seul ThemeProvider (le doublon est supprimé de RootLayoutClient) */}
         <ThemeProvider>
           <RootLayoutClient>
             <AfterIdleClient>
-              <Suspense fallback={null}><Analytics /></Suspense>
-              <Suspense fallback={null}><MetaPixel /></Suspense>
-              <Suspense fallback={null}><Hotjar /></Suspense>
+              {/* 🔭 Tracking unifié */}
+              <Suspense fallback={null}><Tracking /></Suspense>
 
               <AppInstallPrompt />
               <StickyFreeShippingBar />

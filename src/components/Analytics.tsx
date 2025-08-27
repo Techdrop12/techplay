@@ -1,4 +1,4 @@
-// src/components/Analytics.tsx — Ultra Premium (GA4 + Consent Mode v2, propre)
+// src/components/Analytics.tsx — GA4 + Consent Mode v2 (sans doublon), SPA-safe
 'use client'
 
 import { useEffect } from 'react'
@@ -15,7 +15,7 @@ export default function Analytics() {
   const search = useSearchParams()
   const shouldLoad = !!GA_ID && (process.env.NODE_ENV === 'production' || ENABLE_IN_DEV)
 
-  // Pageview à chaque navigation (y compris changement de querystring)
+  // Pageview à chaque navigation (y compris querystring)
   useEffect(() => {
     if (!shouldLoad) return
     const qs = search?.toString() ? `?${search.toString()}` : ''
@@ -78,7 +78,7 @@ export default function Analytics() {
         strategy="afterInteractive"
       />
 
-      {/* Init minimale + Consent Mode par défaut TRES TÔT (avant tout event) */}
+      {/* Init minimale : plus de consent 'default' ici (déjà injecté dans app/layout.tsx) */}
       <Script id="ga4-init" strategy="afterInteractive">
         {`
           (function() {
@@ -95,23 +95,9 @@ export default function Analytics() {
             function gtag(){ window.dataLayer.push(arguments); }
             window.gtag = window.gtag || gtag;
 
-            // Consent par défaut ("denied") - sera mis à jour par la bannière
-            if (!window.__ga_consent_default) {
-              gtag('consent', 'default', {
-                ad_storage: 'denied',
-                analytics_storage: 'denied',
-                ad_user_data: 'denied',
-                ad_personalization: 'denied',
-                functionality_storage: 'granted',
-                security_storage: 'granted',
-                wait_for_update: 500
-              });
-              window.__ga_consent_default = true;
-            }
-
             // Horodatage GA
             gtag('js', new Date());
-            // ⚠️ Pas de 'config' ici : on délègue à initAnalytics() (lib/ga) pour centraliser la logique.
+            // ⚠️ Pas de 'config' ici : géré par initAnalytics() (lib/ga)
           })();
         `}
       </Script>

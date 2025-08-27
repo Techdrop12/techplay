@@ -1,10 +1,9 @@
-// src/components/RootLayoutClient.tsx — FINAL (UA & env attrs + providers)
+// src/components/RootLayoutClient.tsx — FINAL (UA & env attrs + providers épurés)
 'use client'
 
 import type { ReactNode } from 'react'
 import { useEffect } from 'react'
 import { CartProvider } from '@/context/cartContext'
-import { ThemeProvider } from '@/context/themeContext'
 
 type Props = { children: ReactNode }
 
@@ -76,9 +75,5 @@ export default function RootLayoutClient({ children }: Props) {
     }
   }, [])
 
-  return (
-    <ThemeProvider>
-      <CartProvider>{children}</CartProvider>
-    </ThemeProvider>
-  )
+  return <CartProvider>{children}</CartProvider>
 }

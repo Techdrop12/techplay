@@ -8,23 +8,20 @@ import React, {
   useMemo,
   useRef,
   useState,
+  useCallback,
 } from 'react';
 import { event as gaEvent, trackAddToCart } from '@/lib/ga';
 
 /** ----------------------- Constantes & env ----------------------- */
-const STORAGE_KEY = 'cart';              // on garde le même (migration OK)
+const STORAGE_KEY = 'cart';
 const COUPON_KEY = 'cart_coupon_v1';
 const CART_ID_KEY = 'cart_id';
 
 const MIN_QTY = 1;
 const MAX_QTY = 99;
 
-const FREE_SHIPPING_THRESHOLD = Number(
-  process.env.NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD ?? 60
-);
-const FLAT_SHIPPING_FEE = Number(
-  process.env.NEXT_PUBLIC_FLAT_SHIPPING_FEE ?? 0
-);
+const FREE_SHIPPING_THRESHOLD = Number(process.env.NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD ?? 60);
+const FLAT_SHIPPING_FEE = Number(process.env.NEXT_PUBLIC_FLAT_SHIPPING_FEE ?? 0);
 const TAX_RATE = Number(process.env.NEXT_PUBLIC_TAX_RATE ?? 0); // ex: 0.2 (20%)
 
 /** ----------------------- Types ----------------------- */
@@ -35,9 +32,8 @@ export type CartItem = {
   image: string;
   price: number;
   quantity: number;
-  sku?: string; // bonus: cohérent avec Product
+  sku?: string;
 };
-
 export type CartInput = Omit<CartItem, 'quantity'> & { quantity?: number };
 
 export type Coupon =
@@ -45,12 +41,9 @@ export type Coupon =
   | { code: string; type: 'fixed'; value: number; freeShipping?: boolean; expiresAt?: string };
 
 export interface CartContextValue {
-  /** Liste canonique */
   cart: CartItem[];
-  /** Alias pratique */
   items: CartItem[];
   cartId: string;
-  // actions
   addToCart: (item: CartInput) => void | Promise<void>;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
@@ -58,23 +51,18 @@ export interface CartContextValue {
   decrement: (id: string, step?: number) => void;
   clearCart: () => void;
   replaceCart: (items: CartItem[]) => void;
-  // coupon (optionnel)
   coupon?: Coupon | null;
   applyCoupon: (coupon: Coupon) => void;
   removeCoupon: () => void;
-  // sélecteurs
   count: number;
-  /** Sous-total (hors remise), taxes non incluses. */
-  total: number;
+  total: number; // sous-total (pré-remises & hors taxes)
   isInCart: (id: string) => boolean;
   getItemQuantity: (id: string) => number;
   getItem: (id: string) => CartItem | undefined;
   getLineTotal: (id: string) => number;
-  // livraison gratuite (UX)
   freeShippingThreshold: number;
   amountToFreeShipping: number;
   progressToFreeShipping: number;
-  // breakdown complet (bonus)
   discount: number;
   shipping: number;
   tax: number;
@@ -101,7 +89,6 @@ function readCart(): CartItem[] {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    // migration douce : on accepte vieux formats
     const arr: unknown[] = Array.isArray(parsed) ? parsed : parsed?.items ?? [];
     return (arr as any[]).filter(Boolean).map(ensureItemShape);
   } catch {
@@ -112,13 +99,10 @@ function readCart(): CartItem[] {
 function writeCart(cart: CartItem[]) {
   if (typeof window === 'undefined') return;
   try {
-    // stocker sous forme objet (prêt pour futures versions)
     const payload = { v: 2, items: cart };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     window.dispatchEvent(new CustomEvent('cart-updated', { detail: cart }));
-  } catch {
-    // no-op
-  }
+  } catch {}
 }
 
 function readCoupon(): Coupon | null {
@@ -160,12 +144,11 @@ function getOrCreateCartId(): string {
 const CartContext = createContext<CartContextValue | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  // lire le panier dès le 1er render client pour limiter le "flash"
-  const [cart, setCart] = useState<CartItem[]>(
-    () => (typeof window !== 'undefined' ? readCart() : [])
+  const [cart, setCart] = useState<CartItem[]>(() =>
+    typeof window !== 'undefined' ? readCart() : []
   );
-  const [coupon, setCoupon] = useState<Coupon | null>(
-    () => (typeof window !== 'undefined' ? readCoupon() : null)
+  const [coupon, setCoupon] = useState<Coupon | null>(() =>
+    typeof window !== 'undefined' ? readCoupon() : null
   );
   const [cartId, setCartId] = useState<string>('anon');
 
@@ -173,12 +156,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const writeTimer = useRef<number | null>(null);
 
   useEffect(() => {
-    // cartId au mount
     setCartId(getOrCreateCartId());
     hydrated.current = true;
   }, []);
 
-  // Persistance (débouonçage léger pour éviter d'écrire à chaque frappe)
+  // Persistance (débouonçage léger)
   useEffect(() => {
     if (!hydrated.current) return;
     if (writeTimer.current) window.clearTimeout(writeTimer.current);
@@ -191,7 +173,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     writeCoupon(coupon);
   }, [coupon]);
 
-  // Synchronisation multi-onglets
+  // Sync inter-onglets & events custom
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
       if (e.key === STORAGE_KEY) setCart(readCart());
@@ -211,17 +193,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   /** ----------------------- Sélecteurs ----------------------- */
-  const count = useMemo(
-    () => cart.reduce((s, it) => s + (it.quantity || 0), 0),
-    [cart]
-  );
+  const count = useMemo(() => cart.reduce((s, it) => s + (it.quantity || 0), 0), [cart]);
 
   const subtotal = useMemo(
     () => round2(cart.reduce((s, it) => s + (Number(it.price) || 0) * (it.quantity || 0), 0)),
     [cart]
   );
 
-  // % robuste : accepte 0.2 ou 20 (-> 20%)
   const discount = useMemo(() => {
     if (!coupon) return 0;
     if (coupon.type === 'percent') {
@@ -242,7 +220,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const tax = useMemo(() => round2(taxableBase * Math.max(0, TAX_RATE)), [taxableBase]);
   const grandTotal = useMemo(() => round2(taxableBase + tax + shipping), [taxableBase, tax, shipping]);
 
-  // total = sous-total (pré-remises & hors taxes) — conservé pour compat
   const total = useMemo(() => round2(subtotal), [subtotal]);
 
   const amountToFreeShipping = useMemo(() => {
@@ -255,18 +232,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return clamp(Math.round(((subtotal - discount) / FREE_SHIPPING_THRESHOLD) * 100), 0, 100);
   }, [subtotal, discount]);
 
-  const isInCart = (id: string) => cart.some((it) => it._id === id);
-  const getItemQuantity = (id: string) => cart.find((it) => it._id === id)?.quantity || 0;
-  const getItem = (id: string) => cart.find((it) => it._id === id);
-  const getLineTotal = (id: string) => {
-    const it = getItem(id);
-    const p = Number(it?.price ?? 0);
-    const q = Number(it?.quantity ?? 0);
-    return round2(p * q);
-  };
+  const isInCart = useCallback((id: string) => cart.some((it) => it._id === id), [cart]);
+  const getItemQuantity = useCallback(
+    (id: string) => cart.find((it) => it._id === id)?.quantity || 0,
+    [cart]
+  );
+  const getItem = useCallback((id: string) => cart.find((it) => it._id === id), [cart]);
+  const getLineTotal = useCallback(
+    (id: string) => {
+      const it = getItem(id);
+      const p = Number(it?.price ?? 0);
+      const q = Number(it?.quantity ?? 0);
+      return round2(p * q);
+    },
+    [getItem]
+  );
 
   /** ----------------------- Actions ----------------------- */
-  const addToCart: CartContextValue['addToCart'] = (input) => {
+  const addToCart: CartContextValue['addToCart'] = useCallback((input) => {
     const item = ensureItemShape({ ...input, quantity: input.quantity ?? 1 });
 
     setCart((curr) => {
@@ -282,7 +265,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return [...curr, item];
     });
 
-    // Tracking
+    // Tracking (tolérant)
     try {
       gaEvent?.({
         action: 'add_to_cart',
@@ -305,86 +288,110 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         ],
       });
     } catch {}
-  };
+  }, []);
 
-  const removeFromCart: CartContextValue['removeFromCart'] = (id) => {
+  const removeFromCart: CartContextValue['removeFromCart'] = useCallback((id) => {
     setCart((curr) => curr.filter((it) => it._id !== id));
     try {
       gaEvent?.({ action: 'remove_from_cart', category: 'ecommerce', label: id, value: 0 });
     } catch {}
-  };
+  }, []);
 
-  const updateQuantity: CartContextValue['updateQuantity'] = (id, quantity) => {
+  const updateQuantity: CartContextValue['updateQuantity'] = useCallback((id, quantity) => {
     if (!Number.isFinite(quantity)) return;
     const q = clamp(Math.trunc(quantity), MIN_QTY, MAX_QTY);
     setCart((curr) => curr.map((it) => (it._id === id ? { ...it, quantity: q } : it)));
     try {
       gaEvent?.({ action: 'update_cart_quantity', category: 'ecommerce', label: id, value: q });
     } catch {}
-  };
+  }, []);
 
-  const increment: CartContextValue['increment'] = (id, step = 1) => {
+  const increment: CartContextValue['increment'] = useCallback((id, step = 1) => {
     setCart((curr) =>
       curr.map((it) =>
         it._id === id ? { ...it, quantity: clamp(it.quantity + step, MIN_QTY, MAX_QTY) } : it
       )
     );
-  };
+  }, []);
 
-  const decrement: CartContextValue['decrement'] = (id, step = 1) => {
+  const decrement: CartContextValue['decrement'] = useCallback((id, step = 1) => {
     setCart((curr) =>
       curr.map((it) =>
         it._id === id ? { ...it, quantity: clamp(it.quantity - step, MIN_QTY, MAX_QTY) } : it
       )
-      // .filter((it) => it.quantity >= MIN_QTY) // ↩️ active si tu veux auto-supprimer à 0
     );
-  };
+  }, []);
 
-  const clearCart: CartContextValue['clearCart'] = () => {
+  const clearCart: CartContextValue['clearCart'] = useCallback(() => {
     setCart([]);
     try {
       gaEvent?.({ action: 'clear_cart', category: 'ecommerce', label: 'all', value: 0 });
     } catch {}
-  };
+  }, []);
 
-  const replaceCart: CartContextValue['replaceCart'] = (items) => {
+  const replaceCart: CartContextValue['replaceCart'] = useCallback((items) => {
     setCart(items.map(ensureItemShape));
-  };
+  }, []);
 
-  const applyCoupon: CartContextValue['applyCoupon'] = (c) => setCoupon(c);
-  const removeCoupon: CartContextValue['removeCoupon'] = () => setCoupon(null);
+  const applyCoupon: CartContextValue['applyCoupon'] = useCallback((c) => setCoupon(c), []);
+  const removeCoupon: CartContextValue['removeCoupon'] = useCallback(() => setCoupon(null), []);
 
-  const value: CartContextValue = {
-    cart,
-    items: cart, // alias
-    cartId,
-    addToCart,
-    removeFromCart,
-    updateQuantity,
-    increment,
-    decrement,
-    clearCart,
-    replaceCart,
-    // coupon
-    coupon,
-    applyCoupon,
-    removeCoupon,
-    // selectors
-    count,
-    total,
-    isInCart,
-    getItemQuantity,
-    getItem,
-    getLineTotal,
-    freeShippingThreshold: FREE_SHIPPING_THRESHOLD,
-    amountToFreeShipping,
-    progressToFreeShipping,
-    // breakdown
-    discount,
-    shipping,
-    tax,
-    grandTotal,
-  };
+  const value: CartContextValue = useMemo(
+    () => ({
+      cart,
+      items: cart,
+      cartId,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      increment,
+      decrement,
+      clearCart,
+      replaceCart,
+      coupon,
+      applyCoupon,
+      removeCoupon,
+      count,
+      total,
+      isInCart,
+      getItemQuantity,
+      getItem,
+      getLineTotal,
+      freeShippingThreshold: FREE_SHIPPING_THRESHOLD,
+      amountToFreeShipping,
+      progressToFreeShipping,
+      discount,
+      shipping,
+      tax,
+      grandTotal,
+    }),
+    [
+      cart,
+      cartId,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      increment,
+      decrement,
+      clearCart,
+      replaceCart,
+      coupon,
+      applyCoupon,
+      removeCoupon,
+      count,
+      total,
+      isInCart,
+      getItemQuantity,
+      getItem,
+      getLineTotal,
+      amountToFreeShipping,
+      progressToFreeShipping,
+      discount,
+      shipping,
+      tax,
+      grandTotal,
+    ]
+  );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
