@@ -28,17 +28,12 @@ function normalizeHref(
   const loc = locale ?? getCurrentLocale()
 
   if (typeof href === 'string') {
-    // Laisse les URLs absolues et les schémas spéciaux intacts
     return isAbsolute(href) ? href : localizePath(href, loc, { keepQuery })
   }
 
-  // UrlObject : on localise seulement si un pathname est défini & relatif
   const next: UrlObject = { ...href }
   const p = typeof href.pathname === 'string' ? href.pathname : undefined
-
-  if (p && !isAbsolute(p)) {
-    next.pathname = localizePath(p, loc, { keepQuery })
-  }
+  if (p && !isAbsolute(p)) next.pathname = localizePath(p, loc, { keepQuery })
   return next
 }
 

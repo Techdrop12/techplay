@@ -1,13 +1,31 @@
-// src/components/MetaPixel.tsx — FINAL (Consent-aware, SPA pageviews dedup, no double-init)
+// src/components/MetaPixel.tsx — Consent-aware, SPA pageviews dedup, no double-init — FINAL++
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Script from 'next/script'
-import { pixelPageView, isPixelReady } from '@/lib/meta-pixel'
+import { pixelPageView, isPixelReady } from '@/lib/meta-pixel' // garde ton API actuelle
 
 const PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID ?? ''
-const ENABLE_IN_DEV = process.env.NEXT_PUBLIC_PIXEL_IN_DEV === 'true'
+const ENABLE_IN_DEV = (process.env.NEXT_PUBLIC_PIXEL_IN_DEV || '').toLowerCase() === 'true'
+
+function hasAdsConsent(): boolean {
+  try {
+    // 1) Source de vérité injectée par layout.tsx
+    const s: any = (window as any).__consentState || {}
+    const adsGranted =
+      (s.ad_storage !== 'denied') ||
+      (s.ad_user_data !== 'denied') ||
+      (s.ad_personalization !== 'denied')
+
+    // 2) Fallback localStorage (bannière)
+    const ls = localStorage.getItem('consent:ads') === '1'
+
+    return adsGranted || ls
+  } catch {
+    return false
+  }
+}
 
 function eligibleNow(): boolean {
   if (!PIXEL_ID) return false
@@ -27,15 +45,11 @@ function eligibleNow(): boolean {
       localStorage.getItem('analytics:disabled') === '1'
   } catch {}
 
-  // Consent local (défini par Analytics.tsx / ta bannière)
-  let consentAds = '0'
-  try {
-    consentAds = localStorage.getItem('consent:ads') || '0'
-  } catch {}
-
   if (dnt || optedOut) return false
   if (process.env.NODE_ENV !== 'production' && !ENABLE_IN_DEV) return false
-  if (consentAds !== '1') return false
+
+  // Consent pub requis
+  if (!hasAdsConsent()) return false
 
   return true
 }
@@ -50,28 +64,25 @@ export default function MetaPixel() {
     setShouldLoad(eligibleNow())
   }, [])
 
-  // Écoute les mises à jour de consentement (CustomEvent 'tp:consent' émis par ta bannière)
+  // Écoute mises à jour de consent (CMP -> CustomEvent('tp:consent', {detail:{...}}))
   useEffect(() => {
-    const onConsent = (e: Event) => {
-      const detail = (e as CustomEvent).detail || {}
-      // On (re)teste l’éligibilité dès que l’utilisateur consent aux pubs/analytics
-      if ((detail.ads || detail.analytics) && eligibleNow()) {
-        setShouldLoad(true)
-      }
-      // Si l’utilisateur refuse ensuite, on ne "décharge" pas le pixel (Meta ne prévoit pas d'API)
+    const onConsent = () => {
+      if (eligibleNow()) setShouldLoad(true)
     }
     window.addEventListener('tp:consent', onConsent as EventListener)
-    return () => window.removeEventListener('tp:consent', onConsent as EventListener)
+    window.addEventListener('consent_update', onConsent as EventListener) // émis par layout.tsx
+    return () => {
+      window.removeEventListener('tp:consent', onConsent as EventListener)
+      window.removeEventListener('consent_update', onConsent as EventListener)
+    }
   }, [])
 
-  // SPA: track PageView à chaque navigation, quand le pixel est prêt (dedupe)
+  // SPA: PageView à chaque navigation (dedupe)
   useEffect(() => {
     if (!shouldLoad) return
     if (lastPathRef.current === pathname) return
     lastPathRef.current = pathname
 
-    // Le snippet initialise fbq (stub) immédiatement ; si jamais il n'est pas prêt,
-    // on tente à nouveau au prochain tick.
     const fire = () => {
       if (isPixelReady()) {
         pixelPageView()
@@ -97,11 +108,11 @@ export default function MetaPixel() {
             t.src=v; s=b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t,s);
           })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
           fbq('init', '${PIXEL_ID}');
-          // Pas de 'PageView' ici : on le fait manuellement (SPA-friendly).
+          // Pas de 'PageView' ici : on le déclenche manuellement (SPA-friendly) via pixelPageView()
         `}
       </Script>
 
-      {/* Optionnel : balise noscript */}
+      {/* Noscript de courtoisie */}
       <noscript
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{

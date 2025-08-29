@@ -1,8 +1,9 @@
 // src/components/checkout/CheckoutForm.tsx — PREMIUM+ (a11y/UX/Perf/Tracking)
 // - UX/a11y : SR live, focus management, hints, fieldset disabled, role=alert, ids stables
 // - Perf    : pas d’objets recréés inutilement, LS + QS safe
-// - Tracking: GA4 + dataLayer (événements sémantiques), toasts cohérents
-// - Flux    : Stripe Checkout via createCheckoutSession (pas de Payment Element)
+// - Tracking: GA4 + dataLayer + Meta Pixel (InitiateCheckout), toasts cohérents
+// - Flux    : Stripe Checkout via createCheckoutSession (Apple Pay/GPay support côté Checkout)
+// - Devise  : auto (EUR/GBP/USD) selon langue/locale navigateur
 'use client'
 
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
@@ -10,6 +11,7 @@ import { createCheckoutSession } from '@/lib/checkout'
 import { toast } from 'react-hot-toast'
 // GA: on tolère le nom d’export chez toi (event/logEvent) sans casser le build
 import { event as gaEvent } from '@/lib/ga'
+import { pixelInitiateCheckout } from '@/lib/meta-pixel'
 
 type FormErrors = { email?: string; address?: string }
 
@@ -22,21 +24,27 @@ const isAddress = (v: string) => String(v || '').trim().length >= 6
 // Helper ARIA pour composer plusieurs ids
 const joinIds = (...ids: Array<string | undefined>) => ids.filter(Boolean).join(' ')
 
+// Devise auto (EUR/GBP/USD) — simple & robuste
+function detectCurrency(): 'EUR' | 'GBP' | 'USD' {
+  try {
+    const htmlLang = typeof document !== 'undefined' ? document.documentElement.lang || '' : ''
+    const nav = typeof navigator !== 'undefined' ? navigator.language || '' : ''
+    const src = (htmlLang || nav).toLowerCase()
+
+    if (src.includes('gb') || src.endsWith('-uk') || src.includes('en-gb')) return 'GBP'
+    if (src.includes('us') || src.includes('en-us')) return 'USD'
+    if (src.startsWith('en')) return 'USD'
+    return 'EUR'
+  } catch {
+    return 'EUR'
+  }
+}
+
 /** Icône carte bancaire (SVG, sans emoji) */
 function IconCard({ size = 18, className = '' }: { size?: number; className?: string }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      className={className}
-    >
-      <path
-        d="M3 6.5C3 5.12 4.12 4 5.5 4h13A2.5 2.5 0 0 1 21 6.5v11A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5v-11Z"
-        fill="currentColor"
-        opacity="0.12"
-      />
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className={className}>
+      <path d="M3 6.5C3 5.12 4.12 4 5.5 4h13A2.5 2.5 0 0 1 21 6.5v11A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5v-11Z" fill="currentColor" opacity="0.12" />
       <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none" />
       <rect x="5" y="9" width="14" height="2.25" rx="1" fill="currentColor" />
       <rect x="5" y="14" width="5.5" height="1.75" rx="0.9" fill="currentColor" opacity="0.7" />
@@ -51,6 +59,7 @@ export default function CheckoutForm() {
   const [errors, setErrors] = useState<FormErrors>({})
   const [status, setStatus] = useState<string>('') // SR live region
   const [hp, setHp] = useState('') // honeypot
+  const [currency, setCurrency] = useState<'EUR' | 'GBP' | 'USD'>(() => detectCurrency())
 
   const formRef = useRef<HTMLFormElement | null>(null)
   const emailRef = useRef<HTMLInputElement | null>(null)
@@ -66,9 +75,10 @@ export default function CheckoutForm() {
   useEffect(() => {
     try {
       // 1) Querystring ?email=
-      const qsEmail = typeof window !== 'undefined'
-        ? new URLSearchParams(window.location.search).get('email')
-        : null
+      const qsEmail =
+        typeof window !== 'undefined'
+          ? new URLSearchParams(window.location.search).get('email')
+          : null
       if (qsEmail && isEmail(qsEmail)) {
         setEmail(qsEmail)
         try {
@@ -90,6 +100,11 @@ export default function CheckoutForm() {
     } catch {}
   }, [])
 
+  // Recalcule devise si la langue HTML change (rare, mais safe)
+  useEffect(() => {
+    setCurrency(detectCurrency())
+  }, [typeof document !== 'undefined' ? document.documentElement.lang : ''])
+
   const announce = useCallback((msg: string) => {
     setStatus(msg)
     if (srRef.current) srRef.current.textContent = msg
@@ -101,7 +116,6 @@ export default function CheckoutForm() {
     if (!isAddress(address)) next.address = 'Adresse trop courte'
     setErrors(next)
 
-    // focus le premier champ en erreur
     if (next.email) {
       emailRef.current?.focus()
       return false
@@ -114,12 +128,8 @@ export default function CheckoutForm() {
   }, [email, address])
 
   const track = useCallback((name: string, payload?: Record<string, unknown>) => {
-    try {
-      gaEvent?.({ action: name, category: 'checkout', label: 'checkout_form', ...payload })
-    } catch {}
-    try {
-      ;(window as any).dataLayer?.push({ event: name, ...payload })
-    } catch {}
+    try { gaEvent?.({ action: name, category: 'checkout', label: 'checkout_form', ...payload }) } catch {}
+    try { ;(window as any).dataLayer?.push({ event: name, ...payload }) } catch {}
   }, [])
 
   const handleSubmit = useCallback(
@@ -134,20 +144,30 @@ export default function CheckoutForm() {
       formRef.current?.setAttribute('aria-busy', 'true')
 
       try {
-        track('checkout_submit')
+        // Déclenche "begin_checkout" (GA & dataLayer) + Pixel (sans items ici)
+        track('begin_checkout', { currency })
+        try { pixelInitiateCheckout({ currency }) } catch {}
 
         // Sauvegarde opportuniste de l’email
         try { localStorage.setItem(LS_EMAIL_KEY, email) } catch {}
 
         announce('Création de la session de paiement…')
-        const session = await createCheckoutSession({ email, address })
+        const session = await createCheckoutSession({
+          email,
+          address,
+          currency,                            // ✅ on envoie la devise au backend
+          locale:
+            typeof document !== 'undefined'
+              ? (document.documentElement.lang || 'fr').slice(0, 2)
+              : 'fr',
+        })
 
         if (session?.url) {
           toast('Redirection vers le paiement…', {
             icon: <IconCard className="text-[hsl(var(--accent))]" />,
           })
           announce('Redirection vers Stripe')
-          track('checkout_redirect', { provider: 'stripe_checkout' })
+          track('checkout_redirect', { provider: 'stripe_checkout', currency })
           window.location.href = session.url
           return
         }
@@ -163,7 +183,7 @@ export default function CheckoutForm() {
         formRef.current?.setAttribute('aria-busy', 'false')
       }
     },
-    [address, email, hp, loading, validate, announce, track]
+    [address, email, hp, loading, validate, announce, track, currency]
   )
 
   /* -------------------------- Micro UX améliorations ---------------------- */
@@ -174,7 +194,7 @@ export default function CheckoutForm() {
     }
   }, [email])
 
-  // Appuyer sur Enter dans l’email quand il est valide → focus adresse
+  // Enter dans l’email quand il est valide → focus adresse
   const onEmailKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && isEmail(email)) {
       e.preventDefault()

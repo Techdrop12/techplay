@@ -1,4 +1,4 @@
-// src/components/Hotjar.tsx — FINAL (Consent-aware, SPA stateChange, no double-init)
+// src/components/Hotjar.tsx — FINAL+++ (Consent-aware, CMP reactive, SPA stateChange, no double-init)
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -8,6 +8,8 @@ import { eligibleHotjar, hjStateChange } from '@/lib/hotjar'
 
 const HOTJAR_ID = Number(process.env.NEXT_PUBLIC_HOTJAR_ID ?? 0)
 const HOTJAR_SV = Number(process.env.NEXT_PUBLIC_HOTJAR_SV ?? 6)
+const ENABLE_IN_DEV =
+  (process.env.NEXT_PUBLIC_HOTJAR_IN_DEV || '').toLowerCase() === 'true'
 
 export default function Hotjar() {
   const pathname = usePathname() || '/'
@@ -15,22 +17,28 @@ export default function Hotjar() {
 
   // Éligible à l’arrivée
   useEffect(() => {
-    setShouldLoad(eligibleHotjar(HOTJAR_ID))
+    const ok =
+      (process.env.NODE_ENV === 'production' || ENABLE_IN_DEV) &&
+      eligibleHotjar(HOTJAR_ID)
+    setShouldLoad(ok)
   }, [])
 
-  // Réagit aux changements de consentement (CustomEvent 'tp:consent')
+  // Réagit aux changements de consentement (CMP → 'tp:consent' et layout → 'consent_update')
   useEffect(() => {
-    const onConsent = (e: Event) => {
-      const detail = (e as CustomEvent).detail || {}
-      if (detail.analytics && eligibleHotjar(HOTJAR_ID)) {
+    const recheck = () => {
+      if ((process.env.NODE_ENV === 'production' || ENABLE_IN_DEV) && eligibleHotjar(HOTJAR_ID)) {
         setShouldLoad(true)
       }
     }
-    window.addEventListener('tp:consent', onConsent as EventListener)
-    return () => window.removeEventListener('tp:consent', onConsent as EventListener)
+    window.addEventListener('tp:consent', recheck as EventListener)
+    window.addEventListener('consent_update', recheck as EventListener)
+    return () => {
+      window.removeEventListener('tp:consent', recheck as EventListener)
+      window.removeEventListener('consent_update', recheck as EventListener)
+    }
   }, [])
 
-  // SPA: notifier Hotjar sur changement de route
+  // SPA: notifier Hotjar sur chaque changement de route
   useEffect(() => {
     if (!shouldLoad) return
     hjStateChange(pathname)

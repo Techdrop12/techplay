@@ -156,6 +156,21 @@ export default function StickyCartSummary({
     try { localStorage.setItem('tp_cart_sticky_collapsed', v ? '1' : '0') } catch {}
   }
 
+  // Écoute l’événement global “cart-added” pour déplier brièvement
+  useEffect(() => {
+    const onAdded = () => {
+      setCollapsedPersist(false)
+      if (!prefersReduced) {
+        try {
+          const el = document.querySelector('[data-visible="true"]') as HTMLElement | null
+          el?.animate?.([{ boxShadow: '0 0 0 0 rgba(16,185,129,0.0)' }, { boxShadow: '0 0 0 10px rgba(16,185,129,0.25)' }, { boxShadow: '0 0 0 0 rgba(16,185,129,0.0)' }], { duration: 800, easing: 'ease-out' })
+        } catch {}
+      }
+    }
+    window.addEventListener('cart-added', onAdded as EventListener)
+    return () => window.removeEventListener('cart-added', onAdded as EventListener)
+  }, [prefersReduced])
+
   // Visibilité + routes exclues (évaluées APRÈS tous les hooks)
   const visible = mounted && (count ?? 0) > 0
   const gotoCart = useMemo(() => localizePath(cartHref || '/cart', loc), [cartHref, loc])
@@ -183,6 +198,10 @@ export default function StickyCartSummary({
 
   // ⛔️ Masquage APRÈS les hooks → pas d’erreur React #300
   if (!visible || isExcluded) return null
+
+  // Affichage “Livraison” robuste (indéfinie / offerte / prix)
+  const shippingDisplay =
+    Number.isFinite(shipping) ? (shipping === 0 ? 'Offerte' : formatPrice(shipping as number)) : '—'
 
   return (
     <AnimatePresence mode="wait">
@@ -274,8 +293,8 @@ export default function StickyCartSummary({
               <div className="px-4 pt-2 text-[13px] text-gray-700 dark:text-gray-300 space-y-1">
                 <Line label={tx('subtotal', 'Sous-total')} value={formatPrice(subtotal)} />
                 {discount > 0 && <Line label={tx('discount', 'Remise')} value={`- ${formatPrice(discount)}`} accent />}
-                <Line label={tx('vat', 'TVA (est.)')} value={tax > 0 ? formatPrice(tax) : '—'} />
-                <Line label={tx('shipping', 'Livraison')} value={shipping === 0 ? 'Offerte' : formatPrice(shipping)} />
+                <Line label={tx('vat', 'TVA (est.)')} value={Number.isFinite(tax) && (tax as number) > 0 ? formatPrice(tax as number) : '—'} />
+                <Line label={tx('shipping', 'Livraison')} value={shippingDisplay} />
                 <div className="my-2 border-t border-gray-300 dark:border-zinc-700" />
                 <Line label={tx('total', 'Total')} value={formatPrice(payable)} bold />
               </div>

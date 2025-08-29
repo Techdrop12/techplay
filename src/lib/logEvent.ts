@@ -1,4 +1,4 @@
-// src/lib/logEvent.ts — Adaptateur universel pour les événements GA4
+// src/lib/logEvent.ts — Adaptateur universel pour les événements GA4 (robuste + typé)
 import { event as eventObj, logEvent as logStr } from './ga'
 
 export type GAObjectEvent = {
@@ -14,19 +14,17 @@ export type GAObjectEvent = {
  * Accepte soit:
  *  - logEvent('event_name', { ...params })
  *  - logEvent({ action: 'event_name', category, label, value, ... })
+ * Fail-soft si GA indisponible, en essayant gtag si présent.
  */
 export function logEvent(nameOrObj: string | GAObjectEvent, params?: Record<string, unknown>) {
   if (typeof window === 'undefined') return
 
   try {
     if (typeof nameOrObj === 'string') {
-      // Ancienne signature: (name, params)
       return logStr(nameOrObj, params)
     }
-    // Nouvelle signature objet, typée
     return eventObj(nameOrObj)
   } catch {
-    // Fallback best-effort si gtag dispo
     const w = window as any
     if (typeof w?.gtag === 'function') {
       if (typeof nameOrObj === 'string') {

@@ -11,11 +11,16 @@ import React, {
   useCallback,
 } from 'react';
 import { event as gaEvent, trackAddToCart } from '@/lib/ga';
+import {
+  createCheckoutSessionFromCart,
+  type CheckoutResponse,
+} from '@/lib/checkout';
 
 /** ----------------------- Constantes & env ----------------------- */
 const STORAGE_KEY = 'cart';
 const COUPON_KEY = 'cart_coupon_v1';
 const CART_ID_KEY = 'cart_id';
+const CURRENCY_KEY = 'cart_currency_v1';
 
 const MIN_QTY = 1;
 const MAX_QTY = 99;
@@ -25,6 +30,8 @@ const FLAT_SHIPPING_FEE = Number(process.env.NEXT_PUBLIC_FLAT_SHIPPING_FEE ?? 0)
 const TAX_RATE = Number(process.env.NEXT_PUBLIC_TAX_RATE ?? 0); // ex: 0.2 (20%)
 
 /** ----------------------- Types ----------------------- */
+export type Currency = 'EUR' | 'GBP' | 'USD';
+
 export type CartItem = {
   _id: string;
   slug: string;
@@ -41,9 +48,16 @@ export type Coupon =
   | { code: string; type: 'fixed'; value: number; freeShipping?: boolean; expiresAt?: string };
 
 export interface CartContextValue {
+  /** Items & identité de panier */
   cart: CartItem[];
   items: CartItem[];
   cartId: string;
+
+  /** Devise (persistée LS + auto-détectée) */
+  currency: Currency;
+  setCurrency: (c: Currency) => void;
+
+  /** Actions items */
   addToCart: (item: CartInput) => void | Promise<void>;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
@@ -51,15 +65,21 @@ export interface CartContextValue {
   decrement: (id: string, step?: number) => void;
   clearCart: () => void;
   replaceCart: (items: CartItem[]) => void;
+
+  /** Coupon */
   coupon?: Coupon | null;
   applyCoupon: (coupon: Coupon) => void;
   removeCoupon: () => void;
+
+  /** Sélecteurs */
   count: number;
   total: number; // sous-total (pré-remises & hors taxes)
   isInCart: (id: string) => boolean;
   getItemQuantity: (id: string) => number;
   getItem: (id: string) => CartItem | undefined;
   getLineTotal: (id: string) => number;
+
+  /** Totaux calculés */
   freeShippingThreshold: number;
   amountToFreeShipping: number;
   progressToFreeShipping: number;
@@ -67,21 +87,44 @@ export interface CartContextValue {
   shipping: number;
   tax: number;
   grandTotal: number;
+
+  /** Réseau (pratique pour UI) */
+  isOnline: boolean;
+
+  /** Helper express checkout côté panier */
+  beginCheckout: (args: { email: string; address: string; locale?: string }) => Promise<CheckoutResponse>;
 }
 
 /** ----------------------- Utils internes ----------------------- */
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
-const ensureItemShape = (it: Partial<CartItem>): CartItem => ({
-  _id: String(it._id ?? ''),
-  slug: String(it.slug ?? ''),
-  title: String(it.title ?? 'Produit'),
-  image: String(it.image ?? '/placeholder.png'),
-  price: Number.isFinite(Number(it.price)) ? Number(it.price) : 0,
-  quantity: clamp(Number(it.quantity ?? 1), MIN_QTY, MAX_QTY),
-  sku: it.sku ? String(it.sku) : undefined,
-});
+const ensureItemShape = (it: Partial<CartItem>): CartItem => ([
+  '_id','slug','title','image','price','quantity'
+] as const).reduce((acc, key) => {
+  (acc as any)[key] = key === 'price'
+    ? (Number.isFinite(Number((it as any)[key])) ? Number((it as any)[key]) : 0)
+    : key === 'quantity'
+      ? clamp(Math.trunc(Number((it as any)[key] ?? 1)), MIN_QTY, MAX_QTY)
+      : String((it as any)[key] ?? (key === 'title' ? 'Produit' : ''));
+  return acc;
+}, { sku: it.sku ? String(it.sku) : undefined } as CartItem);
+
+/** Devise auto (EUR/GBP/USD) — robuste & SSR-safe */
+function detectCurrency(): Currency {
+  try {
+    const htmlLang = typeof document !== 'undefined' ? (document.documentElement.lang || '') : '';
+    const nav = typeof navigator !== 'undefined' ? (navigator.language || '') : '';
+    const src = (htmlLang || nav).toLowerCase();
+
+    if (src.includes('gb') || src.endsWith('-uk') || src.includes('en-gb')) return 'GBP';
+    if (src.includes('us') || src.includes('en-us')) return 'USD';
+    if (src.startsWith('en')) return 'USD';
+    return 'EUR';
+  } catch {
+    return 'EUR';
+  }
+}
 
 function readCart(): CartItem[] {
   if (typeof window === 'undefined') return [];
@@ -126,6 +169,20 @@ function writeCoupon(coupon: Coupon | null) {
   } catch {}
 }
 
+function readCurrency(): Currency {
+  if (typeof window === 'undefined') return 'EUR';
+  try {
+    const saved = localStorage.getItem(CURRENCY_KEY) as Currency | null;
+    return (saved as Currency) || detectCurrency();
+  } catch {
+    return detectCurrency();
+  }
+}
+function writeCurrency(cur: Currency) {
+  if (typeof window === 'undefined') return;
+  try { localStorage.setItem(CURRENCY_KEY, cur) } catch {}
+}
+
 function getOrCreateCartId(): string {
   if (typeof window === 'undefined') return 'ssr';
   try {
@@ -151,6 +208,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     typeof window !== 'undefined' ? readCoupon() : null
   );
   const [cartId, setCartId] = useState<string>('anon');
+  const [currency, setCurrencyState] = useState<Currency>(() =>
+    typeof window !== 'undefined' ? readCurrency() : 'EUR'
+  );
+  const [isOnline, setIsOnline] = useState<boolean>(() =>
+    typeof navigator !== 'undefined' ? navigator.onLine : true
+  );
 
   const hydrated = useRef(false);
   const writeTimer = useRef<number | null>(null);
@@ -158,6 +221,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setCartId(getOrCreateCartId());
     hydrated.current = true;
+  }, []);
+
+  // Network state (utile UI + télémétrie silencieuse)
+  useEffect(() => {
+    const onOnline = () => setIsOnline(true);
+    const onOffline = () => setIsOnline(false);
+    window.addEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
+    return () => {
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('offline', onOffline);
+    };
   }, []);
 
   // Persistance (débouonçage léger)
@@ -173,12 +248,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     writeCoupon(coupon);
   }, [coupon]);
 
+  // Sauvegarde devise
+  useEffect(() => {
+    if (!hydrated.current) return;
+    writeCurrency(currency);
+  }, [currency]);
+
   // Sync inter-onglets & events custom
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
       if (e.key === STORAGE_KEY) setCart(readCart());
       if (e.key === COUPON_KEY) setCoupon(readCoupon());
       if (e.key === CART_ID_KEY && e.newValue) setCartId(e.newValue);
+      if (e.key === CURRENCY_KEY && e.newValue) setCurrencyState((e.newValue as Currency) || 'EUR');
     };
     const onCustom = (e: Event) => {
       const detail = (e as CustomEvent<CartItem[]>).detail;
@@ -265,7 +347,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return [...curr, item];
     });
 
-    // Tracking (tolérant)
+    // Tracking (tolérant, devise propagée)
     try {
       gaEvent?.({
         action: 'add_to_cart',
@@ -276,7 +358,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } catch {}
     try {
       trackAddToCart?.({
-        currency: 'EUR',
+        currency,
         value: round2(item.price * item.quantity),
         items: [
           {
@@ -288,7 +370,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         ],
       });
     } catch {}
-  }, []);
+  }, [currency]);
 
   const removeFromCart: CartContextValue['removeFromCart'] = useCallback((id) => {
     setCart((curr) => curr.filter((it) => it._id !== id));
@@ -336,11 +418,35 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const applyCoupon: CartContextValue['applyCoupon'] = useCallback((c) => setCoupon(c), []);
   const removeCoupon: CartContextValue['removeCoupon'] = useCallback(() => setCoupon(null), []);
 
+  const setCurrency = useCallback((c: Currency) => {
+    setCurrencyState(c);
+    // pas de conversion des montants ici : on affiche seulement dans la devise sélectionnée.
+    // (si besoin, on branchera un FX service plus tard)
+  }, []);
+
+  /** ----------------------- Express checkout helper ----------------------- */
+  const beginCheckout: CartContextValue['beginCheckout'] = useCallback(async ({ email, address, locale }) => {
+    // Utilise le builder central pour transformer le panier en line items
+    return createCheckoutSessionFromCart({
+      email,
+      address,
+      cart,
+      currency,
+      locale,
+      metadata: { cart_id: cartId },
+    });
+  }, [cart, currency, cartId]);
+
+  /** ----------------------- Valeur contexte ----------------------- */
   const value: CartContextValue = useMemo(
     () => ({
       cart,
       items: cart,
       cartId,
+
+      currency,
+      setCurrency,
+
       addToCart,
       removeFromCart,
       updateQuantity,
@@ -348,15 +454,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       decrement,
       clearCart,
       replaceCart,
+
       coupon,
       applyCoupon,
       removeCoupon,
+
       count,
       total,
       isInCart,
       getItemQuantity,
       getItem,
       getLineTotal,
+
       freeShippingThreshold: FREE_SHIPPING_THRESHOLD,
       amountToFreeShipping,
       progressToFreeShipping,
@@ -364,10 +473,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       shipping,
       tax,
       grandTotal,
+
+      isOnline,
+
+      beginCheckout,
     }),
     [
       cart,
       cartId,
+      currency,
+      setCurrency,
       addToCart,
       removeFromCart,
       updateQuantity,
@@ -390,6 +505,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       shipping,
       tax,
       grandTotal,
+      isOnline,
+      beginCheckout,
     ]
   );
 

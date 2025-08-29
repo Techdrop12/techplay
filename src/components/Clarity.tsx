@@ -1,4 +1,4 @@
-// src/components/Clarity.tsx — Consent-aware Clarity loader (SPA-safe)
+// src/components/Clarity.tsx — Consent-aware Clarity loader (SPA-safe) — FINAL+++
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -6,7 +6,20 @@ import { usePathname } from 'next/navigation'
 import Script from 'next/script'
 
 const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID ?? ''
-const ENABLE_IN_DEV = process.env.NEXT_PUBLIC_CLARITY_IN_DEV === 'true'
+const ENABLE_IN_DEV = (process.env.NEXT_PUBLIC_CLARITY_IN_DEV || '').toLowerCase() === 'true'
+
+function hasAnalyticsConsent(): boolean {
+  try {
+    // Source de vérité posée dans <head> (layout.tsx)
+    const s: any = (window as any).__consentState || {}
+    const ok = s.analytics_storage !== 'denied'
+    // Fallback local (bannière)
+    const ls = localStorage.getItem('consent:analytics') === '1'
+    return ok || ls
+  } catch {
+    return false
+  }
+}
 
 function eligibleNow(): boolean {
   if (!CLARITY_ID) return false
@@ -24,14 +37,9 @@ function eligibleNow(): boolean {
       localStorage.getItem('analytics:disabled') === '1'
   } catch {}
 
-  let consentAnalytics = '0'
-  try {
-    consentAnalytics = localStorage.getItem('consent:analytics') || '0'
-  } catch {}
-
   if (dnt || optedOut) return false
   if (process.env.NODE_ENV !== 'production' && !ENABLE_IN_DEV) return false
-  if (consentAnalytics !== '1') return false
+  if (!hasAnalyticsConsent()) return false
 
   return true
 }
@@ -40,20 +48,25 @@ export default function Clarity() {
   const pathname = usePathname() || '/'
   const [shouldLoad, setShouldLoad] = useState(false)
 
+  // Éligible à l’arrivée
   useEffect(() => {
     setShouldLoad(eligibleNow())
   }, [])
 
+  // Réagit aux changements de consentement (CMP → 'tp:consent' et layout → 'consent_update')
   useEffect(() => {
-    const onConsent = (e: Event) => {
-      const detail = (e as CustomEvent).detail || {}
-      if (detail.analytics && eligibleNow()) setShouldLoad(true)
+    const recheck = () => {
+      if (eligibleNow()) setShouldLoad(true)
     }
-    window.addEventListener('tp:consent', onConsent as EventListener)
-    return () => window.removeEventListener('tp:consent', onConsent as EventListener)
+    window.addEventListener('tp:consent', recheck as EventListener)
+    window.addEventListener('consent_update', recheck as EventListener)
+    return () => {
+      window.removeEventListener('tp:consent', recheck as EventListener)
+      window.removeEventListener('consent_update', recheck as EventListener)
+    }
   }, [])
 
-  // Clarity auto-traque les SPA; rien à faire de plus
+  // Clarity auto-traque les SPA; rien à faire de plus ici
   if (!shouldLoad) return null
 
   return (
@@ -65,6 +78,8 @@ export default function Clarity() {
           t=l.createElement(r); t.async=1; t.src="https://www.clarity.ms/tag/"+i;
           y=l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t,y);
         })(window, document, "clarity", "script", "${CLARITY_ID}");
+        // Par sécurité, si l'API consent existe côté Clarity, on signale qu'il est OK
+        try { window.clarity && window.clarity("consent"); } catch(e) {}
       `}
     </Script>
   )

@@ -1,7 +1,7 @@
-// src/lib/checkout.ts — FINAL (Stripe Checkout client helper)
+// src/lib/checkout.ts — FINAL++ (Stripe Checkout client helper)
 // - Types stricts + validation douce
 // - Idempotency key stable + salt sécurisé
-// - Normalisation devise/locale
+// - Normalisation devise/locale (clamp EUR/GBP/USD pour coller à l'API serveur)
 // - Abort/timeout, keepalive, no-store
 // - Helpers pour construire les items depuis le panier
 // - Rétro-compatibilité avec ton code existant
@@ -12,10 +12,12 @@ export type IsoCurrency =
   | 'EUR' | 'USD' | 'GBP' | 'CHF' | 'CAD' | 'AUD' | 'JPY' | 'BRL' | 'MXN' | 'SEK' | 'NOK' | 'DKK'
   | string // on laisse ouvert si d’autres devises sont utiles côté Stripe
 
+type SupportedCurrency = 'EUR' | 'GBP' | 'USD'
+
 export type CheckoutItem = {
   /** Nom/label affiché côté Stripe */
   name: string
-  /** Prix unitaire (majoritairement TTC côté front); l’API serveur devra savoir si HT/TTC */
+  /** Prix unitaire (majoritairement TTC côté front) */
   price: number
   /** Quantité entière >= 1 */
   quantity: number
@@ -29,8 +31,8 @@ export type CreateCheckoutInput = {
   email: string
   address: string
   items?: CheckoutItem[]             // si omis, le serveur peut reconstruire depuis session/cart
-  currency?: IsoCurrency             // fallback 'EUR'
-  locale?: string                    // ex: 'fr', 'fr-FR' ; fallback auto
+  currency?: IsoCurrency             // clampé en EUR/GBP/USD pour l'API
+  locale?: string                    // ex: 'fr', 'fr-FR'
   idempotencyKey?: string            // si fourni, on respecte
   metadata?: Record<string, string>  // facultatif: pass-through jusqu’au serveur
 }
@@ -89,18 +91,25 @@ function stableStringify(x: any): string {
 function safeLocale(l?: string) {
   if (l && typeof l === 'string' && l.length <= 10) return l
   if (typeof navigator !== 'undefined') {
-    const cand = navigator.language || (navigator as any).userLanguage
+    const cand = (navigator as any).language || (navigator as any).userLanguage
     if (cand) return String(cand).slice(0, 10)
   }
   return 'fr'
 }
 
-/** Normalise une devise en ISO uppercase, fallback EUR */
+/** Normalise une devise ISO uppercase (laisse passer tout code 3 lettres) */
 function normalizeCurrency(c?: string): IsoCurrency {
   const v = String(c || '').trim().toUpperCase()
   if (!v) return 'EUR'
-  // Laisse passer tout code 3 lettres ; Stripe validera côté serveur
   return /^[A-Z]{3}$/.test(v) ? (v as IsoCurrency) : 'EUR'
+}
+
+/** Clamp vers les devises supportées par l’API serveur (EUR/GBP/USD) */
+function normalizeSupportedCurrency(c?: string): SupportedCurrency {
+  const v = String(c || '').trim().toUpperCase()
+  if (v === 'GBP') return 'GBP'
+  if (v === 'USD') return 'USD'
+  return 'EUR'
 }
 
 /** Idempotency key stable pour un payload + salt aléatoire */
@@ -111,7 +120,7 @@ function buildIdempotencyKey(payload: Omit<CreateCheckoutInput, 'idempotencyKey'
     items: (payload.items || []).map((i) => ({
       name: i.name, price: i.price, quantity: i.quantity, image: i.image, currency: i.currency,
     })),
-    currency: normalizeCurrency(payload.currency),
+    currency: normalizeSupportedCurrency(payload.currency),
     locale: safeLocale(payload.locale),
     metadata: payload.metadata || {},
   })
@@ -146,7 +155,8 @@ export function buildCheckoutItemsFromCart(
     price: Math.max(0, toNumber(c.price, 0)),
     quantity: clampInt(c.quantity ?? c.qty ?? 1, 1, 1),
     image: c.image ? clampLen(c.image, MAX_IMAGE) : undefined,
-    currency: normalizeCurrency(c.currency || 'EUR'),
+    // aligné sur l'API serveur
+    currency: normalizeSupportedCurrency(c.currency || 'EUR'),
   }))
 }
 
@@ -165,7 +175,7 @@ export async function createCheckoutSessionFromCart(args: {
     email: args.email,
     address: args.address,
     items,
-    currency: args.currency,
+    currency: normalizeSupportedCurrency(args.currency || 'EUR'),
     locale: args.locale,
     idempotencyKey: args.idempotencyKey,
     metadata: args.metadata,
@@ -180,8 +190,11 @@ export async function createCheckoutSessionFromCart(args: {
  * - Lance une Error descriptive si KO / timeout.
  */
 export async function createCheckoutSession(input: CreateCheckoutInput): Promise<CheckoutResponse> {
-  // Normalisation & validation douce
-  const payload: CreateCheckoutInput = {
+  // 1) Devise clampée (toujours définie)
+  const currency: SupportedCurrency = normalizeSupportedCurrency(input.currency || 'EUR')
+
+  // 2) Payload normalisé avec champs NON optionnels (locale/currency)
+  const payload = {
     email: String((input.email || '')).trim(),
     address: String((input.address || '')).trim(),
     items: (input.items || [])
@@ -191,12 +204,20 @@ export async function createCheckoutSession(input: CreateCheckoutInput): Promise
         price: Math.max(0, toNumber(i.price, 0)),
         quantity: clampInt(i.quantity, 1, 1),
         image: i.image ? clampLen(i.image, MAX_IMAGE) : undefined,
-        currency: normalizeCurrency(i.currency || input.currency || 'EUR'),
+        currency, // on force la même devise sur les items
       })),
-    currency: normalizeCurrency(input.currency || 'EUR'),
-    locale: safeLocale(input.locale),
-    idempotencyKey: input.idempotencyKey, // on laisse passer si fourni
+    currency,                         // ✅ now: always a string (EUR/GBP/USD)
+    locale: safeLocale(input.locale), // ✅ now: always a string
+    idempotencyKey: input.idempotencyKey,
     metadata: sanitizeMetadata(input.metadata),
+  } satisfies {
+    email: string
+    address: string
+    items: { name: string; price: number; quantity: number; image?: string; currency: SupportedCurrency }[]
+    currency: SupportedCurrency
+    locale: string
+    idempotencyKey?: string
+    metadata?: Record<string, string>
   }
 
   if (!payload.email) throw new Error('Email requis')
@@ -209,15 +230,18 @@ export async function createCheckoutSession(input: CreateCheckoutInput): Promise
   try {
     const idem = payload.idempotencyKey || buildIdempotencyKey(payload)
 
+    // ✅ headers typés correctement (HeadersInit)
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'x-idempotency-key': idem,
+      'x-locale': payload.locale,
+      'x-currency': payload.currency, // string garanti
+    }
+
     const res = await fetch('/api/checkout', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'x-idempotency-key': idem,
-        'x-locale': payload.locale || 'fr',
-        'x-currency': payload.currency || 'EUR',
-      },
+      headers,
       body: JSON.stringify(payload),
       signal: controller.signal,
       cache: 'no-store',

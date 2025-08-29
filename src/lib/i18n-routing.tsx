@@ -1,14 +1,12 @@
-// src/lib/i18n-routing.tsx
+// src/lib/i18n-routing.tsx — FINAL (client-safe, cookie-aware, locales depuis i18n/config)
 'use client'
 
-// ✅ Source de vérité : locales depuis i18n/config
 import {
   locales as SUPPORTED_LOCALES,
   defaultLocale as DEFAULT_LOCALE
 } from '@/i18n/config'
 export type { Locale } from '@/i18n/config'
 
-// ⬅️ Ré-export pratique pour les composants
 export { SUPPORTED_LOCALES, DEFAULT_LOCALE }
 
 const isSupported = (v?: string): v is (typeof SUPPORTED_LOCALES)[number] =>
@@ -27,16 +25,15 @@ export function getCurrentPathname(): string {
 
 /**
  * Détermine la locale courante.
- * 1) Si le pathname commence par /fr ou /en → on respecte l’URL.
- * 2) Sinon, on lit le cookie NEXT_LOCALE (si présent et valide).
- * 3) Sinon, on retourne la locale par défaut (fr).
+ * 1) /<locale>/… dans l’URL → prioritaire
+ * 2) Cookie NEXT_LOCALE s’il est valide
+ * 3) Locale par défaut
  */
 export function getCurrentLocale(pathname?: string): (typeof SUPPORTED_LOCALES)[number] {
   const p = pathname ?? getCurrentPathname()
   const first = p.split('/').filter(Boolean)[0]
   if (isSupported(first)) return first as any
 
-  // Fallback sur cookie (utile quand on est sur un chemin sans préfixe)
   try {
     const cookie = document.cookie
       .split('; ')
@@ -74,7 +71,7 @@ export function localizePath(
   return withLocale + qs
 }
 
-/** Retourne les URLs alternatives (hreflang) pour un pathname donné */
+/** URLs alternatives (hreflang) pour un pathname donné */
 export function altLocales(pathname?: string) {
   const p = pathname ?? getCurrentPathname()
   return (SUPPORTED_LOCALES as readonly string[]).map((l) => ({

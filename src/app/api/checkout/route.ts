@@ -28,10 +28,9 @@ const BodySchema = z.object({
   email: z.string().email(),
   address: z.string().min(6),
   items: z.array(LineItem).optional(),
-  currency: z.string().optional(), // fallback sur items / EUR
-  locale: z.string().optional(),   // ex: 'fr'
-  // idempotency proposé par le client (sinon calculé)
-  idempotencyKey: z.string().optional(),
+  currency: z.enum(['EUR', 'GBP', 'USD']).optional(), // fallback sur items / EUR
+  locale: z.string().optional(),                      // ex: 'fr', 'en'
+  idempotencyKey: z.string().optional(),              // idempotency proposé par le client
 })
 
 function ipFromHeaders(req: Request) {
@@ -107,6 +106,14 @@ export async function POST(request: Request) {
     const successUrl = `${origin}/commande/success?session_id={CHECKOUT_SESSION_ID}`
     const cancelUrl = `${origin}/commande`
 
+    // Devise & pays d’expédition (simple déduction utile pour UX)
+    const currency = (body.currency || body.items?.[0]?.currency?.toUpperCase() || 'EUR') as
+      | 'EUR'
+      | 'GBP'
+      | 'USD'
+    const allowedCountries =
+      currency === 'GBP' ? ['GB'] : currency === 'USD' ? ['US'] : ['FR', 'BE', 'LU', 'DE', 'ES', 'IT']
+
     // 💳 Stripe Checkout (si clé dispo)
     if (STRIPE_KEY) {
       // Import dynamique pour éviter d’imposer stripe en dev si non utilisé
@@ -114,12 +121,12 @@ export async function POST(request: Request) {
       const stripe = new Stripe(STRIPE_KEY, { apiVersion: '2024-06-20' as any })
 
       // Line items
-      const currency = (body.currency || body.items?.[0]?.currency || 'eur').toLowerCase()
+      const liCurrency = currency.toLowerCase()
       const line_items =
         body.items && body.items.length
           ? body.items.map((it) => ({
               price_data: {
-                currency,
+                currency: liCurrency,
                 unit_amount: Math.round(it.price * 100),
                 product_data: { name: it.name, images: it.image ? [it.image] : undefined },
               },
@@ -129,8 +136,8 @@ export async function POST(request: Request) {
           : [
               {
                 price_data: {
-                  currency,
-                  unit_amount: 100, // 1.00€ “placeholder” si aucun item n’est fourni
+                  currency: liCurrency,
+                  unit_amount: 100, // 1.00 (fallback si aucun item n’est fourni)
                   product_data: { name: 'Commande TechPlay' },
                 },
                 quantity: 1,
@@ -145,13 +152,18 @@ export async function POST(request: Request) {
           cancel_url: cancelUrl,
           customer_email: body.email,
           phone_number_collection: { enabled: true },
-          shipping_address_collection: { allowed_countries: ['FR', 'BE', 'LU'] },
+          shipping_address_collection: { allowed_countries: allowedCountries as any },
           billing_address_collection: 'auto',
           allow_promotion_codes: true,
           line_items,
+          // Laisse Stripe gérer Apple Pay / Google Pay selon compte + domaine
+          automatic_tax: { enabled: false },
+          // Localisation de l’UI Checkout
+          locale: (body.locale || 'auto') as any, // 'auto' / 'fr' / 'en' …
           metadata: {
             address: body.address.slice(0, 500),
             items_count: (body.items?.reduce((a, i) => a + i.quantity, 0) || 1).toString(),
+            currency,
             idem,
           },
         },
@@ -167,7 +179,10 @@ export async function POST(request: Request) {
   } catch (err: any) {
     console.error('[checkout] error:', err)
     return json(
-      { error: 'Unexpected error', details: process.env.NODE_ENV === 'development' ? String(err?.message || err) : undefined },
+      {
+        error: 'Unexpected error',
+        details: process.env.NODE_ENV === 'development' ? String(err?.message || err) : undefined,
+      },
       { status: 500 }
     )
   }

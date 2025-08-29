@@ -10,7 +10,8 @@ import FreeShippingBadge from '@/components/FreeShippingBadge'
 import QuantitySelector from '@/components/QuantitySelector'
 import RatingStars from '@/components/ui/RatingStars'
 import PricingBadge from '@/components/PricingBadge'
-import AddToCartButton from '@/components/AddToCartButton'
+// ⬇️ on passe sur le wrapper A/B
+import AddToCartButtonAB from '@/components/AddToCartButtonAB'
 import ReviewForm from '@/components/ReviewForm'
 import StickyCartSummary from '@/components/StickyCartSummary'
 import ProductTags from '@/components/ProductTags'
@@ -59,6 +60,21 @@ const toNum = (v: unknown): number | undefined => {
   return Number.isFinite(n) ? n : undefined
 }
 
+/** Détection devise simple (EUR/GBP/USD) */
+function detectCurrency(): 'EUR' | 'GBP' | 'USD' {
+  try {
+    const htmlLang = typeof document !== 'undefined' ? document.documentElement.lang || '' : ''
+    const nav = typeof navigator !== 'undefined' ? navigator.language || '' : ''
+    const src = (htmlLang || nav).toLowerCase()
+    if (src.includes('gb') || src.endsWith('-uk') || src.includes('en-gb')) return 'GBP'
+    if (src.includes('us') || src.includes('en-us')) return 'USD'
+    if (src.startsWith('en')) return 'USD'
+    return 'EUR'
+  } catch {
+    return 'EUR'
+  }
+}
+
 export default function ProductDetail({ product, locale = 'fr' }: Props) {
   const prefersReducedMotion = useReducedMotion()
 
@@ -88,11 +104,13 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     isBestSeller,
     stock,
     brand,
+    category,
   } = product ?? {}
 
   // ✅ Normalisation des prix (tolère string)
   const price = Math.max(0, toNum(priceRaw) ?? 0)
   const oldPrice = toNum(oldPriceRaw)
+  const currency = detectCurrency()
 
   // ✅ Extraction tolérante de `tags`
   const tags: string[] | undefined =
@@ -137,7 +155,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           } catch {}
           try {
             trackViewItem({
-              currency: 'EUR',
+              currency,
               value: price,
               items: [mapProductToGaItem(product, { quantity: 1 })],
             })
@@ -155,7 +173,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     )
     io.observe(el)
     return () => io.disconnect()
-  }, [product, title, price, _id, image, gallery])
+  }, [product, title, price, _id, image, gallery, currency])
 
   // Raccourcis clavier
   useEffect(() => {
@@ -179,29 +197,29 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     try { logEvent({ action: 'add_to_cart', category: 'ecommerce', label: title, value: total }) } catch {}
     try {
       trackAddToCart({
-        currency: 'EUR',
+        currency,
         value: total,
         items: [mapProductToGaItem(product, { quantity })],
       })
     } catch {}
-  }, [title, total, product, quantity])
+  }, [title, total, product, quantity, currency])
 
   const onAddWishlist = useCallback(() => {
     try { logEvent({ action: 'add_to_wishlist', category: 'ecommerce', label: title, value: price }) } catch {}
     try {
       trackAddToWishlist({
-        currency: 'EUR',
+        currency,
         value: price,
         items: [mapProductToGaItem(product, { quantity: 1 })],
       })
     } catch {}
-  }, [title, price, product])
+  }, [title, price, product, currency])
 
   const onThumbSelect = (idx: number) => {
     setActiveIdx(idx)
     try {
       trackSelectItem({
-        currency: 'EUR',
+        currency,
         value: price,
         items: [mapProductToGaItem(product, { quantity: 1 })],
         item_list_name: 'product_gallery',
@@ -444,22 +462,22 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
               itemScope
               itemType="https://schema.org/Offer"
             >
-              <meta itemProp="priceCurrency" content="EUR" />
+              <meta itemProp="priceCurrency" content={currency} />
               <meta itemProp="price" content={priceStr} />
               <meta itemProp="availability" content={availability} />
-              {formatPrice(price)}
+              {formatPrice(price, { currency })}
             </span>
             {typeof oldPrice === 'number' && oldPrice > price && (
-              <span className="line-through text-gray-400 dark:text-gray-500">{formatPrice(oldPrice)}</span>
+              <span className="line-through text-gray-400 dark:text-gray-500">{formatPrice(oldPrice, { currency })}</span>
             )}
             {discount && typeof oldPrice === 'number' && (
               <span className="text-sm text-emerald-600 dark:text-emerald-400 font-semibold">
-                Économisez {formatPrice(oldPrice - price)} ({discount}%)
+                Économisez {formatPrice(oldPrice - price, { currency })} ({discount}%)
               </span>
             )}
             {quantity > 1 && (
               <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
-                Total ({quantity}×)&nbsp;: <span className="font-semibold">{formatPrice(total)}</span>
+                Total ({quantity}×)&nbsp;: <span className="font-semibold">{formatPrice(total, { currency })}</span>
               </span>
             )}
           </div>
@@ -513,9 +531,19 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           <p id="quantity-desc" className="sr-only">Sélectionnez la quantité à ajouter au panier</p>
 
           {!(typeof stock === 'number' && stock <= 0) ? (
-            <AddToCartButton
+            <AddToCartButtonAB
               product={{ _id, slug, title, price, image: gallery[0] ?? image, quantity }}
+              locale={safeLocale}
               onAdd={onAddToCart}
+              // AB key par défaut: 'add_to_cart_cta' (A: Ajouter / B: Commander maintenant)
+              gtmExtra={{
+                from: 'pdp',
+                product_id: _id,
+                product_slug: slug,
+                product_title: title,
+                product_price: price,
+                product_category: category ?? undefined,
+              }}
               size="lg"
               aria-label={`Ajouter ${title} au panier`}
             />

@@ -2,6 +2,7 @@
 'use client'
 
 import { useRef, useState, useId, useCallback, useEffect, useMemo } from 'react'
+import type React from 'react'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/hooks/useCart'
 import type { Product } from '@/types/product'
@@ -10,6 +11,7 @@ import { toast } from 'react-hot-toast'
 import { motion, useReducedMotion } from 'framer-motion'
 import { logEvent } from '@/lib/logEvent'
 import { trackAddToCart } from '@/lib/ga'
+import { pixelAddToCart, pixelInitiateCheckout } from '@/lib/meta-pixel'
 
 type MinimalProduct = Pick<Product, '_id' | 'slug' | 'title' | 'image' | 'price'>
 
@@ -51,6 +53,21 @@ interface Props {
 
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n))
 const isClient = typeof window !== 'undefined'
+
+/** devise simple (EUR/GBP/USD) alignée avec le checkout */
+function detectCurrency(): 'EUR' | 'GBP' | 'USD' {
+  try {
+    const htmlLang = typeof document !== 'undefined' ? document.documentElement.lang || '' : ''
+    const nav = typeof navigator !== 'undefined' ? navigator.language || '' : ''
+    const src = (htmlLang || nav).toLowerCase()
+    if (src.includes('gb') || src.endsWith('-uk') || src.includes('en-gb')) return 'GBP'
+    if (src.includes('us') || src.includes('en-us')) return 'USD'
+    if (src.startsWith('en')) return 'USD'
+    return 'EUR'
+  } catch {
+    return 'EUR'
+  }
+}
 
 /** ripple visuel sans CSS global (WAAPI) */
 function spawnRipple(e: React.MouseEvent<HTMLElement>) {
@@ -133,10 +150,7 @@ const CartIcon = ({ className = '' }: { className?: string }) => (
 
 const CheckIcon = ({ className = '' }: { className?: string }) => (
   <svg className={className} width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-    <path
-      fill="currentColor"
-      d="M9.55 16.6L5.3 12.35l1.4-1.4l2.85 2.85L17.3 6.95l1.4 1.4z"
-    />
+    <path fill="currentColor" d="M9.55 16.6L5.3 12.35l1.4-1.4l2.85 2.85L17.3 6.95l1.4 1.4z" />
   </svg>
 )
 
@@ -182,6 +196,7 @@ export default function AddToCartButton({
   const lastClickRef = useRef<number>(0)
   const labelId = useId()
   const wrapperRef = useRef<HTMLDivElement | null>(null)
+  const currency = useMemo(detectCurrency, [])
 
   const sizeClasses = useMemo(
     () =>
@@ -211,7 +226,7 @@ export default function AddToCartButton({
         ;(window as any).dataLayer.push({
           event: 'add_to_cart',
           ecommerce: {
-            currency: 'EUR',
+            currency,
             value: (detail as any).value,
             items: [
               {
@@ -229,7 +244,7 @@ export default function AddToCartButton({
         })
       } catch {}
     },
-    [disableDataLayer, gtmExtra]
+    [disableDataLayer, gtmExtra, currency]
   )
 
   const focusCartIcon = () => {
@@ -278,9 +293,16 @@ export default function AddToCartButton({
         } catch {}
         try {
           trackAddToCart?.({
-            currency: 'EUR',
+            currency,
             value: price * quantity,
             items: [{ item_id: id, item_name: title, price, quantity }],
+          })
+        } catch {}
+        try {
+          pixelAddToCart?.({
+            value: price * quantity,
+            currency,
+            contents: [{ id, quantity, item_price: price }],
           })
         } catch {}
         doDataLayerPush({ id, title, price, quantity, value: price * quantity, slug })
@@ -326,6 +348,19 @@ export default function AddToCartButton({
 
         // (nouveau) — "Buy now" / instant checkout
         if (instantCheckout) {
+          try {
+            // tracking "buy now"
+            ;(logEvent as any)?.({ action: 'buy_now_click', category: 'ecommerce', label: title })
+            ;(window as any).dataLayer?.push({ event: 'buy_now_click', ...gtmExtra })
+
+            pixelInitiateCheckout?.({
+              value: price * quantity,
+              currency,
+              num_items: 1,
+              contents: [{ id, quantity, item_price: price }],
+            })
+          } catch {}
+
           const path = `/${locale}/commande`
           try {
             router.push(path)
@@ -367,6 +402,8 @@ export default function AddToCartButton({
       instantCheckout,
       locale,
       router,
+      currency,
+      gtmExtra,
     ]
   )
 

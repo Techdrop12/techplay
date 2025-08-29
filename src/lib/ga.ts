@@ -1,10 +1,7 @@
 // src/lib/ga.ts
 // 📊 Google Analytics 4 — “god mode” utils (TS)
-// - SSR-safe, DNT, opt-out, Consent Mode v2
-// - Queue mémoire + OFFLINE queue (persistée localStorage)
-// - Debug mode, sampling par session
-// - Helpers e-commerce GA4 étendus
-// - Config init() optionnelle et safe
+// SSR-safe, DNT, opt-out, Consent Mode v2, queues (RAM + offline),
+// sampling, helpers e-com, et **bridge gtag->dataLayer optionnel** (GTM).
 
 /* ============================= Globals & setup ============================= */
 
@@ -90,6 +87,13 @@ function isGaEnabled(): boolean {
   )
 }
 
+// Option : **bridge gtag -> dataLayer** pour GTM
+// Désactivé par défaut pour éviter tout doublon.
+// Active-le en mettant NEXT_PUBLIC_GTAG_TO_DATALAYER="1"
+// (et dans ce cas, passe fallbackToDataLayer={false} à tes émetteurs si besoin).
+const BRIDGE_TO_DATALAYER =
+  (process.env.NEXT_PUBLIC_GTAG_TO_DATALAYER || '').trim() === '1'
+
 function canTrack(): boolean {
   return (
     isBrowser &&
@@ -120,7 +124,7 @@ function readOfflineQueue(): OfflineEvt[] {
 function writeOfflineQueue(q: OfflineEvt[]) {
   if (!isBrowser) return
   try {
-    localStorage.setItem(OFFLINE_KEY, JSON.stringify(q.slice(-200))) // garde au plus 200 events
+    localStorage.setItem(OFFLINE_KEY, JSON.stringify(q.slice(-200)))
   } catch {}
 }
 
@@ -162,8 +166,18 @@ function flushQueue() {
   }
 }
 
+// Bridge helper (objet {event, ...} consommé par GTM)
+function pushDataLayerEvent(eventName: string, params?: Record<string, any>) {
+  if (!isBrowser) return
+  try {
+    const dl = ((window as any).dataLayer = (window as any).dataLayer || [])
+    dl.push({ event: eventName, ...(params || {}) })
+  } catch {}
+}
+
 function gtagSafe(...args: any[]) {
   if (!isGaEnabled() || !isBrowser || !isSampledIn()) return
+
   // Ajoute debug_mode automatiquement
   if (typeof args[0] === 'string' && args[0] === 'event') {
     const params = (args[2] = args[2] || {})
@@ -171,6 +185,14 @@ function gtagSafe(...args: any[]) {
       if (!('debug_mode' in params)) (params as any).debug_mode = true
     }
   }
+
+  // Si demandé, on **miroite** l'event vers dataLayer pour GTM (sans désactiver gtag)
+  if (BRIDGE_TO_DATALAYER && args[0] === 'event' && typeof args[1] === 'string') {
+    try {
+      pushDataLayerEvent(args[1], args[2] || {})
+    } catch {}
+  }
+
   if (navigator.onLine) {
     if (canTrack()) {
       ;(window as any).gtag(...args)
@@ -179,7 +201,6 @@ function gtagSafe(...args: any[]) {
       startFlushPoller()
     }
   } else {
-    // Offline → persiste
     pushOffline(args)
   }
 }
@@ -212,15 +233,15 @@ type ConsentUpdate = Partial<{
   analytics_storage: ConsentValue
   ad_user_data: ConsentValue
   ad_personalization: ConsentValue
+  functionality_storage: ConsentValue
+  security_storage: ConsentValue
 }> & Record<string, ConsentValue>
 
-/** Définis l’état par défaut (ex: “denied”) très tôt */
 export function setConsentDefault(update: ConsentUpdate) {
   if (!isBrowser) return
   gtagSafe('consent', 'default', { wait_for_update: 500, ...update })
 }
 
-/** Accorde le consentement (clic “Tout accepter”, etc.) */
 export function grantConsent(update: ConsentUpdate = {}) {
   if (!isBrowser) return
   gtagSafe('consent', 'update', {
@@ -228,11 +249,12 @@ export function grantConsent(update: ConsentUpdate = {}) {
     analytics_storage: 'granted',
     ad_user_data: 'granted',
     ad_personalization: 'granted',
+    functionality_storage: 'granted',
+    security_storage: 'granted',
     ...update,
   })
 }
 
-/** Refuse le consentement (clic “Tout refuser”, etc.) */
 export function denyConsent(update: ConsentUpdate = {}) {
   if (!isBrowser) return
   gtagSafe('consent', 'update', {
@@ -240,11 +262,12 @@ export function denyConsent(update: ConsentUpdate = {}) {
     analytics_storage: 'denied',
     ad_user_data: 'denied',
     ad_personalization: 'denied',
+    functionality_storage: 'denied',
+    security_storage: 'granted',
     ...update,
   })
 }
 
-/** Alias simple: consent('grant'|'deny'|{...}) */
 export function consent(modeOrUpdate: 'grant' | 'deny' | ConsentUpdate, update?: ConsentUpdate) {
   if (!isBrowser) return
   if (typeof modeOrUpdate === 'string') {
@@ -253,7 +276,6 @@ export function consent(modeOrUpdate: 'grant' | 'deny' | ConsentUpdate, update?:
   gtagSafe('consent', 'update', modeOrUpdate)
 }
 
-/** Pratique pour une bannière (booleans → consent strings) */
 export function consentUpdateBooleans(p: {
   analytics?: boolean
   ads?: boolean
@@ -281,23 +303,17 @@ export function consentUpdateBooleans(p: {
 /* ============================== Init & Config ============================= */
 
 type InitOptions = {
-  /** passe dans gtag('config', ...) */
   config?: Record<string, any>
-  /** désactive les signaux d’annonces / signaux Google si besoin */
   disableSignals?: boolean
-  /** Active le mode annonces non personnalisées */
   nonPersonalizedAds?: boolean
 }
 
-/** Optionnel : appelle-le une fois côté client après chargement de gtag */
 export function initAnalytics(opts: InitOptions = {}) {
   if (!isGaEnabled() || !isBrowser) return
   const base: Record<string, any> = {
-    // GA4 ignore anonymize_ip (déjà anonymisé côté Google)
-    // Mais on peut piloter ces flags:
     allow_google_signals: !(opts.disableSignals ?? false),
     allow_ad_personalization_signals: !(opts.nonPersonalizedAds ?? false),
-    send_page_view: false, // on contrôle les PV manuellement
+    send_page_view: false,
   }
   const merged = { ...base, ...(opts.config || {}) }
   gtagSafe('config', GA_TRACKING_ID, merged)
@@ -384,7 +400,6 @@ const DEDUPE_MS = 1200
 
 function emit(eventName: string, params: Record<string, any>) {
   if (!isGaEnabled() || !isBrowser) return
-  // signature compacte basée sur items et value
   const sig = JSON.stringify({
     e: eventName,
     v: params?.value ?? null,
@@ -473,7 +488,6 @@ export function setUserProperties(props: Record<string, unknown>) {
   gtagSafe('set', 'user_properties', props)
 }
 
-/** Best-effort: récupère l’ID client GA4 via cookie _ga */
 export function getClientId(): string | null {
   if (!isBrowser) return null
   try {
@@ -498,14 +512,12 @@ export function isAnalyticsEnabled(): boolean {
   return isGaEnabled()
 }
 
-/** Active/désactive localement (ex: préférences utilisateur) */
 export function setLocalAnalyticsEnabled(enabled: boolean) {
   if (!isBrowser) return
   try {
     if (enabled) {
       localStorage.removeItem('ga:disabled')
       localStorage.removeItem('analytics:disabled')
-      // relance flush si ré-activé
       startFlushPoller()
       flushOffline()
     } else {

@@ -1,8 +1,9 @@
-// src/app/layout.tsx — RootLayout ULTIME (SEO/PWA/Consent/a11y/perf) — FINAL++
+// src/app/layout.tsx — RootLayout ULTIME (SEO/PWA/Consent/a11y/perf/GTM SS-ready) — FINAL++++
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
 import { Inter, Sora } from 'next/font/google'
 import { Suspense } from 'react'
+import Script from 'next/script'
 import type React from 'react'
 
 // ✅ Langue depuis next-intl (source de vérité)
@@ -30,6 +31,9 @@ import Tracking from '@/components/Tracking'
 // PWA prompt
 import AppInstallPrompt from '@/components/AppInstallPrompt'
 
+// CMP (bannière)
+import ConsentBanner from '@/components/ConsentBanner'
+
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
@@ -47,8 +51,12 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://techplay.example.c
 const SITE_NAME = 'TechPlay'
 const DEFAULT_OG = '/og-image.jpg'
 
-// 🔒 Noindex automatique pour les déploiements Vercel "preview" (ou override via env)
+// 🔒 Noindex auto pour previews (override via env)
 const IS_PREVIEW = process.env.VERCEL_ENV === 'preview' || process.env.NEXT_PUBLIC_NOINDEX === '1'
+
+// GTM (web) + Server-side endpoint (optionnels)
+const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID // ex: GTM-XXXXXXX
+const GTM_SERVER = (process.env.NEXT_PUBLIC_GTM_SERVER || '').replace(/\/+$/, '') // ex: https://gtm.techplay.com
 
 /* ----------------------------- Static metadata ---------------------------- */
 export const metadata: Metadata = {
@@ -58,14 +66,13 @@ export const metadata: Metadata = {
   description:
     'TechPlay, votre boutique high-tech : audio, gaming, accessoires et packs exclusifs. Qualité, rapidité, satisfaction garantie.',
   keywords: ['high-tech', 'gaming', 'audio', 'accessoires', 'e-commerce', 'TechPlay', 'packs exclusifs'],
-  // 👉 hreflang cohérent avec tes locales ('fr' et 'en')
   alternates: {
     canonical: SITE_URL,
     languages: { 'x-default': SITE_URL, fr: `${SITE_URL}/`, en: `${SITE_URL}/en` },
   },
   openGraph: {
     title: 'TechPlay – Boutique high-tech innovante',
-    description: 'TechPlay, votre boutique high-tech : audio, gaming, accessoires et packs exclusifs.',
+    description: 'TechPlay, votre boutique high-tech : audio, gaming, accessoires.',
     url: SITE_URL,
     siteName: SITE_NAME,
     images: [{ url: DEFAULT_OG, width: 1200, height: 630, alt: 'TechPlay – Boutique high-tech' }],
@@ -75,8 +82,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'TechPlay – Boutique high-tech innovante',
-    description:
-      'TechPlay, votre boutique high-tech : audio, gaming, accessoires et packs exclusifs.',
+    description: 'TechPlay, votre boutique high-tech : audio, gaming, accessoires et packs exclusifs.',
     images: [DEFAULT_OG],
   },
   icons: {
@@ -130,22 +136,36 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* Anti-FOUC + thème */}
         <DarkModeScript />
 
-        {/* Consent Mode v2 (par défaut: opt-out, compatible App Router) */}
+        {/* Consent Mode v2 — par défaut "denied" (App Router safe) + helpers globaux */}
         <script
           id="consent-default"
           dangerouslySetInnerHTML={{
             __html: `
-              window.dataLayer = window.dataLayer || [];
-              window.gtag = function(){ dataLayer.push(arguments); };
-              gtag('consent', 'default', {
-                ad_storage: 'denied',
-                analytics_storage: 'denied',
-                ad_user_data: 'denied',
-                ad_personalization: 'denied',
-                functionality_storage: 'granted',
-                security_storage: 'granted',
-                wait_for_update: 500
-              });
+              (function(){
+                window.dataLayer = window.dataLayer || [];
+                window.gtag = function(){ dataLayer.push(arguments); };
+                var DEFAULT = {
+                  ad_storage: 'denied',
+                  analytics_storage: 'denied',
+                  ad_user_data: 'denied',
+                  ad_personalization: 'denied',
+                  functionality_storage: 'granted',
+                  security_storage: 'granted',
+                  wait_for_update: 500
+                };
+                gtag('consent', 'default', DEFAULT);
+                window.__consentState = { ...DEFAULT };
+                window.__applyConsent = function(next){
+                  try{
+                    var allowed = ['ad_storage','analytics_storage','ad_user_data','ad_personalization','functionality_storage','security_storage'];
+                    var clean = {};
+                    for (var k in next) if (allowed.indexOf(k) > -1) clean[k] = next[k];
+                    window.__consentState = Object.assign({}, window.__consentState, clean);
+                    gtag('consent', 'update', clean);
+                    (window.dataLayer||[]).push({ event: 'consent_update', consent: window.__consentState });
+                  }catch(e){}
+                };
+              })();
             `,
           }}
         />
@@ -159,6 +179,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="dns-prefetch" href="https://connect.facebook.net" />
         <link rel="preconnect" href="https://script.hotjar.com" />
         <link rel="dns-prefetch" href="https://script.hotjar.com" />
+        {!!GTM_SERVER && <link rel="preconnect" href={GTM_SERVER} crossOrigin="" />}
+        {!!GTM_SERVER && <link rel="dns-prefetch" href={GTM_SERVER} />}
 
         {/* LCP: précharge visuels clés du hero (mobile + desktop) */}
         <link rel="preload" as="image" href="/carousel/hero-1-mobile.jpg" media="(max-width: 639px)" />
@@ -168,6 +190,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
 
       <body className="min-h-screen bg-token-surface text-token-text antialiased dark:[color-scheme:dark]">
+        {/* Noscript GTM (si activé) */}
+        {GTM_ID ? (
+          <noscript
+            dangerouslySetInnerHTML={{
+              __html: `<iframe src="https://www.googletagmanager.com/ns.html?id=${GTM_ID}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`,
+            }}
+          />
+        ) : null}
+
         {/* Décor global (non-interactif) */}
         <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
           <div className="absolute left-1/2 top-[-120px] h-[420px] w-[620px] -translate-x-1/2 rounded-full bg-accent/25 blur-3xl dark:bg-accent/30" />
@@ -188,23 +219,43 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <AccessibilitySkip />
         <div id="focus-sentinel" tabIndex={-1} />
 
-        {/* ✅ Un seul ThemeProvider (le doublon est supprimé de RootLayoutClient) */}
+        {/* ✅ Un seul ThemeProvider */}
         <ThemeProvider>
           <RootLayoutClient>
             <AfterIdleClient>
-              {/* 🔭 Tracking unifié — chargé en lazy + Suspense */}
+              {/* 🔭 Tracking unifié — lazy + Suspense */}
               <Suspense fallback={null}><Tracking /></Suspense>
 
               {/* PWA + bars/overlays */}
               <AppInstallPrompt />
               <StickyFreeShippingBar />
               <StickyCartSummary />
+              <ConsentBanner />
               <Toaster position="top-right" />
             </AfterIdleClient>
 
             <Layout>{children}</Layout>
           </RootLayoutClient>
         </ThemeProvider>
+
+        {/* Injection GTM (web) après interactivité — compatible Consent Mode */}
+        {GTM_ID ? (
+          <Script
+            id="gtm-init"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function(w,d,s,l,i){
+                  w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(), event:'gtm.js'});
+                  var f=d.getElementsByTagName(s)[0], j=d.createElement(s), dl=l!='dataLayer'?'&l='+l:'';
+                  j.async=true; j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+                  ${GTM_SERVER ? `j.setAttribute('data-gtm-server', '${GTM_SERVER}');` : ''}
+                  f.parentNode.insertBefore(j,f);
+                })(window,document,'script','dataLayer','${GTM_ID}');
+              `,
+            }}
+          />
+        ) : null}
 
         {/* JSON-LD Organization + WebSite (global, unique) */}
         <script
