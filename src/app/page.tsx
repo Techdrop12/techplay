@@ -1,10 +1,9 @@
-// src/app/page.tsx — Home ULTIME++ (perf/a11y/SEO centralisé, i18n server)
+// src/app/page.tsx — Home ULTIME++ (perf/a11y/SEO centralisé, i18n server) — SAFE IMPORT
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import { getTranslations } from 'next-intl/server'
 
-import { getBestProducts, getRecommendedPacks } from '@/lib/data'
 import type { Product, Pack } from '@/types/product'
 import TrustBadges from '@/components/TrustBadges'
 import ClientTrackingScript from '@/components/ClientTrackingScript'
@@ -189,13 +188,21 @@ export default async function HomePage() {
 
   let bestProducts: Product[] = []
   let recommendedPacks: Pack[] = []
+
   try {
-    ;[bestProducts, recommendedPacks] = await Promise.all([getBestProducts(), getRecommendedPacks()])
+    // ⬇️ import dynamique pour capturer les erreurs d’évaluation du module (@/lib/data)
+    const data = await import('@/lib/data')
+    const [best, packs] = await Promise.all([
+      data.getBestProducts?.() ?? Promise.resolve([]),
+      data.getRecommendedPacks?.() ?? Promise.resolve([]),
+    ])
+    bestProducts = Array.isArray(best) ? best : []
+    recommendedPacks = Array.isArray(packs) ? packs : []
   } catch {
-    // soft-fail : skeletons
+    // soft-fail → on laisse les skeletons
   }
 
-  // JSON-LD ItemList (uniquement ici ; WebSite/Organization sont dans le layout)
+  // JSON-LD ItemList
   const itemListJsonLd =
     Array.isArray(bestProducts) && bestProducts.length > 0
       ? {
