@@ -9,12 +9,6 @@ import {
   FaInstagram,
   FaLock,
   FaFileAlt,
-  FaShieldAlt,
-  FaTruck,
-  FaHeadset,
-  FaCcVisa,
-  FaCcMastercard,
-  FaCcPaypal,
 } from 'react-icons/fa'
 import { event as gaEvent, logEvent } from '@/lib/ga'
 import { toast } from 'react-hot-toast'
@@ -257,21 +251,21 @@ export default function Footer({
               <>
                 <ul className="mt-3 grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
                   <li className="flex items-center gap-2 rounded-lg border border-token-border bg-token-surface/80 px-3 py-2 backdrop-blur">
-                    <FaShieldAlt className="text-emerald-500" aria-hidden="true" /> Paiement sécurisé
+                    <span aria-hidden className="i-ph:shield-check-duotone text-emerald-500" /> Paiement sécurisé
                   </li>
                   <li className="flex items-center gap-2 rounded-lg border border-token-border bg-token-surface/80 px-3 py-2 backdrop-blur">
-                    <FaTruck className="text-[hsl(var(--accent))]" aria-hidden="true" /> Liv. 48–72h
+                    <span aria-hidden className="i-ph:truck-duotone text-[hsl(var(--accent))]" /> Liv. 48–72h
                   </li>
                   <li className="flex items-center gap-2 rounded-lg border border-token-border bg-token-surface/80 px-3 py-2 backdrop-blur">
-                    <FaHeadset className="text-amber-400" aria-hidden="true" /> Support 7j/7
+                    <span aria-hidden className="i-ph:headset-duotone text-amber-400" /> Support 7j/7
                   </li>
                 </ul>
 
                 {/* Paiements */}
                 <div className="flex items-center gap-3 pt-1 text-2xl text-token-text/60">
-                  <FaCcVisa aria-label="Visa" />
-                  <FaCcMastercard aria-label="Mastercard" />
-                  <FaCcPaypal aria-label="PayPal" />
+                  <span aria-hidden className="i-fa6-brands:cc-visa" />
+                  <span aria-hidden className="i-fa6-brands:cc-mastercard" />
+                  <span aria-hidden className="i-fa6-brands:paypal" />
                 </div>
               </>
             )}

@@ -1,13 +1,15 @@
-// src/components/ConsentBanner.tsx — Consent Mode v2 (compact, accessible) — FINAL+++
+// src/components/ConsentBanner.tsx — Consent Mode v2 (compact, accessible) — FINAL++++
 // - Défaut: denied (déjà posé dans <head>), MAJ via tp:consent + __applyConsent
 // - Stocke booleans: localStorage(consent:analytics, consent:ads, consent:decided)
 // - Bouton "Paramètres" avec 2 toggles (Analytics / Publicité)
 // - Émet aussi des events GTM (dataLayer) pour audit
 // - API globale: window.tpOpenConsent() / window.tpResetConsent()
+// - NEW: écoute l’évènement `open-consent-manager` émis par le footer
 
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Link from '@/components/LocalizedLink'
 
 type Prefs = {
   analytics: boolean
@@ -87,36 +89,42 @@ export default function ConsentBanner() {
     setShow(true)
   }, [])
 
-  // API globale pour rouvrir / réinitialiser
+  // API globale + écoute du footer
   useEffect(() => {
-    ;(window as any).tpOpenConsent = () => {
+    const openPanel = () => {
       setPrefs(readPrefs())
       setOpen(true)
       setShow(true)
       writeDecided(false)
       setTimeout(() => firstToggleRef.current?.focus(), 0)
     }
+
+    ;(window as any).tpOpenConsent = openPanel
     ;(window as any).tpResetConsent = () => {
       try {
         localStorage.removeItem('consent:analytics')
         localStorage.removeItem('consent:ads')
         localStorage.removeItem('consent:decided')
       } catch {}
-      // repasse en denied via applyConsent(false)
       const p: Prefs = { analytics: false, ads: false, functionality: true }
       applyConsent(p)
       pushDL('consent_reset', { source: 'user' })
-      ;(window as any).tpOpenConsent?.()
+      openPanel()
     }
+
+    // 🔗 depuis le Footer ("Préférences cookies")
+    const onOpen = () => openPanel()
+    window.addEventListener('open-consent-manager' as any, onOpen)
+
     return () => {
       delete (window as any).tpOpenConsent
       delete (window as any).tpResetConsent
+      window.removeEventListener('open-consent-manager' as any, onOpen)
     }
   }, [])
 
   useEffect(() => {
     if (!show) return
-    // empêche la page de "sauter" sur mobile
     document.documentElement.classList.add('consent-banner-open')
     return () => document.documentElement.classList.remove('consent-banner-open')
   }, [show])
@@ -197,12 +205,13 @@ export default function ConsentBanner() {
             </div>
           )}
 
-          <a
+          <Link
             href="/confidentialite"
+            prefetch={false}
             className="mt-2 inline-block text-xs text-[hsl(var(--accent))] underline underline-offset-4"
           >
             En savoir plus
-          </a>
+          </Link>
         </div>
 
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[240px]">

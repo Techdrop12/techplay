@@ -1,4 +1,4 @@
-// src/components/Tracking.tsx — Orchestrateur tracking (env-aware, idle mount) — FINAL+++
+// src/components/Tracking.tsx — Orchestrateur tracking (env-aware, idle mount) — FINAL++++
 'use client'
 
 import dynamic from 'next/dynamic'
@@ -19,7 +19,7 @@ const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID
 const HOTJAR_ID = process.env.NEXT_PUBLIC_HOTJAR_ID
 const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID
 
-// Désactive tout si explicitement demandé (ex: previews, debug)
+// Désactive les trackers si demandé (ex: previews, debug)
 const DISABLED = (process.env.NEXT_PUBLIC_ANALYTICS_DISABLED || '').toLowerCase() === 'true'
 
 // Petit helper “monte quand le thread est idle” pour préserver LCP
@@ -40,13 +40,11 @@ function Idle({ children, delay = 0 }: { children: React.ReactNode; delay?: numb
 }
 
 export default function Tracking() {
-  if (DISABLED) return null
-
-  // On monte Analytics si GA **ou** GTM est configuré
-  const showAnalytics = Boolean(GA_ID || GTM_ID)
-  const showMeta = Boolean(META_PIXEL_ID)
-  const showHotjar = Boolean(HOTJAR_ID)
-  const showClarity = Boolean(CLARITY_ID)
+  // Toujours enregistrer le SW même si les analytics sont désactivés
+  const showAnalytics = !DISABLED && Boolean(GA_ID || GTM_ID)
+  const showMeta = !DISABLED && Boolean(META_PIXEL_ID)
+  const showHotjar = !DISABLED && Boolean(HOTJAR_ID)
+  const showClarity = !DISABLED && Boolean(CLARITY_ID)
 
   return (
     <>

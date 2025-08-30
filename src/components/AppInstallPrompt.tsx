@@ -1,10 +1,12 @@
-// src/components/AppInstallPrompt.tsx — FINAL
+// src/components/AppInstallPrompt.tsx — FINAL+ (i18n FR/EN, même API)
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import Button from '@/components/Button'
 import { showToast } from '@/components/ToastSystem'
 import { logEvent } from '@/lib/ga'
+import { getCurrentLocale } from '@/lib/i18n-routing'
 
 /** Type minimal pour l’event beforeinstallprompt (non standard dans TS) */
 type BeforeInstallPromptEvent = Event & {
@@ -18,6 +20,46 @@ declare global {
     safari?: any
   }
 }
+
+/* ---------- i18n ---------- */
+const STR = {
+  fr: {
+    title: (brand: string) => <>Installer <span className="text-gradient">{brand}</span></>,
+    desc: 'Accès rapide, notifications, et mode hors-ligne.',
+    iosTitle: 'Sur iPhone/iPad :',
+    iosStep1: 'Appuyez sur ',
+    iosShare: 'Partager',
+    iosStep2: 'Sélectionnez ',
+    iosAdd: '« Sur l’écran d’accueil »',
+    later: 'Plus tard',
+    install: 'Installer',
+    ok: 'OK',
+    toastInstalled: 'Application installée 🎉',
+    toastStarted: 'Installation lancée ✅',
+    toastCancelled: 'Installation annulée.',
+    toastError: 'Impossible de lancer l’installation.',
+    ariaLater: 'Plus tard',
+    ariaInstall: 'Installer l’application',
+  },
+  en: {
+    title: (brand: string) => <>Install <span className="text-gradient">{brand}</span></>,
+    desc: 'Quick access, notifications, and offline mode.',
+    iosTitle: 'On iPhone/iPad:',
+    iosStep1: 'Tap ',
+    iosShare: 'Share',
+    iosStep2: 'Choose ',
+    iosAdd: '“Add to Home Screen”',
+    later: 'Later',
+    install: 'Install',
+    ok: 'OK',
+    toastInstalled: 'App installed 🎉',
+    toastStarted: 'Installation started ✅',
+    toastCancelled: 'Installation cancelled.',
+    toastError: 'Could not start installation.',
+    ariaLater: 'Remind me later',
+    ariaInstall: 'Install the app',
+  },
+} as const
 
 /* ---------- Constantes ---------- */
 
@@ -67,6 +109,10 @@ function setDismissForDays(days = DISMISS_DAYS) {
 /* ---------- Composant principal ---------- */
 
 export default function AppInstallPrompt() {
+  const pathname = usePathname() || '/'
+  const locale = (getCurrentLocale(pathname) as 'fr' | 'en') || 'fr'
+  const t = STR[locale]
+
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [visible, setVisible] = useState(false)
   const [iosHelp, setIosHelp] = useState(false)
@@ -75,10 +121,7 @@ export default function AppInstallPrompt() {
   const installed = isInstalled()
   const ios = isIosSafari()
 
-  // Décision d’affichage : on montre si :
-  // - l’app n’est pas installée
-  // - pas en période de "ne plus montrer"
-  // - on a soit l’event BIP (Android/Chrome), soit on est iOS Safari (aide A2HS)
+  // Décision d’affichage
   const canShowIOSHelp = ios && !installed && getDismissUntil() < now()
   const canShowBIP = !ios && !installed && getDismissUntil() < now()
 
@@ -100,7 +143,7 @@ export default function AppInstallPrompt() {
       setIosHelp(false)
       try { localStorage.removeItem(DISMISS_UNTIL_KEY) } catch {}
       window.__TP_INSTALL_SEEN = true
-      if (SHOW_TOASTS) showToast?.({ type: 'success', message: 'Application installée 🎉' })
+      if (SHOW_TOASTS) showToast?.({ type: 'success', message: t.toastInstalled })
       logEvent('pwa_app_installed')
     }
 
@@ -125,7 +168,7 @@ export default function AppInstallPrompt() {
       window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt as any)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [installed, canShowBIP])
+  }, [installed, canShowBIP, t.toastInstalled])
 
   // iOS Safari : si pas d’event BIP, proposer l’aide A2HS une fois
   useEffect(() => {
@@ -156,25 +199,24 @@ export default function AppInstallPrompt() {
       const { outcome, platform } = await deferredPrompt.userChoice
       logEvent('pwa_install_click', { outcome, platform })
       if (outcome === 'accepted') {
-        if (SHOW_TOASTS) showToast?.({ type: 'success', message: 'Installation lancée ✅' })
+        if (SHOW_TOASTS) showToast?.({ type: 'success', message: t.toastStarted })
       } else {
-        if (SHOW_TOASTS) showToast?.({ type: 'info', message: 'Installation annulée.' })
+        if (SHOW_TOASTS) showToast?.({ type: 'info', message: t.toastCancelled })
       }
     } catch {
-      if (SHOW_TOASTS) showToast?.({ type: 'error', message: 'Impossible de lancer l’installation.' })
+      if (SHOW_TOASTS) showToast?.({ type: 'error', message: t.toastError })
       logEvent('pwa_install_error')
     } finally {
       setDeferredPrompt(null)
       setVisible(false)
       setDismissForDays() // évite spam si l’utilisateur annule
     }
-  }, [deferredPrompt])
+  }, [deferredPrompt, t.toastStarted, t.toastCancelled, t.toastError])
 
   /* ---------- Rendu ---------- */
 
   if (!visible) return null
 
-  // UI : bottom sheet compacte, a11y, tokens, responsive
   return (
     <div
       className="fixed inset-x-3 bottom-4 z-[95] mx-auto max-w-xl rounded-2xl border border-token-border bg-token-surface px-4 py-3 shadow-elevated md:inset-x-auto md:left-6 md:right-auto"
@@ -187,24 +229,26 @@ export default function AppInstallPrompt() {
 
         <div className="flex-1">
           <h2 id="pwa-install-title" className="text-sm font-bold">
-            Installer <span className="text-gradient">TechPlay</span>
+            {t.title('TechPlay')}
           </h2>
 
-          {!iosHelp ? (
-            <p id="pwa-install-desc" className="mt-1 text-sm text-token-text/70">
-              Accès rapide, notifications, et mode hors-ligne.
-            </p>
-          ) : (
-            <div id="pwa-install-desc" className="mt-1 text-sm text-token-text/80">
-              <p className="text-token-text/70">
-                Sur iPhone/iPad&nbsp;:
-              </p>
-              <ol className="ml-4 list-decimal space-y-0.5">
-                <li>Appuyez sur <strong>Partager</strong> dans Safari.</li>
-                <li>Sélectionnez <strong>« Sur l’écran d’accueil »</strong>.</li>
-              </ol>
-            </div>
-          )}
+        {!iosHelp ? (
+          <p id="pwa-install-desc" className="mt-1 text-sm text-token-text/70">
+            {t.desc}
+          </p>
+        ) : (
+          <div id="pwa-install-desc" className="mt-1 text-sm text-token-text/80">
+            <p className="text-token-text/70">{t.iosTitle}</p>
+            <ol className="ml-4 list-decimal space-y-0.5">
+              <li>
+                {t.iosStep1}<strong>{t.iosShare}</strong>.
+              </li>
+              <li>
+                {t.iosStep2}<strong>{t.iosAdd}</strong>.
+              </li>
+            </ol>
+          </div>
+        )}
         </div>
 
         {/* Actions */}
@@ -213,9 +257,9 @@ export default function AppInstallPrompt() {
             variant="secondary"
             size="sm"
             onClick={dismiss}
-            aria-label="Plus tard"
+            aria-label={t.ariaLater}
           >
-            Plus tard
+            {t.later}
           </Button>
 
           {!iosHelp && deferredPrompt ? (
@@ -223,19 +267,18 @@ export default function AppInstallPrompt() {
               variant="accent"
               size="sm"
               onClick={handleInstall}
-              aria-label="Installer l’application"
+              aria-label={t.ariaInstall}
             >
-              Installer
+              {t.install}
             </Button>
           ) : (
-            // Sur iOS on affiche un bouton “OK” pour fermer l’aide
             <Button
               variant="accent"
               size="sm"
               onClick={dismiss}
               aria-label="OK"
             >
-              OK
+              {t.ok}
             </Button>
           )}
         </div>

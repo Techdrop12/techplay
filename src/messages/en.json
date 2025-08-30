@@ -35,7 +35,46 @@
     "redirecting": "Redirecting...",
     "payment_error": "Payment error",
     "error_loading_products": "Error loading products.",
-    "no_products_available": "No products available."
+    "no_products_available": "No products available.",
+    "sections": {
+      "explore": "Explore",
+      "categories_title": "Must-see categories",
+      "categories_sub": "Curated picks to get straight to the point.",
+      "categories_aria": "Featured categories",
+      "home_h1": "TechPlay – High-tech shop & exclusive bundles",
+      "hero_aria": "Featured products carousel",
+      "see_products_noscript": "Browse products",
+      "best_kicker": "Best sellers",
+      "best_title": "Our Best Sellers",
+      "best_sub": "Community favorites — limited stock.",
+      "best_aria": "TechPlay best sellers",
+      "packs_kicker": "Bundle",
+      "packs_title": "Recommended Bundles",
+      "packs_sub": "Combinations designed for performance and savings.",
+      "packs_aria": "Recommended TechPlay bundles",
+      "faq_title": "Frequently asked questions",
+      "faq_aria": "Common questions from our customers",
+      "see_category": "View category",
+      "see": "See →"
+    },
+    "cta": {
+      "aria": "Call to action",
+      "kicker": "Deal of the moment",
+      "headline_prefix": "Boost your setup in",
+      "headline_accent": "one click",
+      "sub": "Optimized bundles, best prices, fast delivery.",
+      "see_packs": "Explore bundles",
+      "see_products": "Browse products"
+    },
+    "testimonials": {
+      "aria": "Customer testimonials",
+      "kicker": "Reviews",
+      "title": "What customers say",
+      "sub": "A demanding and satisfied community.",
+      "lea": "Fast delivery and amazing keyboard, highly recommend!",
+      "maxime": "Responsive support, super cost-effective bundle.",
+      "amine": "Top quality, smooth and clear website."
+    }
   },
   "admin": {
     "add_product": "Add a product",

@@ -17,7 +17,7 @@ const STR = {
   fr: {
     nav: [
       { href: '/products', label: 'Produits' },
-      { href: '/categorie', label: 'Catégories' },
+      { href: '/#categories', label: 'Catégories' }, // ⬅️ ancre home
       { href: '/wishlist', label: 'Wishlist' },
       { href: '/blog', label: 'Blog' },
       { href: '/contact', label: 'Contact' },
@@ -46,7 +46,7 @@ const STR = {
   en: {
     nav: [
       { href: '/products', label: 'Products' },
-      { href: '/categorie', label: 'Categories' },
+      { href: '/#categories', label: 'Categories' }, // ⬅️ anchor
       { href: '/wishlist', label: 'Wishlist' },
       { href: '/blog', label: 'Blog' },
       { href: '/contact', label: 'Contact' },
@@ -412,7 +412,7 @@ export default function MobileNav() {
             {/* Sheet */}
             <motion.div
               ref={panelRef}
-              className="supports-backdrop:glass supports-backdrop:bg-token-surface/80 relative w-full overflow-hidden border border-token-border bg-token-surface/90 shadow-2xl sm:max-w-md sm:rounded-2xl will-change-transform"
+              className="supports-backdrop:bg-token-surface/80 relative w-full overflow-hidden border border-token-border bg-token-surface/90 shadow-2xl sm:max-w-md sm:rounded-2xl will-change-transform"
               variants={sheetVariants}
               drag={reducedMotion ? false : 'y'}
               dragConstraints={{ top: 0, bottom: 0 }}

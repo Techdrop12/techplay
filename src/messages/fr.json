@@ -35,7 +35,46 @@
     "redirecting": "Redirection...",
     "payment_error": "Erreur de paiement",
     "error_loading_products": "Erreur lors du chargement des produits.",
-    "no_products_available": "Aucun produit disponible."
+    "no_products_available": "Aucun produit disponible.",
+    "sections": {
+      "explore": "Explorer",
+      "categories_title": "Catégories incontournables",
+      "categories_sub": "Des sélections pointues pour aller droit au but.",
+      "categories_aria": "Catégories vedettes",
+      "home_h1": "TechPlay – Boutique high-tech & packs exclusifs",
+      "hero_aria": "Carrousel des produits en vedette",
+      "see_products_noscript": "Voir les produits",
+      "best_kicker": "Top ventes",
+      "best_title": "Nos Meilleures Ventes",
+      "best_sub": "Les favoris de la communauté – stock limité.",
+      "best_aria": "Meilleures ventes TechPlay",
+      "packs_kicker": "Bundle",
+      "packs_title": "Packs recommandés",
+      "packs_sub": "Des combinaisons pensées pour la performance et l’économie.",
+      "packs_aria": "Packs TechPlay recommandés",
+      "faq_title": "Questions fréquentes",
+      "faq_aria": "Questions fréquentes de nos clients",
+      "see_category": "Voir la catégorie",
+      "see": "Voir →"
+    },
+    "cta": {
+      "aria": "Appel à l’action",
+      "kicker": "Offre du moment",
+      "headline_prefix": "Boostez votre setup en",
+      "headline_accent": "un clic",
+      "sub": "Packs optimisés, meilleurs prix, livraison rapide.",
+      "see_packs": "Découvrir les packs",
+      "see_products": "Voir les produits"
+    },
+    "testimonials": {
+      "aria": "Témoignages clients",
+      "kicker": "Avis",
+      "title": "Les clients en parlent",
+      "sub": "Une communauté exigeante et satisfaite.",
+      "lea": "Livraison rapide et clavier incroyable, je recommande !",
+      "maxime": "Service client réactif, pack super rentable.",
+      "amine": "Qualité au top, site fluide et clair."
+    }
   },
   "admin": {
     "add_product": "Ajouter un produit",

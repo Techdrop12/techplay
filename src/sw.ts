@@ -15,7 +15,8 @@ import { CacheableResponsePlugin } from 'workbox-cacheable-response'
 import { RangeRequestsPlugin } from 'workbox-range-requests'
 import { enable as navigationPreloadEnable } from 'workbox-navigation-preload'
 
-declare let self: ServiceWorkerGlobalScope
+// ✅ type complet avec WB manifest
+declare const self: ServiceWorkerGlobalScope & { __WB_MANIFEST: any }
 
 /* ============================= Base & lifecycle ============================ */
 
@@ -28,13 +29,15 @@ setCacheNameDetails({
 
 self.skipWaiting()
 clientsClaim()
-navigationPreloadEnable()
+try {
+  navigationPreloadEnable()
+} catch {}
 
 /* ================================ Precache ================================= */
 
 // Manifest injecté au build par Workbox
 precacheAndRoute(self.__WB_MANIFEST || [], {
-  ignoreURLParametersMatching: [/^utm_/, /^fbclid$/],
+  ignoreURLParametersMatching: [/^utm_/, /^fbclid$/, /^ref$/],
 })
 cleanupOutdatedCaches()
 
@@ -162,34 +165,25 @@ registerRoute(
   })
 )
 
-/* ===================== API – mutations (POST/PUT/DEL) ====================== */
-/* Offline queue via Background Sync (panier, avis, subscribe, checkout…)     */
-/* ⚠️ exclut les endpoints sensibles (webhooks, auth).                         */
+/* ========== API – mutations (POST/PUT/PATCH/DELETE) with Background Sync ==== */
+/* ⚠️ On doit enregistrer UNE route par méthode non-GET, sinon Workbox ignore. */
 
 const mutationQueue = new BackgroundSyncPlugin('tp-api-queue', {
   maxRetentionTime: 24 * 60, // minutes
 })
 
-registerRoute(
-  ({ url, request }) => {
-    if (url.origin !== self.location.origin) return false
-    if (!url.pathname.startsWith('/api/')) return false
-    if (url.pathname.startsWith('/api/auth/')) return false
-    if (url.pathname.startsWith('/api/stripe-webhook')) return false
-    return ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)
-  },
-  new NetworkOnly({ plugins: [mutationQueue] }),
-  'POST'
-)
-registerRoute(
-  ({ url, request }) =>
-    url.origin === self.location.origin &&
-    url.pathname.startsWith('/api/') &&
-    !url.pathname.startsWith('/api/auth/') &&
-    !url.pathname.startsWith('/api/stripe-webhook') &&
-    ['PUT', 'PATCH', 'DELETE'].includes(request.method),
-  new NetworkOnly({ plugins: [mutationQueue] })
-)
+const isSyncableMutation = (url: URL) => {
+  if (url.origin !== self.location.origin) return false
+  if (!url.pathname.startsWith('/api/')) return false
+  if (url.pathname.startsWith('/api/auth/')) return false
+  if (url.pathname.startsWith('/api/stripe-webhook')) return false
+  return true
+}
+
+registerRoute(({ url }) => isSyncableMutation(url), new NetworkOnly({ plugins: [mutationQueue] }), 'POST')
+registerRoute(({ url }) => isSyncableMutation(url), new NetworkOnly({ plugins: [mutationQueue] }), 'PUT')
+registerRoute(({ url }) => isSyncableMutation(url), new NetworkOnly({ plugins: [mutationQueue] }), 'PATCH')
+registerRoute(({ url }) => isSyncableMutation(url), new NetworkOnly({ plugins: [mutationQueue] }), 'DELETE')
 
 /* ========================= Cross-origin images ============================= */
 
@@ -232,10 +226,8 @@ setCatchHandler(async ({ request }) => {
 
 self.addEventListener('message', (event) => {
   if (!event.data) return
-  // 1) skip waiting
   if (event.data.type === 'SKIP_WAITING') self.skipWaiting()
 
-  // 2) purge runtime caches on demand
   if (event.data.type === 'CLEAR_RUNTIME_CACHES') {
     event.waitUntil(
       (async () => {

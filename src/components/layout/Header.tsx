@@ -41,6 +41,7 @@ const STR = {
     account: { aria: 'Espace client', title: 'Espace client' },
     headerAria: 'En-tête du site',
     logoAria: 'TechPlay — Accueil',
+    langSwitcher: 'Sélecteur de langue',
   },
   en: {
     nav: { categories: 'Categories', products: 'Products', wishlist: 'Wishlist', blog: 'Blog', contact: 'Contact' },
@@ -60,13 +61,14 @@ const STR = {
     account: { aria: 'Account', title: 'Account' },
     headerAria: 'Site header',
     logoAria: 'TechPlay — Home',
+    langSwitcher: 'Language selector',
   },
 } as const
 
 type NavLink = { href: string; labelKey: keyof typeof STR['fr']['nav'] }
 
 const LINKS: NavLink[] = [
-  { href: '/categorie', labelKey: 'categories' },
+  { href: '/#categories', labelKey: 'categories' }, // ⬅️ ancre home (pas de /categorie)
   { href: '/products', labelKey: 'products' },
   { href: '/wishlist', labelKey: 'wishlist' },
   { href: '/blog', labelKey: 'blog' },
@@ -94,6 +96,9 @@ const ActionBadge = ({ children, className }: { children: React.ReactNode; class
 function LocaleSwitch({ pathname }: { pathname: string }) {
   const router = useRouter()
   const locale = getCurrentLocale(pathname)
+  const isFr = locale === 'fr'
+  const label = isFr ? STR.fr.langSwitcher : STR.en.langSwitcher
+
   const setLang = (newLocale: 'fr' | 'en') => {
     if (newLocale === locale) return
     try {
@@ -106,7 +111,7 @@ function LocaleSwitch({ pathname }: { pathname: string }) {
   return (
     <div
       role="group"
-      aria-label="Sélecteur de langue"
+      aria-label={label}
       className="inline-flex items-center rounded-full border border-token-border bg-token-surface/60 p-0.5"
     >
       {(['fr', 'en'] as const).map((l) => {

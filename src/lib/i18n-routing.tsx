@@ -1,12 +1,8 @@
 // src/lib/i18n-routing.tsx — FINAL (client-safe, cookie-aware, locales depuis i18n/config)
 'use client'
 
-import {
-  locales as SUPPORTED_LOCALES,
-  defaultLocale as DEFAULT_LOCALE
-} from '@/i18n/config'
+import { locales as SUPPORTED_LOCALES, defaultLocale as DEFAULT_LOCALE } from '@/i18n/config'
 export type { Locale } from '@/i18n/config'
-
 export { SUPPORTED_LOCALES, DEFAULT_LOCALE }
 
 const isSupported = (v?: string): v is (typeof SUPPORTED_LOCALES)[number] =>
@@ -76,6 +72,6 @@ export function altLocales(pathname?: string) {
   const p = pathname ?? getCurrentPathname()
   return (SUPPORTED_LOCALES as readonly string[]).map((l) => ({
     locale: l,
-    href: localizePath(p, l as any)
+    href: localizePath(p, l as any),
   }))
 }

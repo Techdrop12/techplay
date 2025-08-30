@@ -1,10 +1,7 @@
 // src/app/[locale]/layout.tsx
 import type { ReactNode } from 'react'
 import { notFound } from 'next/navigation'
-import {
-  NextIntlClientProvider,
-  type AbstractIntlMessages
-} from 'next-intl'
+import { NextIntlClientProvider, type AbstractIntlMessages } from 'next-intl'
 
 import loadMessages from '@/i18n/loadMessages'
 import { locales, isLocale, type Locale } from '@/i18n/config'
@@ -30,10 +27,7 @@ export default async function LocaleLayout({
   const messages = (await loadMessages(locale)) as AbstractIntlMessages
 
   return (
-    <NextIntlClientProvider
-      locale={locale as Locale}
-      messages={messages}
-    >
+    <NextIntlClientProvider locale={locale as Locale} messages={messages}>
       {children}
     </NextIntlClientProvider>
   )

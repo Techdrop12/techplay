@@ -1,4 +1,4 @@
-// next.config.mjs — Ultra Premium FINAL (+ PWA swSrc + CSP)
+// next.config.mjs — Ultra Premium FINAL (+ PWA swSrc + CSP + assets cache)
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
 import withPWA from 'next-pwa'
@@ -14,9 +14,9 @@ const isDev = process.env.NODE_ENV === 'development'
 const withPwaPlugin = withPWA({
   dest: 'public',
   swSrc: 'src/sw.ts',
-  register: false,       // ← on gère l’enregistrement nous-mêmes (AfterIdleClient)
+  register: false,              // on gère l’enregistrement nous-mêmes
   skipWaiting: true,
-  disable: isDev,        // actif en prod uniquement
+  disable: isDev,               // actif en prod uniquement
   buildExcludes: [/middleware-manifest\.json$/],
   fallbacks: { image: '/fallback.png' },
 })
@@ -47,7 +47,11 @@ const securityHeaders = [
   { key: 'Cross-Origin-Resource-Policy', value: 'same-site' },
   { key: 'X-Permitted-Cross-Domain-Policies', value: 'none' },
   { key: 'Origin-Agent-Cluster', value: '?1' },
-  { key: 'Permissions-Policy', value: "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=*, geolocation=(), gyroscope=(), hid=(), idle-detection=(), keyboard-map=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=*, publickey-credentials-get=(), usb=(), screen-wake-lock=(), web-share=(), xr-spatial-tracking=()" },
+  {
+    key: 'Permissions-Policy',
+    value:
+      "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=*, geolocation=(), gyroscope=(), hid=(), idle-detection=(), keyboard-map=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=*, publickey-credentials-get=(), usb=(), screen-wake-lock=(), web-share=(), xr-spatial-tracking=()",
+  },
   { key: 'Content-Security-Policy', value: csp },
 ]
 
@@ -68,6 +72,7 @@ export default withNextIntl(
       remotePatterns: [{ protocol: 'https', hostname: '**' }],
       formats: ['image/avif', 'image/webp'],
       dangerouslyAllowSVG: true,
+      // CSP de sanitization pour les SVG (pas la CSP globale)
       contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
       unoptimized: false,
     },
@@ -76,7 +81,6 @@ export default withNextIntl(
 
     compiler: {
       removeConsole: { exclude: ['error', 'warn'] },
-      // reactRemoveProperties: true,
     },
 
     async redirects() {
@@ -102,7 +106,8 @@ export default withNextIntl(
         { source: '/:path*', headers: securityHeaders },
         { source: '/api/:path*', headers: [{ key: 'Cache-Control', value: 'no-store' }] },
         { source: '/_next/static/:any*', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
-        { source: '/:all*.(js|css|png|jpg|jpeg|gif|webp|svg|ico|woff|woff2)', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
+        // Cache long pour assets (pattern Next officiel)
+        { source: '/:all*(svg|jpg|jpeg|png|gif|webp|ico|woff|woff2|css|js)', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
         { source: '/(site.webmanifest|manifest.json)', headers: [{ key: 'Cache-Control', value: 'public, max-age=86400' }] },
         { source: '/icons/:path*', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
         { source: '/sw.js', headers: [{ key: 'Service-Worker-Allowed', value: '/' }, { key: 'Cache-Control', value: 'no-cache' }] },

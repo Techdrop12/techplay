@@ -1,18 +1,17 @@
-// middleware.ts — Ultra Premium FINAL (i18n ajusté)
+// middleware.ts — Ultra Premium FINAL (i18n, sécurité, canonique, perf)
 import { NextRequest, NextResponse } from 'next/server'
 import createMiddleware from 'next-intl/middleware'
 import { getToken } from 'next-auth/jwt'
 
-/** ───────────────────────── I18N ───────────────────────── **/
+/** ─────────────── I18N core (next-intl) ─────────────── **/
 const intlMiddleware = createMiddleware({
   locales: ['fr', 'en'],
   defaultLocale: 'fr',
   localePrefix: 'as-needed',
-  // ❗️IMPORTANT: on coupe la détection par Accept-Language
-  localeDetection: false,
+  localeDetection: false, // on garde le contrôle
 })
 
-/** ──────────────────── Constantes/Helpers ─────────────────── **/
+/** ─────────────── Constantes/Helpers ─────────────── **/
 const isDev = process.env.NODE_ENV !== 'production'
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com'
 const CANONICAL_HOST = safeHostname(SITE_URL)
@@ -25,9 +24,10 @@ const STATIC_FILES = [
   'favicon.ico',
   'manifest.json',
   'robots.txt',
+  'site.webmanifest',
   'sw.js',
   'firebase-messaging-sw.js',
-]
+] as const
 
 const PUBLIC_PREFIXES = [
   '/_next/',
@@ -40,7 +40,9 @@ const PUBLIC_PREFIXES = [
   '/en/icons/',
 ]
 
-const PUBLIC_PATHS = [...STATIC_FILES.flatMap((f) => [`/${f}`, `/fr/${f}`, `/en/${f}`])]
+const PUBLIC_PATHS = new Set<string>([
+  ...STATIC_FILES.flatMap((f) => [`/${f}`, `/fr/${f}`, `/en/${f}`]),
+])
 
 function safeHostname(url: string) {
   try {
@@ -50,12 +52,14 @@ function safeHostname(url: string) {
   }
 }
 
-/** Normalisation: enlève “//” multiples et trailing slash (sauf racine & /fr|/en) */
+/** Normalisation: // multiples & trailing slash (sauf racine & /fr|/en) */
 function normalizePath(pathname: string) {
   let p = pathname.replace(/\/{2,}/g, '/')
   if (p.length > 1 && /\/$/.test(p) && !/^\/(fr|en)\/?$/.test(p)) {
     p = p.slice(0, -1)
   }
+  // Harmonise /en/ → /en
+  if (p === '/en/') p = '/en'
   return p
 }
 
@@ -67,21 +71,19 @@ function mustEnforceHttps(req: NextRequest) {
   return !isDev && !isLocalhost && proto !== 'https'
 }
 
-/** Redirection domaine canonique (conserve sous-domaines autorisés) */
+/** Redirection domaine canonique (conserve hôtes autorisés & previews) */
 function mustRedirectHost(host: string | null) {
   if (!host || !CANONICAL_HOST) return false
   if (host === CANONICAL_HOST) return false
   if (EXTRA_ALLOWED.includes(host)) return false
-  if (host.endsWith('.vercel.app')) return false // preview autorisée
+  if (host.endsWith('.vercel.app')) return false // previews autorisées
   return true
 }
 
 /** AB test cookie (stickiness), optionnel via env AB_TEST_ENABLED */
 function ensureAbCookie(response: NextResponse) {
   if (process.env.AB_TEST_ENABLED !== 'true') return
-  const has = response.cookies.get('ab')?.value
-  if (has) return
-
+  if (response.cookies.get('ab')?.value) return
   const variant: 'A' | 'B' = Math.random() < 0.5 ? 'A' : 'B'
   response.cookies.set('ab', variant, {
     path: '/',
@@ -92,11 +94,11 @@ function ensureAbCookie(response: NextResponse) {
   })
 }
 
-/** ───────────────────── Middleware principal ───────────────────── **/
+/** ─────────────── Middleware principal ─────────────── **/
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // 0) Normalisation basique (doublons slash / trailing slash)
+  // 0) Normalisation basique
   const normalized = normalizePath(pathname)
   if (normalized !== pathname) {
     const url = request.nextUrl.clone()
@@ -104,7 +106,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308)
   }
 
-  // ✅ 0-bis) Normaliser /fr → / (la locale par défaut ne doit pas être préfixée)
+  // 0-bis) Normaliser /fr → / (locale par défaut non préfixée)
   if (pathname === '/fr' || pathname.startsWith('/fr/')) {
     const url = request.nextUrl.clone()
     url.pathname = pathname.replace(/^\/fr(\/|$)/, '/')
@@ -118,7 +120,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308)
   }
 
-  // 2) Domaine canonique (hors preview vercel et hôtes autorisés)
+  // 2) Domaine canonique (hors previews & hôtes autorisés)
   const host = request.headers.get('host')
   if (!isDev && mustRedirectHost(host)) {
     const url = request.nextUrl.clone()
@@ -130,16 +132,14 @@ export async function middleware(request: NextRequest) {
   const matchStatic = pathname.match(/^\/(fr|en)\/(.+)$/)
   if (matchStatic) {
     const [, , file] = matchStatic
-    if (STATIC_FILES.includes(file) || file.startsWith('icons/')) {
+    if (STATIC_FILES.includes(file as (typeof STATIC_FILES)[number]) || file.startsWith('icons/')) {
       return NextResponse.rewrite(new URL(`/${file}`, request.url))
     }
   }
 
   // 4) Autoriser public paths/prefixes immédiatement
-  if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next()
-  if (PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
-    return NextResponse.next()
-  }
+  if (PUBLIC_PATHS.has(pathname)) return NextResponse.next()
+  if (PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return NextResponse.next()
 
   // 5) Maintenance (bypass pour /admin et page maintenance)
   const isMaintenance = process.env.MAINTENANCE === 'true'
@@ -156,16 +156,16 @@ export async function middleware(request: NextRequest) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
     if (!token || (token as any)?.role !== 'admin') {
       const url = request.nextUrl.clone()
-      url.pathname = '/fr/connexion'
+      // ✅ correspond à ton arbo: /login existe à la racine
+      url.pathname = '/login'
       return NextResponse.redirect(url, 307)
     }
   }
 
-  // 7) i18n (next-intl) — sans détection Accept-Language
+  // 7) i18n (next-intl) — sans Accept-Language
   const response = intlMiddleware(request) as NextResponse
 
-  // ✅ 8) Fixer le cookie de locale selon le chemin courant
-  //    - /en… => en, sinon fr (défaut)
+  // 8) Cookie de locale selon chemin courant
   const derived = pathname === '/en' || pathname.startsWith('/en/') ? 'en' : 'fr'
   if (request.cookies.get('NEXT_LOCALE')?.value !== derived) {
     response.cookies.set('NEXT_LOCALE', derived, {
@@ -197,7 +197,7 @@ export async function middleware(request: NextRequest) {
   return response
 }
 
-/** ───────────────────────── Matcher ───────────────────────── **/
+/** ─────────────── Matcher ─────────────── **/
 export const config = {
   matcher: [
     '/((?!_next/|_vercel/|api/|favicon\\.ico$|robots\\.txt$|manifest\\.json$|site\\.webmanifest$|sw\\.js$|firebase-messaging-sw\\.js$|icons/|fr/icons/|en/icons/|images/|fonts/|static/).*)',
