@@ -1,43 +1,62 @@
-// src/app/page.tsx — Home ULTIME++ (perf/a11y/SEO centralisé, i18n server) — SAFE IMPORT
+// src/app/page.tsx — Home ULTIME++ (perf/a11y/SEO centralisé, i18n server) — PATCH
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import { getTranslations } from 'next-intl/server'
 
+import { getBestProducts, getRecommendedPacks } from '@/lib/data'
 import type { Product, Pack } from '@/types/product'
 import TrustBadges from '@/components/TrustBadges'
-import ClientTrackingScript from '@/components/ClientTrackingScript'
 import Link from '@/components/LocalizedLink'
 import { generateMeta } from '@/lib/seo'
 import { CATEGORIES } from '@/lib/categories'
 
-const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'))
+// ⛑️ IMPORTANT: tout ce qui peut toucher window/DOM devient client-only
+const ClientTrackingScript = dynamic(() => import('@/components/ClientTrackingScript'), { ssr: false })
+const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'), {
+  ssr: false,
+  loading: () => <div className="h-40 sm:h-56 lg:h-72 rounded-2xl skeleton" />,
+})
 const BestProducts = dynamic(() => import('@/components/BestProducts'), {
+  ssr: false,
   loading: () => <SectionSkeleton title="…" />,
 })
 const PacksSection = dynamic(() => import('@/components/PacksSection'), {
+  ssr: false,
   loading: () => <SectionSkeleton title="…" />,
 })
 const FAQ = dynamic(() => import('@/components/FAQ'), {
+  ssr: false,
   loading: () => <SectionSkeleton title="…" />,
 })
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://techplay.example.com'
 
-// SEO localisé via next-intl (messages.seo.*)
+// SEO localisé via next-intl (messages.seo.*) + fallback si jamais le namespace manque
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('seo')
-  const BASE_META = generateMeta({
-    title: t('homepage_title'),
-    description: t('homepage_description'),
-    url: '/',
-    image: '/og-image.jpg',
-    type: 'website',
-  })
-  return {
-    ...BASE_META,
-    title: { absolute: t('homepage_title') },
-    description: t('homepage_description'),
+  try {
+    const t = await getTranslations('seo')
+    const BASE = generateMeta({
+      title: t('homepage_title'),
+      description: t('homepage_description'),
+      url: '/',
+      image: '/og-image.jpg',
+      type: 'website',
+    })
+    return {
+      ...BASE,
+      title: { absolute: t('homepage_title') },
+      description: t('homepage_description'),
+    }
+  } catch {
+    return generateMeta({
+      title: 'TechPlay – Boutique high-tech innovante',
+      description:
+        'TechPlay, votre boutique high-tech : audio, gaming, accessoires et packs exclusifs.',
+      url: '/',
+      image: '/og-image.jpg',
+      type: 'website',
+    })
   }
 }
 
@@ -188,21 +207,15 @@ export default async function HomePage() {
 
   let bestProducts: Product[] = []
   let recommendedPacks: Pack[] = []
-
   try {
-    // ⬇️ import dynamique pour capturer les erreurs d’évaluation du module (@/lib/data)
-    const data = await import('@/lib/data')
-    const [best, packs] = await Promise.all([
-      data.getBestProducts?.() ?? Promise.resolve([]),
-      data.getRecommendedPacks?.() ?? Promise.resolve([]),
-    ])
-    bestProducts = Array.isArray(best) ? best : []
-    recommendedPacks = Array.isArray(packs) ? packs : []
+    ;[bestProducts, recommendedPacks] = await Promise.all([getBestProducts(), getRecommendedPacks()])
   } catch {
-    // soft-fail → on laisse les skeletons
+    // soft-fail : skeletons
+    bestProducts = []
+    recommendedPacks = []
   }
 
-  // JSON-LD ItemList
+  // JSON-LD ItemList (uniquement ici ; WebSite/Organization sont dans le layout)
   const itemListJsonLd =
     Array.isArray(bestProducts) && bestProducts.length > 0
       ? {
