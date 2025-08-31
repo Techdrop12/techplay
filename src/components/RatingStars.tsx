@@ -1,23 +1,33 @@
 // src/components/RatingStars.tsx
 'use client'
 
-import * as React from 'react'
+import {
+  useRef,
+  useState,
+  useCallback,
+  useMemo,
+  type KeyboardEvent,
+  type MouseEvent,
+  type TouchEvent,
+} from 'react'
 import { cn } from '@/lib/utils'
+
+export type SizeToken = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
 export interface RatingStarsProps {
   /** Note courante (peut être décimale, ex: 3.5) */
   value: number
   /** Nombre d’étoiles */
   max?: number
-  /** Éditable (radio group clavier + clic/hover) */
+  /** Éditable (clavier + souris/touch) */
   editable?: boolean
   /** Callback quand la note change */
   onChange?: (value: number) => void
   /** Granularité d’édition (1 ou 0.5) */
   step?: 1 | 0.5
-  /** Taille en px (icone) */
-  size?: number
-  /** Classe des étoiles remplies / vides */
+  /** Taille en px ou token */
+  size?: number | SizeToken
+  /** Classe des étoiles remplies / vides (thème) */
   filledClassName?: string
   emptyClassName?: string
   /** Classe du conteneur */
@@ -28,13 +38,54 @@ export interface RatingStarsProps {
   disabled?: boolean
   /** Afficher la valeur "(4,5/5)" à droite */
   showValue?: boolean
+  /** (option) Ne pas focus en lecture seule */
+  noFocusWhenReadOnly?: boolean
 }
 
-const STAR_PATH =
-  'M12 .587l3.668 7.431 8.2 1.192-5.934 5.787 1.401 8.163L12 18.896 4.665 23.16l1.401-8.163L.132 9.21l8.2-1.192L12 .587z'
+const SIZE_PX: Record<SizeToken, number> = { xs: 14, sm: 16, md: 20, lg: 24, xl: 32 }
+const toPx = (s?: number | SizeToken) => (typeof s === 'number' ? s : SIZE_PX[s ?? 'md'])
 
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
 const roundToStep = (v: number, step: 1 | 0.5) => (step === 1 ? Math.round(v) : Math.round(v * 2) / 2)
+
+function Star({
+  px,
+  fillPercent,
+  emptyClassName,
+  filledClassName,
+}: {
+  px: number
+  fillPercent: number
+  emptyClassName: string
+  filledClassName: string
+}) {
+  const Path = (
+    <path
+      d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.787 1.401 8.163L12 18.896 4.665 23.16l1.401-8.163L.132 9.21l8.2-1.192L12 .587z"
+      vectorEffect="non-scaling-stroke"
+    />
+  )
+
+  return (
+    <span className="relative inline-block align-middle" style={{ width: px, height: px }} aria-hidden>
+      {/* fond vide */}
+      <svg width={px} height={px} viewBox="0 0 24 24" className={cn('block', emptyClassName)}>
+        <g fill="currentColor">{Path}</g>
+      </svg>
+
+      {/* remplissage partiel via clip inline (pas de defs/id) */}
+      <svg
+        width={px}
+        height={px}
+        viewBox="0 0 24 24"
+        className={cn('absolute inset-0', filledClassName)}
+        style={{ clipPath: `inset(0 ${100 - fillPercent}% 0 0)` }}
+      >
+        <g fill="currentColor">{Path}</g>
+      </svg>
+    </span>
+  )
+}
 
 export default function RatingStars({
   value,
@@ -42,132 +93,141 @@ export default function RatingStars({
   editable = false,
   onChange,
   step = 1,
-  size = 20,
-  filledClassName = 'text-yellow-400',
-  emptyClassName = 'text-gray-300 dark:text-gray-600',
+  size = 'md',
+  filledClassName = 'text-amber-500',
+  emptyClassName = 'text-zinc-300 dark:text-zinc-600',
   className,
   ariaLabel,
   disabled,
   showValue = false,
+  noFocusWhenReadOnly,
 }: RatingStarsProps) {
+  const px = toPx(size)
   const safe = clamp(Number.isFinite(value) ? value : 0, 0, max)
-  const [hoverValue, setHoverValue] = React.useState<number | null>(null)
+  const [hoverValue, setHoverValue] = useState<number | null>(null)
   const current = hoverValue ?? safe
-  const uid = React.useId()
+  const rounded = Math.round(current * 10) / 10
 
-  const applyChange = (v: number) => {
-    if (!editable || disabled) return
-    onChange?.(clamp(roundToStep(v, step), 0, max))
-  }
+  const ref = useRef<HTMLDivElement | null>(null)
 
-  const onKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
+  const perStarFill = useMemo(
+    () => Array.from({ length: max }, (_, i) => Math.round(clamp(current - i, 0, 1) * 100)),
+    [current, max],
+  )
+
+  const computeFromPointer = useCallback(
+    (clientX: number) => {
+      const el = ref.current
+      if (!el) return safe
+      const rect = el.getBoundingClientRect()
+      const x = clamp(clientX - rect.left, 0, rect.width)
+      const ratio = rect.width ? x / rect.width : 0
+      const raw = ratio * max
+      const snapped = roundToStep(raw, step)
+      return clamp(snapped, 0, max)
+    },
+    [max, step, safe],
+  )
+
+  const handleMouseMove = useCallback(
+    (e: MouseEvent<HTMLDivElement>) => {
+      if (!editable || disabled) return
+      setHoverValue(computeFromPointer(e.clientX))
+    },
+    [editable, disabled, computeFromPointer],
+  )
+  const handleMouseLeave = useCallback(() => {
     if (!editable || disabled) return
-    const delta = step === 1 ? 1 : 0.5
-    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+    setHoverValue(null)
+  }, [editable, disabled])
+  const handleClick = useCallback(
+    (e: MouseEvent<HTMLDivElement>) => {
+      if (!editable || disabled) return
+      const next = computeFromPointer(e.clientX)
+      onChange?.(next)
+      setHoverValue(null)
+    },
+    [editable, disabled, computeFromPointer, onChange],
+  )
+  const handleTouch = useCallback(
+    (e: TouchEvent<HTMLDivElement>) => {
+      if (!editable || disabled) return
+      const t = e.touches[0]
+      if (!t) return
+      const next = computeFromPointer(t.clientX)
+      setHoverValue(next)
       e.preventDefault()
-      applyChange(safe + delta)
-    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
-      e.preventDefault()
-      applyChange(safe - delta)
-    } else if (e.key === 'Home') {
-      e.preventDefault()
-      applyChange(0)
-    } else if (e.key === 'End') {
-      e.preventDefault()
-      applyChange(max)
-    } else if (e.key === 'Enter' || e.key === ' ') {
-      if (hoverValue != null) {
-        e.preventDefault()
-        applyChange(hoverValue)
+    },
+    [editable, disabled, computeFromPointer],
+  )
+
+  const onKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLDivElement>) => {
+      if (!editable || disabled) return
+      let next = safe
+      const delta = step === 1 ? 1 : 0.5
+      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+        next = safe + delta
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+        next = safe - delta
+      } else if (e.key === 'Home') {
+        next = 0
+      } else if (e.key === 'End') {
+        next = max
+      } else {
+        return
       }
-    }
-  }
+      e.preventDefault()
+      onChange?.(clamp(roundToStep(next, step), 0, max))
+    },
+    [editable, disabled, safe, step, max, onChange],
+  )
 
-  /** Pour demi-étoiles au clic / hover quand step=0.5 */
-  const computePointerValue = (i: number, ev: React.MouseEvent<HTMLButtonElement>) => {
-    // i = index étoile (1..max)
-    if (step === 1) return i
-    const rect = ev.currentTarget.getBoundingClientRect()
-    const x = clamp(ev.clientX - rect.left, 0, rect.width)
-    const half = x < rect.width / 2 ? 0.5 : 1
-    return i - (1 - half) //  i-0.5 si dans la moitié gauche, sinon i
-  }
-
-  const groupLabel =
-    ariaLabel ??
-    (editable ? `Choisir une note sur ${max}` : `Note : ${current} sur ${max}`)
+  const aria =
+    editable && !disabled
+      ? {
+          role: 'slider',
+          'aria-label': ariaLabel ?? `Choisir une note`,
+          'aria-valuemin': 0,
+          'aria-valuemax': max,
+          'aria-valuenow': Math.round(safe * 10) / 10,
+          tabIndex: 0,
+        }
+      : {
+          role: 'img',
+          'aria-label': ariaLabel ?? `Note : ${rounded} sur ${max}`,
+          tabIndex: noFocusWhenReadOnly ? -1 : 0,
+        }
 
   return (
     <div
-      role={editable ? 'radiogroup' : 'img'}
-      aria-label={groupLabel}
-      className={cn('inline-flex items-center gap-1', className)}
+      ref={ref}
+      className={cn('inline-flex select-none items-center gap-1', className)}
+      title={`${rounded}/${max}`}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      onClick={handleClick}
+      onTouchStart={handleTouch}
+      onTouchMove={handleTouch}
+      onTouchEnd={() => editable && setHoverValue(null)}
       onKeyDown={onKeyDown}
+      aria-readonly={!editable || undefined}
       aria-disabled={disabled || undefined}
+      {...aria}
     >
-      {Array.from({ length: max }, (_, i) => {
-        const index = i + 1
-        const fillPct = clamp((current - i) * 100, 0, 100)
+      {perStarFill.map((fill, i) => (
+        <Star
+          key={i}
+          px={px}
+          fillPercent={fill}
+          emptyClassName={emptyClassName!}
+          filledClassName={filledClassName!}
+        />
+      ))}
 
-        const StarSvg = (
-          <svg
-            viewBox="0 0 24 24"
-            width={size}
-            height={size}
-            aria-hidden="true"
-            className="block"
-          >
-            {/* fond vide */}
-            <path d={STAR_PATH} className={emptyClassName} fill="currentColor" />
-            {/* remplissage partiel via clip rect */}
-            <defs>
-              <clipPath id={`clip-${uid}-${i}`}>
-                <rect x="0" y="0" width={`${fillPct}%`} height="100%" />
-              </clipPath>
-            </defs>
-            <path
-              d={STAR_PATH}
-              className={filledClassName}
-              fill="currentColor"
-              clipPath={`url(#clip-${uid}-${i})`}
-            />
-          </svg>
-        )
-
-        if (!editable) {
-          return <span key={i}>{StarSvg}</span>
-        }
-
-        const checked = roundToStep(safe, step) === index
-
-        return (
-          <button
-            key={i}
-            type="button"
-            role="radio"
-            aria-checked={checked}
-            aria-label={`${index} étoile${index > 1 ? 's' : ''}`}
-            disabled={disabled}
-            className={cn(
-              'rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60',
-              disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
-            )}
-            onMouseMove={(e) => {
-              if (disabled) return
-              setHoverValue(computePointerValue(index, e))
-            }}
-            onMouseLeave={() => setHoverValue(null)}
-            onFocus={() => setHoverValue(index)}
-            onBlur={() => setHoverValue(null)}
-            onClick={(e) => applyChange(computePointerValue(index, e))}
-          >
-            {StarSvg}
-          </button>
-        )
-      })}
       {showValue && (
-        <span className="ml-1 text-sm text-gray-600 dark:text-gray-300 font-medium">
-          ({current.toLocaleString(undefined, { maximumFractionDigits: 1 })}/{max})
+        <span className="ml-1 text-sm font-medium text-zinc-600 dark:text-zinc-300" aria-live="polite" aria-atomic="true">
+          ({rounded.toLocaleString(undefined, { maximumFractionDigits: 1 })}/{max})
         </span>
       )}
     </div>

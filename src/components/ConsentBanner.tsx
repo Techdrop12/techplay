@@ -1,4 +1,4 @@
-// src/components/ConsentBanner.tsx — +types globaux, Esc handler, DISABLED env
+// src/components/ConsentBanner.tsx — UX/A11y + Consent Mode v2 bridge
 
 'use client'
 
@@ -23,8 +23,12 @@ const DISABLED = (process.env.NEXT_PUBLIC_ANALYTICS_DISABLED || '').toLowerCase(
 
 type Prefs = { analytics: boolean; ads: boolean; functionality: boolean }
 
-function readDecided(): boolean { try { return localStorage.getItem('consent:decided') === '1' } catch { return false } }
-function writeDecided(v: boolean) { try { localStorage.setItem('consent:decided', v ? '1' : '0') } catch {} }
+function readDecided(): boolean {
+  try { return localStorage.getItem('consent:decided') === '1' } catch { return false }
+}
+function writeDecided(v: boolean) {
+  try { localStorage.setItem('consent:decided', v ? '1' : '0') } catch {}
+}
 function readPrefs(): Prefs {
   try {
     return {
@@ -32,19 +36,30 @@ function readPrefs(): Prefs {
       ads: (localStorage.getItem('consent:ads') || '0') === '1',
       functionality: true,
     }
-  } catch { return { analytics: false, ads: false, functionality: true } }
+  } catch {
+    return { analytics: false, ads: false, functionality: true }
+  }
 }
-function savePrefs(p: Prefs) { try {
-  localStorage.setItem('consent:analytics', p.analytics ? '1' : '0')
-  localStorage.setItem('consent:ads', p.ads ? '1' : '0')
-} catch {} }
+function savePrefs(p: Prefs) {
+  try {
+    localStorage.setItem('consent:analytics', p.analytics ? '1' : '0')
+    localStorage.setItem('consent:ads', p.ads ? '1' : '0')
+  } catch {}
+}
 
 function pushDL(event: string, detail: Record<string, any>) {
-  try { (window as any).dataLayer = (window as any).dataLayer || []; (window as any).dataLayer.push({ event, ...detail }) } catch {}
+  try {
+    ;(window as any).dataLayer = (window as any).dataLayer || []
+    ;(window as any).dataLayer.push({ event, ...detail })
+  } catch {}
 }
+
 function applyConsent(p: Prefs) {
+  // 1) Broadcast app-wide (Tracking, MetaPixel…)
   try { window.dispatchEvent(new CustomEvent('tp:consent', { detail: p })) } catch {}
+  // 2) API de Analytics.tsx (met à jour GA Consent Mode + storage miroir)
   try { window.tpConsentUpdate?.(p) } catch {}
+  // 3) Fallback universel si défini (Root layout/head)
   try {
     window.__applyConsent?.({
       analytics_storage: p.analytics ? 'granted' : 'denied',
@@ -58,7 +73,6 @@ function applyConsent(p: Prefs) {
 }
 
 export default function ConsentBanner() {
-  // 🚫 ne rien rendre si désactivé par ENV
   if (DISABLED) return null
 
   const [open, setOpen] = useState(false)
@@ -92,10 +106,7 @@ export default function ConsentBanner() {
       applyConsent(p); pushDL('consent_reset', { source: 'user' })
       window.tpOpenConsent?.()
     }
-    return () => {
-      delete window.tpOpenConsent
-      delete window.tpResetConsent
-    }
+    return () => { delete window.tpOpenConsent; delete window.tpResetConsent }
   }, [])
 
   // body lock léger
@@ -105,7 +116,7 @@ export default function ConsentBanner() {
     return () => document.documentElement.classList.remove('consent-banner-open')
   }, [show])
 
-  // ⌨️ Fermer panneau "Paramètres" avec Échap (a11y, facultatif)
+  // Esc pour fermer le panneau paramètres
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
@@ -143,8 +154,8 @@ export default function ConsentBanner() {
         <div className="flex-1">
           <h2 id="tp-consent-title" className="text-base font-bold">Votre confidentialité chez TechPlay</h2>
           <p id="tp-consent-desc" className="mt-1 text-sm text-token-text/70">
-            On utilise des cookies pour mesurer l’audience (analytics) et, si vous l’acceptez, pour la
-            publicité. Vous pourrez changer d’avis à tout moment dans les paramètres.
+            Nous utilisons des cookies pour mesurer l’audience et, si vous l’acceptez, pour la publicité.
+            Vous pourrez changer d’avis à tout moment dans les paramètres.
           </p>
 
           {open && (

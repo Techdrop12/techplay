@@ -78,7 +78,7 @@ function eligibleNow(): boolean {
 /** FB attend des SHA-256 lowercased trim pour: em, ph, fn, ln, ct, st, zp, country, external_id */
 const normalizers: Record<string, (v: string) => string> = {
   em: (v) => v.trim().toLowerCase(),
-  ph: (v) => v.replace(/[^0-9]/g, ''), // phone en E.164 si possible (on simplifie)
+  ph: (v) => v.replace(/[^0-9]/g, ''),
   fn: (v) => v.trim().toLowerCase(),
   ln: (v) => v.trim().toLowerCase(),
   ct: (v) => v.trim().toLowerCase(),
@@ -96,19 +96,14 @@ async function sha256Hex(input: string): Promise<string> {
       .map((b) => b.toString(16).padStart(2, '0'))
       .join('')
   } catch {
-    // Fallback ultra-basique (non cryptographique) si crypto indispo
-    // => On évite tout envoi non haché : on retourne une chaîne vide
     return ''
   }
 }
 
 async function buildAdvancedMatching(): Promise<Record<string, string> | null> {
-  // Déjà calculé et réutilisable ?
   if (typeof window !== 'undefined' && window.__pixelHashedAM) return window.__pixelHashedAM
-
   const u = (typeof window !== 'undefined' && window.__pixelUser) || null
   if (!u) return null
-
   const raw: Array<[keyof typeof normalizers, string | undefined]> = [
     ['em', u.email],
     ['ph', u.phone],
@@ -120,7 +115,6 @@ async function buildAdvancedMatching(): Promise<Record<string, string> | null> {
     ['country', u.country],
     ['external_id', u.external_id],
   ]
-
   const entries: Array<[string, string]> = []
   for (const [k, v] of raw) {
     if (!v || !String(v).trim()) continue
@@ -128,7 +122,6 @@ async function buildAdvancedMatching(): Promise<Record<string, string> | null> {
     const hashed = await sha256Hex(norm)
     if (hashed) entries.push([k, hashed])
   }
-
   const out = entries.length ? Object.fromEntries(entries) : null
   if (typeof window !== 'undefined') window.__pixelHashedAM = out
   return out
@@ -139,9 +132,8 @@ async function buildAdvancedMatching(): Promise<Record<string, string> | null> {
 export default function MetaPixel() {
   const pathname = usePathname() || '/'
   const [shouldLoad, setShouldLoad] = useState(false)
-  const [am, setAM] = useState<Record<string, string> | null>(null) // advanced matching
+  const [am, setAM] = useState<Record<string, string> | null>(null)
   const lastPathRef = useRef<string>('')
-  const bootedRef = useRef<boolean>(false)
 
   const debugLog = useMemo(
     () => (...args: any[]) => {
@@ -162,7 +154,7 @@ export default function MetaPixel() {
     const onConsent = () => {
       const ok = eligibleNow()
       setShouldLoad(ok)
-      if (!ok) lastPathRef.current = '' // coupe les futurs PV
+      if (!ok) lastPathRef.current = ''
       debugLog('Consent update, eligible =', ok)
     }
     window.addEventListener('tp:consent', onConsent as EventListener)
@@ -193,9 +185,8 @@ export default function MetaPixel() {
     const fire = () => {
       if (isPixelReady()) {
         debugLog('PageView', pathname)
-        pixelPageView() // => trackPixel('PageView') + CAPI mirror éventuel
+        pixelPageView()
       } else {
-        // tente juste après que le script charge
         setTimeout(() => {
           if (isPixelReady()) {
             debugLog('PageView (late)', pathname)
@@ -206,10 +197,6 @@ export default function MetaPixel() {
     }
     fire()
   }, [pathname, shouldLoad, debugLog])
-
-  // 5) Évite double init en mode Strict/HMR
-  //    On garde un flag global window.__pixelInited
-  const alreadyBooted = typeof window !== 'undefined' && window.__pixelInited === true
 
   if (!shouldLoad) return null
 
@@ -227,9 +214,8 @@ export default function MetaPixel() {
             t.src=v; s=b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t,s);
             f.__pixelInited = true;
           })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
-          // init de base (AM ajoutée ensuite si dispo)
           try { fbq('init', '${PIXEL_ID}'); } catch(e) {}
-          // Pas de 'PageView' auto ici — on gère via pixelPageView() pour SPA
+          // Pas de 'PageView' auto ici — SPA gérée via pixelPageView()
         `}
       </Script>
 

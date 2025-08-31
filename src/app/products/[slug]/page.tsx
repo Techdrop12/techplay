@@ -26,7 +26,6 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       title: 'Produit introuvable',
       description: 'Le produit demandé est introuvable.',
       robots: { index: false, follow: true },
-      // generateProductMeta donnerait aussi alternates; ici 404 logique → pas nécessaire
     }
   }
 

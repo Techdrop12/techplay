@@ -27,13 +27,10 @@ function hasAdsConsent(): boolean {
   if (!isBrowser) return false
   try {
     const s: any = (window as any).__consentState || {}
-    // OK pubs si au moins une dimension publicitaire n’est pas "denied"
     const adsGranted =
       s.ad_storage !== 'denied' ||
       s.ad_user_data !== 'denied' ||
       s.ad_personalization !== 'denied'
-
-    // Fallback posé par la bannière si dispo
     const ls = localStorage.getItem('consent:ads') === '1'
     return adsGranted || ls
   } catch {
@@ -249,6 +246,7 @@ function sendCapi(eventName: string, payload: Record<string, any>) {
   const client_id = getClientId() || undefined
 
   const body = {
+    action_source: 'website',
     event_name: eventName,
     event_id: payload.eventID, // crucial pour la dédup Pixel/CAPI
     event_time: Math.floor(Date.now() / 1000),

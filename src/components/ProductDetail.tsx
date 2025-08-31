@@ -8,7 +8,7 @@ import { formatPrice, cn } from '@/lib/utils'
 import WishlistButton from '@/components/WishlistButton'
 import FreeShippingBadge from '@/components/FreeShippingBadge'
 import QuantitySelector from '@/components/QuantitySelector'
-import RatingStars from '@/components/ui/RatingStars'
+import RatingStars from '@/components/RatingStars'
 import PricingBadge from '@/components/PricingBadge'
 // ⬇️ on passe sur le wrapper A/B
 import AddToCartButtonAB from '@/components/AddToCartButtonAB'
@@ -17,7 +17,9 @@ import StickyCartSummary from '@/components/StickyCartSummary'
 import ProductTags from '@/components/ProductTags'
 import DeliveryEstimate from '@/components/ui/DeliveryEstimate'
 import ShippingSimulator from '@/components/ShippingSimulator'
-import type { Product } from '@/types/product'
+import RatingSummary from '@/components/RatingSummary'
+import ProductReviews from '@/components/Product/ProductReviews'
+import type { Product, Review, AggregateRating } from '@/types/product'
 import { toast } from 'react-hot-toast'
 import { logEvent } from '@/lib/logEvent'
 import {
@@ -75,6 +77,38 @@ function detectCurrency(): 'EUR' | 'GBP' | 'USD' {
   }
 }
 
+/** Agrégat reviews robuste (fallback si l’API ne fournit pas aggregateRating) */
+function computeAggregate(
+  ratingFromProduct: number | undefined,
+  reviews: Review[] | undefined,
+  aggregate?: AggregateRating,
+): AggregateRating {
+  if (aggregate?.total && aggregate.average) return aggregate
+  const list = Array.isArray(reviews) ? reviews : []
+  const total = list.length
+  if (total > 0) {
+    const counts: Record<1 | 2 | 3 | 4 | 5, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+    let sum = 0
+    for (const r of list) {
+      const v = (r?.rating as 1 | 2 | 3 | 4 | 5) ?? 0
+      if (v >= 1 && v <= 5) {
+        counts[v]++
+        sum += v
+      }
+    }
+    return {
+      average: total ? Math.max(0, Math.min(5, sum / total)) : ratingFromProduct ?? 0,
+      total,
+      breakdownCount: counts,
+    }
+  }
+  return {
+    average: typeof ratingFromProduct === 'number' ? Math.max(0, Math.min(5, ratingFromProduct)) : 0,
+    total: (aggregate?.total as number) ?? 0,
+    breakdownCount: aggregate?.breakdownCount,
+  }
+}
+
 export default function ProductDetail({ product, locale = 'fr' }: Props) {
   const prefersReducedMotion = useReducedMotion()
 
@@ -105,6 +139,9 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     stock,
     brand,
     category,
+    reviews,
+    aggregateRating,
+    reviewsCount, // conservé pour compat UI antérieure
   } = product ?? {}
 
   // ✅ Normalisation des prix (tolère string)
@@ -137,6 +174,13 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
       : 'https://schema.org/InStock'
   const lowStock = typeof stock === 'number' && stock > 0 && stock <= 5
   const total = useMemo(() => price * quantity, [price, quantity])
+
+  // Agrégat reviews sécurisé
+  const agg = useMemo(
+    () => computeAggregate(rating, reviews as any, aggregateRating),
+    [rating, reviews, aggregateRating],
+  )
+  const totalReviews = agg.total || reviewsCount || 0
 
   /* ------------------------------------------------------------------------ */
   /*                           Tracking / Recently viewed                     */
@@ -355,7 +399,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           <div className="absolute top-4 right-4 flex gap-2 z-10">
             <button
               onClick={share}
-              className="rounded-full bg-white/90 dark:bg-black/60 border border-gray-200 dark:border-gray-700 px-3 py-1 text-sm shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              className="rounded-full bg-white/90 dark:bg_black/60 dark:bg-black/60 border border-gray-200 dark:border-gray-700 px-3 py-1 text-sm shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               aria-label="Partager ce produit"
               title="Partager"
             >
@@ -423,7 +467,18 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           {brand && <meta itemProp="brand" content={String(brand)} />}
 
           <div className="mt-3 flex flex-wrap items-center gap-3">
-            <RatingStars value={hasRating ? rating! : 4} editable={false} />
+            <RatingStars value={agg.average || (hasRating ? rating! : 4)} editable={false} />
+            {totalReviews > 0 && (
+              <a
+                href="#reviews"
+                className="text-sm text-accent underline underline-offset-2"
+                onClick={() => {
+                  try { logEvent({ action: 'jump_to_reviews', category: 'engagement', label: slug }) } catch {}
+                }}
+              >
+                {totalReviews} avis
+              </a>
+            )}
             <FreeShippingBadge price={price} minimal />
             {typeof stock === 'number' && (
               <span
@@ -622,7 +677,22 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
       <StickyCartSummary locale={safeLocale} />
 
       {/* Avis */}
-      <div className="lg:col-span-2 mt-12">
+      <div className="lg:col-span-2 mt-12" id="reviews" aria-label="Avis clients">
+        <div className="mb-6">
+          <RatingSummary
+            average={agg.average}
+            total={totalReviews}
+            breakdownCount={agg.breakdownCount}
+            jsonLd={{ productSku: _id, productName: title }}
+          />
+        </div>
+
+        {Array.isArray(reviews) && reviews.length > 0 && (
+          <div className="mb-10">
+            <ProductReviews reviews={reviews} />
+          </div>
+        )}
+
         <ReviewForm productId={_id} />
       </div>
 

@@ -235,6 +235,26 @@ type ConsentUpdate = Partial<{
   security_storage: ConsentValue
 }> & Record<string, ConsentValue>
 
+/** Snapshot courant (lecture) */
+export function getConsentState(): Record<string, ConsentValue> {
+  if (typeof window === 'undefined') return {}
+  try {
+    const s = (window as any).__consentState as Record<string, ConsentValue> | undefined
+    return s ? { ...s } : {}
+  } catch {
+    return {}
+  }
+}
+
+/** Notifie le reste de l’app (Pixel, etc.) */
+function dispatchConsentEvent(detail: Record<string, ConsentValue>) {
+  if (typeof window === 'undefined') return
+  try {
+    const ev = new CustomEvent('tp:consent', { detail })
+    window.dispatchEvent(ev)
+  } catch {}
+}
+
 /** Expose et met à jour un snapshot global (utilisé par Pixel). */
 function setGlobalConsentState(update: Record<string, ConsentValue>) {
   try {
@@ -249,6 +269,7 @@ export function setConsentDefault(update: ConsentUpdate) {
   if (!isBrowser) return
   setGlobalConsentState(update as Record<string, ConsentValue>)
   gtagSafe('consent', 'default', { wait_for_update: 500, ...update })
+  dispatchConsentEvent(getConsentState())
 }
 
 export function grantConsent(update: ConsentUpdate = {}) {
@@ -264,6 +285,7 @@ export function grantConsent(update: ConsentUpdate = {}) {
   }
   setGlobalConsentState(payload as Record<string, ConsentValue>)
   gtagSafe('consent', 'update', payload)
+  dispatchConsentEvent(getConsentState())
 }
 
 export function denyConsent(update: ConsentUpdate = {}) {
@@ -279,15 +301,18 @@ export function denyConsent(update: ConsentUpdate = {}) {
   }
   setGlobalConsentState(payload as Record<string, ConsentValue>)
   gtagSafe('consent', 'update', payload)
+  dispatchConsentEvent(getConsentState())
 }
 
 export function consent(modeOrUpdate: 'grant' | 'deny' | ConsentUpdate, update?: ConsentUpdate) {
   if (!isBrowser) return
   if (typeof modeOrUpdate === 'string') {
-    return modeOrUpdate === 'grant' ? grantConsent(update) : denyConsent(update)
+    modeOrUpdate === 'grant' ? grantConsent(update) : denyConsent(update)
+    return
   }
   setGlobalConsentState(modeOrUpdate as Record<string, ConsentValue>)
   gtagSafe('consent', 'update', modeOrUpdate)
+  dispatchConsentEvent(getConsentState())
 }
 
 /** petit helper => type narrow sur 'granted' | 'denied' */
@@ -318,6 +343,7 @@ export function consentUpdateBooleans(p: {
 
   setGlobalConsentState(update)
   gtagSafe('consent', 'update', update)
+  dispatchConsentEvent(getConsentState())
 }
 
 /* ============================== Init & Config ============================= */
@@ -404,12 +430,12 @@ export type Ga4Payload = {
 }
 
 export const mapProductToGaItem = (p: any, overrides: Partial<Ga4Item> = {}): Ga4Item => ({
-  item_id: p?.id ?? p?._id ?? p?.sku,
-  item_name: p?.title ?? p?.name,
-  price: p?.price,
-  item_brand: p?.brand,
-  item_category: p?.category ?? p?.categorySlug,
-  item_variant: p?.variant,
+  item_id: String(p?.id ?? p?._id ?? p?.sku ?? ''),
+  item_name: p?.title ?? p?.name ?? '',
+  price: typeof p?.price === 'string' ? Number(p.price) || undefined : p?.price,
+  item_brand: p?.brand ?? undefined,
+  item_category: p?.category ?? p?.categorySlug ?? undefined,
+  item_variant: p?.variant ?? undefined,
   ...overrides,
 })
 
@@ -540,8 +566,10 @@ export function setLocalAnalyticsEnabled(enabled: boolean) {
       localStorage.removeItem('analytics:disabled')
       startFlushPoller()
       flushOffline()
+      dispatchConsentEvent(getConsentState())
     } else {
       localStorage.setItem('ga:disabled', '1')
+      dispatchConsentEvent(getConsentState())
     }
   } catch {}
 }

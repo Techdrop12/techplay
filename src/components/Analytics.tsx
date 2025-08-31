@@ -1,4 +1,4 @@
-// src/components/Analytics.tsx — GA4 + Consent Mode v2, SPA-safe, sGTM-ready — FINAL
+// src/components/Analytics.tsx — GA4 + Consent Mode v2, SPA-safe, sGTM-ready
 'use client'
 
 import { useEffect } from 'react'
@@ -9,14 +9,14 @@ import { pageview, initAnalytics, consentUpdateBooleans } from '@/lib/ga'
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID ?? ''
 const ENABLE_IN_DEV = (process.env.NEXT_PUBLIC_ANALYTICS_IN_DEV || '').toLowerCase() === 'true'
 const DEBUG_MODE = (process.env.NEXT_PUBLIC_GA_DEBUG || '').toLowerCase() === 'true'
-const GTM_SERVER = (process.env.NEXT_PUBLIC_GTM_SERVER || '').replace(/\/+$/, '') // ex: https://gtm.techplay.com
+const GTM_SERVER = (process.env.NEXT_PUBLIC_GTM_SERVER || '').replace(/\/+$/, '')
 
 export default function Analytics() {
   const pathname = usePathname() || '/'
   const search = useSearchParams()
   const shouldLoad = !!GA_ID && (process.env.NODE_ENV === 'production' || ENABLE_IN_DEV)
 
-  // Pageview à chaque navigation (y compris querystring)
+  // SPA pageviews
   useEffect(() => {
     if (!shouldLoad) return
     const qs = search?.toString() ? `?${search.toString()}` : ''
@@ -24,7 +24,7 @@ export default function Analytics() {
     pageview(`${pathname}${qs}`, title, { send_page_view: false })
   }, [pathname, search, shouldLoad])
 
-  // API publique pour MAJ consent (bannière/CMP -> CustomEvent('tp:consent', {detail:{...}}))
+  // CMP / bannière → Consent Mode
   useEffect(() => {
     if (!shouldLoad) return
     const update = (p: {
@@ -39,7 +39,6 @@ export default function Analytics() {
         localStorage.setItem('consent:analytics', p.analytics ? '1' : '0')
         localStorage.setItem('consent:ads', p.ads ? '1' : '0')
       } catch {}
-      // Propage aussi à une éventuelle API utilitaire injectée en <head> (layout.tsx)
       try {
         if (typeof (window as any).__applyConsent === 'function') {
           ;(window as any).__applyConsent({
@@ -62,7 +61,7 @@ export default function Analytics() {
     }
   }, [shouldLoad])
 
-  // Initialise GA une fois gtag présent (inclut transport_url pour sGTM si défini)
+  // GA init (après gtag ready)
   useEffect(() => {
     if (!shouldLoad) return
     initAnalytics({
@@ -75,7 +74,7 @@ export default function Analytics() {
           typeof location !== 'undefined' ? location.pathname + location.search : undefined,
         page_title: typeof document !== 'undefined' ? document.title : undefined,
         send_page_view: false,
-        ...(GTM_SERVER ? { transport_url: GTM_SERVER } : {}), // ✅ envoie via ton serveur GTM
+        ...(GTM_SERVER ? { transport_url: GTM_SERVER } : {}),
       },
     })
   }, [shouldLoad])
@@ -84,32 +83,57 @@ export default function Analytics() {
 
   return (
     <>
-      {/* Chargeur GA4 (après interaction) */}
+      {/* Bootstrap consent AVANT gtag (défaut basé sur DNT/localStorage) */}
+      <Script id="ga4-consent-bootstrap" strategy="beforeInteractive">
+        {`
+          (function() {
+            var dnt = (navigator.doNotTrack === '1') || (window.doNotTrack === '1') || (navigator.msDoNotTrack === '1');
+            var a = '0', ads = '0';
+            try { a = localStorage.getItem('consent:analytics') || '0'; ads = localStorage.getItem('consent:ads') || '0'; } catch(e){}
+            var analyticsGranted = (!dnt && a === '1');
+            var adsGranted = (!dnt && ads === '1');
+            window.__consentState = {
+              analytics_storage: analyticsGranted ? 'granted' : 'denied',
+              ad_storage: adsGranted ? 'granted' : 'denied',
+              ad_user_data: adsGranted ? 'granted' : 'denied',
+              ad_personalization: adsGranted ? 'granted' : 'denied',
+              functionality_storage: 'granted',
+              security_storage: 'granted'
+            };
+            window.__applyConsent = function(update){
+              try {
+                window.__consentState = Object.assign({}, window.__consentState, update || {});
+                if (typeof window.gtag === 'function') window.gtag('consent','update', window.__consentState);
+                window.dispatchEvent(new CustomEvent('tp:consent', { detail: window.__consentState }));
+              } catch(e){}
+            };
+          })();
+        `}
+      </Script>
+
+      {/* GA4 loader */}
       <Script
         id="ga4-src"
         src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(GA_ID)}`}
         strategy="afterInteractive"
       />
 
-      {/* Init minimale (consent 'default' peut être aussi injecté dans app/layout.tsx) */}
+      {/* gtag bootstrap */}
       <Script id="ga4-init" strategy="afterInteractive">
         {`
           (function() {
             if (window.__ga_inited) return; window.__ga_inited = true;
-
             var dnt = (navigator.doNotTrack === '1') || (window.doNotTrack === '1') || (navigator.msDoNotTrack === '1');
-            var optedOut = false;
-            try { optedOut = localStorage.getItem('ga:disabled') === '1' || localStorage.getItem('analytics:disabled') === '1'; } catch (e) {}
             var DISABLE_KEY = 'ga-disable-${GA_ID}';
+            var optedOut = false;
+            try { optedOut = localStorage.getItem('ga:disabled') === '1' || localStorage.getItem('analytics:disabled') === '1'; } catch(e){}
             if (dnt || optedOut) { window[DISABLE_KEY] = true; }
-
             window.dataLayer = window.dataLayer || [];
             function gtag(){ window.dataLayer.push(arguments); }
             window.gtag = window.gtag || gtag;
-
-            // Horodatage GA
             gtag('js', new Date());
-            // ⚠️ Pas de 'config' ici : géré par initAnalytics() (lib/ga)
+            // Consent par défaut (déjà en window.__consentState) — on le pousse pour que GA respecte dès le départ
+            try { gtag('consent','default', Object.assign({ wait_for_update: 500 }, window.__consentState || {})); } catch(e){}
           })();
         `}
       </Script>
