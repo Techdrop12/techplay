@@ -1,5 +1,5 @@
 // src/lib/meta-pixel.ts
-// 🟦 Meta Pixel helpers (TS) — consent-aware + eventID (dedupe) + CAPI mirror optionnel
+// 🟦 Meta Pixel helpers (TS) — consent-aware + eventID (dedupe) + CAPI mirror optionnel (fiabilisé)
 
 import { getClientId } from '@/lib/ga'
 
@@ -17,22 +17,23 @@ const isBrowser = typeof window !== 'undefined'
 const META_CAPI_URL =
   (process.env.NEXT_PUBLIC_META_CAPI_URL || '').trim() // ex: "/api/meta-capi" (à implémenter côté serveur)
 const META_TEST_EVENT_CODE =
-  (process.env.NEXT_PUBLIC_META_TEST_CODE || '').trim() // ex: "TEST123" (en sandbox)
+  (process.env.NEXT_PUBLIC_META_TEST_CODE || '').trim() // ex: "TEST123" (sandbox)
 const ENABLE_IN_DEV =
   (process.env.NEXT_PUBLIC_PIXEL_IN_DEV || '').toLowerCase() === 'true'
 
 // ===== Consent ==============================================================
+
 function hasAdsConsent(): boolean {
   if (!isBrowser) return false
   try {
     const s: any = (window as any).__consentState || {}
-    // On considère "OK pubs" si au moins une des dimensions publicitaires n’est pas denied
+    // OK pubs si au moins une dimension publicitaire n’est pas "denied"
     const adsGranted =
       s.ad_storage !== 'denied' ||
       s.ad_user_data !== 'denied' ||
       s.ad_personalization !== 'denied'
 
-    // Fallback éventuel posé par la bannière
+    // Fallback posé par la bannière si dispo
     const ls = localStorage.getItem('consent:ads') === '1'
     return adsGranted || ls
   } catch {
@@ -51,13 +52,18 @@ function pixelLocallyDisabled(): boolean {
   }
 }
 
+/** Utile côté UI : savoir si le pixel tirera effectivement */
+export function pixelReadyAndConsented(): boolean {
+  return isBrowser && isPixelReady() && hasAdsConsent() && !pixelLocallyDisabled()
+}
+
 // ===== Cookies / context ====================================================
+
 function readCookie(name: string): string | null {
   if (!isBrowser) return null
   try {
-    const m = document.cookie.match(
-      new RegExp('(?:^|;\\s*)' + name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&') + '=([^;]*)')
-    )
+    const safe = name.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&')
+    const m = document.cookie.match(new RegExp(`(?:^|;\\s*)${safe}=([^;]*)`))
     return m ? decodeURIComponent(m[1]) : null
   } catch {
     return null
@@ -71,7 +77,6 @@ function getFbpFbc() {
   const fbc = (() => {
     const fromCookie = readCookie('_fbc')
     if (fromCookie) return fromCookie
-    // fallback: reconstruit _fbc depuis l’URL si fbclid présent
     try {
       const url = new URL(location.href)
       const fbclid = url.searchParams.get('fbclid')
@@ -86,10 +91,10 @@ function getFbpFbc() {
 }
 
 // ===== EventID (dédup Pixel/CAPI) ==========================================
+
 function uuid(): string {
   if (!isBrowser) return Math.random().toString(36).slice(2)
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const g = (window as any).crypto?.getRandomValues?.bind((window as any).crypto)
     if (g) {
       const buf = new Uint8Array(16)
@@ -99,10 +104,7 @@ function uuid(): string {
       buf[8] = (buf[8] & 0x3f) | 0x80
       const b2hex = (n: number) => n.toString(16).padStart(2, '0')
       const hex = Array.from(buf, b2hex).join('')
-      return `${hex.substr(0, 8)}-${hex.substr(8, 4)}-${hex.substr(12, 4)}-${hex.substr(
-        16,
-        4
-      )}-${hex.substr(20)}`
+      return `${hex.substr(0, 8)}-${hex.substr(8, 4)}-${hex.substr(12, 4)}-${hex.substr(16, 4)}-${hex.substr(20)}`
     }
   } catch {}
   return (
@@ -125,16 +127,21 @@ function shouldEmit(sig: string): boolean {
   return true
 }
 
-// Normalisation basique (value/currency)
+// Normalisation + compactage (value/currency, pas de undefined/vides)
 function normalizeParams(p: Record<string, any> | undefined) {
   if (!p) return p
-  const out: Record<string, any> = { ...p }
-  if (out.currency && typeof out.currency === 'string') {
-    out.currency = out.currency.toUpperCase()
-  }
-  if (typeof out.value === 'string') {
-    const n = Number(out.value.replace(',', '.'))
-    if (!Number.isNaN(n)) out.value = n
+  const out: Record<string, any> = {}
+  for (const k in p) {
+    const v = (p as any)[k]
+    if (v === undefined || v === null || v === '') continue
+    if (k === 'currency' && typeof v === 'string') {
+      out[k] = v.toUpperCase()
+    } else if (k === 'value' && typeof v === 'string') {
+      const n = Number(v.replace(',', '.'))
+      out[k] = Number.isNaN(n) ? v : n
+    } else {
+      out[k] = v
+    }
   }
   return out
 }
@@ -159,15 +166,12 @@ export function trackPixel(event: PixelEvent, params?: Record<string, any>): boo
     const eventID = uuid()
     const payload = { ...(normalizeParams(params) || {}), eventID }
     const sig = JSON.stringify({ e: event, p: payload })
-
     if (!shouldEmit(sig)) return false
 
     fbq('track', event, payload)
 
     // Miroir CAPI optionnel (dédup via eventID)
-    if (META_CAPI_URL) {
-      sendCapi(event, payload)
-    }
+    if (META_CAPI_URL) sendCapi(event, payload)
 
     return true
   } catch {
@@ -221,15 +225,22 @@ export function pixelPurchase(params: {
 export function setLocalPixelEnabled(enabled: boolean) {
   if (!isBrowser) return
   try {
-    if (enabled) {
-      localStorage.removeItem('pixel:disabled')
-    } else {
-      localStorage.setItem('pixel:disabled', '1')
-    }
+    if (enabled) localStorage.removeItem('pixel:disabled')
+    else localStorage.setItem('pixel:disabled', '1')
   } catch {}
 }
 
 // ===== CAPI mirror (optionnel via NEXT_PUBLIC_META_CAPI_URL) ===============
+
+function sendBeaconJson(url: string, body: unknown): boolean {
+  try {
+    const blob = new Blob([JSON.stringify(body)], { type: 'application/json' })
+    if ('sendBeacon' in navigator) {
+      return navigator.sendBeacon(url, blob)
+    }
+  } catch {}
+  return false
+}
 
 function sendCapi(eventName: string, payload: Record<string, any>) {
   if (!isBrowser || !META_CAPI_URL) return
@@ -251,21 +262,18 @@ function sendCapi(eventName: string, payload: Record<string, any>) {
     fbp,
     fbc,
     client_id,
-    params: payload,
+    params: normalizeParams(payload),
     test_event_code: META_TEST_EVENT_CODE || undefined,
   }
 
-  try {
-    const blob = new Blob([JSON.stringify(body)], { type: 'application/json' })
-    // sendBeacon (offline-friendly, non bloquant). Fallback fetch keepalive.
-    const ok = (navigator as any).sendBeacon?.(META_CAPI_URL, blob)
-    if (ok) return
-  } catch {}
+  // Préfère sendBeacon pour la fiabilité (navigation départ)
+  if (sendBeaconJson(META_CAPI_URL, body)) return
 
+  // Fallback fetch keepalive
   try {
     fetch(META_CAPI_URL, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
       keepalive: true,
       credentials: 'omit',

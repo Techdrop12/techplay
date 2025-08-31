@@ -1,7 +1,7 @@
 // src/lib/ga.ts
 // 📊 Google Analytics 4 — “god mode” utils (TS)
 // SSR-safe, DNT, opt-out, Consent Mode v2, queues (RAM + offline),
-// sampling, helpers e-com, et **bridge gtag->dataLayer optionnel** (GTM).
+// sampling, helpers e-com, bridge gtag->dataLayer optionnel (sGTM ok).
 
 /* ============================= Globals & setup ============================= */
 
@@ -9,6 +9,7 @@ declare global {
   interface Window {
     dataLayer: unknown[]
     gtag: (...args: any[]) => void
+    __consentState?: Record<string, 'granted' | 'denied'>
   }
 }
 
@@ -87,10 +88,7 @@ function isGaEnabled(): boolean {
   )
 }
 
-// Option : **bridge gtag -> dataLayer** pour GTM
-// Désactivé par défaut pour éviter tout doublon.
-// Active-le en mettant NEXT_PUBLIC_GTAG_TO_DATALAYER="1"
-// (et dans ce cas, passe fallbackToDataLayer={false} à tes émetteurs si besoin).
+// Bridge gtag -> dataLayer (GTM) — opt-in via ENV
 const BRIDGE_TO_DATALAYER =
   (process.env.NEXT_PUBLIC_GTAG_TO_DATALAYER || '').trim() === '1'
 
@@ -186,7 +184,7 @@ function gtagSafe(...args: any[]) {
     }
   }
 
-  // Si demandé, on **miroite** l'event vers dataLayer pour GTM (sans désactiver gtag)
+  // Miroir facultatif vers dataLayer (GTM)
   if (BRIDGE_TO_DATALAYER && args[0] === 'event' && typeof args[1] === 'string') {
     try {
       pushDataLayerEvent(args[1], args[2] || {})
@@ -237,14 +235,25 @@ type ConsentUpdate = Partial<{
   security_storage: ConsentValue
 }> & Record<string, ConsentValue>
 
+/** Expose et met à jour un snapshot global (utilisé par Pixel). */
+function setGlobalConsentState(update: Record<string, ConsentValue>) {
+  try {
+    ;(window as any).__consentState = {
+      ...(window as any).__consentState,
+      ...update,
+    }
+  } catch {}
+}
+
 export function setConsentDefault(update: ConsentUpdate) {
   if (!isBrowser) return
+  setGlobalConsentState(update as Record<string, ConsentValue>)
   gtagSafe('consent', 'default', { wait_for_update: 500, ...update })
 }
 
 export function grantConsent(update: ConsentUpdate = {}) {
   if (!isBrowser) return
-  gtagSafe('consent', 'update', {
+  const payload: ConsentUpdate = {
     ad_storage: 'granted',
     analytics_storage: 'granted',
     ad_user_data: 'granted',
@@ -252,12 +261,14 @@ export function grantConsent(update: ConsentUpdate = {}) {
     functionality_storage: 'granted',
     security_storage: 'granted',
     ...update,
-  })
+  }
+  setGlobalConsentState(payload as Record<string, ConsentValue>)
+  gtagSafe('consent', 'update', payload)
 }
 
 export function denyConsent(update: ConsentUpdate = {}) {
   if (!isBrowser) return
-  gtagSafe('consent', 'update', {
+  const payload: ConsentUpdate = {
     ad_storage: 'denied',
     analytics_storage: 'denied',
     ad_user_data: 'denied',
@@ -265,7 +276,9 @@ export function denyConsent(update: ConsentUpdate = {}) {
     functionality_storage: 'denied',
     security_storage: 'granted',
     ...update,
-  })
+  }
+  setGlobalConsentState(payload as Record<string, ConsentValue>)
+  gtagSafe('consent', 'update', payload)
 }
 
 export function consent(modeOrUpdate: 'grant' | 'deny' | ConsentUpdate, update?: ConsentUpdate) {
@@ -273,8 +286,12 @@ export function consent(modeOrUpdate: 'grant' | 'deny' | ConsentUpdate, update?:
   if (typeof modeOrUpdate === 'string') {
     return modeOrUpdate === 'grant' ? grantConsent(update) : denyConsent(update)
   }
+  setGlobalConsentState(modeOrUpdate as Record<string, ConsentValue>)
   gtagSafe('consent', 'update', modeOrUpdate)
 }
+
+/** petit helper => type narrow sur 'granted' | 'denied' */
+const cv = (b: boolean): ConsentValue => (b ? 'granted' : 'denied')
 
 export function consentUpdateBooleans(p: {
   analytics?: boolean
@@ -290,14 +307,17 @@ export function consentUpdateBooleans(p: {
   const ad_personalization = p.ad_personalization ?? ads
   const functionality = p.functionality ?? true
 
-  gtagSafe('consent', 'update', {
-    analytics_storage: analytics ? 'granted' : 'denied',
-    ad_storage: ads ? 'granted' : 'denied',
-    ad_user_data: ad_user_data ? 'granted' : 'denied',
-    ad_personalization: ad_personalization ? 'granted' : 'denied',
-    functionality_storage: functionality ? 'granted' : 'denied',
+  const update: Record<string, ConsentValue> = {
+    analytics_storage: cv(analytics),
+    ad_storage: cv(ads),
+    ad_user_data: cv(ad_user_data),
+    ad_personalization: cv(ad_personalization),
+    functionality_storage: cv(functionality),
     security_storage: 'granted',
-  })
+  }
+
+  setGlobalConsentState(update)
+  gtagSafe('consent', 'update', update)
 }
 
 /* ============================== Init & Config ============================= */

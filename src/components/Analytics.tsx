@@ -1,4 +1,4 @@
-// src/components/Analytics.tsx — GA4 + Consent Mode v2 (sans doublon), SPA-safe, sGTM-ready — FINAL++
+// src/components/Analytics.tsx — GA4 + Consent Mode v2, SPA-safe, sGTM-ready — FINAL
 'use client'
 
 import { useEffect } from 'react'
@@ -39,7 +39,7 @@ export default function Analytics() {
         localStorage.setItem('consent:analytics', p.analytics ? '1' : '0')
         localStorage.setItem('consent:ads', p.ads ? '1' : '0')
       } catch {}
-      // Propage aussi à l’API utilitaire injectée en <head> (layout.tsx)
+      // Propage aussi à une éventuelle API utilitaire injectée en <head> (layout.tsx)
       try {
         if (typeof (window as any).__applyConsent === 'function') {
           ;(window as any).__applyConsent({
@@ -71,7 +71,6 @@ export default function Analytics() {
       config: {
         debug_mode: DEBUG_MODE || undefined,
         ads_data_redaction: true,
-        // Route courante au moment de l’init (les autres PV sont gérés via pageview())
         page_path:
           typeof location !== 'undefined' ? location.pathname + location.search : undefined,
         page_title: typeof document !== 'undefined' ? document.title : undefined,
@@ -92,7 +91,7 @@ export default function Analytics() {
         strategy="afterInteractive"
       />
 
-      {/* Init minimale (consent 'default' déjà injecté dans app/layout.tsx) */}
+      {/* Init minimale (consent 'default' peut être aussi injecté dans app/layout.tsx) */}
       <Script id="ga4-init" strategy="afterInteractive">
         {`
           (function() {

@@ -26,13 +26,15 @@ export interface RatingStarsProps {
   ariaLabel?: string
   /** Désactivé */
   disabled?: boolean
+  /** Afficher la valeur "(4,5/5)" à droite */
+  showValue?: boolean
 }
 
-const STAR_PATH = 'M12 .587l3.668 7.431 8.2 1.192-5.934 5.787 1.401 8.163L12 18.896 4.665 23.16l1.401-8.163L.132 9.21l8.2-1.192L12 .587z'
+const STAR_PATH =
+  'M12 .587l3.668 7.431 8.2 1.192-5.934 5.787 1.401 8.163L12 18.896 4.665 23.16l1.401-8.163L.132 9.21l8.2-1.192L12 .587z'
 
-function clamp(n: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, n))
-}
+const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
+const roundToStep = (v: number, step: 1 | 0.5) => (step === 1 ? Math.round(v) : Math.round(v * 2) / 2)
 
 export default function RatingStars({
   value,
@@ -46,16 +48,16 @@ export default function RatingStars({
   className,
   ariaLabel,
   disabled,
+  showValue = false,
 }: RatingStarsProps) {
   const safe = clamp(Number.isFinite(value) ? value : 0, 0, max)
-  const groupLabel = ariaLabel ?? `Note : ${safe} sur ${max}`
   const [hoverValue, setHoverValue] = React.useState<number | null>(null)
   const current = hoverValue ?? safe
   const uid = React.useId()
 
   const applyChange = (v: number) => {
     if (!editable || disabled) return
-    onChange?.(clamp(step === 1 ? Math.round(v) : Math.round(v * 2) / 2, 0, max))
+    onChange?.(clamp(roundToStep(v, step), 0, max))
   }
 
   const onKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
@@ -63,10 +65,10 @@ export default function RatingStars({
     const delta = step === 1 ? 1 : 0.5
     if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
       e.preventDefault()
-      applyChange(clamp(safe + delta, 0, max))
+      applyChange(safe + delta)
     } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
       e.preventDefault()
-      applyChange(clamp(safe - delta, 0, max))
+      applyChange(safe - delta)
     } else if (e.key === 'Home') {
       e.preventDefault()
       applyChange(0)
@@ -74,13 +76,26 @@ export default function RatingStars({
       e.preventDefault()
       applyChange(max)
     } else if (e.key === 'Enter' || e.key === ' ') {
-      // confirme la valeur hover sinon laisse safe
       if (hoverValue != null) {
         e.preventDefault()
         applyChange(hoverValue)
       }
     }
   }
+
+  /** Pour demi-étoiles au clic / hover quand step=0.5 */
+  const computePointerValue = (i: number, ev: React.MouseEvent<HTMLButtonElement>) => {
+    // i = index étoile (1..max)
+    if (step === 1) return i
+    const rect = ev.currentTarget.getBoundingClientRect()
+    const x = clamp(ev.clientX - rect.left, 0, rect.width)
+    const half = x < rect.width / 2 ? 0.5 : 1
+    return i - (1 - half) //  i-0.5 si dans la moitié gauche, sinon i
+  }
+
+  const groupLabel =
+    ariaLabel ??
+    (editable ? `Choisir une note sur ${max}` : `Note : ${current} sur ${max}`)
 
   return (
     <div
@@ -92,7 +107,6 @@ export default function RatingStars({
     >
       {Array.from({ length: max }, (_, i) => {
         const index = i + 1
-        // % de remplissage de cette étoile (0 → 100)
         const fillPct = clamp((current - i) * 100, 0, 100)
 
         const StarSvg = (
@@ -124,8 +138,7 @@ export default function RatingStars({
           return <span key={i}>{StarSvg}</span>
         }
 
-        // Éditable : bouton radio visuel + a11y
-        const checked = Math.round(safe * 2) / 2 === index || (step === 1 && Math.round(safe) === index)
+        const checked = roundToStep(safe, step) === index
 
         return (
           <button
@@ -136,19 +149,27 @@ export default function RatingStars({
             aria-label={`${index} étoile${index > 1 ? 's' : ''}`}
             disabled={disabled}
             className={cn(
-              'rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+              'rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60',
               disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
             )}
-            onMouseEnter={() => setHoverValue(index)}
+            onMouseMove={(e) => {
+              if (disabled) return
+              setHoverValue(computePointerValue(index, e))
+            }}
             onMouseLeave={() => setHoverValue(null)}
             onFocus={() => setHoverValue(index)}
             onBlur={() => setHoverValue(null)}
-            onClick={() => applyChange(index)}
+            onClick={(e) => applyChange(computePointerValue(index, e))}
           >
             {StarSvg}
           </button>
         )
       })}
+      {showValue && (
+        <span className="ml-1 text-sm text-gray-600 dark:text-gray-300 font-medium">
+          ({current.toLocaleString(undefined, { maximumFractionDigits: 1 })}/{max})
+        </span>
+      )}
     </div>
   )
 }
