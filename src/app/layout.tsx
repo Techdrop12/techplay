@@ -66,10 +66,10 @@ export const metadata: Metadata = {
   description:
     'TechPlay, votre boutique high-tech : audio, gaming, accessoires et packs exclusifs. Qualité, rapidité, satisfaction garantie.',
   keywords: ['high-tech', 'gaming', 'audio', 'accessoires', 'e-commerce', 'TechPlay', 'packs exclusifs'],
-  alternates: {
-    canonical: SITE_URL,
-    languages: { 'x-default': SITE_URL, fr: `${SITE_URL}/`, en: `${SITE_URL}/en` },
-  },
+
+  // ⛔️ IMPORTANT : pas de canonical/hreflang ici (root) pour ne pas surécrire toutes les pages.
+  // On posera des canonicals/hreflang au niveau des pages (Lot suivant).
+
   openGraph: {
     title: 'TechPlay – Boutique high-tech innovante',
     description: 'TechPlay, votre boutique high-tech : audio, gaming, accessoires.',

@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getPosts } from '@/lib/blog'
 import BlogCard from '@/components/blog/BlogCard'
+import { generateMeta, jsonLdBreadcrumbs } from '@/lib/seo'
 
 export const revalidate = 60
 
@@ -16,29 +17,33 @@ export async function generateMetadata(
   { searchParams }: { searchParams?: SR }
 ): Promise<Metadata> {
   const q: string = typeof searchParams?.q === 'string' ? searchParams.q : ''
-  const page = Number(searchParams?.page || 1)
+  const page = Math.max(1, Number(searchParams?.page || 1))
 
   const baseTitle = 'Blog TechPlay – Conseils et nouveautés'
   const title = q
-    ? `Résultats pour “${q}” – Page ${page} | TechPlay`
+    ? `Résultats pour “${q}” – Page ${page}`
     : page > 1
     ? `Blog TechPlay – Page ${page}`
     : baseTitle
 
   const description = q
     ? `Articles correspondant à “${q}” sur le blog TechPlay.`
-    : "Explorez nos articles, guides et conseils sur les produits TechPlay."
+    : 'Explorez nos articles, guides et conseils sur les produits TechPlay.'
 
   const sp = new URLSearchParams()
   if (q) sp.set('q', q)
   if (page > 1) sp.set('page', String(page))
 
-  return {
+  const path = `/blog${sp.toString() ? `?${sp}` : ''}`
+
+  // hreflang/canonical/OG absolus + noindex pour les pages de recherche
+  return generateMeta({
     title,
     description,
-    alternates: { canonical: `${SITE_URL}/blog${sp.toString() ? `?${sp}` : ''}` },
-    openGraph: { title, description, url: `${SITE_URL}/blog`, type: 'website' },
-  }
+    url: path,
+    image: '/og-image.jpg',
+    noindex: !!q,
+  })
 }
 
 /* ------------------------------ Page ----------------------------- */
@@ -80,6 +85,12 @@ export default async function BlogPage({ searchParams }: { searchParams?: SR }) 
     sp.set('page', String(next.page ?? page))
     return `/blog?${sp.toString()}`
   }
+
+  // JSON-LD Breadcrumbs (Accueil > Blog)
+  const crumbs = jsonLdBreadcrumbs([
+    { name: 'Accueil', url: '/' },
+    { name: 'Blog', url: '/blog' },
+  ])
 
   return (
     <main className="max-w-7xl mx-auto px-4 pt-32 pb-20" aria-labelledby="blog-title">
@@ -202,11 +213,14 @@ export default async function BlogPage({ searchParams }: { searchParams?: SR }) 
         </nav>
       )}
 
-      {/* JSON-LD (ItemList) */}
+      {/* JSON-LD (Breadcrumbs + ItemList) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }}
+      />
       {posts.length > 0 && (
         <script
           type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               '@context': 'https://schema.org',

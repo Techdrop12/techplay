@@ -63,18 +63,19 @@ export function getFallbackDescription(
   }: { siteName?: string; locale?: string; maxLen?: number } = {}
 ): string {
   const { title, brand, description, price, currency = 'EUR' } = product
-  let parts: string[] = []
+  const parts: string[] = []
   if (title) parts.push(`Découvrez ${title}`)
   if (brand) parts.push(`de la marque ${brand}`)
 
   let out = parts.join(' ')
-  // prix
-  if (price != null && String(price) !== '') {
+
+  // prix (optionnel)
+  if (price != null && String(price).trim() !== '') {
     try {
       const fmt = new Intl.NumberFormat(locale, { style: 'currency', currency })
       out += (out ? ' ' : '') + `à partir de ${fmt.format(Number(price))}`
     } catch {
-      // silent: pas de currency si Intl échoue
+      // ignore: pas de currency si Intl échoue
     }
   }
   if (out) out += ` sur ${siteName}. Livraison rapide et SAV premium.`

@@ -15,7 +15,7 @@ interface MetaProps {
   image?: string
   /** "website" | "article" (note: "product" est mappé vers "website") */
   type?: 'website' | 'article' | 'product'
-  /** "fr_FR" | "en_US" (défaut: "fr_FR") */
+  /** "fr_FR" | "en_US" — si absent, déduit de l’URL */
   locale?: 'fr_FR' | 'en_US'
   /** Empêche l’indexation si true */
   noindex?: boolean
@@ -47,7 +47,6 @@ const SUPPORTED: readonly SiteLocale[] = ['fr', 'en'] as const
 function getOrigin(): string {
   try {
     const u = new URL(RAW_ORIGIN)
-    // retire trailing slash
     return `${u.origin}`
   } catch {
     return 'https://techplay.example.com'
@@ -56,10 +55,11 @@ function getOrigin(): string {
 const ORIGIN = getOrigin()
 
 /** Convertit en URL absolue basée sur ORIGIN si relative */
-function abs(u: string | undefined | null): string {
+function abs(u: string | undefined | null, fallback: string = DEFAULT_OG): string {
   const v = (u || '').trim()
-  if (!v) return `${ORIGIN}${DEFAULT_OG}`
+  if (!v) return `${ORIGIN}${fallback.startsWith('/') ? fallback : `/${fallback}`}`
   try {
+    // déjà absolue
     return new URL(v).toString()
   } catch {
     const path = v.startsWith('/') ? v : `/${v}`
@@ -81,12 +81,13 @@ function inferLocaleFromPath(pathname: string): SiteLocale {
   return (m?.[1] as SiteLocale) || DEFAULT_LOCALE
 }
 
+/** Map site-locale -> OG locale */
+const toOgLocale = (loc: SiteLocale): 'fr_FR' | 'en_US' => (loc === 'en' ? 'en_US' : 'fr_FR')
+
 /** Construit les alternates.languages avec FR sur "/" et EN sur "/en" */
 function buildLanguageAlternates(pathname: string) {
   const pathNoLocale = stripLocalePrefix(pathname) || '/'
-  // FR = chemin “racine” (sans /fr)
-  const frPath = pathNoLocale
-  // EN = /en + chemin sans locale (sauf si "/" → "/en")
+  const frPath = pathNoLocale // FR = racine
   const enPath = pathNoLocale === '/' ? '/en' : `/en${pathNoLocale}`
   return {
     [toHreflang('fr')]: frPath,
@@ -102,12 +103,12 @@ export function generateMeta({
   url,
   image = DEFAULT_OG,
   type = 'website',
-  locale = 'fr_FR',
+  locale, // auto si absent
   noindex = false,
 }: MetaProps): Metadata {
   const canonicalAbs = abs(url)
 
-  // Récupère pathname propre
+  // Récupère pathname propre pour hreflang et OG locale
   let pathname = '/'
   try {
     pathname = new URL(canonicalAbs).pathname || '/'
@@ -115,8 +116,12 @@ export function generateMeta({
     pathname = ensureLeadingSlash(url)
   }
 
+  // Locale OG : auto si non fournie
+  const siteLocale = inferLocaleFromPath(pathname)
+  const ogLocale = (locale ?? toOgLocale(siteLocale)) as 'fr_FR' | 'en_US'
+
   const languages = buildLanguageAlternates(pathname)
-  const imageAbs = abs(image)
+  const imageAbs = abs(image, DEFAULT_OG)
 
   // Map "product" => "website" (Next types)
   const ogType: OpenGraphType = type === 'article' ? 'article' : 'website'
@@ -125,6 +130,7 @@ export function generateMeta({
     // (Astuce: le template du site est déjà défini dans layout.tsx)
     title,
     description,
+    // on duplique metadataBase ici pour robustesse des URLs si jamais une page n’en hérite pas
     metadataBase: new URL(ORIGIN),
     alternates: {
       canonical: canonicalAbs,
@@ -145,7 +151,7 @@ export function generateMeta({
       title,
       description,
       type: ogType,
-      locale,
+      locale: ogLocale,
       url: canonicalAbs,
       siteName: SITE_NAME,
       images: [{ url: imageAbs }],
@@ -247,7 +253,7 @@ export function jsonLdProduct(params: {
   price?: { amount: number; currency: string }
   availability?: 'InStock' | 'OutOfStock' | 'PreOrder'
 }) {
-  const images = Array.isArray(params.image) ? params.image.map(abs) : params.image ? [abs(params.image)] : [abs(DEFAULT_OG)]
+  const images = Array.isArray(params.image) ? params.image.map((u) => abs(u)) : params.image ? [abs(params.image)] : [abs(DEFAULT_OG)]
   const offers =
     params.price
       ? {
