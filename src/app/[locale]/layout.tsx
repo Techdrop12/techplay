@@ -7,7 +7,7 @@ import { NextIntlClientProvider, type AbstractIntlMessages } from 'next-intl'
 import loadMessages from '@/i18n/loadMessages'
 import { locales, isLocale, type Locale } from '@/i18n/config'
 
-/** Prégénère / (fr = default, pas de préfixe) et /en */
+/** Prégénère /fr et /en (utile tant qu’on n’a pas de middleware d’alias pour /) */
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }))
 }

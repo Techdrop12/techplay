@@ -2,12 +2,8 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
-import {
-  languages,
-  localeLabels,
-  type Locale,
-  setLocaleCookie,
-} from '@/lib/language'
+import { locales, localeLabels, type Locale } from '@/i18n/config'
+import { setLocaleCookie } from '@/lib/language'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 import { event as gaEvent } from '@/lib/ga'
 
@@ -24,31 +20,26 @@ export default function LanguageSwitcher() {
     // 1) Persistance cookie (1 an)
     try {
       document.cookie = `${LOCALE_COOKIE}=${next}; Max-Age=31536000; Path=/; SameSite=Lax`
-    } catch {}
-    try {
-      setLocaleCookie(next) // no-op SSR, pratique côté client
+      setLocaleCookie(next)
     } catch {}
 
     // 2) Tracking (GA4 + fallback GTM dataLayer)
     try {
       gaEvent({ action: 'change_language', category: 'engagement', label: next })
-    } catch {}
-    try {
       ;(window as any).dataLayer = (window as any).dataLayer || []
       ;(window as any).dataLayer.push({ event: 'change_language', locale: next })
     } catch {}
 
     // 3) URL localisée + conservation query + hash
-    const href = localizePath(pathname, next, { keepQuery: true })
-    const hash = typeof window !== 'undefined' ? window.location.hash || '' : ''
+    const href = localizePath(pathname, next, { keepQuery: true, keepHash: true })
 
     // 4) Remplacer l’entrée (pas d’empilement d’historique)
-    router.replace(href + hash)
+    router.replace(href)
   }
 
   return (
     <div className="inline-flex gap-2" role="group" aria-label="Sélecteur de langue">
-      {languages.map((lang) => {
+      {locales.map((lang) => {
         const active = current === lang
         return (
           <button

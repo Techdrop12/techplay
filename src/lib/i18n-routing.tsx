@@ -1,7 +1,11 @@
 // src/lib/i18n-routing.tsx
 // Helpers i18n universels (SSR/CSR-safe), URL prefix default-less (fr = /, en = /en)
 
-import { locales as SUPPORTED_LOCALES, defaultLocale as DEFAULT_LOCALE, type Locale } from '@/i18n/config'
+import {
+  locales as SUPPORTED_LOCALES,
+  defaultLocale as DEFAULT_LOCALE,
+  type Locale,
+} from '@/i18n/config'
 
 export { SUPPORTED_LOCALES, DEFAULT_LOCALE }
 export type { Locale }
@@ -21,10 +25,7 @@ export function getCurrentPathname(): string {
 }
 
 /**
- * Détermine la locale courante.
- * 1) /<locale>/… dans l’URL → prioritaire
- * 2) Cookie NEXT_LOCALE s’il est valide
- * 3) Locale par défaut
+ * Locale courante (priorité URL, puis cookie NEXT_LOCALE, sinon défaut)
  */
 export function getCurrentLocale(pathname?: string): (typeof SUPPORTED_LOCALES)[number] {
   const p = pathname ?? getCurrentPathname()
@@ -71,12 +72,10 @@ export function localizePath(
   const bare = stripLocalePrefix(base)
   const withLocale = locale === DEFAULT_LOCALE ? bare : `/${locale}${bare === '/' ? '' : bare}`
 
-  // Query
   const query =
     opts.customQuery ??
     (opts.keepQuery && typeof window !== 'undefined' ? window.location.search || '' : '')
 
-  // Hash
   const hash =
     opts.customHash ??
     (opts.keepHash && typeof window !== 'undefined' ? window.location.hash || '' : '')
@@ -89,6 +88,6 @@ export function altLocales(pathname?: string) {
   const p = pathname ?? getCurrentPathname()
   return (SUPPORTED_LOCALES as readonly string[]).map((l) => ({
     locale: l,
-    href: localizePath(p, l as any),
+    href: localizePath(p, l as any, { keepQuery: true, keepHash: true }),
   }))
 }

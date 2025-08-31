@@ -15,5 +15,6 @@ export {
   toLangTag,
 } from '@/lib/language'
 
-// (Si tu utilises next-intl v3/v4)
-export const localePrefix = 'always' as const
+// ✅ next-intl v3/v4 : FR sans préfixe, EN avec préfixe
+// (si tu actives le routing next-intl)
+export const localePrefix = 'as-needed' as const

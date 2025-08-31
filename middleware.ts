@@ -1,4 +1,4 @@
-// middleware.ts — Ultra Premium FINAL (i18n + root redirect + headers)
+// middleware.ts — Ultra Premium FINAL (i18n + root redirect + headers + en-alias rewrite)
 import { NextRequest, NextResponse } from 'next/server'
 import createMiddleware from 'next-intl/middleware'
 import { getToken } from 'next-auth/jwt'
@@ -35,6 +35,9 @@ const PUBLIC_PREFIXES = [
 ]
 
 const PUBLIC_PATHS = [...STATIC_FILES.flatMap((f) => [`/${f}`, `/fr/${f}`, `/en/${f}`])]
+
+// ✅ Vraies routes localisées existantes sous /[locale]/... (à étendre au fur et à mesure)
+const LOCALE_NATIVE_PREFIXES = ['/wishlist']
 
 function safeHostname(url: string) {
   try {
@@ -158,6 +161,35 @@ export async function middleware(request: NextRequest) {
   if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next()
   if (PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
     return NextResponse.next()
+  }
+
+  // 4-bis) ⭐ EN alias rewrite: /en/<path> → serve /<path> (URL reste /en/<path>),
+  //        sauf pour les vraies routes localisées (ex: /en/wishlist)
+  if (pathname.startsWith('/en/')) {
+    const rest = pathname.slice(3) || '/'
+    const restPath = rest.startsWith('/') ? rest : `/${rest}`
+    const isNative = LOCALE_NATIVE_PREFIXES.some(
+      (p) => restPath === p || restPath.startsWith(p + '/')
+    )
+    if (!isNative) {
+      const url = request.nextUrl.clone()
+      url.pathname = restPath
+      const res = NextResponse.rewrite(url)
+      // Fixe la locale à 'en' pour html[lang], headers & tracking
+      res.cookies.set('NEXT_LOCALE', 'en', {
+        path: '/',
+        maxAge: 60 * 60 * 24 * 365,
+        sameSite: 'lax',
+        secure: !isDev,
+      })
+      res.headers.set('Content-Language', 'en')
+      res.headers.set('Vary', 'Accept-Language, Cookie')
+      if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production') {
+        res.headers.set('X-Robots-Tag', 'noindex, nofollow, noimageindex')
+      }
+      ensureAbCookie(res)
+      return res
+    }
   }
 
   // 5) Maintenance (bypass pour /admin et page maintenance)

@@ -91,9 +91,7 @@ export default function WishlistButton({
     if (count >= WISHLIST_LIMIT) {
       setShake(true); setTimeout(() => setShake(false), 420)
       setSr('Limite de wishlist atteinte')
-      toast.error('Limite de wishlist atteinte', {
-        icon: <AlertTriangle size={18} className="text-amber-500" />,
-      })
+      toast.error('Limite de wishlist atteinte', { icon: <AlertTriangle size={18} className="text-amber-500" /> })
       return
     }
 

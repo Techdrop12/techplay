@@ -21,6 +21,158 @@
     "product_not_found_title": "Product Not Found",
     "product_not_found_description": "The product you are looking for does not exist or is no longer available."
   },
+
+  "common": {
+    "brand": "TechPlay",
+    "loading": "Loading…",
+    "saving": "Saving…",
+    "deleting": "Deleting…",
+    "error": "An error occurred.",
+    "success": "Success",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close",
+    "apply": "Apply",
+    "edit": "Edit",
+    "save": "Save",
+    "delete": "Delete",
+    "yes": "Yes",
+    "no": "No",
+    "back": "Back",
+    "see_more": "See more",
+    "see_less": "See less",
+    "search": "Search",
+    "search_placeholder": "Search a product, a brand…",
+    "empty_state": "Nothing to display yet.",
+    "unit_price": "{value, number, ::currency/EUR}",
+    "percent": "{value, number, percent}",
+    "copied": "Copied!"
+  },
+
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "packs": "Packs",
+    "blog": "Blog",
+    "contact": "Contact",
+    "wishlist": "Wishlist",
+    "cart": "Cart",
+    "account": "Account",
+    "admin": "Admin",
+    "login": "Login"
+  },
+
+  "footer": {
+    "about": "About",
+    "cgv": "Terms",
+    "privacy": "Privacy",
+    "mentions": "Legal Notice",
+    "newsletter_title": "Stay in the loop",
+    "newsletter_sub": "News, promos and new arrivals.",
+    "payments": "Accepted payments",
+    "shipping": "Shipping",
+    "returns": "Returns",
+    "security": "Security"
+  },
+
+  "buttons": {
+    "add_to_cart": "Add to cart",
+    "view_product": "View product",
+    "buy_now": "Buy now",
+    "go_to_cart": "View cart",
+    "checkout": "Proceed to checkout",
+    "continue_shopping": "← Continue shopping",
+    "add_to_wishlist": "Add to wishlist",
+    "remove_from_wishlist": "Remove from wishlist",
+    "apply_filters": "Apply filters",
+    "clear_filters": "Clear filters",
+    "load_more": "Load more",
+    "see_all": "See all"
+  },
+
+  "forms": {
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "first_name": "First name",
+    "last_name": "Last name",
+    "message": "Message",
+    "address": "Address",
+    "city": "City",
+    "postcode": "Postcode",
+    "country": "Country",
+    "phone": "Phone",
+    "coupon": "Promo code",
+    "submit": "Send"
+  },
+
+  "validation": {
+    "required": "Required field",
+    "email_invalid": "Invalid email",
+    "min_chars": "Minimum {min} characters",
+    "max_chars": "Maximum {max} characters",
+    "password_weak": "Password too weak",
+    "postcode_invalid": "Invalid postcode"
+  },
+
+  "aria": {
+    "skip_to_content": "Skip to content",
+    "open_menu": "Open menu",
+    "close_menu": "Close menu",
+    "open_modal": "Open dialog",
+    "close_modal": "Close dialog",
+    "toggle_wishlist": "Toggle wishlist",
+    "toggle_cart": "Open/close cart"
+  },
+
+  "consent": {
+    "banner_title": "Your privacy",
+    "banner_desc": "We use cookies to measure traffic and improve your experience.",
+    "accept_all": "Accept all",
+    "reject_all": "Reject all",
+    "customize": "Customize",
+    "analytics": "Analytics",
+    "ads": "Advertising",
+    "functional": "Functional",
+    "security": "Security"
+  },
+
+  "toasts": {
+    "added_to_cart": "Added to cart",
+    "removed_from_cart": "Removed from cart",
+    "action_failed": "Action failed, please try again.",
+    "added_to_wishlist": "Added to wishlist",
+    "removed_from_wishlist": "Removed from wishlist"
+  },
+
+  "skeleton": {
+    "loading_products": "Loading products…",
+    "loading_product": "Loading product…",
+    "loading_cart": "Loading cart…"
+  },
+
+  "date": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "tomorrow": "Tomorrow",
+    "short": "{value, date, short}",
+    "medium": "{value, date, medium}",
+    "long": "{value, date, long}",
+    "relative": "{value, relative}"
+  },
+
+  "units": {
+    "currency": "{value, number, ::currency/EUR}",
+    "weight_kg": "{value, number} kg",
+    "dimension_cm": "{value, number} cm"
+  },
+
+  "abtest": {
+    "badge": "Experience under test",
+    "variant": "Variant {name}"
+  },
+
   "home": {
     "title": "Home",
     "description": "Discover the best high-tech gadgets and accessories delivered to your door.",
@@ -32,86 +184,133 @@
     "empty_cart": "Your cart is empty",
     "total": "Total",
     "checkout": "Proceed to checkout",
-    "redirecting": "Redirecting...",
+    "redirecting": "Redirecting…",
     "payment_error": "Payment error",
     "error_loading_products": "Error loading products.",
     "no_products_available": "No products available."
   },
-  "admin": {
-    "add_product": "Add a product",
-    "title": "Title",
-    "description": "Description",
+
+  "search": {
+    "title": "Search",
+    "placeholder": "Search a product, a brand…",
+    "no_results": "No results for \"{query}\".",
+    "results_count": "{count, plural, one {# result} other {# results}}"
+  },
+
+  "filters": {
+    "title": "Filters",
     "price": "Price",
     "category": "Category",
-    "image": "Image",
-    "submit": "Submit",
-    "success": "Product added successfully",
-    "error": "Error adding product",
-    "dashboard": "Dashboard",
-    "total_sales": "Total Sales",
-    "total_orders": "Total Orders",
-    "latest_order": "Latest Order",
-    "manage_products": "Manage Products",
-    "delete_confirmation": "Are you sure you want to delete this product?"
+    "brand": "Brand",
+    "rating": "Rating",
+    "availability": "Availability",
+    "in_stock": "In stock",
+    "on_sale": "On sale",
+    "reset": "Reset"
   },
-  "login": {
-    "admin_login": "Admin login",
-    "email": "Email",
-    "password": "Password",
-    "submit": "Login",
-    "failed": "Login failed"
+
+  "sort": {
+    "label": "Sort by",
+    "relevance": "Relevance",
+    "price_asc": "Price: Low to High",
+    "price_desc": "Price: High to Low",
+    "newest": "Newest",
+    "rating": "Top rated"
   },
+
+  "pagination": {
+    "prev": "Previous",
+    "next": "Next",
+    "page_of": "Page {page} of {pages}"
+  },
+
+  "product_list": {
+    "results": "{count, plural, one {# product} other {# products}}",
+    "best_sellers": "Best sellers",
+    "new_arrivals": "New arrivals",
+    "low_stock": "Only {count} left in stock"
+  },
+
   "product": {
     "added_to_cart": "{title} added to cart",
     "out_of_stock": "Out of stock",
     "quantity": "Quantity",
     "reviews_title": "Customer reviews",
-    "write_review": "Write a review"
+    "write_review": "Write a review",
+    "sku": "SKU",
+    "share": "Share",
+    "specs": "Specifications",
+    "description": "Description",
+    "included": "In the box",
+    "warranty": "Warranty",
+    "shipping_info": "Shipping & returns",
+    "delivery_estimate": "Estimated delivery: {date, date, medium}",
+    "you_may_also_like": "You may also like"
   },
-  "error": {
-    "404_title": "Page not found",
-    "404_message": "The page you are looking for does not exist.",
-    "back_home": "Back to homepage",
-    "generic": "An error occurred."
+
+  "packs": {
+    "title": "Packs",
+    "empty": "No packs available at the moment."
   },
-  "a_propos": {
-    "title": "About",
-    "description": "TechPlay is a store specializing in quality tech and gaming products.",
-    "our_mission_title": "Our mission",
-    "our_mission_text": "Our mission is to bring the latest tech innovations to enthusiasts everywhere.",
-    "our_team_title": "Our team",
-    "our_team_text": "We are a team of developers, marketers and tech fans committed to giving you the best experience.",
-    "our_values_title": "Our values",
-    "our_values_text": "Quality, transparency, and passion are our guiding principles."
+
+  "pack": {
+    "items": "{count, plural, one {# item} other {# items}} included",
+    "save": "Save {value, number, ::currency/EUR}"
   },
-  "contact": {
-    "title": "Contact",
-    "intro": "Any question? Write us at"
-  },
+
   "wishlist": {
     "title": "My wishlist",
     "empty": "No products in your wishlist.",
     "view": "View product",
-    "remove": "Remove from wishlist"
+    "remove": "Remove from wishlist",
+    "limit_reached": "Wishlist limit reached",
+    "added": "Added to wishlist",
+    "removed": "Removed from wishlist"
   },
+
   "cart": {
     "your_cart": "Your cart",
     "empty": "Your cart is empty",
     "total": "Total",
+    "subtotal": "Subtotal",
+    "taxes": "VAT",
+    "shipping": "Shipping",
+    "discount": "Discount",
     "checkout": "Proceed to checkout",
     "continue": "← Continue shopping",
     "error": "Payment error",
     "free_shipping_reached": "Free shipping reached!",
     "add_x_more": "Add {missing} more for free shipping",
+    "add_x_more_fmt": "Add {missing, number, ::currency/EUR} more for free shipping",
     "summary_mobile_label": "Cart summary",
     "items_count": "{count, plural, one {# item} other {# items}}",
     "view_cart": "View cart"
   },
-  "success": {
-    "title": "Thank you for your order 🎉",
-    "message": "Your payment has been confirmed. You will receive a confirmation email shortly.",
-    "back": "Return to homepage"
+
+  "checkout": {
+    "title": "Checkout",
+    "billing": "Billing address",
+    "shipping": "Shipping address",
+    "same_as_billing": "Same as billing",
+    "method": "Payment method",
+    "place_order": "Pay now",
+    "processing": "Processing…",
+    "pay_secure": "Secure payment",
+    "error_generic": "An error occurred during payment."
   },
+
+  "commande": {
+    "title": "Checkout",
+    "checkout_title": "Payment",
+    "checkout_description": "Complete your purchase on TechPlay.",
+    "your_cart": "Your cart",
+    "cart_empty": "Your cart is empty",
+    "payment_details": "Payment details",
+    "pay_now": "Pay now",
+    "processing": "Processing…",
+    "payment_error": "An error occurred during payment."
+  },
+
   "orders": {
     "my_orders": "My orders",
     "no_orders_found": "You have no orders yet.",
@@ -126,8 +325,103 @@
     "items_ordered": "Items Ordered",
     "order_summary": "Order Summary",
     "order_not_found": "Order Not Found",
-    "error_loading_order": "Error loading order."
+    "error_loading_order": "Error loading order.",
+    "statuses": {
+      "paid": "Paid",
+      "pending": "Pending",
+      "failed": "Failed",
+      "refunded": "Refunded",
+      "shipped": "Shipped",
+      "delivered": "Delivered"
+    }
   },
+
+  "account": {
+    "overview": "My account",
+    "profile": "Profile",
+    "addresses": "Addresses",
+    "orders": "Orders",
+    "wishlist": "Wishlist",
+    "logout": "Log out",
+    "save_profile": "Save profile",
+    "add_address": "Add address"
+  },
+
+  "auth": {
+    "login": "Login",
+    "register": "Create account",
+    "logout": "Logout",
+    "forgot_password": "Forgot password?",
+    "reset_password": "Reset password",
+    "send_link": "Send link",
+    "check_email": "Check your email",
+    "two_factor": "Two-factor authentication"
+  },
+
+  "address": {
+    "default_billing": "Default billing",
+    "default_shipping": "Default shipping",
+    "make_default": "Make default",
+    "edit": "Edit address",
+    "remove": "Remove address"
+  },
+
+  "payments": {
+    "pay_with": "Pay with {provider}",
+    "card_ending": "Card ending {last4}",
+    "status_succeeded": "Payment succeeded",
+    "status_processing": "Payment processing",
+    "status_failed": "Payment failed"
+  },
+
+  "shipping": {
+    "method": "Shipping method",
+    "standard": "Standard",
+    "express": "Express",
+    "free_from": "Free from {amount, number, ::currency/EUR}",
+    "est_delivery": "Estimated delivery: {date, date, medium}"
+  },
+
+  "returns": {
+    "policy": "Returns within 14 days",
+    "start_return": "Start a return",
+    "help": "Need help? Contact support."
+  },
+
+  "rma": {
+    "title": "After-sales service",
+    "create_ticket": "Create a ticket",
+    "ticket_id": "Ticket #{id}"
+  },
+
+  "notifications": {
+    "title": "Notifications",
+    "marketing": "Offers and news",
+    "orders": "Order updates",
+    "product_alerts": "Product alerts",
+    "save": "Save preferences"
+  },
+
+  "newsletter": {
+    "title": "Newsletter",
+    "placeholder": "Your email",
+    "subscribe": "Subscribe",
+    "subscribed": "Thanks, you’re in!"
+  },
+
+  "blog": {
+    "title": "TechPlay Blog",
+    "no_posts": "No posts available at the moment.",
+    "read_more": "Read more",
+    "author": "Author: {author}",
+    "published_on": "Published on {date}"
+  },
+
+  "category": {
+    "title": "Category: {category}",
+    "no_products": "No products found in this category."
+  },
+
   "cgv": {
     "title": "Terms & Conditions",
     "intro": "These terms and conditions apply to all orders placed on TechPlay.",
@@ -136,41 +430,38 @@
     "section2_title": "Article 2: Orders",
     "section2_text": "The order becomes firm once payment is validated."
   },
-  "blog": {
-    "title": "TechPlay Blog",
-    "no_posts": "No posts available at the moment.",
-    "read_more": "Read more",
-    "author": "Author: {author}",
-    "published_on": "Published on {date}"
+
+  "a_propos": {
+    "title": "About",
+    "description": "TechPlay is a store specializing in quality tech and gaming products.",
+    "our_mission_title": "Our mission",
+    "our_mission_text": "Our mission is to bring the latest tech innovations to enthusiasts everywhere.",
+    "our_team_title": "Our team",
+    "our_team_text": "We are a team of developers, marketers and tech fans committed to giving you the best experience.",
+    "our_values_title": "Our values",
+    "our_values_text": "Quality, transparency, and passion are our guiding principles."
   },
-  "category": {
-    "title": "Category: {category}",
-    "no_products": "No products found in this category."
+
+  "contact": {
+    "title": "Contact",
+    "intro": "Any question? Write us at"
   },
-  "commande": {
-    "title": "Checkout",
-    "checkout_title": "Payment",
-    "checkout_description": "Complete your purchase on TechPlay.",
-    "your_cart": "Your cart",
-    "cart_empty": "Your cart is empty",
-    "payment_details": "Payment details",
-    "pay_now": "Pay now",
-    "processing": "Processing…",
-    "payment_error": "An error occurred during payment."
+
+  "error": {
+    "404_title": "Page not found",
+    "404_message": "The page you are looking for does not exist.",
+    "back_home": "Back to homepage",
+    "generic": "An error occurred.",
+    "network": "Network connection issue",
+    "server": "Server error, please try again later"
   },
-  "reviews": {
-    "title": "Customer reviews",
-    "aria_label": "Customer review list",
-    "filter_label": "Filter reviews by rating",
-    "filter_stars": "Filter by {count} stars",
-    "clear_filter": "Clear filter",
-    "clear": "Clear",
-    "sort_label": "Sort reviews",
-    "sort_recent": "Recent",
-    "sort_helpful": "Helpful",
-    "no_reviews": "No reviews for this product.",
-    "error_loading": "Error loading reviews.",
-    "retry": "Retry",
-    "verified": "Verified review"
+
+  "maintenance": {
+    "title": "Maintenance",
+    "message": "The site is temporarily unavailable. Please check back later."
+  },
+
+  "sitemap": {
+    "title": "Sitemap"
   }
 }

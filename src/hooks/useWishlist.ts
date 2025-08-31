@@ -28,13 +28,9 @@ function toCanonical<T extends Record<string, any>>(item: T | null | undefined):
 }
 
 export interface UseWishlistReturn<T extends WishlistItemBase = WishlistItemBase> {
-  /** liste canonique */
   items: T[]
-  /** alias rétro-compat pour l’existant (Header/MobileNav) */
-  wishlist: T[]
-  /** taille */
+  wishlist: T[] // alias rétro-compat
   count: number
-  /** helpers */
   has: (id: string) => boolean
   add: (item: T) => void
   remove: (id: string) => void
@@ -58,8 +54,18 @@ export function useWishlist<T extends WishlistItemBase = WishlistItemBase>(): Us
       }
     }
     window.addEventListener('storage', onStorage)
+
+    const onCustom = (e: Event) => {
+      try {
+        const detail = (e as CustomEvent<T[]>).detail
+        if (Array.isArray(detail)) setItems(detail)
+      } catch {}
+    }
+    window.addEventListener('wishlist-updated', onCustom as EventListener)
+
     return () => {
       window.removeEventListener('storage', onStorage)
+      window.removeEventListener('wishlist-updated', onCustom as EventListener)
       mounted.current = false
     }
   }, [])
@@ -74,10 +80,13 @@ export function useWishlist<T extends WishlistItemBase = WishlistItemBase>(): Us
     }
   }, [items])
 
-  const has = useCallback((id: string) => {
-    const cid = normalizeId(id)
-    return cid ? items.some((x) => normalizeId((x as any).id ?? (x as any)._id) === cid) : false
-  }, [items])
+  const has = useCallback(
+    (id: string) => {
+      const cid = normalizeId(id)
+      return cid ? items.some((x) => normalizeId((x as any).id ?? (x as any)._id) === cid) : false
+    },
+    [items]
+  )
 
   const add = useCallback((raw: T) => {
     const c = toCanonical(raw)
@@ -92,9 +101,7 @@ export function useWishlist<T extends WishlistItemBase = WishlistItemBase>(): Us
   const remove = useCallback((id: string) => {
     const cid = normalizeId(id)
     if (!cid) return
-    setItems((prev) =>
-      prev.filter((x) => normalizeId((x as any).id ?? (x as any)._id) !== cid)
-    )
+    setItems((prev) => prev.filter((x) => normalizeId((x as any).id ?? (x as any)._id) !== cid))
   }, [])
 
   const toggle = useCallback((raw: T) => {
@@ -102,9 +109,7 @@ export function useWishlist<T extends WishlistItemBase = WishlistItemBase>(): Us
     if (!c) return
     setItems((prev) => {
       const exists = prev.some((x) => normalizeId((x as any).id ?? (x as any)._id) === c.id)
-      if (exists) {
-        return prev.filter((x) => normalizeId((x as any).id ?? (x as any)._id) !== c.id)
-      }
+      if (exists) return prev.filter((x) => normalizeId((x as any).id ?? (x as any)._id) !== c.id)
       const next = [c as T, ...prev]
       return next.length > MAX_ITEMS ? next.slice(0, MAX_ITEMS) : next
     })
@@ -114,11 +119,8 @@ export function useWishlist<T extends WishlistItemBase = WishlistItemBase>(): Us
 
   const count = items.length
 
-  // objet mémoisé — et alias wishlist pour compat
-  const value = useMemo<UseWishlistReturn<T>>(
+  return useMemo<UseWishlistReturn<T>>(
     () => ({ items, wishlist: items, add, remove, toggle, has, clear, count }),
     [items, add, remove, toggle, has, clear, count]
   )
-
-  return value
 }
