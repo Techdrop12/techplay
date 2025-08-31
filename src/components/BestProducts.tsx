@@ -1,3 +1,4 @@
+// src/components/BestProducts.tsx
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
@@ -78,7 +79,7 @@ export default function BestProducts({
   autoLoadOnIntersect = true,
 }: BestProductsProps) {
   const pathname = usePathname() || '/'
-  const locale = getCurrentLocale(pathname)
+  const locale = getCurrentLocale(pathname) as 'fr' | 'en'
   const t = useMemo(() => {
     if (locale === 'en') {
       return {
@@ -105,6 +106,7 @@ export default function BestProducts({
         moreShown: (n: number) => `${n} additional products displayed.`,
         loading: 'Loading best sellers…',
         noscript: 'See all products',
+        untitled: 'Untitled product',
       }
     }
     return {
@@ -131,6 +133,7 @@ export default function BestProducts({
       moreShown: (n: number) => `${n} produits supplémentaires affichés.`,
       loading: 'Chargement des meilleures ventes…',
       noscript: 'Voir tous les produits',
+      untitled: 'Produit sans titre',
     }
   }, [locale])
 
@@ -347,7 +350,7 @@ export default function BestProducts({
               <ProductCard
                 product={{
                   ...product,
-                  title: (product as any).title ?? (product as any).name ?? 'Produit sans titre',
+                  title: (product as any).title ?? (product as any).name ?? t.untitled,
                   image:
                     (product as any).image ??
                     (product as any).imageUrl ??
@@ -377,7 +380,7 @@ export default function BestProducts({
             </svg>
           </button>
 
-          {/* Sentinel pour IntersectionObserver (présent dans le flux, invisible visuellement) */}
+          {/* Sentinel pour IntersectionObserver */}
           {autoLoadOnIntersect && (
             <div
               ref={sentinelRef}

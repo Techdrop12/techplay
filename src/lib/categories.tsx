@@ -28,7 +28,7 @@ const glyph = (d: string) => (
 
 export const HeadphonesIcon: React.FC<IconProps> = ({ className }) => (
   <IconBadge className={className}>
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
       {glyph('M12 3a9 9 0 0 0-9 9v6a3 3 0 0 0 3 3h1a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H5a7 7 0 0 1 14 0h-2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h1a3 3 0 0 0 3-3v-6a9 9 0 0 0-9-9z')}
     </svg>
   </IconBadge>
@@ -36,7 +36,7 @@ export const HeadphonesIcon: React.FC<IconProps> = ({ className }) => (
 
 export const KeyboardIcon: React.FC<IconProps> = ({ className }) => (
   <IconBadge className={className}>
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
       {glyph('M3 6h18a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Zm2 3h2v2H5V9Zm3 0h2v2H8V9Zm3 0h2v2h-2V9Zm3 0h2v2h-2V9Zm3 0h2v2h-2V9ZM5 12h2v2H5v-2Zm3 0h2v2H8v-2Zm3 0h5v2h-5v-2Z')}
     </svg>
   </IconBadge>
@@ -44,7 +44,7 @@ export const KeyboardIcon: React.FC<IconProps> = ({ className }) => (
 
 export const MouseIcon: React.FC<IconProps> = ({ className }) => (
   <IconBadge className={className}>
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
       {glyph('M12 2a6 6 0 0 1 6 6v8a6 6 0 0 1-12 0V8a6 6 0 0 1 6-6Zm0 2a4 4 0 0 0-4 4v2h8V8a4 4 0 0 0-4-4Zm-.5 1h1v3h-1V5Z')}
     </svg>
   </IconBadge>
@@ -52,7 +52,7 @@ export const MouseIcon: React.FC<IconProps> = ({ className }) => (
 
 export const CameraIcon: React.FC<IconProps> = ({ className }) => (
   <IconBadge className={className}>
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
       {glyph('M9 4h6l1.5 2H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3L9 4Zm3 4a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z')}
     </svg>
   </IconBadge>
@@ -60,7 +60,7 @@ export const CameraIcon: React.FC<IconProps> = ({ className }) => (
 
 export const BatteryIcon: React.FC<IconProps> = ({ className }) => (
   <IconBadge className={className}>
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
       {glyph('M2 8a3 3 0 0 1 3-3h11a3 3 0 0 1 3 3v1h1a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-1v1a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V8Zm9 1-3 5h2v3l3-5h-2V9Z')}
     </svg>
   </IconBadge>
@@ -68,7 +68,7 @@ export const BatteryIcon: React.FC<IconProps> = ({ className }) => (
 
 export const SpeakerIcon: React.FC<IconProps> = ({ className }) => (
   <IconBadge className={className}>
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
       {glyph('M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm5 2a2 2 0 1 0 .001 3.999A2 2 0 0 0 12 6Zm0 6a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z')}
     </svg>
   </IconBadge>
@@ -76,7 +76,7 @@ export const SpeakerIcon: React.FC<IconProps> = ({ className }) => (
 
 export const DriveIcon: React.FC<IconProps> = ({ className }) => (
   <IconBadge className={className}>
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
       {glyph('M4 7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7Zm3 1h10v3H7V8Zm0 5h6v4H7v-4Z')}
     </svg>
   </IconBadge>
@@ -84,7 +84,7 @@ export const DriveIcon: React.FC<IconProps> = ({ className }) => (
 
 export const MonitorIcon: React.FC<IconProps> = ({ className }) => (
   <IconBadge className={className}>
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
       {glyph('M3 5h18a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7v2h3v2H7v-2h3v-2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z')}
     </svg>
   </IconBadge>
@@ -111,14 +111,14 @@ const CATS_FR: Readonly<CategoryDef[]> = [
 ] as const
 
 const CATS_EN: Readonly<CategoryDef[]> = [
-  { slug: 'casques',   label: 'Headphones', desc: 'Immersive audio',    href: '/products?cat=casques',   Icon: HeadphonesIcon },
-  { slug: 'claviers',  label: 'Keyboards',  desc: 'Mech & low-profile', href: '/products?cat=claviers',  Icon: KeyboardIcon },
-  { slug: 'souris',    label: 'Mice',       desc: 'Precision & comfort',href: '/products?cat=souris',    Icon: MouseIcon },
-  { slug: 'webcams',   label: 'Webcams',    desc: 'HD video calls',     href: '/products?cat=webcams',   Icon: CameraIcon },
-  { slug: 'batteries', label: 'Batteries',  desc: 'Power & hubs',       href: '/products?cat=batteries', Icon: BatteryIcon },
-  { slug: 'audio',     label: 'Audio',      desc: 'Speakers & DAC',     href: '/products?cat=audio',     Icon: SpeakerIcon },
-  { slug: 'stockage',  label: 'Storage',    desc: 'SSD & cards',        href: '/products?cat=stockage',  Icon: DriveIcon },
-  { slug: 'ecrans',    label: 'Monitors',   desc: '144Hz and up',       href: '/products?cat=ecrans',    Icon: MonitorIcon },
+  { slug: 'casques',   label: 'Headphones', desc: 'Immersive audio',     href: '/products?cat=casques',   Icon: HeadphonesIcon },
+  { slug: 'claviers',  label: 'Keyboards',  desc: 'Mech & low-profile',  href: '/products?cat=claviers',  Icon: KeyboardIcon },
+  { slug: 'souris',    label: 'Mice',       desc: 'Precision & comfort', href: '/products?cat=souris',    Icon: MouseIcon },
+  { slug: 'webcams',   label: 'Webcams',    desc: 'HD video calls',      href: '/products?cat=webcams',   Icon: CameraIcon },
+  { slug: 'batteries', label: 'Batteries',  desc: 'Power & hubs',        href: '/products?cat=batteries', Icon: BatteryIcon },
+  { slug: 'audio',     label: 'Audio',      desc: 'Speakers & DAC',      href: '/products?cat=audio',     Icon: SpeakerIcon },
+  { slug: 'stockage',  label: 'Storage',    desc: 'SSD & cards',         href: '/products?cat=stockage',  Icon: DriveIcon },
+  { slug: 'ecrans',    label: 'Monitors',   desc: '144Hz and up',        href: '/products?cat=ecrans',    Icon: MonitorIcon },
 ] as const
 
 /** Helper i18n — renvoie les catégories localisées (labels/desc). */

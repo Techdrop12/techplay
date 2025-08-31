@@ -1,7 +1,7 @@
+// src/components/SEOHead.tsx — Canonical/hreflang alignés avec FR sans préfixe + EN préfixé
 'use client'
 
 // NOTE: À n’utiliser que sur les rares pages qui n’emploient pas l’API Metadata.
-// Avec l’App Router, privilégie `export const metadata` par page/layout.
 
 import Head from 'next/head'
 
@@ -51,7 +51,7 @@ function currentPathname(): string {
 }
 
 function stripLocalePrefix(pathname: string): string {
-  return pathname.replace(/^\/(fr|en)(?=\/|$)/, '')
+  return pathname.replace(/^\/(fr|en)(?=\/|$)/, '') || '/'
 }
 
 function detectLocaleFromPath(pathname: string): Locale {
@@ -71,22 +71,24 @@ export default function SEOHead({
   modifiedTime,
   prevUrl,
   nextUrl,
-  imageAlt = `${SITE_NAME} – Boutique high-tech`,
+  imageAlt,
 }: Props) {
   const pathname = currentPathname()
   const loc: Locale = locale ?? detectLocaleFromPath(pathname)
 
   const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`
-  const canonicalAbs = absUrl(url) ?? new URL(pathname, ORIGIN).toString()
 
-  // Hreflang FR/EN + x-default
-  const pathNoLocale = stripLocalePrefix(pathname.split('?')[0] || '/')
-  const hrefFr = new URL(`/fr${pathNoLocale}`, ORIGIN).toString()
+  // Canonical: FR sans préfixe, EN avec /en
+  const pathNoLocale = stripLocalePrefix((pathname.split('?')[0] || '/') as string)
+  const canonicalByLoc = new URL(loc === 'en' ? `/en${pathNoLocale}` : pathNoLocale, ORIGIN).toString()
+  const canonicalAbs = absUrl(url) ?? canonicalByLoc
+
+  // Hreflang FR/EN + x-default (pointent vers mêmes chemins "pathNoLocale")
+  const hrefFr = new URL(pathNoLocale, ORIGIN).toString()
   const hrefEn = new URL(`/en${pathNoLocale}`, ORIGIN).toString()
-  const hrefDefault = new URL('/', ORIGIN).toString()
+  const hrefDefault = hrefFr
 
   const ogImage = absUrl(image) || absUrl('/og-image.jpg')
-
   const robots = [
     noindex ? 'noindex' : 'index',
     nofollow ? 'nofollow' : 'follow',
@@ -97,6 +99,11 @@ export default function SEOHead({
 
   const ogLocale = loc === 'en' ? 'en_US' : 'fr_FR'
   const ogLocaleAlt = loc === 'en' ? 'fr_FR' : 'en_US'
+  const fallbackAlt = loc === 'en' ? `${SITE_NAME} – High-tech store` : `${SITE_NAME} – Boutique high-tech`
+  const imageAltFinal = imageAlt ?? fallbackAlt
+
+  const prevAbs = absUrl(prevUrl)
+  const nextAbs = absUrl(nextUrl)
 
   return (
     <Head>
@@ -107,8 +114,8 @@ export default function SEOHead({
       <link key="alt-xdef" rel="alternate" hrefLang="x-default" href={hrefDefault} />
 
       {/* Pagination (si fourni) */}
-      {prevUrl ? <link key="prev" rel="prev" href={absUrl(prevUrl)} /> : null}
-      {nextUrl ? <link key="next" rel="next" href={absUrl(nextUrl)} /> : null}
+      {prevAbs ? <link key="prev" rel="prev" href={prevAbs} /> : null}
+      {nextAbs ? <link key="next" rel="next" href={nextAbs} /> : null}
 
       {/* Base meta */}
       <title key="title">{fullTitle}</title>
@@ -120,7 +127,7 @@ export default function SEOHead({
       <meta key="og:title" property="og:title" content={fullTitle} />
       <meta key="og:description" property="og:description" content={description} />
       {ogImage && <meta key="og:image" property="og:image" content={ogImage} />}
-      {imageAlt && <meta key="og:image:alt" property="og:image:alt" content={imageAlt} />}
+      {imageAltFinal && <meta key="og:image:alt" property="og:image:alt" content={imageAltFinal} />}
       <meta key="og:url" property="og:url" content={canonicalAbs} />
       <meta key="og:type" property="og:type" content={type} />
       <meta key="og:site_name" property="og:site_name" content={SITE_NAME} />

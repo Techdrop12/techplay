@@ -1,8 +1,11 @@
+// src/components/FAQ.tsx
 'use client'
 
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import type { KeyboardEvent, RefCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { usePathname } from 'next/navigation'
+import { getCurrentLocale } from '@/lib/i18n-routing'
 
 interface FAQItem {
   _id: string
@@ -11,6 +14,28 @@ interface FAQItem {
 }
 
 export default function FAQ() {
+  const pathname = usePathname() || '/'
+  const locale = getCurrentLocale(pathname) as 'fr' | 'en'
+  const t = useMemo(() => {
+    return locale === 'en'
+      ? {
+          title: 'FAQ',
+          placeholder: 'Search a question…',
+          expand: 'Open all',
+          collapse: 'Close all',
+          loading: 'Loading questions…',
+          empty: (q: string) => `No results for “${q}”.`,
+        }
+      : {
+          title: 'FAQ',
+          placeholder: 'Rechercher une question…',
+          expand: 'Tout ouvrir',
+          collapse: 'Tout fermer',
+          loading: 'Chargement…',
+          empty: (q: string) => `Aucun résultat pour “${q}”.`,
+        }
+  }, [locale])
+
   const [faqs, setFaqs] = useState<FAQItem[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -21,7 +46,7 @@ export default function FAQ() {
     try {
       setLoading(true)
       const res = await fetch('/api/faq', { cache: 'no-store' })
-      if (!res.ok) throw new Error('Erreur API')
+      if (!res.ok) throw new Error('API error')
       const data = await res.json()
       setFaqs(Array.isArray(data) ? data : [])
     } catch (error) {
@@ -29,24 +54,33 @@ export default function FAQ() {
       setFaqs([
         {
           _id: '1',
-          question: 'Quels sont les délais de livraison ?',
-          answer: 'La majorité des commandes sont livrées en 48 à 72h ouvrées.',
+          question: locale === 'en' ? 'What are the delivery times?' : 'Quels sont les délais de livraison ?',
+          answer:
+            locale === 'en'
+              ? 'Most orders are delivered within 2–3 business days.'
+              : 'La majorité des commandes sont livrées en 48 à 72h ouvrées.',
         },
         {
           _id: '2',
-          question: 'Puis-je retourner un article ?',
-          answer: 'Oui, vous avez 14 jours pour changer d’avis et demander un remboursement.',
+          question: locale === 'en' ? 'Can I return an item?' : 'Puis-je retourner un article ?',
+          answer:
+            locale === 'en'
+              ? 'Yes, you have 14 days to change your mind and request a refund.'
+              : 'Oui, vous avez 14 jours pour changer d’avis et demander un remboursement.',
         },
         {
           _id: '3',
-          question: 'Les paiements sont-ils sécurisés ?',
-          answer: 'Oui, les paiements sont 100% sécurisés via Stripe ou PayPal.',
+          question: locale === 'en' ? 'Are payments secure?' : 'Les paiements sont-ils sécurisés ?',
+          answer:
+            locale === 'en'
+              ? 'Yes, payments are 100% secure via Stripe or PayPal.'
+              : 'Oui, les paiements sont 100% sécurisés via Stripe ou PayPal.',
         },
       ])
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [locale])
 
   useEffect(() => {
     fetchFAQs()
@@ -95,12 +129,10 @@ export default function FAQ() {
     }
   }
 
-  // ✅ ref callback qui retourne void (TypeScript OK)
   const setHeaderRef = (idx: number): RefCallback<HTMLButtonElement> => (el) => {
     headerRefs.current[idx] = el
   }
 
-  // JSON-LD SEO (FAQPage)
   const faqJsonLd = useMemo(() => {
     if (!filteredFaqs.length) return null
     return {
@@ -117,7 +149,7 @@ export default function FAQ() {
   return (
     <section className="max-w-3xl mx-auto px-4 py-16" aria-labelledby="faq-heading">
       <h2 id="faq-heading" className="text-3xl font-extrabold mb-6 text-center">
-        FAQ
+        {t.title}
       </h2>
 
       {/* Barre outils */}
@@ -125,11 +157,11 @@ export default function FAQ() {
         <input
           type="search"
           inputMode="search"
-          placeholder="Rechercher une question…"
+          placeholder={t.placeholder}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full sm:w-2/3 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-          aria-label="Rechercher dans la FAQ"
+          aria-label={t.placeholder}
         />
         <div className="flex gap-2">
           <button
@@ -137,14 +169,14 @@ export default function FAQ() {
             onClick={expandAll}
             className="rounded-md bg-accent text-white px-3 py-2 text-sm font-semibold hover:bg-accent/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent"
           >
-            Tout ouvrir
+            {t.expand}
           </button>
           <button
             type="button"
             onClick={collapseAll}
             className="rounded-md bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-100 px-3 py-2 text-sm hover:bg-gray-300 dark:hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent"
           >
-            Tout fermer
+            {t.collapse}
           </button>
         </div>
       </div>
@@ -160,7 +192,7 @@ export default function FAQ() {
 
       {!loading && filteredFaqs.length === 0 && (
         <p className="text-center text-gray-500 dark:text-gray-400" role="status">
-          Aucun résultat pour “{search}”.
+          {t.empty(search)}
         </p>
       )}
 
@@ -173,8 +205,6 @@ export default function FAQ() {
 
           return (
             <div key={faq._id} className="py-4">
-              {/* ✅ commentaire déplacé en dehors de la balise */}
-              {/* corrige la signature de ref */}
               <button
                 ref={setHeaderRef(i)}
                 id={headerId}

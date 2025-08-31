@@ -1,5 +1,6 @@
 // src/lib/i18n-routing.tsx
-// Helpers i18n universels (SSR/CSR-safe), URL prefix default-less (fr = /, en = /en)
+// Helpers i18n universels (SSR/CSR-safe)
+// FR = racine “/”, EN = préfixée “/en”, conservation query/hash sûre.
 
 import {
   locales as SUPPORTED_LOCALES,
@@ -15,6 +16,27 @@ const isSupported = (v?: string): v is (typeof SUPPORTED_LOCALES)[number] =>
 
 const ensureLeadingSlash = (p: string) => (p?.startsWith('/') ? p : `/${p || ''}`)
 
+/** Parse un chemin RELATIF potentiellement avec ?query et #hash (sans origin) */
+function splitUrl(input: string) {
+  const raw = input || '/'
+  try {
+    const u = new URL(raw, 'http://x') // base factice
+    return {
+      pathname: ensureLeadingSlash(u.pathname || '/'),
+      search: u.search || '',
+      hash: u.hash || '',
+    }
+  } catch {
+    // Fallback ultra tolérant
+    const m = String(raw).match(/^([^?#]*)(\?[^#]*)?(#.*)?$/)
+    return {
+      pathname: ensureLeadingSlash(m?.[1] || '/'),
+      search: m?.[2] || '',
+      hash: m?.[3] || '',
+    }
+  }
+}
+
 export function getCurrentPathname(): string {
   if (typeof window === 'undefined') return '/'
   try {
@@ -24,9 +46,7 @@ export function getCurrentPathname(): string {
   }
 }
 
-/**
- * Locale courante (priorité URL, puis cookie NEXT_LOCALE, sinon défaut)
- */
+/** Locale courante (priorité URL, puis cookie NEXT_LOCALE, sinon défaut) */
 export function getCurrentLocale(pathname?: string): (typeof SUPPORTED_LOCALES)[number] {
   const p = pathname ?? getCurrentPathname()
   const first = p.split('/').filter(Boolean)[0]
@@ -42,52 +62,73 @@ export function getCurrentLocale(pathname?: string): (typeof SUPPORTED_LOCALES)[
   return DEFAULT_LOCALE as any
 }
 
-/** Retire un éventuel préfixe de locale du pathname fourni */
+/** Retire un éventuel préfixe de locale du pathname fourni (ne touche pas query/hash) */
 export function stripLocalePrefix(pathname: string): string {
-  const parts = ensureLeadingSlash(pathname).split('/').filter(Boolean)
+  const p = ensureLeadingSlash(pathname)
+  const parts = p.split('/').filter(Boolean)
   if (parts.length && isSupported(parts[0])) parts.shift()
   const bare = '/' + parts.join('/')
   return bare === '//' ? '/' : bare
 }
 
 type LocalizeOptions = {
+  /** Conserver la query de la page courante si le chemin n’en a pas */
   keepQuery?: boolean
+  /** Conserver le hash de la page courante si le chemin n’en a pas */
   keepHash?: boolean
+  /** Pathname de secours si `path` est vide */
   currentPathname?: string
-  customQuery?: string // si fourni, prime sur keepQuery
-  customHash?: string  // si fourni, prime sur keepHash
+  /** Force la query (?a=1…) */
+  customQuery?: string // prime sur keepQuery ET sur la query présente dans `path`
+  /** Force le hash (#id) */
+  customHash?: string  // prime sur keepHash ET sur le hash présent dans `path`
 }
 
 /**
- * Construit un chemin localisé.
+ * Construit un chemin localisé robuste.
  * - `fr` (locale par défaut) → pas de préfixe
- * - Autres locales → `/<locale>/…`
+ * - autres locales → `/<locale>/…`
+ * - conserve intelligemment ?query et #hash
  */
 export function localizePath(
   path: string,
   locale: (typeof SUPPORTED_LOCALES)[number],
   opts: LocalizeOptions = {}
 ): string {
-  const base = ensureLeadingSlash(path || opts.currentPathname || getCurrentPathname())
-  const bare = stripLocalePrefix(base)
-  const withLocale = locale === DEFAULT_LOCALE ? bare : `/${locale}${bare === '/' ? '' : bare}`
+  const basis = path || opts.currentPathname || getCurrentPathname()
+  const { pathname: rawPath, search: rawSearch, hash: rawHash } = splitUrl(basis)
 
-  const query =
-    opts.customQuery ??
-    (opts.keepQuery && typeof window !== 'undefined' ? window.location.search || '' : '')
+  const barePath = stripLocalePrefix(rawPath)
+  const withLocale = locale === DEFAULT_LOCALE ? barePath : `/${locale}${barePath === '/' ? '' : barePath}`
 
-  const hash =
-    opts.customHash ??
-    (opts.keepHash && typeof window !== 'undefined' ? window.location.hash || '' : '')
+  // Query finale (priorités : custom > path > keepQuery(window))
+  let q = ''
+  if (typeof opts.customQuery === 'string') {
+    q = opts.customQuery.startsWith('?') || opts.customQuery === '' ? opts.customQuery : `?${opts.customQuery}`
+  } else if (rawSearch) {
+    q = rawSearch
+  } else if (opts.keepQuery && typeof window !== 'undefined') {
+    q = window.location.search || ''
+  }
 
-  return withLocale + query + hash
+  // Hash final (priorités : custom > path > keepHash(window))
+  let h = ''
+  if (typeof opts.customHash === 'string') {
+    h = opts.customHash.startsWith('#') || opts.customHash === '' ? opts.customHash : `#${opts.customHash}`
+  } else if (rawHash) {
+    h = rawHash
+  } else if (opts.keepHash && typeof window !== 'undefined') {
+    h = window.location.hash || ''
+  }
+
+  return withLocale + q + h
 }
 
-/** URLs alternatives (hreflang) pour un pathname donné */
-export function altLocales(pathname?: string) {
-  const p = pathname ?? getCurrentPathname()
+/** URLs alternatives (hreflang) pour un chemin donné (conserve query/hash) */
+export function altLocales(fullPath?: string) {
+  const input = fullPath ?? (typeof window !== 'undefined' ? (window.location.pathname + window.location.search + window.location.hash) : '/')
   return (SUPPORTED_LOCALES as readonly string[]).map((l) => ({
     locale: l,
-    href: localizePath(p, l as any, { keepQuery: true, keepHash: true }),
+    href: localizePath(input, l as any, { keepQuery: true, keepHash: true }),
   }))
 }

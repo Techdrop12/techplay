@@ -40,6 +40,8 @@ const STR = {
       installAppTitle: 'Installer l’application',
       dealsAria: 'Voir les offres du jour',
       dealsTitle: 'Offres du jour',
+      srCountCart: 'Articles dans le panier : ',
+      srCountWish: 'Articles dans la wishlist : ',
     },
     trends: ['écouteurs bluetooth', 'casque gaming', 'chargeur rapide USB-C', 'pack starter', 'power bank', 'souris sans fil'],
   },
@@ -69,6 +71,8 @@ const STR = {
       installAppTitle: 'Install the app',
       dealsAria: "See today's deals",
       dealsTitle: "Today's deals",
+      srCountCart: 'Items in cart: ',
+      srCountWish: 'Items in wishlist: ',
     },
     trends: ['bluetooth earbuds', 'gaming headset', 'USB-C fast charger', 'starter pack', 'power bank', 'wireless mouse'],
   },
@@ -514,6 +518,7 @@ export default function MobileNav() {
                   <Icon.Heart />
                   {wishlistCount > 0 && (
                     <span className="rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-[11px] font-bold text-white">
+                      <span className="sr-only">{t.ui.srCountWish}</span>
                       {wishlistCount}
                     </span>
                   )}
@@ -640,7 +645,7 @@ export default function MobileNav() {
                   <Icon.Cart />
                   {cartCount > 0 && (
                     <span className="ml-2 rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white">
-                      <span className="sr-only">Cart count: </span>
+                      <span className="sr-only">{t.ui.srCountCart}</span>
                       {cartCount}
                     </span>
                   )}
