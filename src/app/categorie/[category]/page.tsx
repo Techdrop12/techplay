@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { getAllProducts } from '@/lib/data'
 import type { Product } from '@/types/product'
 import ProductGrid from '@/components/ProductGrid'
+import { generateMeta, jsonLdBreadcrumbs } from '@/lib/seo'
 
 export const revalidate = 900
 
@@ -37,25 +38,23 @@ const ICON_BY_SLUG: Record<string, (p: any) => JSX.Element> = {
   ecrans: Icon.Monitor,
 }
 
-// ✅ SEO dynamique
-export function generateMetadata({ params }: Props): Metadata {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com'
+// ✅ SEO dynamique (canonical/hreflang/OG absolus via generateMeta)
+export function generateMetadata({ params, searchParams }: Props): Metadata {
   const capitalized =
     params.category.charAt(0).toUpperCase() +
     params.category.slice(1).replace(/-/g, ' ')
-  const url = `${base}/categorie/${params.category}`
 
-  return {
+  // noindex si recherche/filtre — on évite d’indexer les SERP internes
+  const hasFilters =
+    !!searchParams?.q || !!searchParams?.min || !!searchParams?.max
+
+  return generateMeta({
     title: `${capitalized} – Produits TechPlay`,
-    description: `Explorez tous les produits de la catégorie "${capitalized}" sur TechPlay.`,
-    openGraph: {
-      title: `${capitalized} – Produits TechPlay`,
-      description: `Tous les produits disponibles dans la catégorie "${capitalized}"`,
-      type: 'website',
-      url,
-    },
-    alternates: { canonical: url },
-  }
+    description: `Explorez tous les produits de la catégorie « ${capitalized} » sur TechPlay.`,
+    url: `/categorie/${params.category}`, // relatif : helper gère l’absolu + hreflang
+    image: '/og-image.jpg',
+    noindex: hasFilters,
+  })
 }
 
 const PAGE_SIZE = 24
@@ -134,6 +133,12 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     const qs = sp.toString()
     return qs ? `/categorie/${category}?${qs}` : `/categorie/${category}`
   }
+
+  const crumbs = jsonLdBreadcrumbs([
+    { name: 'Accueil', url: '/' },
+    { name: 'Catégories', url: '/categorie' },
+    { name: displayCategory, url: `/categorie/${category}` },
+  ])
 
   return (
     <main className="max-w-7xl mx-auto px-4 pt-28 pb-20" aria-labelledby="category-title" id="main">
@@ -237,6 +242,12 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           <span className="rounded-md border px-3 py-1.5 opacity-40">Suivant →</span>
         )}
       </nav>
+
+      {/* JSON-LD Breadcrumbs */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }}
+      />
     </main>
   )
 }

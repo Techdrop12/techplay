@@ -8,78 +8,52 @@ import type { Product } from '@/types/product'
 import ProductDetail from '@/components/ProductDetail'
 import ProductJsonLd from '@/components/JsonLd/ProductJsonLd'
 import { defaultLocale as DEFAULT_LOCALE, isLocale } from '@/i18n/config'
+import { generateProductMeta, jsonLdBreadcrumbs } from '@/lib/seo'
+import { getFallbackDescription } from '@/lib/meta'
 
 export const revalidate = 1800
-
-const SITE = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
 
 // Déduplication du fetch entre generateMetadata() et la page
 const getProductCached = cache(async (slug: string) => getProductBySlug(slug))
 
-/** Rend une URL absolue à partir d'une relative. */
-const abs = (u: string) => {
-  try {
-    return new URL(u).toString()
-  } catch {
-    return new URL(u.startsWith('/') ? u : `/${u}`, SITE).toString()
-  }
-}
-
+/* ---------------------- Metadata dynamique ---------------------- */
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const product = await getProductCached(params.slug)
-
-  const canonical = `${SITE}/products/${params.slug}`
+  const path = `/products/${params.slug}`
 
   if (!product) {
     return {
       title: 'Produit introuvable',
       description: 'Le produit demandé est introuvable.',
       robots: { index: false, follow: true },
-      alternates: {
-        canonical,
-        languages: {
-          'fr-FR': `${SITE}/fr/products/${params.slug}`,
-          'en-US': `${SITE}/en/products/${params.slug}`,
-          'x-default': canonical,
-        },
-      },
+      // generateProductMeta donnerait aussi alternates; ici 404 logique → pas nécessaire
     }
   }
 
   const title = product.title ?? 'Produit'
-  const desc =
-    (product.description || 'Découvrez ce produit TechPlay.').slice(0, 300)
-  const img = abs(product.image || '/og-image.jpg')
-
+  const description = getFallbackDescription(
+    {
+      title: product.title,
+      brand: (product as any).brand,
+      description: (product as any).description,
+      price: (product as any).price,
+      currency: 'EUR',
+    },
+    { maxLen: 160 }
+  )
+  const image = (product as any).image ?? '/og-image.jpg'
   const noindex = (product as any)?.noindex === true
 
-  return {
+  const base = generateProductMeta({
     title,
-    description: desc,
-    metadataBase: new URL(SITE),
-    alternates: {
-      canonical,
-      languages: {
-        'fr-FR': `${SITE}/fr/products/${params.slug}`,
-        'en-US': `${SITE}/en/products/${params.slug}`,
-        'x-default': canonical,
-      },
-    },
+    description,
+    url: path,       // relatif : helper gère absolu + hreflang
+    image,
+  })
+
+  return {
+    ...base,
     robots: noindex ? { index: false, follow: false } : { index: true, follow: true },
-    openGraph: {
-      title,
-      description: desc,
-      type: 'website', // Next n'accepte que 'website' | 'article'
-      url: canonical,
-      images: [{ url: img, width: 1200, height: 630, alt: product.title ?? 'Produit TechPlay' }],
-      siteName: 'TechPlay',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description: desc,
-      images: [img],
-    },
     // Tags additionnels OG "product:*" (non typés par Next, via 'other')
     other: {
       ...(typeof (product as any).price === 'number'
@@ -88,11 +62,12 @@ export async function generateMetadata({ params }: { params: { slug: string } })
             'product:price:currency': 'EUR',
           }
         : {}),
-      ...(product?.brand ? { 'product:brand': String(product.brand) } : {}),
+      ...(product && (product as any).brand ? { 'product:brand': String((product as any).brand) } : {}),
     },
   }
 }
 
+/* ------------------------------ Page ----------------------------- */
 export default async function ProductPage({ params }: { params: { slug: string } }) {
   const product = await getProductCached(params.slug)
   if (!product) return notFound()
@@ -104,15 +79,11 @@ export default async function ProductPage({ params }: { params: { slug: string }
   const cookieLocale = cookieStore.get('NEXT_LOCALE')?.value
   const locale = isLocale(cookieLocale || '') ? (cookieLocale as string) : (DEFAULT_LOCALE as string)
 
-  const breadcrumb = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Accueil', item: `${SITE}/` },
-      { '@type': 'ListItem', position: 2, name: 'Produits', item: `${SITE}/products` },
-      { '@type': 'ListItem', position: 3, name: safeProduct.title ?? 'Produit', item: `${SITE}/products/${safeProduct.slug}` },
-    ],
-  }
+  const crumbs = jsonLdBreadcrumbs([
+    { name: 'Accueil', url: '/' },
+    { name: 'Produits', url: '/products' },
+    { name: safeProduct.title ?? 'Produit', url: `/products/${safeProduct.slug}` },
+  ])
 
   return (
     <>
@@ -130,7 +101,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
       {/* Breadcrumb JSON-LD */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }}
       />
     </>
   )

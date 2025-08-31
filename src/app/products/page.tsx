@@ -1,9 +1,10 @@
-// src/app/products/page.tsx — SEO/UX/Perf++
-import type { Metadata, ResolvingMetadata } from 'next'
+// src/app/products/page.tsx — SEO/UX/Perf++ (generateMeta + noindex filtres + OG dynamique)
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getProductsPage } from '@/lib/data'
 import ProductGrid from '@/components/ProductGrid'
 import type { Product } from '@/types/product'
+import { generateMeta, jsonLdBreadcrumbs } from '@/lib/seo'
 
 export const revalidate = 900
 
@@ -14,14 +15,6 @@ type Query = { q?: string; sort?: string; min?: string; max?: string; page?: str
 
 const SORT_VALUES: SortKey[] = ['price_asc', 'price_desc', 'rating', 'new', 'promo']
 const PAGE_SIZE = 24
-
-const toAbs = (u: string) => {
-  try {
-    return new URL(u).toString()
-  } catch {
-    return new URL(u.startsWith('/') ? u : `/${u}`, SITE).toString()
-  }
-}
 
 function buildQS(params: Query) {
   const sp = new URLSearchParams()
@@ -35,10 +28,9 @@ function buildQS(params: Query) {
   return s ? `?${s}` : ''
 }
 
-/** 🔥 Metadata dynamique + OG auto */
+/* ---------------------- Metadata dynamique ---------------------- */
 export async function generateMetadata(
-  { searchParams }: { searchParams?: Query },
-  _parent: ResolvingMetadata
+  { searchParams }: { searchParams?: Query }
 ): Promise<Metadata> {
   const q = (searchParams?.q ?? '').trim()
   const sort = (searchParams?.sort ?? 'new') as SortKey
@@ -60,37 +52,19 @@ export async function generateMetadata(
   const description = 'Parcourez notre catalogue complet de produits TechPlay. Livraison rapide, innovation garantie.'
 
   const qs = buildQS({ q, sort, min, max, cat, page: String(page) })
-  const url = `${SITE}/products${qs}`
-  const og = toAbs(`/api/og${qs}`) // ✅ image OG dynamique
+  const hasFilters = !!(q || cat || min || max || (sort && sort !== 'new') || page > 1)
 
-  return {
+  // Canonical propre + hreflang auto (pages filtrées = noindex + canonical vers /products)
+  return generateMeta({
     title,
     description,
-    alternates: {
-      canonical: url,
-      languages: {
-        'fr-FR': `${SITE}/fr/products${qs}`,
-        'en-US': `${SITE}/en/products${qs}`,
-        'x-default': url,
-      },
-    },
-    openGraph: {
-      title,
-      description,
-      type: 'website',
-      url,
-      images: [{ url: og, width: 1200, height: 630, alt: 'Catalogue TechPlay' }],
-      siteName: 'TechPlay',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: [og],
-    },
-  }
+    url: hasFilters ? '/products' : `/products${qs}`,
+    image: `/api/og${qs}`,
+    noindex: hasFilters,
+  })
 }
 
+/* ------------------------------ Page ----------------------------- */
 export default async function ProductsPage({ searchParams }: { searchParams?: Query }) {
   const q = (searchParams?.q ?? '').trim()
   const rawSort = (searchParams?.sort ?? 'new') as SortKey
@@ -132,17 +106,12 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Qu
     (a, b) => categoryCounts[b] - categoryCounts[a]
   )
 
-  // Breadcrumb JSON-LD
-  const breadcrumbLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Accueil', item: `${SITE}/` },
-      { '@type': 'ListItem', position: 2, name: 'Produits', item: `${SITE}/products` },
-    ],
-  }
+  // JSON-LD
+  const breadcrumbLd = jsonLdBreadcrumbs([
+    { name: 'Accueil', url: '/' },
+    { name: 'Produits', url: '/products' },
+  ])
 
-  // ItemList JSON-LD — top 24 visibles
   const itemListLd =
     Array.isArray(items) && items.length
       ? {
@@ -159,7 +128,7 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Qu
 
   // Filtres actifs (chips)
   const activeChips: Array<{ label: string; href: string }> = []
-  if (q) activeChips.push({ label: `Recherche : “${q}”`, href: buildUrl(1).replace(/(\?|&)q=[^&]*/,'$1').replace(/\?&/,'?').replace(/\?$/,'') })
+  if (q) activeChips.push({ label: `Recherche : “${q}”`, href: `/products${buildQS({ sort, min: min?.toString(), max: max?.toString(), cat: cat || undefined, page: '1' })}` })
   if (cat) activeChips.push({ label: `Catégorie : ${cat}`, href: `/products${buildQS({ q, sort, min: min?.toString(), max: max?.toString(), page: '1' })}` })
   if (typeof min === 'number') activeChips.push({ label: `Min ${min}€`, href: `/products${buildQS({ q, sort, max: max?.toString(), cat: cat || undefined, page: '1' })}` })
   if (typeof max === 'number') activeChips.push({ label: `Max ${max}€`, href: `/products${buildQS({ q, sort, min: min?.toString(), cat: cat || undefined, page: '1' })}` })
@@ -252,7 +221,6 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Qu
 
         {(q || sort !== 'new' || typeof min === 'number' || typeof max === 'number' || cat || page > 1) && (
           <div className="lg:col-span-5 flex flex-wrap items-center gap-2 pt-1">
-            {/* Chips actifs */}
             {activeChips.map((chip, i) => (
               <Link
                 key={chip.label + i}
