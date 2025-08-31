@@ -1,6 +1,19 @@
-export const locales = ['fr', 'en'] as const;
-export type Locale = (typeof locales)[number];
+// src/i18n/config.ts
+// Re-exports to keep ONE source of truth
 
-export const defaultLocale: Locale = 'fr';
+export {
+  languages as locales,
+  DEFAULT_LOCALE as defaultLocale,
+  LOCALE_COOKIE,
+  type Locale,
+  type AppLocale,
+  isLocale,
+  normalizeLocale,
+  extractLocaleFromPath,
+  withLocale,
+  localeLabels,
+  toLangTag,
+} from '@/lib/language'
 
-export const isLocale = (l: string): l is Locale => (locales as readonly string[]).includes(l);
+// (Si tu utilises next-intl v3/v4)
+export const localePrefix = 'always' as const

@@ -1,4 +1,4 @@
-// middleware.ts — Ultra Premium FINAL (i18n ajusté)
+// middleware.ts — Ultra Premium FINAL (i18n + root redirect + headers)
 import { NextRequest, NextResponse } from 'next/server'
 import createMiddleware from 'next-intl/middleware'
 import { getToken } from 'next-auth/jwt'
@@ -8,7 +8,7 @@ const intlMiddleware = createMiddleware({
   locales: ['fr', 'en'],
   defaultLocale: 'fr',
   localePrefix: 'as-needed',
-  // ❗️IMPORTANT: on coupe la détection par Accept-Language
+  // ❗️IMPORTANT: on coupe la détection par Accept-Language (on gère nous-mêmes à la racine)
   localeDetection: false,
 })
 
@@ -21,13 +21,7 @@ const EXTRA_ALLOWED = (process.env.ALLOWED_HOSTNAMES || '')
   .map((h) => h.trim())
   .filter(Boolean)
 
-const STATIC_FILES = [
-  'favicon.ico',
-  'manifest.json',
-  'robots.txt',
-  'sw.js',
-  'firebase-messaging-sw.js',
-]
+const STATIC_FILES = ['favicon.ico', 'manifest.json', 'robots.txt', 'sw.js', 'firebase-messaging-sw.js']
 
 const PUBLIC_PREFIXES = [
   '/_next/',
@@ -92,6 +86,19 @@ function ensureAbCookie(response: NextResponse) {
   })
 }
 
+/** Choix simple à partir d'Accept-Language (en priorité en, sinon fr) */
+function bestFromAcceptLanguage(h?: string | null): 'fr' | 'en' {
+  if (!h) return 'fr'
+  try {
+    const langs = h.split(',').map((s) => s.trim().split(';')[0].toLowerCase())
+    for (const l of langs) {
+      if (l.startsWith('en')) return 'en'
+      if (l.startsWith('fr')) return 'fr'
+    }
+  } catch {}
+  return 'fr'
+}
+
 /** ───────────────────── Middleware principal ───────────────────── **/
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -104,11 +111,23 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308)
   }
 
-  // ✅ 0-bis) Normaliser /fr → / (la locale par défaut ne doit pas être préfixée)
+  // ✅ 0-bis) Normaliser /fr → / (locale par défaut non préfixée)
   if (pathname === '/fr' || pathname.startsWith('/fr/')) {
     const url = request.nextUrl.clone()
     url.pathname = pathname.replace(/^\/fr(\/|$)/, '/')
     return NextResponse.redirect(url, 308)
+  }
+
+  // ✅ 0-ter) Redirection racine -> locale (cookie > Accept-Language)
+  if (pathname === '/') {
+    const cookieLoc = request.cookies.get('NEXT_LOCALE')?.value as 'fr' | 'en' | undefined
+    const chosen = cookieLoc || bestFromAcceptLanguage(request.headers.get('accept-language'))
+    if (chosen === 'en') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/en'
+      return NextResponse.redirect(url, 307)
+    }
+    // fr => on reste sur /
   }
 
   // 1) HTTPS obligatoire en prod
@@ -178,6 +197,7 @@ export async function middleware(request: NextRequest) {
 
   // 9) En-têtes dynamiques (SEO/CDN/Perf)
   response.headers.set('Vary', 'Accept-Language, Cookie')
+  response.headers.set('Content-Language', derived)
   if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production') {
     response.headers.set('X-Robots-Tag', 'noindex, nofollow, noimageindex')
   }
