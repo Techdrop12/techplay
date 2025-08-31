@@ -8,10 +8,8 @@ import {
   type Locale,
   setLocaleCookie,
 } from '@/lib/language'
-import {
-  getCurrentLocale,
-  localizePath,
-} from '@/lib/i18n-routing'
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
+import { event as gaEvent } from '@/lib/ga'
 
 const LOCALE_COOKIE = 'NEXT_LOCALE'
 
@@ -23,20 +21,28 @@ export default function LanguageSwitcher() {
   const changeLanguage = (next: Locale) => {
     if (next === current) return
 
-    // 1) Persist cookie (1 an) — doublon volontaire avec helper pour limiter deps
+    // 1) Persistance cookie (1 an)
     try {
       document.cookie = `${LOCALE_COOKIE}=${next}; Max-Age=31536000; Path=/; SameSite=Lax`
     } catch {}
-    // (utilise aussi notre helper — no-op côté SSR)
-    try { setLocaleCookie(next) } catch {}
+    try {
+      setLocaleCookie(next) // no-op SSR, pratique côté client
+    } catch {}
 
-    // 2) Construit l'URL localisée (en conservant la querystring)
+    // 2) Tracking (GA4 + fallback GTM dataLayer)
+    try {
+      gaEvent({ action: 'change_language', category: 'engagement', label: next })
+    } catch {}
+    try {
+      ;(window as any).dataLayer = (window as any).dataLayer || []
+      ;(window as any).dataLayer.push({ event: 'change_language', locale: next })
+    } catch {}
+
+    // 3) URL localisée + conservation query + hash
     const href = localizePath(pathname, next, { keepQuery: true })
-
-    // 3) Conserve le hash (#section) si présent
     const hash = typeof window !== 'undefined' ? window.location.hash || '' : ''
 
-    // 4) On remplace l'entrée (pas d'empilement d'historique)
+    // 4) Remplacer l’entrée (pas d’empilement d’historique)
     router.replace(href + hash)
   }
 
