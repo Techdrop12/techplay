@@ -24,7 +24,12 @@ interface Props {
   imageAlt?: string
 }
 
-const ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com'
+// 🔒 ORIGIN normalisé (https + pas de trailing slash) pour éviter les canoniques invalides
+const RAW_ORIGIN = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').trim()
+const ORIGIN = (
+  /^https?:\/\//i.test(RAW_ORIGIN) ? RAW_ORIGIN : `https://${RAW_ORIGIN}`
+).replace(/\/+$/, '')
+
 const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || 'TechPlay'
 const TWITTER_HANDLE = process.env.NEXT_PUBLIC_TWITTER_HANDLE || '@techplay'
 

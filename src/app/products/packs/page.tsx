@@ -10,7 +10,13 @@ import { getRecommendedPacks } from '@/lib/data'
 
 export const revalidate = 900
 
-const SITE = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
+// 🔒 SITE normalisé (protocole+pas de trailing slash) pour des URLs OG/canonical sûres
+const RAW_SITE = (process.env.NEXT_PUBLIC_SITE_URL || '').trim()
+const SITE = (
+  RAW_SITE
+    ? (/^https?:\/\//i.test(RAW_SITE) ? RAW_SITE : `https://${RAW_SITE}`)
+    : 'https://techplay.example.com'
+).replace(/\/+$/, '')
 
 export const metadata: Metadata = {
   title: 'Nos Packs',
