@@ -27,7 +27,13 @@ import ConsentBanner from '@/components/ConsentBanner'
 const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter', adjustFontFallback: true })
 const sora = Sora({ subsets: ['latin'], display: 'swap', variable: '--font-sora' })
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://techplay.example.com'
+/** 🔒 Normalisation robuste de l’URL du site (évite un crash si NEXT_PUBLIC_SITE_URL n’a pas de protocole) */
+const RAW_SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || '').trim()
+const NORMALIZED_SITE_URL = RAW_SITE_URL
+  ? (/^https?:\/\//i.test(RAW_SITE_URL) ? RAW_SITE_URL : `https://${RAW_SITE_URL}`)
+  : 'https://techplay.example.com'
+const SITE_URL = NORMALIZED_SITE_URL.replace(/\/+$/, '') // sans trailing slash
+
 const SITE_NAME = 'TechPlay'
 const DEFAULT_OG = '/og-image.jpg'
 const IS_PREVIEW = process.env.VERCEL_ENV === 'preview' || process.env.NEXT_PUBLIC_NOINDEX === '1'
