@@ -7,16 +7,20 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import PackCard from '@/components/PackCard'
 import type { Pack } from '@/types/product'
 import { cn } from '@/lib/utils'
-import { usePathname } from 'next/navigation'
-import { getCurrentLocale } from '@/lib/i18n-routing'
 
 interface Props {
   packs: Pack[]
+  /** Classe optionnelle */
   className?: string
+  /** Afficher le header interne (évite les doublons si tu as déjà un SectionHeader au-dessus) */
   showHeader?: boolean
+  /** Nombre initial d’items visibles, puis “Voir plus” (0 = tous) */
   limit?: number
+  /** Afficher la barre de contrôles (tri / filtres) */
   showControls?: boolean
+  /** Tri initial */
   initialSort?: 'savings' | 'priceAsc' | 'priceDesc' | 'items'
+  /** Activer l’autoload “voir plus” quand le sentinel entre dans le viewport */
   autoLoadOnIntersect?: boolean
 }
 
@@ -46,7 +50,7 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
 }
 
-/* Helpers */
+/* ───────────────────────────── Helpers ───────────────────────────── */
 
 function pushDL(event: string, payload?: Record<string, unknown>) {
   try {
@@ -112,36 +116,6 @@ export default function PacksSection({
   initialSort = 'savings',
   autoLoadOnIntersect = true,
 }: Props) {
-  const pathname = usePathname() || '/'
-  const locale = getCurrentLocale(pathname) as 'fr' | 'en'
-  const t = useMemo(() => {
-    return locale === 'en'
-      ? {
-          title: 'Recommended Packs',
-          sub: 'Smart bundles: optimized for performance and budget.',
-          seeAll: 'See all packs',
-          display: 'Showing',
-          promo: 'On sale',
-          stock: 'In stock',
-          sortLabel: 'Sort packs',
-          sort: { savings: 'Saving %', priceAsc: 'Price ↑', priceDesc: 'Price ↓', items: 'Items count' },
-          more: 'Show more',
-          loading: 'Loading recommended packs…',
-        }
-      : {
-          title: 'Nos Packs Recommandés',
-          sub: 'Équipez-vous malin : bundles optimisés pour la perf’ et le budget.',
-          seeAll: 'Voir tous les packs',
-          display: 'Affichage',
-          promo: 'Promo',
-          stock: 'En stock',
-          sortLabel: 'Trier les packs',
-          sort: { savings: 'Économie %', priceAsc: 'Prix ↑', priceDesc: 'Prix ↓', items: 'Nb d’articles' },
-          more: 'Voir plus',
-          loading: 'Chargement des packs recommandés…',
-        }
-  }, [locale])
-
   const headingId = useId()
   const subId = headingId + '-sub'
   const gridId = headingId + '-grid'
@@ -159,6 +133,7 @@ export default function PacksSection({
 
   const isEmpty = !Array.isArray(packs) || packs.length === 0
 
+  /* Fallback skeleton élégant */
   if (isEmpty) {
     return (
       <section className={cn('max-w-6xl mx-auto px-6 py-16', className)}>
@@ -168,7 +143,7 @@ export default function PacksSection({
           ))}
         </div>
         <p className="mt-6 text-center text-sm text-token-text/70" role="status" aria-live="polite">
-          {t.loading}
+          Chargement des packs recommandés…
         </p>
       </section>
     )
@@ -214,8 +189,8 @@ export default function PacksSection({
   useEffect(() => {
     if (!expanded) return
     const remaining = Math.max(0, filteredSorted.length - (limit || 0))
-    if (remaining > 0) setAnnounce(locale === 'en' ? `${remaining} more packs displayed.` : `${remaining} packs supplémentaires affichés.`)
-  }, [expanded, filteredSorted.length, limit, locale])
+    if (remaining > 0) setAnnounce(remaining + ' packs supplémentaires affichés.')
+  }, [expanded, filteredSorted.length, limit])
 
   /* Autoload “voir plus” si le sentinel devient visible */
   useEffect(() => {
@@ -250,11 +225,11 @@ export default function PacksSection({
           <div className="text-center sm:text-left">
             <h2 id={headingId} className="flex items-center justify-center gap-2 text-3xl font-extrabold text-brand dark:text-white sm:justify-start">
               <DuotoneGift />
-              <span>{t.title}</span>
+              <span>Nos Packs Recommandés</span>
             </h2>
             <p id={subId} className="mt-2 text-sm text-token-text/70">
-              {t.sub}
-              <span className="sr-only"> {totalCount} packs.</span>
+              Équipez-vous malin : bundles optimisés pour la perf’ et le budget.
+              <span className="sr-only"> {totalCount} packs disponibles.</span>
             </p>
           </div>
 
@@ -262,10 +237,10 @@ export default function PacksSection({
             href="/products/packs"
             prefetch={false}
             className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] px-5 py-2 text-sm font-semibold text-white shadow-md transition hover:shadow-lg hover:bg-[hsl(var(--accent)/.90)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
-            aria-label={t.seeAll}
+            aria-label="Voir tous les packs TechPlay"
             onClick={() => pushDL('packs_see_all')}
           >
-            {t.seeAll}
+            Voir tous les packs
             <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" className="opacity-90">
               <path fill="currentColor" d="M13.172 12L8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z" />
             </svg>
@@ -273,11 +248,11 @@ export default function PacksSection({
         </div>
       )}
 
-      {/* Barre de contrôle */}
+      {/* Barre de contrôle (tri / filtres) */}
       {showControls && (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div className="text-xs text-token-text/70">
-            {t.display} <span className="font-semibold">{visibleCount}</span> / <span>{totalCount}</span>
+            Affichage <span className="font-semibold">{visibleCount}</span> / <span>{totalCount}</span>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -292,9 +267,9 @@ export default function PacksSection({
                   : 'border-token-border bg-token-surface hover:shadow'
               )}
               aria-pressed={filterPromo}
-              aria-label={locale === 'en' ? 'Filter: on sale' : 'Filtrer : en promotion'}
+              aria-label="Filtrer : en promotion"
             >
-              {t.promo}
+              Promo
             </button>
 
             <button
@@ -307,13 +282,13 @@ export default function PacksSection({
                   : 'border-token-border bg-token-surface hover:shadow'
               )}
               aria-pressed={filterStock}
-              aria-label={locale === 'en' ? 'Filter: in stock' : 'Filtrer : en stock'}
+              aria-label="Filtrer : en stock"
             >
-              {t.stock}
+              En stock
             </button>
 
             {/* Tri */}
-            <label className="sr-only" htmlFor={sortId}>{t.sortLabel}</label>
+            <label className="sr-only" htmlFor={sortId}>Trier</label>
             <select
               id={sortId}
               className="rounded-xl border border-token-border bg-token-surface px-3 py-1.5 text-xs font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
@@ -323,12 +298,12 @@ export default function PacksSection({
                 setSortBy(v)
                 pushDL('packs_sort', { sort: v })
               }}
-              aria-label={t.sortLabel}
+              aria-label="Trier les packs"
             >
-              <option value="savings">{t.sort.savings}</option>
-              <option value="priceAsc">{t.sort.priceAsc}</option>
-              <option value="priceDesc">{t.sort.priceDesc}</option>
-              <option value="items">{t.sort.items}</option>
+              <option value="savings">Économie %</option>
+              <option value="priceAsc">Prix ↑</option>
+              <option value="priceDesc">Prix ↓</option>
+              <option value="items">Nb d’articles</option>
             </select>
           </div>
         </div>
@@ -370,7 +345,7 @@ export default function PacksSection({
             aria-controls={gridId}
             aria-expanded={expanded ? 'true' : 'false'}
           >
-            {t.more}
+            Voir plus
             <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" className="opacity-80">
               <path fill="currentColor" d="M7 10l5 5 5-5z" />
             </svg>
@@ -388,7 +363,7 @@ export default function PacksSection({
       {/* Noscript fallback */}
       <noscript>
         <p className="mt-6 text-center">
-          <a href="/products/packs">{t.seeAll}</a>
+          <a href="/products/packs">Voir tous les packs</a>
         </p>
       </noscript>
     </section>

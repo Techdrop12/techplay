@@ -29,13 +29,12 @@ export function normalizeLocale(x: unknown): Locale {
   return DEFAULT_LOCALE
 }
 
-/** Replace (or add) the locale prefix in a pathname (FR = no prefix) */
+/** Replace (or add) the locale prefix in a pathname */
 export function withLocale(pathname: string, locale: Locale): string {
   const re = new RegExp(`^/(?:${languages.join('|')})(?=/|$)`)
   const safe = pathname.startsWith('/') ? pathname : `/${pathname}`
-  const bare = re.test(safe) ? safe.replace(re, '') : safe
-  if (locale === DEFAULT_LOCALE) return bare || '/'
-  return `/${locale}${bare === '/' ? '' : bare}`
+  if (re.test(safe)) return safe.replace(re, `/${locale}`)
+  return `/${locale}${safe === '/' ? '' : safe}`
 }
 
 /** Extract the locale from a pathname (defaults to DEFAULT_LOCALE) */
@@ -57,7 +56,7 @@ export function pickBestLocale(acceptLanguageHeader?: string | null): Locale {
   try {
     const parts = acceptLanguageHeader
       .split(',')
-      .map((s) => s.trim().split(';')[0].toLowerCase())
+      .map(s => s.trim().split(';')[0].toLowerCase())
     for (const p of parts) {
       const n = normalizeLocale(p)
       if (isLocale(n)) return n

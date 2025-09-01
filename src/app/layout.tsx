@@ -6,10 +6,7 @@ import { Suspense } from 'react'
 import Script from 'next/script'
 import type React from 'react'
 import { cookies } from 'next/headers'
-import { defaultLocale as DEFAULT_LOCALE, isLocale, type Locale } from '@/i18n/config'
-
-import { NextIntlClientProvider, type AbstractIntlMessages } from 'next-intl'
-import loadMessages from '@/i18n/loadMessages'
+import { defaultLocale as DEFAULT_LOCALE, isLocale } from '@/i18n/config'
 
 import Layout from '@/components/layout/Layout'
 import RootLayoutClient from '@/components/RootLayoutClient'
@@ -27,13 +24,7 @@ import ConsentBanner from '@/components/ConsentBanner'
 const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter', adjustFontFallback: true })
 const sora = Sora({ subsets: ['latin'], display: 'swap', variable: '--font-sora' })
 
-/** 🔒 Normalisation robuste de l’URL du site (évite un crash si NEXT_PUBLIC_SITE_URL n’a pas de protocole) */
-const RAW_SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || '').trim()
-const NORMALIZED_SITE_URL = RAW_SITE_URL
-  ? (/^https?:\/\//i.test(RAW_SITE_URL) ? RAW_SITE_URL : `https://${RAW_SITE_URL}`)
-  : 'https://techplay.example.com'
-const SITE_URL = NORMALIZED_SITE_URL.replace(/\/+$/, '') // sans trailing slash
-
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://techplay.example.com'
 const SITE_NAME = 'TechPlay'
 const DEFAULT_OG = '/og-image.jpg'
 const IS_PREVIEW = process.env.VERCEL_ENV === 'preview' || process.env.NEXT_PUBLIC_NOINDEX === '1'
@@ -83,8 +74,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const cookieStore = await cookies()
   const cookieLocale = cookieStore.get('NEXT_LOCALE')?.value
   const htmlLang = isLocale(cookieLocale || '') ? (cookieLocale as string) : (DEFAULT_LOCALE as string)
-  const locale = htmlLang as Locale
-  const messages = (await loadMessages(locale)) as AbstractIntlMessages
 
   return (
     <html lang={htmlLang} dir="ltr" className={`${inter.variable} ${sora.variable} scroll-smooth`} suppressHydrationWarning>
@@ -142,99 +131,97 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
 
       <body className="min-h-screen bg-token-surface text-token-text antialiased dark:[color-scheme:dark]">
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          {GTM_ID ? (
-            <noscript
-              dangerouslySetInnerHTML={{
-                __html: `<iframe src="https://www.googletagmanager.com/ns.html?id=${GTM_ID}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`,
-              }}
-            />
-          ) : null}
-
-          <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
-            <div className="absolute left-1/2 top-[-120px] h-[420px] w-[620px] -translate-x-1/2 rounded-full bg-accent/25 blur-3xl dark:bg-accent/30" />
-            <div className="absolute right-[-120px] bottom-[-140px] h-[360px] w-[360px] rounded-full bg-brand/10 blur-3xl dark:bg-brand/20" />
-            <div
-              className="absolute inset-0 opacity-[0.08] dark:opacity-[0.11]"
-              style={{
-                backgroundImage: 'radial-gradient(currentColor 1px, transparent 1px)',
-                backgroundSize: '22px 22px',
-                color: 'rgba(0,0,0,.65)',
-                maskImage: 'linear-gradient(180deg, transparent 0%, black 20%, black 80%, transparent 100%)',
-                WebkitMaskImage: 'linear-gradient(180deg, transparent 0%, black 20%, black 80%, transparent 100%)',
-              } as React.CSSProperties}
-            />
-          </div>
-
-          <AccessibilitySkip />
-          <div id="focus-sentinel" tabIndex={-1} />
-
-          <ThemeProvider>
-            <RootLayoutClient>
-              <AfterIdleClient>
-                <Suspense fallback={null}><Tracking /></Suspense>
-                <AppInstallPrompt />
-                <StickyFreeShippingBar />
-                <StickyCartSummary />
-                <ConsentBanner />
-                <Toaster position="top-right" />
-              </AfterIdleClient>
-              <Layout>{children}</Layout>
-            </RootLayoutClient>
-          </ThemeProvider>
-
-          {GTM_ID ? (
-            <Script
-              id="gtm-init"
-              strategy="afterInteractive"
-              dangerouslySetInnerHTML={{
-                __html: `
-                  (function(w,d,s,l,i){
-                    w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(), event:'gtm.js'});
-                    var f=d.getElementsByTagName(s)[0], j=d.createElement(s), dl=l!='dataLayer'?'&l='+l:'';
-                    j.async=true; j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
-                    ${GTM_SERVER ? `j.setAttribute('data-gtm-server', '${GTM_SERVER}');` : ''}
-                    f.parentNode.insertBefore(j,f);
-                  })(window,document,'script','dataLayer','${GTM_ID}');
-                `,
-              }}
-            />
-          ) : null}
-
-          {/* JSON-LD global (Organization + WebSite) */}
-          <script
-            id="ld-org"
-            type="application/ld+json"
+        {GTM_ID ? (
+          <noscript
             dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                '@context': 'https://schema.org',
-                '@type': 'Organization',
-                name: SITE_NAME,
-                url: SITE_URL,
-                logo: `${SITE_URL}/logo.png`,
-                sameAs: [],
-              }),
+              __html: `<iframe src="https://www.googletagmanager.com/ns.html?id=${GTM_ID}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`,
             }}
           />
-          <script
-            id="ld-website"
-            type="application/ld+json"
+        ) : null}
+
+        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
+          <div className="absolute left-1/2 top-[-120px] h-[420px] w-[620px] -translate-x-1/2 rounded-full bg-accent/25 blur-3xl dark:bg-accent/30" />
+          <div className="absolute right-[-120px] bottom-[-140px] h-[360px] w-[360px] rounded-full bg-brand/10 blur-3xl dark:bg-brand/20" />
+          <div
+            className="absolute inset-0 opacity-[0.08] dark:opacity-[0.11]"
+            style={{
+              backgroundImage: 'radial-gradient(currentColor 1px, transparent 1px)',
+              backgroundSize: '22px 22px',
+              color: 'rgba(0,0,0,.65)',
+              maskImage: 'linear-gradient(180deg, transparent 0%, black 20%, black 80%, transparent 100%)',
+              WebkitMaskImage: 'linear-gradient(180deg, transparent 0%, black 20%, black 80%, transparent 100%)',
+            } as React.CSSProperties}
+          />
+        </div>
+
+        <AccessibilitySkip />
+        <div id="focus-sentinel" tabIndex={-1} />
+
+        <ThemeProvider>
+          <RootLayoutClient>
+            <AfterIdleClient>
+              <Suspense fallback={null}><Tracking /></Suspense>
+              <AppInstallPrompt />
+              <StickyFreeShippingBar />
+              <StickyCartSummary />
+              <ConsentBanner />
+              <Toaster position="top-right" />
+            </AfterIdleClient>
+            <Layout>{children}</Layout>
+          </RootLayoutClient>
+        </ThemeProvider>
+
+        {GTM_ID ? (
+          <Script
+            id="gtm-init"
+            strategy="afterInteractive"
             dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                '@context': 'https://schema.org',
-                '@type': 'WebSite',
-                url: SITE_URL,
-                name: SITE_NAME,
-                potentialAction: {
-                  '@type': 'SearchAction',
-                  target: `${SITE_URL}/products?q={search_term_string}`,
-                  'query-input': 'required name=search_term_string',
-                },
-              }),
+              __html: `
+                (function(w,d,s,l,i){
+                  w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(), event:'gtm.js'});
+                  var f=d.getElementsByTagName(s)[0], j=d.createElement(s), dl=l!='dataLayer'?'&l='+l:'';
+                  j.async=true; j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+                  ${GTM_SERVER ? `j.setAttribute('data-gtm-server', '${GTM_SERVER}');` : ''}
+                  f.parentNode.insertBefore(j,f);
+                })(window,document,'script','dataLayer','${GTM_ID}');
+              `,
             }}
           />
-          <div className="pb-[env(safe-area-inset-bottom)]" aria-hidden />
-        </NextIntlClientProvider>
+        ) : null}
+
+        {/* JSON-LD global (Organization + WebSite) */}
+        <script
+          id="ld-org"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: SITE_NAME,
+              url: SITE_URL,
+              logo: `${SITE_URL}/logo.png`,
+              sameAs: [],
+            }),
+          }}
+        />
+        <script
+          id="ld-website"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebSite',
+              url: SITE_URL,
+              name: SITE_NAME,
+              potentialAction: {
+                '@type': 'SearchAction',
+                target: `${SITE_URL}/products?q={search_term_string}`,
+                'query-input': 'required name=search_term_string',
+              },
+            }),
+          }}
+        />
+        <div className="pb-[env(safe-area-inset-bottom)]" aria-hidden />
       </body>
     </html>
   )

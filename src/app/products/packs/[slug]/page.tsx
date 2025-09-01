@@ -1,4 +1,3 @@
-// src/app/products/packs/[slug]/page.tsx
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import type { Pack } from '@/types/product'
@@ -8,13 +7,7 @@ import ProductJsonLd from '@/components/JsonLd/ProductJsonLd'
 
 export const revalidate = 1800
 
-// 🔒 SITE normalisé (protocole+pas de trailing slash)
-const RAW_SITE = (process.env.NEXT_PUBLIC_SITE_URL || '').trim()
-const SITE = (
-  RAW_SITE
-    ? (/^https?:\/\//i.test(RAW_SITE) ? RAW_SITE : `https://${RAW_SITE}`)
-    : 'https://techplay.example.com'
-).replace(/\/+$/, '')
+const SITE = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const pack = await getPackBySlug(params.slug)

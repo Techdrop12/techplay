@@ -71,7 +71,6 @@ export default function Tracking() {
     const onEvt = (e: Event) => apply((e as CustomEvent).detail || {})
     window.addEventListener('tp:consent', onEvt as EventListener)
 
-    // Wrap __applyConsent si défini, pour capturer les updates Consent Mode (GTM/GA)
     if (!wrappedRef.current) {
       wrappedRef.current = true
       try {
@@ -86,7 +85,6 @@ export default function Tracking() {
       } catch {}
     }
 
-    // Sync tardive de sécurité (ex: CMP externe qui a déjà set __consentState)
     const id = window.setTimeout(() => {
       try { setConsent(readInitialConsent()) } catch {}
     }, 300)

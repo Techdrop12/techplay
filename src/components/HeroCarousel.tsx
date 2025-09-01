@@ -79,6 +79,37 @@ interface HeroCarouselProps {
 
 /* -------------------------------- Config --------------------------------- */
 
+const DEFAULT_SLIDES: ReadonlyArray<Slide> = [
+  {
+    id: 1,
+    imageMobile: '/carousel/hero-1-mobile.jpg',
+    imageDesktop: '/carousel/hero-1-desktop.jpg',
+    alt: 'Casques gaming — immersion totale',
+    text: 'Casques Gaming — Immersion totale',
+    ctaLabel: 'Découvrir',
+    ctaLink: '/products?cat=casques', // FR
+    badge: 'Nouveautés',
+  },
+  {
+    id: 2,
+    imageMobile: '/carousel/hero-2-mobile.jpg',
+    imageDesktop: '/carousel/hero-2-desktop.jpg',
+    alt: 'Souris RGB — précision & style',
+    text: 'Souris RGB — Précision & Style',
+    ctaLabel: 'Explorer',
+    ctaLink: '/products?cat=souris', // FR
+  },
+  {
+    id: 3,
+    imageMobile: '/carousel/hero-3-mobile.jpg',
+    imageDesktop: '/carousel/hero-3-desktop.jpg',
+    alt: 'Claviers mécaniques — réactivité ultime',
+    text: 'Claviers Mécaniques — Réactivité ultime',
+    ctaLabel: 'Voir plus',
+    ctaLink: '/products?cat=claviers', // FR
+  },
+] as const
+
 const TEXT_SIZES = {
   sm: 'text-xl sm:text-2xl',
   md: 'text-3xl sm:text-4xl',
@@ -96,73 +127,10 @@ function pushDL(event: string, payload?: Record<string, unknown>) {
   } catch {}
 }
 
-const SLIDES_I18N: Record<'fr' | 'en', ReadonlyArray<Slide>> = {
-  fr: [
-    {
-      id: 1,
-      imageMobile: '/carousel/hero-1-mobile.jpg',
-      imageDesktop: '/carousel/hero-1-desktop.jpg',
-      alt: 'Casques gaming — immersion totale',
-      text: 'Casques Gaming — Immersion totale',
-      ctaLabel: 'Découvrir',
-      ctaLink: '/products?cat=casques',
-      badge: 'Nouveautés',
-    },
-    {
-      id: 2,
-      imageMobile: '/carousel/hero-2-mobile.jpg',
-      imageDesktop: '/carousel/hero-2-desktop.jpg',
-      alt: 'Souris RGB — précision & style',
-      text: 'Souris RGB — Précision & Style',
-      ctaLabel: 'Explorer',
-      ctaLink: '/products?cat=souris',
-    },
-    {
-      id: 3,
-      imageMobile: '/carousel/hero-3-mobile.jpg',
-      imageDesktop: '/carousel/hero-3-desktop.jpg',
-      alt: 'Claviers mécaniques — réactivité ultime',
-      text: 'Claviers Mécaniques — Réactivité ultime',
-      ctaLabel: 'Voir plus',
-      ctaLink: '/products?cat=claviers',
-    },
-  ],
-  en: [
-    {
-      id: 1,
-      imageMobile: '/carousel/hero-1-mobile.jpg',
-      imageDesktop: '/carousel/hero-1-desktop.jpg',
-      alt: 'Gaming headsets — total immersion',
-      text: 'Gaming Headsets — Total Immersion',
-      ctaLabel: 'Discover',
-      ctaLink: '/products?cat=casques',
-      badge: 'New',
-    },
-    {
-      id: 2,
-      imageMobile: '/carousel/hero-2-mobile.jpg',
-      imageDesktop: '/carousel/hero-2-desktop.jpg',
-      alt: 'RGB mice — precision & style',
-      text: 'RGB Mice — Precision & Style',
-      ctaLabel: 'Explore',
-      ctaLink: '/products?cat=souris',
-    },
-    {
-      id: 3,
-      imageMobile: '/carousel/hero-3-mobile.jpg',
-      imageDesktop: '/carousel/hero-3-desktop.jpg',
-      alt: 'Mechanical keyboards — ultimate reactivity',
-      text: 'Mechanical Keyboards — Ultimate Reactivity',
-      ctaLabel: 'See more',
-      ctaLink: '/products?cat=claviers',
-    },
-  ],
-}
-
 /* ------------------------------- Component ------------------------------- */
 
 export default function HeroCarousel({
-  slides,
+  slides = DEFAULT_SLIDES,
   intervalMs = 7000,
   showOverlay = true,
   overlayOpacity = 0.35,
@@ -182,18 +150,12 @@ export default function HeroCarousel({
   onSlideChange,
 }: HeroCarouselProps) {
   const pathname = usePathname() || '/'
-  const locale = getCurrentLocale(pathname) as 'fr' | 'en'
+  const locale = getCurrentLocale(pathname) // 'fr' | 'en'
 
-  // Slides finaux (props > i18n)
-  const slidesFinal = useMemo<ReadonlyArray<Slide>>(
-    () => (slides && slides.length ? slides : SLIDES_I18N[locale]),
-    [slides, locale]
-  )
-
-  const total = Math.max(0, slidesFinal.length)
+  const total = Math.max(0, slides.length)
   const [index, setIndex] = useState(0)
 
-  // Pause states
+  // Pause states: distinction utilisateur vs auto (hover/IO/visibility)
   const [isPaused, setPaused] = useState(false)
   const userPausedRef = useRef(false)
 
@@ -241,11 +203,11 @@ export default function HeroCarousel({
         }
   }, [locale])
 
-  const current = useMemo(() => slidesFinal[index], [slidesFinal, index])
+  const current = useMemo(() => slides[index], [slides, index])
 
   useEffect(() => {
-    if (index > Math.max(0, slidesFinal.length - 1)) setIndex(0)
-  }, [slidesFinal.length, index])
+    if (index > Math.max(0, slides.length - 1)) setIndex(0)
+  }, [slides.length, index])
 
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ['start start', 'end start'] })
   const y = useTransform(scrollYProgress, [0, 1], [0, parallaxPx])
@@ -288,7 +250,7 @@ export default function HeroCarousel({
   // Lifecycle timer
   useEffect(() => { startTimer(); return clearTimer }, [startTimer])
 
-  // Onglet masqué/visible
+  // Onglet masqué/visible → auto pause/resume (sans casser la pause utilisateur)
   useEffect(() => {
     const onVis = () => (document.hidden ? autoPause() : autoResume())
     document.addEventListener('visibilitychange', onVis)
@@ -309,21 +271,21 @@ export default function HeroCarousel({
     return () => io.disconnect()
   }, [pauseWhenHidden, autoPause, autoResume])
 
-  // Warm cache
+  // Warm cache of next/prev images (desktop + mobile)
   useEffect(() => {
     if (typeof window === 'undefined' || total <= 1) return
     const nextIdx = (index + 1) % total
     const prevIdx = (index - 1 + total) % total
     const urls = [
-      slidesFinal[nextIdx]?.imageDesktop || slidesFinal[nextIdx]?.image || slidesFinal[nextIdx]?.poster,
-      slidesFinal[prevIdx]?.imageDesktop || slidesFinal[prevIdx]?.image || slidesFinal[prevIdx]?.poster,
-      slidesFinal[nextIdx]?.imageMobile,
-      slidesFinal[prevIdx]?.imageMobile,
+      slides[nextIdx]?.imageDesktop || slides[nextIdx]?.image || slides[nextIdx]?.poster,
+      slides[prevIdx]?.imageDesktop || slides[prevIdx]?.image || slides[prevIdx]?.poster,
+      slides[nextIdx]?.imageMobile,
+      slides[prevIdx]?.imageMobile,
     ].filter(Boolean) as string[]
     urls.forEach((src) => { const img = new window.Image(); img.src = src })
-  }, [index, slidesFinal, total])
+  }, [index, slides, total])
 
-  // ARIA live
+  // ARIA live (annonce slide courant)
   useEffect(() => {
     onSlideChange?.(index, current)
     try {
@@ -348,7 +310,7 @@ export default function HeroCarousel({
     else if (e.key === 'ArrowLeft') { autoPause(); prev(); autoResume() }
     else if (e.key === 'Home') { autoPause(); setIndex(total ? 0 : 0); autoResume() }
     else if (e.key === 'End') { autoPause(); setIndex(total ? total - 1 : 0); autoResume() }
-    else if (e.key === ' ' || e.key === 'Spacebar' || e.key === 'Space') { e.preventDefault(); userPausedRef.current ? resumeUser() : pauseUser() }
+    else if (e.key === ' ' || e.key === 'Spacebar' || e.key === 'Space') { e.preventDefault(); isPaused ? resumeUser() : pauseUser() }
   }
 
   if (total === 0) return null
@@ -609,7 +571,7 @@ export default function HeroCarousel({
       {showBullets && total > 1 && (
         <nav className="absolute bottom-3 left-1/2 z-20 -translate-x-1/2 sm:hidden" aria-label={t.nav}>
           <ul className="flex gap-3">
-            {slidesFinal.map((s, i) => {
+            {slides.map((s, i) => {
               const active = i === index
               const bulletLabel = t.goTo + (i + 1) + (s.alt ? ' : ' + s.alt : '')
               return (
@@ -637,7 +599,7 @@ export default function HeroCarousel({
       {showThumbnails && total > 1 && (
         <div className="absolute bottom-4 left-1/2 z-20 hidden -translate-x-1/2 sm:block" aria-label={t.thumbs}>
           <ul className="flex gap-3">
-            {slidesFinal.map((s, i) => {
+            {slides.map((s, i) => {
               const active = i === index
               const thumb = s.imageDesktop || s.image || s.poster || '/og-image.jpg'
               return (

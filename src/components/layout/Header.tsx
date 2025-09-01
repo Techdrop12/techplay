@@ -20,8 +20,6 @@ import {
   CartIcon as Cart,
   UserIcon as User,
 } from '@/components/ui/premium-icons'
-import { LOCALE_COOKIE } from '@/i18n/config'
-import { setLocaleCookie } from '@/lib/language'
 
 /* ----------------------------- i18n strings ------------------------------ */
 const STR = {
@@ -43,9 +41,6 @@ const STR = {
     account: { aria: 'Espace client', title: 'Espace client' },
     headerAria: 'En-tête du site',
     logoAria: 'TechPlay — Accueil',
-    srCountCart: 'Articles dans le panier : ',
-    srCountWish: 'Articles dans la wishlist : ',
-    localeSwitchAria: 'Sélecteur de langue',
   },
   en: {
     nav: { categories: 'Categories', products: 'Products', wishlist: 'Wishlist', blog: 'Blog', contact: 'Contact' },
@@ -65,9 +60,6 @@ const STR = {
     account: { aria: 'Account', title: 'Account' },
     headerAria: 'Site header',
     logoAria: 'TechPlay — Home',
-    srCountCart: 'Items in cart: ',
-    srCountWish: 'Items in wishlist: ',
-    localeSwitchAria: 'Language selector',
   },
 } as const
 
@@ -101,22 +93,20 @@ const ActionBadge = ({ children, className }: { children: React.ReactNode; class
 /** Sélecteur de langue FR/EN (persiste NEXT_LOCALE + navigation localisée) */
 function LocaleSwitch({ pathname }: { pathname: string }) {
   const router = useRouter()
-  const locale = getCurrentLocale(pathname) as 'fr' | 'en'
-  const aria = STR[locale].localeSwitchAria
+  const locale = getCurrentLocale(pathname)
   const setLang = (newLocale: 'fr' | 'en') => {
     if (newLocale === locale) return
     try {
-      document.cookie = `${LOCALE_COOKIE}=${newLocale}; Max-Age=31536000; Path=/; SameSite=Lax`
-      setLocaleCookie(newLocale)
+      document.cookie = `NEXT_LOCALE=${newLocale}; Max-Age=31536000; Path=/; SameSite=Lax`
     } catch {}
-    const next = localizePath(pathname, newLocale, { keepQuery: true, keepHash: true })
+    const next = localizePath(pathname, newLocale)
     router.replace(next)
   }
 
   return (
     <div
       role="group"
-      aria-label={aria}
+      aria-label="Sélecteur de langue"
       className="inline-flex items-center rounded-full border border-token-border bg-token-surface/60 p-0.5"
     >
       {(['fr', 'en'] as const).map((l) => {
@@ -183,7 +173,7 @@ export default function Header() {
   const prefetchTimers = useRef<Map<string, number>>(new Map())
   const searchRef = useRef<HTMLInputElement | null>(null)
 
-  // tendances recherche i18n
+  // tendances recherche i18n (⚠️ typées en string[] pour éviter les unions littérales)
   const trends: string[] = useMemo(() => [...(STR[locale].trends as readonly string[])], [locale])
   const [placeholder, setPlaceholder] = useState<string>(() => trends[0] ?? '')
   const saveData = useRef<boolean>(false)
@@ -241,7 +231,7 @@ export default function Header() {
   }, [])
 
   useEffect(() => {
-    // Data Saver → pas de prefetch agressif
+    // Détecte Data Saver pour éviter les prefetch agressifs
     try {
       const conn = (navigator as any)?.connection
       saveData.current = !!conn?.saveData
@@ -287,7 +277,7 @@ export default function Header() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  // placeholder tournant
+  // placeholder tournant selon langue (→ state typé string)
   useEffect(() => {
     setPlaceholder(trends[0] ?? '')
     let i = 0
@@ -662,7 +652,7 @@ export default function Header() {
             {wishlistCount > 0 && (
               <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
                 <span className="rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm">
-                  <span className="sr-only">{t.srCountWish}</span>{wishlistCount}
+                  <span className="sr-only">Wishlist count: </span>{wishlistCount}
                 </span>
               </div>
             )}
@@ -687,7 +677,7 @@ export default function Header() {
             {cartCount > 0 && (
               <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
                 <span className="animate-[pulse_2s_ease-in-out_infinite] rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm">
-                  <span className="sr-only">{t.srCountCart}</span>{cartCount}
+                  <span className="sr-only">Cart count: </span>{cartCount}
                 </span>
               </div>
             )}

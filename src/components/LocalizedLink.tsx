@@ -1,4 +1,4 @@
-// src/components/LocalizedLink.tsx — i18n-safe (string | UrlObject) + absolus intacts + rel sécurisé
+// src/components/LocalizedLink.tsx — FINAL (i18n-safe + absolus intacts)
 'use client'
 
 import NextLink, { type LinkProps } from 'next/link'
@@ -17,8 +17,6 @@ type Props = Omit<LinkProps, 'href'> &
 
 /** Détecte toute URL absolue (http, https, mailto, tel, etc.) ou protocole relatif `//` */
 function isAbsolute(href: string) {
-  // - //example.com
-  // - https://, http://, mailto:, tel:, etc.
   return /^(?:[a-z][a-z0-9+.-]*:)?\/\//i.test(href) || /^[a-z][a-z0-9+.-]*:/i.test(href)
 }
 
@@ -33,7 +31,6 @@ function normalizeHref(
     return isAbsolute(href) ? href : localizePath(href, loc, { keepQuery })
   }
 
-  // UrlObject: on ne touche que pathname si relative
   const next: UrlObject = { ...href }
   const p = typeof href.pathname === 'string' ? href.pathname : undefined
   if (p && !isAbsolute(p)) next.pathname = localizePath(p, loc, { keepQuery })
@@ -41,18 +38,11 @@ function normalizeHref(
 }
 
 const LocalizedLink = forwardRef<HTMLAnchorElement, Props>(function LocalizedLink(
-  { href, locale, keepQuery = false, target, rel, ...rest },
+  { href, locale, keepQuery = false, ...rest },
   ref
 ) {
   const finalHref = normalizeHref(href, locale, keepQuery)
-
-  // Sécurité pour les liens externes en target=_blank (noopener/noreferrer)
-  const isExt =
-    (typeof finalHref === 'string' && isAbsolute(finalHref)) ||
-    (typeof finalHref !== 'string' && typeof finalHref.pathname === 'string' && isAbsolute(finalHref.pathname!))
-  const safeRel = target === '_blank' && isExt ? (rel ? `${rel} noopener noreferrer` : 'noopener noreferrer') : rel
-
-  return <NextLink ref={ref} href={finalHref as any} target={target} rel={safeRel} {...rest} />
+  return <NextLink ref={ref} href={finalHref as any} {...rest} />
 })
 
 export default LocalizedLink

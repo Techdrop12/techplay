@@ -9,13 +9,8 @@ export const revalidate = 60
 
 type SR = Record<string, string | string[] | undefined>
 
-// 🔒 SITE normalisé (https + pas de trailing slash) pour JSON-LD absolu fiable
-const RAW_SITE = (process.env.NEXT_PUBLIC_SITE_URL || '').trim()
-const SITE = (
-  RAW_SITE
-    ? (/^https?:\/\//i.test(RAW_SITE) ? RAW_SITE : `https://${RAW_SITE}`)
-    : 'https://techplay.example.com'
-).replace(/\/+$/, '')
+const SITE_URL: string =
+  process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
 /* ---------------------- Metadata dynamique ---------------------- */
 export async function generateMetadata(
@@ -233,7 +228,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: SR }) 
               itemListElement: posts.map((p: any, idx: number) => ({
                 '@type': 'ListItem',
                 position: idx + 1 + (page - 1) * limit,
-                url: `${SITE}/blog/${String(p.slug || '')}`,
+                url: `${SITE_URL}/blog/${String(p.slug || '')}`,
                 name: String(p.title || ''),
               })),
             }),

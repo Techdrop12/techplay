@@ -1,8 +1,8 @@
-// src/components/ConsentBanner.tsx — UX/A11y + Consent Mode v2 bridge + i18n FR/EN
+// src/components/ConsentBanner.tsx — UX/A11y + Consent Mode v2 bridge
+
 'use client'
 
-import { useEffect, useRef, useState, useMemo } from 'react'
-import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
+import { useEffect, useRef, useState } from 'react'
 
 declare global {
   interface Window {
@@ -72,42 +72,6 @@ function applyConsent(p: Prefs) {
   } catch {}
 }
 
-/** i18n local minimal (auto depuis l’URL) */
-const STR = {
-  fr: {
-    title: 'Votre confidentialité chez TechPlay',
-    desc:
-      'Nous utilisons des cookies pour mesurer l’audience et, si vous l’acceptez, pour la publicité. ' +
-      'Vous pourrez changer d’avis à tout moment dans les paramètres.',
-    more: 'En savoir plus',
-    audience: 'Mesure d’audience',
-    recommended: '(recommandé)',
-    ads: 'Publicité',
-    alwaysOn: 'Fonctionnels & sécurité sont toujours actifs.',
-    acceptAll: 'Tout accepter',
-    settings: 'Paramètres',
-    refuseAll: 'Tout refuser',
-    save: 'Sauvegarder',
-    back: 'Retour',
-  },
-  en: {
-    title: 'Your privacy at TechPlay',
-    desc:
-      'We use cookies to measure audience and, if you accept, for advertising. ' +
-      'You can change your preferences at any time in the settings.',
-    more: 'Learn more',
-    audience: 'Analytics',
-    recommended: '(recommended)',
-    ads: 'Advertising',
-    alwaysOn: 'Functional & security cookies are always active.',
-    acceptAll: 'Accept all',
-    settings: 'Settings',
-    refuseAll: 'Reject all',
-    save: 'Save',
-    back: 'Back',
-  },
-} as const
-
 export default function ConsentBanner() {
   if (DISABLED) return null
 
@@ -115,14 +79,6 @@ export default function ConsentBanner() {
   const [prefs, setPrefs] = useState<Prefs>({ analytics: false, ads: false, functionality: true })
   const [show, setShow] = useState(false)
   const firstToggleRef = useRef<HTMLInputElement | null>(null)
-
-  const loc = useMemo(() => getCurrentLocale(), []) as 'fr' | 'en'
-  const t = STR[loc]
-  const privacyHref = useMemo(() => {
-    // adapte la route selon la locale si tu as une page en EN
-    const base = loc === 'en' ? '/privacy' : '/confidentialite'
-    return localizePath(base, loc)
-  }, [loc])
 
   useEffect(() => {
     const dnt =
@@ -153,7 +109,7 @@ export default function ConsentBanner() {
     return () => { delete window.tpOpenConsent; delete window.tpResetConsent }
   }, [])
 
-  // body lock léger (pour éviter saut lors de l’apparition)
+  // body lock léger
   useEffect(() => {
     if (!show) return
     document.documentElement.classList.add('consent-banner-open')
@@ -196,17 +152,16 @@ export default function ConsentBanner() {
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-5">
         <div className="flex-1">
-          <h2 id="tp-consent-title" className="text-base font-bold">{t.title}</h2>
+          <h2 id="tp-consent-title" className="text-base font-bold">Votre confidentialité chez TechPlay</h2>
           <p id="tp-consent-desc" className="mt-1 text-sm text-token-text/70">
-            {t.desc}
+            Nous utilisons des cookies pour mesurer l’audience et, si vous l’acceptez, pour la publicité.
+            Vous pourrez changer d’avis à tout moment dans les paramètres.
           </p>
 
           {open && (
             <div className="mt-3 grid gap-2 rounded-xl border border-token-border bg-token-surface/70 p-3">
               <label className="flex items-center justify-between gap-3">
-                <span className="text-sm">
-                  {t.audience} <span className="text-xs text-token-text/60">{t.recommended}</span>
-                </span>
+                <span className="text-sm">Mesure d’audience <span className="text-xs text-token-text/60">(recommandé)</span></span>
                 <input
                   ref={firstToggleRef}
                   type="checkbox"
@@ -216,7 +171,7 @@ export default function ConsentBanner() {
                 />
               </label>
               <label className="flex items-center justify-between gap-3">
-                <span className="text-sm">{t.ads}</span>
+                <span className="text-sm">Publicité</span>
                 <input
                   type="checkbox"
                   className="h-5 w-5 accent-[hsl(var(--accent))]"
@@ -224,12 +179,12 @@ export default function ConsentBanner() {
                   onChange={(e) => setPrefs((p) => ({ ...p, ads: e.target.checked }))}
                 />
               </label>
-              <p className="mt-1 text-xs text-token-text/60">{t.alwaysOn}</p>
+              <p className="mt-1 text-xs text-token-text/60">Fonctionnels & sécurité sont toujours actifs.</p>
             </div>
           )}
 
-          <a href={privacyHref} className="mt-2 inline-block text-xs text-[hsl(var(--accent))] underline underline-offset-4">
-            {t.more}
+          <a href="/confidentialite" className="mt-2 inline-block text-xs text-[hsl(var(--accent))] underline underline-offset-4">
+            En savoir plus
           </a>
         </div>
 
@@ -238,26 +193,26 @@ export default function ConsentBanner() {
             <>
               <button type="button" onClick={acceptAll}
                 className="w-full rounded-xl bg-[hsl(var(--accent))] px-4 py-2 text-sm font-semibold text-white shadow hover:bg-[hsl(var(--accent)/.92)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]">
-                {t.acceptAll}
+                Tout accepter
               </button>
               <button type="button" onClick={() => { setOpen(true); setTimeout(() => firstToggleRef.current?.focus(), 0) }}
                 className="w-full rounded-xl border border-token-border bg-token-surface px-4 py-2 text-sm font-semibold hover:shadow focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]">
-                {t.settings}
+                Paramètres
               </button>
               <button type="button" onClick={refuseAll}
                 className="w-full rounded-xl border border-token-border bg-token-surface px-4 py-2 text-sm font-semibold hover:shadow focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]">
-                {t.refuseAll}
+                Tout refuser
               </button>
             </>
           ) : (
             <>
               <button type="button" onClick={saveSelected}
                 className="w-full rounded-xl bg-[hsl(var(--accent))] px-4 py-2 text-sm font-semibold text-white shadow hover:bg-[hsl(var(--accent)/.92)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]">
-                {t.save}
+                Sauvegarder
               </button>
               <button type="button" onClick={() => setOpen(false)}
                 className="w-full rounded-xl border border-token-border bg-token-surface px-4 py-2 text-sm font-semibold hover:shadow focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]">
-                {t.back}
+                Retour
               </button>
             </>
           )}

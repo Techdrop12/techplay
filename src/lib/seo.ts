@@ -1,10 +1,10 @@
-// src/lib/seo.ts — Générateur de metadata Next (hreflang, OG absolus, noindex, helpers)
-// Typé, robuste aux URLs relatives/absolues. FR = "/", EN = "/en".
+// src/lib/seo.ts — ULTIME++ Générateur de metadata Next (hreflang, OG absolus, noindex, helpers)
+// Typé, robuste à des URLs relatives/absolues, FR par défaut sur "/" et EN sur "/en".
 
 import type { Metadata } from 'next'
 
 type SiteLocale = 'fr' | 'en'
-type OpenGraphType = 'website' | 'article' // (Next n’accepte pas "product" en type strict)
+type OpenGraphType = 'website' | 'article' // (Next n’accepte pas "product" directement)
 
 interface MetaProps {
   title: string
@@ -30,6 +30,7 @@ interface ArticleMetaExtras {
 }
 
 interface ProductMetaExtras {
+  /** Non utilisé directement par Next Metadata (OG "product" non typé), exposé pour JSON-LD éventuel */
   price?: { amount: number; currency: string }
   sku?: string
   brand?: string
@@ -40,6 +41,7 @@ const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || 'TechPlay'
 const TWITTER_HANDLE = process.env.NEXT_PUBLIC_TWITTER_HANDLE || '@techplay'
 const DEFAULT_OG = '/og-image.jpg'
 const DEFAULT_LOCALE: SiteLocale = 'fr'
+const SUPPORTED: readonly SiteLocale[] = ['fr', 'en'] as const
 
 /** Origin normalisée (sans trailing slash, URL valide) */
 function getOrigin(): string {
@@ -57,7 +59,8 @@ function abs(u: string | undefined | null, fallback: string = DEFAULT_OG): strin
   const v = (u || '').trim()
   if (!v) return `${ORIGIN}${fallback.startsWith('/') ? fallback : `/${fallback}`}`
   try {
-    return new URL(v).toString() // déjà absolue
+    // déjà absolue
+    return new URL(v).toString()
   } catch {
     const path = v.startsWith('/') ? v : `/${v}`
     return `${ORIGIN}${path}`
@@ -124,8 +127,10 @@ export function generateMeta({
   const ogType: OpenGraphType = type === 'article' ? 'article' : 'website'
 
   return {
+    // (Astuce: le template du site est déjà défini dans layout.tsx)
     title,
     description,
+    // on duplique metadataBase ici pour robustesse des URLs si jamais une page n’en hérite pas
     metadataBase: new URL(ORIGIN),
     alternates: {
       canonical: canonicalAbs,
@@ -187,10 +192,12 @@ export function generateProductMeta(
   base: MetaProps,
   _extras: ProductMetaExtras = {}
 ): Metadata {
+  // Pour OG, on reste sur type "website". Les détails produit doivent aller en JSON-LD.
   return generateMeta({ ...base, type: 'product' })
 }
 
 /** Utilitaires JSON-LD prêts à insérer dans un <script type="application/ld+json"> */
+// À utiliser dans tes pages si besoin (ex: Product, Article, Breadcrumbs)
 export function jsonLdBreadcrumbs(items: Array<{ name: string; url: string }>) {
   return {
     '@context': 'https://schema.org',
@@ -270,4 +277,5 @@ export function jsonLdProduct(params: {
   }
 }
 
+// Expose quelques constantes si besoin ailleurs
 export { ORIGIN, SITE_NAME, TWITTER_HANDLE }
