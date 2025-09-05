@@ -1,17 +1,18 @@
 // src/components/checkout/CheckoutForm.tsx — PREMIUM+ (a11y/UX/Perf/Tracking)
 // - UX/a11y : SR live, focus management, hints, fieldset disabled, role=alert, ids stables
 // - Perf    : pas d’objets recréés inutilement, LS + QS safe
-// - Tracking: GA4 + dataLayer + Meta Pixel (InitiateCheckout), toasts cohérents
+// - Tracking: GA4 + dataLayer + Meta Pixel (InitiateCheckout & add_shipping_info)
 // - Flux    : Stripe Checkout via createCheckoutSession (Apple Pay/GPay support côté Checkout)
 // - Devise  : auto (EUR/GBP/USD) selon langue/locale navigateur
 'use client'
 
-import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState, useMemo } from 'react'
 import { createCheckoutSession } from '@/lib/checkout'
 import { toast } from 'react-hot-toast'
-// GA: on tolère le nom d’export chez toi (event/logEvent) sans casser le build
-import { event as gaEvent } from '@/lib/ga'
+// GA: on tolère le nom d’export chez toi (event/logEvent) pour préfill events
+import { event as gaEvent, mapProductToGaItem, trackAddShippingInfo, pushDataLayer } from '@/lib/ga'
 import { pixelInitiateCheckout } from '@/lib/meta-pixel'
+import { useCart } from '@/hooks/useCart'
 
 type FormErrors = { email?: string; address?: string }
 
@@ -24,13 +25,12 @@ const isAddress = (v: string) => String(v || '').trim().length >= 6
 // Helper ARIA pour composer plusieurs ids
 const joinIds = (...ids: Array<string | undefined>) => ids.filter(Boolean).join(' ')
 
-// Devise auto (EUR/GBP/USD) — simple & robuste
+// Devise auto (EUR/GBP/USD)
 function detectCurrency(): 'EUR' | 'GBP' | 'USD' {
   try {
     const htmlLang = typeof document !== 'undefined' ? document.documentElement.lang || '' : ''
     const nav = typeof navigator !== 'undefined' ? navigator.language || '' : ''
     const src = (htmlLang || nav).toLowerCase()
-
     if (src.includes('gb') || src.endsWith('-uk') || src.includes('en-gb')) return 'GBP'
     if (src.includes('us') || src.includes('en-us')) return 'USD'
     if (src.startsWith('en')) return 'USD'
@@ -70,6 +70,28 @@ export default function CheckoutForm() {
   const emailHintId = useId()
   const addressHintId = useId()
   const srStatusId = useId()
+
+  // Cart (pour envoyer add_shipping_info propre)
+  const { cart } = useCart()
+  const { subtotal, itemsCount, gaItems, pixelContents } = useMemo(() => {
+    const items = Array.isArray(cart) ? cart : []
+    const subtotal = items.reduce(
+      (s, it: any) => s + (Number(it?.price) || 0) * Math.max(1, Number(it?.quantity || 1)),
+      0
+    )
+    const gaItems = items.map((it: any) =>
+      mapProductToGaItem(it, {
+        quantity: Math.max(1, Number(it?.quantity || 1)),
+      })
+    )
+    const pixelContents = items.map((it: any) => ({
+      id: String(it?._id || it?.slug),
+      quantity: Math.max(1, Number(it?.quantity || 1)),
+      item_price: Number(it?.price) || 0,
+    }))
+    const itemsCount = items.reduce((s, it: any) => s + Math.max(1, Number(it?.quantity || 1)), 0)
+    return { subtotal, itemsCount, gaItems, pixelContents }
+  }, [cart])
 
   /* ----------------------------- Prefill email ---------------------------- */
   useEffect(() => {
@@ -127,11 +149,6 @@ export default function CheckoutForm() {
     return true
   }, [email, address])
 
-  const track = useCallback((name: string, payload?: Record<string, unknown>) => {
-    try { gaEvent?.({ action: name, category: 'checkout', label: 'checkout_form', ...payload }) } catch {}
-    try { ;(window as any).dataLayer?.push({ event: name, ...payload }) } catch {}
-  }, [])
-
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault()
@@ -144,9 +161,34 @@ export default function CheckoutForm() {
       formRef.current?.setAttribute('aria-busy', 'true')
 
       try {
-        // Déclenche "begin_checkout" (GA & dataLayer) + Pixel (sans items ici)
-        track('begin_checkout', { currency })
-        try { pixelInitiateCheckout({ currency }) } catch {}
+        // Étape funnel: add_shipping_info (avant redirection)
+        try {
+          trackAddShippingInfo({
+            currency,
+            value: subtotal,
+            items: gaItems,
+            shipping_tier: 'standard',
+          })
+        } catch {}
+
+        try {
+          pushDataLayer({
+            event: 'add_shipping_info',
+            currency,
+            value: subtotal,
+            ecommerce: { currency, value: subtotal, items: gaItems, shipping_tier: 'standard' },
+          })
+        } catch {}
+
+        try {
+          // Pixel: on signale l’intention (utilise la valeur si on l’a)
+          pixelInitiateCheckout({
+            currency,
+            value: subtotal || undefined,
+            num_items: itemsCount || undefined,
+            contents: pixelContents,
+          })
+        } catch {}
 
         // Sauvegarde opportuniste de l’email
         try { localStorage.setItem(LS_EMAIL_KEY, email) } catch {}
@@ -155,7 +197,7 @@ export default function CheckoutForm() {
         const session = await createCheckoutSession({
           email,
           address,
-          currency,                            // ✅ on envoie la devise au backend
+          currency, // ✅ on envoie la devise au backend
           locale:
             typeof document !== 'undefined'
               ? (document.documentElement.lang || 'fr').slice(0, 2)
@@ -167,7 +209,7 @@ export default function CheckoutForm() {
             icon: <IconCard className="text-[hsl(var(--accent))]" />,
           })
           announce('Redirection vers Stripe')
-          track('checkout_redirect', { provider: 'stripe_checkout', currency })
+          pushDataLayer({ event: 'checkout_redirect', provider: 'stripe_checkout', currency })
           window.location.href = session.url
           return
         }
@@ -177,13 +219,13 @@ export default function CheckoutForm() {
         const msg = err?.message || 'Une erreur est survenue. Réessayez.'
         announce(msg)
         toast.error('Une erreur est survenue. Veuillez réessayer.')
-        track('checkout_error', { message: msg })
+        pushDataLayer({ event: 'checkout_error', message: msg })
       } finally {
         setLoading(false)
         formRef.current?.setAttribute('aria-busy', 'false')
       }
     },
-    [address, email, hp, loading, validate, announce, track, currency]
+    [address, email, hp, loading, validate, announce, currency, subtotal, gaItems, itemsCount, pixelContents]
   )
 
   /* -------------------------- Micro UX améliorations ---------------------- */

@@ -1,4 +1,4 @@
-// src/app/commande/page.tsx
+// src/app/commande/page.tsx — FINAL (GA4 begin_checkout helper + GTM + UX)
 'use client'
 
 import Link from 'next/link'
@@ -8,30 +8,68 @@ import CartList from '@/components/cart/CartList'
 import CartSummary from '@/components/cart/CartSummary'
 import CheckoutForm from '@/components/checkout/CheckoutForm'
 import FreeShippingBadge from '@/components/FreeShippingBadge'
-import { logEvent } from '@/lib/logEvent'
+import { mapProductToGaItem, trackBeginCheckout, pushDataLayer } from '@/lib/ga'
+
+/** Devise simple (EUR/GBP/USD) */
+function detectCurrency(): 'EUR' | 'GBP' | 'USD' {
+  try {
+    const htmlLang = typeof document !== 'undefined' ? document.documentElement.lang || '' : ''
+    const nav = typeof navigator !== 'undefined' ? navigator.language || '' : ''
+    const src = (htmlLang || nav).toLowerCase()
+    if (src.includes('gb') || src.endsWith('-uk') || src.includes('en-gb')) return 'GBP'
+    if (src.includes('us') || src.includes('en-us')) return 'USD'
+    if (src.startsWith('en')) return 'USD'
+    return 'EUR'
+  } catch {
+    return 'EUR'
+  }
+}
 
 export default function CheckoutPage() {
   const { cart } = useCart()
   const hasFiredRef = useRef(false)
 
-  // Remonte en haut et track "begin_checkout" une seule fois
+  // Items GA4 + totaux
+  const { itemsCount, subtotal, gaItems, currency } = useMemo(() => {
+    const items = Array.isArray(cart) ? cart : []
+    const itemsCount = items.reduce((s, it: any) => s + Math.max(1, Number(it?.quantity || 1)), 0)
+    const subtotal = items.reduce(
+      (s, it: any) => s + (Number(it?.price) || 0) * Math.max(1, Number(it?.quantity || 1)),
+      0
+    )
+    const gaItems = items.map((it: any) =>
+      mapProductToGaItem(it, {
+        quantity: Math.max(1, Number(it?.quantity || 1)),
+      })
+    )
+    const currency = detectCurrency()
+    return { itemsCount, subtotal, gaItems, currency }
+  }, [cart])
+
+  // Scroll top + begin_checkout une seule fois quand il y a du contenu
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
-    if (!hasFiredRef.current && cart?.length) {
-      hasFiredRef.current = true
-      try {
-        logEvent({ action: 'begin_checkout', category: 'ecommerce', label: 'checkout_page', value: cart.length })
-      } catch {}
-    }
+    if (!cart?.length || hasFiredRef.current) return
+    hasFiredRef.current = true
+
+    try {
+      // GA4 “canonique”
+      trackBeginCheckout({ currency, value: subtotal, items: gaItems })
+    } catch {}
+
+    try {
+      // GTM (si tu lis dans le dataLayer)
+      pushDataLayer({
+        event: 'begin_checkout',
+        currency,
+        value: subtotal,
+        ecommerce: { currency, value: subtotal, items: gaItems },
+      })
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cart?.length])
 
   const isEmpty = !cart || cart.length === 0
-
-  const { itemsCount, subtotal } = useMemo(() => {
-    const itemsCount = (cart || []).reduce((s, it: any) => s + Math.max(1, Number(it?.quantity || 1)), 0)
-    const subtotal = (cart || []).reduce((s, it: any) => s + (Number(it?.price) || 0) * Math.max(1, Number(it?.quantity || 1)), 0)
-    return { itemsCount, subtotal }
-  }, [cart])
 
   return (
     <main
@@ -44,7 +82,11 @@ export default function CheckoutPage() {
         <ol className="flex items-center gap-2">
           <li><Link href="/" className="hover:underline">Accueil</Link></li>
           <li aria-hidden="true">/</li>
-          <li><Link href="/commande" aria-current="page" className="text-gray-700 dark:text-gray-200 font-medium">Commande</Link></li>
+          <li>
+            <Link href="/commande" aria-current="page" className="text-gray-700 dark:text-gray-200 font-medium">
+              Commande
+            </Link>
+          </li>
         </ol>
       </nav>
 
@@ -112,7 +154,9 @@ export default function CheckoutPage() {
               <div className="flex items-center justify-between p-3">
                 <div className="text-sm">
                   <p className="font-semibold text-gray-900 dark:text-white">Sous-total</p>
-                  <p className="text-gray-600 dark:text-gray-400">{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(subtotal)}</p>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    {new Intl.NumberFormat('fr-FR', { style: 'currency', currency }).format(subtotal)}
+                  </p>
                 </div>
                 <a
                   href="#paiement"
