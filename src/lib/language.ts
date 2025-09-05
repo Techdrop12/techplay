@@ -29,12 +29,23 @@ export function normalizeLocale(x: unknown): Locale {
   return DEFAULT_LOCALE
 }
 
-/** Replace (or add) the locale prefix in a pathname */
+const RE_LOCALE_PREFIX = new RegExp(`^/(?:${languages.join('|')})(?=/|$)`)
+const ensureLeadingSlash = (p: string) => (p?.startsWith('/') ? p : `/${p || ''}`)
+
+/** Remove a locale prefix from a pathname if present (keeps leading slash) */
+function stripLocalePrefix(pathname: string): string {
+  const safe = ensureLeadingSlash(pathname || '/')
+  const out = safe.replace(RE_LOCALE_PREFIX, '')
+  return out || '/'
+}
+
+/**
+ * Replace (or add) the locale prefix in a pathname,
+ * respecting "as-needed" strategy: default locale (fr) → no prefix.
+ */
 export function withLocale(pathname: string, locale: Locale): string {
-  const re = new RegExp(`^/(?:${languages.join('|')})(?=/|$)`)
-  const safe = pathname.startsWith('/') ? pathname : `/${pathname}`
-  if (re.test(safe)) return safe.replace(re, `/${locale}`)
-  return `/${locale}${safe === '/' ? '' : safe}`
+  const base = stripLocalePrefix(ensureLeadingSlash(pathname))
+  return locale === DEFAULT_LOCALE ? base : `/${locale}${base === '/' ? '' : base}`
 }
 
 /** Extract the locale from a pathname (defaults to DEFAULT_LOCALE) */
@@ -47,7 +58,8 @@ export function extractLocaleFromPath(pathname: string): Locale {
 export function setLocaleCookie(locale: Locale) {
   if (typeof document === 'undefined') return
   const maxAge = 60 * 60 * 24 * 365
-  document.cookie = `${LOCALE_COOKIE}=${locale}; Max-Age=${maxAge}; Path=/; SameSite=Lax`
+  const secure = typeof location !== 'undefined' && location.protocol === 'https:' ? '; Secure' : ''
+  document.cookie = `${LOCALE_COOKIE}=${encodeURIComponent(locale)}; Max-Age=${maxAge}; Path=/; SameSite=Lax${secure}`
 }
 
 /** Server utility: pick best from Accept-Language */
@@ -56,7 +68,7 @@ export function pickBestLocale(acceptLanguageHeader?: string | null): Locale {
   try {
     const parts = acceptLanguageHeader
       .split(',')
-      .map(s => s.trim().split(';')[0].toLowerCase())
+      .map((s) => s.trim().split(';')[0].toLowerCase())
     for (const p of parts) {
       const n = normalizeLocale(p)
       if (isLocale(n)) return n

@@ -13,6 +13,8 @@ type Props = Omit<LinkProps, 'href'> &
     locale?: Locale
     /** Conserve le querystring courant (utile pour garder un tri/filtre) */
     keepQuery?: boolean
+    /** Conserve le hash (#section) courant si true */
+    keepHash?: boolean
   }
 
 /** Détecte toute URL absolue (http, https, mailto, tel, etc.) ou protocole relatif `//` */
@@ -23,25 +25,26 @@ function isAbsolute(href: string) {
 function normalizeHref(
   href: string | UrlObject,
   locale?: Locale,
-  keepQuery?: boolean
+  keepQuery?: boolean,
+  keepHash?: boolean
 ): string | UrlObject {
   const loc = locale ?? getCurrentLocale()
 
   if (typeof href === 'string') {
-    return isAbsolute(href) ? href : localizePath(href, loc, { keepQuery })
+    return isAbsolute(href) ? href : localizePath(href, loc, { keepQuery, keepHash })
   }
 
   const next: UrlObject = { ...href }
   const p = typeof href.pathname === 'string' ? href.pathname : undefined
-  if (p && !isAbsolute(p)) next.pathname = localizePath(p, loc, { keepQuery })
+  if (p && !isAbsolute(p)) next.pathname = localizePath(p, loc, { keepQuery, keepHash })
   return next
 }
 
 const LocalizedLink = forwardRef<HTMLAnchorElement, Props>(function LocalizedLink(
-  { href, locale, keepQuery = false, ...rest },
+  { href, locale, keepQuery = false, keepHash = false, ...rest },
   ref
 ) {
-  const finalHref = normalizeHref(href, locale, keepQuery)
+  const finalHref = normalizeHref(href, locale, keepQuery, keepHash)
   return <NextLink ref={ref} href={finalHref as any} {...rest} />
 })
 

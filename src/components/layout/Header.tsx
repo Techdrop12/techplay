@@ -13,6 +13,7 @@ import { useWishlist } from '@/hooks/useWishlist'
 import ThemeToggle from '@/components/ui/ThemeToggle'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 import { getCategories } from '@/lib/categories'
+import { LOCALE_COOKIE, setLocaleCookie } from '@/lib/language'
 import {
   SearchIcon as Search,
   FlameIcon as Flame,
@@ -97,7 +98,9 @@ function LocaleSwitch({ pathname }: { pathname: string }) {
   const setLang = (newLocale: 'fr' | 'en') => {
     if (newLocale === locale) return
     try {
-      document.cookie = `NEXT_LOCALE=${newLocale}; Max-Age=31536000; Path=/; SameSite=Lax`
+      const secure = typeof location !== 'undefined' && location.protocol === 'https:' ? '; Secure' : ''
+      document.cookie = `${LOCALE_COOKIE}=${encodeURIComponent(newLocale)}; Max-Age=31536000; Path=/; SameSite=Lax${secure}`
+      setLocaleCookie(newLocale)
     } catch {}
     const next = localizePath(pathname, newLocale)
     router.replace(next)
