@@ -41,7 +41,6 @@ const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || 'TechPlay'
 const TWITTER_HANDLE = process.env.NEXT_PUBLIC_TWITTER_HANDLE || '@techplay'
 const DEFAULT_OG = '/og-image.jpg'
 const DEFAULT_LOCALE: SiteLocale = 'fr'
-const SUPPORTED: readonly SiteLocale[] = ['fr', 'en'] as const
 
 /** Origin normalisée (sans trailing slash, URL valide) */
 function getOrigin(): string {
@@ -127,6 +126,7 @@ export function generateMeta({
   const ogType: OpenGraphType = type === 'article' ? 'article' : 'website'
 
   return {
+    // Astuce: laisser Next composer le template de titre au niveau du RootLayout si besoin
     title,
     description,
     metadataBase: new URL(ORIGIN),
@@ -138,12 +138,21 @@ export function generateMeta({
       ? {
           index: false,
           follow: false,
-          googleBot: { index: false, follow: false, 'max-snippet': -1, 'max-video-preview': -1, 'max-image-preview': 'none' },
+          googleBot: {
+            index: false,
+            follow: false,
+            'max-snippet': -1,
+            'max-video-preview': -1,
+            'max-image-preview': 'none',
+          },
         }
       : {
           index: true,
           follow: true,
-          googleBot: { index: true, follow: true },
+          googleBot: {
+            index: true,
+            follow: true,
+          },
         },
     openGraph: {
       title,
@@ -167,7 +176,7 @@ export function generateMeta({
 /** Helper spécifique Article: ajoute les champs OG article */
 export function generateArticleMeta(
   base: MetaProps,
-  extras: ArticleMetaExtras = {}
+  extras: ArticleMetaExtras = {},
 ): Metadata {
   const m = generateMeta({ ...base, type: 'article' })
   const { publishedTime, modifiedTime, authors, section, tags } = extras
@@ -188,9 +197,8 @@ export function generateArticleMeta(
 /** Helper “Product”: conserve type "website" (Next) et expose un bloc à réutiliser pour JSON-LD */
 export function generateProductMeta(
   base: MetaProps,
-  _extras: ProductMetaExtras = {}
+  _extras: ProductMetaExtras = {},
 ): Metadata {
-  // Pour OG, on reste sur type "website". Les détails produit doivent aller en JSON-LD.
   return generateMeta({ ...base, type: 'product' })
 }
 
@@ -274,5 +282,5 @@ export function jsonLdProduct(params: {
   }
 }
 
-// Expose quelques constantes si besoin ailleurs
+// Expose constantes utiles
 export { ORIGIN, SITE_NAME, TWITTER_HANDLE }

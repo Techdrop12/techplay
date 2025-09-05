@@ -1,3 +1,4 @@
+// src/components/JsonLd/index.ts
 export { default as BreadcrumbJsonLd } from './BreadcrumbJsonLd'
 export { default as OrganizationJsonLd } from './OrganizationJsonLd'
 export { default as ArticleJsonLd } from './ArticleJsonLd'

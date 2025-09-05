@@ -42,7 +42,6 @@ export default function ProductJsonLd({ product, maxReviews = 0 }: Props) {
     slug = '',
     title = 'Produit',
     description = 'Découvrez ce produit sur notre boutique.',
-    // ⚠️ on ne destructure plus "price" ici pour éviter le piège de typage
     image,
     category = 'Produit',
     brand,
@@ -56,11 +55,11 @@ export default function ProductJsonLd({ product, maxReviews = 0 }: Props) {
   const imagesInput = Array.isArray(image) ? image : [image ?? '/placeholder.png']
   const images = imagesInput.map((src) => absUrl(src)!).filter(Boolean)
 
-  // --- FIX prix (gère number ou string "123,45") ---
+  // Prix robuste (number ou string "123,45")
   const priceRaw: unknown = (product as any).price
   const priceNumber =
     typeof priceRaw === 'string'
-      ? Number.parseFloat(priceRaw.replace(',', '.')) || 0
+      ? Number.parseFloat((priceRaw as string).replace(',', '.')) || 0
       : Number(priceRaw) || 0
 
   // disponibilité (fallback via stock si présent)
@@ -72,7 +71,7 @@ export default function ProductJsonLd({ product, maxReviews = 0 }: Props) {
         : 'https://schema.org/OutOfStock'
       : DEF_AVAIL)
 
-  // si promo avec date de fin, expose priceValidUntil (YYYY-MM-DD)
+  // promo éventuelle → priceValidUntil (YYYY-MM-DD)
   const priceValidUntil =
     product?.promo?.endDate ? new Date(product.promo.endDate).toISOString().slice(0, 10) : undefined
 
@@ -141,7 +140,7 @@ export default function ProductJsonLd({ product, maxReviews = 0 }: Props) {
     }))
   }
 
-  const currency = currencyProp || 'EUR'
+  const currency = (currencyProp || 'EUR').toUpperCase()
 
   const structuredData: Record<string, any> = {
     '@context': 'https://schema.org',
