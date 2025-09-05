@@ -1,7 +1,7 @@
 // src/lib/meta-pixel.ts
 // 🟦 Meta Pixel helpers (TS) — consent-aware + eventID (dedupe) + CAPI mirror optionnel (fiabilisé)
 
-import { getClientId } from '@/lib/ga'
+import { getClientId, getConsentState } from '@/lib/ga'
 
 export type PixelEvent =
   | 'PageView'
@@ -14,19 +14,16 @@ export type PixelEvent =
 const isBrowser = typeof window !== 'undefined'
 
 // ===== ENV (tous optionnels) ===============================================
-const META_CAPI_URL =
-  (process.env.NEXT_PUBLIC_META_CAPI_URL || '').trim() // ex: "/api/meta-capi" (à implémenter côté serveur)
-const META_TEST_EVENT_CODE =
-  (process.env.NEXT_PUBLIC_META_TEST_CODE || '').trim() // ex: "TEST123" (sandbox)
-const ENABLE_IN_DEV =
-  (process.env.NEXT_PUBLIC_PIXEL_IN_DEV || '').toLowerCase() === 'true'
+const META_CAPI_URL = (process.env.NEXT_PUBLIC_META_CAPI_URL || '').trim() // ex: "/api/meta-capi"
+const META_TEST_EVENT_CODE = (process.env.NEXT_PUBLIC_META_TEST_CODE || '').trim() // ex: "TEST123"
+const ENABLE_IN_DEV = (process.env.NEXT_PUBLIC_PIXEL_IN_DEV || '').toLowerCase() === 'true'
 
 // ===== Consent ==============================================================
 
 function hasAdsConsent(): boolean {
   if (!isBrowser) return false
   try {
-    const s: any = (window as any).__consentState || {}
+    const s = getConsentState()
     const adsGranted =
       s.ad_storage !== 'denied' ||
       s.ad_user_data !== 'denied' ||
@@ -101,7 +98,7 @@ function uuid(): string {
       buf[8] = (buf[8] & 0x3f) | 0x80
       const b2hex = (n: number) => n.toString(16).padStart(2, '0')
       const hex = Array.from(buf, b2hex).join('')
-      return `${hex.substr(0, 8)}-${hex.substr(8, 4)}-${hex.substr(12, 4)}-${hex.substr(16, 4)}-${hex.substr(20)}`
+      return `${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20)}`
     }
   } catch {}
   return (

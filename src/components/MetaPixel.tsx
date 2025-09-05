@@ -23,7 +23,6 @@ declare global {
       country: string
       external_id: string
     }>
-    __consentState?: Record<string, 'granted' | 'denied'>
   }
 }
 
@@ -31,27 +30,13 @@ const PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID ?? ''
 const ENABLE_IN_DEV = (process.env.NEXT_PUBLIC_PIXEL_IN_DEV || '').toLowerCase() === 'true'
 const DEBUG = (process.env.NEXT_PUBLIC_PIXEL_DEBUG || '').toLowerCase() === 'true'
 
-/* ----------------------------- Consent helpers ---------------------------- */
-
-function hasAdsConsent(): boolean {
-  try {
-    const s: any = (window as any).__consentState || {}
-    const adsGranted =
-      s.ad_storage !== 'denied' ||
-      s.ad_user_data !== 'denied' ||
-      s.ad_personalization !== 'denied'
-    const ls = localStorage.getItem('consent:ads') === '1'
-    return adsGranted || ls
-  } catch {
-    return false
-  }
-}
+/* ----------------------------- Eligibility ---------------------------- */
 
 function eligibleNow(): boolean {
   if (!PIXEL_ID) return false
   if (typeof window === 'undefined') return false
 
-  // Respect DNT
+  // Respect Do Not Track
   const dnt =
     (navigator as any).doNotTrack === '1' ||
     (window as any).doNotTrack === '1' ||
@@ -68,14 +53,23 @@ function eligibleNow(): boolean {
   if (dnt || optedOut) return false
   if (process.env.NODE_ENV !== 'production' && !ENABLE_IN_DEV) return false
 
-  // Consent pubs requis
-  if (!hasAdsConsent()) return false
+  // Consent pubs requis (géré en amont dans Tracking/ga.ts → events 'tp:consent')
+  try {
+    const s: any = (window as any).__consentState || {}
+    const adsGranted =
+      s.ad_storage !== 'denied' ||
+      s.ad_user_data !== 'denied' ||
+      s.ad_personalization !== 'denied'
+    const ls = localStorage.getItem('consent:ads') === '1'
+    if (!adsGranted && !ls) return false
+  } catch {
+    return false
+  }
 
   return true
 }
 
 /* ------------------------- Advanced Matching (AM) -------------------------- */
-/** FB attend des SHA-256 lowercased trim pour: em, ph, fn, ln, ct, st, zp, country, external_id */
 const normalizers: Record<string, (v: string) => string> = {
   em: (v) => v.trim().toLowerCase(),
   ph: (v) => v.replace(/[^0-9]/g, ''),
@@ -102,7 +96,7 @@ async function sha256Hex(input: string): Promise<string> {
 
 async function buildAdvancedMatching(): Promise<Record<string, string> | null> {
   if (typeof window !== 'undefined' && window.__pixelHashedAM) return window.__pixelHashedAM
-  const u = (typeof window !== 'undefined' && window.__pixelUser) || null
+  const u = (typeof window !== 'undefined' && (window as any).__pixelUser) || null
   if (!u) return null
   const raw: Array<[keyof typeof normalizers, string | undefined]> = [
     ['em', u.email],

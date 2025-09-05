@@ -10,17 +10,12 @@ export type AnalyticsParams = Record<string, unknown>
 export function sendEvent(name: string, params?: AnalyticsParams) {
   if (typeof window === 'undefined') return
   try {
-    // Utilise notre helper GA4 (ajoute debug_mode, etc. si activé)
     gaLogEvent(name, params)
   } catch {
-    // Fallback best-effort si jamais ga.ts change ou n'est pas dispo
     const w = window as any
     if (typeof w?.gtag === 'function') w.gtag('event', name, params || {})
   }
 }
 
-// On ré-exporte toute l'API GA (pageview, event, trackPurchase, …)
 export * from './ga'
-
-// Optionnel : export par défaut pratique
 export default { sendEvent }

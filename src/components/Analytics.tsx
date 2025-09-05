@@ -132,7 +132,6 @@ export default function Analytics() {
             function gtag(){ window.dataLayer.push(arguments); }
             window.gtag = window.gtag || gtag;
             gtag('js', new Date());
-            // Consent par défaut (déjà en window.__consentState) — on le pousse pour que GA respecte dès le départ
             try { gtag('consent','default', Object.assign({ wait_for_update: 500 }, window.__consentState || {})); } catch(e){}
           })();
         `}

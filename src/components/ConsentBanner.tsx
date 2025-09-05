@@ -1,5 +1,4 @@
 // src/components/ConsentBanner.tsx — UX/A11y + Consent Mode v2 bridge
-
 'use client'
 
 import { useEffect, useRef, useState } from 'react'

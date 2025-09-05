@@ -95,9 +95,14 @@ export default function Tracking() {
     }
   }, [])
 
+  // NB: les IDs .env ne changent pas en runtime; dépendre seulement du consent évite des re-mounts
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const canAnalytics = useMemo(() => Boolean((GA_ID || GTM_ID) && consent.analytics), [consent.analytics])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const canMeta = useMemo(() => Boolean(META_PIXEL_ID && consent.ads), [consent.ads])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const canHotjar = useMemo(() => Boolean(HOTJAR_ID && consent.analytics), [consent.analytics])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const canClarity = useMemo(() => Boolean(CLARITY_ID && consent.analytics), [consent.analytics])
 
   return (
