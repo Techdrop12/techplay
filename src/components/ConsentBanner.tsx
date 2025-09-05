@@ -1,4 +1,4 @@
-// src/components/ConsentBanner.tsx — UX/A11y + Consent Mode v2 bridge
+// src/components/ConsentBanner.tsx — UX/A11y + Consent Mode v2 bridge (version consolidée)
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
@@ -56,7 +56,7 @@ function pushDL(event: string, detail: Record<string, any>) {
 function applyConsent(p: Prefs) {
   // 1) Broadcast app-wide (Tracking, MetaPixel…)
   try { window.dispatchEvent(new CustomEvent('tp:consent', { detail: p })) } catch {}
-  // 2) API de Analytics.tsx (met à jour GA Consent Mode + storage miroir)
+  // 2) API Analytics.tsx (met à jour GA Consent Mode + storage miroir)
   try { window.tpConsentUpdate?.(p) } catch {}
   // 3) Fallback universel si défini (Root layout/head)
   try {

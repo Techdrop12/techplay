@@ -1,4 +1,4 @@
-// src/components/Analytics.tsx — GA4 + Consent Mode v2, SPA-safe, sGTM-ready
+// src/components/Analytics.tsx — GA4 + Consent Mode v2, SPA-safe, sGTM-ready (version optimisée)
 'use client'
 
 import { useEffect } from 'react'
@@ -10,11 +10,6 @@ const GA_ID = process.env.NEXT_PUBLIC_GA_ID ?? ''
 const ENABLE_IN_DEV = (process.env.NEXT_PUBLIC_ANALYTICS_IN_DEV || '').toLowerCase() === 'true'
 const DEBUG_MODE = (process.env.NEXT_PUBLIC_GA_DEBUG || '').toLowerCase() === 'true'
 const GTM_SERVER = (process.env.NEXT_PUBLIC_GTM_SERVER || '').replace(/\/+$/, '')
-const COOKIE_FLAGS = (process.env.NEXT_PUBLIC_GA_COOKIE_FLAGS || 'SameSite=None;Secure').trim()
-const LINKER = (process.env.NEXT_PUBLIC_GA_LINKER_DOMAINS || '')
-  .split(',')
-  .map((s) => s.trim())
-  .filter(Boolean)
 
 export default function Analytics() {
   const pathname = usePathname() || '/'
@@ -29,7 +24,7 @@ export default function Analytics() {
     pageview(`${pathname}${qs}`, title, { send_page_view: false })
   }, [pathname, search, shouldLoad])
 
-  // CMP / bannière → Consent Mode
+  // CMP / bannière → Consent Mode (bridge unique)
   useEffect(() => {
     if (!shouldLoad) return
     const update = (p: {
@@ -69,59 +64,33 @@ export default function Analytics() {
   // GA init (après gtag ready)
   useEffect(() => {
     if (!shouldLoad) return
-    const cfg: Record<string, any> = {
-      debug_mode: DEBUG_MODE || undefined,
-      ads_data_redaction: true,
-      page_path: typeof location !== 'undefined' ? location.pathname + location.search : undefined,
-      page_title: typeof document !== 'undefined' ? document.title : undefined,
-      send_page_view: false,
-      ...(GTM_SERVER ? { transport_url: GTM_SERVER } : {}),
-      ...(COOKIE_FLAGS ? { cookie_flags: COOKIE_FLAGS } : {}),
-      ...(LINKER.length ? { linker: { domains: LINKER } } : {}),
-    }
-    initAnalytics({ disableSignals: true, nonPersonalizedAds: true, config: cfg })
+    initAnalytics({
+      disableSignals: true,
+      nonPersonalizedAds: true,
+      config: {
+        debug_mode: DEBUG_MODE || undefined,
+        ads_data_redaction: true,
+        page_path:
+          typeof location !== 'undefined' ? location.pathname + location.search : undefined,
+        page_title: typeof document !== 'undefined' ? document.title : undefined,
+        send_page_view: false,
+        ...(GTM_SERVER ? { transport_url: GTM_SERVER } : {}),
+      },
+    })
   }, [shouldLoad])
 
   if (!shouldLoad) return null
 
   return (
     <>
-      {/* Bootstrap consent AVANT gtag (défaut basé sur DNT/localStorage) */}
-      <Script id="ga4-consent-bootstrap" strategy="beforeInteractive">
-        {`
-          (function() {
-            var dnt = (navigator.doNotTrack === '1') || (window.doNotTrack === '1') || (navigator.msDoNotTrack === '1');
-            var a = '0', ads = '0';
-            try { a = localStorage.getItem('consent:analytics') || '0'; ads = localStorage.getItem('consent:ads') || '0'; } catch(e){}
-            var analyticsGranted = (!dnt && a === '1');
-            var adsGranted = (!dnt && ads === '1');
-            window.__consentState = {
-              analytics_storage: analyticsGranted ? 'granted' : 'denied',
-              ad_storage: adsGranted ? 'granted' : 'denied',
-              ad_user_data: adsGranted ? 'granted' : 'denied',
-              ad_personalization: adsGranted ? 'granted' : 'denied',
-              functionality_storage: 'granted',
-              security_storage: 'granted'
-            };
-            window.__applyConsent = function(update){
-              try {
-                window.__consentState = Object.assign({}, window.__consentState, update || {});
-                if (typeof window.gtag === 'function') window.gtag('consent','update', window.__consentState);
-                window.dispatchEvent(new CustomEvent('tp:consent', { detail: window.__consentState }));
-              } catch(e){}
-            };
-          })();
-        `}
-      </Script>
-
-      {/* GA4 loader */}
+      {/* GA4 loader (unique si pas géré par GTM) */}
       <Script
         id="ga4-src"
         src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(GA_ID)}`}
         strategy="afterInteractive"
       />
 
-      {/* gtag bootstrap */}
+      {/* gtag bootstrap (consent default déjà posé dans app/layout.tsx) */}
       <Script id="ga4-init" strategy="afterInteractive">
         {`
           (function() {
@@ -130,12 +99,14 @@ export default function Analytics() {
             var DISABLE_KEY = 'ga-disable-${GA_ID}';
             var optedOut = false;
             try { optedOut = localStorage.getItem('ga:disabled') === '1' || localStorage.getItem('analytics:disabled') === '1'; } catch(e){}
+
             if (dnt || optedOut) { window[DISABLE_KEY] = true; }
+
             window.dataLayer = window.dataLayer || [];
-            function gtag(){ window.dataLayer.push(arguments); }
+            function gtag(){ dataLayer.push(arguments); }
             window.gtag = window.gtag || gtag;
             gtag('js', new Date());
-            try { gtag('consent','default', Object.assign({ wait_for_update: 500 }, window.__consentState || {})); } catch(e){}
+            // Consent default déjà injecté côté root layout (source de vérité).
           })();
         `}
       </Script>

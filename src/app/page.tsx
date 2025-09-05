@@ -1,7 +1,8 @@
-// src/app/page.tsx — Home ULTIME++ (perf/a11y/SEO centralisé, sans doublons)
+// src/app/page.tsx — Home i18n-ready (FR/EN via cookie), catégories localisées, SEO centralisé
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
+import { cookies } from 'next/headers'
 
 import { getBestProducts, getRecommendedPacks } from '@/lib/data'
 import type { Product, Pack } from '@/types/product'
@@ -9,20 +10,69 @@ import TrustBadges from '@/components/TrustBadges'
 import ClientTrackingScript from '@/components/ClientTrackingScript'
 import Link from '@/components/LocalizedLink'
 import { generateMeta } from '@/lib/seo'
-import { CATEGORIES } from '@/lib/categories'
+import { getCategories } from '@/lib/categories'
+import { isLocale, defaultLocale as DEFAULT_LOCALE } from '@/i18n/config'
 
 const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'))
 const BestProducts = dynamic(() => import('@/components/BestProducts'), {
-  loading: () => <SectionSkeleton title="Nos Meilleures Ventes" />,
+  loading: () => <SectionSkeleton title="…" />,
 })
 const PacksSection = dynamic(() => import('@/components/PacksSection'), {
-  loading: () => <SectionSkeleton title="Packs recommandés" />,
+  loading: () => <SectionSkeleton title="…" />,
 })
 const FAQ = dynamic(() => import('@/components/FAQ'), {
-  loading: () => <SectionSkeleton title="Questions fréquentes" />,
+  loading: () => <SectionSkeleton title="…" />,
 })
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://techplay.example.com'
+
+/* ----------------------------- i18n strings ------------------------------ */
+const STR = {
+  fr: {
+    homeTitle: 'TechPlay – Boutique high-tech & packs exclusifs',
+    heroAria: 'Carrousel des produits en vedette',
+    catsKicker: 'Explorer',
+    catsTitle: 'Catégories incontournables',
+    catsSub: 'Des sélections pointues pour aller droit au but.',
+    bestKicker: 'Top ventes',
+    bestTitle: 'Nos Meilleures Ventes',
+    bestSub: 'Les favoris de la communauté – stock limité.',
+    packsKicker: 'Bundle',
+    packsTitle: 'Packs recommandés',
+    packsSub: 'Des combinaisons pensées pour la performance et l’économie.',
+    faqTitle: 'Questions fréquentes',
+    ctaTitle: 'Appel à l’action',
+    ctaOffer: 'Offre du moment',
+    ctaHeadline: 'Boostez votre setup en ',
+    ctaSpan: 'un clic',
+    ctaText: 'Packs optimisés, meilleurs prix, livraison rapide.',
+    ctaPacks: 'Découvrir les packs',
+    ctaProducts: 'Voir les produits',
+    seeCat: 'Voir →',
+  },
+  en: {
+    homeTitle: 'TechPlay – High-tech store & exclusive bundles',
+    heroAria: 'Featured products carousel',
+    catsKicker: 'Explore',
+    catsTitle: 'Must-have categories',
+    catsSub: 'Curated picks to get straight to the point.',
+    bestKicker: 'Best sellers',
+    bestTitle: 'Our Best Sellers',
+    bestSub: 'Community favorites – limited stock.',
+    packsKicker: 'Bundle',
+    packsTitle: 'Recommended bundles',
+    packsSub: 'Combos designed for performance and savings.',
+    faqTitle: 'Frequently asked questions',
+    ctaTitle: 'Call to action',
+    ctaOffer: 'Deal of the moment',
+    ctaHeadline: 'Boost your setup in ',
+    ctaSpan: 'one click',
+    ctaText: 'Optimized bundles, best prices, fast delivery.',
+    ctaPacks: 'Discover bundles',
+    ctaProducts: 'View products',
+    seeCat: 'See →',
+  },
+} as const
 
 // SEO: on génère tout via lib/seo puis on force un titre absolute (évite le suffixe du layout)
 const BASE_META = generateMeta({
@@ -65,18 +115,17 @@ function SectionHeader({
 }
 
 /* --------------------- Catégories (icônes premium centrales) -------------------- */
-function FeaturedCategories() {
-  // On affiche les catégories depuis le mapping central (zéro duplication).
-  const items = CATEGORIES.slice(0, 8)
+function FeaturedCategories({ locale }: { locale: 'fr' | 'en' }) {
+  const items = getCategories(locale).slice(0, 8)
 
   return (
     <section id="categories" aria-labelledby="cats-title" className="motion-section">
       <SectionHeader
-        kicker="Explorer"
-        title="Catégories incontournables"
-        sub="Des sélections pointues pour aller droit au but."
+        kicker={STR[locale].catsKicker}
+        title={STR[locale].catsTitle}
+        sub={STR[locale].catsSub}
       />
-      <h3 id="cats-title" className="sr-only">Catégories vedettes</h3>
+      <h3 id="cats-title" className="sr-only">{STR[locale].catsTitle}</h3>
 
       <ul role="list" className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-6">
         {items.map((c) => (
@@ -87,13 +136,13 @@ function FeaturedCategories() {
               className="group block rounded-2xl border border-token-border bg-token-surface/70 backdrop-blur shadow-sm transition hover:shadow-elevated focus-ring p-4 sm:p-5"
               data-gtm="home_cat_card"
               data-cat={c.label}
-              aria-label={`Voir la catégorie ${c.label} — ${c.desc}`}
+              aria-label={`${c.label} — ${c.desc}`}
             >
               <c.Icon className="opacity-80" />
               <div className="mt-3 font-semibold">{c.label}</div>
               <div className="text-xs text-token-text/60">{c.desc}</div>
               <div className="mt-3 text-xs font-semibold text-[hsl(var(--accent))] opacity-0 transition group-hover:opacity-100">
-                Voir →
+                {STR[locale].seeCat}
               </div>
             </Link>
           </li>
@@ -103,10 +152,10 @@ function FeaturedCategories() {
   )
 }
 
-function SplitCTA() {
+function SplitCTA({ locale }: { locale: 'fr' | 'en' }) {
   return (
     <section
-      aria-label="Appel à l’action"
+      aria-label={STR[locale].ctaTitle}
       className="motion-section relative overflow-hidden rounded-3xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.10)] via-transparent to-token-surface p-6 sm:p-10 shadow-elevated"
       style={{ contentVisibility: 'auto', containIntrinsicSize: '300px' } as any}
     >
@@ -114,12 +163,15 @@ function SplitCTA() {
       <div aria-hidden className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-token-text/10 blur-3xl" />
       <div className="relative grid items-center gap-6 lg:grid-cols-2">
         <div>
-          <p className="text-xs uppercase tracking-widest font-bold text-[hsl(var(--accent))]/90">Offre du moment</p>
+          <p className="text-xs uppercase tracking-widest font-bold text-[hsl(var(--accent))]/90">
+            {STR[locale].ctaOffer}
+          </p>
           <h3 className="mt-2 text-2xl sm:text-3xl font-extrabold">
-            Boostez votre setup en <span className="text-gradient">un clic</span>
+            {STR[locale].ctaHeadline}
+            <span className="text-gradient">{STR[locale].ctaSpan}</span>
           </h3>
           <p className="mt-3 text-sm sm:text-base text-token-text/70">
-            Packs optimisés, meilleurs prix, livraison rapide.
+            {STR[locale].ctaText}
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Link
@@ -128,7 +180,7 @@ function SplitCTA() {
               className="inline-flex items-center rounded-xl bg-[hsl(var(--accent))] px-5 py-3 font-semibold text-white shadow hover:bg-[hsl(var(--accent)/.92)] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
               data-gtm="home_cta_packs"
             >
-              Découvrir les packs
+              {STR[locale].ctaPacks}
             </Link>
             <Link
               href="/products"
@@ -136,7 +188,7 @@ function SplitCTA() {
               className="inline-flex items-center rounded-xl border border-token-border bg-token-surface px-5 py-3 font-semibold hover:shadow focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
               data-gtm="home_cta_products"
             >
-              Voir les produits
+              {STR[locale].ctaProducts}
             </Link>
           </div>
         </div>
@@ -146,15 +198,23 @@ function SplitCTA() {
   )
 }
 
-function Testimonials() {
-  const items = [
-    { name: 'Léa',    text: 'Livraison rapide et clavier incroyable, je recommande !' },
-    { name: 'Maxime', text: 'Service client réactif, pack super rentable.' },
-    { name: 'Amine',  text: 'Qualité au top, site fluide et clair.' },
-  ]
+function Testimonials({ locale }: { locale: 'fr' | 'en' }) {
+  const items =
+    locale === 'fr'
+      ? [
+          { name: 'Léa',    text: 'Livraison rapide et clavier incroyable, je recommande !' },
+          { name: 'Maxime', text: 'Service client réactif, pack super rentable.' },
+          { name: 'Amine',  text: 'Qualité au top, site fluide et clair.' },
+        ]
+      : [
+          { name: 'Lea',   text: 'Fast delivery and an amazing keyboard, highly recommend!' },
+          { name: 'Max',   text: 'Responsive support, bundle was great value.' },
+          { name: 'Amin',  text: 'Top quality, smooth and clear website.' },
+        ]
+
   return (
-    <section aria-label="Témoignages clients" className="motion-section">
-      <SectionHeader kicker="Avis" title="Les clients en parlent" sub="Une communauté exigeante et satisfaite." />
+    <section aria-label="Testimonials" className="motion-section">
+      <SectionHeader kicker="Avis / Reviews" title="Les clients en parlent / What customers say" sub="" />
       <ul role="list" className="mt-8 grid gap-4 sm:grid-cols-3">
         {items.map((t, i) => (
           <li key={i} className="rounded-2xl border border-token-border bg-token-surface/70 p-5 shadow-soft">
@@ -182,6 +242,12 @@ function SectionSkeleton({ title }: { title: string }) {
 
 /* --------------------------------- Page ---------------------------------- */
 export default async function HomePage() {
+  // Locale depuis cookie (fallback FR)
+  const cookieStore = await cookies()
+  const cookieLocale = cookieStore.get('NEXT_LOCALE')?.value
+  const locale = isLocale(cookieLocale || '') ? (cookieLocale as 'fr' | 'en') : (DEFAULT_LOCALE as 'fr' | 'en')
+  const L = STR[locale]
+
   let bestProducts: Product[] = []
   let recommendedPacks: Pack[] = []
   try {
@@ -199,18 +265,20 @@ export default async function HomePage() {
       ? {
           '@context': 'https://schema.org',
           '@type': 'ItemList',
-          itemListElement: bestProducts.slice(0, 8).map((p: any, idx: number) => ({
-            '@type': 'ListItem',
-            position: idx + 1,
-            url: p?.slug ? `${SITE_URL}/products/${p.slug}` : `${SITE_URL}/products`,
-            name: p?.title ?? 'Produit',
-          })),
+          itemListElement: bestProducts.slice(0, 8).map((p: any, idx: number) => ([
+            {
+              '@type': 'ListItem',
+              position: idx + 1,
+              url: p?.slug ? `${SITE_URL}/products/${p.slug}` : `${SITE_URL}/products`,
+              name: p?.title ?? 'Produit',
+            }
+          ][0])),
         }
       : null
 
   return (
     <>
-      <h1 className="sr-only">TechPlay – Boutique high-tech & packs exclusifs</h1>
+      <h1 className="sr-only">{L.homeTitle}</h1>
       <ClientTrackingScript event="homepage_view" />
 
       {/* Glow décoratif global */}
@@ -219,62 +287,62 @@ export default async function HomePage() {
       </div>
 
       <main id="main" className="mx-auto max-w-screen-xl scroll-smooth px-4 sm:px-6 space-y-24 md:space-y-28" role="main" tabIndex={-1}>
-        <section aria-label="Carrousel des produits en vedette" className="motion-section" id="hero">
+        <section aria-label={L.heroAria} className="motion-section" id="hero">
           <Suspense fallback={<div className="h-40 sm:h-56 lg:h-72 rounded-2xl skeleton" />}>
             <HeroCarousel />
             <noscript><p><a href="/products">Voir les produits</a></p></noscript>
           </Suspense>
         </section>
 
-        <FeaturedCategories />
+        <FeaturedCategories locale={locale} />
 
         <section
-          aria-label="Meilleures ventes TechPlay"
+          aria-label={L.bestTitle}
           className="motion-section"
           id="best-products"
           style={{ contentVisibility: 'auto', containIntrinsicSize: '600px' } as any}
         >
           <SectionHeader
-            kicker="Top ventes"
-            title="Nos Meilleures Ventes"
-            sub="Les favoris de la communauté – stock limité."
+            kicker={L.bestKicker}
+            title={L.bestTitle}
+            sub={L.bestSub}
           />
           <div className="mt-8">
-            <Suspense fallback={<SectionSkeleton title="Nos Meilleures Ventes" />}>
+            <Suspense fallback={<SectionSkeleton title={L.bestTitle} />}>
               <BestProducts products={bestProducts} showTitle={false} />
             </Suspense>
           </div>
         </section>
 
         <section
-          aria-label="Packs TechPlay recommandés"
+          aria-label={L.packsTitle}
           className="motion-section"
           id="packs"
           style={{ contentVisibility: 'auto', containIntrinsicSize: '600px' } as any}
         >
           <SectionHeader
-            kicker="Bundle"
-            title="Packs recommandés"
-            sub="Des combinaisons pensées pour la performance et l’économie."
+            kicker={L.packsKicker}
+            title={L.packsTitle}
+            sub={L.packsSub}
           />
           <div className="mt-8">
-            <Suspense fallback={<SectionSkeleton title="Packs recommandés" />}>
+            <Suspense fallback={<SectionSkeleton title={L.packsTitle} />}>
               <PacksSection packs={recommendedPacks} />
             </Suspense>
           </div>
         </section>
 
-        <Testimonials />
-        <SplitCTA />
+        <Testimonials locale={locale} />
+        <SplitCTA locale={locale} />
 
         <section
-          aria-label="Questions fréquentes de nos clients"
+          aria-label={L.faqTitle}
           className="motion-section"
           style={{ contentVisibility: 'auto', containIntrinsicSize: '500px' } as any}
         >
-          <SectionHeader kicker="FAQ" title="Questions fréquentes" />
+          <SectionHeader kicker="FAQ" title={L.faqTitle} />
           <div className="mt-8">
-            <Suspense fallback={<SectionSkeleton title="Questions fréquentes" />}>
+            <Suspense fallback={<SectionSkeleton title={L.faqTitle} />}>
               <FAQ />
             </Suspense>
           </div>

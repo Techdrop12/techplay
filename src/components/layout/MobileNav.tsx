@@ -1,4 +1,4 @@
-// src/components/layout/MobileNav.tsx — i18n-safe, icônes premium, catégories centralisées — FINAL++
+// src/components/layout/MobileNav.tsx — i18n-safe, icônes premium, catégories centralisées — FINAL++ (hooks optionnels sûrs)
 'use client'
 
 import Link from '@/components/LocalizedLink'
@@ -139,6 +139,14 @@ const track = (args: { action: string; category?: string; label?: string; value?
   try { (logEvent as any)?.(action, payload) } catch {}
 }
 
+/* --- Hooks optionnels sûrs : respect strict de la règle des hooks --- */
+function useOptionalCart(): any {
+  try { return useCart() as any } catch { return {} }
+}
+function useOptionalWishlist(): any {
+  try { return useWishlist() as any } catch { return {} }
+}
+
 export default function MobileNav() {
   const pathname = usePathname() || '/'
   const router = useRouter()
@@ -154,9 +162,9 @@ export default function MobileNav() {
   const dialogId = useId()
   const titleId = `${dialogId}-title`
 
-  // Stores (hooks inconditionnels)
-  const cartStore = (() => { try { return useCart() as any } catch { return {} } })()
-  const wishlistStore = (() => { try { return useWishlist() as any } catch { return {} } })()
+  // Stores via hooks optionnels
+  const cartStore = useOptionalCart()
+  const wishlistStore = useOptionalWishlist()
   const cart = cartStore?.cart
   const wishlist = wishlistStore?.wishlist
 
@@ -270,8 +278,8 @@ export default function MobileNav() {
         if (!focusables.length) return
         const first = focusables[0]
         const last = focusables[focusables.length - 1]
-        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
-        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); (last as HTMLElement).focus() }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); (first as HTMLElement).focus() }
       }
     }
 
