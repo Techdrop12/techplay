@@ -1,4 +1,4 @@
-// src/components/layout/MobileNav.tsx — i18n-safe, icônes premium, catégories centralisées — FINAL++ (hooks optionnels sûrs)
+// src/components/layout/MobileNav.tsx — i18n-safe, icônes premium, catégories centralisées — FINAL++ (hooks optionnels sûrs + fix lien catégories + a11y polish)
 'use client'
 
 import Link from '@/components/LocalizedLink'
@@ -17,6 +17,7 @@ const STR = {
   fr: {
     nav: [
       { href: '/products', label: 'Produits' },
+      // Spécial: '/categorie' est géré comme un bouton qui ouvre la section Catégories (pas une page)
       { href: '/categorie', label: 'Catégories' },
       { href: '/wishlist', label: 'Wishlist' },
       { href: '/blog', label: 'Blog' },
@@ -46,6 +47,7 @@ const STR = {
   en: {
     nav: [
       { href: '/products', label: 'Products' },
+      // Special: '/categorie' is handled as a button opening Categories section (not a page)
       { href: '/categorie', label: 'Categories' },
       { href: '/wishlist', label: 'Wishlist' },
       { href: '/blog', label: 'Blog' },
@@ -161,6 +163,7 @@ export default function MobileNav() {
   const reducedMotion = useReducedMotion()
   const dialogId = useId()
   const titleId = `${dialogId}-title`
+  const catsPanelId = useId()
 
   // Stores via hooks optionnels
   const cartStore = useOptionalCart()
@@ -314,12 +317,13 @@ export default function MobileNav() {
   const sheetVariants = { hidden: { y: reducedMotion ? 0 : '10%', opacity: 0.001 }, visible: { y: 0, opacity: 1, transition: { duration: reducedMotion ? 0 : 0.22, ease: 'easeOut' } }, exit: { y: reducedMotion ? 0 : '10%', opacity: 0, transition: { duration: 0.16 } } }
 
   const isActive = (href: string) => {
+    if (href === '/categorie') return false // ce n'est pas une vraie page
     const tHref = L(href)
     return pathname === tHref || pathname.startsWith(tHref + '/')
   }
 
   const prefetchOnPointer = (href: string) => {
-    try { const tHref = L(href); if (tHref && !isActive(href)) router.prefetch(tHref) } catch {}
+    try { const tHref = L(href); if (href !== '/categorie' && tHref && !isActive(href)) router.prefetch(tHref) } catch {}
   }
 
   // Placeholder (pause on focus + onglet masqué) + récentes
@@ -375,12 +379,25 @@ export default function MobileNav() {
     router.push(`${SEARCH_ACTION}?q=${encodeURIComponent(cleaned)}`)
   }
 
+  // Helper pour ouvrir la section catégories depuis l'item de nav (sans naviguer)
+  const openCatsFromNav = () => {
+    setCatsOpen(true)
+    track({ action: 'mobile_nav_link_click', label: '/categorie' })
+    // scroll léger vers la section catégories dans le panneau
+    requestAnimationFrame(() => {
+      try {
+        const el = document.getElementById(catsPanelId)
+        el?.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' })
+      } catch {}
+    })
+  }
+
   return (
     <>
       {/* Trigger */}
       <button
         ref={triggerRef}
-        onClick={() => setOpen(true)}
+        onClick={openMenu}
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={dialogId}
@@ -413,7 +430,7 @@ export default function MobileNav() {
             <motion.div
               className="absolute inset-0 bg-black/40 backdrop-blur-sm"
               variants={overlayVariants}
-              onClick={() => setOpen(false)}
+              onClick={() => closeMenu('backdrop')}
               aria-hidden="true"
             />
 
@@ -425,14 +442,14 @@ export default function MobileNav() {
               drag={reducedMotion ? false : 'y'}
               dragConstraints={{ top: 0, bottom: 0 }}
               dragElastic={0.04}
-              onDragEnd={(_, info) => { if (info.offset.y > 80) setOpen(false) }}
+              onDragEnd={(_, info) => { if (info.offset.y > 80) closeMenu('drag_close') }}
             >
               <div className="pt-[env(safe-area-inset-top)]" />
               <div className="mx-auto mt-3 h-1.5 w-14 rounded-full bg-token-text/20" aria-hidden="true" />
               <div className="flex items-center justify-between px-4 py-3">
                 <h2 id={titleId} className="text-lg font-semibold">{t.ui.menu}</h2>
                 <button
-                  onClick={() => setOpen(false)}
+                  onClick={() => closeMenu('close_btn')}
                   type="button"
                   className="rounded px-3 py-2 text-sm hover:bg-token-surface-2 focus-ring"
                   aria-label={t.ui.closeMenu}
@@ -515,7 +532,7 @@ export default function MobileNav() {
                   prefetch={false}
                   onPointerDown={() => prefetchOnPointer('/wishlist')}
                   onFocus={() => prefetchOnPointer('/wishlist')}
-                  onClick={() => { track({ action: 'mobile_nav_quick_wishlist' }); setOpen(false) }}
+                  onClick={() => { track({ action: 'mobile_nav_quick_wishlist' }); closeMenu('quick_wishlist') }}
                   className="relative inline-flex items-center gap-2 rounded-lg border border-token-border px-3 py-2 text-sm font-medium hover:bg-token-surface-2 focus-ring"
                   aria-label={t.ui.wishlist(wishlistCount)}
                 >
@@ -531,7 +548,7 @@ export default function MobileNav() {
                   prefetch={false}
                   onPointerDown={() => prefetchOnPointer('/login')}
                   onFocus={() => prefetchOnPointer('/login')}
-                  onClick={() => { track({ action: 'mobile_nav_quick_account' }); setOpen(false) }}
+                  onClick={() => { track({ action: 'mobile_nav_quick_account' }); closeMenu('quick_account') }}
                   className="inline-flex items-center gap-2 rounded-lg border border-token-border px-3 py-2 text-sm font-medium hover:bg-token-surface-2 focus-ring"
                   aria-label={t.ui.account}
                 >
@@ -557,6 +574,7 @@ export default function MobileNav() {
                   type="button"
                   onClick={() => setCatsOpen((v) => !v)}
                   aria-expanded={catsOpen}
+                  aria-controls={catsPanelId}
                   className="flex w-full items-center justify-between rounded-xl border border-token-border bg-token-surface px-4 py-3 text-base font-semibold hover:bg-token-surface-2 focus-ring"
                 >
                   {t.ui.categories}
@@ -565,6 +583,9 @@ export default function MobileNav() {
                 <AnimatePresence initial={false}>
                   {catsOpen && (
                     <motion.div
+                      id={catsPanelId}
+                      role="region"
+                      aria-label={t.ui.categories}
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
@@ -579,7 +600,7 @@ export default function MobileNav() {
                               prefetch={false}
                               onPointerDown={() => prefetchOnPointer(c.href)}
                               onFocus={() => prefetchOnPointer(c.href)}
-                              onClick={() => { track({ action: 'mobile_nav_cat', label: c.href }); setOpen(false) }}
+                              onClick={() => { track({ action: 'mobile_nav_cat', label: c.href }); closeMenu('cat_click') }}
                               className="group flex items-center gap-3 rounded-xl border border-transparent bg-token-surface/80 p-3 transition hover:-translate-y-0.5 hover:border-[hsl(var(--accent)/.30)] hover:bg-token-surface shadow-sm hover:shadow-md focus-ring"
                             >
                               <c.Icon className="opacity-80" />
@@ -605,8 +626,30 @@ export default function MobileNav() {
                   {t.nav.map((item) => {
                     const { href, label } = item
                     const promo = (item as any).promo === true || href.includes('promo=1')
+
+                    // Cas spécial: l'item "Catégories" n'est pas une page → transforme en bouton qui ouvre la section
+                    if (href === '/categorie') {
+                      return (
+                        <li key={href}>
+                          <button
+                            type="button"
+                            onClick={openCatsFromNav}
+                            aria-expanded={catsOpen}
+                            aria-controls={catsPanelId}
+                            className={[
+                              'w-full rounded-xl px-4 py-3 text-left transition focus-ring',
+                              'hover:bg-token-surface-2 border border-transparent',
+                            ].join(' ')}
+                          >
+                            {label}
+                          </button>
+                        </li>
+                      )
+                    }
+
                     const active = isActive(href)
-                    const onClick = () => { track({ action: 'mobile_nav_link_click', label: href }); setOpen(false) }
+                    const onClick = () => { track({ action: 'mobile_nav_link_click', label: href }); closeMenu('nav_link') }
+
                     return (
                       <li key={href}>
                         <Link
@@ -641,7 +684,7 @@ export default function MobileNav() {
                   prefetch={false}
                   onPointerDown={() => prefetchOnPointer('/commande')}
                   onFocus={() => prefetchOnPointer('/commande')}
-                  onClick={() => { track({ action: 'mobile_nav_cart_click', label: 'cart', value: cartCount || 1 }); setOpen(false) }}
+                  onClick={() => { track({ action: 'mobile_nav_cart_click', label: 'cart', value: cartCount || 1 }); closeMenu('cart_btn') }}
                   className="relative inline-flex items-center justify-center rounded-lg border border-token-border px-4 py-2 text-base font-semibold hover:bg-token-surface-2 focus-ring"
                   aria-label={t.ui.cart(cartCount)}
                 >
@@ -655,7 +698,7 @@ export default function MobileNav() {
                 </Link>
 
                 <button
-                  onClick={() => setOpen(false)}
+                  onClick={() => closeMenu('footer_close')}
                   type="button"
                   className="ml-auto text-sm text-token-text/70 hover:underline focus:outline-none"
                   aria-label={t.ui.closeMenu}
