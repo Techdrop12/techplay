@@ -169,9 +169,10 @@ export default function Footer({
 
   const openConsentManager = (e?: { preventDefault?: () => void }) => {
     e?.preventDefault?.()
-    try {
-      window.dispatchEvent(new CustomEvent('open-consent-manager'))
-    } catch {}
+    // ✅ Compat totale avec ton CMP (ConsentBanner.tsx expose tpOpenConsent)
+    try { ;(window as any).tpOpenConsent?.() } catch {}
+    // Fallback event (si tu relies ailleurs)
+    try { window.dispatchEvent(new CustomEvent('open-consent-manager')) } catch {}
     track('open_consent_manager', { location: 'footer' })
   }
 
