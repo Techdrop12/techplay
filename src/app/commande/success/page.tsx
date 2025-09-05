@@ -1,13 +1,11 @@
-// src/app/commande/success/page.tsx — SUCCESS ++ avec PurchaseTracker (noindex)
+// src/app/commande/success/page.tsx — SUCCESS ++ (noindex, wrapper client pour dynamic)
 import type { Metadata } from 'next'
-import dynamic from 'next/dynamic'
+import PurchaseTrackerClient from './PurchaseTrackerClient'
 
 export const metadata: Metadata = {
   title: 'Commande réussie',
   robots: { index: false, follow: false },
 }
-
-const PurchaseTracker = dynamic(() => import('@/components/checkout/PurchaseTracker'), { ssr: false })
 
 export default function OrderSuccessPage({
   searchParams,
@@ -17,9 +15,6 @@ export default function OrderSuccessPage({
 
   return (
     <main className="container max-w-3xl mx-auto px-4 py-24 text-center">
-      {/* Tracking achat (dédupliqué) */}
-      <PurchaseTracker sessionId={sess} mock={mock} />
-
       <h1 className="text-3xl font-extrabold">Merci pour votre commande 🎉</h1>
       <p className="mt-3 text-gray-600 dark:text-gray-300">
         Un email de confirmation va vous être envoyé dans quelques instants.
@@ -36,6 +31,9 @@ export default function OrderSuccessPage({
           <p className="text-sm">Session non spécifiée.</p>
         )}
       </div>
+
+      {/* Tracking post-achat (client) */}
+      <PurchaseTrackerClient sessionId={sess} mock={mock} />
 
       <div className="mt-8 space-x-3">
         <a href="/" className="inline-block rounded-lg border px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-zinc-800">
