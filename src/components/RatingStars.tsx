@@ -103,9 +103,10 @@ export default function RatingStars({
   noFocusWhenReadOnly,
 }: RatingStarsProps) {
   const px = toPx(size)
-  const safe = clamp(Number.isFinite(value) ? value : 0, 0, max)
+  const committed = clamp(Number.isFinite(value) ? value : 0, 0, max)
+
   const [hoverValue, setHoverValue] = useState<number | null>(null)
-  const current = hoverValue ?? safe
+  const current = hoverValue ?? committed
   const rounded = Math.round(current * 10) / 10
 
   const ref = useRef<HTMLDivElement | null>(null)
@@ -118,7 +119,7 @@ export default function RatingStars({
   const computeFromPointer = useCallback(
     (clientX: number) => {
       const el = ref.current
-      if (!el) return safe
+      if (!el) return committed
       const rect = el.getBoundingClientRect()
       const x = clamp(clientX - rect.left, 0, rect.width)
       const ratio = rect.width ? x / rect.width : 0
@@ -126,7 +127,7 @@ export default function RatingStars({
       const snapped = roundToStep(raw, step)
       return clamp(snapped, 0, max)
     },
-    [max, step, safe],
+    [max, step, committed],
   )
 
   const handleMouseMove = useCallback(
@@ -164,12 +165,12 @@ export default function RatingStars({
   const onKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
       if (!editable || disabled) return
-      let next = safe
+      let next = committed
       const delta = step === 1 ? 1 : 0.5
       if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
-        next = safe + delta
+        next = committed + delta
       } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
-        next = safe - delta
+        next = committed - delta
       } else if (e.key === 'Home') {
         next = 0
       } else if (e.key === 'End') {
@@ -180,21 +181,22 @@ export default function RatingStars({
       e.preventDefault()
       onChange?.(clamp(roundToStep(next, step), 0, max))
     },
-    [editable, disabled, safe, step, max, onChange],
+    [editable, disabled, committed, step, max, onChange],
   )
 
-  const aria =
+  const sliderAria =
     editable && !disabled
       ? {
-          role: 'slider',
-          'aria-label': ariaLabel ?? `Choisir une note`,
+          role: 'slider' as const,
+          'aria-label': ariaLabel ?? 'Choisir une note',
           'aria-valuemin': 0,
           'aria-valuemax': max,
-          'aria-valuenow': Math.round(safe * 10) / 10,
+          'aria-valuenow': Math.round(committed * 10) / 10,
+          'aria-valuetext': `${Math.round(committed * 10) / 10} sur ${max}`,
           tabIndex: 0,
         }
       : {
-          role: 'img',
+          role: 'img' as const,
           'aria-label': ariaLabel ?? `Note : ${rounded} sur ${max}`,
           tabIndex: noFocusWhenReadOnly ? -1 : 0,
         }
@@ -213,7 +215,7 @@ export default function RatingStars({
       onKeyDown={onKeyDown}
       aria-readonly={!editable || undefined}
       aria-disabled={disabled || undefined}
-      {...aria}
+      {...sliderAria}
     >
       {perStarFill.map((fill, i) => (
         <Star
@@ -226,7 +228,11 @@ export default function RatingStars({
       ))}
 
       {showValue && (
-        <span className="ml-1 text-sm font-medium text-zinc-600 dark:text-zinc-300" aria-live="polite" aria-atomic="true">
+        <span
+          className="ml-1 text-sm font-medium text-zinc-600 dark:text-zinc-300"
+          aria-live="polite"
+          aria-atomic="true"
+        >
           ({rounded.toLocaleString(undefined, { maximumFractionDigits: 1 })}/{max})
         </span>
       )}
