@@ -3,16 +3,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import createMiddleware from 'next-intl/middleware'
 import { getToken } from 'next-auth/jwt'
 
-/** ───────────────────────── I18N ───────────────────────── **/
-const intlMiddleware = createMiddleware({
-  locales: ['fr', 'en'],
-  defaultLocale: 'fr',
-  localePrefix: 'as-needed',
-  // ❗️IMPORTANT: on coupe la détection par Accept-Language (on gère nous-mêmes à la racine)
-  localeDetection: false,
-})
+/** ─────────────────────── Constantes ─────────────────────── **/
+const SUPPORTED_LOCALES = ['fr', 'en'] as const
+const DEFAULT_LOCALE = 'fr' as const
+const LOCALE_COOKIE = 'NEXT_LOCALE'
+const ADMIN_LOGIN_PATH = process.env.ADMIN_LOGIN_PATH || '/login'
 
-/** ──────────────────── Constantes/Helpers ─────────────────── **/
 const isDev = process.env.NODE_ENV !== 'production'
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com'
 const CANONICAL_HOST = safeHostname(SITE_URL)
@@ -36,9 +32,19 @@ const PUBLIC_PREFIXES = [
 
 const PUBLIC_PATHS = [...STATIC_FILES.flatMap((f) => [`/${f}`, `/fr/${f}`, `/en/${f}`])]
 
-// ✅ Vraies routes localisées existantes sous /[locale]/... (à étendre au fur et à mesure)
+// ✅ Vraies routes localisées existantes sous /[locale]/... (à étendre au besoin)
 const LOCALE_NATIVE_PREFIXES = ['/wishlist']
 
+/** ─────────────────────── i18n (next-intl) ─────────────────────── **/
+const intlMiddleware = createMiddleware({
+  locales: SUPPORTED_LOCALES as unknown as string[],
+  defaultLocale: DEFAULT_LOCALE,
+  localePrefix: 'as-needed',
+  // ❗️IMPORTANT: pas de détection Accept-Language côté next-intl (on gère nous-mêmes à la racine)
+  localeDetection: false,
+})
+
+/** ──────────────────── Helpers réutilisables ─────────────────── **/
 function safeHostname(url: string) {
   try {
     return new URL(url).hostname
@@ -102,6 +108,28 @@ function bestFromAcceptLanguage(h?: string | null): 'fr' | 'en' {
   return 'fr'
 }
 
+/** Ajoute des valeurs au header Vary sans dupliquer ni écraser. */
+function appendVary(res: NextResponse, values: string) {
+  const prev = res.headers.get('Vary')
+  const set = new Set<string>()
+  if (prev) prev.split(',').forEach((v) => set.add(v.trim()))
+  values.split(',').forEach((v) => set.add(v.trim()))
+  res.headers.set('Vary', Array.from(set).join(', '))
+}
+
+/** En-têtes communs */
+function setCommonHeaders(res: NextResponse, lang: 'fr' | 'en') {
+  appendVary(res, 'Accept-Language, Cookie')
+  res.headers.set('Content-Language', lang)
+  if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production') {
+    res.headers.set('X-Robots-Tag', 'noindex, nofollow, noimageindex')
+  }
+  res.headers.set('X-DNS-Prefetch-Control', 'on')
+  res.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
+  res.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  res.headers.set('X-Content-Type-Options', 'nosniff')
+}
+
 /** ───────────────────── Middleware principal ───────────────────── **/
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -123,7 +151,7 @@ export async function middleware(request: NextRequest) {
 
   // ✅ 0-ter) Redirection racine -> locale (cookie > Accept-Language)
   if (pathname === '/') {
-    const cookieLoc = request.cookies.get('NEXT_LOCALE')?.value as 'fr' | 'en' | undefined
+    const cookieLoc = request.cookies.get(LOCALE_COOKIE)?.value as 'fr' | 'en' | undefined
     const chosen = cookieLoc || bestFromAcceptLanguage(request.headers.get('accept-language'))
     if (chosen === 'en') {
       const url = request.nextUrl.clone()
@@ -144,7 +172,7 @@ export async function middleware(request: NextRequest) {
   const host = request.headers.get('host')
   if (!isDev && mustRedirectHost(host)) {
     const url = request.nextUrl.clone()
-    url.host = CANONICAL_HOST
+    url.hostname = CANONICAL_HOST // ✅ plus fiable que .host
     return NextResponse.redirect(url, 308)
   }
 
@@ -176,17 +204,13 @@ export async function middleware(request: NextRequest) {
       url.pathname = restPath
       const res = NextResponse.rewrite(url)
       // Fixe la locale à 'en' pour html[lang], headers & tracking
-      res.cookies.set('NEXT_LOCALE', 'en', {
+      res.cookies.set(LOCALE_COOKIE, 'en', {
         path: '/',
         maxAge: 60 * 60 * 24 * 365,
         sameSite: 'lax',
         secure: !isDev,
       })
-      res.headers.set('Content-Language', 'en')
-      res.headers.set('Vary', 'Accept-Language, Cookie')
-      if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production') {
-        res.headers.set('X-Robots-Tag', 'noindex, nofollow, noimageindex')
-      }
+      setCommonHeaders(res, 'en')
       ensureAbCookie(res)
       return res
     }
@@ -207,7 +231,7 @@ export async function middleware(request: NextRequest) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
     if (!token || (token as any)?.role !== 'admin') {
       const url = request.nextUrl.clone()
-      url.pathname = '/fr/connexion'
+      url.pathname = ADMIN_LOGIN_PATH // ✅ /login par défaut
       return NextResponse.redirect(url, 307)
     }
   }
@@ -218,8 +242,8 @@ export async function middleware(request: NextRequest) {
   // ✅ 8) Fixer le cookie de locale selon le chemin courant
   //    - /en… => en, sinon fr (défaut)
   const derived = pathname === '/en' || pathname.startsWith('/en/') ? 'en' : 'fr'
-  if (request.cookies.get('NEXT_LOCALE')?.value !== derived) {
-    response.cookies.set('NEXT_LOCALE', derived, {
+  if (request.cookies.get(LOCALE_COOKIE)?.value !== derived) {
+    response.cookies.set(LOCALE_COOKIE, derived, {
       path: '/',
       maxAge: 60 * 60 * 24 * 365,
       sameSite: 'lax',
@@ -228,11 +252,8 @@ export async function middleware(request: NextRequest) {
   }
 
   // 9) En-têtes dynamiques (SEO/CDN/Perf)
-  response.headers.set('Vary', 'Accept-Language, Cookie')
-  response.headers.set('Content-Language', derived)
-  if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production') {
-    response.headers.set('X-Robots-Tag', 'noindex, nofollow, noimageindex')
-  }
+  setCommonHeaders(response, derived as 'fr' | 'en')
+
   if (
     pathname.startsWith('/checkout') ||
     pathname.startsWith('/commande') ||
@@ -240,8 +261,6 @@ export async function middleware(request: NextRequest) {
   ) {
     response.headers.set('Cache-Control', 'no-store')
   }
-  response.headers.set('X-DNS-Prefetch-Control', 'on')
-  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
 
   // 10) AB test stickiness (optionnel)
   ensureAbCookie(response)
