@@ -224,6 +224,26 @@ export function setLocalPixelEnabled(enabled: boolean) {
   } catch {}
 }
 
+/** Nouveau: setter pratique pour l'Advanced Matching (recalcule côté UI). */
+export function setPixelUser(user: Partial<{
+  email: string
+  phone: string
+  first_name: string
+  last_name: string
+  city: string
+  state: string
+  zip: string
+  country: string
+  external_id: string
+}>) {
+  if (!isBrowser) return
+  ;(window as any).__pixelUser = { ...(window as any).__pixelUser, ...(user || {}) }
+  ;(window as any).__pixelHashedAM = null
+  try {
+    window.dispatchEvent(new CustomEvent('tp:pixel-user'))
+  } catch {}
+}
+
 // ===== CAPI mirror (optionnel via NEXT_PUBLIC_META_CAPI_URL) ===============
 
 function sendBeaconJson(url: string, body: unknown): boolean {

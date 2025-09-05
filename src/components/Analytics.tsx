@@ -10,6 +10,11 @@ const GA_ID = process.env.NEXT_PUBLIC_GA_ID ?? ''
 const ENABLE_IN_DEV = (process.env.NEXT_PUBLIC_ANALYTICS_IN_DEV || '').toLowerCase() === 'true'
 const DEBUG_MODE = (process.env.NEXT_PUBLIC_GA_DEBUG || '').toLowerCase() === 'true'
 const GTM_SERVER = (process.env.NEXT_PUBLIC_GTM_SERVER || '').replace(/\/+$/, '')
+const COOKIE_FLAGS = (process.env.NEXT_PUBLIC_GA_COOKIE_FLAGS || 'SameSite=None;Secure').trim()
+const LINKER = (process.env.NEXT_PUBLIC_GA_LINKER_DOMAINS || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean)
 
 export default function Analytics() {
   const pathname = usePathname() || '/'
@@ -64,19 +69,17 @@ export default function Analytics() {
   // GA init (après gtag ready)
   useEffect(() => {
     if (!shouldLoad) return
-    initAnalytics({
-      disableSignals: true,
-      nonPersonalizedAds: true,
-      config: {
-        debug_mode: DEBUG_MODE || undefined,
-        ads_data_redaction: true,
-        page_path:
-          typeof location !== 'undefined' ? location.pathname + location.search : undefined,
-        page_title: typeof document !== 'undefined' ? document.title : undefined,
-        send_page_view: false,
-        ...(GTM_SERVER ? { transport_url: GTM_SERVER } : {}),
-      },
-    })
+    const cfg: Record<string, any> = {
+      debug_mode: DEBUG_MODE || undefined,
+      ads_data_redaction: true,
+      page_path: typeof location !== 'undefined' ? location.pathname + location.search : undefined,
+      page_title: typeof document !== 'undefined' ? document.title : undefined,
+      send_page_view: false,
+      ...(GTM_SERVER ? { transport_url: GTM_SERVER } : {}),
+      ...(COOKIE_FLAGS ? { cookie_flags: COOKIE_FLAGS } : {}),
+      ...(LINKER.length ? { linker: { domains: LINKER } } : {}),
+    }
+    initAnalytics({ disableSignals: true, nonPersonalizedAds: true, config: cfg })
   }, [shouldLoad])
 
   if (!shouldLoad) return null

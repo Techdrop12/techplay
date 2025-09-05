@@ -53,7 +53,7 @@ function eligibleNow(): boolean {
   if (dnt || optedOut) return false
   if (process.env.NODE_ENV !== 'production' && !ENABLE_IN_DEV) return false
 
-  // Consent pubs requis (géré en amont dans Tracking/ga.ts → events 'tp:consent')
+  // Consent pubs requis (ga.ts émet des events 'tp:consent')
   try {
     const s: any = (window as any).__consentState || {}
     const adsGranted =
@@ -143,7 +143,7 @@ export default function MetaPixel() {
     setShouldLoad(eligibleNow())
   }, [])
 
-  // 2) Recalcule à chaque MAJ consent
+  // 2) Recalcule à chaque MAJ consent OU update user (AM)
   useEffect(() => {
     const onConsent = () => {
       const ok = eligibleNow()
@@ -151,8 +151,19 @@ export default function MetaPixel() {
       if (!ok) lastPathRef.current = ''
       debugLog('Consent update, eligible =', ok)
     }
+    const onUser = async () => {
+      try {
+        const adv = await buildAdvancedMatching()
+        setAM(adv || null)
+        if (adv) debugLog('Advanced Matching updated:', Object.keys(adv))
+      } catch {}
+    }
     window.addEventListener('tp:consent', onConsent as EventListener)
-    return () => window.removeEventListener('tp:consent', onConsent as EventListener)
+    window.addEventListener('tp:pixel-user', onUser as EventListener)
+    return () => {
+      window.removeEventListener('tp:consent', onConsent as EventListener)
+      window.removeEventListener('tp:pixel-user', onUser as EventListener)
+    }
   }, [debugLog])
 
   // 3) Prépare l’Advanced Matching (si dispo) — asynchrone et idempotent
@@ -165,9 +176,7 @@ export default function MetaPixel() {
         if (adv) debugLog('Advanced Matching ready:', Object.keys(adv))
       } catch {}
     })()
-    return () => {
-      cancelled = true
-    }
+    return () => { cancelled = true }
   }, [pathname, debugLog])
 
   // 4) Fire PageView sur chaque navigation (dédup)

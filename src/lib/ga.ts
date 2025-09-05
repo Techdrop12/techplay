@@ -36,7 +36,7 @@ const debugMode: boolean =
 // Sampling par session (0–100). Par défaut 100 (tout envoyé)
 const SAMPLE_PCT = Math.min(
   100,
-  Math.max(0, Number(process.env.NEXT_PUBLIC_ANALYTICS_SAMPLE ?? 100))
+  Math.max(0, Number(process.env.NEXT_PUBLIC_ANALYTICS_SAMPLE ?? 100)),
 )
 
 function isSampledIn(): boolean {
@@ -203,7 +203,7 @@ function gtagSafe(...args: any[]) {
   }
 }
 
-// Flush sur “online” / visibilité / idle
+// Flush sur “online” / visibilité / idle / pagehide
 if (isBrowser) {
   window.addEventListener('online', () => {
     startFlushPoller()
@@ -214,6 +214,9 @@ if (isBrowser) {
       startFlushPoller()
       flushOffline()
     }
+  })
+  window.addEventListener('pagehide', () => {
+    // rien à faire ici: on a persisté offline; flush au retour
   })
   const ric =
     (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 300))
@@ -354,12 +357,31 @@ type InitOptions = {
   nonPersonalizedAds?: boolean
 }
 
+/** Utilise env:
+ * - NEXT_PUBLIC_GA_COOKIE_FLAGS (ex: "SameSite=None;Secure") — défaut conservateur
+ * - NEXT_PUBLIC_GA_LINKER_DOMAINS (ex: "techplay.fr,blog.techplay.fr")
+ */
+function envConfigExtras(): Record<string, any> {
+  const extras: Record<string, any> = {}
+  const cookieFlags = (process.env.NEXT_PUBLIC_GA_COOKIE_FLAGS || 'SameSite=None;Secure').trim()
+  if (cookieFlags) extras.cookie_flags = cookieFlags
+
+  const linker = (process.env.NEXT_PUBLIC_GA_LINKER_DOMAINS || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+  if (linker.length) extras.linker = { domains: linker }
+
+  return extras
+}
+
 export function initAnalytics(opts: InitOptions = {}) {
   if (!isGaEnabled() || !isBrowser) return
   const base: Record<string, any> = {
     allow_google_signals: !(opts.disableSignals ?? false),
     allow_ad_personalization_signals: !(opts.nonPersonalizedAds ?? false),
     send_page_view: false,
+    ...envConfigExtras(),
   }
   const merged = { ...base, ...(opts.config || {}) }
   gtagSafe('config', GA_TRACKING_ID, merged)
@@ -463,70 +485,25 @@ function emit(eventName: string, params: Record<string, any>) {
 
 /* ------------------------------ Trackers E-com ---------------------------- */
 
-export function trackViewItem(payload: Ga4Payload) {
-  emit('view_item', payload)
-}
-
-export function trackViewItemList(payload: Ga4Payload & { item_list_id?: string; item_list_name?: string }) {
-  emit('view_item_list', payload)
-}
-
-export function trackSelectItem(payload: Ga4Payload & { item_list_id?: string; item_list_name?: string }) {
-  emit('select_item', payload)
-}
-
-export function trackAddToCart(payload: Ga4Payload) {
-  emit('add_to_cart', payload)
-}
-
-export function trackRemoveFromCart(payload: Ga4Payload) {
-  emit('remove_from_cart', payload)
-}
-
-export function trackViewCart(payload: Ga4Payload) {
-  emit('view_cart', payload)
-}
-
-export function trackAddToWishlist(payload: Ga4Payload) {
-  emit('add_to_wishlist', payload)
-}
-
-export function trackBeginCheckout(payload: Ga4Payload & { coupon?: string }) {
-  emit('begin_checkout', payload)
-}
-
-export function trackAddShippingInfo(payload: Ga4Payload & { shipping_tier?: string; coupon?: string }) {
-  emit('add_shipping_info', payload)
-}
-
-export function trackAddPaymentInfo(payload: Ga4Payload & { payment_type?: string; coupon?: string }) {
-  emit('add_payment_info', payload)
-}
-
-export function trackPurchase(
-  payload: Ga4Payload & {
-    transaction_id: string
-    tax?: number
-    shipping?: number
-    coupon?: string
-  }
-) {
-  emit('purchase', payload)
-}
-
-export function trackRefund(payload: { transaction_id: string; value?: number; currency?: string; items?: Ga4Item[] }) {
-  emit('refund', payload as any)
-}
+export function trackViewItem(payload: Ga4Payload) { emit('view_item', payload) }
+export function trackViewItemList(payload: Ga4Payload & { item_list_id?: string; item_list_name?: string }) { emit('view_item_list', payload) }
+export function trackSelectItem(payload: Ga4Payload & { item_list_id?: string; item_list_name?: string }) { emit('select_item', payload) }
+export function trackAddToCart(payload: Ga4Payload) { emit('add_to_cart', payload) }
+export function trackRemoveFromCart(payload: Ga4Payload) { emit('remove_from_cart', payload) }
+export function trackViewCart(payload: Ga4Payload) { emit('view_cart', payload) }
+export function trackAddToWishlist(payload: Ga4Payload) { emit('add_to_wishlist', payload) }
+export function trackBeginCheckout(payload: Ga4Payload & { coupon?: string }) { emit('begin_checkout', payload) }
+export function trackAddShippingInfo(payload: Ga4Payload & { shipping_tier?: string; coupon?: string }) { emit('add_shipping_info', payload) }
+export function trackAddPaymentInfo(payload: Ga4Payload & { payment_type?: string; coupon?: string }) { emit('add_payment_info', payload) }
+export function trackPurchase(payload: Ga4Payload & { transaction_id: string; tax?: number; shipping?: number; coupon?: string }) { emit('purchase', payload) }
+export function trackRefund(payload: { transaction_id: string; value?: number; currency?: string; items?: Ga4Item[] }) { emit('refund', payload as any) }
 
 /* ================================ Users =================================== */
 
 export function setUserId(userId: string | null) {
   if (!isGaEnabled() || !isBrowser) return
-  if (userId) {
-    gtagSafe('config', GA_TRACKING_ID, { user_id: String(userId) })
-  } else {
-    gtagSafe('config', GA_TRACKING_ID, { user_id: undefined })
-  }
+  if (userId) gtagSafe('config', GA_TRACKING_ID, { user_id: String(userId) })
+  else gtagSafe('config', GA_TRACKING_ID, { user_id: undefined })
 }
 
 export function setUserProperties(props: Record<string, unknown>) {

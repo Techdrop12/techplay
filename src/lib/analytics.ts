@@ -1,6 +1,6 @@
 // src/lib/analytics.ts — Adaptateur canonique (SSR-safe) pour l'app
 // Exporte `sendEvent` attendu par le code + ré-exporte toute l'API GA.
-// Si GA n'est pas prêt, on fait un fallback best-effort vers window.gtag.
+// Si GA n'est pas prêt, fallback best-effort vers gtag/dataLayer.
 
 import { logEvent as gaLogEvent } from './ga'
 
@@ -13,7 +13,11 @@ export function sendEvent(name: string, params?: AnalyticsParams) {
     gaLogEvent(name, params)
   } catch {
     const w = window as any
-    if (typeof w?.gtag === 'function') w.gtag('event', name, params || {})
+    if (typeof w?.gtag === 'function') {
+      try { w.gtag('event', name, params || {}) } catch {}
+    } else if (Array.isArray(w?.dataLayer)) {
+      try { w.dataLayer.push({ event: name, ...(params || {}) }) } catch {}
+    }
   }
 }
 
