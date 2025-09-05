@@ -10,9 +10,7 @@ export type Messages = Record<string, unknown>
  * Compatible RSC / Next 15 et sécurisé niveau bundling.
  */
 export default async function loadMessages(localeInput: string | unknown): Promise<Messages> {
-  const locale: Locale = normalizeLocale(
-    typeof localeInput === 'string' ? localeInput : undefined
-  )
+  const locale: Locale = normalizeLocale(typeof localeInput === 'string' ? localeInput : undefined)
 
   switch (locale) {
     case 'en': {

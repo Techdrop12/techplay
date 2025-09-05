@@ -4,10 +4,11 @@
 import {
   locales as SUPPORTED_LOCALES,
   defaultLocale as DEFAULT_LOCALE,
+  LOCALE_COOKIE,
   type Locale,
 } from '@/i18n/config'
 
-export { SUPPORTED_LOCALES, DEFAULT_LOCALE }
+export { SUPPORTED_LOCALES, DEFAULT_LOCALE, LOCALE_COOKIE }
 export type { Locale }
 
 const isSupported = (v?: string): v is (typeof SUPPORTED_LOCALES)[number] =>
@@ -24,20 +25,28 @@ export function getCurrentPathname(): string {
   }
 }
 
+function readCookie(name: string): string | undefined {
+  if (typeof document === 'undefined') return undefined
+  try {
+    const raw = document.cookie.split('; ').find((c) => c.startsWith(`${name}=`))
+    if (!raw) return undefined
+    const v = raw.split('=').slice(1).join('=')
+    return decodeURIComponent(v)
+  } catch {
+    return undefined
+  }
+}
+
 /**
- * Locale courante (priorité URL, puis cookie NEXT_LOCALE, sinon défaut)
+ * Locale courante (priorité URL, puis cookie LOCALE_COOKIE, sinon défaut)
  */
 export function getCurrentLocale(pathname?: string): (typeof SUPPORTED_LOCALES)[number] {
   const p = pathname ?? getCurrentPathname()
   const first = p.split('/').filter(Boolean)[0]
   if (isSupported(first)) return first as any
 
-  try {
-    const cookie = (typeof document !== 'undefined'
-      ? document.cookie.split('; ').find((c) => c.startsWith('NEXT_LOCALE='))?.split('=')[1]
-      : undefined) as string | undefined
-    if (isSupported(cookie)) return cookie as any
-  } catch {}
+  const fromCookie = readCookie(LOCALE_COOKIE)
+  if (isSupported(fromCookie)) return fromCookie as any
 
   return DEFAULT_LOCALE as any
 }

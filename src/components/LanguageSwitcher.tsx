@@ -2,12 +2,10 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
-import { locales, localeLabels, type Locale } from '@/i18n/config'
+import { locales, localeLabels, LOCALE_COOKIE, type Locale } from '@/i18n/config'
 import { setLocaleCookie } from '@/lib/language'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 import { event as gaEvent } from '@/lib/ga'
-
-const LOCALE_COOKIE = 'NEXT_LOCALE'
 
 export default function LanguageSwitcher() {
   const pathname = usePathname() || '/'
@@ -19,7 +17,8 @@ export default function LanguageSwitcher() {
 
     // 1) Persistance cookie (1 an)
     try {
-      document.cookie = `${LOCALE_COOKIE}=${next}; Max-Age=31536000; Path=/; SameSite=Lax`
+      const secure = typeof location !== 'undefined' && location.protocol === 'https:' ? '; Secure' : ''
+      document.cookie = `${LOCALE_COOKIE}=${encodeURIComponent(next)}; Max-Age=31536000; Path=/; SameSite=Lax${secure}`
       setLocaleCookie(next)
     } catch {}
 
@@ -45,11 +44,11 @@ export default function LanguageSwitcher() {
           <button
             key={lang}
             type="button"
-            onClick={() => changeLanguage(lang)}
+            onClick={() => changeLanguage(lang as Locale)}
             disabled={active}
             aria-pressed={active}
             aria-current={active ? 'true' : undefined}
-            aria-label={`Changer la langue vers ${localeLabels[lang]}`}
+            aria-label={`Changer la langue vers ${localeLabels[lang as keyof typeof localeLabels]}`}
             className={[
               'px-2 py-1 rounded text-sm transition outline-none focus:ring-2',
               active
