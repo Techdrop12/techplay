@@ -25,7 +25,12 @@ export default function ProductReviews({ reviews }: Props) {
         return (
           <article key={review._id} className="mb-4 border-b pb-3">
             <header className="flex items-center gap-2 mb-1">
-              <RatingStars value={review.rating} editable={false} size={16} ariaLabel={`Note ${review.rating}/5`} />
+              <RatingStars
+                value={review.rating}
+                editable={false}
+                size={16}
+                ariaLabel={`Note ${review.rating}/5`}
+              />
               {review.author && <span className="text-sm text-zinc-600">par {review.author}</span>}
               {created && <time className="ml-auto text-xs text-zinc-500">{created}</time>}
             </header>

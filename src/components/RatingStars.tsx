@@ -67,7 +67,7 @@ function Star({
   )
 
   return (
-    <span className="relative inline-block align-middle" style={{ width: px, height: px }} aria-hidden>
+    <span className="relative inline-block align-middle" style={{ width: px, height: px }} aria-hidden="true">
       {/* fond vide */}
       <svg width={px} height={px} viewBox="0 0 24 24" className={cn('block', emptyClassName)}>
         <g fill="currentColor">{Path}</g>
@@ -109,7 +109,8 @@ export default function RatingStars({
   const current = hoverValue ?? committed
   const rounded = Math.round(current * 10) / 10
 
-  const ref = useRef<HTMLDivElement | null>(null)
+  // Ref sur la "piste" des étoiles (exclut le texte showValue pour un calcul précis)
+  const trackRef = useRef<HTMLDivElement | null>(null)
 
   const perStarFill = useMemo(
     () => Array.from({ length: max }, (_, i) => Math.round(clamp(current - i, 0, 1) * 100)),
@@ -118,7 +119,7 @@ export default function RatingStars({
 
   const computeFromPointer = useCallback(
     (clientX: number) => {
-      const el = ref.current
+      const el = trackRef.current
       if (!el) return committed
       const rect = el.getBoundingClientRect()
       const x = clamp(clientX - rect.left, 0, rect.width)
@@ -175,13 +176,16 @@ export default function RatingStars({
         next = 0
       } else if (e.key === 'End') {
         next = max
+      } else if (e.key === ' ' || e.key === 'Enter') {
+        // Confirme la valeur "hover" si présente
+        next = hoverValue ?? committed
       } else {
         return
       }
       e.preventDefault()
       onChange?.(clamp(roundToStep(next, step), 0, max))
     },
-    [editable, disabled, committed, step, max, onChange],
+    [editable, disabled, committed, step, max, onChange, hoverValue],
   )
 
   const sliderAria =
@@ -203,33 +207,38 @@ export default function RatingStars({
 
   return (
     <div
-      ref={ref}
-      className={cn('inline-flex select-none items-center gap-1', className)}
+      className={cn('inline-flex select-none items-center gap-2', className)}
       title={`${rounded}/${max}`}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      onClick={handleClick}
-      onTouchStart={handleTouch}
-      onTouchMove={handleTouch}
-      onTouchEnd={() => editable && setHoverValue(null)}
       onKeyDown={onKeyDown}
       aria-readonly={!editable || undefined}
       aria-disabled={disabled || undefined}
       {...sliderAria}
     >
-      {perStarFill.map((fill, i) => (
-        <Star
-          key={i}
-          px={px}
-          fillPercent={fill}
-          emptyClassName={emptyClassName!}
-          filledClassName={filledClassName!}
-        />
-      ))}
+      {/* piste des étoiles (seule zone interactive pointeur) */}
+      <div
+        ref={trackRef}
+        className="inline-flex items-center gap-1"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        onClick={handleClick}
+        onTouchStart={handleTouch}
+        onTouchMove={handleTouch}
+        onTouchEnd={() => editable && setHoverValue(null)}
+      >
+        {perStarFill.map((fill, i) => (
+          <Star
+            key={i}
+            px={px}
+            fillPercent={fill}
+            emptyClassName={emptyClassName!}
+            filledClassName={filledClassName!}
+          />
+        ))}
+      </div>
 
       {showValue && (
         <span
-          className="ml-1 text-sm font-medium text-zinc-600 dark:text-zinc-300"
+          className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
           aria-live="polite"
           aria-atomic="true"
         >

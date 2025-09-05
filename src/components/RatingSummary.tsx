@@ -3,7 +3,7 @@
 
 import * as React from 'react'
 import { cn } from '@/lib/utils'
-import RatingStars from './RatingStars'
+import RatingStars from '@/components/RatingStars'
 
 type Note = 1 | 2 | 3 | 4 | 5
 export interface RatingSummaryProps {
@@ -119,11 +119,13 @@ export default function RatingSummary({
       <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
         <strong className="text-base tabular-nums">{rounded.toFixed(1)} ★</strong>
         <RatingStars value={avg} editable={false} size={18} ariaLabel={`Note moyenne ${rounded}/5`} />
-        <span className="tabular-nums">({(total ?? 0).toLocaleString()}{' '}avis)</span>
+        <span className="tabular-nums">
+          ({(total ?? 0).toLocaleString()} avis)
+        </span>
       </div>
 
       {/* Barres */}
-      {showBars && (Object.values(pct).some((v) => v > 0)) && (
+      {showBars && Object.values(pct).some((v) => v > 0) && (
         <div className="space-y-1">
           {order.map((n) => {
             const v = pct[n] ?? 0
@@ -146,7 +148,7 @@ export default function RatingSummary({
                     style={{ width: `${v}%` }}
                   />
                 </div>
-                <span className="w-10 text-right text-xs tabular-nums" aria-hidden>
+                <span className="w-10 text-right text-xs tabular-nums" aria-hidden="true">
                   {v.toFixed(0)}%
                 </span>
               </div>
