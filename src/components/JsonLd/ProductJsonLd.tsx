@@ -42,7 +42,7 @@ export default function ProductJsonLd({ product, maxReviews = 0 }: Props) {
     slug = '',
     title = 'Produit',
     description = 'Découvrez ce produit sur notre boutique.',
-    price = 0,
+    // ⚠️ on ne destructure plus "price" ici pour éviter le piège de typage
     image,
     category = 'Produit',
     brand,
@@ -56,8 +56,12 @@ export default function ProductJsonLd({ product, maxReviews = 0 }: Props) {
   const imagesInput = Array.isArray(image) ? image : [image ?? '/placeholder.png']
   const images = imagesInput.map((src) => absUrl(src)!).filter(Boolean)
 
+  // --- FIX prix (gère number ou string "123,45") ---
+  const priceRaw: unknown = (product as any).price
   const priceNumber =
-    typeof price === 'string' ? Number.parseFloat(price) || 0 : Number(price) || 0
+    typeof priceRaw === 'string'
+      ? Number.parseFloat(priceRaw.replace(',', '.')) || 0
+      : Number(priceRaw) || 0
 
   // disponibilité (fallback via stock si présent)
   const avail =
@@ -98,8 +102,8 @@ export default function ProductJsonLd({ product, maxReviews = 0 }: Props) {
   } else {
     const ratingNum = typeof product.rating === 'number' ? product.rating : 0
     const count =
-      typeof product.reviewCount === 'number'
-        ? product.reviewCount
+      typeof (product as any).reviewCount === 'number'
+        ? (product as any).reviewCount
         : typeof product.reviewsCount === 'number'
         ? product.reviewsCount
         : 0
@@ -177,7 +181,6 @@ export default function ProductJsonLd({ product, maxReviews = 0 }: Props) {
     },
   }
 
-  // stringify propre (supprime undefined)
   const json = JSON.stringify(structuredData, (_k, v) => (v === undefined ? undefined : v))
 
   return (

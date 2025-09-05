@@ -127,10 +127,8 @@ export function generateMeta({
   const ogType: OpenGraphType = type === 'article' ? 'article' : 'website'
 
   return {
-    // (Astuce: le template du site est déjà défini dans layout.tsx)
     title,
     description,
-    // on duplique metadataBase ici pour robustesse des URLs si jamais une page n’en hérite pas
     metadataBase: new URL(ORIGIN),
     alternates: {
       canonical: canonicalAbs,
@@ -197,7 +195,6 @@ export function generateProductMeta(
 }
 
 /** Utilitaires JSON-LD prêts à insérer dans un <script type="application/ld+json"> */
-// À utiliser dans tes pages si besoin (ex: Product, Article, Breadcrumbs)
 export function jsonLdBreadcrumbs(items: Array<{ name: string; url: string }>) {
   return {
     '@context': 'https://schema.org',

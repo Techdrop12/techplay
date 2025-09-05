@@ -1,5 +1,6 @@
 'use client'
 
+// src/components/JsonLd/ArticleJsonLd.tsx
 import type { BlogPost } from '@/types/blog'
 import React from 'react'
 
@@ -14,7 +15,8 @@ function iso(d?: unknown): string | undefined {
 }
 
 export default function ArticleJsonLd({ post }: ArticleJsonLdProps) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.techplay.fr'
+  const RAW = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.techplay.fr'
+  const siteUrl = RAW.replace(/\/+$/, '')
 
   const structuredData = {
     '@context': 'https://schema.org',

@@ -24,7 +24,7 @@ interface Props {
   imageAlt?: string
 }
 
-const ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com'
+const ORIGIN = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
 const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || 'TechPlay'
 const TWITTER_HANDLE = process.env.NEXT_PUBLIC_TWITTER_HANDLE || '@techplay'
 
@@ -34,7 +34,8 @@ function absUrl(input?: string): string | undefined {
     return new URL(input).toString()
   } catch {
     try {
-      return new URL(input.startsWith('/') ? input : `/${input}`, ORIGIN).toString()
+      const path = input.startsWith('/') ? input : `/${input}`
+      return new URL(path, ORIGIN).toString()
     } catch {
       return undefined
     }
@@ -115,6 +116,7 @@ export default function SEOHead({
       <meta key="desc" name="description" content={description} />
       <meta key="robots" name="robots" content={robots} />
       <meta key="googlebot" name="googlebot" content={robots} />
+      <meta key="format-detection" name="format-detection" content="telephone=no,address=no,email=no" />
 
       {/* Open Graph */}
       <meta key="og:title" property="og:title" content={fullTitle} />
