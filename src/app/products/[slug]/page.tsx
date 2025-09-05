@@ -95,7 +95,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
       </main>
 
       {/* JSON-LD Produit (centralisé dans ce composant pour éviter tout doublon) */}
-      <ProductJsonLd product={safeProduct} />
+      <ProductJsonLd product={safeProduct} maxReviews={3} />
 
       {/* Breadcrumb JSON-LD */}
       <script

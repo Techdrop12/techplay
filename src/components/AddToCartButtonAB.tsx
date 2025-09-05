@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AddToCartButton from '@/components/AddToCartButton'
 import { getABVariant } from '@/lib/ab-test'
 import { logEvent, pushDataLayer } from '@/lib/ga'
-import { pixelAddToCart, pixelInitiateCheckout } from '@/lib/meta-pixel'
+import { pixelInitiateCheckout } from '@/lib/meta-pixel'
 import type { Product } from '@/types/product'
 
 type MinimalProduct = Pick<Product, '_id' | 'slug' | 'title' | 'image' | 'price'> & {
@@ -31,6 +31,12 @@ const dedupe = (sig: string, ms = 1000) => {
   SEEN.add(sig)
   setTimeout(() => SEEN.delete(sig), ms)
   return false
+}
+
+// Mini helper monnaie pour l’event “buy now”
+function detectCurrency(locale?: string): 'EUR' | 'GBP' | 'USD' {
+  if (locale && locale.startsWith('en')) return 'USD'
+  return 'EUR'
 }
 
 export default function AddToCartButtonAB({
@@ -87,7 +93,7 @@ export default function AddToCartButtonAB({
   if (!variant) return null
   const conf = presets[variant] || presets[keys[0]]
 
-  // ⬇️ On trace au niveau du wrapper (pas de prop onClick sur AddToCartButton)
+  // Tracking click CTA (pas d’envoi Pixel AddToCart ici → on laisse le bouton le faire après succès)
   const handleWrapperClick = useCallback(
     async (e: any) => {
       const base = {
@@ -103,29 +109,14 @@ export default function AddToCartButtonAB({
         logEvent('cta_click', { cta: 'add_to_cart_ab', ...base })
       } catch {}
 
-      // Pixel: AddToCart
-      try {
-        pixelAddToCart({
-          value: Number(product.price) || undefined,
-          currency: locale === 'fr' ? 'EUR' : 'EUR', // ajuste si multi-devises
-          contents: [
-            {
-              id: String(product._id || product.slug),
-              quantity: Number(product.quantity || 1),
-              item_price: Number(product.price),
-            },
-          ],
-        })
-      } catch {}
-
-      // Variant B → Buy Now
+      // Variant B → “Buy now” : Pixel InitiateCheckout
       if (conf.instantCheckout) {
         try {
           pushDataLayer({ event: 'buy_now_click', ...base })
           logEvent('buy_now_click', base)
           pixelInitiateCheckout({
             value: Number(product.price) || undefined,
-            currency: locale === 'fr' ? 'EUR' : 'EUR',
+            currency: detectCurrency(locale),
             num_items: 1,
             contents: [
               {
@@ -158,7 +149,7 @@ export default function AddToCartButtonAB({
         instantCheckout={!!conf.instantCheckout}
         className={className}
         gtmExtra={{ ab_name: testKey, ab_variant: variant, ...(rest?.gtmExtra || {}) }}
-        {...rest} // (on ne passe plus onClick ici)
+        {...rest}
       />
     </span>
   )

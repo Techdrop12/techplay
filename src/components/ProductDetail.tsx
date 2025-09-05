@@ -10,7 +10,6 @@ import FreeShippingBadge from '@/components/FreeShippingBadge'
 import QuantitySelector from '@/components/QuantitySelector'
 import RatingStars from '@/components/RatingStars'
 import PricingBadge from '@/components/PricingBadge'
-// ⬇️ on passe sur le wrapper A/B
 import AddToCartButtonAB from '@/components/AddToCartButtonAB'
 import ReviewForm from '@/components/ReviewForm'
 import StickyCartSummary from '@/components/StickyCartSummary'
@@ -29,8 +28,9 @@ import {
   trackSelectItem,
   mapProductToGaItem,
 } from '@/lib/ga'
+import { pixelViewContent } from '@/lib/meta-pixel'
 import { DEFAULT_LOCALE, isLocale, type AppLocale } from '@/lib/language'
-import { FaCcVisa, FaCcMastercard, FaCcPaypal } from 'react-icons/fa' // logos paiement
+import { FaCcVisa, FaCcMastercard, FaCcPaypal } from 'react-icons/fa'
 
 interface Props {
   product: Product
@@ -141,7 +141,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     category,
     reviews,
     aggregateRating,
-    reviewsCount, // conservé pour compat UI antérieure
+    reviewsCount,
   } = product ?? {}
 
   // ✅ Normalisation des prix (tolère string)
@@ -186,7 +186,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
   /*                           Tracking / Recently viewed                     */
   /* ------------------------------------------------------------------------ */
 
-  // GA4 view_item (une fois visible)
+  // GA4 + Pixel “ViewContent” quand la section devient visible (une seule fois)
   useEffect(() => {
     if (!sectionRef.current || viewedRef.current) return
     const el = sectionRef.current
@@ -202,6 +202,16 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
               currency,
               value: price,
               items: [mapProductToGaItem(product, { quantity: 1 })],
+            })
+          } catch {}
+          try {
+            pixelViewContent({
+              value: price,
+              currency,
+              content_name: title,
+              content_type: 'product',
+              content_ids: [String(product?._id ?? product?.slug ?? '')].filter(Boolean),
+              contents: [{ id: String(product?._id ?? product?.slug ?? ''), quantity: 1, item_price: price }],
             })
           } catch {}
           // Ajout "vu récemment" (tolérant)
@@ -341,9 +351,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
       itemScope
       itemType="https://schema.org/Product"
     >
-      {/* -------------------------------------------------------------------- */}
-      {/*                                Galerie                                */}
-      {/* -------------------------------------------------------------------- */}
+      {/* Galerie */}
       <div className="grid gap-4">
         <div
           ref={mediaRef}
@@ -448,9 +456,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         )}
       </div>
 
-      {/* -------------------------------------------------------------------- */}
-      {/*                           Infos + actions                             */}
-      {/* -------------------------------------------------------------------- */}
+      {/* Infos + actions */}
       <div className="flex flex-col justify-between space-y-8">
         <div>
           <h1
@@ -590,7 +596,6 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
               product={{ _id, slug, title, price, image: gallery[0] ?? image, quantity }}
               locale={safeLocale}
               onAdd={onAddToCart}
-              // AB key par défaut: 'add_to_cart_cta' (A: Ajouter / B: Commander maintenant)
               gtmExtra={{
                 from: 'pdp',
                 product_id: _id,
@@ -653,7 +658,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             <ShippingSimulator minDays={2} maxDays={3} businessDaysOnly />
           </div>
 
-          {/* Infos supplémentaires en <details> (0 deps) */}
+          {/* Infos supplémentaires */}
           <div className="mt-2 grid gap-2">
             <details className="rounded-xl border border-gray-200 dark:border-gray-700 p-3">
               <summary className="cursor-pointer font-semibold">Livraison & retours</summary>
@@ -696,7 +701,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         <ReviewForm productId={_id} />
       </div>
 
-      {/* NOTE: Le JSON-LD est injecté au niveau de la page (/products/[slug]) via <ProductJsonLd /> pour éviter les doublons. */}
+      {/* NOTE: Le JSON-LD est injecté au niveau de la page (/products/[slug]) via <ProductJsonLd /> */}
     </motion.section>
   )
 }

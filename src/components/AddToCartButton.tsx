@@ -131,7 +131,7 @@ function flyTo(el: HTMLElement, target: HTMLElement, prefersReduced: boolean) {
   dot.animate(keyframes, { duration, easing: prefersReduced ? 'linear' : 'cubic-bezier(.2,.8,.2,1)' }).onfinish = () => dot.remove()
 }
 
-/* ---------- Inline icons (modern, no emoji) ---------- */
+/* ---------- Inline icons ---------- */
 const Spinner = () => (
   <svg className="animate-spin -ml-0.5 mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
     <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.25" strokeWidth="4" fill="none" />
@@ -349,10 +349,8 @@ export default function AddToCartButton({
         // (nouveau) — "Buy now" / instant checkout
         if (instantCheckout) {
           try {
-            // tracking "buy now"
             ;(logEvent as any)?.({ action: 'buy_now_click', category: 'ecommerce', label: title })
             ;(window as any).dataLayer?.push({ event: 'buy_now_click', ...gtmExtra })
-
             pixelInitiateCheckout?.({
               value: price * quantity,
               currency,
