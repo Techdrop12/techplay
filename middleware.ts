@@ -2,11 +2,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import createMiddleware from 'next-intl/middleware'
 import { getToken } from 'next-auth/jwt'
+import { LOCALE_COOKIE } from '@/lib/language'
 
 /** ─────────────────────── Constantes ─────────────────────── **/
 const SUPPORTED_LOCALES = ['fr', 'en'] as const
 const DEFAULT_LOCALE = 'fr' as const
-const LOCALE_COOKIE = 'NEXT_LOCALE'
 const ADMIN_LOGIN_PATH = process.env.ADMIN_LOGIN_PATH || '/login'
 
 const isDev = process.env.NODE_ENV !== 'production'

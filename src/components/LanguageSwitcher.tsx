@@ -2,8 +2,7 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
-import { locales, localeLabels, LOCALE_COOKIE, type Locale } from '@/i18n/config'
-import { setLocaleCookie } from '@/lib/language'
+import { languages as SUPPORTED_LOCALES, localeLabels, LOCALE_COOKIE, type Locale, setLocaleCookie } from '@/lib/language'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 import { event as gaEvent } from '@/lib/ga'
 
@@ -24,7 +23,7 @@ export default function LanguageSwitcher() {
 
     // 2) Tracking (GA4 + fallback GTM dataLayer)
     try {
-      gaEvent({ action: 'change_language', category: 'engagement', label: next })
+      gaEvent?.({ action: 'change_language', category: 'engagement', label: next })
       ;(window as any).dataLayer = (window as any).dataLayer || []
       ;(window as any).dataLayer.push({ event: 'change_language', locale: next })
     } catch {}
@@ -38,17 +37,17 @@ export default function LanguageSwitcher() {
 
   return (
     <div className="inline-flex gap-2" role="group" aria-label="Sélecteur de langue">
-      {locales.map((lang) => {
+      {(SUPPORTED_LOCALES as readonly Locale[]).map((lang) => {
         const active = current === lang
         return (
           <button
             key={lang}
             type="button"
-            onClick={() => changeLanguage(lang as Locale)}
+            onClick={() => changeLanguage(lang)}
             disabled={active}
             aria-pressed={active}
             aria-current={active ? 'true' : undefined}
-            aria-label={`Changer la langue vers ${localeLabels[lang as keyof typeof localeLabels]}`}
+            aria-label={`Changer la langue vers ${localeLabels[lang]}`}
             className={[
               'px-2 py-1 rounded text-sm transition outline-none focus:ring-2',
               active
