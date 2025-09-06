@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
+import Link from '@/components/LocalizedLink'
 import { getAllProducts } from '@/lib/data'
 import type { Product } from '@/types/product'
 import ProductGrid from '@/components/ProductGrid'

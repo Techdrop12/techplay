@@ -1,7 +1,7 @@
 // src/components/NotFound.tsx
 'use client'
 
-import Link from 'next/link'
+import Link from '@/components/LocalizedLink'
 import { useEffect, useMemo, useRef } from 'react'
 import { usePathname, useSearchParams, useRouter } from 'next/navigation'
 

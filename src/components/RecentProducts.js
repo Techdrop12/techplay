@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { getRecentProducts } from '@/lib/recentProducts'
-import Link from 'next/link'
+import Link from '@/components/LocalizedLink'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 

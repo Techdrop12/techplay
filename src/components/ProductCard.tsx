@@ -238,8 +238,6 @@ export default function ProductCard({
   }
   const resetTilt = () => setTilt({ rx: 0, ry: 0 })
 
-  const href = slug ? `/products/${slug}` : `/products`
-
   return (
     <motion.article
       ref={cardRef}
@@ -296,7 +294,7 @@ export default function ProductCard({
 
         {/* Zone cliquable (image + contenu) */}
         <Link
-          href={href}
+          href={productUrl}
           prefetch={false}
           className="block rounded-[inherit] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.60)]"
           onClick={handleClick}

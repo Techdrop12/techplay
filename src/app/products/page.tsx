@@ -1,6 +1,6 @@
 // src/app/products/page.tsx — SEO/UX/Perf++ (generateMeta + noindex filtres + OG dynamique)
 import type { Metadata } from 'next'
-import Link from 'next/link'
+import Link from '@/components/LocalizedLink'
 import { getProductsPage } from '@/lib/data'
 import ProductGrid from '@/components/ProductGrid'
 import type { Product } from '@/types/product'

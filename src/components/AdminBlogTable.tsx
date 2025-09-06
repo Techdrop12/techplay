@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/LocalizedLink'
 import { toast } from 'react-hot-toast';
 
 interface BlogPost {

@@ -1,7 +1,7 @@
 // src/components/ui/ExitIntentPopup.tsx — FINAL (fusion + robustesse)
 'use client'
 
-import Link from 'next/link'
+import Link from '@/components/LocalizedLink'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 type Props = {

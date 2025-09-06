@@ -2,7 +2,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef } from 'react'
-import Link from 'next/link'
+import Link from '@/components/LocalizedLink'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useCart } from '@/hooks/useCart'
 import CartList from '@/components/cart/CartList'

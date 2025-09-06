@@ -1,7 +1,7 @@
 // src/components/Breadcrumbs.tsx
 // Fil d'Ariane accessible + SEO (JSON-LD optionnel), TS strict, design propre.
 import type { ReactNode, HTMLAttributes } from 'react'
-import Link from 'next/link'
+import Link from '@/components/LocalizedLink'
 import useBreadcrumbSegments from '@/lib/useBreadcrumbSegments'
 
 type Crumb = {

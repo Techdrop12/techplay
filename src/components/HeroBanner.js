@@ -1,5 +1,5 @@
 // src/components/HeroBanner.js — simple, propre, i18n-safe
-import Link from 'next/link'
+import Link from '@/components/LocalizedLink'
 
 export default function HeroBanner() {
   return (

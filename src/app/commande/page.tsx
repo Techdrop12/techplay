@@ -1,7 +1,7 @@
 // src/app/commande/page.tsx — FINAL (GA4 begin_checkout helper + GTM + UX)
 'use client'
 
-import Link from 'next/link'
+import Link from '@/components/LocalizedLink'
 import { useEffect, useMemo, useRef } from 'react'
 import { useCart } from '@/hooks/useCart'
 import CartList from '@/components/cart/CartList'

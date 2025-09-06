@@ -1,7 +1,7 @@
 // src/app/products/packs/page.tsx
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import Link from 'next/link'
+import Link from '@/components/LocalizedLink'
 import PackCard from '@/components/PackCard'
 import SectionTitle from '@/components/SectionTitle'
 import SectionWrapper from '@/components/SectionWrapper'

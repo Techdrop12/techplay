@@ -1,6 +1,6 @@
 // src/app/not-found.tsx
 import { Suspense } from 'react'
-import Link from 'next/link'
+import Link from '@/components/LocalizedLink'
 import NotFoundClient from '@/components/NotFound'
 
 export const dynamic = 'force-dynamic'

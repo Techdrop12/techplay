@@ -7,7 +7,7 @@ import { getProductBySlug } from '@/lib/data'
 import type { Product } from '@/types/product'
 import ProductDetail from '@/components/ProductDetail'
 import ProductJsonLd from '@/components/JsonLd/ProductJsonLd'
-import { defaultLocale as DEFAULT_LOCALE, isLocale } from '@/i18n/config'
+import { DEFAULT_LOCALE, isLocale } from '@/lib/language'
 import { generateProductMeta, jsonLdBreadcrumbs } from '@/lib/seo'
 import { getFallbackDescription } from '@/lib/meta'
 

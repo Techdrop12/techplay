@@ -3,7 +3,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@/components/LocalizedLink'
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useCart } from '@/hooks/useCart';

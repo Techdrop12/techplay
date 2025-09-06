@@ -1,7 +1,7 @@
 // src/components/blog/BlogCard.tsx
 'use client'
 
-import Link from 'next/link'
+
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import type { BlogPost } from '@/types/blog'

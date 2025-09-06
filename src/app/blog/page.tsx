@@ -1,6 +1,6 @@
 // src/app/blog/page.tsx
 import type { Metadata } from 'next'
-import Link from 'next/link'
+import Link from '@/components/LocalizedLink'
 import { getPosts } from '@/lib/blog'
 import BlogCard from '@/components/blog/BlogCard'
 import { generateMeta, jsonLdBreadcrumbs } from '@/lib/seo'

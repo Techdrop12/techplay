@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/LocalizedLink'
 
 export default function FloatingCTA({ href = '/fr/commande', label = 'Commander' }) {
   return (

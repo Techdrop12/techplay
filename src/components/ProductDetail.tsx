@@ -147,7 +147,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
   // ✅ Normalisation des prix (tolère string)
   const price = Math.max(0, toNum(priceRaw) ?? 0)
   const oldPrice = toNum(oldPriceRaw)
-  const currency = detectCurrency()
+  const currency: 'EUR' = 'EUR'
 
   // ✅ Extraction tolérante de `tags`
   const tags: string[] | undefined =
