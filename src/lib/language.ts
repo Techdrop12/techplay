@@ -13,6 +13,10 @@ export const localeLabels: Record<Locale, string> = {
   en: 'English',
 }
 
+// BCP-47 (lang tag) & OG variants
+const LANG_TAG: Record<Locale, string> = { fr: 'fr-FR', en: 'en-US' }
+const OG_LOCALE: Record<Locale, string> = { fr: 'fr_FR', en: 'en_US' }
+
 /** Strict check on known locales */
 export function isLocale(x: unknown): x is Locale {
   return typeof x === 'string' && (languages as readonly string[]).includes(x)
@@ -29,11 +33,21 @@ export function normalizeLocale(x: unknown): Locale {
   return DEFAULT_LOCALE
 }
 
+/** BCP-47 tag (handy if you add RTL later) */
+export function toLangTag(locale: Locale): string {
+  return LANG_TAG[locale]
+}
+
+/** Open Graph locale (fr_FR / en_US) */
+export function toOgLocale(locale: Locale): string {
+  return OG_LOCALE[locale]
+}
+
 const RE_LOCALE_PREFIX = new RegExp(`^/(?:${languages.join('|')})(?=/|$)`)
 const ensureLeadingSlash = (p: string) => (p?.startsWith('/') ? p : `/${p || ''}`)
 
 /** Remove a locale prefix from a pathname if present (keeps leading slash) */
-function stripLocalePrefix(pathname: string): string {
+export function stripLocalePrefix(pathname: string): string {
   const safe = ensureLeadingSlash(pathname || '/')
   const out = safe.replace(RE_LOCALE_PREFIX, '')
   return out || '/'
@@ -75,9 +89,4 @@ export function pickBestLocale(acceptLanguageHeader?: string | null): Locale {
     }
   } catch {}
   return DEFAULT_LOCALE
-}
-
-/** BCP-47 tag (handy if you add RTL later) */
-export function toLangTag(locale: Locale): string {
-  return locale === 'fr' ? 'fr-FR' : 'en-US'
 }

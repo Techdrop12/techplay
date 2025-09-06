@@ -6,6 +6,7 @@ import { NextIntlClientProvider, type AbstractIntlMessages } from 'next-intl'
 
 import loadMessages from '@/i18n/loadMessages'
 import { locales, isLocale, type Locale } from '@/i18n/config'
+import { toOgLocale } from '@/lib/language'
 
 /** Prégénère /fr et /en (utile tant qu’on n’a pas de middleware d’alias pour /) */
 export function generateStaticParams() {
@@ -15,8 +16,7 @@ export function generateStaticParams() {
 /** Ajuste seulement l'OG locale; canonicals/hreflang se font page par page */
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const loc = isLocale(params.locale) ? (params.locale as Locale) : ('fr' as Locale)
-  const ogLocale = loc === 'fr' ? 'fr_FR' : 'en_US'
-  return { openGraph: { locale: ogLocale } }
+  return { openGraph: { locale: toOgLocale(loc) } }
 }
 
 export default async function LocaleLayout({

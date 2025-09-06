@@ -1,12 +1,11 @@
-// src/app/layout.tsx — Root layout (lang from cookie), default-locale without prefix
+// src/app/layout.tsx — Root layout (lang from cookie or Accept-Language), default-locale without prefix
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
 import { Inter, Sora } from 'next/font/google'
 import { Suspense } from 'react'
 import Script from 'next/script'
 import type React from 'react'
-import { cookies } from 'next/headers'
-import { defaultLocale as DEFAULT_LOCALE, isLocale } from '@/i18n/config'
+import { cookies, headers } from 'next/headers'
 
 import Layout from '@/components/layout/Layout'
 import RootLayoutClient from '@/components/RootLayoutClient'
@@ -21,6 +20,8 @@ import Tracking from '@/components/Tracking'
 import AppInstallPrompt from '@/components/AppInstallPrompt'
 import ConsentBanner from '@/components/ConsentBanner'
 
+import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale, toOgLocale, toLangTag, pickBestLocale, type Locale } from '@/lib/language'
+
 const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter', adjustFontFallback: true })
 const sora = Sora({ subsets: ['latin'], display: 'swap', variable: '--font-sora' })
 
@@ -31,32 +32,39 @@ const IS_PREVIEW = process.env.VERCEL_ENV === 'preview' || process.env.NEXT_PUBL
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID
 const GTM_SERVER = (process.env.NEXT_PUBLIC_GTM_SERVER || '').replace(/\/+$/, '')
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  applicationName: SITE_NAME,
-  title: { default: 'TechPlay – Boutique high-tech innovante', template: '%s | TechPlay' },
-  description:
-    'TechPlay, votre boutique high-tech : audio, gaming, accessoires et packs exclusifs. Qualité, rapidité, satisfaction garantie.',
-  keywords: ['high-tech', 'gaming', 'audio', 'accessoires', 'e-commerce', 'TechPlay', 'packs exclusifs'],
-  openGraph: {
-    title: 'TechPlay – Boutique high-tech innovante',
-    description: 'TechPlay, votre boutique high-tech : audio, gaming, accessoires.',
-    url: SITE_URL,
-    siteName: SITE_NAME,
-    images: [{ url: DEFAULT_OG, width: 1200, height: 630, alt: 'TechPlay – Boutique high-tech' }],
-    locale: 'fr_FR',
-    type: 'website',
-  },
-  twitter: { card: 'summary_large_image', title: 'TechPlay – Boutique high-tech innovante', description: 'TechPlay…', images: [DEFAULT_OG] },
-  icons: {
-    icon: [{ url: '/favicon.ico' }, { url: '/icons/icon-192x192.png', type: 'image/png', sizes: '192x192' }, { url: '/icons/icon-512x512.png', type: 'image/png', sizes: '512x512' }],
-    apple: [{ url: '/icons/icon-192x192.png', sizes: '180x180', type: 'image/png' }],
-  },
-  manifest: '/site.webmanifest',
-  appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: SITE_NAME },
-  formatDetection: { telephone: false, address: false, email: false },
-  robots: { index: !IS_PREVIEW, follow: !IS_PREVIEW, googleBot: { index: !IS_PREVIEW, follow: !IS_PREVIEW } },
-  referrer: 'strict-origin-when-cross-origin',
+export async function generateMetadata(): Promise<Metadata> {
+  const cookieStore = await cookies()
+  const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value
+  const acceptLang = (await headers()).get('accept-language')
+  const locale: Locale = isLocale(cookieLocale) ? (cookieLocale as Locale) : pickBestLocale(acceptLang)
+
+  return {
+    metadataBase: new URL(SITE_URL),
+    applicationName: SITE_NAME,
+    title: { default: 'TechPlay – Boutique high-tech innovante', template: '%s | TechPlay' },
+    description:
+      'TechPlay, votre boutique high-tech : audio, gaming, accessoires et packs exclusifs. Qualité, rapidité, satisfaction garantie.',
+    keywords: ['high-tech', 'gaming', 'audio', 'accessoires', 'e-commerce', 'TechPlay', 'packs exclusifs'],
+    openGraph: {
+      title: 'TechPlay – Boutique high-tech innovante',
+      description: 'TechPlay, votre boutique high-tech : audio, gaming, accessoires.',
+      url: SITE_URL,
+      siteName: SITE_NAME,
+      images: [{ url: DEFAULT_OG, width: 1200, height: 630, alt: 'TechPlay – Boutique high-tech' }],
+      locale: toOgLocale(locale),
+      type: 'website',
+    },
+    twitter: { card: 'summary_large_image', title: 'TechPlay – Boutique high-tech innovante', description: 'TechPlay…', images: [DEFAULT_OG] },
+    icons: {
+      icon: [{ url: '/favicon.ico' }, { url: '/icons/icon-192x192.png', type: 'image/png', sizes: '192x192' }, { url: '/icons/icon-512x512.png', type: 'image/png', sizes: '512x512' }],
+      apple: [{ url: '/icons/icon-192x192.png', sizes: '180x180', type: 'image/png' }],
+    },
+    manifest: '/site.webmanifest',
+    appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: SITE_NAME },
+    formatDetection: { telephone: false, address: false, email: false },
+    robots: { index: !IS_PREVIEW, follow: !IS_PREVIEW, googleBot: { index: !IS_PREVIEW, follow: !IS_PREVIEW } },
+    referrer: 'strict-origin-when-cross-origin',
+  }
 }
 
 export const viewport: Viewport = {
@@ -72,14 +80,16 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies()
-  const cookieLocale = cookieStore.get('NEXT_LOCALE')?.value
-  const htmlLang = isLocale(cookieLocale || '') ? (cookieLocale as string) : (DEFAULT_LOCALE as string)
+  const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value
+  const acceptLang = (await headers()).get('accept-language')
+  const currentLocale: Locale =
+    isLocale(cookieLocale || '') ? (cookieLocale as Locale) : pickBestLocale(acceptLang)
 
   return (
-    <html lang={htmlLang} dir="ltr" className={`${inter.variable} ${sora.variable} scroll-smooth`} suppressHydrationWarning>
+    <html lang={toLangTag(currentLocale)} dir="ltr" className={`${inter.variable} ${sora.variable} scroll-smooth`} suppressHydrationWarning>
       <head>
         <meta httpEquiv="x-dns-prefetch-control" content="on" />
-        <meta httpEquiv="content-language" content={htmlLang} />
+        <meta httpEquiv="content-language" content={currentLocale} />
         <DarkModeScript />
 
         {/* Consent Mode v2 par défaut (denied) + helpers globaux */}

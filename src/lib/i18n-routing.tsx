@@ -2,11 +2,14 @@
 // Helpers i18n universels (SSR/CSR-safe), URL prefix default-less (fr = /, en = /en)
 
 import {
-  locales as SUPPORTED_LOCALES,
-  defaultLocale as DEFAULT_LOCALE,
+  languages as SUPPORTED_LOCALES,
+  DEFAULT_LOCALE,
   LOCALE_COOKIE,
   type Locale,
-} from '@/i18n/config'
+  isLocale,
+  stripLocalePrefix as _strip,
+  withLocale as _withLocale,
+} from '@/lib/language'
 
 export { SUPPORTED_LOCALES, DEFAULT_LOCALE, LOCALE_COOKIE }
 export type { Locale }
@@ -53,10 +56,7 @@ export function getCurrentLocale(pathname?: string): (typeof SUPPORTED_LOCALES)[
 
 /** Retire un éventuel préfixe de locale du pathname fourni */
 export function stripLocalePrefix(pathname: string): string {
-  const parts = ensureLeadingSlash(pathname).split('/').filter(Boolean)
-  if (parts.length && isSupported(parts[0])) parts.shift()
-  const bare = '/' + parts.join('/')
-  return bare === '//' ? '/' : bare
+  return _strip(pathname)
 }
 
 type LocalizeOptions = {
@@ -79,7 +79,7 @@ export function localizePath(
 ): string {
   const base = ensureLeadingSlash(path || opts.currentPathname || getCurrentPathname())
   const bare = stripLocalePrefix(base)
-  const withLocale = locale === DEFAULT_LOCALE ? bare : `/${locale}${bare === '/' ? '' : bare}`
+  const withLocale = _withLocale(bare, locale as Locale)
 
   const query =
     opts.customQuery ??
