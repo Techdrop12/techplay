@@ -1,7 +1,7 @@
 // src/components/blog/BlogCard.tsx
 'use client'
 
-
+import Link from '@/components/LocalizedLink'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import type { BlogPost } from '@/types/blog'
@@ -52,6 +52,7 @@ export default function BlogCard({ article }: BlogCardProps) {
       <Link
         href={`/blog/${article.slug}`}
         className="text-blue-600 hover:underline text-sm mt-3 inline-block font-medium"
+        prefetch={false}
       >
         Lire l’article →
       </Link>
