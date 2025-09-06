@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils'
 
 type IconProps = { className?: string }
 
-/** Badge premium : fond dégradé subtil + anneau (duotone) */
 const IconBadge: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => (
   <span
     className={cn(
@@ -18,7 +17,6 @@ const IconBadge: React.FC<{ children: React.ReactNode; className?: string }> = (
   </span>
 )
 
-/** Pack d’icônes duotone (sans lib externe) */
 const glyph = (d: string) => (
   <>
     <path d={d} fill="currentColor" className="opacity-90" />
@@ -121,13 +119,9 @@ const CATS_EN: Readonly<CategoryDef[]> = [
   { slug: 'ecrans',    label: 'Monitors',   desc: '144Hz and up',       href: '/products?cat=ecrans',    Icon: MonitorIcon },
 ] as const
 
-/** Helper i18n — renvoie les catégories localisées (labels/desc). */
 export function getCategories(locale: 'fr' | 'en' = 'fr'): Readonly<CategoryDef[]> {
   return locale === 'en' ? CATS_EN : CATS_FR
 }
 
-/** Compat : export historique (FR par défaut). */
 export const CATEGORIES: Readonly<CategoryDef[]> = CATS_FR
-
-/** Union pratique des slugs */
 export type CategorySlug = typeof CATS_FR[number]['slug']

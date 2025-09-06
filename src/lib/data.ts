@@ -18,7 +18,6 @@ export async function getBestProducts(): Promise<ProductType[]> {
 }
 
 export async function getAllProducts(): Promise<ProductType[]> {
-  // ⚠️ utilisé ailleurs: on laisse simple, sans normalisation promo
   await connectToDatabase()
   return (await Product.find({})
     .select('_id slug title price image gallery rating reviewsCount stock category brand sku')
@@ -64,24 +63,39 @@ type GetProductsPageInput = {
   sort?: SortKey
   page?: number
   pageSize?: number
-  /** 🔥 nouveau : filtre catégorie (match insensible à la casse) */
+  /** filtre catégorie (insensible à la casse + alias FR/EN) */
   category?: string | null
 }
 
 const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
+/** Alias FR/EN robustes pour les catégories dataset */
+const CATEGORY_ALIASES: Record<string, string[]> = {
+  casques: ['casques', 'casque', 'headphones', 'headset', 'écouteurs', 'earbuds', 'audio headset'],
+  claviers: ['claviers', 'clavier', 'keyboards', 'keyboard', 'mechanical keyboard', 'mech'],
+  souris: ['souris', 'mouse', 'mice', 'gaming mouse', 'wireless mouse'],
+  webcams: ['webcam', 'webcams', 'camera', 'pc camera'],
+  batteries: ['batteries', 'battery', 'power bank', 'chargeur', 'charger', 'usb-c charger', 'hub'],
+  audio: ['audio', 'speakers', 'speaker', 'enceinte', 'dac', 'soundbar'],
+  stockage: ['stockage', 'storage', 'ssd', 'carte', 'memory card', 'sd card', 'usb', 'hdd', 'disque'],
+  ecrans: ['ecrans', 'écrans', 'monitor', 'monitors', 'screen', 'display'],
+}
+
+/** Construit un RegExp “^alias1|alias2|…$” insensible à la casse */
+function buildCategoryRegex(input?: string | null): RegExp | null {
+  if (!input) return null
+  const key = String(input).trim().toLowerCase()
+  const list = CATEGORY_ALIASES[key] || [key]
+  const alts = Array.from(new Set(list.filter(Boolean).map((s) => s.trim())))
+  return alts.length ? new RegExp(`^(${alts.map(escapeRegex).join('|')})$`, 'i') : null
+}
+
 /**
- * Normalise le prix selon ta structure:
- * - prix de base: `price`
- * - promo active: `promo.price` < price ET date ok
- * On expose au front:
- *   - `price`  = prix courant
- *   - `oldPrice` = ancien prix si promo, sinon null
- *   - `images` = `gallery` (ton schéma) pour matcher le front
- *
- * Retour étendu:
- *   - categoryCounts: Record<cat, count> (calculé AVANT d'appliquer le filtre catégorie)
- *   - priceRange: { min, max } sur le prix courant (après promo)
+ * Normalise le prix:
+ * - `currentPrice` = promo si active sinon `price`
+ * - `oldPriceOut` = ancien prix si promo active
+ * Tous les filtres min/max et les stats se basent sur `currentPrice` ✅
+ * Le tri "promo" utilise le pourcentage de remise calculé côté DB.
  */
 export async function getProductsPage({
   q,
@@ -98,48 +112,20 @@ export async function getProductsPage({
   const safeSize = Math.min(96, Math.max(1, Number(pageSize) || 24))
   const skip = (safePage - 1) * safeSize
 
-  // match hors catégorie (sert de base pour les facets: counts)
-  const baseMatch: Record<string, any> = {}
-
+  // Match texte (titre/desc/marque/catégorie)
+  const textMatch: Record<string, any> = {}
   if (q && q.trim()) {
     const rx = new RegExp(q.trim(), 'i')
-    baseMatch.$or = [{ title: rx }, { description: rx }, { brand: rx }, { category: rx }]
+    textMatch.$or = [{ title: rx }, { description: rx }, { brand: rx }, { category: rx }]
   }
 
-  if (typeof min === 'number' || typeof max === 'number') {
-    baseMatch.price = {}
-    if (typeof min === 'number') baseMatch.price.$gte = min
-    if (typeof max === 'number') baseMatch.price.$lte = max
-  }
-
-  // Tri par défaut
-  let fallbackSort: Record<string, 1 | -1>
-  switch (sort) {
-    case 'price_asc':
-      fallbackSort = { price: 1 }
-      break
-    case 'price_desc':
-      fallbackSort = { price: -1 }
-      break
-    case 'rating':
-      fallbackSort = { rating: -1 }
-      break
-    case 'new':
-      fallbackSort = { createdAt: -1 }
-      break
-    case 'promo':
-      fallbackSort = { createdAt: -1 }
-      break
-    default:
-      fallbackSort = { createdAt: -1 }
-  }
+  // Catégorie (alias FR/EN) → RegExp alternatives
+  const catRegex = buildCategoryRegex(category || undefined)
+  const categoryMatch = catRegex ? { category: { $regex: catRegex } } : null
 
   const now = new Date()
-  const categoryMatch =
-    category && category.trim()
-      ? { category: { $regex: new RegExp(`^${escapeRegex(category.trim())}$`, 'i') } }
-      : null
 
+  // Stages communs: calcul promo + prix courant + % remise
   const promoAddFields = [
     {
       $addFields: {
@@ -182,6 +168,20 @@ export async function getProductsPage({
     },
   ]
 
+  // Filtre min/max sur le PRIX COURANT (après promo)
+  const priceMatch =
+    typeof min === 'number' || typeof max === 'number'
+      ? {
+          $match: {
+            currentPrice: {
+              ...(typeof min === 'number' ? { $gte: min } : {}),
+              ...(typeof max === 'number' ? { $lte: max } : {}),
+            },
+          },
+        }
+      : null
+
+  // Tri
   const itemsSort =
     sort === 'promo'
       ? [{ $sort: { discountPct: -1, currentPrice: 1 } }]
@@ -189,16 +189,19 @@ export async function getProductsPage({
       ? [{ $sort: { currentPrice: 1 } }]
       : sort === 'price_desc'
       ? [{ $sort: { currentPrice: -1 } }]
-      : [{ $sort: fallbackSort }]
+      : sort === 'rating'
+      ? [{ $sort: { rating: -1 } }]
+      : [{ $sort: { createdAt: -1 } }]
 
   const pipeline: any[] = [
-    { $match: baseMatch },
+    { $match: textMatch },
     {
       $facet: {
-        // Liste paginée (filtre catégorie appliqué ici uniquement)
+        // Liste paginée (catégorie appliquée ici)
         items: [
           ...(categoryMatch ? [{ $match: categoryMatch }] : []),
           ...promoAddFields,
+          ...(priceMatch ? [priceMatch] : []),
           ...itemsSort,
           { $skip: skip },
           { $limit: safeSize },
@@ -223,13 +226,18 @@ export async function getProductsPage({
           },
         ],
 
-        // Total (avec filtre catégorie)
-        total: [(categoryMatch ? { $match: categoryMatch } : undefined), { $count: 'value' }].filter(
-          Boolean
-        ) as any[],
+        // Total (avec catégorie)
+        total: [
+          ...(categoryMatch ? [{ $match: categoryMatch }] : []),
+          ...promoAddFields,
+          ...(priceMatch ? [priceMatch] : []),
+          { $count: 'value' },
+        ],
 
-        // Comptages par catégorie (⚠️ sans filtre de catégorie, mais avec q/min/max)
+        // Comptages par catégorie (sans filtre de catégorie, mais avec q + min/max courants)
         categoryCounts: [
+          ...promoAddFields,
+          ...(priceMatch ? [priceMatch] : []),
           {
             $group: {
               _id: { $ifNull: ['$category', 'Autres'] },
@@ -240,7 +248,11 @@ export async function getProductsPage({
         ],
 
         // Stats de prix courants (après promo)
-        stats: [...promoAddFields, { $group: { _id: null, min: { $min: '$currentPrice' }, max: { $max: '$currentPrice' } } }],
+        stats: [
+          ...promoAddFields,
+          ...(priceMatch ? [priceMatch] : []),
+          { $group: { _id: null, min: { $min: '$currentPrice' }, max: { $max: '$currentPrice' } } },
+        ],
       },
     },
   ]
