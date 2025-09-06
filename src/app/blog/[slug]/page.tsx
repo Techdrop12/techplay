@@ -5,13 +5,15 @@ import type { Metadata } from 'next'
 import ArticleJsonLd from '@/components/JsonLd/ArticleJsonLd'
 import type { BlogPost } from '@/types/blog'
 import { generateArticleMeta, jsonLdBreadcrumbs } from '@/lib/seo'
+import { cookies, headers } from 'next/headers'
+import { LOCALE_COOKIE, isLocale, pickBestLocale, type Locale } from '@/lib/language'
+import { localizePath } from '@/lib/i18n-routing'
 
 interface Props {
   params: { slug: string }
 }
 
-// ✅ Metadata canonique (canonical, hreflang, OG absolus, OG locale auto)
-//    Compatible avec n'importe quelle forme de BlogPost (on lit en "souple")
+/* ---------------------- Metadata ---------------------- */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await getBlogPostBySlug(params.slug)
   const path = `/blog/${params.slug}`
@@ -29,7 +31,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     )
   }
 
-  // On lit les champs de manière robuste sans imposer un shape précis
   const p = post as Record<string, any>
 
   const image = (p.image as string) ?? '/placeholder.png'
@@ -60,16 +61,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   )
 }
 
+/* ------------------------------ Page ----------------------------- */
 export default async function BlogPostPage({ params }: Props) {
   const post = await getBlogPostBySlug(params.slug)
   if (!post) notFound()
 
   const safePost = post as BlogPost
 
+  const cookieStore = await cookies()
+  const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value
+  const acceptLang = (await headers()).get('accept-language') || ''
+  const locale: Locale = isLocale(cookieLocale || '') ? (cookieLocale as Locale) : pickBestLocale(acceptLang)
+
   const crumbs = jsonLdBreadcrumbs([
-    { name: 'Accueil', url: '/' },
-    { name: 'Blog', url: '/blog' },
-    { name: safePost.title, url: `/blog/${params.slug}` },
+    { name: 'Accueil', url: localizePath('/', locale) },
+    { name: 'Blog', url: localizePath('/blog', locale) },
+    { name: safePost.title, url: localizePath(`/blog/${params.slug}`, locale) },
   ])
 
   return (
@@ -82,7 +89,7 @@ export default async function BlogPostPage({ params }: Props) {
         />
       </main>
 
-      {/* JSON-LD Article (ton composant existant) */}
+      {/* JSON-LD Article */}
       <ArticleJsonLd post={safePost} />
 
       {/* JSON-LD Breadcrumbs */}

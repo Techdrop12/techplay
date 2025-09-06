@@ -1,16 +1,18 @@
 // src/app/blog/page.tsx
 import type { Metadata } from 'next'
+import { cookies, headers } from 'next/headers'
 import Link from '@/components/LocalizedLink'
 import { getPosts } from '@/lib/blog'
 import BlogCard from '@/components/blog/BlogCard'
 import { generateMeta, jsonLdBreadcrumbs } from '@/lib/seo'
+import { LOCALE_COOKIE, isLocale, pickBestLocale, type Locale } from '@/lib/language'
+import { localizePath } from '@/lib/i18n-routing'
 
 export const revalidate = 60
 
 type SR = Record<string, string | string[] | undefined>
 
-const SITE_URL: string =
-  process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+const SITE = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
 
 /* ---------------------- Metadata dynamique ---------------------- */
 export async function generateMetadata(
@@ -48,6 +50,11 @@ export async function generateMetadata(
 
 /* ------------------------------ Page ----------------------------- */
 export default async function BlogPage({ searchParams }: { searchParams?: SR }) {
+  const cookieStore = await cookies()
+  const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value
+  const acceptLang = (await headers()).get('accept-language') || ''
+  const locale: Locale = isLocale(cookieLocale || '') ? (cookieLocale as Locale) : pickBestLocale(acceptLang)
+
   const page = Math.max(1, Number(searchParams?.page || 1))
   const limit = Math.max(1, Math.min(24, Number(searchParams?.limit || 12)))
 
@@ -72,7 +79,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: SR }) 
 
   const { items: posts, pagination } = await getPosts(params)
 
-  // Conserver les filtres dans les liens
+  // Conserver les filtres dans les liens (LocalizedLink ajoutera le préfixe de locale)
   const persist = (
     next: Partial<Record<'page' | 'limit' | 'q' | 'tag' | 'category' | 'sort', string | number>>
   ) => {
@@ -86,10 +93,10 @@ export default async function BlogPage({ searchParams }: { searchParams?: SR }) 
     return `/blog?${sp.toString()}`
   }
 
-  // JSON-LD Breadcrumbs (Accueil > Blog)
+  // JSON-LD Breadcrumbs (localisé)
   const crumbs = jsonLdBreadcrumbs([
-    { name: 'Accueil', url: '/' },
-    { name: 'Blog', url: '/blog' },
+    { name: 'Accueil', url: localizePath('/', locale) },
+    { name: 'Blog', url: localizePath('/blog', locale) },
   ])
 
   return (
@@ -102,7 +109,12 @@ export default async function BlogPage({ searchParams }: { searchParams?: SR }) 
       </h1>
 
       {/* Recherche / tri */}
-      <form role="search" className="mb-8 grid grid-cols-1 sm:grid-cols-3 gap-3" action="/blog" method="GET">
+      <form
+        role="search"
+        className="mb-8 grid grid-cols-1 sm:grid-cols-3 gap-3"
+        action={localizePath('/blog', locale)}
+        method="GET"
+      >
         <input
           type="search"
           name="q"
@@ -228,7 +240,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: SR }) 
               itemListElement: posts.map((p: any, idx: number) => ({
                 '@type': 'ListItem',
                 position: idx + 1 + (page - 1) * limit,
-                url: `${SITE_URL}/blog/${String(p.slug || '')}`,
+                url: `${SITE}${localizePath(`/blog/${String(p.slug || '')}`, locale)}`,
                 name: String(p.title || ''),
               })),
             }),

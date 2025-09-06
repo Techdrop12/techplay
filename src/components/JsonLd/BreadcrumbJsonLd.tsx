@@ -1,16 +1,18 @@
 'use client'
 
 import Head from 'next/head'
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
 interface BreadcrumbJsonLdProps {
   items: { name: string; path: string }[]
   siteUrl?: string
 }
 
-const ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com'
+const ORIGIN = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
 
 export default function BreadcrumbJsonLd({ items, siteUrl = ORIGIN }: BreadcrumbJsonLdProps) {
   if (!items?.length) return null
+  const locale = getCurrentLocale()
 
   const abs = (p: string) => {
     try {
@@ -18,7 +20,8 @@ export default function BreadcrumbJsonLd({ items, siteUrl = ORIGIN }: Breadcrumb
       new URL(p)
       return p
     } catch {
-      return new URL(p.startsWith('/') ? p : `/${p}`, siteUrl).toString()
+      const localized = localizePath(p.startsWith('/') ? p : `/${p}`, locale)
+      return `${siteUrl}${localized}`
     }
   }
 

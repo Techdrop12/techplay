@@ -3,14 +3,15 @@
 import Head from 'next/head'
 import type { BlogPost } from '@/types/blog'
 import React from 'react'
+import { localizePath, type Locale } from '@/lib/i18n-routing'
 
 interface BlogJsonLdProps {
   posts: BlogPost[]
-  locale?: 'fr' | 'en'
+  locale?: Locale
   siteUrl?: string
 }
 
-const ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com'
+const ORIGIN = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
 
 function iso(d?: unknown): string | undefined {
   if (!d) return undefined
@@ -20,12 +21,13 @@ function iso(d?: unknown): string | undefined {
 
 export default function BlogJsonLd({
   posts = [],
-  locale = 'fr',
+  locale = 'fr' as Locale,
   siteUrl = ORIGIN,
 }: BlogJsonLdProps) {
   if (!Array.isArray(posts) || posts.length === 0) return null
 
-  const blogUrl = new URL(`/${locale}/blog`, siteUrl).toString()
+  const blogPath = localizePath('/blog', locale)
+  const blogUrl = `${siteUrl}${blogPath}`
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -42,7 +44,7 @@ export default function BlogJsonLd({
       '@id': blogUrl,
     },
     blogPost: posts.map((post) => {
-      const postUrl = new URL(`/${locale}/blog/${post.slug}`, siteUrl).toString()
+      const postUrl = `${siteUrl}${localizePath(`/blog/${post.slug}`, locale)}`
       return {
         '@type': 'BlogPosting',
         headline: post.title,
@@ -61,7 +63,7 @@ export default function BlogJsonLd({
       url: siteUrl,
       logo: {
         '@type': 'ImageObject',
-        url: new URL('/icons/icon-512x512.png', siteUrl).toString(),
+        url: `${siteUrl}/icons/icon-512x512.png`,
         width: 512,
         height: 512,
       },

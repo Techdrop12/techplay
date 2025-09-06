@@ -14,7 +14,7 @@ export default function BlogList({ articles }: BlogListProps) {
       aria-label="Liste des articles du blog"
     >
       {articles.map((article) => (
-        <BlogCard key={article._id} article={article} />
+        <BlogCard key={article._id ?? article.slug} article={article} />
       ))}
     </section>
   )

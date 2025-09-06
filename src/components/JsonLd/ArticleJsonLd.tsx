@@ -3,6 +3,7 @@
 // src/components/JsonLd/ArticleJsonLd.tsx
 import type { BlogPost } from '@/types/blog'
 import React from 'react'
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
 interface ArticleJsonLdProps {
   post: BlogPost
@@ -17,6 +18,8 @@ function iso(d?: unknown): string | undefined {
 export default function ArticleJsonLd({ post }: ArticleJsonLdProps) {
   const RAW = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.techplay.fr'
   const siteUrl = RAW.replace(/\/+$/, '')
+  const locale = getCurrentLocale()
+  const pagePath = localizePath(`/blog/${post.slug}`, locale)
 
   const structuredData = {
     '@context': 'https://schema.org',
@@ -35,7 +38,7 @@ export default function ArticleJsonLd({ post }: ArticleJsonLdProps) {
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `${siteUrl}/blog/${post.slug}`,
+      '@id': `${siteUrl}${pagePath}`,
     },
     publisher: {
       '@type': 'Organization',
