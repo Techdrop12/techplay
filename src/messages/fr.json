@@ -1,25 +1,25 @@
 {
   "seo": {
     "homepage_title": "Bienvenue sur TechPlay",
-    "homepage_description": "Découvrez les meilleurs gadgets high-tech et accessoires livrés chez vous.",
+    "homepage_description": "Gadgets high-tech et accessoires gaming de référence, livrés chez vous. Qualité, rapidité et service premium.",
     "a_propos_title": "À propos de TechPlay",
-    "a_propos_description": "En savoir plus sur notre mission, notre équipe et nos valeurs.",
+    "a_propos_description": "Notre mission, notre équipe et nos valeurs pour une expérience d’achat exigeante.",
     "contact_title": "Contact",
-    "contact_description": "Une question ? Contactez TechPlay directement par email.",
-    "wishlist_title": "Ma wishlist",
-    "wishlist_description": "Retrouvez ici vos produits favoris enregistrés sur TechPlay.",
+    "contact_description": "Une question ? Contactez TechPlay par email, nous répondons rapidement.",
+    "wishlist_title": "Ma liste de souhaits",
+    "wishlist_description": "Retrouvez vos favoris enregistrés sur TechPlay.",
     "cart_title": "Mon panier",
-    "cart_description": "Retrouvez ici les produits que vous souhaitez commander sur TechPlay.",
+    "cart_description": "Gérez les produits que vous souhaitez commander sur TechPlay.",
     "success_title": "Commande réussie",
-    "success_description": "Confirmation de commande chez TechPlay.",
+    "success_description": "Votre commande TechPlay a bien été confirmée.",
     "orders_title": "Mes commandes",
-    "orders_description": "Liste de vos commandes chez TechPlay",
+    "orders_description": "Historique et suivi de vos commandes TechPlay.",
     "cgv_title": "Conditions Générales de Vente",
     "cgv_description": "Toutes les conditions générales de vente de TechPlay.",
     "blog_title": "Blog TechPlay",
-    "blog_description": "Toutes les actualités et articles de TechPlay.",
+    "blog_description": "Actualités, conseils et sélections par TechPlay.",
     "product_not_found_title": "Produit introuvable",
-    "product_not_found_description": "Le produit que vous cherchez n'existe pas ou plus."
+    "product_not_found_description": "Le produit que vous cherchez n’existe pas ou n’est plus disponible."
   },
 
   "common": {
@@ -43,7 +43,7 @@
     "see_more": "Voir plus",
     "see_less": "Voir moins",
     "search": "Rechercher",
-    "search_placeholder": "Rechercher un produit, une marque…",
+    "search_placeholder": "Rechercher un produit ou une marque…",
     "empty_state": "Rien à afficher pour le moment.",
     "unit_price": "{value, number, ::currency/EUR}",
     "percent": "{value, number, percent}",
@@ -56,7 +56,7 @@
     "packs": "Packs",
     "blog": "Blog",
     "contact": "Contact",
-    "wishlist": "Wishlist",
+    "wishlist": "Liste de souhaits",
     "cart": "Panier",
     "account": "Compte",
     "admin": "Admin",
@@ -83,8 +83,8 @@
     "go_to_cart": "Voir le panier",
     "checkout": "Passer au paiement",
     "continue_shopping": "← Continuer vos achats",
-    "add_to_wishlist": "Ajouter à la wishlist",
-    "remove_from_wishlist": "Retirer de la wishlist",
+    "add_to_wishlist": "Ajouter à la liste de souhaits",
+    "remove_from_wishlist": "Retirer de la liste de souhaits",
     "apply_filters": "Appliquer les filtres",
     "clear_filters": "Effacer les filtres",
     "load_more": "Charger plus",
@@ -96,7 +96,7 @@
     "password": "Mot de passe",
     "name": "Nom",
     "first_name": "Prénom",
-    "last_name": "Nom",
+    "last_name": "Nom de famille",
     "message": "Message",
     "address": "Adresse",
     "city": "Ville",
@@ -122,7 +122,7 @@
     "close_menu": "Fermer le menu",
     "open_modal": "Ouvrir la fenêtre",
     "close_modal": "Fermer la fenêtre",
-    "toggle_wishlist": "Basculer la wishlist",
+    "toggle_wishlist": "Basculer la liste de souhaits",
     "toggle_cart": "Ouvrir/fermer le panier"
   },
 
@@ -142,8 +142,8 @@
     "added_to_cart": "Ajouté au panier",
     "removed_from_cart": "Retiré du panier",
     "action_failed": "Action impossible, réessayez.",
-    "added_to_wishlist": "Ajouté à la wishlist",
-    "removed_from_wishlist": "Retiré de la wishlist"
+    "added_to_wishlist": "Ajouté à la liste de souhaits",
+    "removed_from_wishlist": "Retiré de la liste de souhaits"
   },
 
   "skeleton": {
@@ -192,7 +192,7 @@
 
   "search": {
     "title": "Recherche",
-    "placeholder": "Rechercher un produit, une marque…",
+    "placeholder": "Rechercher un produit ou une marque…",
     "no_results": "Aucun résultat pour « {query} ».",
     "results_count": "{count, plural, one {# résultat} other {# résultats}}"
   },
@@ -260,12 +260,12 @@
 
   "wishlist": {
     "title": "Ma liste de souhaits",
-    "empty": "Aucun produit dans votre wishlist.",
+    "empty": "Aucun produit dans votre liste de souhaits.",
     "view": "Voir le produit",
-    "remove": "Supprimer de la wishlist",
-    "limit_reached": "Limite de wishlist atteinte",
-    "added": "Ajouté à la wishlist",
-    "removed": "Retiré de la wishlist"
+    "remove": "Supprimer de la liste de souhaits",
+    "limit_reached": "Limite de liste de souhaits atteinte",
+    "added": "Ajouté à la liste de souhaits",
+    "removed": "Retiré de la liste de souhaits"
   },
 
   "cart": {
@@ -313,7 +313,7 @@
 
   "orders": {
     "my_orders": "Mes commandes",
-    "no_orders_found": "Vous n'avez pas encore de commande.",
+    "no_orders_found": "Vous n’avez pas encore de commande.",
     "view_details": "Voir détails",
     "order_id": "Commande n° {orderId}",
     "date": "Date",
@@ -341,7 +341,7 @@
     "profile": "Profil",
     "addresses": "Adresses",
     "orders": "Commandes",
-    "wishlist": "Wishlist",
+    "wishlist": "Liste de souhaits",
     "logout": "Se déconnecter",
     "save_profile": "Enregistrer le profil",
     "add_address": "Ajouter une adresse"
@@ -406,7 +406,7 @@
     "title": "Newsletter",
     "placeholder": "Votre email",
     "subscribe": "S’abonner",
-    "subscribed": "Merci, c’est bon !"
+    "subscribed": "Merci, vous êtes inscrit(e) !"
   },
 
   "blog": {
@@ -424,7 +424,7 @@
 
   "cgv": {
     "title": "Conditions Générales de Vente",
-    "intro": "Les présentes conditions s'appliquent à toutes les commandes effectuées sur le site TechPlay.",
+    "intro": "Les présentes conditions s’appliquent à toutes les commandes effectuées sur le site TechPlay.",
     "section1_title": "Article 1 : Objet",
     "section1_text": "Les présentes conditions régissent les ventes de produits TechPlay.",
     "section2_title": "Article 2 : Commande",
@@ -435,21 +435,21 @@
     "title": "À propos",
     "description": "TechPlay est une boutique spécialisée dans la vente de produits tech et gaming de qualité.",
     "our_mission_title": "Notre mission",
-    "our_mission_text": "Notre mission est de rendre accessibles aux passionnés les dernières innovations technologiques.",
+    "our_mission_text": "Rendre accessibles aux passionnés les dernières innovations technologiques.",
     "our_team_title": "Notre équipe",
-    "our_team_text": "Nous sommes une équipe de développeurs, marketeurs et fans de tech déterminés à vous offrir la meilleure expérience.",
+    "our_team_text": "Développeurs, marketeurs et fans de tech réunis pour vous offrir la meilleure expérience.",
     "our_values_title": "Nos valeurs",
-    "our_values_text": "Qualité, transparence et passion sont nos mots d’ordre."
+    "our_values_text": "Qualité, transparence et passion."
   },
 
   "contact": {
     "title": "Contact",
-    "intro": "Une question ? Écris-nous à"
+    "intro": "Une question ? Écrivez-nous à"
   },
 
   "error": {
     "404_title": "Page non trouvée",
-    "404_message": "La page que vous cherchez n'existe pas.",
+    "404_message": "La page que vous cherchez n’existe pas.",
     "back_home": "Retour à l’accueil",
     "generic": "Une erreur est survenue.",
     "network": "Problème de connexion réseau",

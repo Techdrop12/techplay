@@ -17,7 +17,20 @@ function toCanonical(product: any): { id: string } & Record<string, any> | null 
 export function getWishlist(): any[] {
   if (!isBrowser()) return []
   try {
-    return JSON.parse(window.localStorage.getItem(STORAGE_KEY) || '[]') || []
+    const raw = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || '[]') || []
+    // petite sanitization à la volée
+    const seen = new Set<string>()
+    const out: any[] = []
+    for (const it of Array.isArray(raw) ? raw : []) {
+      const c = toCanonical(it)
+      if (!c) continue
+      if (!seen.has(c.id)) {
+        out.push(c)
+        seen.add(c.id)
+      }
+      if (out.length >= MAX_ITEMS) break
+    }
+    return out
   } catch {
     return []
   }

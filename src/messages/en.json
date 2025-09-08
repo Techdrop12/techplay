@@ -1,25 +1,25 @@
 {
   "seo": {
     "homepage_title": "Welcome to TechPlay",
-    "homepage_description": "Discover the best high-tech gadgets and accessories delivered to your door.",
+    "homepage_description": "Premium high-tech gadgets and gaming accessories delivered fast. Quality products, great service.",
     "a_propos_title": "About TechPlay",
-    "a_propos_description": "Learn more about our mission, team, and values.",
+    "a_propos_description": "Our mission, our team, and our values for a top-tier shopping experience.",
     "contact_title": "Contact",
-    "contact_description": "Any question? Contact TechPlay by email.",
+    "contact_description": "Got a question? Contact TechPlay by email and we’ll get back to you quickly.",
     "wishlist_title": "My wishlist",
-    "wishlist_description": "Find your favorite saved products on TechPlay.",
+    "wishlist_description": "Find your saved favorites on TechPlay.",
     "cart_title": "My cart",
     "cart_description": "View and manage the products in your TechPlay cart.",
     "success_title": "Order successful",
     "success_description": "Your TechPlay order has been confirmed.",
     "orders_title": "My orders",
-    "orders_description": "List of your orders on TechPlay",
+    "orders_description": "Track and view your TechPlay orders.",
     "cgv_title": "Terms & Conditions",
     "cgv_description": "All TechPlay terms and conditions.",
     "blog_title": "TechPlay Blog",
-    "blog_description": "All the latest news and articles from TechPlay.",
-    "product_not_found_title": "Product Not Found",
-    "product_not_found_description": "The product you are looking for does not exist or is no longer available."
+    "blog_description": "News, tips and curated selections from TechPlay.",
+    "product_not_found_title": "Product not found",
+    "product_not_found_description": "The product you’re looking for doesn’t exist or is no longer available."
   },
 
   "common": {
@@ -43,7 +43,7 @@
     "see_more": "See more",
     "see_less": "See less",
     "search": "Search",
-    "search_placeholder": "Search a product, a brand…",
+    "search_placeholder": "Search for a product or brand…",
     "empty_state": "Nothing to display yet.",
     "unit_price": "{value, number, ::currency/EUR}",
     "percent": "{value, number, percent}",
@@ -67,9 +67,9 @@
     "about": "About",
     "cgv": "Terms",
     "privacy": "Privacy",
-    "mentions": "Legal Notice",
+    "mentions": "Legal notice",
     "newsletter_title": "Stay in the loop",
-    "newsletter_sub": "News, promos and new arrivals.",
+    "newsletter_sub": "News, promos & new arrivals.",
     "payments": "Accepted payments",
     "shipping": "Shipping",
     "returns": "Returns",
@@ -192,7 +192,7 @@
 
   "search": {
     "title": "Search",
-    "placeholder": "Search a product, a brand…",
+    "placeholder": "Search for a product or brand…",
     "no_results": "No results for \"{query}\".",
     "results_count": "{count, plural, one {# result} other {# results}}"
   },
@@ -321,10 +321,10 @@
     "shipping": "Shipping",
     "total": "Total",
     "status": "Status",
-    "customer_info": "Customer Info",
-    "items_ordered": "Items Ordered",
-    "order_summary": "Order Summary",
-    "order_not_found": "Order Not Found",
+    "customer_info": "Customer info",
+    "items_ordered": "Items ordered",
+    "order_summary": "Order summary",
+    "order_not_found": "Order not found",
     "error_loading_order": "Error loading order.",
     "statuses": {
       "paid": "Paid",
@@ -435,16 +435,16 @@
     "title": "About",
     "description": "TechPlay is a store specializing in quality tech and gaming products.",
     "our_mission_title": "Our mission",
-    "our_mission_text": "Our mission is to bring the latest tech innovations to enthusiasts everywhere.",
+    "our_mission_text": "Bringing the latest tech innovations to enthusiasts everywhere.",
     "our_team_title": "Our team",
-    "our_team_text": "We are a team of developers, marketers and tech fans committed to giving you the best experience.",
+    "our_team_text": "Developers, marketers and tech fans committed to giving you the best experience.",
     "our_values_title": "Our values",
-    "our_values_text": "Quality, transparency, and passion are our guiding principles."
+    "our_values_text": "Quality, transparency and passion."
   },
 
   "contact": {
     "title": "Contact",
-    "intro": "Any question? Write us at"
+    "intro": "Got a question? Write to us at"
   },
 
   "error": {

@@ -1,7 +1,8 @@
-// src/components/WishlistButton.tsx — premium (hook-based, no emoji) — REVISED
+// src/components/WishlistButton.tsx — premium (hook-based, i18n toasts/aria)
 'use client'
 
 import { useMemo, useRef, useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { Heart, HeartCrack, AlertTriangle } from 'lucide-react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { toast } from 'react-hot-toast'
@@ -41,6 +42,10 @@ export default function WishlistButton({
   size = 'md',
   withLabel = false,
 }: WishlistButtonProps) {
+  const tBtn = useTranslations('buttons')
+  const tToast = useTranslations('toasts')
+  const tWL = useTranslations('wishlist')
+
   const prefersReduced = useReducedMotion()
   const btnRef = useRef<HTMLButtonElement | null>(null)
   const [rippler, setRippler] = useState(0)
@@ -74,13 +79,13 @@ export default function WishlistButton({
     if (!valid || disabled) return
     try { navigator.vibrate?.(8) } catch {}
 
-    const title = String(product?.title ?? 'Produit')
+    const title = String(product?.title ?? 'Product')
     const price = Number(product?.price) || 0
 
     if (isWishlisted) {
       remove(pid)
-      setSr(`${title} retiré de la wishlist`)
-      toast('Retiré de la wishlist', {
+      setSr(tWL('removed'))
+      toast(tToast('removed_from_wishlist'), {
         icon: <HeartCrack size={18} className="text-gray-600" />,
         style: { borderRadius: '10px', background: '#111827', color: '#fff' },
       })
@@ -90,15 +95,15 @@ export default function WishlistButton({
 
     if (count >= WISHLIST_LIMIT) {
       setShake(true); setTimeout(() => setShake(false), 420)
-      setSr('Limite de wishlist atteinte')
-      toast.error('Limite de wishlist atteinte', { icon: <AlertTriangle size={18} className="text-amber-500" /> })
+      setSr(tWL('limit_reached'))
+      toast.error(tWL('limit_reached'), { icon: <AlertTriangle size={18} className="text-amber-500" /> })
       return
     }
 
     const canonical = { ...product, id: pid }
     add(canonical as any)
-    setSr(`${title} ajouté à la wishlist`)
-    toast.success('Ajouté à la wishlist', {
+    setSr(tWL('added'))
+    toast.success(tToast('added_to_wishlist'), {
       icon: <Heart size={18} className="text-red-500" />,
       style: { borderRadius: '10px', background: '#111827', color: '#fff' },
     })
@@ -114,6 +119,8 @@ export default function WishlistButton({
     } catch {}
   }
 
+  const ariaLabel = isWishlisted ? tBtn('remove_from_wishlist') : tBtn('add_to_wishlist')
+
   return (
     <>
       {/* SR live for a11y */}
@@ -128,10 +135,10 @@ export default function WishlistButton({
         transition={{ duration: 0.42 }}
         className={cn(floating ? baseFloating : baseInline, 'relative transition-colors', className)}
         style={{ width: dim, height: dim }}
-        aria-label={isWishlisted ? 'Retirer de la wishlist' : 'Ajouter à la wishlist'}
+        aria-label={ariaLabel}
         aria-pressed={isWishlisted}
         disabled={!valid || disabled}
-        title={isWishlisted ? 'Retirer de la wishlist' : 'Ajouter à la wishlist'}
+        title={ariaLabel}
         data-wishlisted={isWishlisted ? 'true' : 'false'}
       >
         {!prefersReduced && isWishlisted && (
@@ -157,7 +164,9 @@ export default function WishlistButton({
         />
 
         {!floating && withLabel && (
-          <span className="ml-2 text-sm font-medium">{isWishlisted ? 'Dans la wishlist' : 'Wishlist'}</span>
+          <span className="ml-2 text-sm font-medium">
+            {isWishlisted ? tWL('title') : 'Wishlist'}
+          </span>
         )}
       </motion.button>
     </>

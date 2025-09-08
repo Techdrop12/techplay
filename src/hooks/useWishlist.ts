@@ -27,6 +27,25 @@ function toCanonical<T extends Record<string, any>>(item: T | null | undefined):
   return { ...item, id }
 }
 
+/** Nettoie un tableau brut issu du storage vers une liste d'items *canoniques* */
+function sanitizeArray<T extends Record<string, any>>(arr: unknown): T[] {
+  if (!Array.isArray(arr)) return []
+  const canon = arr
+    .map((x) => toCanonical(x as any))
+    .filter(Boolean) as (T & { id: string })[]
+  // dedupe par id en gardant le 1er
+  const seen = new Set<string>()
+  const out: T[] = []
+  for (const it of canon) {
+    const id = normalizeId((it as any).id)
+    if (id && !seen.has(id)) {
+      out.push(it as T)
+      seen.add(id)
+    }
+  }
+  return out.slice(0, MAX_ITEMS)
+}
+
 export interface UseWishlistReturn<T extends WishlistItemBase = WishlistItemBase> {
   items: T[]
   wishlist: T[] // alias rétro-compat
@@ -45,20 +64,20 @@ export function useWishlist<T extends WishlistItemBase = WishlistItemBase>(): Us
   // Load + sync inter-onglets
   useEffect(() => {
     mounted.current = true
-    const stored = safeParse<T[]>(typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null, [])
-    setItems(Array.isArray(stored) ? stored : [])
+    const stored = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
+    setItems(sanitizeArray<T>(safeParse(stored, [])))
 
     const onStorage = (e: StorageEvent) => {
       if (e.key === STORAGE_KEY) {
-        setItems(safeParse<T[]>(e.newValue, []))
+        setItems(sanitizeArray<T>(safeParse(e.newValue, [])))
       }
     }
     window.addEventListener('storage', onStorage)
 
     const onCustom = (e: Event) => {
       try {
-        const detail = (e as CustomEvent<T[]>).detail
-        if (Array.isArray(detail)) setItems(detail)
+        const detail = (e as CustomEvent<T[]>)?.detail
+        if (Array.isArray(detail)) setItems(sanitizeArray<T>(detail))
       } catch {}
     }
     window.addEventListener('wishlist-updated', onCustom as EventListener)
