@@ -17,7 +17,8 @@ const EXTRA_ALLOWED = (process.env.ALLOWED_HOSTNAMES || '')
   .map((h) => h.trim())
   .filter(Boolean)
 
-const STATIC_FILES = ['favicon.ico', 'manifest.json', 'robots.txt', 'sw.js', 'firebase-messaging-sw.js']
+// + site.webmanifest pour cohérence
+const STATIC_FILES = ['favicon.ico', 'manifest.json', 'robots.txt', 'site.webmanifest', 'sw.js', 'firebase-messaging-sw.js']
 
 const PUBLIC_PREFIXES = [
   '/_next/',

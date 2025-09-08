@@ -18,6 +18,7 @@ const isSupported = (v?: string): v is (typeof SUPPORTED_LOCALES)[number] =>
   !!v && (SUPPORTED_LOCALES as readonly string[]).includes(v as string)
 
 const ensureLeadingSlash = (p: string) => (p?.startsWith('/') ? p : `/${p || ''}`)
+const isExternalUrl = (p: string) => /^([a-z][a-z0-9+\-.]*:)?\/\//i.test(p) || p.startsWith('mailto:') || p.startsWith('tel:')
 
 export function getCurrentPathname(): string {
   if (typeof window === 'undefined') return '/'
@@ -71,12 +72,16 @@ type LocalizeOptions = {
  * Construit un chemin localisé.
  * - `fr` (locale par défaut) → pas de préfixe
  * - Autres locales → `/<locale>/…`
+ * - Laisse intacts les liens externes (http, https, mailto, tel)
  */
 export function localizePath(
   path: string,
   locale: (typeof SUPPORTED_LOCALES)[number],
   opts: LocalizeOptions = {}
 ): string {
+  if (!path) path = opts.currentPathname || ''
+  if (isExternalUrl(path)) return path
+
   const base = ensureLeadingSlash(path || opts.currentPathname || getCurrentPathname())
   const bare = stripLocalePrefix(base)
   const withLocale = _withLocale(bare, locale as Locale)

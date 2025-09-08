@@ -1,5 +1,5 @@
 // src/i18n/config.ts
-// Re-exports to keep ONE source of truth
+// Re-exports to keep ONE source of truth for locales
 
 export {
   languages as locales,
@@ -13,8 +13,8 @@ export {
   withLocale,
   localeLabels,
   toLangTag,
+  toOgLocale,
 } from '@/lib/language'
 
 // ✅ next-intl v3/v4 : FR sans préfixe, EN avec préfixe
-// (si tu actives le routing next-intl)
 export const localePrefix = 'as-needed' as const

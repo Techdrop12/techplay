@@ -17,7 +17,7 @@ type Props = Omit<LinkProps, 'href'> &
     keepHash?: boolean
   }
 
-/** Détecte toute URL absolue (http, https, mailto, tel, etc.) ou protocole relatif `//` */
+/** URL absolue (http/https/mailto/tel/…) ou protocole relatif `//` */
 function isAbsolute(href: string) {
   return /^(?:[a-z][a-z0-9+.-]*:)?\/\//i.test(href) || /^[a-z][a-z0-9+.-]*:/i.test(href)
 }

@@ -11,16 +11,21 @@ export type Messages = Record<string, unknown>
  */
 export default async function loadMessages(localeInput: string | unknown): Promise<Messages> {
   const locale: Locale = normalizeLocale(typeof localeInput === 'string' ? localeInput : undefined)
-
-  switch (locale) {
-    case 'en': {
-      const mod = await import('@/messages/en.json')
-      return (mod.default ?? mod) as Messages
+  try {
+    switch (locale) {
+      case 'en': {
+        const mod = await import('@/messages/en.json')
+        return (mod.default ?? mod) as Messages
+      }
+      case 'fr':
+      default: {
+        const mod = await import('@/messages/fr.json')
+        return (mod.default ?? mod) as Messages
+      }
     }
-    case 'fr':
-    default: {
-      const mod = await import('@/messages/fr.json')
-      return (mod.default ?? mod) as Messages
-    }
+  } catch {
+    // Fallback safe si un JSON manque en build preview
+    const mod = await import('@/messages/fr.json')
+    return (mod.default ?? mod) as Messages
   }
 }

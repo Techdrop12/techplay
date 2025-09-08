@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { NextIntlClientProvider, type AbstractIntlMessages } from 'next-intl'
+import { unstable_setRequestLocale } from 'next-intl/server'
 
 import loadMessages from '@/i18n/loadMessages'
 import { locales, isLocale, type Locale } from '@/i18n/config'
@@ -28,6 +29,9 @@ export default async function LocaleLayout({
 }) {
   const locale = params.locale
   if (!isLocale(locale)) notFound()
+
+  // ✅ indique la locale au runtime côté serveur (next-intl RSC)
+  unstable_setRequestLocale(locale as Locale)
 
   const messages = (await loadMessages(locale)) as AbstractIntlMessages
 

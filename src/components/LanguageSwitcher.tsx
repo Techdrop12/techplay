@@ -2,7 +2,13 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
-import { languages as SUPPORTED_LOCALES, localeLabels, LOCALE_COOKIE, type Locale, setLocaleCookie } from '@/lib/language'
+import {
+  languages as SUPPORTED_LOCALES,
+  localeLabels,
+  LOCALE_COOKIE,
+  type Locale,
+  setLocaleCookie,
+} from '@/lib/language'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 import { event as gaEvent } from '@/lib/ga'
 
@@ -14,10 +20,8 @@ export default function LanguageSwitcher() {
   const changeLanguage = (next: Locale) => {
     if (next === current) return
 
-    // 1) Persistance cookie (1 an)
+    // 1) Persistance cookie (1 an) — une seule écriture via util
     try {
-      const secure = typeof location !== 'undefined' && location.protocol === 'https:' ? '; Secure' : ''
-      document.cookie = `${LOCALE_COOKIE}=${encodeURIComponent(next)}; Max-Age=31536000; Path=/; SameSite=Lax${secure}`
       setLocaleCookie(next)
     } catch {}
 
