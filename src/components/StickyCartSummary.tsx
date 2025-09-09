@@ -1,4 +1,4 @@
-// src/components/StickyCartSummary.tsx — PREMIUM (no emoji, SVG icons, a11y/SEO ok)
+// src/components/StickyCartSummary.tsx — PREMIUM (no emoji, SVG icons, a11y/SEO ok) + FIX pointer-events
 'use client'
 
 import Link from '@/components/LocalizedLink'
@@ -212,7 +212,7 @@ export default function StickyCartSummary({
         exit={prefersReduced ? { y: 0, opacity: 0 } : { y: 72, opacity: 0 }}
         transition={prefersReduced ? { duration: 0.15 } : { type: 'spring', stiffness: 320, damping: 26 }}
         className={cn(
-          'md:hidden fixed bottom-0 left-0 right-0 z-[60]',
+          'md:hidden fixed bottom-0 left-0 right-0 z-[60] pointer-events-none',
           'backdrop-blur supports-[backdrop-filter]:bg-white/85 dark:supports-[backdrop-filter]:bg-zinc-900/85',
           'border-t border-gray-200 dark:border-zinc-800 shadow-[0_-6px_20px_rgba(0,0,0,0.08)]',
           'pb-[env(safe-area-inset-bottom)]',
@@ -222,123 +222,125 @@ export default function StickyCartSummary({
         aria-label={tx('mobile_summary', 'Résumé de votre panier', { count })}
         data-visible="true"
       >
-        {/* Barre supérieure */}
-        <div className="flex items-center justify-between px-4 py-2">
-          <button
-            type="button"
-            onClick={() => setCollapsedPersist(!collapsed)}
-            className="text-sm font-semibold text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] rounded-md px-1 -mx-1"
-            aria-expanded={!collapsed}
-            aria-controls="sticky-cart-panel"
-          >
-            {collapsed ? tx('show', 'Afficher') : tx('hide', 'Masquer')} · {count}{' '}
-            {tx('item', (count ?? 0) > 1 ? 'articles' : 'article', { count })}
-          </button>
-
-          <div className="text-sm text-gray-800 dark:text-gray-100" aria-live="polite">
-            {tx('total', 'Total')} : <strong className="ml-1">{formatPrice(payable)}</strong>
-          </div>
-        </div>
-
-        {/* Panneau détaillé */}
-        <AnimatePresence initial={false}>
-          {!collapsed && (
-            <motion.div
-              id="sticky-cart-panel"
-              key="panel"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.22, ease: 'easeInOut' }}
-              className="overflow-hidden"
+        <div className="pointer-events-auto">
+          {/* Barre supérieure */}
+          <div className="flex items-center justify-between px-4 py-2">
+            <button
+              type="button"
+              onClick={() => setCollapsedPersist(!collapsed)}
+              className="text-sm font-semibold text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] rounded-md px-1 -mx-1"
+              aria-expanded={!collapsed}
+              aria-controls="sticky-cart-panel"
             >
-              {/* Progress “livraison offerte” */}
-              <div className="px-4 pt-1">
-                <div className="mb-1 flex items-center justify-between text-[11px] text-gray-600 dark:text-gray-300">
-                  <span>{tx('free_shipping', 'Livraison offerte')}</span>
-                  <span aria-hidden="true">{progress}%</span>
+              {collapsed ? tx('show', 'Afficher') : tx('hide', 'Masquer')} · {count}{' '}
+              {tx('item', (count ?? 0) > 1 ? 'articles' : 'article', { count })}
+            </button>
+
+            <div className="text-sm text-gray-800 dark:text-gray-100" aria-live="polite">
+              {tx('total', 'Total')} : <strong className="ml-1">{formatPrice(payable)}</strong>
+            </div>
+          </div>
+
+          {/* Panneau détaillé */}
+          <AnimatePresence initial={false}>
+            {!collapsed && (
+              <motion.div
+                id="sticky-cart-panel"
+                key="panel"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.22, ease: 'easeInOut' }}
+                className="overflow-hidden"
+              >
+                {/* Progress “livraison offerte” */}
+                <div className="px-4 pt-1">
+                  <div className="mb-1 flex items-center justify-between text-[11px] text-gray-600 dark:text-gray-300">
+                    <span>{tx('free_shipping', 'Livraison offerte')}</span>
+                    <span aria-hidden="true">{progress}%</span>
+                  </div>
+                  <div
+                    className="h-2 w-full overflow-hidden rounded-full bg-gray-200/70 dark:bg-zinc-800"
+                    aria-label={tx('free_shipping_progress', 'Progression vers la livraison offerte')}
+                    role="progressbar"
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={progress}
+                  >
+                    <motion.div
+                      className={cn('h-full rounded-full', progress >= 100 ? 'bg-green-500' : 'bg-[hsl(var(--accent))]')}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${progress}%` }}
+                      transition={{ duration: 0.35 }}
+                    />
+                  </div>
+
+                  <p
+                    className={cn(
+                      'mt-2 text-xs',
+                      remaining > 0 ? 'text-gray-600 dark:text-gray-300' : 'text-green-600 dark:text-green-400 font-semibold'
+                    )}
+                    aria-live="polite"
+                  >
+                    {remaining > 0
+                      ? tx('free_shipping_remaining', 'Plus que {amount} pour la livraison gratuite.', {
+                          amount: formatPrice(remaining),
+                        })
+                      : tx('free_shipping_unlocked', 'Bravo ! La livraison est offerte.')}
+                  </p>
                 </div>
-                <div
-                  className="h-2 w-full overflow-hidden rounded-full bg-gray-200/70 dark:bg-zinc-800"
-                  aria-label={tx('free_shipping_progress', 'Progression vers la livraison offerte')}
-                  role="progressbar"
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-valuenow={progress}
-                >
-                  <motion.div
-                    className={cn('h-full rounded-full', progress >= 100 ? 'bg-green-500' : 'bg-[hsl(var(--accent))]')}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progress}%` }}
-                    transition={{ duration: 0.35 }}
-                  />
+
+                {/* Lignes montants */}
+                <div className="px-4 pt-2 text-[13px] text-gray-700 dark:text-gray-300 space-y-1">
+                  <Line label={tx('subtotal', 'Sous-total')} value={formatPrice(subtotal)} />
+                  {discount > 0 && <Line label={tx('discount', 'Remise')} value={`- ${formatPrice(discount)}`} accent />}
+                  <Line label={tx('vat', 'TVA (est.)')} value={Number.isFinite(tax) && (tax as number) > 0 ? formatPrice(tax as number) : '—'} />
+                  <Line label={tx('shipping', 'Livraison')} value={shippingDisplay} />
+                  <div className="my-2 border-t border-gray-300 dark:border-zinc-700" />
+                  <Line label={tx('total', 'Total')} value={formatPrice(payable)} bold />
                 </div>
 
-                <p
-                  className={cn(
-                    'mt-2 text-xs',
-                    remaining > 0 ? 'text-gray-600 dark:text-gray-300' : 'text-green-600 dark:text-green-400 font-semibold'
-                  )}
-                  aria-live="polite"
-                >
-                  {remaining > 0
-                    ? tx('free_shipping_remaining', 'Plus que {amount} pour la livraison gratuite.', {
-                        amount: formatPrice(remaining),
-                      })
-                    : tx('free_shipping_unlocked', 'Bravo ! La livraison est offerte.')}
-                </p>
-              </div>
+                {/* CTAs */}
+                <div className="grid grid-cols-2 gap-2 px-4 py-3">
+                  <Link
+                    href={gotoCart}
+                    onClick={() => onCta('voir_panier')}
+                    className="inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-zinc-700 px-3 py-2 text-sm font-semibold text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
+                    aria-label={tx('view_cart', 'Voir le panier')}
+                  >
+                    {tx('view_cart', 'Voir le panier')}
+                  </Link>
+                  <Link
+                    href={gotoCheckout}
+                    onClick={() => onCta('commander')}
+                    className="inline-flex items-center justify-center rounded-lg bg-[hsl(var(--accent))] text-white px-3 py-2 text-sm font-extrabold shadow-md hover:opacity-90 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
+                    aria-label={tx('checkout', 'Commander')}
+                  >
+                    {tx('checkout', 'Commander')} →
+                  </Link>
+                </div>
 
-              {/* Lignes montants */}
-              <div className="px-4 pt-2 text-[13px] text-gray-700 dark:text-gray-300 space-y-1">
-                <Line label={tx('subtotal', 'Sous-total')} value={formatPrice(subtotal)} />
-                {discount > 0 && <Line label={tx('discount', 'Remise')} value={`- ${formatPrice(discount)}`} accent />}
-                <Line label={tx('vat', 'TVA (est.)')} value={Number.isFinite(tax) && (tax as number) > 0 ? formatPrice(tax as number) : '—'} />
-                <Line label={tx('shipping', 'Livraison')} value={shippingDisplay} />
-                <div className="my-2 border-t border-gray-300 dark:border-zinc-700" />
-                <Line label={tx('total', 'Total')} value={formatPrice(payable)} bold />
-              </div>
-
-              {/* CTAs */}
-              <div className="grid grid-cols-2 gap-2 px-4 py-3">
-                <Link
-                  href={gotoCart}
-                  onClick={() => onCta('voir_panier')}
-                  className="inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-zinc-700 px-3 py-2 text-sm font-semibold text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
-                  aria-label={tx('view_cart', 'Voir le panier')}
-                >
-                  {tx('view_cart', 'Voir le panier')}
-                </Link>
-                <Link
-                  href={gotoCheckout}
-                  onClick={() => onCta('commander')}
-                  className="inline-flex items-center justify-center rounded-lg bg-[hsl(var(--accent))] text-white px-3 py-2 text-sm font-extrabold shadow-md hover:opacity-90 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
-                  aria-label={tx('checkout', 'Commander')}
-                >
-                  {tx('checkout', 'Commander')} →
-                </Link>
-              </div>
-
-              {/* Trust line (no emoji) */}
-              <div className="px-4 pb-3 -mt-1">
-                <ul className="flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
-                  <li className="flex items-center gap-1.5">
-                    <IconLock className="text-gray-600 dark:text-gray-300" />
-                    <span>{tx('secure_payment', 'Paiement sécurisé')}</span>
-                  </li>
-                  <li className="flex items-center gap-1.5">
-                    <IconRocket className="text-gray-600 dark:text-gray-300" />
-                    <span>{tx('fast_shipping', '48h')}</span>
-                  </li>
-                  <li className="flex items-center gap-1.5">
-                    <IconHeadset className="text-gray-600 dark:text-gray-300" />
-                    <span>{tx('support', 'Support 7j/7')}</span>
-                  </li>
-                </ul>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                {/* Trust line (no emoji) */}
+                <div className="px-4 pb-3 -mt-1">
+                  <ul className="flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
+                    <li className="flex items-center gap-1.5">
+                      <IconLock className="text-gray-600 dark:text-gray-300" />
+                      <span>{tx('secure_payment', 'Paiement sécurisé')}</span>
+                    </li>
+                    <li className="flex items-center gap-1.5">
+                      <IconRocket className="text-gray-600 dark:text-gray-300" />
+                      <span>{tx('fast_shipping', '48h')}</span>
+                    </li>
+                    <li className="flex items-center gap-1.5">
+                      <IconHeadset className="text-gray-600 dark:text-gray-300" />
+                      <span>{tx('support', 'Support 7j/7')}</span>
+                    </li>
+                  </ul>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </motion.aside>
     </AnimatePresence>
   )

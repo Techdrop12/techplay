@@ -1,4 +1,4 @@
-// src/components/ConsentBanner.tsx — UX/A11y + Consent Mode v2 bridge (version consolidée)
+// src/components/ConsentBanner.tsx — UX/A11y + Consent Mode v2 bridge (version consolidée) + FIX pointer-events
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
@@ -147,9 +147,9 @@ export default function ConsentBanner() {
       aria-labelledby="tp-consent-title"
       aria-describedby="tp-consent-desc"
       data-nosnippet
-      className="fixed inset-x-0 bottom-0 z-[60] mx-auto max-w-4xl rounded-t-2xl border border-token-border bg-token-surface/95 px-4 py-4 shadow-2xl backdrop-blur sm:rounded-2xl sm:bottom-6 sm:px-6 sm:py-5"
+      className="fixed inset-x-0 bottom-0 z-[60] mx-auto max-w-4xl rounded-t-2xl border border-token-border bg-token-surface/95 px-4 py-4 shadow-2xl backdrop-blur sm:rounded-2xl sm:bottom-6 sm:px-6 sm:py-5 pointer-events-none"
     >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-5 pointer-events-auto">
         <div className="flex-1">
           <h2 id="tp-consent-title" className="text-base font-bold">Votre confidentialité chez TechPlay</h2>
           <p id="tp-consent-desc" className="mt-1 text-sm text-token-text/70">

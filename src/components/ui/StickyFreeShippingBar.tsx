@@ -1,4 +1,4 @@
-// src/components/ui/StickyFreeShippingBar.tsx — FINAL (i18n + routes harmonisées)
+// src/components/ui/StickyFreeShippingBar.tsx — FINAL (i18n + routes harmonisées) + FIX pointer-events
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -156,7 +156,7 @@ export default function StickyFreeShippingBar({
 
   return (
     <div
-      className={cn('fixed z-50 px-3 sm:px-4', sideClasses, className)}
+      className={cn('fixed z-50 px-3 sm:px-4 pointer-events-none', sideClasses, className)}
       role="region"
       aria-label={isFr ? 'Barre livraison offerte' : 'Free shipping bar'}
       data-position={position}
@@ -165,7 +165,8 @@ export default function StickyFreeShippingBar({
         className={cn(
           'mx-auto max-w-5xl rounded-xl shadow-lg border',
           'bg-white/90 dark:bg-zinc-900/90 border-gray-200 dark:border-zinc-800',
-          'supports-[backdrop-filter]:backdrop-blur-lg'
+          'supports-[backdrop-filter]:backdrop-blur-lg',
+          'pointer-events-auto'
         )}
       >
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 px-3 sm:px-4 py-2">
