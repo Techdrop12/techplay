@@ -1,4 +1,4 @@
-// src/app/layout.tsx — Root layout (lang from cookie or Accept-Language), default-locale without prefix
+// src/app/layout.tsx — Root layout (lang from cookie or Accept-Language), default-locale without prefix + hreflang/canonical
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
 import { Inter, Sora } from 'next/font/google'
@@ -27,6 +27,7 @@ import {
   toLangTag,
   pickBestLocale,
   type Locale,
+  DEFAULT_LOCALE,
 } from '@/lib/language'
 
 const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter', adjustFontFallback: true })
@@ -44,6 +45,15 @@ export async function generateMetadata(): Promise<Metadata> {
   const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value
   const acceptLang = (await headers()).get('accept-language') || undefined
   const locale: Locale = isLocale(cookieLocale) ? (cookieLocale as Locale) : pickBestLocale(acceptLang)
+
+  // hreflang/canonical pour la racine (les pages spécifiques peuvent exporter leurs propres alternates)
+  const alternates: Metadata['alternates'] = {
+    canonical: SITE_URL,
+    languages: {
+      fr: SITE_URL + '/',
+      en: SITE_URL + '/en',
+    },
+  }
 
   return {
     metadataBase: new URL(SITE_URL),
@@ -80,6 +90,7 @@ export async function generateMetadata(): Promise<Metadata> {
     formatDetection: { telephone: false, address: false, email: false },
     robots: { index: !IS_PREVIEW, follow: !IS_PREVIEW, googleBot: { index: !IS_PREVIEW, follow: !IS_PREVIEW } },
     referrer: 'strict-origin-when-cross-origin',
+    alternates,
   }
 }
 
@@ -109,7 +120,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     >
       <head>
         <meta httpEquiv="x-dns-prefetch-control" content="on" />
-        <meta httpEquiv="content-language" content={currentLocale} />
+        <meta httpEquiv="content-language" content={currentLocale || DEFAULT_LOCALE} />
         <DarkModeScript />
 
         {/* Consent Mode v2 par défaut (denied) + helpers globaux */}

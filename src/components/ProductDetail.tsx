@@ -147,7 +147,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
   // ✅ Normalisation des prix (tolère string)
   const price = Math.max(0, toNum(priceRaw) ?? 0)
   const oldPrice = toNum(oldPriceRaw)
-  const currency: 'EUR' = 'EUR'
+  const currency = (detectCurrency?.() ?? 'EUR') as 'EUR' | 'GBP' | 'USD'
 
   // ✅ Extraction tolérante de `tags`
   const tags: string[] | undefined =
@@ -407,7 +407,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           <div className="absolute top-4 right-4 flex gap-2 z-10">
             <button
               onClick={share}
-              className="rounded-full bg-white/90 dark:bg_black/60 dark:bg-black/60 border border-gray-200 dark:border-gray-700 px-3 py-1 text-sm shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              className="rounded-full bg-white/90 dark:bg-black/60 border border-gray-200 dark:border-gray-700 px-3 py-1 text-sm shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               aria-label="Partager ce produit"
               title="Partager"
             >
@@ -469,7 +469,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           </h1>
 
           {/* Microdata extras */}
-          <meta itemProp="sku" content={_id} />
+          {(_id || (product as any)?.sku) && <meta itemProp="sku" content={String(_id || (product as any).sku)} />}
           {brand && <meta itemProp="brand" content={String(brand)} />}
 
           <div className="mt-3 flex flex-wrap items-center gap-3">

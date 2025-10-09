@@ -84,7 +84,7 @@ export function localizePath(
 
   const base = ensureLeadingSlash(path || opts.currentPathname || getCurrentPathname())
   const bare = stripLocalePrefix(base)
-  const withLocale = _withLocale(bare, locale as Locale)
+  const withLocale = _withLocale(bare, locale as any)
 
   const query =
     opts.customQuery ??

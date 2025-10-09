@@ -1,7 +1,7 @@
-// src/components/layout/Layout.tsx — Ultra Premium FINAL (CLS-safe, A11y+, VT, idle-prefetch)
+// src/components/layout/Layout.tsx — Ultra Premium FINAL+++ (CLS-safe, A11y+, VT, idle-prefetch, SR localisé)
 'use client'
 
-import { type ReactNode, useEffect, Suspense, useRef, useState } from 'react'
+import { type ReactNode, useEffect, Suspense, useRef, useState, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import Header from './Header'
 import { usePathname, useRouter } from 'next/navigation'
@@ -10,8 +10,7 @@ import LiveChat from '../LiveChat'
 import { useTheme } from '@/context/themeContext'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
-// ⛔️ supprimé: import('./PWAInstall')
-// (le prompt PWA est désormais géré uniquement par src/app/layout.tsx via <AppInstallPrompt/>)
+// (PWA prompt géré dans app/layout.tsx via <AppInstallPrompt/>)
 const ScrollTopButton = dynamic(() => import('../ui/ScrollTopButton'), { ssr: false })
 const FooterLazy = dynamic(() => import('@/components/Footer'), { ssr: true, loading: () => null })
 
@@ -51,11 +50,15 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
     return () => window.clearTimeout(t)
   }, [pathname])
 
-  /** ───────────────────── SR route announcement */
+  /** ───────────────────── SR route announcement — localisé */
+  const LOCALE_STR = useMemo(() => ({
+    fr: { loading: (p: string) => `Chargement de ${p}` },
+    en: { loading: (p: string) => `Loading ${p}` },
+  }), [])
   useEffect(() => {
-    const label = document.title?.trim() || `Chargement de ${pathname}`
+    const label = (document.title?.trim() || '') || LOCALE_STR[locale as 'fr' | 'en']?.loading?.(pathname) || pathname
     setRouteAnnouncement(label)
-  }, [pathname])
+  }, [pathname, locale, LOCALE_STR])
 
   /** ───────────────────── Header offset (CLS guard) */
   useEffect(() => {
@@ -125,14 +128,16 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locale, router])
 
+  const LOADING_FALLBACK = locale === 'fr' ? 'Chargement…' : 'Loading…'
+
   return (
     <>
       {/* Skip link */}
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-[max(0.5rem,env(safe-area-inset-top))] focus:z-[100] px-3 py-2 rounded-md focus-ring bg-token-surface text-token-text shadow-soft"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-[max(0.5rem,env(safe-area-inset-top))] focus:z=[100] px-3 py-2 rounded-md focus-ring bg-token-surface text-token-text shadow-soft"
       >
-        Aller au contenu
+        {locale === 'fr' ? 'Aller au contenu' : 'Skip to content'}
       </a>
 
       {/* Route change announcement for screen readers */}
@@ -170,10 +175,10 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
         data-theme={theme}
         data-pathname={pathname ?? ''}
         className="relative min-h-[calc(var(--vh,1vh)*100)] pt-[var(--header-offset,4.5rem)] bg-token-surface text-token-text transition-colors px-[max(0px,env(safe-area-inset-left))] pb-[max(0px,env(safe-area-inset-bottom))] pr-[max(0px,env(safe-area-inset-right))]"
-        aria-label="Contenu principal"
+        aria-label={locale === 'fr' ? 'Contenu principal' : 'Main content'}
         style={{ opacity: 1, visibility: 'visible' }}
       >
-        <Suspense fallback={<div className="px-4 py-8 text-sm text-token-text/70">Chargement…</div>}>
+        <Suspense fallback={<div className="px-4 py-8 text-sm text-token-text/70">{LOADING_FALLBACK}</div>}>
           {children}
         </Suspense>
       </main>

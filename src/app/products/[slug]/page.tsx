@@ -52,7 +52,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
   return {
     ...base,
-    robots: noindex ? { index: false, follow: false } : { index: true, follow: true },
+    // noindex tout en conservant follow pour préserver le maillage interne
+    robots: noindex ? { index: false, follow: true } : { index: true, follow: true },
     // Tags additionnels OG "product:*" (non typés par Next, via 'other')
     other: {
       ...(typeof (product as any).price === 'number'

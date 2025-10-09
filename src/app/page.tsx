@@ -11,7 +11,7 @@ import ClientTrackingScript from '@/components/ClientTrackingScript'
 import Link from '@/components/LocalizedLink'
 import { generateMeta } from '@/lib/seo'
 import { getCategories } from '@/lib/categories'
-import { isLocale, defaultLocale as DEFAULT_LOCALE } from '@/i18n/config'
+import { isLocale, DEFAULT_LOCALE, LOCALE_COOKIE, type Locale } from '@/lib/language'
 
 const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'))
 const BestProducts = dynamic(() => import('@/components/BestProducts'), {
@@ -74,7 +74,7 @@ const STR = {
   },
 } as const
 
-// SEO: on génère tout via lib/seo puis on force un titre absolute (évite le suffixe du layout)
+// SEO: on génère via lib/seo puis on force un titre absolute (évite le suffixe du layout)
 const BASE_META = generateMeta({
   title: 'TechPlay – Boutique high-tech & packs exclusifs',
   description:
@@ -242,10 +242,10 @@ function SectionSkeleton({ title }: { title: string }) {
 
 /* --------------------------------- Page ---------------------------------- */
 export default async function HomePage() {
-  // Locale depuis cookie (fallback FR)
+  // Locale depuis cookie (fallback DEFAULT_LOCALE)
   const cookieStore = await cookies()
-  const cookieLocale = cookieStore.get('NEXT_LOCALE')?.value
-  const locale = isLocale(cookieLocale || '') ? (cookieLocale as 'fr' | 'en') : (DEFAULT_LOCALE as 'fr' | 'en')
+  const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value
+  const locale = isLocale(cookieLocale || '') ? (cookieLocale as Locale) : (DEFAULT_LOCALE as Locale)
   const L = STR[locale]
 
   let bestProducts: Product[] = []
@@ -265,14 +265,12 @@ export default async function HomePage() {
       ? {
           '@context': 'https://schema.org',
           '@type': 'ItemList',
-          itemListElement: bestProducts.slice(0, 8).map((p: any, idx: number) => ([
-            {
-              '@type': 'ListItem',
-              position: idx + 1,
-              url: p?.slug ? `${SITE_URL}/products/${p.slug}` : `${SITE_URL}/products`,
-              name: p?.title ?? 'Produit',
-            }
-          ][0])),
+          itemListElement: bestProducts.slice(0, 8).map((p: any, idx: number) => ({
+            '@type': 'ListItem',
+            position: idx + 1,
+            url: p?.slug ? `${SITE_URL}/products/${p.slug}` : `${SITE_URL}/products`,
+            name: p?.title ?? 'Produit',
+          })),
         }
       : null
 

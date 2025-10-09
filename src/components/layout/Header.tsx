@@ -1,4 +1,4 @@
-// src/components/layout/Header.tsx — ULTIME++ (i18n switch FR/EN actif, mega-menu a11y, perf/UX/a11y)
+// src/components/layout/Header.tsx — ULTIME+++ (i18n switch FR/EN actif, mega-menu a11y, perf/UX/a11y, micro-polish)
 'use client'
 
 import NextLink from 'next/link' // logo
@@ -76,6 +76,7 @@ const LINKS: NavLink[] = [
 
 const SCROLL_HIDE_OFFSET = 80
 const HOVER_PREFETCH_DELAY = 120
+const PLACEHOLDER_MS = 4000 // harmonisé avec mobile
 
 /** Badge premium */
 const ActionBadge = ({ children, className }: { children: React.ReactNode; className?: string }) => (
@@ -119,6 +120,7 @@ function LocaleSwitch({ pathname }: { pathname: string }) {
             key={l}
             type="button"
             onClick={() => setLang(l)}
+            onMouseDown={(e) => e.preventDefault()} // supprime le blur parasite dans certains navigateurs
             disabled={active}
             aria-pressed={active}
             aria-current={active ? 'true' : undefined}
@@ -287,7 +289,7 @@ export default function Header() {
     const id = window.setInterval(() => {
       i = (i + 1) % trends.length
       setPlaceholder(trends[i] ?? '')
-    }, 4000)
+    }, PLACEHOLDER_MS)
     return () => clearInterval(id)
   }, [trends])
 
@@ -468,6 +470,7 @@ export default function Header() {
                     onClick={() => setCatOpen((v) => !v)}
                     onFocus={openCats}
                     onBlur={() => closeCats(80)}
+                    onMouseDown={(e) => e.preventDefault()} // évite blur + fermeture pendant un drag
                     className={cn(
                       'relative transition-colors duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded-sm px-0.5',
                       active

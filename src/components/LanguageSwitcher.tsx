@@ -1,4 +1,4 @@
-// src/components/LanguageSwitcher.tsx
+// src/components/LanguageSwitcher.tsx — polish mineur (anti-blur mousedown, dataLayer + cookie util)
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
@@ -23,6 +23,9 @@ export default function LanguageSwitcher() {
     // 1) Persistance cookie (1 an) — une seule écriture via util
     try {
       setLocaleCookie(next)
+      // double guard côté document.cookie (utile en cas d’environnement custom)
+      const secure = typeof location !== 'undefined' && location.protocol === 'https:' ? '; Secure' : ''
+      document.cookie = `${LOCALE_COOKIE}=${encodeURIComponent(next)}; Max-Age=31536000; Path=/; SameSite=Lax${secure}`
     } catch {}
 
     // 2) Tracking (GA4 + fallback GTM dataLayer)
@@ -48,6 +51,7 @@ export default function LanguageSwitcher() {
             key={lang}
             type="button"
             onClick={() => changeLanguage(lang)}
+            onMouseDown={(e) => e.preventDefault()} // évite le blur
             disabled={active}
             aria-pressed={active}
             aria-current={active ? 'true' : undefined}

@@ -110,7 +110,10 @@ export default function ProductCard({
       : typeof x?.reviews === 'number'
       ? x.reviews
       : undefined
-  const sku: string | undefined = typeof x?.sku === 'string' ? x.sku : (x?.id ? String(x.id) : undefined)
+  const sku: string | undefined =
+    typeof x?.sku === 'string' && x.sku.trim()
+      ? x.sku.trim()
+      : (x?.id ? String(x.id) : undefined)
   const tags: string[] | undefined = Array.isArray(x?.tags) ? (x.tags as string[]).filter(Boolean) : undefined
 
   const prefersReducedMotion = useReducedMotion()
@@ -267,7 +270,7 @@ export default function ProductCard({
       <meta itemProp="image" content={toAbs(mainImage)} />
       {slug && <meta itemProp="url" content={toAbs(productUrl)} />}
       {brand && <meta itemProp="brand" content={String(brand)} />}
-      {sku && <meta itemProp="sku" content={sku} />}
+      {sku ? <meta itemProp="sku" content={sku} /> : null}
       {hasRating && (
         <div itemProp="aggregateRating" itemScope itemType="https://schema.org/AggregateRating" className="hidden">
           <meta itemProp="ratingValue" content={rating!.toFixed(1)} />

@@ -184,7 +184,8 @@ export default function PackCard({ pack, priority = false, className }: PackCard
   // Style conique piloté par économie %
   const conicPercent = typeof discountPct === 'number' ? Math.max(8, Math.min(100, discountPct)) : 0
 
-  const href = slug ? `/products/packs/${slug}` : '/products/packs'
+  // Utilise l'URL localisée pour le lien (cohérent avec microdonnées)
+  const href = urlPath
 
   return (
     <motion.article

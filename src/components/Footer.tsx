@@ -1,4 +1,4 @@
-// src/components/Footer.tsx — ULTIME++ (i18n, tokens, SEO, newsletter, CMP, a11y)
+// src/components/Footer.tsx — ULTIME+++ (i18n, tokens, SEO, newsletter, CMP, a11y polish: cookies role=button)
 'use client'
 
 import { useId, useMemo, useState } from 'react'
@@ -50,7 +50,7 @@ const DEFAULT_LEGAL: FooterLink[] = [
   { label: 'Mentions légales', href: '/mentions-legales' },
   { label: 'Confidentialité', href: '/confidentialite' },
   { label: 'CGV', href: '/cgv' },
-  { label: 'Préférences cookies', href: '#cookies' }, // ouvre le CMP (évènement custom)
+  { label: 'Préférences cookies', href: '#cookies' }, // ouvre le CMP
 ]
 
 // Normalisation d’anciennes routes -> nouvelles routes canoniques
@@ -332,6 +332,8 @@ export default function Footer({
                       </>
                     )
 
+                    const isCookie = label.toLowerCase().includes('cookie')
+
                     return (
                       <li key={`${group.title}-${href}`}>
                         {external ? (
@@ -345,9 +347,11 @@ export default function Footer({
                           >
                             {item}
                           </a>
-                        ) : label.toLowerCase().includes('cookie') ? (
+                        ) : isCookie ? (
                           <a
                             href="#cookies"
+                            role="button"
+                            aria-controls="tp-consent-panel"
                             className="inline-flex items-center gap-2 rounded-sm text-token-text/80 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
                             onClick={(e) => onNavClick(group.title, label, '#cookies', e)}
                             data-gtm="footer_link_cookies"
@@ -514,6 +518,8 @@ export default function Footer({
             <li>
               <a
                 href="#cookies"
+                role="button"
+                aria-controls="tp-consent-panel"
                 onClick={(e) => openConsentManager(e)}
                 className="underline decoration-dotted underline-offset-2 hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
               >

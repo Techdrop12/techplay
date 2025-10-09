@@ -1,4 +1,4 @@
-// src/components/layout/MobileNav.tsx — i18n-safe, icônes premium, catégories centralisées — FINAL++ (hooks optionnels sûrs + fix lien catégories + a11y polish)
+// src/components/layout/MobileNav.tsx — FINAL+++ (i18n-safe, icônes premium, catégories centralisées, a11y polish, placeholders harmonisés, wishlist live region)
 'use client'
 
 import Link from '@/components/LocalizedLink'
@@ -17,8 +17,7 @@ const STR = {
   fr: {
     nav: [
       { href: '/products', label: 'Produits' },
-      // Spécial: '/categorie' est géré comme un bouton qui ouvre la section Catégories (pas une page)
-      { href: '/categorie', label: 'Catégories' },
+      { href: '/categorie', label: 'Catégories' }, // bouton spécial
       { href: '/wishlist', label: 'Wishlist' },
       { href: '/blog', label: 'Blog' },
       { href: '/contact', label: 'Contact' },
@@ -47,8 +46,7 @@ const STR = {
   en: {
     nav: [
       { href: '/products', label: 'Products' },
-      // Special: '/categorie' is handled as a button opening Categories section (not a page)
-      { href: '/categorie', label: 'Categories' },
+      { href: '/categorie', label: 'Categories' }, // special button
       { href: '/wishlist', label: 'Wishlist' },
       { href: '/blog', label: 'Blog' },
       { href: '/contact', label: 'Contact' },
@@ -148,6 +146,8 @@ function useOptionalCart(): any {
 function useOptionalWishlist(): any {
   try { return useWishlist() as any } catch { return {} }
 }
+
+const PLACEHOLDER_MS = 4000 // harmonisé avec Header
 
 export default function MobileNav() {
   const pathname = usePathname() || '/'
@@ -317,7 +317,7 @@ export default function MobileNav() {
   const sheetVariants = { hidden: { y: reducedMotion ? 0 : '10%', opacity: 0.001 }, visible: { y: 0, opacity: 1, transition: { duration: reducedMotion ? 0 : 0.22, ease: 'easeOut' } }, exit: { y: reducedMotion ? 0 : '10%', opacity: 0, transition: { duration: 0.16 } } }
 
   const isActive = (href: string) => {
-    if (href === '/categorie') return false // ce n'est pas une vraie page
+    if (href === '/categorie') return false // pas une vraie page
     const tHref = L(href)
     return pathname === tHref || pathname.startsWith(tHref + '/')
   }
@@ -332,7 +332,7 @@ export default function MobileNav() {
     let id: number | null = null
     const start = () => {
       if (id || searchFocused || document.visibilityState !== 'visible') return
-      id = window.setInterval(() => { i = (i + 1) % trends.length; setPlaceholder(trends[i] ?? '') }, 3500)
+      id = window.setInterval(() => { i = (i + 1) % trends.length; setPlaceholder(trends[i] ?? '') }, PLACEHOLDER_MS)
     }
     const stop = () => { if (id) { clearInterval(id); id = null } }
     const onVis = () => { if (document.visibilityState === 'visible' && !searchFocused) start(); else stop() }
@@ -383,7 +383,6 @@ export default function MobileNav() {
   const openCatsFromNav = () => {
     setCatsOpen(true)
     track({ action: 'mobile_nav_link_click', label: '/categorie' })
-    // scroll léger vers la section catégories dans le panneau
     requestAnimationFrame(() => {
       try {
         const el = document.getElementById(catsPanelId)
@@ -537,6 +536,10 @@ export default function MobileNav() {
                   aria-label={t.ui.wishlist(wishlistCount)}
                 >
                   <Icon.Heart />
+                  {/* live region discret pour MAJ du compteur */}
+                  <span aria-live="polite" aria-atomic="true" className="sr-only">
+                    {wishlistCount} items in wishlist
+                  </span>
                   {wishlistCount > 0 && (
                     <span className="rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-[11px] font-bold text-white">
                       {wishlistCount}
@@ -627,7 +630,6 @@ export default function MobileNav() {
                     const { href, label } = item
                     const promo = (item as any).promo === true || href.includes('promo=1')
 
-                    // Cas spécial: l'item "Catégories" n'est pas une page → transforme en bouton qui ouvre la section
                     if (href === '/categorie') {
                       return (
                         <li key={href}>
