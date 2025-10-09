@@ -15,7 +15,8 @@ import { CacheableResponsePlugin } from 'workbox-cacheable-response'
 import { RangeRequestsPlugin } from 'workbox-range-requests'
 import { enable as navigationPreloadEnable } from 'workbox-navigation-preload'
 
-declare let self: ServiceWorkerGlobalScope
+// ✅ Typage correct de __WB_MANIFEST pour TS
+declare const self: ServiceWorkerGlobalScope & { __WB_MANIFEST: any }
 
 /* ============================= Base & lifecycle ============================ */
 
@@ -163,8 +164,6 @@ registerRoute(
 )
 
 /* ===================== API – mutations (POST/PUT/DEL) ====================== */
-/* Offline queue via Background Sync (panier, avis, subscribe, checkout…)     */
-/* ⚠️ exclut les endpoints sensibles (webhooks, auth).                         */
 
 const mutationQueue = new BackgroundSyncPlugin('tp-api-queue', {
   maxRetentionTime: 24 * 60, // minutes
@@ -230,12 +229,9 @@ setCatchHandler(async ({ request }) => {
 
 /* ============================== Messaging ================================= */
 
-self.addEventListener('message', (event) => {
+self.addEventListener('message', (event: ExtendableMessageEvent) => {
   if (!event.data) return
-  // 1) skip waiting
   if (event.data.type === 'SKIP_WAITING') self.skipWaiting()
-
-  // 2) purge runtime caches on demand
   if (event.data.type === 'CLEAR_RUNTIME_CACHES') {
     event.waitUntil(
       (async () => {
@@ -249,3 +245,6 @@ self.addEventListener('message', (event) => {
     )
   }
 })
+
+// ✅ Marquer le fichier comme module pour éviter les warnings TS (isolatedModules)
+export {}

@@ -20,7 +20,14 @@ import Tracking from '@/components/Tracking'
 import AppInstallPrompt from '@/components/AppInstallPrompt'
 import ConsentBanner from '@/components/ConsentBanner'
 
-import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale, toOgLocale, toLangTag, pickBestLocale, type Locale } from '@/lib/language'
+import {
+  LOCALE_COOKIE,
+  isLocale,
+  toOgLocale,
+  toLangTag,
+  pickBestLocale,
+  type Locale,
+} from '@/lib/language'
 
 const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter', adjustFontFallback: true })
 const sora = Sora({ subsets: ['latin'], display: 'swap', variable: '--font-sora' })
@@ -35,7 +42,7 @@ const GTM_SERVER = (process.env.NEXT_PUBLIC_GTM_SERVER || '').replace(/\/+$/, ''
 export async function generateMetadata(): Promise<Metadata> {
   const cookieStore = await cookies()
   const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value
-  const acceptLang = (await headers()).get('accept-language')
+  const acceptLang = (await headers()).get('accept-language') || undefined
   const locale: Locale = isLocale(cookieLocale) ? (cookieLocale as Locale) : pickBestLocale(acceptLang)
 
   return {
@@ -54,9 +61,18 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: toOgLocale(locale),
       type: 'website',
     },
-    twitter: { card: 'summary_large_image', title: 'TechPlay – Boutique high-tech innovante', description: 'TechPlay…', images: [DEFAULT_OG] },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'TechPlay – Boutique high-tech innovante',
+      description: 'TechPlay…',
+      images: [DEFAULT_OG],
+    },
     icons: {
-      icon: [{ url: '/favicon.ico' }, { url: '/icons/icon-192x192.png', type: 'image/png', sizes: '192x192' }, { url: '/icons/icon-512x512.png', type: 'image/png', sizes: '512x512' }],
+      icon: [
+        { url: '/favicon.ico' },
+        { url: '/icons/icon-192x192.png', type: 'image/png', sizes: '192x192' },
+        { url: '/icons/icon-512x512.png', type: 'image/png', sizes: '512x512' },
+      ],
       apple: [{ url: '/icons/icon-192x192.png', sizes: '180x180', type: 'image/png' }],
     },
     manifest: '/site.webmanifest',
@@ -81,12 +97,16 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies()
   const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value
-  const acceptLang = (await headers()).get('accept-language')
-  const currentLocale: Locale =
-    isLocale(cookieLocale || '') ? (cookieLocale as Locale) : pickBestLocale(acceptLang)
+  const acceptLang = (await headers()).get('accept-language') || undefined
+  const currentLocale: Locale = isLocale(cookieLocale || '') ? (cookieLocale as Locale) : pickBestLocale(acceptLang)
 
   return (
-    <html lang={toLangTag(currentLocale)} dir="ltr" className={`${inter.variable} ${sora.variable} scroll-smooth`} suppressHydrationWarning>
+    <html
+      lang={toLangTag(currentLocale)}
+      dir="ltr"
+      className={`${inter.variable} ${sora.variable} scroll-smooth`}
+      suppressHydrationWarning
+    >
       <head>
         <meta httpEquiv="x-dns-prefetch-control" content="on" />
         <meta httpEquiv="content-language" content={currentLocale} />
@@ -99,7 +119,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             __html: `
               (function(){
                 window.dataLayer = window.dataLayer || [];
-                window.gtag = function(){ dataLayer.push(arguments); };
+                window.gtag = window.gtag || function(){ (window.dataLayer||[]).push(arguments); };
                 var DEFAULT = {
                   ad_storage: 'denied',
                   analytics_storage: 'denied',
@@ -127,14 +147,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
 
         {/* Perf: preconnect/dns-prefetch */}
-        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="" />
-        <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="" />
-        <link rel="preconnect" href="https://connect.facebook.net" crossOrigin="" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://connect.facebook.net" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
         <link rel="dns-prefetch" href="https://connect.facebook.net" />
-        {GTM_SERVER && <link rel="preconnect" href={GTM_SERVER} crossOrigin="" />}
+        {GTM_SERVER && <link rel="preconnect" href={GTM_SERVER} crossOrigin="anonymous" />}
         {GTM_SERVER && <link rel="dns-prefetch" href={GTM_SERVER} />}
+
+        {/* LCP hero images */}
         <link rel="preload" as="image" href="/carousel/hero-1-mobile.jpg" media="(max-width: 639px)" />
         <link rel="preload" as="image" href="/carousel/hero-1-desktop.jpg" media="(min-width: 640px)" />
         <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
@@ -149,6 +171,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           />
         ) : null}
 
+        {/* subtle background decoration */}
         <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
           <div className="absolute left-1/2 top-[-120px] h-[420px] w-[620px] -translate-x-1/2 rounded-full bg-accent/25 blur-3xl dark:bg-accent/30" />
           <div className="absolute right-[-120px] bottom-[-140px] h-[360px] w-[360px] rounded-full bg-brand/10 blur-3xl dark:bg-brand/20" />
@@ -231,6 +254,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             }),
           }}
         />
+
         <div className="pb-[env(safe-area-inset-bottom)]" aria-hidden />
       </body>
     </html>

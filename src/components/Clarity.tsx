@@ -11,17 +11,18 @@ const ENABLE_IN_DEV = (process.env.NEXT_PUBLIC_CLARITY_IN_DEV || '').toLowerCase
 function consentState() {
   try {
     const s: any = (window as any).__consentState || {}
-    // normalise en 'granted' | 'denied'
-    const ad = s.ad_storage === 'granted' ? 'granted' : 'denied'
-    const analytics = s.analytics_storage === 'granted' ? 'granted' : 'denied'
-    // fallback LS si dispo (bannière)
-    const lsAnalytics = localStorage.getItem('consent:analytics') === '1'
+    const analyticsGranted = s.analytics_storage === 'granted' || localStorage.getItem('consent:analytics') === '1'
+    const adsGranted =
+      s.ad_storage === 'granted' ||
+      s.ad_user_data === 'granted' ||
+      s.ad_personalization === 'granted' ||
+      localStorage.getItem('consent:ads') === '1'
     return {
-      ad_Storage: (s.ad_storage === 'granted' ? 'granted' : (localStorage.getItem('consent:ads') === '1' ? 'granted' : 'denied')) as 'granted' | 'denied',
-      analytics_Storage: (analytics === 'granted' || lsAnalytics) ? 'granted' : 'denied' as 'granted' | 'denied',
+      ad_storage: adsGranted ? 'granted' as const : 'denied' as const,
+      analytics_storage: analyticsGranted ? 'granted' as const : 'denied' as const,
     }
   } catch {
-    return { ad_Storage: 'denied' as const, analytics_Storage: 'denied' as const }
+    return { ad_storage: 'denied' as const, analytics_storage: 'denied' as const }
   }
 }
 
@@ -38,8 +39,7 @@ function eligibleNow(): boolean {
   } catch {}
   if (dnt || optedOut) return false
   if (process.env.NODE_ENV !== 'production' && !ENABLE_IN_DEV) return false
-  // on préfère n’injecter que si analytics OK (Clarity peut fonctionner en no-consent, mais ici on reste strict)
-  return consentState().analytics_Storage === 'granted'
+  return consentState().analytics_storage === 'granted'
 }
 
 export default function Clarity() {
@@ -47,23 +47,18 @@ export default function Clarity() {
   const [shouldLoad, setShouldLoad] = useState(false)
   const loadedRef = useRef(false)
 
-  // Eligibilité au premier rendu
   useEffect(() => { setShouldLoad(eligibleNow()) }, [])
 
-  // Réagit UNIQUEMENT à tp:consent (événement CustomEvent émis par la CMP)
   useEffect(() => {
     const onConsent = () => {
       const ok = eligibleNow()
       setShouldLoad(ok)
-      // Si déjà chargé, propage ConsentV2 ou révoque proprement
       try {
         const cs = consentState()
         if ((window as any).clarity && typeof (window as any).clarity === 'function') {
-          if (cs.ad_Storage === 'denied' && cs.analytics_Storage === 'denied') {
-            // Révocation totale → efface cookies & stop jusqu’à nouveau consentement
+          if (cs.ad_storage === 'denied' && cs.analytics_storage === 'denied') {
             ;(window as any).clarity('consent', false)
           } else {
-            // ConsentV2 recommandé
             ;(window as any).clarity('consentv2', cs)
           }
         }
@@ -73,17 +68,13 @@ export default function Clarity() {
     return () => window.removeEventListener('tp:consent', onConsent as EventListener)
   }, [])
 
-  // Clarity gère les SPA, rien à faire ici (on garde le hook pour future extension)
-  useEffect(() => {
-    // no-op (placeholder)
-  }, [pathname])
+  useEffect(() => {}, [pathname])
 
   if (!shouldLoad) return null
 
   return (
     <Script id="clarity" strategy="afterInteractive" onLoad={() => {
       loadedRef.current = true
-      // signale l’état de consentement dès le chargement
       try { (window as any).clarity && (window as any).clarity('consentv2', consentState()) } catch {}
     }}>
       {`

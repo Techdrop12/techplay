@@ -1,4 +1,4 @@
-// src/components/Analytics.tsx — GA4 + Consent Mode v2, SPA-safe, sGTM-ready (version optimisée)
+// src/components/Analytics.tsx — GA4 + Consent Mode v2, SPA-safe, sGTM-ready
 'use client'
 
 import { useEffect } from 'react'
@@ -24,7 +24,7 @@ export default function Analytics() {
     pageview(`${pathname}${qs}`, title, { send_page_view: false })
   }, [pathname, search, shouldLoad])
 
-  // CMP / bannière → Consent Mode (bridge unique)
+  // CMP / bannière → Consent Mode bridge (unique)
   useEffect(() => {
     if (!shouldLoad) return
     const update = (p: {
@@ -40,8 +40,9 @@ export default function Analytics() {
         localStorage.setItem('consent:ads', p.ads ? '1' : '0')
       } catch {}
       try {
-        if (typeof (window as any).__applyConsent === 'function') {
-          ;(window as any).__applyConsent({
+        const apply = (window as any).__applyConsent
+        if (typeof apply === 'function') {
+          apply({
             analytics_storage: p.analytics ? 'granted' : 'denied',
             ad_storage: p.ads ? 'granted' : 'denied',
             ad_user_data: (p.ad_user_data ?? p.ads) ? 'granted' : 'denied',
@@ -61,7 +62,7 @@ export default function Analytics() {
     }
   }, [shouldLoad])
 
-  // GA init (après gtag ready)
+  // GA init
   useEffect(() => {
     if (!shouldLoad) return
     initAnalytics({
@@ -70,8 +71,7 @@ export default function Analytics() {
       config: {
         debug_mode: DEBUG_MODE || undefined,
         ads_data_redaction: true,
-        page_path:
-          typeof location !== 'undefined' ? location.pathname + location.search : undefined,
+        page_path: typeof location !== 'undefined' ? location.pathname + location.search : undefined,
         page_title: typeof document !== 'undefined' ? document.title : undefined,
         send_page_view: false,
         ...(GTM_SERVER ? { transport_url: GTM_SERVER } : {}),
@@ -90,23 +90,22 @@ export default function Analytics() {
         strategy="afterInteractive"
       />
 
-      {/* gtag bootstrap (consent default déjà posé dans app/layout.tsx) */}
+      {/* gtag bootstrap (consent default déjà posé côté root layout) */}
       <Script id="ga4-init" strategy="afterInteractive">
         {`
           (function() {
-            if (window.__ga_inited) return; window.__ga_inited = true;
+            if ((window as any).__ga_inited) return; (window as any).__ga_inited = true;
             var dnt = (navigator.doNotTrack === '1') || (window.doNotTrack === '1') || (navigator.msDoNotTrack === '1');
             var DISABLE_KEY = 'ga-disable-${GA_ID}';
             var optedOut = false;
             try { optedOut = localStorage.getItem('ga:disabled') === '1' || localStorage.getItem('analytics:disabled') === '1'; } catch(e){}
 
-            if (dnt || optedOut) { window[DISABLE_KEY] = true; }
+            if (dnt || optedOut) { (window as any)[DISABLE_KEY] = true; }
 
             window.dataLayer = window.dataLayer || [];
-            function gtag(){ dataLayer.push(arguments); }
-            window.gtag = window.gtag || gtag;
+            function gtag(){ (window.dataLayer||[]).push(arguments); }
+            (window as any).gtag = (window as any).gtag || gtag;
             gtag('js', new Date());
-            // Consent default déjà injecté côté root layout (source de vérité).
           })();
         `}
       </Script>

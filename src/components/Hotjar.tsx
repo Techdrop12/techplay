@@ -9,8 +9,6 @@ import { eligibleHotjar, hjStateChange } from '@/lib/hotjar'
 const HOTJAR_ID = Number(process.env.NEXT_PUBLIC_HOTJAR_ID ?? 0)
 const HOTJAR_SV = Number(process.env.NEXT_PUBLIC_HOTJAR_SV ?? 6)
 const ENABLE_IN_DEV = (process.env.NEXT_PUBLIC_HOTJAR_IN_DEV || '').toLowerCase() === 'true'
-
-// Si tu veux être ultra strict : reload quand l’utilisateur retire son consentement
 const STRICT_RELOAD = (process.env.NEXT_PUBLIC_HOTJAR_STRICT_RELOAD || '').toLowerCase() === '1'
 
 function hasAnalyticsConsent(): boolean {
@@ -44,13 +42,11 @@ export default function Hotjar() {
   const [shouldLoad, setShouldLoad] = useState(false)
   const loadedRef = useRef(false)
 
-  // Eligibilité au premier rendu
   useEffect(() => {
     const ok = (process.env.NODE_ENV === 'production' || ENABLE_IN_DEV) && eligibleHotjar(HOTJAR_ID) && eligibleNow()
     setShouldLoad(ok)
   }, [])
 
-  // Réagit UNIQUEMENT au CustomEvent('tp:consent') (la bannière l’émet et Analytics relaie)
   useEffect(() => {
     const recheck = () => {
       const ok = eligibleNow()
@@ -67,7 +63,6 @@ export default function Hotjar() {
     return () => window.removeEventListener('tp:consent', recheck as EventListener)
   }, [])
 
-  // SPA: notifier Hotjar à chaque changement de route
   useEffect(() => {
     if (!shouldLoad || !loadedRef.current) return
     hjStateChange(pathname)

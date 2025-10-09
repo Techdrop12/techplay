@@ -75,7 +75,6 @@ function getFbpFbc() {
       const url = new URL(location.href)
       const fbclid = url.searchParams.get('fbclid')
       if (!fbclid) return null
-      // format recommandé: fb.1.<timestamp>.<fbclid>
       return `fb.1.${Math.floor(Date.now() / 1000)}.${fbclid}`
     } catch {
       return null
@@ -93,7 +92,6 @@ function uuid(): string {
     if (g) {
       const buf = new Uint8Array(16)
       g(buf)
-      // RFC4122 v4
       buf[6] = (buf[6] & 0x0f) | 0x40
       buf[8] = (buf[8] & 0x3f) | 0x80
       const b2hex = (n: number) => n.toString(16).padStart(2, '0')
@@ -110,7 +108,6 @@ function uuid(): string {
   )
 }
 
-// Dédoublonnage léger sur 1.2 s (signature payload)
 const SEEN = new Map<string, number>()
 const DEDUPE_MS = 1200
 function shouldEmit(sig: string): boolean {
@@ -121,21 +118,17 @@ function shouldEmit(sig: string): boolean {
   return true
 }
 
-// Normalisation + compactage (value/currency, pas de undefined/vides)
 function normalizeParams(p: Record<string, any> | undefined) {
   if (!p) return p
   const out: Record<string, any> = {}
   for (const k in p) {
     const v = (p as any)[k]
     if (v === undefined || v === null || v === '') continue
-    if (k === 'currency' && typeof v === 'string') {
-      out[k] = v.toUpperCase()
-    } else if (k === 'value' && typeof v === 'string') {
+    if (k === 'currency' && typeof v === 'string') out[k] = v.toUpperCase()
+    else if (k === 'value' && typeof v === 'string') {
       const n = Number(v.replace(',', '.'))
       out[k] = Number.isNaN(n) ? v : n
-    } else {
-      out[k] = v
-    }
+    } else out[k] = v
   }
   return out
 }
@@ -163,21 +156,15 @@ export function trackPixel(event: PixelEvent, params?: Record<string, any>): boo
     if (!shouldEmit(sig)) return false
 
     fbq('track', event, payload)
-
-    // Miroir CAPI optionnel (dédup via eventID)
-    if (META_CAPI_URL) sendCapi(event, payload)
-
+    if (META_CAPI_URL) sendCapi(event, payload) // mirror optionnel
     return true
   } catch {
     return false
   }
 }
 
-/** Helpers courants (optionnels) */
-export function pixelPageView(): boolean {
-  return trackPixel('PageView')
-}
-
+/** Helpers courants */
+export const pixelPageView = () => trackPixel('PageView')
 export function pixelViewContent(params: {
   content_ids?: (string | number)[]
   content_type?: string
@@ -185,46 +172,32 @@ export function pixelViewContent(params: {
   currency?: string
   content_name?: string
   contents?: Array<{ id: string | number; quantity?: number; item_price?: number }>
-}) {
-  return trackPixel('ViewContent', params as any)
-}
-
+}) { return trackPixel('ViewContent', params as any) }
 export function pixelAddToCart(params: {
   content_ids?: (string | number)[]
   value?: number
   currency?: string
   contents?: Array<{ id: string | number; quantity?: number; item_price?: number }>
-}) {
-  return trackPixel('AddToCart', params as any)
-}
-
+}) { return trackPixel('AddToCart', params as any) }
 export function pixelInitiateCheckout(params: {
   value?: number
   currency?: string
   num_items?: number
   contents?: Array<{ id: string | number; quantity?: number; item_price?: number }>
-}) {
-  return trackPixel('InitiateCheckout', params as any)
-}
-
+}) { return trackPixel('InitiateCheckout', params as any) }
 export function pixelPurchase(params: {
   value: number
   currency: string
   contents?: Array<{ id: string | number; quantity?: number; item_price?: number }>
-}) {
-  return trackPixel('Purchase', params as any)
-}
+}) { return trackPixel('Purchase', params as any) }
 
-/** Opt-out local pratique (aligne avec ta logique Analytics). */
+/** Opt-out local pratique */
 export function setLocalPixelEnabled(enabled: boolean) {
   if (!isBrowser) return
-  try {
-    if (enabled) localStorage.removeItem('pixel:disabled')
-    else localStorage.setItem('pixel:disabled', '1')
-  } catch {}
+  try { enabled ? localStorage.removeItem('pixel:disabled') : localStorage.setItem('pixel:disabled', '1') } catch {}
 }
 
-/** Nouveau: setter pratique pour l'Advanced Matching (recalcule côté UI). */
+/** Setter Advanced Matching (hash côté composant MetaPixel) */
 export function setPixelUser(user: Partial<{
   email: string
   phone: string
@@ -239,9 +212,7 @@ export function setPixelUser(user: Partial<{
   if (!isBrowser) return
   ;(window as any).__pixelUser = { ...(window as any).__pixelUser, ...(user || {}) }
   ;(window as any).__pixelHashedAM = null
-  try {
-    window.dispatchEvent(new CustomEvent('tp:pixel-user'))
-  } catch {}
+  try { window.dispatchEvent(new CustomEvent('tp:pixel-user')) } catch {}
 }
 
 // ===== CAPI mirror (optionnel via NEXT_PUBLIC_META_CAPI_URL) ===============
@@ -249,9 +220,7 @@ export function setPixelUser(user: Partial<{
 function sendBeaconJson(url: string, body: unknown): boolean {
   try {
     const blob = new Blob([JSON.stringify(body)], { type: 'application/json' })
-    if ('sendBeacon' in navigator) {
-      return navigator.sendBeacon(url, blob)
-    }
+    if ('sendBeacon' in navigator) return navigator.sendBeacon(url, blob)
   } catch {}
   return false
 }
@@ -265,26 +234,15 @@ function sendCapi(eventName: string, payload: Record<string, any>) {
   const body = {
     action_source: 'website',
     event_name: eventName,
-    event_id: payload.eventID, // crucial pour la dédup Pixel/CAPI
+    event_id: payload.eventID,
     event_time: Math.floor(Date.now() / 1000),
-    event_source_url: (() => {
-      try {
-        return location.href
-      } catch {
-        return undefined
-      }
-    })(),
-    fbp,
-    fbc,
-    client_id,
+    event_source_url: (() => { try { return location.href } catch { return undefined } })(),
+    fbp, fbc, client_id,
     params: normalizeParams(payload),
     test_event_code: META_TEST_EVENT_CODE || undefined,
   }
 
-  // Préfère sendBeacon pour la fiabilité (navigation départ)
   if (sendBeaconJson(META_CAPI_URL, body)) return
-
-  // Fallback fetch keepalive
   try {
     fetch(META_CAPI_URL, {
       method: 'POST',

@@ -22,11 +22,18 @@ function Idle({ children, delay = 0 }: { children: React.ReactNode; delay?: numb
   const [ready, setReady] = useState(false)
   useEffect(() => {
     let t = window.setTimeout(() => setReady(true), delay || 0)
-    const ric = (window as any).requestIdleCallback
+    const ric: any = (window as any).requestIdleCallback
+    let idleId: number | null = null
     if (typeof ric === 'function') {
-      ric(() => { window.clearTimeout(t); setReady(true) })
+      idleId = ric(() => { window.clearTimeout(t); setReady(true) })
     }
-    return () => window.clearTimeout(t)
+    return () => {
+      window.clearTimeout(t)
+      if (idleId != null) {
+        const cancel = (window as any).cancelIdleCallback
+        if (typeof cancel === 'function') cancel(idleId)
+      }
+    }
   }, [delay])
   return ready ? <>{children}</> : null
 }

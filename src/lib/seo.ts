@@ -1,36 +1,28 @@
-// src/lib/seo.ts — ULTIME++ Générateur de metadata Next (hreflang, OG absolus, noindex, helpers)
-// Typé, robuste à des URLs relatives/absolues, FR par défaut sur "/" et EN sur "/en".
-
+// src/lib/seo.ts — Générateur de metadata Next (hreflang, OG absolus, noindex, helpers)
 import type { Metadata } from 'next'
 
 type SiteLocale = 'fr' | 'en'
-type OpenGraphType = 'website' | 'article' // (Next n’accepte pas "product" directement)
+type OpenGraphType = 'website' | 'article'
 
 interface MetaProps {
   title: string
   description: string
-  /** URL canonique – relative ("/products") ou absolue ("https://.../products") */
   url: string
-  /** OG image – relative ou absolue (défaut: "/og-image.jpg") */
   image?: string
-  /** "website" | "article" (note: "product" est mappé vers "website") */
   type?: 'website' | 'article' | 'product'
-  /** "fr_FR" | "en_US" — si absent, déduit de l’URL */
   locale?: 'fr_FR' | 'en_US'
-  /** Empêche l’indexation si true */
   noindex?: boolean
 }
 
 interface ArticleMetaExtras {
-  publishedTime?: string // ISO
-  modifiedTime?: string  // ISO
-  authors?: string[]     // URLs ou noms
+  publishedTime?: string
+  modifiedTime?: string
+  authors?: string[]
   section?: string
   tags?: string[]
 }
 
 interface ProductMetaExtras {
-  /** Non utilisé directement par Next Metadata (OG "product" non typé), exposé pour JSON-LD éventuel */
   price?: { amount: number; currency: string }
   sku?: string
   brand?: string
@@ -42,51 +34,41 @@ const TWITTER_HANDLE = process.env.NEXT_PUBLIC_TWITTER_HANDLE || '@techplay'
 const DEFAULT_OG = '/og-image.jpg'
 const DEFAULT_LOCALE: SiteLocale = 'fr'
 
-/** Origin normalisée (sans trailing slash, URL valide) */
 function getOrigin(): string {
   try {
     const u = new URL(RAW_ORIGIN)
-    return `${u.origin}`
+    return u.origin
   } catch {
     return 'https://techplay.example.com'
   }
 }
 const ORIGIN = getOrigin()
 
-/** Convertit en URL absolue basée sur ORIGIN si relative */
-function abs(u: string | undefined | null, fallback: string = DEFAULT_OG): string {
+function abs(u?: string | null, fallback: string = DEFAULT_OG): string {
   const v = (u || '').trim()
-  if (!v) return `${ORIGIN}${fallback.startsWith('/') ? fallback : `/${fallback}`}`
+  const effective = v || fallback
   try {
-    // déjà absolue
-    return new URL(v).toString()
+    return new URL(effective).toString()
   } catch {
-    const path = v.startsWith('/') ? v : `/${v}`
+    const path = effective.startsWith('/') ? effective : `/${effective}`
     return `${ORIGIN}${path}`
   }
 }
 
 const ensureLeadingSlash = (p: string) => (p.startsWith('/') ? p : `/${p}`)
-
-/** Supprime préfixe locale /fr ou /en au début du pathname */
 const stripLocalePrefix = (pathname: string) => pathname.replace(/^\/(fr|en)(?=\/|$)/, '')
-
-/** Mappe "fr"|"en" -> "fr-FR"|"en-US" */
 const toHreflang = (loc: SiteLocale) => (loc === 'fr' ? 'fr-FR' : 'en-US')
 
-/** Déduit la locale de l’URL si possible (sinon "fr") */
 function inferLocaleFromPath(pathname: string): SiteLocale {
   const m = pathname.match(/^\/(fr|en)(?=\/|$)/)
   return (m?.[1] as SiteLocale) || DEFAULT_LOCALE
 }
 
-/** Map site-locale -> OG locale */
 const toOgLocale = (loc: SiteLocale): 'fr_FR' | 'en_US' => (loc === 'en' ? 'en_US' : 'fr_FR')
 
-/** Construit les alternates.languages avec FR sur "/" et EN sur "/en" */
 function buildLanguageAlternates(pathname: string) {
   const pathNoLocale = stripLocalePrefix(pathname) || '/'
-  const frPath = pathNoLocale // FR = racine
+  const frPath = pathNoLocale
   const enPath = pathNoLocale === '/' ? '/en' : `/en${pathNoLocale}`
   return {
     [toHreflang('fr')]: frPath,
@@ -95,19 +77,17 @@ function buildLanguageAlternates(pathname: string) {
   }
 }
 
-/** Générateur principal de metadata */
 export function generateMeta({
   title,
   description,
   url,
   image = DEFAULT_OG,
   type = 'website',
-  locale, // auto si absent
+  locale,
   noindex = false,
 }: MetaProps): Metadata {
   const canonicalAbs = abs(url)
 
-  // Récupère pathname propre pour hreflang et OG locale
   let pathname = '/'
   try {
     pathname = new URL(canonicalAbs).pathname || '/'
@@ -115,18 +95,13 @@ export function generateMeta({
     pathname = ensureLeadingSlash(url)
   }
 
-  // Locale OG : auto si non fournie
   const siteLocale = inferLocaleFromPath(pathname)
   const ogLocale = (locale ?? toOgLocale(siteLocale)) as 'fr_FR' | 'en_US'
-
   const languages = buildLanguageAlternates(pathname)
-  const imageAbs = abs(image, DEFAULT_OG)
-
-  // Map "product" => "website" (Next types)
+  const imageAbs = abs(image)
   const ogType: OpenGraphType = type === 'article' ? 'article' : 'website'
 
   return {
-    // Astuce: laisser Next composer le template de titre au niveau du RootLayout si besoin
     title,
     description,
     metadataBase: new URL(ORIGIN),
@@ -149,10 +124,7 @@ export function generateMeta({
       : {
           index: true,
           follow: true,
-          googleBot: {
-            index: true,
-            follow: true,
-          },
+          googleBot: { index: true, follow: true },
         },
     openGraph: {
       title,
@@ -173,11 +145,7 @@ export function generateMeta({
   }
 }
 
-/** Helper spécifique Article: ajoute les champs OG article */
-export function generateArticleMeta(
-  base: MetaProps,
-  extras: ArticleMetaExtras = {},
-): Metadata {
+export function generateArticleMeta(base: MetaProps, extras: ArticleMetaExtras = {}): Metadata {
   const m = generateMeta({ ...base, type: 'article' })
   const { publishedTime, modifiedTime, authors, section, tags } = extras
   return {
@@ -194,15 +162,10 @@ export function generateArticleMeta(
   }
 }
 
-/** Helper “Product”: conserve type "website" (Next) et expose un bloc à réutiliser pour JSON-LD */
-export function generateProductMeta(
-  base: MetaProps,
-  _extras: ProductMetaExtras = {},
-): Metadata {
+export function generateProductMeta(base: MetaProps, _extras: ProductMetaExtras = {}): Metadata {
   return generateMeta({ ...base, type: 'product' })
 }
 
-/** Utilitaires JSON-LD prêts à insérer dans un <script type="application/ld+json"> */
 export function jsonLdBreadcrumbs(items: Array<{ name: string; url: string }>) {
   return {
     '@context': 'https://schema.org',
@@ -282,5 +245,4 @@ export function jsonLdProduct(params: {
   }
 }
 
-// Expose constantes utiles
 export { ORIGIN, SITE_NAME, TWITTER_HANDLE }

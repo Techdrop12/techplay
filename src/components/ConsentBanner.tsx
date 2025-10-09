@@ -1,4 +1,4 @@
-// src/components/ConsentBanner.tsx — UX/A11y + Consent Mode v2 bridge (version consolidée) + FIX pointer-events
+// src/components/ConsentBanner.tsx — UX/A11y + Consent Mode v2 bridge (version consolidée) + FIX pointer-events + aria-live
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
@@ -54,11 +54,8 @@ function pushDL(event: string, detail: Record<string, any>) {
 }
 
 function applyConsent(p: Prefs) {
-  // 1) Broadcast app-wide (Tracking, MetaPixel…)
   try { window.dispatchEvent(new CustomEvent('tp:consent', { detail: p })) } catch {}
-  // 2) API Analytics.tsx (met à jour GA Consent Mode + storage miroir)
   try { window.tpConsentUpdate?.(p) } catch {}
-  // 3) Fallback universel si défini (Root layout/head)
   try {
     window.__applyConsent?.({
       analytics_storage: p.analytics ? 'granted' : 'denied',
@@ -89,7 +86,6 @@ export default function ConsentBanner() {
     setShow(true)
   }, [])
 
-  // API globale
   useEffect(() => {
     window.tpOpenConsent = () => {
       setPrefs(readPrefs()); setOpen(true); setShow(true); writeDecided(false)
@@ -108,14 +104,12 @@ export default function ConsentBanner() {
     return () => { delete window.tpOpenConsent; delete window.tpResetConsent }
   }, [])
 
-  // body lock léger
   useEffect(() => {
     if (!show) return
     document.documentElement.classList.add('consent-banner-open')
     return () => document.documentElement.classList.remove('consent-banner-open')
   }, [show])
 
-  // Esc pour fermer le panneau paramètres
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
@@ -146,6 +140,7 @@ export default function ConsentBanner() {
       aria-modal="true"
       aria-labelledby="tp-consent-title"
       aria-describedby="tp-consent-desc"
+      aria-live="polite"
       data-nosnippet
       className="fixed inset-x-0 bottom-0 z-[60] mx-auto max-w-4xl rounded-t-2xl border border-token-border bg-token-surface/95 px-4 py-4 shadow-2xl backdrop-blur sm:rounded-2xl sm:bottom-6 sm:px-6 sm:py-5 pointer-events-none"
     >

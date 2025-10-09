@@ -19,7 +19,7 @@ type Props = {
   onceKey?: string
   /** Pousser aussi dans dataLayer (utile pour GTM/tests) */
   fallbackToDataLayer?: boolean
-  /** Emettre aussi vers Meta Pixel (si consent autorisé et Pixel prêt) */
+  /** Émettre aussi vers Meta Pixel (si consent autorisé et Pixel prêt) */
   mirrorToMetaPixel?: boolean
 }
 
@@ -64,9 +64,7 @@ export default function ClientTrackingScript({
     fired.current = true
 
     // 1) GA4
-    try {
-      logEvent(event, params)
-    } catch {}
+    try { logEvent(event, params) } catch {}
 
     // 2) dataLayer fallback (GTM)
     if (fallbackToDataLayer) {
@@ -85,12 +83,10 @@ export default function ClientTrackingScript({
     }
 
     if (once && typeof window !== 'undefined') {
-      try {
-        sessionStorage.setItem(key, '1')
-      } catch {}
+      try { sessionStorage.setItem(key, '1') } catch {}
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [event]) // volontairement minimal pour éviter les multi-envois
+    // on déclenche si la clé change (donc si event OU params/onceKey changent)
+  }, [key, fallbackToDataLayer, mirrorToMetaPixel])
 
   return null
 }

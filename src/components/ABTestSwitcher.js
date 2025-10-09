@@ -1,4 +1,4 @@
-// ✅ src/components/ABTestSwitcher.js
+// src/components/ABTestSwitcher.js
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -14,7 +14,6 @@ export default function ABTestSwitcher({ testKey = 'main_test', variants = ['A',
   useEffect(() => {
     const v = getABVariant(testKey, variants, { ttlDays, allowUrlOverride: true })
     setVariant(v)
-    // Track assignation (une seule fois)
     try {
       pushDataLayer({ event: 'ab_assign', ab_name: testKey, ab_variant: v })
       logEvent('ab_assign', { ab_name: testKey, ab_variant: v })
