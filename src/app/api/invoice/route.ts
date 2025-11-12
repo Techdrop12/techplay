@@ -175,10 +175,10 @@ email: readCustomerField(body, 'email') || readEmail(body),
           }
         : undefined,
     discount:
-      readDiscountAmount(body) != null || body?.discountAmount != null
+      readDiscountAmount(body) != null || readDiscountAmount(body) != null
         ? {
             code: toStr(readDiscount(body)?.code ?? body?.coupon),
-            amount: toNum(readDiscountAmount(body) ?? body?.discountAmount, 0),
+            amount: toNum(readDiscountAmount(body) ?? readDiscountAmount(body), 0),
           }
         : undefined,
     currency,
