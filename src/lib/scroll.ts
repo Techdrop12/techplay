@@ -199,6 +199,8 @@ export function unlockBodyScroll(): void {
 
 /* ============================ Throttle util ============================ */
 
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- throttle générique: "any" requis pour Parameters/ReturnType */
+
 export function throttle<T extends (...args: unknown[]) => any>(fn: T, wait = 100) {
   let last = 0
   let timeout: unknown

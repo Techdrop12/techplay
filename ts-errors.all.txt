@@ -1,4 +1,3 @@
-src/app/api/checkout/route.ts(122,47): error TS2322: Type 'unknown' is not assignable to type '"2023-10-16" | undefined'.
 src/app/api/checkout/route.ts(156,42): error TS2322: Type 'unknown' is not assignable to type 'AllowedCountry[]'.
 src/app/api/checkout/route.ts(163,11): error TS2322: Type 'unknown' is not assignable to type 'Locale | undefined'.
 src/app/api/checkout/route.ts(185,71): error TS2339: Property 'message' does not exist on type '{}'.
@@ -681,7 +680,7 @@ src/lib/rateLimit.ts(54,10): error TS18046: 'g' is of type 'unknown'.
 src/lib/scroll.ts(118,32): error TS2571: Object is of type 'unknown'.
 src/lib/scroll.ts(121,19): error TS2571: Object is of type 'unknown'.
 src/lib/scroll.ts(122,8): error TS2571: Object is of type 'unknown'.
-src/lib/scroll.ts(212,20): error TS2769: No overload matches this call.
+src/lib/scroll.ts(214,20): error TS2769: No overload matches this call.
   Overload 1 of 3, '(timeout: string | number | Timeout | undefined): void', gave the following error.
     Argument of type 'unknown' is not assignable to parameter of type 'string | number | Timeout | undefined'.
   Overload 2 of 3, '(id: number | undefined): void', gave the following error.

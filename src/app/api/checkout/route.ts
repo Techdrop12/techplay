@@ -119,7 +119,7 @@ export async function POST(request: Request) {
     if (STRIPE_KEY) {
       // Import dynamique pour éviter d’imposer stripe en dev si non utilisé
       const Stripe = (await import('stripe')).default
-      const stripe = new Stripe(STRIPE_KEY, { apiVersion: '2024-06-20' as unknown })
+      const stripe = new Stripe(STRIPE_KEY, { apiVersion: "2023-10-16"})
 
       // Line items
       const liCurrency = currency.toLowerCase()
