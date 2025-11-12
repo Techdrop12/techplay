@@ -1,3 +1,11 @@
+async function getInvoiceBody(req: Request): Promise<InvoiceBody> {
+  const j = await getInvoiceBody(req);
+  const id = (j as any)?.orderId;
+  if (typeof id !== "string" || !id.trim()) {
+    throw new Error("Missing orderId");
+  }
+  return { orderId: id };
+}
 type InvoiceBody = { orderId: string }
 
 // src/app/api/invoice/route.ts — Invoice PDF (App Router, Node runtime)
