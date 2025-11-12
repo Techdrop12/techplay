@@ -1,3 +1,7 @@
+function readCode(x: any, fallback: string = ''): string {
+  const v = (x && typeof x === "object") ? (x as any).code : undefined
+  return (typeof v === "string" && v.trim()) ? v : fallback
+}
 function readDiscountCode(x: any, fallback: string = ''): string {
   if (!x || typeof x !== "object") return fallback
   const d: any = (x as any).discount
@@ -188,7 +192,7 @@ email: readCustomerField(body, 'email') || readEmail(body),
     discount:
       readDiscountAmount(body) != null || readDiscountAmount(body) != null
         ? {
-            code: toStr(readDiscount(body)?.code ?? body?.coupon),
+            code: readCode(toStr(readDiscount(body)) ?? body?.coupon),
             amount: toNum(readDiscountAmount(body) ?? readDiscountAmount(body), 0),
           }
         : undefined,
