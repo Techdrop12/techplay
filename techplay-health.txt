@@ -1,1 +1,1 @@
-TS_HEAD=src/app/api/checkout/route.ts(2,10): error TS2724: '"@/i18n/config"' has no exported member named 'locales'. Did you mean 'Locale'? | COMMIT=7a84af6
+TS_HEAD=src/app/api/checkout/route.ts(46,3): error TS2322: Type 'string | undefined' is not assignable to type 'ZodTypeAny'.

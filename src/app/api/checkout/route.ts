@@ -1,15 +1,7 @@
 import type { Locale } from '@/i18n/config';
-import { locales as __locales } from '@/i18n/config';
 
-function toLocale(input: unknown): Locale | undefined {
-  if (typeof input !== "string") return undefined;
-  const primary = input.toLowerCase().split(/[-_]/)[0];
-  // On valide par rapport à la liste de locales exposée par le projet
-  if ((__locales as readonly string[]).includes(primary)) {
-    return primary as Locale;
-  }
-  return undefined;
-}
+
+import { toLocale } from "@/lib/toLocale";
 function toAllowedCountries(input: unknown): string[] {
   if (Array.isArray(input)) {
     return input.filter((s): s is string => typeof s === "string").map(s => s.toUpperCase());
@@ -214,4 +206,3 @@ export async function POST(request: Request) {
 export async function GET() {
   return json({ error: 'Method Not Allowed' }, { status: 405 })
 }
-
