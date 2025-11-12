@@ -13,7 +13,7 @@ const PackSchema = new Schema(
     toJSON: {
       virtuals: true,
       versionKey: false,
-      transform: (_doc, ret: any) => {
+      transform: (_doc, ret: unknown) => {
         ret.id = ret._id?.toString?.() ?? ret._id;
         const { _id, __v, ...rest } = ret;
         return rest;
@@ -22,10 +22,11 @@ const PackSchema = new Schema(
   }
 );
 
-PackSchema.virtual('id').get(function (this: any) {
+PackSchema.virtual('id').get(function (this: unknown) {
   return this._id.toString();
 });
 
 export type Pack = InferSchemaType<typeof PackSchema>;
 export default (mongoose.models.Pack as mongoose.Model<Pack>) ||
   mongoose.model<Pack>('Pack', PackSchema);
+

@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# Décommente pour activer le typecheck avant push :
+# echo "→ typecheck (pre-push)…"
+# npm run -s typecheck || exit 1

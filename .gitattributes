@@ -1,0 +1,22 @@
+# Normalisation par défaut
+* text=auto
+
+# Code et configs -> LF (recommandé cross-plateforme)
+*.js   text eol=lf
+*.jsx  text eol=lf
+*.ts   text eol=lf
+*.tsx  text eol=lf
+*.css  text eol=lf
+*.scss text eol=lf
+*.md   text eol=lf
+*.json text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+*.cjs  text eol=lf
+*.mjs  text eol=lf
+
+# Hooks Husky (shell) -> LF impératif
+.husky/* text eol=lf
+
+# Scripts PowerShell -> CRLF (Windows)
+*.ps1 text eol=crlf

@@ -27,7 +27,7 @@ const ProductSchema = new Schema(
     toJSON: {
       virtuals: true,
       versionKey: false,
-      transform: (_doc, ret: any) => {
+      transform: (_doc, ret: unknown) => {
         ret.id = ret._id?.toString?.();
         const { _id, __v, ...rest } = ret;
         return rest;
@@ -36,7 +36,7 @@ const ProductSchema = new Schema(
   }
 );
 
-ProductSchema.virtual('id').get(function (this: any) {
+ProductSchema.virtual('id').get(function (this: unknown) {
   return this._id.toString();
 });
 ProductSchema.index({ title: 'text', description: 'text', brand: 'text', category: 'text' });
@@ -44,3 +44,4 @@ ProductSchema.index({ title: 'text', description: 'text', brand: 'text', categor
 export type Product = InferSchemaType<typeof ProductSchema>;
 export default (mongoose.models.Product as mongoose.Model<Product>) ||
   mongoose.model<Product>('Product', ProductSchema);
+

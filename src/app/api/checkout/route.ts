@@ -61,7 +61,7 @@ function originAllowed(req: Request) {
   )
 }
 
-function json(data: any, init?: ResponseInit) {
+function json(data: unknown, init?: ResponseInit) {
   const res = NextResponse.json(data, init)
   res.headers.set('Cache-Control', 'no-store')
   return res
@@ -119,7 +119,7 @@ export async function POST(request: Request) {
     if (STRIPE_KEY) {
       // Import dynamique pour éviter d’imposer stripe en dev si non utilisé
       const Stripe = (await import('stripe')).default
-      const stripe = new Stripe(STRIPE_KEY, { apiVersion: '2024-06-20' as any })
+      const stripe = new Stripe(STRIPE_KEY, { apiVersion: '2024-06-20' as unknown })
 
       // Line items
       const liCurrency = currency.toLowerCase()
@@ -153,14 +153,14 @@ export async function POST(request: Request) {
           cancel_url: cancelUrl,
           customer_email: body.email,
           phone_number_collection: { enabled: true },
-          shipping_address_collection: { allowed_countries: allowedCountries as any },
+          shipping_address_collection: { allowed_countries: allowedCountries as unknown },
           billing_address_collection: 'auto',
           allow_promotion_codes: true,
           line_items,
           // Laisse Stripe gérer Apple Pay / Google Pay selon compte + domaine
           automatic_tax: { enabled: false },
           // Localisation de l’UI Checkout
-          locale: (body.locale || 'auto') as any, // 'auto' / 'fr' / 'en' …
+          locale: (body.locale || 'auto') as unknown, // 'auto' / 'fr' / 'en' …
           metadata: {
             address: body.address.slice(0, 500),
             items_count: (body.items?.reduce((a, i) => a + i.quantity, 0) || 1).toString(),
@@ -177,7 +177,7 @@ export async function POST(request: Request) {
     // 🧪 Fallback “mock” sans Stripe (dev / clé absente)
     const mockUrl = `${origin}/commande/success?mock=1`
     return json({ id: 'sess_mock_' + idem.slice(0, 10), url: mockUrl })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[checkout] error:', err)
     return json(
       {
@@ -193,3 +193,4 @@ export async function POST(request: Request) {
 export async function GET() {
   return json({ error: 'Method Not Allowed' }, { status: 405 })
 }
+

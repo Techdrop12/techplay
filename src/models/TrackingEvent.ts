@@ -12,7 +12,7 @@ const TrackingEventSchema = new Schema(
     toJSON: {
       virtuals: true,
       versionKey: false,
-      transform: (_doc, ret: any) => {
+      transform: (_doc, ret: unknown) => {
         ret.id = ret._id?.toString?.() ?? ret._id;
         const { _id, __v, ...rest } = ret;
         return rest;
@@ -21,7 +21,7 @@ const TrackingEventSchema = new Schema(
   }
 );
 
-TrackingEventSchema.virtual('id').get(function (this: any) {
+TrackingEventSchema.virtual('id').get(function (this: unknown) {
   return this._id.toString();
 });
 TrackingEventSchema.index({ event: 1, email: 1, createdAt: -1 });
@@ -29,3 +29,4 @@ TrackingEventSchema.index({ event: 1, email: 1, createdAt: -1 });
 export type TrackingEvent = InferSchemaType<typeof TrackingEventSchema>;
 export default (mongoose.models.TrackingEvent as mongoose.Model<TrackingEvent>) ||
   mongoose.model<TrackingEvent>('TrackingEvent', TrackingEventSchema);
+

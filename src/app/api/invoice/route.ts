@@ -18,14 +18,14 @@ export const dynamic = 'force-dynamic'
 
 /* ---------- Helpers de validation/coercition (sans dépendance externe) ---------- */
 
-function toNum(n: any, def = 0): number {
+function toNum(n: unknown, def = 0): number {
   const v = Number(n)
   return Number.isFinite(v) ? v : def
 }
-function toStr(s: any, def = ''): string {
+function toStr(s: unknown, def = ''): string {
   return typeof s === 'string' ? s : def
 }
-function asItems(arr: any): OrderItem[] {
+function asItems(arr: unknown): OrderItem[] {
   if (!Array.isArray(arr)) return []
   return arr
     .map((x) => ({
@@ -37,7 +37,7 @@ function asItems(arr: any): OrderItem[] {
     .filter((it) => it.name && it.quantity > 0)
 }
 
-function buildOrderFromBody(body: any): Order {
+function buildOrderFromBody(body: unknown): Order {
   const id = body?.orderId ?? body?.id ?? Date.now()
   const currency = toStr(body?.currency, 'EUR')
 
@@ -84,7 +84,7 @@ function buildOrderFromBody(body: any): Order {
 /* --------------------------------- POST --------------------------------- */
 
 export async function POST(req: Request) {
-  let body: any = {}
+  let body: unknown = {}
   try {
     body = await req.json()
   } catch {
@@ -150,3 +150,4 @@ export async function OPTIONS() {
     },
   })
 }
+

@@ -36,7 +36,7 @@ async function verifyRecaptcha(token: string | undefined, ip: string) {
     body,
     // timeout / abort non nécessaire ici
   })
-  const json = (await res.json()) as any
+  const json = (await res.json()) as unknown
   const ok = !!json.success && (json.score == null || json.score >= 0.4)
   return { ok, score: json.score ?? 0 }
 }
@@ -75,8 +75,8 @@ if (MONGO_URI) {
 }
 
 // ------------- Idempotency (fallback mémoire si pas de DB) -------------
-const memIds = (globalThis as any).__REV_MEM__ || new Set<string>()
-;(globalThis as any).__REV_MEM__ = memIds
+const memIds = (globalThis as unknown).__REV_MEM__ || new Set<string>()
+;(globalThis as unknown).__REV_MEM__ = memIds
 
 function makeIdemKey(input: { productId: string; email?: string; comment: string; ip: string }) {
   const base = `${input.productId}|${(input.email || '').toLowerCase()}|${input.comment.trim()}|${input.ip}`
@@ -96,7 +96,7 @@ async function handler(request: Request) {
   try {
     payload = ReviewSchemaZ.parse(await request.json())
   } catch (e) {
-    const msg = (e as any)?.errors?.[0]?.message || 'Payload invalide'
+    const msg = (e as unknown)?.errors?.[0]?.message || 'Payload invalide'
     const res = limiter.check(ip)
     return NextResponse.json({ success: false, error: msg }, { status: 400, headers: limiter.headers(res) })
   }
@@ -139,7 +139,7 @@ async function handler(request: Request) {
     }
     try {
       await ReviewModel.create({ ...doc, createdAt: new Date() })
-    } catch (err: any) {
+    } catch (err: unknown) {
       // duplication (idempotency)
       if (err?.code === 11000) {
         const res = limiter.check(ip)
@@ -157,3 +157,4 @@ async function handler(request: Request) {
 
 // 👉 export: on enveloppe le handler avec le middleware de rate limit pour retour des bons headers 429
 export const POST = withRateLimit(handler, limiter)
+

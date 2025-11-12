@@ -12,7 +12,7 @@ const UserSchema = new Schema(
     toJSON: {
       virtuals: true,
       versionKey: false,
-      transform: (_doc, ret: any) => {
+      transform: (_doc, ret: unknown) => {
         ret.id = ret._id?.toString?.() ?? ret._id;
         const { _id, __v, password, ...rest } = ret;
         return rest;
@@ -21,18 +21,19 @@ const UserSchema = new Schema(
   }
 );
 
-UserSchema.virtual('id').get(function (this: any) {
+UserSchema.virtual('id').get(function (this: unknown) {
   return this._id.toString();
 });
 UserSchema.index({ email: 1 }, { unique: true });
 
 export type User = InferSchemaType<typeof UserSchema>;
 export interface UserModel extends Model<User> {
-  toSafeObject(user: any): Omit<User, 'password'> & { id: string };
+  toSafeObject(user: unknown): Omit<User, 'password'> & { id: string };
 }
-UserSchema.statics.toSafeObject = (user: any) => {
-  const { password, ...safe } = (user?.toJSON ? user.toJSON() : user) as any;
+UserSchema.statics.toSafeObject = (user: unknown) => {
+  const { password, ...safe } = (user?.toJSON ? user.toJSON() : user) as unknown;
   return safe;
 };
 
 export default (mongoose.models.User as UserModel) || mongoose.model<User, UserModel>('User', UserSchema);
+

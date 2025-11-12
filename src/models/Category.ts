@@ -12,7 +12,7 @@ const CategorySchema = new Schema(
     toJSON: {
       virtuals: true,
       versionKey: false,
-      transform: (_doc, ret: any) => {
+      transform: (_doc, ret: unknown) => {
         ret.id = ret._id?.toString?.();
         const { _id, __v, ...rest } = ret;
         return rest;
@@ -21,7 +21,7 @@ const CategorySchema = new Schema(
   }
 );
 
-CategorySchema.virtual('id').get(function (this: any) {
+CategorySchema.virtual('id').get(function (this: unknown) {
   return this._id.toString();
 });
 CategorySchema.index({ name: 'text', description: 'text' });
@@ -29,3 +29,4 @@ CategorySchema.index({ name: 'text', description: 'text' });
 export type Category = InferSchemaType<typeof CategorySchema>;
 export default (mongoose.models.Category as mongoose.Model<Category>) ||
   mongoose.model<Category>('Category', CategorySchema);
+

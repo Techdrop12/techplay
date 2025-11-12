@@ -15,7 +15,8 @@ export async function POST(req: Request) {
     if (tag) revalidateTag(tag)
     if (path) revalidatePath(path)
     return NextResponse.json({ ok: true })
-  } catch (e: any) {
+  } catch (e: unknown) {
     return NextResponse.json({ ok: false, error: e?.message || 'error' }, { status: 500 })
   }
 }
+

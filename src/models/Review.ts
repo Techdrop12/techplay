@@ -18,7 +18,7 @@ const ReviewSchema = new Schema(
     toJSON: {
       virtuals: true,
       versionKey: false,
-      transform: (_doc, ret: any) => {
+      transform: (_doc, ret: unknown) => {
         ret.id = ret._id?.toString?.() ?? ret._id;
         const { _id, __v, ...rest } = ret;
         return rest;
@@ -27,7 +27,7 @@ const ReviewSchema = new Schema(
   }
 );
 
-ReviewSchema.virtual('id').get(function (this: any) {
+ReviewSchema.virtual('id').get(function (this: unknown) {
   return this._id.toString();
 });
 ReviewSchema.index({ product: 1, createdAt: -1 });
@@ -35,3 +35,4 @@ ReviewSchema.index({ product: 1, createdAt: -1 });
 export type Review = InferSchemaType<typeof ReviewSchema> & { product: Types.ObjectId };
 export default (mongoose.models.Review as mongoose.Model<Review>) ||
   mongoose.model<Review>('Review', ReviewSchema);
+

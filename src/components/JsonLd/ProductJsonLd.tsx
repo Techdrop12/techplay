@@ -13,7 +13,7 @@ type Props = {
     _id?: string
     gtin13?: string
     mpn?: string
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     [k: string]: unknown
   }
   /** Nombre d'avis à inclure dans le JSON-LD (0 = aucun). Par défaut: 0 */
