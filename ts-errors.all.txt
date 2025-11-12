@@ -1,5 +1,5 @@
-src/app/[locale]/wishlist/page.tsx(57,24): error TS2571: Object is of type 'unknown'.
-src/app/[locale]/wishlist/page.tsx(57,52): error TS2571: Object is of type 'unknown'.
+src/app/[locale]/wishlist/page.tsx(62,24): error TS2571: Object is of type 'unknown'.
+src/app/[locale]/wishlist/page.tsx(62,52): error TS2571: Object is of type 'unknown'.
 src/app/api/admin/revalidate/route.ts(19,53): error TS2339: Property 'message' does not exist on type '{}'.
 src/app/api/checkout/route.ts(122,47): error TS2322: Type 'unknown' is not assignable to type '"2023-10-16" | undefined'.
 src/app/api/checkout/route.ts(156,42): error TS2322: Type 'unknown' is not assignable to type 'AllowedCountry[]'.

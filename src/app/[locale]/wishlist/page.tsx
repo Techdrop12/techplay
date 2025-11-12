@@ -1,3 +1,8 @@
+function getErrorMessage(e: unknown): string {
+  if (e instanceof Error) return getErrorMessage(e);
+  if (typeof e === "string") return e;
+  try { return JSON.stringify(e); } catch { return String(e); }
+}
 // src/app/[locale]/wishlist/page.tsx — FINAL (i18n + hook unifié)
 'use client'
 
