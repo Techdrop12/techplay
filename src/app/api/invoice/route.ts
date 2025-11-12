@@ -139,7 +139,7 @@ function buildOrderFromBody(body: unknown): Order {
       postcode: readCustomerField(body, 'postcode'),
       city: readCustomerField(body, 'city'),
       country: readCustomerField(body, 'country'),
-      email: toStr(readEmail(body)(customer)),
+email: readCustomerField(body, 'email') || readEmail(body),
       phone: readCustomerField(body, 'phone'),
     },
     items: asItems(readItems(body)),
