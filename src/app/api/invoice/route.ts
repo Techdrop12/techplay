@@ -1,3 +1,12 @@
+function readCreatedAt(x: any, fallback: number = Date.now()): number {
+  const v = (x && typeof x === "object") ? (x as any).createdAt : undefined
+  if (typeof v === "number" && Number.isFinite(v)) return v
+  if (typeof v === "string") {
+    const t = Date.parse(v)
+    if (!Number.isNaN(t)) return t
+  }
+  return fallback
+}
 function readTaxRateDefault(x: any, fallback: number = 0): number {
   const v = (x && typeof x === "object") ? (x as any).taxRateDefault : undefined
   const n = Number(v)
@@ -104,7 +113,7 @@ function buildOrderFromBody(body: unknown): Order {
 
   return {
     id,
-    createdAt: body?.createdAt,
+    createdAt: readCreatedAt(body),
     customerName: toStr(body?.customerName) || toStr(body?.customer?.name),
     customer: {
       name: toStr(body?.customer?.name),
