@@ -1,9 +1,7 @@
-src/app/api/invoice/route.ts(160,27): error TS2339: Property 'amount' does not exist on type 'number'.
-src/app/api/invoice/route.ts(160,51): error TS2339: Property 'discountAmount' does not exist on type '{}'.
-src/app/api/invoice/route.ts(162,45): error TS2339: Property 'code' does not exist on type 'number'.
-src/app/api/invoice/route.ts(162,59): error TS2339: Property 'coupon' does not exist on type '{}'.
-src/app/api/invoice/route.ts(163,47): error TS2339: Property 'amount' does not exist on type 'number'.
-src/app/api/invoice/route.ts(163,63): error TS2339: Property 'discountAmount' does not exist on type '{}'.
+src/app/api/invoice/route.ts(178,49): error TS2339: Property 'discountAmount' does not exist on type '{}'.
+src/app/api/invoice/route.ts(180,45): error TS2339: Property 'code' does not exist on type 'number'.
+src/app/api/invoice/route.ts(180,59): error TS2339: Property 'coupon' does not exist on type '{}'.
+src/app/api/invoice/route.ts(181,61): error TS2339: Property 'discountAmount' does not exist on type '{}'.
 src/app/api/review/route.ts(40,16): error TS18046: 'json' is of type 'unknown'.
 src/app/api/review/route.ts(40,33): error TS18046: 'json' is of type 'unknown'.
 src/app/api/review/route.ts(40,55): error TS18046: 'json' is of type 'unknown'.

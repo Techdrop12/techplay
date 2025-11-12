@@ -1,3 +1,21 @@
+function readDiscountLabel(x: any, fallback: string = "Remise"): string {
+  const hasObj = x && typeof x === "object";
+  const d = hasObj ? (x as any).discount : undefined;
+  const lbl = hasObj ? (x as any).discountLabel : undefined;
+  const fromObj = (d && typeof d === "object" && typeof (d as any).label === "string") ? (d as any).label : undefined;
+  const v = typeof fromObj === "string" ? fromObj : (typeof lbl === "string" ? lbl : undefined);
+  return (typeof v === "string" && v.trim()) ? v : fallback;
+}
+function readDiscountAmount(x: any, fallback: number = 0): number {
+  const hasObj = x && typeof x === "object";
+  const d = hasObj ? (x as any).discount : undefined;
+  const da = hasObj ? (x as any).discountAmount : undefined;
+  // formats supportés: discount:number | discount:{amount:number,label?:string} | discountAmount:number
+  const n1 = typeof d === "number" ? d : Number((d as any)?.amount);
+  const n2 = Number(da);
+  const n  = Number.isFinite(n1) ? n1 : (Number.isFinite(n2) ? n2 : NaN);
+  return Number.isFinite(n) ? n : fallback;
+}
 function readDiscount(x: any, fallback: number = 0): number {
   const v = (x && typeof x === "object") ? (x as any).discount : undefined
   const n = Number(v)
@@ -157,10 +175,10 @@ email: readCustomerField(body, 'email') || readEmail(body),
           }
         : undefined,
     discount:
-      readDiscount(body)?.amount != null || body?.discountAmount != null
+      readDiscountAmount(body) != null || body?.discountAmount != null
         ? {
             code: toStr(readDiscount(body)?.code ?? body?.coupon),
-            amount: toNum(readDiscount(body)?.amount ?? body?.discountAmount, 0),
+            amount: toNum(readDiscountAmount(body) ?? body?.discountAmount, 0),
           }
         : undefined,
     currency,
