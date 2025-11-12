@@ -1,1 +1,1 @@
-HUSKY_LF=OK | ESLINT_ANY=1 | TS_HEAD=src/app/[locale]/wishlist/page.tsx(57,24): error TS2571: Object is of type 'unknown'. | COMMIT=a0a1754
+HUSKY_LF=OK | ESLINT_ANY=1 | TS_HEAD=src/app/[locale]/wishlist/page.tsx(57,24): error TS2571: Object is of type 'unknown'. | COMMIT=d520534
