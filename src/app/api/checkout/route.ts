@@ -1,3 +1,12 @@
+function toAllowedCountries(input: unknown): string[] {
+  if (Array.isArray(input)) {
+    return input.filter((s): s is string => typeof s === "string").map(s => s.toUpperCase());
+  }
+  if (typeof input === "string") {
+    return input.split(",").map(s => s.trim().toUpperCase()).filter(Boolean);
+  }
+  return ["FR"];
+}
 // src/app/api/checkout/route.ts
 import crypto from 'crypto'
 
@@ -153,7 +162,7 @@ export async function POST(request: Request) {
           cancel_url: cancelUrl,
           customer_email: body.email,
           phone_number_collection: { enabled: true },
-          shipping_address_collection: { allowed_countries: allowedCountries as unknown },
+          shipping_address_collection: { allowed_countries: toAllowedCountries(allowedCountries as unknown ) as unknown as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry[]},
           billing_address_collection: 'auto',
           allow_promotion_codes: true,
           line_items,

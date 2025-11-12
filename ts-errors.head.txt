@@ -1,6 +1,6 @@
-src/app/api/checkout/route.ts(156,42): error TS2322: Type 'unknown' is not assignable to type 'AllowedCountry[]'.
-src/app/api/checkout/route.ts(163,11): error TS2322: Type 'unknown' is not assignable to type 'Locale | undefined'.
-src/app/api/checkout/route.ts(185,71): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/checkout/route.ts(165,124): error TS2503: Cannot find namespace 'Stripe'.
+src/app/api/checkout/route.ts(172,11): error TS2322: Type 'unknown' is not assignable to type 'Locale | undefined'.
+src/app/api/checkout/route.ts(194,71): error TS2339: Property 'message' does not exist on type '{}'.
 src/app/api/invoice/route.ts(41,20): error TS2339: Property 'orderId' does not exist on type '{}'.
 src/app/api/invoice/route.ts(41,37): error TS2339: Property 'id' does not exist on type '{}'.
 src/app/api/invoice/route.ts(42,32): error TS2339: Property 'currency' does not exist on type '{}'.

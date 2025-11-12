@@ -1,1 +1,1 @@
-HUSKY_LF=OK | ESLINT_ANY=1 | TS_HEAD=src/app/api/checkout/route.ts(156,42): error TS2322: Type 'unknown' is not assignable to type 'AllowedCountry[]'. | COMMIT=0696ffe
+HUSKY_LF=OK | TS_HEAD=src/app/api/checkout/route.ts(165,124): error TS2503: Cannot find namespace 'Stripe'. | COMMIT=6a21d01
