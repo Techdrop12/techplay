@@ -1,3 +1,8 @@
+function readId(x: any): string {
+  const id = readId(x)
+  if (typeof id !== "string" || !id.trim()) throw new Error("Missing id")
+  return id
+}
 function readOrderId(x: any): string {
   const id = readOrderId(x);
   if (typeof id !== "string" || !id.trim()) throw new Error("Missing orderId");
@@ -53,7 +58,7 @@ function asItems(arr: unknown): OrderItem[] {
 }
 
 function buildOrderFromBody(body: unknown): Order {
-  const id = readOrderId(body) ?? body?.id ?? Date.now()
+  const id = readOrderId(body) ?? readId(body) ?? Date.now()
   const currency = toStr(body?.currency, 'EUR')
 
   const shippingPrice = body?.shipping?.price ?? body?.shippingPrice

@@ -1,32 +1,31 @@
-src/app/api/invoice/route.ts(56,41): error TS2339: Property 'id' does not exist on type '{}'.
-src/app/api/invoice/route.ts(57,32): error TS2339: Property 'currency' does not exist on type '{}'.
-src/app/api/invoice/route.ts(59,31): error TS2339: Property 'shipping' does not exist on type '{}'.
-src/app/api/invoice/route.ts(59,56): error TS2339: Property 'shippingPrice' does not exist on type '{}'.
-src/app/api/invoice/route.ts(61,11): error TS2339: Property 'shipping' does not exist on type '{}'.
-src/app/api/invoice/route.ts(61,38): error TS2339: Property 'shippingTaxRate' does not exist on type '{}'.
-src/app/api/invoice/route.ts(61,63): error TS2339: Property 'taxRateDefault' does not exist on type '{}'.
-src/app/api/invoice/route.ts(65,22): error TS2339: Property 'createdAt' does not exist on type '{}'.
-src/app/api/invoice/route.ts(66,31): error TS2339: Property 'customerName' does not exist on type '{}'.
-src/app/api/invoice/route.ts(66,60): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(68,25): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(69,28): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(70,29): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(71,29): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(72,29): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(62,32): error TS2339: Property 'currency' does not exist on type '{}'.
+src/app/api/invoice/route.ts(64,31): error TS2339: Property 'shipping' does not exist on type '{}'.
+src/app/api/invoice/route.ts(64,56): error TS2339: Property 'shippingPrice' does not exist on type '{}'.
+src/app/api/invoice/route.ts(66,11): error TS2339: Property 'shipping' does not exist on type '{}'.
+src/app/api/invoice/route.ts(66,38): error TS2339: Property 'shippingTaxRate' does not exist on type '{}'.
+src/app/api/invoice/route.ts(66,63): error TS2339: Property 'taxRateDefault' does not exist on type '{}'.
+src/app/api/invoice/route.ts(70,22): error TS2339: Property 'createdAt' does not exist on type '{}'.
+src/app/api/invoice/route.ts(71,31): error TS2339: Property 'customerName' does not exist on type '{}'.
+src/app/api/invoice/route.ts(71,60): error TS2339: Property 'customer' does not exist on type '{}'.
 src/app/api/invoice/route.ts(73,25): error TS2339: Property 'customer' does not exist on type '{}'.
 src/app/api/invoice/route.ts(74,28): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(75,26): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(76,26): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(78,26): error TS2339: Property 'items' does not exist on type '{}'.
-src/app/api/invoice/route.ts(82,32): error TS2339: Property 'shipping' does not exist on type '{}'.
-src/app/api/invoice/route.ts(88,13): error TS2339: Property 'discount' does not exist on type '{}'.
-src/app/api/invoice/route.ts(88,47): error TS2339: Property 'discountAmount' does not exist on type '{}'.
-src/app/api/invoice/route.ts(90,31): error TS2339: Property 'discount' does not exist on type '{}'.
-src/app/api/invoice/route.ts(90,55): error TS2339: Property 'coupon' does not exist on type '{}'.
-src/app/api/invoice/route.ts(91,33): error TS2339: Property 'discount' does not exist on type '{}'.
-src/app/api/invoice/route.ts(91,59): error TS2339: Property 'discountAmount' does not exist on type '{}'.
-src/app/api/invoice/route.ts(95,43): error TS2339: Property 'taxRateDefault' does not exist on type '{}'.
-src/app/api/invoice/route.ts(95,68): error TS18046: 'body' is of type 'unknown'.
+src/app/api/invoice/route.ts(75,29): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(76,29): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(77,29): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(78,25): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(79,28): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(80,26): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(81,26): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(83,26): error TS2339: Property 'items' does not exist on type '{}'.
+src/app/api/invoice/route.ts(87,32): error TS2339: Property 'shipping' does not exist on type '{}'.
+src/app/api/invoice/route.ts(93,13): error TS2339: Property 'discount' does not exist on type '{}'.
+src/app/api/invoice/route.ts(93,47): error TS2339: Property 'discountAmount' does not exist on type '{}'.
+src/app/api/invoice/route.ts(95,31): error TS2339: Property 'discount' does not exist on type '{}'.
+src/app/api/invoice/route.ts(95,55): error TS2339: Property 'coupon' does not exist on type '{}'.
+src/app/api/invoice/route.ts(96,33): error TS2339: Property 'discount' does not exist on type '{}'.
+src/app/api/invoice/route.ts(96,59): error TS2339: Property 'discountAmount' does not exist on type '{}'.
+src/app/api/invoice/route.ts(100,43): error TS2339: Property 'taxRateDefault' does not exist on type '{}'.
+src/app/api/invoice/route.ts(100,68): error TS18046: 'body' is of type 'unknown'.
 src/app/api/review/route.ts(40,16): error TS18046: 'json' is of type 'unknown'.
 src/app/api/review/route.ts(40,33): error TS18046: 'json' is of type 'unknown'.
 src/app/api/review/route.ts(40,55): error TS18046: 'json' is of type 'unknown'.
