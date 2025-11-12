@@ -1,33 +1,32 @@
-src/app/api/invoice/route.ts(51,20): error TS2339: Property 'orderId' does not exist on type '{}'.
-src/app/api/invoice/route.ts(51,37): error TS2339: Property 'id' does not exist on type '{}'.
-src/app/api/invoice/route.ts(52,32): error TS2339: Property 'currency' does not exist on type '{}'.
-src/app/api/invoice/route.ts(54,31): error TS2339: Property 'shipping' does not exist on type '{}'.
-src/app/api/invoice/route.ts(54,56): error TS2339: Property 'shippingPrice' does not exist on type '{}'.
-src/app/api/invoice/route.ts(56,11): error TS2339: Property 'shipping' does not exist on type '{}'.
-src/app/api/invoice/route.ts(56,38): error TS2339: Property 'shippingTaxRate' does not exist on type '{}'.
-src/app/api/invoice/route.ts(56,63): error TS2339: Property 'taxRateDefault' does not exist on type '{}'.
-src/app/api/invoice/route.ts(60,22): error TS2339: Property 'createdAt' does not exist on type '{}'.
-src/app/api/invoice/route.ts(61,31): error TS2339: Property 'customerName' does not exist on type '{}'.
-src/app/api/invoice/route.ts(61,60): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(63,25): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(64,28): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(65,29): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(66,29): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(67,29): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(56,41): error TS2339: Property 'id' does not exist on type '{}'.
+src/app/api/invoice/route.ts(57,32): error TS2339: Property 'currency' does not exist on type '{}'.
+src/app/api/invoice/route.ts(59,31): error TS2339: Property 'shipping' does not exist on type '{}'.
+src/app/api/invoice/route.ts(59,56): error TS2339: Property 'shippingPrice' does not exist on type '{}'.
+src/app/api/invoice/route.ts(61,11): error TS2339: Property 'shipping' does not exist on type '{}'.
+src/app/api/invoice/route.ts(61,38): error TS2339: Property 'shippingTaxRate' does not exist on type '{}'.
+src/app/api/invoice/route.ts(61,63): error TS2339: Property 'taxRateDefault' does not exist on type '{}'.
+src/app/api/invoice/route.ts(65,22): error TS2339: Property 'createdAt' does not exist on type '{}'.
+src/app/api/invoice/route.ts(66,31): error TS2339: Property 'customerName' does not exist on type '{}'.
+src/app/api/invoice/route.ts(66,60): error TS2339: Property 'customer' does not exist on type '{}'.
 src/app/api/invoice/route.ts(68,25): error TS2339: Property 'customer' does not exist on type '{}'.
 src/app/api/invoice/route.ts(69,28): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(70,26): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(71,26): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(73,26): error TS2339: Property 'items' does not exist on type '{}'.
-src/app/api/invoice/route.ts(77,32): error TS2339: Property 'shipping' does not exist on type '{}'.
-src/app/api/invoice/route.ts(83,13): error TS2339: Property 'discount' does not exist on type '{}'.
-src/app/api/invoice/route.ts(83,47): error TS2339: Property 'discountAmount' does not exist on type '{}'.
-src/app/api/invoice/route.ts(85,31): error TS2339: Property 'discount' does not exist on type '{}'.
-src/app/api/invoice/route.ts(85,55): error TS2339: Property 'coupon' does not exist on type '{}'.
-src/app/api/invoice/route.ts(86,33): error TS2339: Property 'discount' does not exist on type '{}'.
-src/app/api/invoice/route.ts(86,59): error TS2339: Property 'discountAmount' does not exist on type '{}'.
-src/app/api/invoice/route.ts(90,43): error TS2339: Property 'taxRateDefault' does not exist on type '{}'.
-src/app/api/invoice/route.ts(90,68): error TS18046: 'body' is of type 'unknown'.
+src/app/api/invoice/route.ts(70,29): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(71,29): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(72,29): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(73,25): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(74,28): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(75,26): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(76,26): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(78,26): error TS2339: Property 'items' does not exist on type '{}'.
+src/app/api/invoice/route.ts(82,32): error TS2339: Property 'shipping' does not exist on type '{}'.
+src/app/api/invoice/route.ts(88,13): error TS2339: Property 'discount' does not exist on type '{}'.
+src/app/api/invoice/route.ts(88,47): error TS2339: Property 'discountAmount' does not exist on type '{}'.
+src/app/api/invoice/route.ts(90,31): error TS2339: Property 'discount' does not exist on type '{}'.
+src/app/api/invoice/route.ts(90,55): error TS2339: Property 'coupon' does not exist on type '{}'.
+src/app/api/invoice/route.ts(91,33): error TS2339: Property 'discount' does not exist on type '{}'.
+src/app/api/invoice/route.ts(91,59): error TS2339: Property 'discountAmount' does not exist on type '{}'.
+src/app/api/invoice/route.ts(95,43): error TS2339: Property 'taxRateDefault' does not exist on type '{}'.
+src/app/api/invoice/route.ts(95,68): error TS18046: 'body' is of type 'unknown'.
 src/app/api/review/route.ts(40,16): error TS18046: 'json' is of type 'unknown'.
 src/app/api/review/route.ts(40,33): error TS18046: 'json' is of type 'unknown'.
 src/app/api/review/route.ts(40,55): error TS18046: 'json' is of type 'unknown'.
@@ -148,3 +147,4 @@ src/components/AppInstallPrompt.tsx(99,14): error TS2769: No overload matches th
   Overload 3 of 3, '(type: keyof DedicatedWorkerGlobalScopeEventMap, listener: (this: DedicatedWorkerGlobalScope, ev: Event | MessageEvent<any> | ErrorEvent | PromiseRejectionEvent | RTCTransformEvent) => any, options?: boolean | ... 1 more ... | undefined): void', gave the following error.
     Argument of type '"beforeinstallprompt"' is not assignable to parameter of type 'keyof DedicatedWorkerGlobalScopeEventMap'.
 src/components/BestProducts.tsx(42,9): error TS2571: Object is of type 'unknown'.
+src/components/BestProducts.tsx(159,54): error TS2352: Conversion of type 'Product' to type 'AnyProduct' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.

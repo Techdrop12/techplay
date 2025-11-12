@@ -1,3 +1,8 @@
+function readOrderId(x: any): string {
+  const id = readOrderId(x);
+  if (typeof id !== "string" || !id.trim()) throw new Error("Missing orderId");
+  return id;
+}
 async function getInvoiceBody(req: Request): Promise<InvoiceBody> {
   const j = await getInvoiceBody(req);
   const id = (j as any)?.orderId;
@@ -48,7 +53,7 @@ function asItems(arr: unknown): OrderItem[] {
 }
 
 function buildOrderFromBody(body: unknown): Order {
-  const id = body?.orderId ?? body?.id ?? Date.now()
+  const id = readOrderId(body) ?? body?.id ?? Date.now()
   const currency = toStr(body?.currency, 'EUR')
 
   const shippingPrice = body?.shipping?.price ?? body?.shippingPrice
