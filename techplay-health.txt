@@ -1,1 +1,1 @@
-TS_HEAD=src/app/api/checkout/route.ts(176,11): error TS2322: Type 'ZodOptional<ZodString>' is not assignable to type 'Locale | undefined'.
+TS_HEAD=src/app/api/checkout/route.ts(198,71): error TS2339: Property 'message' does not exist on type '{}'.

@@ -43,7 +43,7 @@ const BodySchema = z.object({
   address: z.string().min(6),
   items: z.array(LineItem).optional(),
   currency: z.enum(['EUR', 'GBP', 'USD']).optional(), // fallback sur items / EUR
-  locale: z.string().min(2).max(5).optional(),                      // ex: 'fr', 'en'
+  locale: z.string().min(2).max(5).optional(),        // ex: 'fr', 'en'
   idempotencyKey: z.string().optional(),              // idempotency proposé par le client
 })
 
@@ -173,7 +173,7 @@ export async function POST(request: Request) {
           // Laisse Stripe gérer Apple Pay / Google Pay selon compte + domaine
           automatic_tax: { enabled: false },
           // Localisation de l’UI Checkout
-          locale: z.string().min(2).max(5).optional(), // 'auto' / 'fr' / 'en' …
+          locale: undefined, // 'auto' / 'fr' / 'en' …
           metadata: {
             address: body.address.slice(0, 500),
             items_count: (body.items?.reduce((a, i) => a + i.quantity, 0) || 1).toString(),
