@@ -1,1 +1,1 @@
-HUSKY_LF=OK | TS_HEAD=src/app/api/checkout/route.ts(165,124): error TS2503: Cannot find namespace 'Stripe'. | COMMIT=6a21d01
+HUSKY_LF=OK | ESLINT_ANY=0 | TS_HEAD=src/app/api/checkout/route.ts(172,11): error TS2322: Type 'unknown' is not assignable to type 'Locale | undefined'. | COMMIT=d4e8dde

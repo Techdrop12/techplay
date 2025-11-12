@@ -162,7 +162,7 @@ export async function POST(request: Request) {
           cancel_url: cancelUrl,
           customer_email: body.email,
           phone_number_collection: { enabled: true },
-          shipping_address_collection: { allowed_countries: toAllowedCountries(allowedCountries as unknown ) as unknown as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry[]},
+          shipping_address_collection: { allowed_countries: toAllowedCountries(allowedCountries as unknown ) as unknown as import('stripe').Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry[]},
           billing_address_collection: 'auto',
           allow_promotion_codes: true,
           line_items,
