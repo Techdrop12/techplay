@@ -1,3 +1,5 @@
+type InvoiceBody = { orderId: string }
+
 // src/app/api/invoice/route.ts — Invoice PDF (App Router, Node runtime)
 // - Utilise la source unique: formatInvoiceData + renderInvoicePDFStream
 // - Validation douce / coercition des champs
@@ -86,7 +88,7 @@ function buildOrderFromBody(body: unknown): Order {
 export async function POST(req: Request) {
   let body: unknown = {}
   try {
-    body = await req.json()
+    body = await req.json() as InvoiceBody
   } catch {
     // body restera {}
   }
