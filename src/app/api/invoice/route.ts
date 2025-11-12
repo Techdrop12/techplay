@@ -1,3 +1,19 @@
+function readCustomer(x: any): any {
+  const c = (x && typeof x === "object") ? (x as any).customer : undefined
+  return (c && typeof c === "object") ? c : {}
+}
+function readCustomerName(x: any, fallback: string = ''): string {
+  const cn = (x && typeof x === "object") ? (x as any).customerName : undefined
+  if (typeof cn === "string" && cn.trim()) return cn
+  const c = readCustomer(x)
+  const n = (c as any).name
+  return (typeof n === "string") ? n : fallback
+}
+function readCustomerField(x: any, key: string, fallback: string = ''): string {
+  const c = readCustomer(x)
+  const v = (c as any)?.[key]
+  return (typeof v === "string") ? v : fallback
+}
 function readCreatedAt(x: any, fallback: number = Date.now()): number {
   const v = (x && typeof x === "object") ? (x as any).createdAt : undefined
   if (typeof v === "number" && Number.isFinite(v)) return v
@@ -113,18 +129,18 @@ function buildOrderFromBody(body: unknown): Order {
 
   return {
     id,
-    createdAt: readCreatedAt(body),
-    customerName: toStr(body?.customerName) || toStr(body?.customer?.name),
+    createdAt: new Date(readCreatedAt(body)),
+    customerName: readCustomerName(body),
     customer: {
-      name: toStr(body?.customer?.name),
-      company: toStr(body?.customer?.company),
-      address1: toStr(body?.customer?.address1),
-      address2: toStr(body?.customer?.address2),
-      postcode: toStr(body?.customer?.postcode),
-      city: toStr(body?.customer?.city),
-      country: toStr(body?.customer?.country),
-      email: toStr(body?.readEmail(customer)),
-      phone: toStr(body?.customer?.phone),
+      name: readCustomerField(body, 'name'),
+      company: readCustomerField(body, 'company'),
+      address1: readCustomerField(body, 'address1'),
+      address2: readCustomerField(body, 'address2'),
+      postcode: readCustomerField(body, 'postcode'),
+      city: readCustomerField(body, 'city'),
+      country: readCustomerField(body, 'country'),
+      email: toStr(readEmail(body)(customer)),
+      phone: readCustomerField(body, 'phone'),
     },
     items: asItems(readItems(body)),
     shipping:
