@@ -2,6 +2,12 @@ import type { Locale } from '@/i18n/config';
 
 
 import { toLocale } from "@/lib/toLocale";
+
+function getErrorMessage(e: unknown): string {
+  if (e instanceof Error) return getErrorMessage(e)
+  if (typeof e === "string") return e
+  try { return JSON.stringify(e) } catch { return String(e) }
+}
 function toAllowedCountries(input: unknown): string[] {
   if (Array.isArray(input)) {
     return input.filter((s): s is string => typeof s === "string").map(s => s.toUpperCase());
@@ -195,7 +201,7 @@ export async function POST(request: Request) {
     return json(
       {
         error: 'Unexpected error',
-        details: process.env.NODE_ENV === 'development' ? String(err?.message || err) : undefined,
+        details: process.env.NODE_ENV === 'development' ? getErrorMessage(err) : undefined,
       },
       { status: 500 }
     )

@@ -1,1 +1,1 @@
-TS_HEAD=src/app/api/checkout/route.ts(198,71): error TS2339: Property 'message' does not exist on type '{}'.
+TS_HEAD=src/app/api/invoice/route.ts(41,20): error TS2339: Property 'orderId' does not exist on type '{}'.
