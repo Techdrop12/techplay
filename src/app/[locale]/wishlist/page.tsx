@@ -1,3 +1,11 @@
+type Keyable = { _id?: string | number; slug?: string | number };
+function getProductKey(p: unknown, i: number): string | number {
+  if (typeof p === "object" && p !== null) {
+    const o = p as Keyable;
+    return o._id ?? o.slug ?? i;
+  }
+  return i;
+}
 function getErrorMessage(e: unknown): string {
   if (e instanceof Error) return getErrorMessage(e);
   if (typeof e === "string") return e;
@@ -59,7 +67,7 @@ export default function WishlistPage() {
             {wishlist.map((product, i) =>
               product ? (
                 <ProductCard
-                  key={(product as unknown)._id ?? (product as unknown).slug ?? i}
+                  key={getProductKey(product, i)}
                   product={{
                     ...product,
                     title: product.title ?? 'Product',
