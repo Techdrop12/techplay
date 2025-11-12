@@ -1,4 +1,150 @@
-Unknown command: "pm"
-
-To see a list of supported npm commands, run:
-  npm help
+src/app/[locale]/wishlist/page.tsx(57,24): error TS2571: Object is of type 'unknown'.
+src/app/[locale]/wishlist/page.tsx(57,52): error TS2571: Object is of type 'unknown'.
+src/app/api/admin/revalidate/route.ts(19,53): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/checkout/route.ts(122,47): error TS2322: Type 'unknown' is not assignable to type '"2023-10-16" | undefined'.
+src/app/api/checkout/route.ts(156,42): error TS2322: Type 'unknown' is not assignable to type 'AllowedCountry[]'.
+src/app/api/checkout/route.ts(163,11): error TS2322: Type 'unknown' is not assignable to type 'Locale | undefined'.
+src/app/api/checkout/route.ts(185,71): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/invoice/route.ts(41,20): error TS2339: Property 'orderId' does not exist on type '{}'.
+src/app/api/invoice/route.ts(41,37): error TS2339: Property 'id' does not exist on type '{}'.
+src/app/api/invoice/route.ts(42,32): error TS2339: Property 'currency' does not exist on type '{}'.
+src/app/api/invoice/route.ts(44,31): error TS2339: Property 'shipping' does not exist on type '{}'.
+src/app/api/invoice/route.ts(44,56): error TS2339: Property 'shippingPrice' does not exist on type '{}'.
+src/app/api/invoice/route.ts(46,11): error TS2339: Property 'shipping' does not exist on type '{}'.
+src/app/api/invoice/route.ts(46,38): error TS2339: Property 'shippingTaxRate' does not exist on type '{}'.
+src/app/api/invoice/route.ts(46,63): error TS2339: Property 'taxRateDefault' does not exist on type '{}'.
+src/app/api/invoice/route.ts(50,22): error TS2339: Property 'createdAt' does not exist on type '{}'.
+src/app/api/invoice/route.ts(51,31): error TS2339: Property 'customerName' does not exist on type '{}'.
+src/app/api/invoice/route.ts(51,60): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(53,25): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(54,28): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(55,29): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(56,29): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(57,29): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(58,25): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(59,28): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(60,26): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(61,26): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(63,26): error TS2339: Property 'items' does not exist on type '{}'.
+src/app/api/invoice/route.ts(67,32): error TS2339: Property 'shipping' does not exist on type '{}'.
+src/app/api/invoice/route.ts(73,13): error TS2339: Property 'discount' does not exist on type '{}'.
+src/app/api/invoice/route.ts(73,47): error TS2339: Property 'discountAmount' does not exist on type '{}'.
+src/app/api/invoice/route.ts(75,31): error TS2339: Property 'discount' does not exist on type '{}'.
+src/app/api/invoice/route.ts(75,55): error TS2339: Property 'coupon' does not exist on type '{}'.
+src/app/api/invoice/route.ts(76,33): error TS2339: Property 'discount' does not exist on type '{}'.
+src/app/api/invoice/route.ts(76,59): error TS2339: Property 'discountAmount' does not exist on type '{}'.
+src/app/api/invoice/route.ts(80,43): error TS2339: Property 'taxRateDefault' does not exist on type '{}'.
+src/app/api/invoice/route.ts(80,68): error TS18046: 'body' is of type 'unknown'.
+src/app/api/review/route.ts(40,16): error TS18046: 'json' is of type 'unknown'.
+src/app/api/review/route.ts(40,33): error TS18046: 'json' is of type 'unknown'.
+src/app/api/review/route.ts(40,55): error TS18046: 'json' is of type 'unknown'.
+src/app/api/review/route.ts(41,23): error TS18046: 'json' is of type 'unknown'.
+src/app/api/review/route.ts(78,16): error TS2571: Object is of type 'unknown'.
+src/app/api/review/route.ts(79,2): error TS2571: Object is of type 'unknown'.
+src/app/api/review/route.ts(99,33): error TS2339: Property 'errors' does not exist on type '{}'.
+src/app/api/review/route.ts(144,16): error TS2339: Property 'code' does not exist on type '{}'.
+src/app/blog/[slug]/page.tsx(36,13): error TS2352: Conversion of type 'BlogPost' to type 'Record<string, unknown>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'BlogPost'.
+src/app/blog/[slug]/page.tsx(90,46): error TS2571: Object is of type 'unknown'.
+src/app/blog/page.tsx(79,15): error TS18046: 'params' is of type 'unknown'.
+src/app/blog/page.tsx(80,20): error TS18046: 'params' is of type 'unknown'.
+src/app/blog/page.tsx(82,55): error TS2345: Argument of type 'unknown' is not assignable to parameter of type '{ page: number; limit: number; publishedOnly: boolean; tag: string; category: string; q: string; sort: string; } | undefined'.
+src/app/blog/page.tsx(169,29): error TS18046: 'post' is of type 'unknown'.
+src/app/blog/page.tsx(169,53): error TS18046: 'post' is of type 'unknown'.
+src/app/blog/page.tsx(169,92): error TS2322: Type 'unknown' is not assignable to type 'BlogPost'.
+src/app/blog/page.tsx(245,61): error TS18046: 'p' is of type 'unknown'.
+src/app/blog/page.tsx(246,30): error TS18046: 'p' is of type 'unknown'.
+src/app/categorie/[category]/page.tsx(21,103): error TS2698: Spread types may only be created from object types.
+src/app/categorie/[category]/page.tsx(22,101): error TS2698: Spread types may only be created from object types.
+src/app/categorie/[category]/page.tsx(23,98): error TS2698: Spread types may only be created from object types.
+src/app/categorie/[category]/page.tsx(24,99): error TS2698: Spread types may only be created from object types.
+src/app/categorie/[category]/page.tsx(25,100): error TS2698: Spread types may only be created from object types.
+src/app/categorie/[category]/page.tsx(26,100): error TS2698: Spread types may only be created from object types.
+src/app/categorie/[category]/page.tsx(27,98): error TS2698: Spread types may only be created from object types.
+src/app/categorie/[category]/page.tsx(28,100): error TS2698: Spread types may only be created from object types.
+src/app/categorie/[category]/page.tsx(81,36): error TS2571: Object is of type 'unknown'.
+src/app/categorie/[category]/page.tsx(86,29): error TS2571: Object is of type 'unknown'.
+src/app/categorie/[category]/page.tsx(86,79): error TS2571: Object is of type 'unknown'.
+src/app/categorie/[category]/page.tsx(86,102): error TS2571: Object is of type 'unknown'.
+src/app/categorie/[category]/page.tsx(96,16): error TS2571: Object is of type 'unknown'.
+src/app/categorie/[category]/page.tsx(97,16): error TS2571: Object is of type 'unknown'.
+src/app/categorie/[category]/page.tsx(98,18): error TS2571: Object is of type 'unknown'.
+src/app/categorie/[category]/page.tsx(99,18): error TS2571: Object is of type 'unknown'.
+src/app/categorie/[category]/page.tsx(151,32): error TS2322: Type '{ className: string; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'className' does not exist on type 'IntrinsicAttributes'.
+src/app/commande/page.tsx(12,10): error TS2305: Module '"@/lib/ga"' has no exported member 'mapProductToGaItem'.
+src/app/commande/page.tsx(12,30): error TS2305: Module '"@/lib/ga"' has no exported member 'trackBeginCheckout'.
+src/app/commande/page.tsx(12,50): error TS2305: Module '"@/lib/ga"' has no exported member 'pushDataLayer'.
+src/app/commande/page.tsx(36,84): error TS2339: Property 'quantity' does not exist on type '{}'.
+src/app/commande/page.tsx(38,43): error TS2339: Property 'price' does not exist on type '{}'.
+src/app/commande/page.tsx(38,81): error TS2339: Property 'quantity' does not exist on type '{}'.
+src/app/commande/page.tsx(43,42): error TS2339: Property 'quantity' does not exist on type '{}'.
+src/app/confidentialite/page.tsx(27,9): error TS2571: Object is of type 'unknown'.
+src/app/page.tsx(161,7): error TS2322: Type 'unknown' is not assignable to type 'CSSProperties | undefined'.
+src/app/page.tsx(272,21): error TS2339: Property 'slug' does not exist on type '{}'.
+src/app/page.tsx(272,54): error TS2339: Property 'slug' does not exist on type '{}'.
+src/app/page.tsx(273,22): error TS2339: Property 'title' does not exist on type '{}'.
+src/app/page.tsx(302,11): error TS2322: Type 'unknown' is not assignable to type 'CSSProperties | undefined'.
+src/app/page.tsx(320,11): error TS2322: Type 'unknown' is not assignable to type 'CSSProperties | undefined'.
+src/app/page.tsx(340,11): error TS2322: Type 'unknown' is not assignable to type 'CSSProperties | undefined'.
+src/app/products/[slug]/page.tsx(39,14): error TS2571: Object is of type 'unknown'.
+src/app/products/[slug]/page.tsx(40,20): error TS2571: Object is of type 'unknown'.
+src/app/products/[slug]/page.tsx(41,14): error TS2571: Object is of type 'unknown'.
+src/app/products/[slug]/page.tsx(46,17): error TS2571: Object is of type 'unknown'.
+src/app/products/[slug]/page.tsx(47,41): error TS2339: Property 'noindex' does not exist on type '{}'.
+src/app/products/[slug]/page.tsx(62,18): error TS2571: Object is of type 'unknown'.
+src/app/products/[slug]/page.tsx(64,44): error TS2571: Object is of type 'unknown'.
+src/app/products/[slug]/page.tsx(68,22): error TS2571: Object is of type 'unknown'.
+src/app/products/[slug]/page.tsx(68,77): error TS2571: Object is of type 'unknown'.
+src/app/products/[slug]/page.tsx(102,22): error TS2322: Type 'Product' is not assignable to type 'Product & { [k: string]: unknown; brand?: string | undefined; rating?: number | undefined; reviewCount?: number | undefined; availability?: string | undefined; currency?: string | undefined; image?: string | ... 1 more ... | undefined; _id?: string | undefined; gtin13?: string | undefined; mpn?: string | undefined; }'.
+  Type 'Product' is not assignable to type '{ [k: string]: unknown; brand?: string | undefined; rating?: number | undefined; reviewCount?: number | undefined; availability?: string | undefined; currency?: string | undefined; image?: string | string[] | undefined; _id?: string | undefined; gtin13?: string | undefined; mpn?: string | undefined; }'.
+    Index signature for type 'string' is missing in type 'Product'.
+src/app/products/packs/[slug]/page.tsx(53,22): error TS2322: Type 'Pack' is not assignable to type 'Product & { [k: string]: unknown; brand?: string | undefined; rating?: number | undefined; reviewCount?: number | undefined; availability?: string | undefined; currency?: string | undefined; image?: string | ... 1 more ... | undefined; _id?: string | undefined; gtin13?: string | undefined; mpn?: string | undefined; }'.
+  Type 'Pack' is not assignable to type '{ [k: string]: unknown; brand?: string | undefined; rating?: number | undefined; reviewCount?: number | undefined; availability?: string | undefined; currency?: string | undefined; image?: string | string[] | undefined; _id?: string | undefined; gtin13?: string | undefined; mpn?: string | undefined; }'.
+    Index signature for type 'string' is missing in type 'Pack'.
+src/app/products/page.tsx(57,38): error TS2571: Object is of type 'unknown'.
+src/app/products/page.tsx(89,38): error TS2571: Object is of type 'unknown'.
+src/components/account/InvoiceButton.tsx(5,10): error TS2305: Module '"@/lib/ga"' has no exported member 'event'.
+src/components/account/InvoiceButton.tsx(154,14): error TS2339: Property 'name' does not exist on type '{}'.
+src/components/account/InvoiceButton.tsx(156,18): error TS2339: Property 'message' does not exist on type '{}'.
+src/components/account/OrderList.tsx(131,40): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'SetStateAction<"recent" | "old" | "amountAsc" | "amountDesc">'.
+src/components/AddToCartButton.tsx(14,10): error TS2305: Module '"@/lib/ga"' has no exported member 'trackAddToCart'.
+src/components/AddToCartButton.tsx(16,10): error TS2305: Module '"@/lib/meta-pixel"' has no exported member 'pixelAddToCart'.
+src/components/AddToCartButton.tsx(16,26): error TS2305: Module '"@/lib/meta-pixel"' has no exported member 'pixelInitiateCheckout'.
+src/components/AddToCartButton.tsx(227,9): error TS2571: Object is of type 'unknown'.
+src/components/AddToCartButton.tsx(227,41): error TS2571: Object is of type 'unknown'.
+src/components/AddToCartButton.tsx(228,10): error TS2571: Object is of type 'unknown'.
+src/components/AddToCartButton.tsx(232,20): error TS2571: Object is of type 'unknown'.
+src/components/AddToCartButton.tsx(239,31): error TS2571: Object is of type 'unknown'.
+src/components/AddToCartButton.tsx(240,29): error TS2571: Object is of type 'unknown'.
+src/components/AddToCartButton.tsx(241,32): error TS2571: Object is of type 'unknown'.
+src/components/AddToCartButton.tsx(294,11): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/components/AddToCartButton.tsx(354,13): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/components/AddToCartButton.tsx(355,14): error TS2571: Object is of type 'unknown'.
+src/components/AddToCartButtonAB.tsx(10,10): error TS2305: Module '"@/lib/ga"' has no exported member 'logEvent'.
+src/components/AddToCartButtonAB.tsx(10,20): error TS2305: Module '"@/lib/ga"' has no exported member 'pushDataLayer'.
+src/components/AddToCartButtonAB.tsx(11,10): error TS2305: Module '"@/lib/meta-pixel"' has no exported member 'pixelInitiateCheckout'.
+src/components/AfterIdleClient.tsx(11,26): error TS2571: Object is of type 'unknown'.
+src/components/AfterIdleClient.tsx(11,98): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'TimerHandler'.
+src/components/AfterIdleClient.tsx(12,16): error TS18046: 'ric' is of type 'unknown'.
+src/components/AfterIdleClient.tsx(14,7): error TS2571: Object is of type 'unknown'.
+src/components/AfterIdleClient.tsx(60,42): error TS2571: Object is of type 'unknown'.
+src/components/AfterIdleClient.tsx(64,7): error TS2571: Object is of type 'unknown'.
+src/components/Analytics.tsx(7,10): error TS2305: Module '"@/lib/ga"' has no exported member 'GA_TRACKING_ID'.
+src/components/Analytics.tsx(7,26): error TS2305: Module '"@/lib/ga"' has no exported member 'initAnalytics'.
+src/components/Analytics.tsx(7,41): error TS2305: Module '"@/lib/ga"' has no exported member 'pageview'.
+src/components/AppInstallPrompt.tsx(8,10): error TS2305: Module '"@/lib/ga"' has no exported member 'logEvent'.
+src/components/AppInstallPrompt.tsx(31,25): error TS2571: Object is of type 'unknown'.
+src/components/AppInstallPrompt.tsx(37,57): error TS2571: Object is of type 'unknown'.
+src/components/AppInstallPrompt.tsx(96,12): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(type: keyof WindowEventMap, listener: (this: Window, ev: Event | MessageEvent<any> | ErrorEvent | PromiseRejectionEvent | ... 27 more ... | PopStateEvent) => any, options?: boolean | ... 1 more ... | undefined): void', gave the following error.
+    Argument of type '"beforeinstallprompt"' is not assignable to parameter of type 'keyof WindowEventMap'.
+  Overload 2 of 3, '(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions | undefined): void', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'EventListenerOrEventListenerObject'.
+  Overload 3 of 3, '(type: keyof DedicatedWorkerGlobalScopeEventMap, listener: (this: DedicatedWorkerGlobalScope, ev: Event | MessageEvent<any> | ErrorEvent | PromiseRejectionEvent | RTCTransformEvent) => any, options?: boolean | ... 1 more ... | undefined): void', gave the following error.
+    Argument of type '"beforeinstallprompt"' is not assignable to parameter of type 'keyof DedicatedWorkerGlobalScopeEventMap'.
+src/components/AppInstallPrompt.tsx(99,14): error TS2769: No overload matches this call.

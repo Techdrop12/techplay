@@ -1,0 +1,5 @@
+
+File                                                                 Line Col Msg
+----                                                                 ---- --- ---
+C:\Users\Childhood\Desktop\TechPlay_FINAL_DELIVERY\src\lib\scroll.ts  202  60 Unexpected any. Specify a different type.
+
