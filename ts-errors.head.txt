@@ -1,31 +1,22 @@
-src/app/api/invoice/route.ts(62,32): error TS2339: Property 'currency' does not exist on type '{}'.
-src/app/api/invoice/route.ts(64,31): error TS2339: Property 'shipping' does not exist on type '{}'.
-src/app/api/invoice/route.ts(64,56): error TS2339: Property 'shippingPrice' does not exist on type '{}'.
-src/app/api/invoice/route.ts(66,11): error TS2339: Property 'shipping' does not exist on type '{}'.
-src/app/api/invoice/route.ts(66,38): error TS2339: Property 'shippingTaxRate' does not exist on type '{}'.
-src/app/api/invoice/route.ts(66,63): error TS2339: Property 'taxRateDefault' does not exist on type '{}'.
-src/app/api/invoice/route.ts(70,22): error TS2339: Property 'createdAt' does not exist on type '{}'.
-src/app/api/invoice/route.ts(71,31): error TS2339: Property 'customerName' does not exist on type '{}'.
-src/app/api/invoice/route.ts(71,60): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(73,25): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(74,28): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(75,29): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(76,29): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(77,29): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(78,25): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(79,28): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(80,26): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(81,26): error TS2339: Property 'customer' does not exist on type '{}'.
-src/app/api/invoice/route.ts(83,26): error TS2339: Property 'items' does not exist on type '{}'.
-src/app/api/invoice/route.ts(87,32): error TS2339: Property 'shipping' does not exist on type '{}'.
-src/app/api/invoice/route.ts(93,13): error TS2339: Property 'discount' does not exist on type '{}'.
-src/app/api/invoice/route.ts(93,47): error TS2339: Property 'discountAmount' does not exist on type '{}'.
-src/app/api/invoice/route.ts(95,31): error TS2339: Property 'discount' does not exist on type '{}'.
-src/app/api/invoice/route.ts(95,55): error TS2339: Property 'coupon' does not exist on type '{}'.
-src/app/api/invoice/route.ts(96,33): error TS2339: Property 'discount' does not exist on type '{}'.
-src/app/api/invoice/route.ts(96,59): error TS2339: Property 'discountAmount' does not exist on type '{}'.
-src/app/api/invoice/route.ts(100,43): error TS2339: Property 'taxRateDefault' does not exist on type '{}'.
-src/app/api/invoice/route.ts(100,68): error TS18046: 'body' is of type 'unknown'.
+src/app/api/invoice/route.ts(107,22): error TS2339: Property 'createdAt' does not exist on type '{}'.
+src/app/api/invoice/route.ts(108,31): error TS2339: Property 'customerName' does not exist on type '{}'.
+src/app/api/invoice/route.ts(108,60): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(110,25): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(111,28): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(112,29): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(113,29): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(114,29): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(115,25): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(116,28): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(117,26): error TS2339: Property 'readEmail' does not exist on type '{}'.
+src/app/api/invoice/route.ts(117,36): error TS2304: Cannot find name 'customer'.
+src/app/api/invoice/route.ts(118,26): error TS2339: Property 'customer' does not exist on type '{}'.
+src/app/api/invoice/route.ts(130,13): error TS2339: Property 'discount' does not exist on type '{}'.
+src/app/api/invoice/route.ts(130,47): error TS2339: Property 'discountAmount' does not exist on type '{}'.
+src/app/api/invoice/route.ts(132,31): error TS2339: Property 'discount' does not exist on type '{}'.
+src/app/api/invoice/route.ts(132,55): error TS2339: Property 'coupon' does not exist on type '{}'.
+src/app/api/invoice/route.ts(133,33): error TS2339: Property 'discount' does not exist on type '{}'.
+src/app/api/invoice/route.ts(133,59): error TS2339: Property 'discountAmount' does not exist on type '{}'.
 src/app/api/review/route.ts(40,16): error TS18046: 'json' is of type 'unknown'.
 src/app/api/review/route.ts(40,33): error TS18046: 'json' is of type 'unknown'.
 src/app/api/review/route.ts(40,55): error TS18046: 'json' is of type 'unknown'.
@@ -148,3 +139,617 @@ src/components/AppInstallPrompt.tsx(99,14): error TS2769: No overload matches th
 src/components/BestProducts.tsx(42,9): error TS2571: Object is of type 'unknown'.
 src/components/BestProducts.tsx(159,54): error TS2352: Conversion of type 'Product' to type 'AnyProduct' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
   Index signature for type 'string' is missing in type 'Product'.
+src/components/BestProducts.tsx(160,56): error TS2352: Conversion of type 'Product' to type 'AnyProduct' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'Product'.
+src/components/BestProducts.tsx(164,27): error TS2352: Conversion of type 'Product' to type 'AnyProduct' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'Product'.
+src/components/BestProducts.tsx(165,27): error TS2352: Conversion of type 'Product' to type 'AnyProduct' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'Product'.
+src/components/BestProducts.tsx(166,28): error TS2352: Conversion of type 'Product' to type 'AnyProduct' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'Product'.
+src/components/BestProducts.tsx(167,28): error TS2352: Conversion of type 'Product' to type 'AnyProduct' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'Product'.
+src/components/BestProducts.tsx(175,23): error TS2352: Conversion of type 'Product' to type 'AnyProduct' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'Product'.
+src/components/BestProducts.tsx(175,50): error TS2352: Conversion of type 'Product' to type 'AnyProduct' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'Product'.
+src/components/BestProducts.tsx(176,23): error TS2352: Conversion of type 'Product' to type 'AnyProduct' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'Product'.
+src/components/BestProducts.tsx(176,50): error TS2352: Conversion of type 'Product' to type 'AnyProduct' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'Product'.
+src/components/BestProducts.tsx(237,7): error TS2322: Type 'unknown' is not assignable to type 'CSSProperties | undefined'.
+src/components/BestProducts.tsx(335,35): error TS2339: Property '_id' does not exist on type '{}'.
+src/components/BestProducts.tsx(336,35): error TS2339: Property 'slug' does not exist on type '{}'.
+src/components/BestProducts.tsx(337,35): error TS2339: Property 'id' does not exist on type '{}'.
+src/components/BestProducts.tsx(352,26): error TS2571: Object is of type 'unknown'.
+src/components/BestProducts.tsx(352,56): error TS2571: Object is of type 'unknown'.
+src/components/BestProducts.tsx(354,21): error TS2571: Object is of type 'unknown'.
+src/components/BestProducts.tsx(355,21): error TS2571: Object is of type 'unknown'.
+src/components/BestProducts.tsx(356,21): error TS2571: Object is of type 'unknown'.
+src/components/cart/AbandonCartTracker.tsx(60,15): error TS2571: Object is of type 'unknown'.
+src/components/cart/AbandonCartTracker.tsx(61,15): error TS2571: Object is of type 'unknown'.
+src/components/cart/AbandonCartTracker.tsx(62,15): error TS2571: Object is of type 'unknown'.
+src/components/cart/AbandonCartTracker.tsx(68,47): error TS2571: Object is of type 'unknown'.
+src/components/cart/AbandonCartTracker.tsx(69,25): error TS2571: Object is of type 'unknown'.
+src/components/cart/AbandonCartTracker.tsx(108,46): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'CartItem[]'.
+src/components/cart/CartList.tsx(35,14): error TS2571: Object is of type 'unknown'.
+src/components/cart/CartPageClient.tsx(12,10): error TS2305: Module '"@/lib/ga"' has no exported member 'event'.
+src/components/cart/CartPageClient.tsx(97,23): error TS2322: Type 'unknown' is not assignable to type '(Product & { quantity: number; })[]'.
+src/components/cart/CartPageClient.tsx(99,24): error TS2322: Type 'unknown' is not assignable to type '(Product & { quantity: number; })[]'.
+src/components/cart/CartReminder.tsx(7,10): error TS2614: Module '"@/lib/analytics"' has no exported member 'pageview'. Did you mean to use 'import pageview from "@/lib/analytics"' instead?
+src/components/cart/CartReminder.tsx(51,16): error TS2571: Object is of type 'unknown'.
+src/components/cart/CartReminder.tsx(53,9): error TS2571: Object is of type 'unknown'.
+src/components/catalogue/FilterPanel.tsx(7,10): error TS2305: Module '"@/lib/ga"' has no exported member 'event'.
+src/components/catalogue/FilterPanel.tsx(7,28): error TS2305: Module '"@/lib/ga"' has no exported member 'logEvent'.
+src/components/catalogue/FilterPanel.tsx(7,38): error TS2305: Module '"@/lib/ga"' has no exported member 'pushDataLayer'.
+src/components/catalogue/FilterPanel.tsx(77,3): error TS2322: Type '(p: React.SVGProps<SVGSVGElement>) => JSX.Element' is not assignable to type '(p: unknown) => Element'.
+  Types of parameters 'p' and 'p' are incompatible.
+    Type 'unknown' is not assignable to type 'SVGProps<SVGSVGElement>'.
+src/components/catalogue/FilterPanel.tsx(78,3): error TS2322: Type '(p: React.SVGProps<SVGSVGElement>) => JSX.Element' is not assignable to type '(p: unknown) => Element'.
+  Types of parameters 'p' and 'p' are incompatible.
+    Type 'unknown' is not assignable to type 'SVGProps<SVGSVGElement>'.
+src/components/catalogue/FilterPanel.tsx(79,3): error TS2322: Type '(p: React.SVGProps<SVGSVGElement>) => JSX.Element' is not assignable to type '(p: unknown) => Element'.
+  Types of parameters 'p' and 'p' are incompatible.
+    Type 'unknown' is not assignable to type 'SVGProps<SVGSVGElement>'.
+src/components/catalogue/FilterPanel.tsx(80,3): error TS2322: Type '(p: React.SVGProps<SVGSVGElement>) => JSX.Element' is not assignable to type '(p: unknown) => Element'.
+  Types of parameters 'p' and 'p' are incompatible.
+    Type 'unknown' is not assignable to type 'SVGProps<SVGSVGElement>'.
+src/components/catalogue/FilterPanel.tsx(81,3): error TS2322: Type '(p: React.SVGProps<SVGSVGElement>) => JSX.Element' is not assignable to type '(p: unknown) => Element'.
+  Types of parameters 'p' and 'p' are incompatible.
+    Type 'unknown' is not assignable to type 'SVGProps<SVGSVGElement>'.
+src/components/catalogue/FilterPanel.tsx(82,3): error TS2322: Type '(p: React.SVGProps<SVGSVGElement>) => JSX.Element' is not assignable to type '(p: unknown) => Element'.
+  Types of parameters 'p' and 'p' are incompatible.
+    Type 'unknown' is not assignable to type 'SVGProps<SVGSVGElement>'.
+src/components/catalogue/FilterPanel.tsx(83,3): error TS2322: Type '(p: React.SVGProps<SVGSVGElement>) => JSX.Element' is not assignable to type '(p: unknown) => Element'.
+  Types of parameters 'p' and 'p' are incompatible.
+    Type 'unknown' is not assignable to type 'SVGProps<SVGSVGElement>'.
+src/components/catalogue/FilterPanel.tsx(84,3): error TS2322: Type '(p: React.SVGProps<SVGSVGElement>) => JSX.Element' is not assignable to type '(p: unknown) => Element'.
+  Types of parameters 'p' and 'p' are incompatible.
+    Type 'unknown' is not assignable to type 'SVGProps<SVGSVGElement>'.
+src/components/catalogue/FilterPanel.tsx(222,36): error TS2322: Type '{ className: string; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'className' does not exist on type 'IntrinsicAttributes'.
+src/components/catalogue/SearchBar.tsx(11,10): error TS2305: Module '"@/lib/ga"' has no exported member 'event'.
+src/components/catalogue/SearchBar.tsx(11,28): error TS2305: Module '"@/lib/ga"' has no exported member 'logEvent'.
+src/components/catalogue/SearchBar.tsx(134,52): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(type: "mousedown", listener: (this: Document, ev: MouseEvent) => any, options?: boolean | AddEventListenerOptions | undefined): void', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'boolean | AddEventListenerOptions | undefined'.
+  Overload 2 of 2, '(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions | undefined): void', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'boolean | AddEventListenerOptions | undefined'.
+src/components/catalogue/SearchBar.tsx(135,53): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(type: "touchstart", listener: (this: Document, ev: TouchEvent) => any, options?: boolean | AddEventListenerOptions | undefined): void', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'boolean | AddEventListenerOptions | undefined'.
+  Overload 2 of 2, '(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions | undefined): void', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'boolean | AddEventListenerOptions | undefined'.
+src/components/checkout/CheckoutForm.tsx(15,10): error TS2305: Module '"@/lib/ga"' has no exported member 'event'.
+src/components/checkout/CheckoutForm.tsx(15,28): error TS2305: Module '"@/lib/ga"' has no exported member 'mapProductToGaItem'.
+src/components/checkout/CheckoutForm.tsx(15,48): error TS2305: Module '"@/lib/ga"' has no exported member 'trackAddShippingInfo'.
+src/components/checkout/CheckoutForm.tsx(15,70): error TS2305: Module '"@/lib/ga"' has no exported member 'pushDataLayer'.
+src/components/checkout/CheckoutForm.tsx(16,10): error TS2305: Module '"@/lib/meta-pixel"' has no exported member 'pixelInitiateCheckout'.
+src/components/checkout/CheckoutForm.tsx(80,43): error TS2339: Property 'price' does not exist on type '{}'.
+src/components/checkout/CheckoutForm.tsx(80,81): error TS2339: Property 'quantity' does not exist on type '{}'.
+src/components/checkout/CheckoutForm.tsx(85,42): error TS2339: Property 'quantity' does not exist on type '{}'.
+src/components/checkout/CheckoutForm.tsx(89,22): error TS2339: Property '_id' does not exist on type '{}'.
+src/components/checkout/CheckoutForm.tsx(89,33): error TS2339: Property 'slug' does not exist on type '{}'.
+src/components/checkout/CheckoutForm.tsx(90,40): error TS2339: Property 'quantity' does not exist on type '{}'.
+src/components/checkout/CheckoutForm.tsx(91,30): error TS2339: Property 'price' does not exist on type '{}'.
+src/components/checkout/CheckoutForm.tsx(93,84): error TS2339: Property 'quantity' does not exist on type '{}'.
+src/components/checkout/CheckoutForm.tsx(109,12): error TS2571: Object is of type 'unknown'.
+src/components/checkout/CheckoutForm.tsx(120,12): error TS2571: Object is of type 'unknown'.
+src/components/checkout/CheckoutForm.tsx(220,26): error TS2339: Property 'message' does not exist on type '{}'.
+src/components/checkout/PurchaseTracker.tsx(6,10): error TS2305: Module '"@/lib/ga"' has no exported member 'trackPurchase'.
+src/components/checkout/PurchaseTracker.tsx(7,10): error TS2305: Module '"@/lib/meta-pixel"' has no exported member 'pixelPurchase'.
+src/components/checkout/PurchaseTracker.tsx(44,36): error TS18046: 'order' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(45,23): error TS18046: 'order' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(46,27): error TS18046: 'order' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(47,25): error TS18046: 'order' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(48,30): error TS18046: 'order' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(49,34): error TS18046: 'order' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(50,17): error TS18046: 'order' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(51,35): error TS18046: 'it' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(51,49): error TS18046: 'it' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(51,58): error TS18046: 'it' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(52,37): error TS18046: 'it' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(52,53): error TS18046: 'it' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(52,65): error TS18046: 'it' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(53,33): error TS18046: 'it' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(54,48): error TS18046: 'it' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(55,31): error TS18046: 'it' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(55,48): error TS18046: 'it' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(56,34): error TS18046: 'it' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(56,54): error TS18046: 'it' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(57,33): error TS18046: 'it' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(57,52): error TS18046: 'it' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(58,29): error TS18046: 'it' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(58,50): error TS18046: 'it' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(66,11): error TS2571: Object is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(66,43): error TS2571: Object is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(67,12): error TS2571: Object is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(70,38): error TS18046: 'order' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(71,25): error TS18046: 'order' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(72,29): error TS18046: 'order' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(73,27): error TS18046: 'order' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(74,32): error TS18046: 'order' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(75,22): error TS18046: 'order' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(82,29): error TS18046: 'order' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(83,17): error TS18046: 'i' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(83,30): error TS18046: 'i' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(84,23): error TS18046: 'i' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(85,25): error TS18046: 'i' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(88,27): error TS18046: 'order' is of type 'unknown'.
+src/components/checkout/PurchaseTracker.tsx(89,23): error TS18046: 'order' is of type 'unknown'.
+src/components/Clarity.tsx(13,24): error TS2571: Object is of type 'unknown'.
+src/components/Clarity.tsx(14,30): error TS18046: 's' is of type 'unknown'.
+src/components/Clarity.tsx(16,7): error TS18046: 's' is of type 'unknown'.
+src/components/Clarity.tsx(17,7): error TS18046: 's' is of type 'unknown'.
+src/components/Clarity.tsx(18,7): error TS18046: 's' is of type 'unknown'.
+src/components/Clarity.tsx(33,5): error TS2571: Object is of type 'unknown'.
+src/components/Clarity.tsx(34,5): error TS2571: Object is of type 'unknown'.
+src/components/Clarity.tsx(35,5): error TS2571: Object is of type 'unknown'.
+src/components/Clarity.tsx(58,13): error TS2571: Object is of type 'unknown'.
+src/components/Clarity.tsx(58,51): error TS2571: Object is of type 'unknown'.
+src/components/Clarity.tsx(60,13): error TS2571: Object is of type 'unknown'.
+src/components/Clarity.tsx(62,13): error TS2571: Object is of type 'unknown'.
+src/components/Clarity.tsx(78,13): error TS2571: Object is of type 'unknown'.
+src/components/Clarity.tsx(78,44): error TS2571: Object is of type 'unknown'.
+src/components/ClientTrackingScript.tsx(6,10): error TS2305: Module '"@/lib/ga"' has no exported member 'logEvent'.
+src/components/ClientTrackingScript.tsx(7,10): error TS2305: Module '"@/lib/meta-pixel"' has no exported member 'trackPixel'.
+src/components/ClientTrackingScript.tsx(7,22): error TS2305: Module '"@/lib/meta-pixel"' has no exported member 'pixelReadyAndConsented'.
+src/components/ClientTrackingScript.tsx(73,9): error TS2571: Object is of type 'unknown'.
+src/components/ClientTrackingScript.tsx(73,41): error TS2571: Object is of type 'unknown'.
+src/components/ClientTrackingScript.tsx(74,10): error TS2571: Object is of type 'unknown'.
+src/components/ConsentBanner.tsx(51,5): error TS2571: Object is of type 'unknown'.
+src/components/ConsentBanner.tsx(51,37): error TS2571: Object is of type 'unknown'.
+src/components/ConsentBanner.tsx(52,6): error TS2571: Object is of type 'unknown'.
+src/components/ConsentBanner.tsx(81,7): error TS2571: Object is of type 'unknown'.
+src/components/ConsentBanner.tsx(82,7): error TS2571: Object is of type 'unknown'.
+src/components/ConsentBanner.tsx(83,7): error TS2571: Object is of type 'unknown'.
+src/components/Footer.tsx(22,10): error TS2305: Module '"@/lib/ga"' has no exported member 'event'.
+src/components/Footer.tsx(22,28): error TS2305: Module '"@/lib/ga"' has no exported member 'logEvent'.
+src/components/Footer.tsx(106,5): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/components/Footer.tsx(174,11): error TS2571: Object is of type 'unknown'.
+src/components/Footer.tsx(214,23): error TS2339: Property 'message' does not exist on type '{}'.
+src/components/FreeShippingBadge.tsx(145,15): error TS2571: Object is of type 'unknown'.
+src/components/FreeShippingBadge.tsx(241,42): error TS2571: Object is of type 'unknown'.
+src/components/FreeShippingBadge.tsx(302,40): error TS2571: Object is of type 'unknown'.
+src/components/FreeShippingBadge.tsx(343,36): error TS2571: Object is of type 'unknown'.
+src/components/HeroCarousel.tsx(127,5): error TS2571: Object is of type 'unknown'.
+src/components/HeroCarousel.tsx(367,11): error TS2322: Type 'unknown' is not assignable to type 'MotionStyle | undefined'.
+src/components/HeroCarousel.tsx(409,37): error TS2571: Object is of type 'unknown'.
+src/components/HeroCarousel.tsx(423,37): error TS2571: Object is of type 'unknown'.
+src/components/Hotjar.tsx(17,24): error TS2571: Object is of type 'unknown'.
+src/components/Hotjar.tsx(18,16): error TS18046: 's' is of type 'unknown'.
+src/components/Hotjar.tsx(28,5): error TS2571: Object is of type 'unknown'.
+src/components/Hotjar.tsx(29,5): error TS2571: Object is of type 'unknown'.
+src/components/Hotjar.tsx(30,5): error TS2571: Object is of type 'unknown'.
+src/components/Input.tsx(133,49): error TS2339: Property 'value' does not exist on type '{}'.
+src/components/JsonLd/ArticleJsonLd.tsx(16,46): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'string | number'.
+src/components/JsonLd/ArticleJsonLd.tsx(31,24): error TS2571: Object is of type 'unknown'.
+src/components/JsonLd/ArticleJsonLd.tsx(32,23): error TS2571: Object is of type 'unknown'.
+src/components/JsonLd/ArticleJsonLd.tsx(32,59): error TS2571: Object is of type 'unknown'.
+src/components/JsonLd/ArticleJsonLd.tsx(35,13): error TS2571: Object is of type 'unknown'.
+src/components/JsonLd/ArticleJsonLd.tsx(39,12): error TS2571: Object is of type 'unknown'.
+src/components/JsonLd/BlogJsonLd.tsx(20,46): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'string | number'.
+src/components/JsonLd/BlogJsonLd.tsx(54,17): error TS2571: Object is of type 'unknown'.
+src/components/JsonLd/BlogJsonLd.tsx(54,70): error TS2571: Object is of type 'unknown'.
+src/components/JsonLd/BlogJsonLd.tsx(55,17): error TS2571: Object is of type 'unknown'.
+src/components/JsonLd/BlogJsonLd.tsx(55,69): error TS2571: Object is of type 'unknown'.
+src/components/JsonLd/BlogJsonLd.tsx(58,17): error TS2571: Object is of type 'unknown'.
+src/components/JsonLd/ProductJsonLd.tsx(59,29): error TS2571: Object is of type 'unknown'.
+src/components/JsonLd/ProductJsonLd.tsx(104,14): error TS2571: Object is of type 'unknown'.
+src/components/JsonLd/ProductJsonLd.tsx(105,11): error TS2571: Object is of type 'unknown'.
+src/components/JsonLd/ProductJsonLd.tsx(132,52): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'string | number'.
+src/components/LanguageSwitcher.tsx(6,10): error TS2305: Module '"@/lib/ga"' has no exported member 'event'.
+src/components/LanguageSwitcher.tsx(35,8): error TS2571: Object is of type 'unknown'.
+src/components/LanguageSwitcher.tsx(35,40): error TS2571: Object is of type 'unknown'.
+src/components/LanguageSwitcher.tsx(36,8): error TS2571: Object is of type 'unknown'.
+src/components/layout/Header.tsx(158,11): error TS2339: Property 'cart' does not exist on type 'unknown'.
+src/components/layout/Header.tsx(159,11): error TS2339: Property 'wishlist' does not exist on type 'unknown'.
+src/components/layout/Header.tsx(162,90): error TS2339: Property 'quantity' does not exist on type '{}'.
+src/components/layout/Header.tsx(163,103): error TS2339: Property 'quantity' does not exist on type '{}'.
+src/components/layout/Header.tsx(244,44): error TS2339: Property 'connection' does not exist on type '{}'.
+src/components/layout/Layout.tsx(14,10): error TS2305: Module '"@/lib/ga"' has no exported member 'pageview'.
+src/components/layout/Layout.tsx(109,7): error TS2571: Object is of type 'unknown'.
+src/components/layout/Layout.tsx(110,64): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'IdleDeadline'.
+src/components/layout/Layout.tsx(111,44): error TS2571: Object is of type 'unknown'.
+src/components/layout/Layout.tsx(116,15): error TS2339: Property 'connection' does not exist on type '{}'.
+src/components/layout/Layout.tsx(117,15): error TS2339: Property 'connection' does not exist on type '{}'.
+src/components/layout/Layout.tsx(118,17): error TS2339: Property 'connection' does not exist on type '{}'.
+src/components/layout/Layout.tsx(118,49): error TS2339: Property 'connection' does not exist on type '{}'.
+src/components/layout/MobileNav.tsx(13,10): error TS2305: Module '"@/lib/ga"' has no exported member 'event'.
+src/components/layout/MobileNav.tsx(13,28): error TS2305: Module '"@/lib/ga"' has no exported member 'logEvent'.
+src/components/layout/MobileNav.tsx(140,9): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/components/layout/MobileNav.tsx(172,27): error TS2339: Property 'cart' does not exist on type '{}'.
+src/components/layout/MobileNav.tsx(173,35): error TS2339: Property 'wishlist' does not exist on type '{}'.
+src/components/layout/MobileNav.tsx(178,60): error TS2339: Property 'quantity' does not exist on type '{}'.
+src/components/layout/MobileNav.tsx(180,66): error TS2339: Property 'quantity' does not exist on type '{}'.
+src/components/layout/MobileNav.tsx(213,47): error TS18046: 'e' is of type 'unknown'.
+src/components/layout/MobileNav.tsx(227,10): error TS2339: Property 'prompt' does not exist on type '{}'.
+src/components/layout/MobileNav.tsx(228,16): error TS2339: Property 'userChoice' does not exist on type '{}'.
+src/components/layout/MobileNav.tsx(250,13): error TS2571: Object is of type 'unknown'.
+src/components/layout/MobileNav.tsx(265,13): error TS2571: Object is of type 'unknown'.
+src/components/layout/MobileNav.tsx(632,35): error TS2571: Object is of type 'unknown'.
+src/components/LocalizedLink.tsx(50,30): error TS2322: Type 'unknown' is not assignable to type 'Url'.
+src/components/marketing/PopupEmailCapture.tsx(136,9): error TS2571: Object is of type 'unknown'.
+src/components/marketing/PopupEmailCapture.tsx(142,21): error TS2339: Property 'message' does not exist on type '{}'.
+src/components/MetaPixel.tsx(8,10): error TS2305: Module '"@/lib/meta-pixel"' has no exported member 'pixelPageView'.
+src/components/MetaPixel.tsx(8,25): error TS2305: Module '"@/lib/meta-pixel"' has no exported member 'isPixelReady'.
+src/components/MetaPixel.tsx(42,5): error TS2571: Object is of type 'unknown'.
+src/components/MetaPixel.tsx(43,5): error TS2571: Object is of type 'unknown'.
+src/components/MetaPixel.tsx(44,5): error TS2571: Object is of type 'unknown'.
+src/components/MetaPixel.tsx(59,24): error TS2571: Object is of type 'unknown'.
+src/components/MetaPixel.tsx(61,7): error TS18046: 's' is of type 'unknown'.
+src/components/MetaPixel.tsx(62,7): error TS18046: 's' is of type 'unknown'.
+src/components/MetaPixel.tsx(63,7): error TS18046: 's' is of type 'unknown'.
+src/components/MetaPixel.tsx(100,47): error TS2571: Object is of type 'unknown'.
+src/components/Modal.tsx(61,8): error TS2571: Object is of type 'unknown'.
+src/components/Modal.tsx(68,20): error TS2571: Object is of type 'unknown'.
+src/components/Modal.tsx(70,8): error TS2571: Object is of type 'unknown'.
+src/components/Modal.tsx(259,7): error TS2322: Type 'unknown' is not assignable to type 'FC<ModalProps> & { Header: ({ children }: { children: ReactNode; }) => Element; Body: ({ children, className }: { children: ReactNode; className?: string | undefined; }) => Element; Footer: ({ children }: { ...; }) => Element; }'.
+  Type 'unknown' is not assignable to type 'FC<ModalProps>'.
+src/components/PackCard.tsx(12,10): error TS2305: Module '"@/lib/ga"' has no exported member 'pushDataLayer'.
+src/components/PackCard.tsx(45,54): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(45,66): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(47,12): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(47,44): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(48,14): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(48,48): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(49,14): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(49,46): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(50,14): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(50,47): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(53,45): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(53,69): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(53,79): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(54,52): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(54,83): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(54,101): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(54,117): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(55,44): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(55,67): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(56,42): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(56,53): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(56,77): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(56,91): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(57,45): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(57,69): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(59,12): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(59,42): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(60,15): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(60,40): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(61,42): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(61,63): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(61,72): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(61,86): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(62,44): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(62,67): error TS18046: 'x' is of type 'unknown'.
+src/components/PackCard.tsx(80,30): error TS2339: Property 'price' does not exist on type '{}'.
+src/components/PackCard.tsx(80,42): error TS2339: Property 'prix' does not exist on type '{}'.
+src/components/PackCard.tsx(80,53): error TS2339: Property 'amount' does not exist on type '{}'.
+src/components/PackCard.tsx(179,31): error TS2339: Property 'title' does not exist on type '{}'.
+src/components/PackCard.tsx(179,43): error TS2339: Property 'name' does not exist on type '{}'.
+src/components/PackCard.tsx(179,54): error TS2339: Property 'label' does not exist on type '{}'.
+src/components/PackCard.tsx(205,34): error TS2464: A computed property name must be of type 'string', 'number', 'symbol', or 'any'.
+src/components/PacksSection.tsx(59,5): error TS2571: Object is of type 'unknown'.
+src/components/PacksSection.tsx(82,72): error TS2345: Argument of type '{}' is not assignable to parameter of type 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type '{}'.
+src/components/PacksSection.tsx(157,54): error TS2352: Conversion of type 'Pack' to type 'AnyPack' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'Pack'.
+src/components/PacksSection.tsx(158,56): error TS2352: Conversion of type 'Pack' to type 'AnyPack' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'Pack'.
+src/components/PacksSection.tsx(162,31): error TS2352: Conversion of type 'Pack' to type 'AnyPack' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'Pack'.
+src/components/PacksSection.tsx(163,31): error TS2352: Conversion of type 'Pack' to type 'AnyPack' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'Pack'.
+src/components/PacksSection.tsx(164,36): error TS2352: Conversion of type 'Pack' to type 'AnyPack' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'Pack'.
+src/components/PacksSection.tsx(165,36): error TS2352: Conversion of type 'Pack' to type 'AnyPack' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'Pack'.
+src/components/PacksSection.tsx(166,32): error TS2352: Conversion of type 'Pack' to type 'AnyPack' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'Pack'.
+src/components/PacksSection.tsx(167,32): error TS2352: Conversion of type 'Pack' to type 'AnyPack' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'Pack'.
+src/components/PacksSection.tsx(324,42): error TS2339: Property 'slug' does not exist on type '{}'.
+src/components/PacksSection.tsx(324,69): error TS2339: Property '_id' does not exist on type '{}'.
+src/components/Product/ProductBadges.tsx(4,8): error TS18046: 'product' is of type 'unknown'.
+src/components/Product/ProductBadges.tsx(9,8): error TS18046: 'product' is of type 'unknown'.
+src/components/Product/ProductReviews.tsx(23,35): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'string | number'.
+src/components/ProductCard.tsx(22,10): error TS2305: Module '"@/lib/ga"' has no exported member 'pushDataLayer'.
+src/components/ProductCard.tsx(110,15): error TS2339: Property 'reviewsCount' does not exist on type '{}'.
+src/components/ProductCard.tsx(111,11): error TS2339: Property 'reviewsCount' does not exist on type '{}'.
+src/components/ProductCard.tsx(112,19): error TS2339: Property 'reviews' does not exist on type '{}'.
+src/components/ProductCard.tsx(113,11): error TS2339: Property 'reviews' does not exist on type '{}'.
+src/components/ProductCard.tsx(116,15): error TS2339: Property 'sku' does not exist on type '{}'.
+src/components/ProductCard.tsx(116,37): error TS2339: Property 'sku' does not exist on type '{}'.
+src/components/ProductCard.tsx(117,11): error TS2339: Property 'sku' does not exist on type '{}'.
+src/components/ProductCard.tsx(118,13): error TS2339: Property 'id' does not exist on type '{}'.
+src/components/ProductCard.tsx(118,27): error TS2339: Property 'id' does not exist on type '{}'.
+src/components/ProductCard.tsx(119,55): error TS2339: Property 'tags' does not exist on type '{}'.
+src/components/ProductCard.tsx(119,66): error TS2339: Property 'tags' does not exist on type '{}'.
+src/components/ProductCard.tsx(237,9): error TS2571: Object is of type 'unknown'.
+src/components/ProductCard.tsx(238,6): error TS2571: Object is of type 'unknown'.
+src/components/ProductCard.tsx(241,8): error TS2571: Object is of type 'unknown'.
+src/components/ProductDetail.tsx(26,3): error TS2305: Module '"@/lib/ga"' has no exported member 'trackViewItem'.
+src/components/ProductDetail.tsx(27,3): error TS2305: Module '"@/lib/ga"' has no exported member 'trackAddToCart'.
+src/components/ProductDetail.tsx(28,3): error TS2305: Module '"@/lib/ga"' has no exported member 'trackAddToWishlist'.
+src/components/ProductDetail.tsx(29,3): error TS2305: Module '"@/lib/ga"' has no exported member 'trackSelectItem'.
+src/components/ProductDetail.tsx(30,3): error TS2305: Module '"@/lib/ga"' has no exported member 'mapProductToGaItem'.
+src/components/ProductDetail.tsx(34,10): error TS2305: Module '"@/lib/meta-pixel"' has no exported member 'pixelViewContent'.
+src/components/ProductDetail.tsx(182,36): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Review[] | undefined'.
+src/components/ProductDetail.tsx(223,107): error TS2339: Property '_id' does not exist on type '{}'.
+src/components/ProductDetail.tsx(290,11): error TS2571: Object is of type 'unknown'.
+src/components/ProductDetail.tsx(291,15): error TS2571: Object is of type 'unknown'.
+src/components/ProductDetail.tsx(474,42): error TS2339: Property 'sku' does not exist on type '{}'.
+src/components/ProductDetail.tsx(474,94): error TS2571: Object is of type 'unknown'.
+src/components/ProductGrid.tsx(11,10): error TS2305: Module '"@/lib/ga"' has no exported member 'pushDataLayer'.
+src/components/ReviewForm.tsx(10,10): error TS2305: Module '"@/lib/ga"' has no exported member 'event'.
+src/components/StickyCartSummary.tsx(12,10): error TS2305: Module '"@/lib/ga"' has no exported member 'event'.
+src/components/StickyCartSummary.tsx(12,17): error TS2305: Module '"@/lib/ga"' has no exported member 'logEvent'.
+src/components/StickyCartSummary.tsx(107,27): error TS18046: 't' is of type 'unknown'.
+src/components/StickyCartSummary.tsx(107,67): error TS18046: 't' is of type 'unknown'.
+src/components/StickyCartSummary.tsx(134,94): error TS2339: Property 'price' does not exist on type '{}'.
+src/components/StickyCartSummary.tsx(134,113): error TS2339: Property 'quantity' does not exist on type '{}'.
+src/components/Tracking.tsx(25,26): error TS2571: Object is of type 'unknown'.
+src/components/Tracking.tsx(33,24): error TS2571: Object is of type 'unknown'.
+src/components/Tracking.tsx(45,24): error TS2571: Object is of type 'unknown'.
+src/components/Tracking.tsx(46,23): error TS18046: 's' is of type 'unknown'.
+src/components/Tracking.tsx(47,17): error TS18046: 's' is of type 'unknown'.
+src/components/Tracking.tsx(47,47): error TS18046: 's' is of type 'unknown'.
+src/components/Tracking.tsx(47,79): error TS18046: 's' is of type 'unknown'.
+src/components/Tracking.tsx(67,24): error TS2339: Property 'analytics' does not exist on type '{}'.
+src/components/Tracking.tsx(67,64): error TS2339: Property 'ads' does not exist on type '{}'.
+src/components/Tracking.tsx(69,34): error TS2339: Property 'analytics' does not exist on type '{}'.
+src/components/Tracking.tsx(69,65): error TS2339: Property 'analytics' does not exist on type '{}'.
+src/components/Tracking.tsx(70,28): error TS2339: Property 'ads' does not exist on type '{}'.
+src/components/Tracking.tsx(70,53): error TS2339: Property 'ads' does not exist on type '{}'.
+src/components/Tracking.tsx(74,31): error TS2339: Property 'analytics_storage' does not exist on type '{}'.
+src/components/Tracking.tsx(75,25): error TS2339: Property 'ad_storage' does not exist on type '{}'.
+src/components/Tracking.tsx(75,59): error TS2339: Property 'ad_user_data' does not exist on type '{}'.
+src/components/Tracking.tsx(75,95): error TS2339: Property 'ad_personalization' does not exist on type '{}'.
+src/components/Tracking.tsx(85,22): error TS18046: 'w' is of type 'unknown'.
+src/components/Tracking.tsx(87,11): error TS18046: 'w' is of type 'unknown'.
+src/components/ui/ABTestBanner.tsx(6,10): error TS2305: Module '"@/lib/ga"' has no exported member 'logEvent'.
+src/components/ui/ABTestBanner.tsx(6,20): error TS2305: Module '"@/lib/ga"' has no exported member 'pushDataLayer'.
+src/components/ui/ExitIntentPopup.tsx(110,15): error TS2571: Object is of type 'unknown'.
+src/components/ui/ExitIntentPopup.tsx(139,11): error TS2571: Object is of type 'unknown'.
+src/components/ui/ExitIntentPopup.tsx(177,21): error TS2571: Object is of type 'unknown'.
+src/components/ui/StickyFreeShippingBar.tsx(56,11): error TS2339: Property 'cart' does not exist on type 'unknown'.
+src/components/ui/StickyFreeShippingBar.tsx(73,8): error TS2571: Object is of type 'unknown'.
+src/components/ui/StickyFreeShippingBar.tsx(89,32): error TS2339: Property 'price' does not exist on type '{}'.
+src/components/ui/StickyFreeShippingBar.tsx(89,45): error TS2339: Property 'unitPrice' does not exist on type '{}'.
+src/components/ui/StickyFreeShippingBar.tsx(89,62): error TS2339: Property 'product' does not exist on type '{}'.
+src/components/ui/StickyFreeShippingBar.tsx(90,30): error TS2339: Property 'quantity' does not exist on type '{}'.
+src/components/ui/StickyFreeShippingBar.tsx(90,46): error TS2339: Property 'qty' does not exist on type '{}'.
+src/components/ui/StickyFreeShippingBar.tsx(131,9): error TS2571: Object is of type 'unknown'.
+src/components/ui/StickyFreeShippingBar.tsx(195,19): error TS2571: Object is of type 'unknown'.
+src/components/WishlistButton.tsx(11,10): error TS2305: Module '"@/lib/ga"' has no exported member 'trackAddToWishlist'.
+src/components/WishlistButton.tsx(105,9): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'WishlistItemBase'.
+  Type 'unknown' is not assignable to type '{ id: string; }'.
+src/context/cartContext.tsx(18,10): error TS2305: Module '"@/lib/ga"' has no exported member 'event'.
+src/context/cartContext.tsx(18,28): error TS2305: Module '"@/lib/ga"' has no exported member 'trackAddToCart'.
+src/context/cartContext.tsx(106,3): error TS2571: Object is of type 'unknown'.
+src/context/cartContext.tsx(107,31): error TS2571: Object is of type 'unknown'.
+src/context/cartContext.tsx(107,63): error TS2571: Object is of type 'unknown'.
+src/context/cartContext.tsx(109,33): error TS2571: Object is of type 'unknown'.
+src/context/cartContext.tsx(110,16): error TS2571: Object is of type 'unknown'.
+src/context/cartContext.tsx(137,51): error TS2345: Argument of type '(it: Partial<CartItem>) => CartItem' is not assignable to parameter of type '(value: unknown, index: number, array: unknown[]) => CartItem'.
+  Types of parameters 'it' and 'value' are incompatible.
+    Type 'unknown' is not assignable to type 'Partial<CartItem>'.
+src/data/types.ts(7,3): error TS2322: Type 'unknown' is not assignable to type 'boolean'.
+src/data/types.ts(7,24): error TS2339: Property 'sku' does not exist on type '{}'.
+src/data/types.ts(7,53): error TS2339: Property 'stock' does not exist on type '{}'.
+src/data/types.ts(7,77): error TS2339: Property 'sku' does not exist on type '{}'.
+src/hooks/useWishlist.ts(25,26): error TS2571: Object is of type 'unknown'.
+src/hooks/useWishlist.ts(25,50): error TS2571: Object is of type 'unknown'.
+src/hooks/useWishlist.ts(34,29): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Record<string, unknown> | null | undefined'.
+src/hooks/useWishlist.ts(40,28): error TS2571: Object is of type 'unknown'.
+src/hooks/useWishlist.ts(105,50): error TS2571: Object is of type 'unknown'.
+src/hooks/useWishlist.ts(105,71): error TS2571: Object is of type 'unknown'.
+src/hooks/useWishlist.ts(114,40): error TS2571: Object is of type 'unknown'.
+src/hooks/useWishlist.ts(114,61): error TS2571: Object is of type 'unknown'.
+src/hooks/useWishlist.ts(123,55): error TS2571: Object is of type 'unknown'.
+src/hooks/useWishlist.ts(123,76): error TS2571: Object is of type 'unknown'.
+src/hooks/useWishlist.ts(130,51): error TS2571: Object is of type 'unknown'.
+src/hooks/useWishlist.ts(130,72): error TS2571: Object is of type 'unknown'.
+src/hooks/useWishlist.ts(131,57): error TS2571: Object is of type 'unknown'.
+src/hooks/useWishlist.ts(131,78): error TS2571: Object is of type 'unknown'.
+src/i18n/config.ts(10,77): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+src/lib/ab-banner.ts(5,10): error TS2305: Module '"./ga"' has no exported member 'logEvent'.
+src/lib/ab-banner.ts(5,20): error TS2305: Module '"./ga"' has no exported member 'pushDataLayer'.
+src/lib/analytics.ts(5,10): error TS2305: Module '"./ga"' has no exported member 'logEvent'.
+src/lib/analytics.ts(16,19): error TS2339: Property 'gtag' does not exist on type '{}'.
+src/lib/analytics.ts(17,15): error TS2339: Property 'gtag' does not exist on type '{}'.
+src/lib/analytics.ts(18,33): error TS2339: Property 'dataLayer' does not exist on type '{}'.
+src/lib/analytics.ts(19,15): error TS2339: Property 'dataLayer' does not exist on type '{}'.
+src/lib/auth-options.ts(60,29): error TS2339: Property 'headers' does not exist on type '{}'.
+src/lib/auth-options.ts(61,29): error TS2339: Property 'headers' does not exist on type '{}'.
+src/lib/auth-options.ts(87,24): error TS2571: Object is of type 'unknown'.
+src/lib/auth-options.ts(88,22): error TS2571: Object is of type 'unknown'.
+src/lib/auth-options.ts(94,9): error TS2571: Object is of type 'unknown'.
+src/lib/auth-options.ts(95,10): error TS2571: Object is of type 'unknown'.
+src/lib/cart.ts(22,24): error TS2339: Property '_id' does not exist on type '{}'.
+src/lib/cart.ts(23,25): error TS2339: Property 'slug' does not exist on type '{}'.
+src/lib/cart.ts(25,26): error TS2339: Property 'title' does not exist on type '{}'.
+src/lib/cart.ts(26,26): error TS2339: Property 'image' does not exist on type '{}'.
+src/lib/cart.ts(27,26): error TS2339: Property 'price' does not exist on type '{}'.
+src/lib/cart.ts(28,41): error TS2339: Property 'quantity' does not exist on type '{}'.
+src/lib/checkout.ts(86,75): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/lib/checkout.ts(94,18): error TS2571: Object is of type 'unknown'.
+src/lib/checkout.ts(94,53): error TS2571: Object is of type 'unknown'.
+src/lib/checkout.ts(136,14): error TS2571: Object is of type 'unknown'.
+src/lib/checkout.ts(259,25): error TS2339: Property 'error' does not exist on type '{}'.
+src/lib/checkout.ts(265,14): error TS2339: Property 'name' does not exist on type '{}'.
+src/lib/data.ts(262,39): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(pipeline?: PipelineStage[] | undefined, options?: AggregateOptions | undefined): Aggregate<any[]>', gave the following error.
+    Argument of type 'unknown[]' is not assignable to parameter of type 'PipelineStage[]'.
+      Type 'unknown' is not assignable to type 'PipelineStage'.
+  Overload 2 of 2, '(pipeline: PipelineStage[]): Aggregate<any[]>', gave the following error.
+    Argument of type 'unknown[]' is not assignable to parameter of type 'PipelineStage[]'.
+      Type 'unknown' is not assignable to type 'PipelineStage'.
+src/lib/email.ts(30,39): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'TransportOptions | Transport<unknown, TransportOptions>'.
+src/lib/ga.ts(1,25): error TS2307: Cannot find module '@/types/analytics' or its corresponding type declarations.
+src/lib/hotjar.ts(13,5): error TS2571: Object is of type 'unknown'.
+src/lib/hotjar.ts(14,5): error TS2571: Object is of type 'unknown'.
+src/lib/hotjar.ts(15,5): error TS2571: Object is of type 'unknown'.
+src/lib/i18n-routing.tsx(50,27): error TS2322: Type 'unknown' is not assignable to type '"en" | "fr"'.
+src/lib/i18n-routing.tsx(53,32): error TS2322: Type 'unknown' is not assignable to type '"en" | "fr"'.
+src/lib/i18n-routing.tsx(55,3): error TS2322: Type 'unknown' is not assignable to type '"en" | "fr"'.
+src/lib/i18n-routing.tsx(87,40): error TS2345: Argument of type 'unknown' is not assignable to parameter of type '"en" | "fr"'.
+src/lib/i18n-routing.tsx(105,27): error TS2345: Argument of type 'unknown' is not assignable to parameter of type '"en" | "fr"'.
+src/lib/logEvent.ts(2,10): error TS2305: Module '"./ga"' has no exported member 'event'.
+src/lib/logEvent.ts(2,29): error TS2305: Module '"./ga"' has no exported member 'logEvent'.
+src/lib/logEvent.ts(29,19): error TS2339: Property 'gtag' does not exist on type '{}'.
+src/lib/logEvent.ts(31,11): error TS2339: Property 'gtag' does not exist on type '{}'.
+src/lib/logEvent.ts(34,11): error TS2339: Property 'gtag' does not exist on type '{}'.
+src/lib/meta-pixel.ts(1,31): error TS2307: Cannot find module '@/types/analytics' or its corresponding type declarations.
+src/lib/notifications.ts(48,48): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'PushSubscription'.
+src/lib/notifications.ts(54,14): error TS2339: Property 'statusCode' does not exist on type '{}'.
+src/lib/notifications.ts(54,41): error TS2339: Property 'statusCode' does not exist on type '{}'.
+src/lib/notifications.ts(54,61): error TS2571: Object is of type 'unknown'.
+src/lib/pdf.ts(242,5): error TS2322: Type 'unknown' is not assignable to type 'string | undefined'.
+src/lib/pdf.ts(261,23): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(263,21): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(264,27): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(271,7): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(275,3): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(291,3): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(298,3): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(300,13): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(303,3): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(307,11): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(312,7): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(321,5): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(322,5): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(323,5): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(324,5): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(331,3): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(340,15): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(341,10): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(342,5): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(343,5): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(351,3): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(353,3): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(356,3): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(358,3): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(359,3): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(362,92): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(371,29): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(373,3): error TS18046: 'doc' is of type 'unknown'.
+src/lib/pdf.ts(417,9): error TS2322: Type 'unknown' is not assignable to type 'Readable'.
+src/lib/performance.ts(12,45): error TS2571: Object is of type 'unknown'.
+src/lib/performance.ts(13,1): error TS2571: Object is of type 'unknown'.
+src/lib/rateLimit.ts(52,3): error TS18046: 'g' is of type 'unknown'.
+src/lib/rateLimit.ts(52,14): error TS18046: 'g' is of type 'unknown'.
+src/lib/rateLimit.ts(53,3): error TS18046: 'g' is of type 'unknown'.
+src/lib/rateLimit.ts(53,18): error TS18046: 'g' is of type 'unknown'.
+src/lib/rateLimit.ts(54,10): error TS18046: 'g' is of type 'unknown'.
+src/lib/scroll.ts(118,32): error TS2571: Object is of type 'unknown'.
+src/lib/scroll.ts(121,19): error TS2571: Object is of type 'unknown'.
+src/lib/scroll.ts(122,8): error TS2571: Object is of type 'unknown'.
+src/lib/scroll.ts(214,20): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(timeout: string | number | Timeout | undefined): void', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'string | number | Timeout | undefined'.
+  Overload 2 of 3, '(id: number | undefined): void', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'number | undefined'.
+  Overload 3 of 3, '(id: number | undefined): void', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'number | undefined'.
+src/lib/seo.ts(153,5): error TS2322: Type 'unknown' is not assignable to type 'OpenGraph | null | undefined'.
+src/lib/wishlist.ts(12,34): error TS2339: Property 'id' does not exist on type 'object'.
+src/lib/wishlist.ts(12,48): error TS2339: Property '_id' does not exist on type 'object'.
+src/lib/wishlist.ts(44,53): error TS2339: Property 'id' does not exist on type '{}'.
+src/lib/wishlist.ts(44,62): error TS2339: Property '_id' does not exist on type '{}'.
+src/lib/wishlist.ts(57,52): error TS2339: Property 'id' does not exist on type '{}'.
+src/lib/wishlist.ts(57,61): error TS2339: Property '_id' does not exist on type '{}'.
+src/lib/wishlist.ts(60,48): error TS2339: Property 'id' does not exist on type '{}'.
+src/lib/wishlist.ts(60,57): error TS2339: Property '_id' does not exist on type '{}'.
+src/models/Article.ts(21,9): error TS18046: 'ret' is of type 'unknown'.
+src/models/Article.ts(21,18): error TS18046: 'ret' is of type 'unknown'.
+src/models/Article.ts(22,17): error TS2339: Property '_id' does not exist on type 'unknown'.
+src/models/Article.ts(22,22): error TS2339: Property '__v' does not exist on type 'unknown'.
+src/models/Article.ts(22,30): error TS2700: Rest types may only be created from object types.
+src/models/Article.ts(30,10): error TS2571: Object is of type 'unknown'.
+src/models/Blog.ts(20,9): error TS18046: 'ret' is of type 'unknown'.
+src/models/Blog.ts(20,18): error TS18046: 'ret' is of type 'unknown'.
+src/models/Blog.ts(21,17): error TS2339: Property '_id' does not exist on type 'unknown'.
+src/models/Blog.ts(21,22): error TS2339: Property '__v' does not exist on type 'unknown'.
+src/models/Blog.ts(21,30): error TS2700: Rest types may only be created from object types.
+src/models/Blog.ts(29,10): error TS2571: Object is of type 'unknown'.
+src/models/Category.ts(16,9): error TS18046: 'ret' is of type 'unknown'.
+src/models/Category.ts(16,18): error TS18046: 'ret' is of type 'unknown'.
+src/models/Category.ts(17,17): error TS2339: Property '_id' does not exist on type 'unknown'.
+src/models/Category.ts(17,22): error TS2339: Property '__v' does not exist on type 'unknown'.
+src/models/Category.ts(17,30): error TS2700: Rest types may only be created from object types.
+src/models/Category.ts(25,10): error TS2571: Object is of type 'unknown'.
+src/models/Email.ts(24,9): error TS18046: 'ret' is of type 'unknown'.
+src/models/Email.ts(24,18): error TS18046: 'ret' is of type 'unknown'.
+src/models/Email.ts(24,43): error TS18046: 'ret' is of type 'unknown'.
+src/models/Email.ts(25,17): error TS2339: Property '_id' does not exist on type 'unknown'.
+src/models/Email.ts(25,22): error TS2339: Property '__v' does not exist on type 'unknown'.
+src/models/Email.ts(25,30): error TS2700: Rest types may only be created from object types.
+src/models/Email.ts(33,10): error TS2571: Object is of type 'unknown'.
+src/models/Pack.ts(17,9): error TS18046: 'ret' is of type 'unknown'.
+src/models/Pack.ts(17,18): error TS18046: 'ret' is of type 'unknown'.
+src/models/Pack.ts(17,43): error TS18046: 'ret' is of type 'unknown'.
+src/models/Pack.ts(18,17): error TS2339: Property '_id' does not exist on type 'unknown'.
+src/models/Pack.ts(18,22): error TS2339: Property '__v' does not exist on type 'unknown'.
+src/models/Pack.ts(18,30): error TS2700: Rest types may only be created from object types.
+src/models/Pack.ts(26,10): error TS2571: Object is of type 'unknown'.
+src/models/Product.ts(31,9): error TS18046: 'ret' is of type 'unknown'.
+src/models/Product.ts(31,18): error TS18046: 'ret' is of type 'unknown'.
+src/models/Product.ts(32,17): error TS2339: Property '_id' does not exist on type 'unknown'.
+src/models/Product.ts(32,22): error TS2339: Property '__v' does not exist on type 'unknown'.
+src/models/Product.ts(32,30): error TS2700: Rest types may only be created from object types.
+src/models/Product.ts(40,10): error TS2571: Object is of type 'unknown'.
+src/models/Review.ts(22,9): error TS18046: 'ret' is of type 'unknown'.
+src/models/Review.ts(22,18): error TS18046: 'ret' is of type 'unknown'.
+src/models/Review.ts(22,43): error TS18046: 'ret' is of type 'unknown'.
+src/models/Review.ts(23,17): error TS2339: Property '_id' does not exist on type 'unknown'.
+src/models/Review.ts(23,22): error TS2339: Property '__v' does not exist on type 'unknown'.
+src/models/Review.ts(23,30): error TS2700: Rest types may only be created from object types.
+src/models/Review.ts(31,10): error TS2571: Object is of type 'unknown'.
+src/models/Token.ts(18,9): error TS18046: 'ret' is of type 'unknown'.
+src/models/Token.ts(18,18): error TS18046: 'ret' is of type 'unknown'.
+src/models/Token.ts(18,43): error TS18046: 'ret' is of type 'unknown'.
+src/models/Token.ts(19,17): error TS2339: Property '_id' does not exist on type 'unknown'.
+src/models/Token.ts(19,22): error TS2339: Property '__v' does not exist on type 'unknown'.
+src/models/Token.ts(19,30): error TS2700: Rest types may only be created from object types.
+src/models/Token.ts(27,10): error TS2571: Object is of type 'unknown'.
+src/models/TrackingEvent.ts(16,9): error TS18046: 'ret' is of type 'unknown'.
+src/models/TrackingEvent.ts(16,18): error TS18046: 'ret' is of type 'unknown'.
+src/models/TrackingEvent.ts(16,43): error TS18046: 'ret' is of type 'unknown'.
+src/models/TrackingEvent.ts(17,17): error TS2339: Property '_id' does not exist on type 'unknown'.
+src/models/TrackingEvent.ts(17,22): error TS2339: Property '__v' does not exist on type 'unknown'.
+src/models/TrackingEvent.ts(17,30): error TS2700: Rest types may only be created from object types.
+src/models/TrackingEvent.ts(25,10): error TS2571: Object is of type 'unknown'.
+src/models/User.ts(16,9): error TS18046: 'ret' is of type 'unknown'.
+src/models/User.ts(16,18): error TS18046: 'ret' is of type 'unknown'.
+src/models/User.ts(16,43): error TS18046: 'ret' is of type 'unknown'.
+src/models/User.ts(17,17): error TS2339: Property '_id' does not exist on type 'unknown'.
+src/models/User.ts(17,22): error TS2339: Property '__v' does not exist on type 'unknown'.
+src/models/User.ts(17,27): error TS2339: Property 'password' does not exist on type 'unknown'.
+src/models/User.ts(17,40): error TS2700: Rest types may only be created from object types.
+src/models/User.ts(25,10): error TS2571: Object is of type 'unknown'.
+src/models/User.ts(34,11): error TS2339: Property 'password' does not exist on type 'unknown'.
+src/models/User.ts(34,24): error TS2700: Rest types may only be created from object types.
+src/models/User.ts(34,40): error TS2339: Property 'toJSON' does not exist on type '{}'.
+src/models/User.ts(34,54): error TS2339: Property 'toJSON' does not exist on type '{}'.

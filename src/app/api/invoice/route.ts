@@ -1,3 +1,40 @@
+function readTaxRateDefault(x: any, fallback: number = 0): number {
+  const v = (x && typeof x === "object") ? (x as any).taxRateDefault : undefined
+  const n = Number(v)
+  return Number.isFinite(n) ? n : fallback
+}
+function readShippingTaxRate(x: any, fallback: number = 0): number {
+  const v = (x && typeof x === "object") ? (x as any).shippingTaxRate : undefined
+  const n = Number(v)
+  return Number.isFinite(n) ? n : fallback
+}
+function readShippingPrice(x: any, fallback: number = 0): number {
+  const v = (x && typeof x === "object") ? (x as any).shippingPrice : undefined
+  const n = Number(v)
+  return Number.isFinite(n) ? n : fallback
+}
+function readShipping(x: any): any {
+  const s = (x && typeof x === "object") ? (x as any).shipping : undefined
+  if (s && typeof s === "object") return s
+  return {}
+}
+function readItems(x: any): any[] {
+  const it = (x && typeof x === "object") ? (x as any).items : undefined
+  return Array.isArray(it) ? it : []
+}
+function readEmail(x: any, fallback: string = ''): string {
+  const e = (x && typeof x === "object") ? (x as any).email : undefined
+  return (typeof e === "string") ? e : fallback
+}
+function readAddress(x: any, fallback: string = ''): string {
+  const a = (x && typeof x === "object") ? (x as any).address : undefined
+  return (typeof a === "string") ? a : fallback
+}
+function readCurrency(x: any, fallback: string = 'EUR'): string {
+  const c = readCurrency(x)
+  if (typeof c === "string" && c.trim()) return c
+  return fallback
+}
 function readId(x: any): string {
   const id = readId(x)
   if (typeof id !== "string" || !id.trim()) throw new Error("Missing id")
@@ -59,11 +96,11 @@ function asItems(arr: unknown): OrderItem[] {
 
 function buildOrderFromBody(body: unknown): Order {
   const id = readOrderId(body) ?? readId(body) ?? Date.now()
-  const currency = toStr(body?.currency, 'EUR')
+  const currency = readCurrency(body, 'EUR')
 
-  const shippingPrice = body?.shipping?.price ?? body?.shippingPrice
+  const shippingPrice = readShipping(body)?.price ?? readShippingPrice(body)
   const shippingRate =
-    body?.shipping?.taxRate ?? body?.shippingTaxRate ?? body?.taxRateDefault
+    readShipping(body)?.taxRate ?? readShippingTaxRate(body) ?? readTaxRateDefault(body)
 
   return {
     id,
@@ -77,14 +114,14 @@ function buildOrderFromBody(body: unknown): Order {
       postcode: toStr(body?.customer?.postcode),
       city: toStr(body?.customer?.city),
       country: toStr(body?.customer?.country),
-      email: toStr(body?.customer?.email),
+      email: toStr(body?.readEmail(customer)),
       phone: toStr(body?.customer?.phone),
     },
-    items: asItems(body?.items),
+    items: asItems(readItems(body)),
     shipping:
       shippingPrice != null
         ? {
-            label: toStr(body?.shipping?.label, 'Livraison'),
+            label: toStr(readShipping(body)?.label, 'Livraison'),
             price: toNum(shippingPrice, 0),
             taxRate: Number.isFinite(shippingRate) ? Number(shippingRate) : undefined,
           }
@@ -97,7 +134,7 @@ function buildOrderFromBody(body: unknown): Order {
           }
         : undefined,
     currency,
-    taxRateDefault: Number.isFinite(body?.taxRateDefault) ? Number(body.taxRateDefault) : undefined,
+    taxRateDefault: Number.isFinite(readTaxRateDefault(body)) ? Number(readTaxRateDefault(body)) : undefined,
   }
 }
 
@@ -113,7 +150,7 @@ export async function POST(req: Request) {
 
   const order = buildOrderFromBody(body)
 
-  if (!order.items || order.items.length === 0) {
+  if (!readItems(order) || readItems(order).length === 0) {
     return NextResponse.json(
       { error: 'Aucun article dans la commande.' },
       { status: 400 }
