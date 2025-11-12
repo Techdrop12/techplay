@@ -2,18 +2,14 @@
 'use client'
 
 import NextLink from 'next/link' // logo
-import Link from '@/components/LocalizedLink'
-import { useEffect, useId, useRef, useState, useMemo } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useId, useRef, useState, useMemo } from 'react'
+
 import Logo from '../Logo'
+
 import MobileNav from './MobileNav'
-import { cn } from '@/lib/utils'
-import { useCart } from '@/hooks/useCart'
-import { useWishlist } from '@/hooks/useWishlist'
-import ThemeToggle from '@/components/ui/ThemeToggle'
-import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
-import { getCategories } from '@/lib/categories'
-import { LOCALE_COOKIE, setLocaleCookie } from '@/lib/language'
+
+import Link from '@/components/LocalizedLink'
 import {
   SearchIcon as Search,
   FlameIcon as Flame,
@@ -21,6 +17,13 @@ import {
   CartIcon as Cart,
   UserIcon as User,
 } from '@/components/ui/premium-icons'
+import ThemeToggle from '@/components/ui/ThemeToggle'
+import { useCart } from '@/hooks/useCart'
+import { useWishlist } from '@/hooks/useWishlist'
+import { getCategories } from '@/lib/categories'
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
+import { LOCALE_COOKIE, setLocaleCookie } from '@/lib/language'
+import { cn } from '@/lib/utils'
 
 /* ----------------------------- i18n strings ------------------------------ */
 const STR = {
@@ -152,12 +155,12 @@ export default function Header() {
   const categories = useMemo(() => getCategories(locale), [locale])
 
   // stores
-  const { cart } = useCart() as any
-  const { wishlist } = useWishlist() as any
+  const { cart } = useCart() as unknown
+  const { wishlist } = useWishlist() as unknown
 
   const cartCount = useMemo(() => {
-    if (Array.isArray(cart)) return cart.reduce((tot: number, it: any) => tot + (it?.quantity || 1), 0)
-    if (Array.isArray(cart?.items)) return cart.items.reduce((tot: number, it: any) => tot + (it?.quantity || 1), 0)
+    if (Array.isArray(cart)) return cart.reduce((tot: number, it: unknown) => tot + (it?.quantity || 1), 0)
+    if (Array.isArray(cart?.items)) return cart.items.reduce((tot: number, it: unknown) => tot + (it?.quantity || 1), 0)
     const n = Number(cart?.count ?? cart?.size ?? 0)
     return Number.isFinite(n) ? n : 0
   }, [cart])
@@ -238,7 +241,7 @@ export default function Header() {
   useEffect(() => {
     // Détecte Data Saver pour éviter les prefetch agressifs
     try {
-      const conn = (navigator as any)?.connection
+      const conn = (navigator as unknown)?.connection
       saveData.current = !!conn?.saveData
     } catch {}
   }, [])
@@ -275,7 +278,7 @@ export default function Header() {
         searchRef.current?.select()
       }
       if (e.key === 'Escape' && searchRef.current === document.activeElement) {
-        ;(e.target as HTMLInputElement)?.blur()
+        (e.target as HTMLInputElement)?.blur()
       }
     }
     window.addEventListener('keydown', onKey)
@@ -715,3 +718,4 @@ export default function Header() {
     </header>
   )
 }
+

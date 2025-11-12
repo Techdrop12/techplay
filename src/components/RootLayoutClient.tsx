@@ -1,8 +1,10 @@
 // src/components/RootLayoutClient.tsx — FINAL (UA & env attrs + providers épurés)
 'use client'
 
-import type { ReactNode } from 'react'
 import { useEffect } from 'react'
+
+import type { ReactNode } from 'react'
+
 import { CartProvider } from '@/context/cartContext'
 
 type Props = { children: ReactNode }

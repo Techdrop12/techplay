@@ -1,6 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+
 import type { ComponentType } from 'react'
 
 interface ClientOnlyProps<T extends Record<string, unknown>> {

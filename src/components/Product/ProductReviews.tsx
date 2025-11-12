@@ -1,6 +1,7 @@
 // src/components/Product/ProductReviews.tsx
-import RatingStars from '@/components/RatingStars'
 import type { Review } from '@/types/product'
+
+import RatingStars from '@/components/RatingStars'
 import { formatDate } from '@/lib/formatDate'
 
 interface Props {
@@ -19,7 +20,7 @@ export default function ProductReviews({ reviews }: Props) {
       {list.map((review) => {
         const created =
           typeof review.createdAt === 'string' || review.createdAt instanceof Date
-            ? formatDate(new Date(review.createdAt as any))
+            ? formatDate(new Date(review.createdAt as unknown))
             : undefined
 
         return (
@@ -42,3 +43,4 @@ export default function ProductReviews({ reviews }: Props) {
     </div>
   )
 }
+

@@ -2,6 +2,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef } from 'react'
+
 import { logEvent } from '@/lib/ga'
 import { trackPixel, pixelReadyAndConsented } from '@/lib/meta-pixel'
 
@@ -69,8 +70,8 @@ export default function ClientTrackingScript({
     // 2) dataLayer fallback (GTM)
     if (fallbackToDataLayer) {
       try {
-        ;(window as any).dataLayer = (window as any).dataLayer || []
-        ;(window as any).dataLayer.push({ event, ...(params || {}) })
+        (window as unknown).dataLayer = (window as unknown).dataLayer || []
+        ;(window as unknown).dataLayer.push({ event, ...(params || {}) })
       } catch {}
     }
 
@@ -78,7 +79,7 @@ export default function ClientTrackingScript({
     if (mirrorToMetaPixel && pixelReadyAndConsented()) {
       try {
         const metaEvt = META_EVENT_MAP[event] || event
-        trackPixel(metaEvt as any, params as any)
+        trackPixel(metaEvt as unknown, params as unknown)
       } catch {}
     }
 
@@ -90,3 +91,4 @@ export default function ClientTrackingScript({
 
   return null
 }
+

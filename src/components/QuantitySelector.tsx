@@ -1,5 +1,6 @@
 'use client'
 
+import { motion, useReducedMotion } from 'framer-motion'
 import {
   useCallback,
   useEffect,
@@ -12,7 +13,7 @@ import {
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
-import { motion, useReducedMotion } from 'framer-motion'
+
 import { cn } from '@/lib/utils'
 
 interface QuantitySelectorProps {

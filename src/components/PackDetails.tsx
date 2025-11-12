@@ -1,12 +1,15 @@
 'use client'
 
-import Image from 'next/image'
-import { formatPrice } from '@/lib/utils'
-import WishlistButton from '@/components/WishlistButton'
-import StarsRating from '@/components/StarsRating'
-import ProductTags from '@/components/ProductTags'
-import type { Pack } from '@/types/product'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
+
+import type { Pack } from '@/types/product'
+
+import ProductTags from '@/components/ProductTags'
+import StarsRating from '@/components/StarsRating'
+import WishlistButton from '@/components/WishlistButton'
+import { formatPrice } from '@/lib/utils'
+
 
 interface Props {
   pack: Pack

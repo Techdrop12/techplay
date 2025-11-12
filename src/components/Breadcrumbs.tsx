@@ -1,6 +1,7 @@
 // src/components/Breadcrumbs.tsx
 // Fil d'Ariane accessible + SEO (JSON-LD optionnel), TS strict, design propre.
 import type { ReactNode, HTMLAttributes } from 'react'
+
 import Link from '@/components/LocalizedLink'
 import useBreadcrumbSegments from '@/lib/useBreadcrumbSegments'
 
@@ -128,7 +129,7 @@ export default function Breadcrumbs({
       {jsonLdData && (
         <script
           type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
+           
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }}
         />
       )}

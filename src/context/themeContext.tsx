@@ -94,7 +94,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       mq.removeEventListener?.('change', onScheme)
       window.removeEventListener('storage', onStorage)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [])
 
   // Setter public

@@ -2,6 +2,7 @@
 'use client'
 
 import Head from 'next/head'
+
 import type { BlogPost } from '@/types/blog'
 
 interface BlogListJsonLdProps {

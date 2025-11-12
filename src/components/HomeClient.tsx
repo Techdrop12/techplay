@@ -4,10 +4,11 @@ import {useTranslations} from 'next-intl'
 import {useEffect, useMemo, useRef, useState} from 'react'
 import {toast} from 'react-hot-toast'
 
-import HeroCarousel from '@/components/HeroCarousel'
-import ProductCard from '@/components/ProductCard'
-import MotionWrapper from '@/components/MotionWrapper'
 import type { Product } from '@/types/product'
+
+import HeroCarousel from '@/components/HeroCarousel'
+import MotionWrapper from '@/components/MotionWrapper'
+import ProductCard from '@/components/ProductCard'
 
 /* -------------------------------------------------------------------------- */
 /*                                   Types                                    */
@@ -229,7 +230,7 @@ export default function HomeClient() {
    (si tu n’as pas ajouté le keyframe shimmer côté Tailwind, la classe ci-dessous
    garantit l’anim dans ce composant) */
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
+   
   namespace JSX {
     interface IntrinsicElements {
       style: React.DetailedHTMLProps<React.StyleHTMLAttributes<HTMLStyleElement>, HTMLStyleElement>

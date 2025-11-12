@@ -1,11 +1,13 @@
 // src/components/ProductGrid.tsx
 'use client'
 
-import { useEffect, useMemo, useRef, memo } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { useEffect, useMemo, useRef, memo } from 'react'
+
+import type { Product } from '@/types/product'
+
 import ProductCard from '@/components/ProductCard'
 import ProductSkeleton from '@/components/ProductSkeleton'
-import type { Product } from '@/types/product'
 import { pushDataLayer } from '@/lib/ga'
 
 type Cols = { base?: number; sm?: number; md?: number; lg?: number; xl?: number }

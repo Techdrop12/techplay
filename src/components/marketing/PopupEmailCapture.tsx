@@ -71,7 +71,7 @@ export default function PopupEmailCapture({
     if (hiddenByRoute || isDismissed()) return
     const t = setTimeout(() => setOpen(true), delayMs)
     return () => clearTimeout(t)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [hiddenByRoute, delayMs])
 
   // Focus & ESC
@@ -133,12 +133,12 @@ export default function PopupEmailCapture({
       }
 
       try {
-        ;(window as any).dataLayer?.push({ event: 'email_capture_success' })
+        (window as unknown).dataLayer?.push({ event: 'email_capture_success' })
       } catch {}
       announce('Inscription réussie')
       persistDismiss()
       setOpen(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err?.message || 'Une erreur est survenue')
       announce('Échec de l’inscription')
     } finally {
@@ -263,3 +263,4 @@ async function safeJson(res: Response) {
     return {}
   }
 }
+

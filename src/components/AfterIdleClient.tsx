@@ -8,10 +8,10 @@ export default function AfterIdleClient({ children }: { children: ReactNode }) {
   const reloadedRef = useRef(false)
 
   useEffect(() => {
-    const ric: any = (window as any).requestIdleCallback ?? ((cb: any) => setTimeout(cb, 1))
+    const ric: unknown = (window as unknown).requestIdleCallback ?? ((cb: unknown) => setTimeout(cb, 1))
     const id = ric(() => setReady(true))
     return () => {
-      ;(window as any).cancelIdleCallback?.(id)
+      (window as unknown).cancelIdleCallback?.(id)
       clearTimeout(id)
     }
   }, [])
@@ -57,11 +57,11 @@ export default function AfterIdleClient({ children }: { children: ReactNode }) {
     }
 
     const idle = (cb: () => void) =>
-      ('requestIdleCallback' in window ? (window as any).requestIdleCallback(cb) : setTimeout(cb, 500))
+      ('requestIdleCallback' in window ? (window as unknown).requestIdleCallback(cb) : setTimeout(cb, 500))
 
     const id = idle(register)
     return () => {
-      ;(window as any).cancelIdleCallback?.(id)
+      (window as unknown).cancelIdleCallback?.(id)
       clearTimeout(id)
     }
   }, [ready])
@@ -69,3 +69,4 @@ export default function AfterIdleClient({ children }: { children: ReactNode }) {
   if (!ready) return null
   return <>{children}</>
 }
+

@@ -2,6 +2,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+
 import { trackPurchase } from '@/lib/ga'
 import { pixelPurchase } from '@/lib/meta-pixel'
 
@@ -20,7 +21,7 @@ export default function PurchaseTracker({ sessionId, mock }: Props) {
 
     ;(async () => {
       try {
-        let order: any
+        let order: unknown
 
         if (mock) {
           order = {
@@ -46,7 +47,7 @@ export default function PurchaseTracker({ sessionId, mock }: Props) {
             tax: Number(order.tax) || undefined,
             shipping: Number(order.shipping) || undefined,
             items: Array.isArray(order.items)
-              ? order.items.map((it: any) => ({
+              ? order.items.map((it: unknown) => ({
                   item_id: String(it.item_id ?? it.id ?? it.sku ?? ''),
                   item_name: String(it.item_name ?? it.title ?? it.name ?? 'Article'),
                   price: Number(it.price) || undefined,
@@ -62,8 +63,8 @@ export default function PurchaseTracker({ sessionId, mock }: Props) {
 
         // dataLayer
         try {
-          ;(window as any).dataLayer = (window as any).dataLayer || []
-          ;(window as any).dataLayer.push({
+          (window as unknown).dataLayer = (window as unknown).dataLayer || []
+          ;(window as unknown).dataLayer.push({
             event: 'purchase',
             ecommerce: {
               transaction_id: String(order.transaction_id),
@@ -78,7 +79,7 @@ export default function PurchaseTracker({ sessionId, mock }: Props) {
 
         // Meta Pixel
         try {
-          const contents = (order.items || []).map((i: any) => ({
+          const contents = (order.items || []).map((i: unknown) => ({
             id: i.item_id ?? i.id,
             quantity: i.quantity,
             item_price: i.price,
@@ -99,3 +100,4 @@ export default function PurchaseTracker({ sessionId, mock }: Props) {
 
   return null
 }
+

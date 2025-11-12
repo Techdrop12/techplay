@@ -1,4 +1,4 @@
-// next.config.mjs — Ultra Premium FINAL (+ PWA swSrc + CSP)
+// next.config.mjs â€” Ultra Premium FINAL (+ PWA swSrc + CSP)
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
 import withPWA from 'next-pwa'
@@ -10,11 +10,11 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 const isDev = process.env.NODE_ENV === 'development'
 
-/** PWA (workbox) — utilise TON SW custom */
+/** PWA (workbox) â€” utilise TON SW custom */
 const withPwaPlugin = withPWA({
   dest: 'public',
   swSrc: 'src/sw.ts',
-  register: false,       // ← on gère l’enregistrement nous-mêmes (AfterIdleClient)
+  register: false,       // â† on gÃ¨re lâ€™enregistrement nous-mÃªmes (AfterIdleClient)
   skipWaiting: true,
   disable: isDev,        // actif en prod uniquement
   buildExcludes: [/middleware-manifest\.json$/],
@@ -36,7 +36,7 @@ const csp = [
   "form-action 'self'",
 ].join('; ')
 
-/** Headers de sécu globaux */
+/** Headers de sÃ©cu globaux */
 const securityHeaders = [
   { key: 'X-DNS-Prefetch-Control', value: 'on' },
   { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
@@ -64,7 +64,7 @@ export default withNextIntl(
       optimizePackageImports: ['react-icons', 'lodash'],
     },
 
-    images: {
+    images: { domains: ["fakestoreapi.com","images.unsplash.com","i.imgur.com"],  qualities: [75,85,88],
       remotePatterns: [{ protocol: 'https', hostname: '**' }],
       formats: ['image/avif', 'image/webp'],
       dangerouslyAllowSVG: true,
@@ -118,3 +118,5 @@ export default withNextIntl(
     httpAgentOptions: { keepAlive: true },
   })
 )
+
+

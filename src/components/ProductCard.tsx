@@ -1,6 +1,9 @@
 // src/components/ProductCard.tsx — ULTIME+++ (a11y/SEO/Perf max + LCP) — PATCH
 'use client'
 
+import { motion, useReducedMotion } from 'framer-motion'
+import Image from 'next/image'
+import { usePathname } from 'next/navigation'
 import {
   useEffect,
   useMemo,
@@ -9,18 +12,17 @@ import {
   type MouseEvent as ReactMouseEvent,
   useCallback,
 } from 'react'
-import Link from '@/components/LocalizedLink'
-import Image from 'next/image'
-import { usePathname } from 'next/navigation'
-import { motion, useReducedMotion } from 'framer-motion'
-import { cn, formatPrice } from '@/lib/utils'
-import WishlistButton from '@/components/WishlistButton'
-import FreeShippingBadge from '@/components/FreeShippingBadge'
-import AddToCartButton from '@/components/AddToCartButton'
+
 import type { Product } from '@/types/product'
-import { logEvent } from '@/lib/logEvent'
+
+import AddToCartButton from '@/components/AddToCartButton'
+import FreeShippingBadge from '@/components/FreeShippingBadge'
+import Link from '@/components/LocalizedLink'
+import WishlistButton from '@/components/WishlistButton'
 import { pushDataLayer } from '@/lib/ga'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
+import { logEvent } from '@/lib/logEvent'
+import { cn, formatPrice } from '@/lib/utils'
 
 interface ProductCardProps {
   product: Product
@@ -103,7 +105,7 @@ export default function ProductCard({
   const oldPrice = toNum(oldPriceRaw)
 
   // Champs tolérants
-  const x = product as any
+  const x = product as unknown
   const reviewsCount: number | undefined =
     typeof x?.reviewsCount === 'number'
       ? x.reviewsCount
@@ -232,11 +234,11 @@ export default function ProductCard({
     const dy = e.clientY - cy
     const ry = clamp((dx / (r.width / 2)) * 6, -8, 8)
     const rx = clamp((-dy / (r.height / 2)) * 6, -8, 8)
-    if ((ticking as any).current) return
-    ;(ticking as any).current = true
+    if ((ticking as unknown).current) return
+    ;(ticking as unknown).current = true
     requestAnimationFrame(() => {
       setTilt({ rx, ry })
-      ;(ticking as any).current = false
+      ;(ticking as unknown).current = false
     })
   }
   const resetTilt = () => setTilt({ rx: 0, ry: 0 })
@@ -321,7 +323,7 @@ export default function ProductCard({
               blurDataURL={BLUR_DATA_URL}
               quality={85}
               onError={() => setImgError(true)}
-              onLoadingComplete={() => setImgLoaded(true)}
+              onLoad={() => setImgLoaded(true)}
               decoding="async"
               draggable={false}
             />
@@ -483,3 +485,5 @@ export default function ProductCard({
     </motion.article>
   )
 }
+
+

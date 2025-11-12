@@ -1,5 +1,6 @@
 // src/lib/categories.tsx
 import React from 'react'
+
 import { cn } from '@/lib/utils'
 
 type IconProps = { className?: string }

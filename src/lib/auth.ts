@@ -2,6 +2,7 @@
 // ✅ Helpers NextAuth SSR-safe : getSession, requireSession, isAdmin, getUserId.
 
 import { getServerSession } from "next-auth";
+
 import { authOptions } from "@/lib/auth-options"; // doit exister dans ton projet
 
 export type SessionLike = {

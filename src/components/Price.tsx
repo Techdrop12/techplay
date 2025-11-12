@@ -2,7 +2,9 @@
 'use client'
 
 import * as React from 'react'
+
 import type { HTMLAttributes, ReactNode } from 'react'
+
 import { formatPrice } from '@/lib/utils'
 
 type Numeric = number | string

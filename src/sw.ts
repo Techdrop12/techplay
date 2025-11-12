@@ -1,7 +1,12 @@
 /// <reference lib="webworker" />
-/* eslint-disable no-undef */
+ 
+import { BackgroundSyncPlugin } from 'workbox-background-sync'
+import { CacheableResponsePlugin } from 'workbox-cacheable-response'
 import { clientsClaim, setCacheNameDetails } from 'workbox-core'
+import { ExpirationPlugin } from 'workbox-expiration'
+import { enable as navigationPreloadEnable } from 'workbox-navigation-preload'
 import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching'
+import { RangeRequestsPlugin } from 'workbox-range-requests'
 import { registerRoute, setCatchHandler } from 'workbox-routing'
 import {
   CacheFirst,
@@ -9,14 +14,9 @@ import {
   NetworkFirst,
   NetworkOnly,
 } from 'workbox-strategies'
-import { BackgroundSyncPlugin } from 'workbox-background-sync'
-import { ExpirationPlugin } from 'workbox-expiration'
-import { CacheableResponsePlugin } from 'workbox-cacheable-response'
-import { RangeRequestsPlugin } from 'workbox-range-requests'
-import { enable as navigationPreloadEnable } from 'workbox-navigation-preload'
 
 // ✅ Typage correct de __WB_MANIFEST pour TS
-declare const self: ServiceWorkerGlobalScope & { __WB_MANIFEST: any }
+declare const self: ServiceWorkerGlobalScope & { __WB_MANIFEST: unknown }
 
 /* ============================= Base & lifecycle ============================ */
 
@@ -248,3 +248,4 @@ self.addEventListener('message', (event: ExtendableMessageEvent) => {
 
 // ✅ Marquer le fichier comme module pour éviter les warnings TS (isolatedModules)
 export {}
+

@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
-import type { KeyboardEvent, RefCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
+
+import type { KeyboardEvent, RefCallback } from 'react'
 
 interface FAQItem {
   _id: string
@@ -221,7 +222,7 @@ export default function FAQ() {
       {faqJsonLd && (
         <script
           type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
+           
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
         />
       )}

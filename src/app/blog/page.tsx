@@ -1,12 +1,14 @@
 // src/app/blog/page.tsx
-import type { Metadata } from 'next'
 import { cookies, headers } from 'next/headers'
+
+import type { Metadata } from 'next'
+
+import BlogCard from '@/components/blog/BlogCard'
 import Link from '@/components/LocalizedLink'
 import { getPosts } from '@/lib/blog'
-import BlogCard from '@/components/blog/BlogCard'
-import { generateMeta, jsonLdBreadcrumbs } from '@/lib/seo'
-import { LOCALE_COOKIE, isLocale, pickBestLocale, type Locale } from '@/lib/language'
 import { localizePath } from '@/lib/i18n-routing'
+import { LOCALE_COOKIE, isLocale, pickBestLocale, type Locale } from '@/lib/language'
+import { generateMeta, jsonLdBreadcrumbs } from '@/lib/seo'
 
 export const revalidate = 60
 
@@ -67,7 +69,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: SR }) 
     typeof searchParams?.sort === 'string' ? searchParams.sort : 'newest'
 
   // ✅ Construire l’objet params sans passer "undefined"
-  const params: any = {
+  const params: unknown = {
     page,
     limit,
     q,
@@ -163,7 +165,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: SR }) 
         </p>
       ) : (
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" aria-label="Liste des articles">
-          {posts.map((post: any, idx: number) => (
+          {posts.map((post: unknown, idx: number) => (
             <BlogCard key={(post._id as string) ?? (post.slug as string) ?? `post-${idx}`} article={post} />
           ))}
         </section>
@@ -237,7 +239,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: SR }) 
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'ItemList',
-              itemListElement: posts.map((p: any, idx: number) => ({
+              itemListElement: posts.map((p: unknown, idx: number) => ({
                 '@type': 'ListItem',
                 position: idx + 1 + (page - 1) * limit,
                 url: `${SITE}${localizePath(`/blog/${String(p.slug || '')}`, locale)}`,
@@ -250,3 +252,4 @@ export default async function BlogPage({ searchParams }: { searchParams?: SR }) 
     </main>
   )
 }
+

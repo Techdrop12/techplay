@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 
 declare global {
   interface Window {
-    $crisp: any[];
+    $crisp: unknown[];
     CRISP_WEBSITE_ID: string;
   }
 }
@@ -24,3 +24,4 @@ export default function LiveChat() {
 
   return null;
 }
+

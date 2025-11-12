@@ -1,12 +1,14 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
+
 import type { Product } from '@/types/product'
+
 import ProductCard from '@/components/ProductCard'
-import { cn } from '@/lib/utils'
 import { getCurrentLocale } from '@/lib/i18n-routing'
+import { cn } from '@/lib/utils'
 
 type SortKey = 'popular' | 'priceAsc' | 'priceDesc' | 'rating'
 
@@ -21,7 +23,7 @@ interface BestProductsProps {
   autoLoadOnIntersect?: boolean
 }
 
-type AnyProduct = Record<string, any>
+type AnyProduct = Record<string, unknown>
 
 const containerVariants = {
   hidden: { opacity: 0, y: 24 },
@@ -37,7 +39,7 @@ const itemVariants = {
 }
 
 function pushDL(event: string, payload?: Record<string, unknown>) {
-  try { ;(window as any).dataLayer?.push({ event, ...payload }) } catch {}
+  try { (window as unknown).dataLayer?.push({ event, ...payload }) } catch {}
 }
 
 function getPrice(p: AnyProduct): number | undefined {
@@ -232,7 +234,7 @@ export default function BestProducts({
       className={cn('max-w-6xl mx-auto px-4 py-10', className)}
       aria-labelledby={showTitle ? headingId : undefined}
       role="region"
-      style={{ contentVisibility: 'auto', containIntrinsicSize: '800px' } as any}
+      style={{ contentVisibility: 'auto', containIntrinsicSize: '800px' } as unknown}
     >
       {showTitle && (
         <>
@@ -330,9 +332,9 @@ export default function BestProducts({
       >
         {list.map((product, i) => {
           const key =
-            (product as any)?._id ??
-            (product as any)?.slug ??
-            (product as any)?.id ??
+            (product as unknown)?._id ??
+            (product as unknown)?.slug ??
+            (product as unknown)?.id ??
             `bp-${i}`
 
           return (
@@ -347,11 +349,11 @@ export default function BestProducts({
               <ProductCard
                 product={{
                   ...product,
-                  title: (product as any).title ?? (product as any).name ?? 'Produit sans titre',
+                  title: (product as unknown).title ?? (product as unknown).name ?? 'Produit sans titre',
                   image:
-                    (product as any).image ??
-                    (product as any).imageUrl ??
-                    (product as any).images?.[0] ??
+                    (product as unknown).image ??
+                    (product as unknown).imageUrl ??
+                    (product as unknown).images?.[0] ??
                     '/og-image.jpg',
                 }}
                 /** Boost LCP: priorité sur la 1ʳᵉ rangée (desktop 4 items) */
@@ -398,3 +400,4 @@ export default function BestProducts({
     </section>
   )
 }
+

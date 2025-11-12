@@ -1,9 +1,11 @@
 // src/components/cart/CartList.tsx
 'use client';
 
-import React, { useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import React, { useEffect, useMemo, useRef } from 'react';
+
 import type { Product } from '@/types/product';
+
 import CartItem from '@/components/cart/CartItem';
 import { useCart } from '@/hooks/useCart';
 
@@ -30,7 +32,7 @@ export default function CartList({
   const safeItems = useMemo(
     () =>
       (items || []).map((it) => ({
-        _id: (it as any)._id ?? it.slug, // fallback si _id absent
+        _id: (it as unknown)._id ?? it.slug, // fallback si _id absent
         slug: it.slug,
         title: it.title ?? 'Produit',
         image: it.image ?? '/placeholder.png',
@@ -150,3 +152,4 @@ export default function CartList({
     </section>
   );
 }
+

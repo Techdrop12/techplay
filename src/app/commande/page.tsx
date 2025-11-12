@@ -1,13 +1,14 @@
 // src/app/commande/page.tsx — FINAL (GA4 begin_checkout helper + GTM + UX)
 'use client'
 
-import Link from '@/components/LocalizedLink'
 import { useEffect, useMemo, useRef } from 'react'
-import { useCart } from '@/hooks/useCart'
+
 import CartList from '@/components/cart/CartList'
 import CartSummary from '@/components/cart/CartSummary'
 import CheckoutForm from '@/components/checkout/CheckoutForm'
 import FreeShippingBadge from '@/components/FreeShippingBadge'
+import Link from '@/components/LocalizedLink'
+import { useCart } from '@/hooks/useCart'
 import { mapProductToGaItem, trackBeginCheckout, pushDataLayer } from '@/lib/ga'
 
 /** Devise simple (EUR/GBP/USD) */
@@ -32,12 +33,12 @@ export default function CheckoutPage() {
   // Items GA4 + totaux
   const { itemsCount, subtotal, gaItems, currency } = useMemo(() => {
     const items = Array.isArray(cart) ? cart : []
-    const itemsCount = items.reduce((s, it: any) => s + Math.max(1, Number(it?.quantity || 1)), 0)
+    const itemsCount = items.reduce((s, it: unknown) => s + Math.max(1, Number(it?.quantity || 1)), 0)
     const subtotal = items.reduce(
-      (s, it: any) => s + (Number(it?.price) || 0) * Math.max(1, Number(it?.quantity || 1)),
+      (s, it: unknown) => s + (Number(it?.price) || 0) * Math.max(1, Number(it?.quantity || 1)),
       0
     )
-    const gaItems = items.map((it: any) =>
+    const gaItems = items.map((it: unknown) =>
       mapProductToGaItem(it, {
         quantity: Math.max(1, Number(it?.quantity || 1)),
       })
@@ -66,7 +67,7 @@ export default function CheckoutPage() {
         ecommerce: { currency, value: subtotal, items: gaItems },
       })
     } catch {}
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [cart?.length])
 
   const isEmpty = !cart || cart.length === 0
@@ -174,3 +175,4 @@ export default function CheckoutPage() {
     </main>
   )
 }
+

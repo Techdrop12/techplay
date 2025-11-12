@@ -5,7 +5,7 @@ export async function fetcher<T = unknown>(url: string, init: FetcherInit = {}):
   const controller = new AbortController()
   const to = timeoutMs ? setTimeout(() => controller.abort(), timeoutMs) : null
 
-  let lastErr: any
+  let lastErr: unknown
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       const res = await fetch(url, { ...rest, signal: controller.signal })
@@ -21,3 +21,4 @@ export async function fetcher<T = unknown>(url: string, init: FetcherInit = {}):
   }
   throw lastErr || new Error('Network error')
 }
+

@@ -2,7 +2,9 @@
 'use client'
 
 import { useEffect, useMemo, useRef } from 'react'
+
 import type { Product } from '@/types/product'
+
 import { sendAbandonCartReminder } from '@/lib/abandon-cart'
 
 /** Type local – structure attendue par l’API d’abandon de panier */
@@ -55,16 +57,16 @@ export default function AbandonCartTracker({
       ? cart.map((p) => {
           const id =
             String(
-              (p as any)._id ??
-              (p as any).id ??
-              (p as any).sku ??
+              (p as unknown)._id ??
+              (p as unknown).id ??
+              (p as unknown).sku ??
               p.slug ??
               Math.random().toString(36).slice(2)
             )
           const title = p.title ?? 'Produit'
           const price = Math.max(0, Number(p.price ?? 0)) || 0
-          const quantity = Math.max(1, Number((p as any).quantity ?? 1)) || 1
-          const image = (p as any).image ?? '/placeholder.png'
+          const quantity = Math.max(1, Number((p as unknown).quantity ?? 1)) || 1
+          const image = (p as unknown).image ?? '/placeholder.png'
           return { id, title, price, quantity, image }
         })
       : []
@@ -103,10 +105,10 @@ export default function AbandonCartTracker({
     timerRef.current = window.setTimeout(async () => {
       try {
         // En plus de la dédup 24h côté lib, on déduplique en mémoire par signature
-        await sendAbandonCartReminder(email, normalized as any)
+        await sendAbandonCartReminder(email, normalized as unknown)
         lastSentSigRef.current = signature
       } catch (error) {
-        // eslint-disable-next-line no-console
+         
         console.error('[AbandonCartTracker] Failed to send reminder:', error)
       }
     }, Math.max(10_000, delay)) // garde un minimum de 10s par sécurité
@@ -122,3 +124,4 @@ export default function AbandonCartTracker({
 
   return null
 }
+

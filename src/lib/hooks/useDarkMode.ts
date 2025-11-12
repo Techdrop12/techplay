@@ -1,5 +1,6 @@
 // src/lib/hooks/useDarkMode.ts — compat: wrap du ThemeProvider
 import { useMemo } from 'react'
+
 import { useTheme } from '@/context/themeContext'
 
 export function useDarkMode() {

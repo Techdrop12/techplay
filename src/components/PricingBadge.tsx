@@ -1,8 +1,10 @@
 'use client'
 
-import * as React from 'react'
 import { motion } from 'framer-motion'
+import * as React from 'react'
+
 import Price from './Price'
+
 import { cn } from '@/lib/utils'
 
 type Numeric = number | string

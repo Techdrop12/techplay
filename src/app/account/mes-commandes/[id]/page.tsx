@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+
 import Link from '@/components/LocalizedLink'
 
 type Props = { params: { id: string } }

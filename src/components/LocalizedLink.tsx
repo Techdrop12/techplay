@@ -2,10 +2,12 @@
 'use client'
 
 import NextLink, { type LinkProps } from 'next/link'
-import type { UrlObject } from 'url'
-import { getCurrentLocale, localizePath, type Locale } from '@/lib/i18n-routing'
 import { forwardRef } from 'react'
+
 import type React from 'react'
+import type { UrlObject } from 'url'
+
+import { getCurrentLocale, localizePath, type Locale } from '@/lib/i18n-routing'
 
 type Props = Omit<LinkProps, 'href'> &
   Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> & {
@@ -45,7 +47,8 @@ const LocalizedLink = forwardRef<HTMLAnchorElement, Props>(function LocalizedLin
   ref
 ) {
   const finalHref = normalizeHref(href, locale, keepQuery, keepHash)
-  return <NextLink ref={ref} href={finalHref as any} {...rest} />
+  return <NextLink ref={ref} href={finalHref as unknown} {...rest} />
 })
 
 export default LocalizedLink
+

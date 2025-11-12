@@ -1,16 +1,18 @@
 // src/components/AddToCartButton.tsx — ultra premium (compat + a11y + analytics + AB-ready)
 'use client'
 
-import { useRef, useState, useId, useCallback, useEffect, useMemo } from 'react'
-import type React from 'react'
-import { useRouter } from 'next/navigation'
-import { useCart } from '@/hooks/useCart'
-import type { Product } from '@/types/product'
-import Button from '@/components/Button'
-import { toast } from 'react-hot-toast'
 import { motion, useReducedMotion } from 'framer-motion'
-import { logEvent } from '@/lib/logEvent'
+import { useRouter } from 'next/navigation'
+import { useRef, useState, useId, useCallback, useEffect, useMemo } from 'react'
+import { toast } from 'react-hot-toast'
+
+import type { Product } from '@/types/product'
+import type React from 'react'
+
+import Button from '@/components/Button'
+import { useCart } from '@/hooks/useCart'
 import { trackAddToCart } from '@/lib/ga'
+import { logEvent } from '@/lib/logEvent'
 import { pixelAddToCart, pixelInitiateCheckout } from '@/lib/meta-pixel'
 
 type MinimalProduct = Pick<Product, '_id' | 'slug' | 'title' | 'image' | 'price'>
@@ -222,21 +224,21 @@ export default function AddToCartButton({
     (detail: Record<string, unknown>) => {
       if (disableDataLayer || !isClient) return
       try {
-        ;(window as any).dataLayer = (window as any).dataLayer || []
-        ;(window as any).dataLayer.push({
+        (window as unknown).dataLayer = (window as unknown).dataLayer || []
+        ;(window as unknown).dataLayer.push({
           event: 'add_to_cart',
           ecommerce: {
             currency,
-            value: (detail as any).value,
+            value: (detail as unknown).value,
             items: [
               {
                 item_id: detail.id,
                 item_name: detail.title,
                 price: detail.price,
                 quantity: detail.quantity,
-                item_variant: (detail as any).variant,
-                item_brand: (detail as any).brand,
-                item_category: (detail as any).category,
+                item_variant: (detail as unknown).variant,
+                item_brand: (detail as unknown).brand,
+                item_category: (detail as unknown).category,
               },
             ],
           },
@@ -289,7 +291,7 @@ export default function AddToCartButton({
 
         // analytics
         try {
-          ;(logEvent as any)?.({ action: 'add_to_cart', category: 'ecommerce', label: title, value: price * quantity })
+          (logEvent as unknown)?.({ action: 'add_to_cart', category: 'ecommerce', label: title, value: price * quantity })
         } catch {}
         try {
           trackAddToCart?.({
@@ -349,8 +351,8 @@ export default function AddToCartButton({
         // (nouveau) — "Buy now" / instant checkout
         if (instantCheckout) {
           try {
-            ;(logEvent as any)?.({ action: 'buy_now_click', category: 'ecommerce', label: title })
-            ;(window as any).dataLayer?.push({ event: 'buy_now_click', ...gtmExtra })
+            (logEvent as unknown)?.({ action: 'buy_now_click', category: 'ecommerce', label: title })
+            ;(window as unknown).dataLayer?.push({ event: 'buy_now_click', ...gtmExtra })
             pixelInitiateCheckout?.({
               value: price * quantity,
               currency,
@@ -457,3 +459,4 @@ export default function AddToCartButton({
     </>
   )
 }
+

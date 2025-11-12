@@ -1,10 +1,11 @@
 // src/components/ReviewForm.tsx — Premium UX/a11y + DX safe (cooldown, drafts, JSON-LD correct)
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { toast } from 'react-hot-toast'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'react-hot-toast'
+
 import RatingStars from '@/components/RatingStars'
 import { event as gaEvent } from '@/lib/ga'
 
@@ -196,7 +197,7 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
         {jsonLd && (
           <script
             type="application/ld+json"
-            // eslint-disable-next-line react/no-danger
+             
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
           />
         )}

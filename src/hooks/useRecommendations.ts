@@ -45,7 +45,7 @@ export default function useRecommendations(category?: string, excludeId?: string
       });
 
     return () => controller.abort();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [category, excludeId]);
 
   return useMemo(() => state, [state]);

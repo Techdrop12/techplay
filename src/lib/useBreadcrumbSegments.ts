@@ -1,7 +1,7 @@
 'use client'
 
-import { useMemo } from 'react'
 import { usePathname } from 'next/navigation'
+import { useMemo } from 'react'
 
 export type Locale = 'fr' | 'en'
 export type BreadcrumbSegment = { label: string; href: string }

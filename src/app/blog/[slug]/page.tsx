@@ -1,13 +1,15 @@
 // src/app/blog/[slug]/page.tsx
-import { getBlogPostBySlug } from '@/lib/data'
-import { notFound } from 'next/navigation'
-import type { Metadata } from 'next'
-import ArticleJsonLd from '@/components/JsonLd/ArticleJsonLd'
-import type { BlogPost } from '@/types/blog'
-import { generateArticleMeta, jsonLdBreadcrumbs } from '@/lib/seo'
 import { cookies, headers } from 'next/headers'
-import { LOCALE_COOKIE, isLocale, pickBestLocale, type Locale } from '@/lib/language'
+import { notFound } from 'next/navigation'
+
+import type { BlogPost } from '@/types/blog'
+import type { Metadata } from 'next'
+
+import ArticleJsonLd from '@/components/JsonLd/ArticleJsonLd'
+import { getBlogPostBySlug } from '@/lib/data'
 import { localizePath } from '@/lib/i18n-routing'
+import { LOCALE_COOKIE, isLocale, pickBestLocale, type Locale } from '@/lib/language'
+import { generateArticleMeta, jsonLdBreadcrumbs } from '@/lib/seo'
 
 interface Props {
   params: { slug: string }
@@ -31,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     )
   }
 
-  const p = post as Record<string, any>
+  const p = post as Record<string, unknown>
 
   const image = (p.image as string) ?? '/placeholder.png'
   const published = (p.publishedAt ?? p.date ?? p.createdAt) as string | undefined
@@ -85,7 +87,7 @@ export default async function BlogPostPage({ params }: Props) {
         <h1 className="text-3xl font-bold mb-4 text-brand">{safePost.title}</h1>
         <article
           className="prose dark:prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: (safePost as any).content || '' }}
+          dangerouslySetInnerHTML={{ __html: (safePost as unknown).content || '' }}
         />
       </main>
 
@@ -100,3 +102,4 @@ export default async function BlogPostPage({ params }: Props) {
     </>
   )
 }
+

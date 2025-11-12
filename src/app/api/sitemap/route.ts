@@ -1,5 +1,6 @@
 // src/app/api/sitemap/route.ts — uses lib/sitemap (no URLs hardcoded)
 import { NextResponse } from 'next/server'
+
 import { buildStaticSitemap, entriesToXml } from '@/lib/sitemap'
 
 export const runtime = 'edge'          // rapide, pas de dépendance Node

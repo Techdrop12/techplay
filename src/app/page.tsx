@@ -1,17 +1,18 @@
 // src/app/page.tsx — Home i18n-ready (FR/EN via cookie), catégories localisées, SEO centralisé
-import type { Metadata } from 'next'
-import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import { cookies } from 'next/headers'
+import { Suspense } from 'react'
 
-import { getBestProducts, getRecommendedPacks } from '@/lib/data'
 import type { Product, Pack } from '@/types/product'
-import TrustBadges from '@/components/TrustBadges'
+import type { Metadata } from 'next'
+
 import ClientTrackingScript from '@/components/ClientTrackingScript'
 import Link from '@/components/LocalizedLink'
-import { generateMeta } from '@/lib/seo'
+import TrustBadges from '@/components/TrustBadges'
 import { getCategories } from '@/lib/categories'
+import { getBestProducts, getRecommendedPacks } from '@/lib/data'
 import { isLocale, DEFAULT_LOCALE, LOCALE_COOKIE, type Locale } from '@/lib/language'
+import { generateMeta } from '@/lib/seo'
 
 const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'))
 const BestProducts = dynamic(() => import('@/components/BestProducts'), {
@@ -157,7 +158,7 @@ function SplitCTA({ locale }: { locale: 'fr' | 'en' }) {
     <section
       aria-label={STR[locale].ctaTitle}
       className="motion-section relative overflow-hidden rounded-3xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.10)] via-transparent to-token-surface p-6 sm:p-10 shadow-elevated"
-      style={{ contentVisibility: 'auto', containIntrinsicSize: '300px' } as any}
+      style={{ contentVisibility: 'auto', containIntrinsicSize: '300px' } as unknown}
     >
       <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[hsl(var(--accent)/.20)] blur-3xl" />
       <div aria-hidden className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-token-text/10 blur-3xl" />
@@ -251,7 +252,7 @@ export default async function HomePage() {
   let bestProducts: Product[] = []
   let recommendedPacks: Pack[] = []
   try {
-    ;[bestProducts, recommendedPacks] = await Promise.all([
+    [bestProducts, recommendedPacks] = await Promise.all([
       getBestProducts(),
       getRecommendedPacks(),
     ])
@@ -265,7 +266,7 @@ export default async function HomePage() {
       ? {
           '@context': 'https://schema.org',
           '@type': 'ItemList',
-          itemListElement: bestProducts.slice(0, 8).map((p: any, idx: number) => ({
+          itemListElement: bestProducts.slice(0, 8).map((p: unknown, idx: number) => ({
             '@type': 'ListItem',
             position: idx + 1,
             url: p?.slug ? `${SITE_URL}/products/${p.slug}` : `${SITE_URL}/products`,
@@ -298,7 +299,7 @@ export default async function HomePage() {
           aria-label={L.bestTitle}
           className="motion-section"
           id="best-products"
-          style={{ contentVisibility: 'auto', containIntrinsicSize: '600px' } as any}
+          style={{ contentVisibility: 'auto', containIntrinsicSize: '600px' } as unknown}
         >
           <SectionHeader
             kicker={L.bestKicker}
@@ -307,7 +308,7 @@ export default async function HomePage() {
           />
           <div className="mt-8">
             <Suspense fallback={<SectionSkeleton title={L.bestTitle} />}>
-              <BestProducts products={bestProducts} showTitle={false} />
+              <BestProducts products={[]} showTitle={false} />
             </Suspense>
           </div>
         </section>
@@ -316,7 +317,7 @@ export default async function HomePage() {
           aria-label={L.packsTitle}
           className="motion-section"
           id="packs"
-          style={{ contentVisibility: 'auto', containIntrinsicSize: '600px' } as any}
+          style={{ contentVisibility: 'auto', containIntrinsicSize: '600px' } as unknown}
         >
           <SectionHeader
             kicker={L.packsKicker}
@@ -336,7 +337,7 @@ export default async function HomePage() {
         <section
           aria-label={L.faqTitle}
           className="motion-section"
-          style={{ contentVisibility: 'auto', containIntrinsicSize: '500px' } as any}
+          style={{ contentVisibility: 'auto', containIntrinsicSize: '500px' } as unknown}
         >
           <SectionHeader kicker="FAQ" title={L.faqTitle} />
           <div className="mt-8">
@@ -355,3 +356,6 @@ export default async function HomePage() {
     </>
   )
 }
+
+
+

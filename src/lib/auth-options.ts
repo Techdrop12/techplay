@@ -3,9 +3,11 @@
 // - vérif bcrypt, rate-limit léger, rôle, JWT, pages custom, cookies secure
 // - fallback ADMIN_* via env pour un compte admin local
 
-import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
+
 import { verifyPassword } from './bcrypt'
+
+import type { NextAuthOptions } from 'next-auth'
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@techplay.local'
 const ADMIN_HASH  = process.env.ADMIN_PASSWORD_HASH // bcrypt hash conseillé
@@ -55,8 +57,8 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials, req) {
         const ip =
-          (req as any)?.headers?.['x-forwarded-for'] ||
-          (req as any)?.headers?.['x-real-ip'] ||
+          (req as unknown)?.headers?.['x-forwarded-for'] ||
+          (req as unknown)?.headers?.['x-real-ip'] ||
           'unknown'
 
         if (!credentials?.email || !credentials?.password) return null
@@ -82,15 +84,15 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.userId = (user as any).id
-        token.role = (user as any).role ?? 'user'
+        token.userId = (user as unknown).id
+        token.role = (user as unknown).role ?? 'user'
       }
       return token
     },
     async session({ session, token }) {
       if (session?.user) {
-        ;(session.user as any).id = token.userId as string | undefined
-        ;(session.user as any).role = (token.role as string) || 'user'
+        (session.user as unknown).id = token.userId as string | undefined
+        ;(session.user as unknown).role = (token.role as string) || 'user'
       }
       return session
     },
@@ -99,3 +101,4 @@ export const authOptions: NextAuthOptions = {
   // Active des logs utiles en dev
   debug: process.env.NODE_ENV !== 'production',
 }
+

@@ -1,13 +1,14 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+
 import { useCart } from '@/context/cartContext'
 import { pageview } from '@/lib/analytics'
-import { useRouter } from 'next/navigation'
 
 interface CartItem {
   title?: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 export default function CartReminder() {
@@ -47,9 +48,9 @@ export default function CartReminder() {
 
       if (
         typeof window !== 'undefined' &&
-        typeof (window as any).gtag === 'function'
+        typeof (window as unknown).gtag === 'function'
       ) {
-        ;(window as any).gtag('event', 'cart_reminder_displayed')
+        (window as unknown).gtag('event', 'cart_reminder_displayed')
       }
     }
   }, [show])
@@ -76,4 +77,5 @@ export default function CartReminder() {
     </div>
   )
 }
+
 

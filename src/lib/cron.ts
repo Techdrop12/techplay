@@ -10,7 +10,7 @@ type CronTask = {
 };
 
 function log(msg: string) {
-  // eslint-disable-next-line no-console
+   
   console.log(`[CRON] ${new Date().toISOString()} — ${msg}`);
 }
 

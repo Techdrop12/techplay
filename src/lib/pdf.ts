@@ -1,12 +1,13 @@
 // src/lib/pdf.ts — Invoice data formatter + PDF generator (single source of truth)
 // Ultra-premium: typé, i18n, remises, TVA, shipping, logo, headers répétés, Web stream pour Next.js App Router.
 
-import type { Readable } from 'node:stream'
-import type { IncomingMessage, ServerResponse } from 'http'
-// pdfkit n’a pas toujours ses types installés. On laisse TS ignorer l’import si manquants.
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import PDFDocument from 'pdfkit'
+
+import type { IncomingMessage, ServerResponse } from 'http'
+import type { Readable } from 'node:stream'
+// pdfkit n’a pas toujours ses types installés. On laisse TS ignorer l’import si manquants.
+ 
+// @ts-ignore
 
 /* =============================== Types =============================== */
 
@@ -233,18 +234,18 @@ export async function renderInvoiceToHttpResponse(
 function createDoc(opts: PdfRenderOptions = {}) {
   const margin = opts.margin ?? 50
   const size = opts.pageSize ?? 'A4'
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+   
   // @ts-ignore
   const doc = new PDFDocument({ size, margin, bufferPages: true })
   doc.info = {
     Title: opts.title || 'Invoice',
-    Author: (opts.brand?.name || process.env.BRAND_NAME || 'TechPlay') as any,
+    Author: (opts.brand?.name || process.env.BRAND_NAME || 'TechPlay') as unknown,
     Subject: 'Invoice',
   }
   return doc
 }
 
-function drawInvoice(doc: any, data: InvoiceData, opts: PdfRenderOptions) {
+function drawInvoice(doc: unknown, data: InvoiceData, opts: PdfRenderOptions) {
   const brand = getBrand(opts.brand)
 
   const nf = new Intl.NumberFormat(opts.locale || 'fr-FR', {
@@ -365,7 +366,7 @@ function drawInvoice(doc: any, data: InvoiceData, opts: PdfRenderOptions) {
     .fillColor('#000')
 }
 
-function drawTableHeader(doc: any, opt?: { yStart?: number }) {
+function drawTableHeader(doc: unknown, opt?: { yStart?: number }) {
   const startX = 50
   const y0 = opt?.yStart ?? doc.y
   const columns = { title: startX, qty: 330, unit: 380, amount: 460 }
@@ -413,7 +414,7 @@ function nodeToWebReadable(stream: Readable): ReadableStream<Uint8Array> {
 
 async function renderInvoiceNodeStream(data: InvoiceData, opts: PdfRenderOptions = {}): Promise<Readable> {
   const doc = createDoc(opts)
-  const stream: Readable = doc as any
+  const stream: Readable = doc as unknown
   drawInvoice(doc, data, opts)
   doc.end()
   return stream
@@ -428,7 +429,7 @@ function normalizeRate(rate: number) {
   return rate
 }
 
-function toNumber(n: any): number {
+function toNumber(n: unknown): number {
   const v = Number(n)
   return Number.isFinite(v) ? v : 0
 }
@@ -467,3 +468,4 @@ function formatDateFR(d: Date) {
     return d.toISOString().slice(0, 10)
   }
 }
+

@@ -1,7 +1,7 @@
 // src/lib/api-client.ts
 // ✅ Client fetch typé avec retry, AbortController, gestion d’erreurs JSON
 
-type Json = Record<string, any>
+type Json = Record<string, unknown>
 
 async function fetchJSON<T>(
   url: string,
@@ -54,3 +54,4 @@ export async function postReview(payload: PostReviewPayload): Promise<PostReview
     timeoutMs: 10000,
   })
 }
+

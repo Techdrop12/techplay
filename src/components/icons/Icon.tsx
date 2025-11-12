@@ -1,9 +1,10 @@
 'use client'
-import { cn } from '@/lib/utils'
 import {
   Headphones, Keyboard, Mouse, Camera, BatteryCharging, Gift,
   ShoppingCart, Heart, Search, User, Sparkles
 } from 'lucide-react'
+
+import { cn } from '@/lib/utils'
 
 const MAP = {
   headphones: Headphones,

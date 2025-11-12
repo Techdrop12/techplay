@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+
 import { getABVariant } from '@/lib/ab-test'
 import { logEvent, pushDataLayer } from '@/lib/ga'
 
@@ -36,7 +37,7 @@ export default function ABTestBanner({
       pushDataLayer({ event: 'ab_assign', ab_name: name, ab_variant: v })
       logEvent('ab_assign', { ab_name: name, ab_variant: v })
     } catch {}
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [name])
 
   const label = useMemo(() => {

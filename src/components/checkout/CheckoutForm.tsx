@@ -7,12 +7,13 @@
 'use client'
 
 import { useCallback, useEffect, useId, useRef, useState, useMemo } from 'react'
-import { createCheckoutSession } from '@/lib/checkout'
 import { toast } from 'react-hot-toast'
+
+import { useCart } from '@/hooks/useCart'
+import { createCheckoutSession } from '@/lib/checkout'
 // GA: on tolère le nom d’export chez toi (event/logEvent) pour préfill events
 import { event as gaEvent, mapProductToGaItem, trackAddShippingInfo, pushDataLayer } from '@/lib/ga'
 import { pixelInitiateCheckout } from '@/lib/meta-pixel'
-import { useCart } from '@/hooks/useCart'
 
 type FormErrors = { email?: string; address?: string }
 
@@ -76,20 +77,20 @@ export default function CheckoutForm() {
   const { subtotal, itemsCount, gaItems, pixelContents } = useMemo(() => {
     const items = Array.isArray(cart) ? cart : []
     const subtotal = items.reduce(
-      (s, it: any) => s + (Number(it?.price) || 0) * Math.max(1, Number(it?.quantity || 1)),
+      (s, it: unknown) => s + (Number(it?.price) || 0) * Math.max(1, Number(it?.quantity || 1)),
       0
     )
-    const gaItems = items.map((it: any) =>
+    const gaItems = items.map((it: unknown) =>
       mapProductToGaItem(it, {
         quantity: Math.max(1, Number(it?.quantity || 1)),
       })
     )
-    const pixelContents = items.map((it: any) => ({
+    const pixelContents = items.map((it: unknown) => ({
       id: String(it?._id || it?.slug),
       quantity: Math.max(1, Number(it?.quantity || 1)),
       item_price: Number(it?.price) || 0,
     }))
-    const itemsCount = items.reduce((s, it: any) => s + Math.max(1, Number(it?.quantity || 1)), 0)
+    const itemsCount = items.reduce((s, it: unknown) => s + Math.max(1, Number(it?.quantity || 1)), 0)
     return { subtotal, itemsCount, gaItems, pixelContents }
   }, [cart])
 
@@ -105,7 +106,7 @@ export default function CheckoutForm() {
         setEmail(qsEmail)
         try {
           gaEvent?.({ action: 'checkout_prefill_email_qs', category: 'checkout', label: 'querystring' })
-          ;(window as any).dataLayer?.push({ event: 'checkout_prefill_email_qs' })
+          ;(window as unknown).dataLayer?.push({ event: 'checkout_prefill_email_qs' })
         } catch {}
         return
       }
@@ -116,7 +117,7 @@ export default function CheckoutForm() {
         setEmail(saved)
         try {
           gaEvent?.({ action: 'checkout_prefill_email_ls', category: 'checkout', label: 'localstorage' })
-          ;(window as any).dataLayer?.push({ event: 'checkout_prefill_email_ls' })
+          ;(window as unknown).dataLayer?.push({ event: 'checkout_prefill_email_ls' })
         } catch {}
       }
     } catch {}
@@ -214,7 +215,7 @@ export default function CheckoutForm() {
           return
         }
         throw new Error('Session invalide')
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('[Checkout] error:', err)
         const msg = err?.message || 'Une erreur est survenue. Réessayez.'
         announce(msg)
@@ -398,3 +399,4 @@ export default function CheckoutForm() {
     </form>
   )
 }
+

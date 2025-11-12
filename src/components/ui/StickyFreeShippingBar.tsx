@@ -1,13 +1,14 @@
 // src/components/ui/StickyFreeShippingBar.tsx — FINAL (i18n + routes harmonisées) + FIX pointer-events
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { cn } from '@/lib/utils'
-import { useCart } from '@/hooks/useCart'
+import { useEffect, useMemo, useRef, useState } from 'react'
+
 import FreeShippingBadge from '@/components/FreeShippingBadge'
 import Link from '@/components/LocalizedLink'
+import { useCart } from '@/hooks/useCart'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
+import { cn } from '@/lib/utils'
 
 type Position = 'bottom' | 'top'
 
@@ -52,7 +53,7 @@ export default function StickyFreeShippingBar({
 }: Props) {
   const pathname = usePathname() || '/'
   const locale = getCurrentLocale(pathname)
-  const { cart } = useCart() as any
+  const { cart } = useCart() as unknown
 
   // ── State
   const [visible, setVisible] = useState(false)
@@ -69,7 +70,7 @@ export default function StickyFreeShippingBar({
   const onClose = () => {
     try {
       localStorage.setItem(dismissKey, '1')
-      ;(window as any).dataLayer?.push({ event: 'free_shipping_bar_close' })
+      ;(window as unknown).dataLayer?.push({ event: 'free_shipping_bar_close' })
     } catch {}
     setVisible(false)
     setDismissed(true)
@@ -84,7 +85,7 @@ export default function StickyFreeShippingBar({
   // ── Subtotal (robuste)
   const subtotal: number = useMemo(() => {
     if (!Array.isArray(cart)) return 0
-    return cart.reduce((sum: number, it: any) => {
+    return cart.reduce((sum: number, it: unknown) => {
       const price = Number(it?.price ?? it?.unitPrice ?? it?.product?.price ?? 0)
       const qty = Number(it?.quantity ?? it?.qty ?? 1)
       const p = Number.isFinite(price) ? price : 0
@@ -127,7 +128,7 @@ export default function StickyFreeShippingBar({
     if (visible && !shownOnceRef.current) {
       shownOnceRef.current = true
       try {
-        ;(window as any).dataLayer?.push({
+        (window as unknown).dataLayer?.push({
           event: 'free_shipping_bar_show',
           reached,
           subtotal,
@@ -191,7 +192,7 @@ export default function StickyFreeShippingBar({
               aria-label={labelCart}
               onClick={() => {
                 try {
-                  ;(window as any).dataLayer?.push({ event: 'free_shipping_bar_cta', reached })
+                  (window as unknown).dataLayer?.push({ event: 'free_shipping_bar_cta', reached })
                 } catch {}
               }}
             >
@@ -211,3 +212,4 @@ export default function StickyFreeShippingBar({
     </div>
   )
 }
+

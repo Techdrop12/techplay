@@ -1,11 +1,13 @@
 // src/app/products/packs/page.tsx
-import type { Metadata } from 'next'
 import { Suspense } from 'react'
+
+import type { Pack } from '@/types/product'
+import type { Metadata } from 'next'
+
 import Link from '@/components/LocalizedLink'
 import PackCard from '@/components/PackCard'
 import SectionTitle from '@/components/SectionTitle'
 import SectionWrapper from '@/components/SectionWrapper'
-import type { Pack } from '@/types/product'
 import { getRecommendedPacks } from '@/lib/data'
 
 export const revalidate = 900

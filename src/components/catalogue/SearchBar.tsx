@@ -1,13 +1,15 @@
 // src/components/catalogue/SearchBar.tsx
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Fuse from 'fuse.js'
-import type { FuseResultMatch, FuseResult } from 'fuse.js'
+import { useRouter } from 'next/navigation'
+import { useEffect, useMemo, useRef, useState } from 'react'
+
 import type { Product } from '@/types/product'
-import { cn, formatPrice } from '@/lib/utils'
+import type { FuseResultMatch, FuseResult } from 'fuse.js'
+
 import { event as gaEvent, logEvent } from '@/lib/ga'
+import { cn, formatPrice } from '@/lib/utils'
 
 interface Props {
   products: Product[]
@@ -129,8 +131,8 @@ export default function SearchBar({
       const root = inputRef.current.closest('[data-search-root="true"]')
       if (root && !root.contains(target)) setOpen(false)
     }
-    document.addEventListener('mousedown', onDown, { passive: true } as any)
-    document.addEventListener('touchstart', onDown, { passive: true } as any)
+    document.addEventListener('mousedown', onDown, { passive: true } as unknown)
+    document.addEventListener('touchstart', onDown, { passive: true } as unknown)
     return () => {
       document.removeEventListener('mousedown', onDown as EventListener)
       document.removeEventListener('touchstart', onDown as EventListener)
@@ -257,7 +259,7 @@ export default function SearchBar({
                   >
                     <span className="truncate">{highlight(p.title ?? '', res.matches)}</span>
                     <span className="ml-3 text-xs text-gray-400 dark:text-gray-500 truncate max-w-[40%]">
-                      {Number.isFinite(p.price as any)
+                      {Number.isFinite(p.price as unknown)
                         ? formatPrice(Number(p.price), { locale, currency, stripZeros: true })
                         : ''}
                     </span>
@@ -314,3 +316,4 @@ export default function SearchBar({
     </div>
   )
 }
+

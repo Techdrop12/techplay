@@ -1,7 +1,8 @@
 'use client'
 
-import Link from '@/components/LocalizedLink'
 import { motion } from 'framer-motion'
+
+import Link from '@/components/LocalizedLink'
 
 interface EmptyCartProps {
   locale?: 'fr' | 'en'

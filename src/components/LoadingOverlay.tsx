@@ -3,8 +3,10 @@
 
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import { cn } from '@/lib/utils'
+
 import Spinner from './Spinner'
+
+import { cn } from '@/lib/utils'
 
 export interface LoadingOverlayProps {
   /** Affiche/masque l’overlay */

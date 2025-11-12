@@ -25,7 +25,7 @@ export function logEvent(nameOrObj: string | GAObjectEvent, params?: Record<stri
     }
     return eventObj(nameOrObj)
   } catch {
-    const w = window as any
+    const w = window as unknown
     if (typeof w?.gtag === 'function') {
       if (typeof nameOrObj === 'string') {
         w.gtag('event', nameOrObj, params || {})
@@ -38,3 +38,4 @@ export function logEvent(nameOrObj: string | GAObjectEvent, params?: Record<stri
 }
 
 export default logEvent
+

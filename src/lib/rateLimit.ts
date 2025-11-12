@@ -48,7 +48,7 @@ export type Limiter = {
 /* ------------------------------------------------------------------ */
 type Store = Map<string, Entry>;
 function getGlobalStore(id: string): Store {
-  const g = globalThis as any;
+  const g = globalThis as unknown;
   g.__RL__ = g.__RL__ || {};
   g.__RL__[id] = g.__RL__[id] || new Map<string, Entry>();
   return g.__RL__[id] as Store;
@@ -159,7 +159,7 @@ export function createRateLimiter(opts: RateLimitOptions = {}): Limiter {
 /** Extraction d’IP robuste (Edge/Node) */
 export function ipFromRequest(req: Request): string {
   // @ts-ignore — compat Node/Edge
-  const h: Headers = (req as any).headers || new Headers();
+  const h: Headers = (req as unknown).headers || new Headers();
   const xfwd = h.get('x-forwarded-for');
   const xip =
     xfwd?.split(',')[0]?.trim() ||
@@ -167,7 +167,7 @@ export function ipFromRequest(req: Request): string {
     h.get('x-real-ip') ||
     h.get('fly-client-ip') ||
     // @ts-ignore Node
-    (req as any).ip ||
+    (req as unknown).ip ||
     'unknown';
   return xip;
 }
@@ -203,3 +203,4 @@ export function withRateLimit(
     return res;
   };
 }
+

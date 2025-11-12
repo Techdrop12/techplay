@@ -24,7 +24,7 @@ function writePrefs(p: Prefs) {
 
 function applyConsent(p: Prefs) {
   try { window.dispatchEvent(new CustomEvent('tp:consent', { detail: p })) } catch {}
-  try { ;(window as any).tpConsentUpdate?.({ analytics: p.analytics, ads: p.ads, functionality: true }) } catch {}
+  try { (window as unknown).tpConsentUpdate?.({ analytics: p.analytics, ads: p.ads, functionality: true }) } catch {}
 }
 
 export default function ConfidentialitePage() {
@@ -99,3 +99,4 @@ export default function ConfidentialitePage() {
     </main>
   )
 }
+

@@ -3,7 +3,7 @@
 /**
  * Envoie un événement de page SEO au dataLayer (GTM)
  */
-export function seoMonitor(page: string, extra: Record<string, any> = {}) {
+export function seoMonitor(page: string, extra: Record<string, unknown> = {}) {
   if (typeof window !== 'undefined') {
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
@@ -18,7 +18,7 @@ export function seoMonitor(page: string, extra: Record<string, any> = {}) {
 /**
  * Envoie un événement SEO à Google Analytics 4 (gtag)
  */
-export function logSeoEvent(event: string, data: Record<string, any> = {}) {
+export function logSeoEvent(event: string, data: Record<string, unknown> = {}) {
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
     window.gtag('event', event, {
       event_category: 'SEO',
@@ -30,10 +30,11 @@ export function logSeoEvent(event: string, data: Record<string, any> = {}) {
 /**
  * Permet de remonter une erreur SEO potentielle
  */
-export function reportSEOIssue(message: string, context: Record<string, any> = {}) {
+export function reportSEOIssue(message: string, context: Record<string, unknown> = {}) {
   if (typeof window !== 'undefined') {
     console.warn('[SEO Monitor]', message, context);
     // Exemple futur : envoyer vers API /logs
     // fetch('/api/log-seo', { method: 'POST', body: JSON.stringify({ message, ...context }) })
   }
 }
+

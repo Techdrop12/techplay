@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from '@/components/LocalizedLink'
 import { toast } from 'react-hot-toast';
+
+import Link from '@/components/LocalizedLink'
 
 interface BlogPost {
   _id: string;

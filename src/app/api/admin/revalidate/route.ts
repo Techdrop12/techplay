@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server'
 import { revalidatePath, revalidateTag } from 'next/cache'
+import { NextResponse } from 'next/server'
 
 export async function POST(req: Request) {
   const url = new URL(req.url)

@@ -12,7 +12,7 @@ export function sendEvent(name: string, params?: AnalyticsParams) {
   try {
     gaLogEvent(name, params)
   } catch {
-    const w = window as any
+    const w = window as unknown
     if (typeof w?.gtag === 'function') {
       try { w.gtag('event', name, params || {}) } catch {}
     } else if (Array.isArray(w?.dataLayer)) {
@@ -23,3 +23,4 @@ export function sendEvent(name: string, params?: AnalyticsParams) {
 
 export * from './ga'
 export default { sendEvent }
+

@@ -1,10 +1,12 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { cn } from '@/lib/utils'
-import { formatPrice } from '@/lib/formatPrice'   // ✅ ici aussi
+
 import type { Product } from '@/types/product'
+
 import FreeShippingBadge from '@/components/FreeShippingBadge'
+import { formatPrice } from '@/lib/formatPrice'   // ✅ ici aussi
+import { cn } from '@/lib/utils'
 
 type CouponSpec =
   | { type: 'percent'; value: number } // ex: 10 = -10%

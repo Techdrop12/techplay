@@ -1,7 +1,9 @@
+import supplierStock from './supplier-stock.json'; // tsconfig: "resolveJsonModule": true
+
+import type { SupplierStockItem } from './types';
+
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
-import type { SupplierStockItem } from './types';
-import supplierStock from './supplier-stock.json'; // tsconfig: "resolveJsonModule": true
 
 export interface SyncResult {
   processed: number;

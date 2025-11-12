@@ -14,7 +14,7 @@ type Props = {
     gtin13?: string
     mpn?: string
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [k: string]: any
+    [k: string]: unknown
   }
   /** Nombre d'avis à inclure dans le JSON-LD (0 = aucun). Par défaut: 0 */
   maxReviews?: number
@@ -56,7 +56,7 @@ export default function ProductJsonLd({ product, maxReviews = 0 }: Props) {
   const images = imagesInput.map((src) => absUrl(src)!).filter(Boolean)
 
   // Prix robuste (number ou string "123,45")
-  const priceRaw: unknown = (product as any).price
+  const priceRaw: unknown = (product as unknown).price
   const priceNumber =
     typeof priceRaw === 'string'
       ? Number.parseFloat((priceRaw as string).replace(',', '.')) || 0
@@ -101,8 +101,8 @@ export default function ProductJsonLd({ product, maxReviews = 0 }: Props) {
   } else {
     const ratingNum = typeof product.rating === 'number' ? product.rating : 0
     const count =
-      typeof (product as any).reviewCount === 'number'
-        ? (product as any).reviewCount
+      typeof (product as unknown).reviewCount === 'number'
+        ? (product as unknown).reviewCount
         : typeof product.reviewsCount === 'number'
         ? product.reviewsCount
         : 0
@@ -123,13 +123,13 @@ export default function ProductJsonLd({ product, maxReviews = 0 }: Props) {
       : undefined
 
   // -------- Reviews (optionnels, limités) --------
-  let reviewNodes: Array<Record<string, any>> | undefined
+  let reviewNodes: Array<Record<string, unknown>> | undefined
   if (maxReviews > 0 && Array.isArray(product.reviews) && product.reviews.length > 0) {
     reviewNodes = product.reviews.slice(0, maxReviews).map((r) => ({
       '@type': 'Review',
       ...(r?.title ? { name: r.title } : {}),
       ...(r?.author ? { author: { '@type': 'Person', name: r.author } } : {}),
-      ...(r?.createdAt ? { datePublished: new Date(r.createdAt as any).toISOString() } : {}),
+      ...(r?.createdAt ? { datePublished: new Date(r.createdAt as unknown).toISOString() } : {}),
       reviewBody: String(r?.comment ?? ''),
       reviewRating: {
         '@type': 'Rating',
@@ -142,7 +142,7 @@ export default function ProductJsonLd({ product, maxReviews = 0 }: Props) {
 
   const currency = (currencyProp || 'EUR').toUpperCase()
 
-  const structuredData: Record<string, any> = {
+  const structuredData: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     '@id': productUrl,
@@ -186,8 +186,9 @@ export default function ProductJsonLd({ product, maxReviews = 0 }: Props) {
     <script
       id={`jsonld-product-${slug}`}
       type="application/ld+json"
-      // eslint-disable-next-line react/no-danger
+       
       dangerouslySetInnerHTML={{ __html: json }}
     />
   )
 }
+

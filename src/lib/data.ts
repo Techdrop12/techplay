@@ -1,11 +1,13 @@
 // src/lib/data.ts
 import { connectToDatabase } from './db'
-import Product from '@/models/Product'
-import Pack from '@/models/Pack'
-import Blog from '@/models/Blog'
 
-import type { Product as ProductType, Pack as PackType } from '@/types/product'
 import type { BlogPost } from '@/types/blog'
+import type { Product as ProductType, Pack as PackType } from '@/types/product'
+
+import Blog from '@/models/Blog'
+import Pack from '@/models/Pack'
+import Product from '@/models/Product'
+
 
 /* ==================== Accès simples ==================== */
 
@@ -113,7 +115,7 @@ export async function getProductsPage({
   const skip = (safePage - 1) * safeSize
 
   // Match texte (titre/desc/marque/catégorie)
-  const textMatch: Record<string, any> = {}
+  const textMatch: Record<string, unknown> = {}
   if (q && q.trim()) {
     const rx = new RegExp(q.trim(), 'i')
     textMatch.$or = [{ title: rx }, { description: rx }, { brand: rx }, { category: rx }]
@@ -193,7 +195,7 @@ export async function getProductsPage({
       ? [{ $sort: { rating: -1 } }]
       : [{ $sort: { createdAt: -1 } }]
 
-  const pipeline: any[] = [
+  const pipeline: unknown[] = [
     { $match: textMatch },
     {
       $facet: {
@@ -283,3 +285,4 @@ export async function getProductsPage({
     priceRange,
   }
 }
+

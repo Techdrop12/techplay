@@ -1,8 +1,9 @@
 // src/components/ui/ExitIntentPopup.tsx — FINAL (fusion + robustesse)
 'use client'
 
-import Link from '@/components/LocalizedLink'
 import { useEffect, useMemo, useRef, useState } from 'react'
+
+import Link from '@/components/LocalizedLink'
 
 type Props = {
   /** Afficher seulement si le panier contient des items */
@@ -106,7 +107,7 @@ export default function ExitIntentPopup({
         shownOnce.current = true
         setOpen(true)
         // analytics (optionnel)
-        try { (window as any).dataLayer?.push({ event: 'exit_intent_shown' }) } catch {}
+        try { (window as unknown).dataLayer?.push({ event: 'exit_intent_shown' }) } catch {}
         document.removeEventListener('mouseout', onMouseOut)
       }
     }
@@ -135,7 +136,7 @@ export default function ExitIntentPopup({
   const close = () => {
     setOpen(false)
     persistDismiss()
-    try { (window as any).dataLayer?.push({ event: 'exit_intent_closed' }) } catch {}
+    try { (window as unknown).dataLayer?.push({ event: 'exit_intent_closed' }) } catch {}
   }
 
   const onBackdrop = (e: React.MouseEvent) => {
@@ -173,7 +174,7 @@ export default function ExitIntentPopup({
             className="inline-flex items-center justify-center rounded-lg bg-[hsl(var(--accent))] px-4 py-2 font-semibold text-white shadow hover:opacity-90"
             onClick={() => {
               persistDismiss()
-              try { (window as any).dataLayer?.push({ event: 'exit_intent_cta_click' }) } catch {}
+              try { (window as unknown).dataLayer?.push({ event: 'exit_intent_cta_click' }) } catch {}
             }}
           >
             {isFr ? 'Voir mon panier →' : 'Go to cart →'}
@@ -189,3 +190,4 @@ export default function ExitIntentPopup({
     </div>
   )
 }
+

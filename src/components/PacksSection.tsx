@@ -1,11 +1,13 @@
 // src/components/PacksSection.tsx
 'use client'
 
-import Link from '@/components/LocalizedLink'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
-import PackCard from '@/components/PackCard'
+
 import type { Pack } from '@/types/product'
+
+import Link from '@/components/LocalizedLink'
+import PackCard from '@/components/PackCard'
 import { cn } from '@/lib/utils'
 
 interface Props {
@@ -24,7 +26,7 @@ interface Props {
   autoLoadOnIntersect?: boolean
 }
 
-type AnyPack = Record<string, any>
+type AnyPack = Record<string, unknown>
 
 /* Icône cadeau duotone (premium) */
 function DuotoneGift({ size = 18, className = 'text-[hsl(var(--accent))]' }: { size?: number; className?: string }) {
@@ -54,7 +56,7 @@ const itemVariants = {
 
 function pushDL(event: string, payload?: Record<string, unknown>) {
   try {
-    ;(window as any).dataLayer?.push({ event, ...payload })
+    (window as unknown).dataLayer?.push({ event, ...payload })
   } catch {}
 }
 
@@ -64,12 +66,12 @@ function getPackPrice(p: AnyPack): number | undefined {
   return Number.isFinite(n) ? n : undefined
 }
 
-function getItems(p: AnyPack): any[] {
+function getItems(p: AnyPack): unknown[] {
   const arr = p.items ?? p.products ?? p.contents ?? []
   return Array.isArray(arr) ? arr : []
 }
 
-function getItemPrice(it: Record<string, any>): number {
+function getItemPrice(it: Record<string, unknown>): number {
   const v = it.price ?? it.prix ?? it.amount
   const n = typeof v === 'number' ? v : Number(v)
   return Number.isFinite(n) ? n : 0
@@ -77,7 +79,7 @@ function getItemPrice(it: Record<string, any>): number {
 
 function getSumItems(p: AnyPack): number {
   const items = getItems(p)
-  return items.reduce((acc: number, it: any) => acc + getItemPrice(it || {}), 0)
+  return items.reduce((acc: number, it: unknown) => acc + getItemPrice(it || {}), 0)
 }
 
 /** % d’économie (0..100). Si impossible à calculer, 0. */
@@ -319,7 +321,7 @@ export default function PacksSection({
         id={gridId}
       >
         {list.map((pack, i) => {
-          const key = (pack as any)?.slug ?? (pack as any)?._id ?? ('pk-' + i)
+          const key = (pack as unknown)?.slug ?? (pack as unknown)?._id ?? ('pk-' + i)
           return (
             <motion.li
               key={key}
@@ -369,3 +371,4 @@ export default function PacksSection({
     </section>
   )
 }
+

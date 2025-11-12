@@ -115,11 +115,11 @@ export function scrollToSnap(
       typeof container === 'string'
         ? (document.querySelector(container) as Element | null)
         : container
-    if (root && 'scrollTop' in (root as any)) {
+    if (root && 'scrollTop' in (root as unknown)) {
       const rect = el.getBoundingClientRect()
       const rootRect = (root as Element).getBoundingClientRect()
-      const top = (root as any).scrollTop + (rect.top - rootRect.top) - offset
-      ;(root as any).scrollTo({ top, behavior: resolvedBehavior })
+      const top = (root as unknown).scrollTop + (rect.top - rootRect.top) - offset
+      ;(root as unknown).scrollTo({ top, behavior: resolvedBehavior })
     } else {
       el.scrollIntoView({ behavior: resolvedBehavior, block, inline })
     }
@@ -199,9 +199,9 @@ export function unlockBodyScroll(): void {
 
 /* ============================ Throttle util ============================ */
 
-export function throttle<T extends (...args: any[]) => any>(fn: T, wait = 100) {
+export function throttle<T extends (...args: unknown[]) => any>(fn: T, wait = 100) {
   let last = 0
-  let timeout: any
+  let timeout: unknown
   return (...args: Parameters<T>) => {
     const now = Date.now()
     const remaining = wait - (now - last)
@@ -217,3 +217,4 @@ export function throttle<T extends (...args: any[]) => any>(fn: T, wait = 100) {
     }
   }
 }
+

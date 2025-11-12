@@ -1,8 +1,10 @@
 'use client'
 
 // src/components/JsonLd/ArticleJsonLd.tsx
-import type { BlogPost } from '@/types/blog'
 import React from 'react'
+
+import type { BlogPost } from '@/types/blog'
+
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
 interface ArticleJsonLdProps {
@@ -11,7 +13,7 @@ interface ArticleJsonLdProps {
 
 function iso(d?: unknown): string | undefined {
   if (!d) return undefined
-  const x = d instanceof Date ? d : new Date(d as any)
+  const x = d instanceof Date ? d : new Date(d as unknown)
   return Number.isFinite(x.getTime()) ? x.toISOString() : undefined
 }
 
@@ -26,15 +28,15 @@ export default function ArticleJsonLd({ post }: ArticleJsonLdProps) {
     '@type': 'Article',
     headline: post.title,
     description: post.description || '',
-    datePublished: iso((post as any).createdAt) || iso(Date.now()),
-    dateModified: iso((post as any).updatedAt) || iso((post as any).createdAt) || iso(Date.now()),
+    datePublished: iso((post as unknown).createdAt) || iso(Date.now()),
+    dateModified: iso((post as unknown).updatedAt) || iso((post as unknown).createdAt) || iso(Date.now()),
     author: {
       '@type': 'Person',
-      name: (post as any).author || 'TechPlay',
+      name: (post as unknown).author || 'TechPlay',
     },
     image: {
       '@type': 'ImageObject',
-      url: (post as any).image || `${siteUrl}/placeholder.png`,
+      url: (post as unknown).image || `${siteUrl}/placeholder.png`,
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
@@ -57,3 +59,4 @@ export default function ArticleJsonLd({ post }: ArticleJsonLdProps) {
     />
   )
 }
+

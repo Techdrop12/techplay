@@ -1,15 +1,18 @@
 // src/app/products/[slug]/page.tsx — SEO/Perf+ (cached fetch, hreflang, robust OG)
-import { notFound } from 'next/navigation'
-import type { Metadata } from 'next'
-import { cache } from 'react'
 import { cookies } from 'next/headers'
-import { getProductBySlug } from '@/lib/data'
+import { notFound } from 'next/navigation'
+import { cache } from 'react'
+
+
 import type { Product } from '@/types/product'
-import ProductDetail from '@/components/ProductDetail'
+import type { Metadata } from 'next'
+
 import ProductJsonLd from '@/components/JsonLd/ProductJsonLd'
+import ProductDetail from '@/components/ProductDetail'
+import { getProductBySlug } from '@/lib/data'
 import { DEFAULT_LOCALE, isLocale } from '@/lib/language'
-import { generateProductMeta, jsonLdBreadcrumbs } from '@/lib/seo'
 import { getFallbackDescription } from '@/lib/meta'
+import { generateProductMeta, jsonLdBreadcrumbs } from '@/lib/seo'
 
 export const revalidate = 1800
 
@@ -33,15 +36,15 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const description = getFallbackDescription(
     {
       title: product.title,
-      brand: (product as any).brand,
-      description: (product as any).description,
-      price: (product as any).price,
+      brand: (product as unknown).brand,
+      description: (product as unknown).description,
+      price: (product as unknown).price,
       currency: 'EUR',
     },
     { maxLen: 160 }
   )
-  const image = (product as any).image ?? '/og-image.jpg'
-  const noindex = (product as any)?.noindex === true
+  const image = (product as unknown).image ?? '/og-image.jpg'
+  const noindex = (product as unknown)?.noindex === true
 
   const base = generateProductMeta({
     title,
@@ -56,13 +59,13 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     robots: noindex ? { index: false, follow: true } : { index: true, follow: true },
     // Tags additionnels OG "product:*" (non typés par Next, via 'other')
     other: {
-      ...(typeof (product as any).price === 'number'
+      ...(typeof (product as unknown).price === 'number'
         ? {
-            'product:price:amount': String((product as any).price),
+            'product:price:amount': String((product as unknown).price),
             'product:price:currency': 'EUR',
           }
         : {}),
-      ...(product && (product as any).brand ? { 'product:brand': String((product as any).brand) } : {}),
+      ...(product && (product as unknown).brand ? { 'product:brand': String((product as unknown).brand) } : {}),
     },
   }
 }
@@ -106,3 +109,4 @@ export default async function ProductPage({ params }: { params: { slug: string }
     </>
   )
 }
+

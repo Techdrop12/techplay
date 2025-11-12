@@ -1,6 +1,7 @@
 'use client'
 
 import Head from 'next/head'
+
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
 interface BreadcrumbJsonLdProps {

@@ -1,13 +1,17 @@
 // src/components/layout/Layout.tsx — Ultra Premium FINAL+++ (CLS-safe, A11y+, VT, idle-prefetch, SR localisé)
 'use client'
 
-import { type ReactNode, useEffect, Suspense, useRef, useState, useMemo } from 'react'
 import dynamic from 'next/dynamic'
-import Header from './Header'
 import { usePathname, useRouter } from 'next/navigation'
-import { pageview } from '@/lib/ga'
+import { type ReactNode, useEffect, Suspense, useRef, useState, useMemo } from 'react'
+
+
 import LiveChat from '../LiveChat'
+
+import Header from './Header'
+
 import { useTheme } from '@/context/themeContext'
+import { pageview } from '@/lib/ga'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
 // (PWA prompt géré dans app/layout.tsx via <AppInstallPrompt/>)
@@ -102,12 +106,12 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
   /** ───────────────────── Idle prefetch (réseaux rapides, no save-data) */
   useEffect(() => {
     const ric: ((cb: IdleRequestCallback, opts?: IdleRequestOptions) => number) =
-      (window as any).requestIdleCallback ||
-      ((cb: IdleRequestCallback) => window.setTimeout(() => cb({ didTimeout: false, timeRemaining: () => 0 } as any), 350))
-    const clearRic: (id: number) => void = (window as any).cancelIdleCallback || window.clearTimeout
+      (window as unknown).requestIdleCallback ||
+      ((cb: IdleRequestCallback) => window.setTimeout(() => cb({ didTimeout: false, timeRemaining: () => 0 } as unknown), 350))
+    const clearRic: (id: number) => void = (window as unknown).cancelIdleCallback || window.clearTimeout
 
     const canPrefetch = () => {
-      const nav: any = navigator
+      const nav: unknown = navigator
       return (
         !nav?.connection ||
         (!nav.connection.saveData &&
@@ -125,7 +129,7 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
     }, { timeout: 1200 })
 
     return () => clearRic(id)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [locale, router])
 
   const LOADING_FALLBACK = locale === 'fr' ? 'Chargement…' : 'Loading…'
@@ -192,3 +196,4 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
     </>
   )
 }
+

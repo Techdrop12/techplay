@@ -1,15 +1,16 @@
 // src/components/MetaPixel.tsx — Ultra+ : consent-aware, SPA PV, advanced matching, anti double-init, debug
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Script from 'next/script'
+import { useEffect, useMemo, useRef, useState } from 'react'
+
 import { pixelPageView, isPixelReady } from '@/lib/meta-pixel'
 
 declare global {
   interface Window {
-    fbq?: (...args: any[]) => void
-    _fbq?: any
+    fbq?: (...args: unknown[]) => void
+    _fbq?: unknown
     __pixelInited?: boolean
     __pixelHashedAM?: Record<string, string> | null
     __pixelUser?: Partial<{
@@ -38,9 +39,9 @@ function eligibleNow(): boolean {
 
   // Respect Do Not Track
   const dnt =
-    (navigator as any).doNotTrack === '1' ||
-    (window as any).doNotTrack === '1' ||
-    (navigator as any).msDoNotTrack === '1'
+    (navigator as unknown).doNotTrack === '1' ||
+    (window as unknown).doNotTrack === '1' ||
+    (navigator as unknown).msDoNotTrack === '1'
 
   // Opt-out locaux
   let optedOut = false
@@ -55,7 +56,7 @@ function eligibleNow(): boolean {
 
   // Consent pubs requis (ga.ts émet des events 'tp:consent')
   try {
-    const s: any = (window as any).__consentState || {}
+    const s: unknown = (window as unknown).__consentState || {}
     const adsGranted =
       s.ad_storage !== 'denied' ||
       s.ad_user_data !== 'denied' ||
@@ -96,7 +97,7 @@ async function sha256Hex(input: string): Promise<string> {
 
 async function buildAdvancedMatching(): Promise<Record<string, string> | null> {
   if (typeof window !== 'undefined' && window.__pixelHashedAM) return window.__pixelHashedAM
-  const u = (typeof window !== 'undefined' && (window as any).__pixelUser) || null
+  const u = (typeof window !== 'undefined' && (window as unknown).__pixelUser) || null
   if (!u) return null
   const raw: Array<[keyof typeof normalizers, string | undefined]> = [
     ['em', u.email],
@@ -130,9 +131,9 @@ export default function MetaPixel() {
   const lastPathRef = useRef<string>('')
 
   const debugLog = useMemo(
-    () => (...args: any[]) => {
+    () => (...args: unknown[]) => {
       if (!DEBUG) return
-      // eslint-disable-next-line no-console
+       
       console.log('[Pixel]', ...args)
     },
     []
@@ -235,7 +236,7 @@ export default function MetaPixel() {
 
       {/* Noscript de courtoisie (ne respecte pas le consent runtime) */}
       <noscript
-        // eslint-disable-next-line react/no-danger
+         
         dangerouslySetInnerHTML={{
           __html: `
             <img height="1" width="1" style="display:none"
@@ -248,3 +249,4 @@ export default function MetaPixel() {
     </>
   )
 }
+

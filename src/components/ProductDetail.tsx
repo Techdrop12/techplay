@@ -1,26 +1,27 @@
 // src/components/ProductDetail.tsx — OPTI MAX (SEO/a11y/UX/Perf) — CENTRAL JSON-LD GÉRÉ EN PAGE — FINAL
 'use client'
 
+import { motion, useReducedMotion } from 'framer-motion'
 import Image from 'next/image'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { motion, useReducedMotion } from 'framer-motion'
-import { formatPrice, cn } from '@/lib/utils'
-import WishlistButton from '@/components/WishlistButton'
+import { toast } from 'react-hot-toast'
+import { FaCcVisa, FaCcMastercard, FaCcPaypal } from 'react-icons/fa'
+
+import type { Product, Review, AggregateRating } from '@/types/product'
+
+import AddToCartButtonAB from '@/components/AddToCartButtonAB'
 import FreeShippingBadge from '@/components/FreeShippingBadge'
+import PricingBadge from '@/components/PricingBadge'
+import ProductReviews from '@/components/Product/ProductReviews'
+import ProductTags from '@/components/ProductTags'
 import QuantitySelector from '@/components/QuantitySelector'
 import RatingStars from '@/components/RatingStars'
-import PricingBadge from '@/components/PricingBadge'
-import AddToCartButtonAB from '@/components/AddToCartButtonAB'
-import ReviewForm from '@/components/ReviewForm'
-import StickyCartSummary from '@/components/StickyCartSummary'
-import ProductTags from '@/components/ProductTags'
-import DeliveryEstimate from '@/components/ui/DeliveryEstimate'
-import ShippingSimulator from '@/components/ShippingSimulator'
 import RatingSummary from '@/components/RatingSummary'
-import ProductReviews from '@/components/Product/ProductReviews'
-import type { Product, Review, AggregateRating } from '@/types/product'
-import { toast } from 'react-hot-toast'
-import { logEvent } from '@/lib/logEvent'
+import ReviewForm from '@/components/ReviewForm'
+import ShippingSimulator from '@/components/ShippingSimulator'
+import StickyCartSummary from '@/components/StickyCartSummary'
+import DeliveryEstimate from '@/components/ui/DeliveryEstimate'
+import WishlistButton from '@/components/WishlistButton'
 import {
   trackViewItem,
   trackAddToCart,
@@ -28,9 +29,10 @@ import {
   trackSelectItem,
   mapProductToGaItem,
 } from '@/lib/ga'
-import { pixelViewContent } from '@/lib/meta-pixel'
 import { DEFAULT_LOCALE, isLocale, type AppLocale } from '@/lib/language'
-import { FaCcVisa, FaCcMastercard, FaCcPaypal } from 'react-icons/fa'
+import { logEvent } from '@/lib/logEvent'
+import { pixelViewContent } from '@/lib/meta-pixel'
+import { formatPrice, cn } from '@/lib/utils'
 
 interface Props {
   product: Product
@@ -177,7 +179,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
 
   // Agrégat reviews sécurisé
   const agg = useMemo(
-    () => computeAggregate(rating, reviews as any, aggregateRating),
+    () => computeAggregate(rating, reviews as unknown, aggregateRating),
     [rating, reviews, aggregateRating],
   )
   const totalReviews = agg.total || reviewsCount || 0
@@ -217,7 +219,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           // Ajout "vu récemment" (tolérant)
           try {
             const key = 'recent:products'
-            const prev = JSON.parse(localStorage.getItem(key) || '[]') as any[]
+            const prev = JSON.parse(localStorage.getItem(key) || '[]') as unknown[]
             const next = [{ _id, slug, title, price, image: gallery[0] ?? image }, ...prev.filter(p => p?._id !== _id)].slice(0, 16)
             localStorage.setItem(key, JSON.stringify(next))
           } catch {}
@@ -285,8 +287,8 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
   const share = async () => {
     try {
       const url = typeof window !== 'undefined' ? window.location.href : ''
-      if ((navigator as any).share) {
-        await (navigator as any).share({ title, text: title, url })
+      if ((navigator as unknown).share) {
+        await (navigator as unknown).share({ title, text: title, url })
       } else if (navigator.clipboard) {
         await navigator.clipboard.writeText(url)
         toast.success('Lien copié dans le presse-papier')
@@ -382,7 +384,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             priority
             placeholder="blur"
             blurDataURL={BLUR_DATA_URL}
-            onLoadingComplete={() => setImgLoaded(true)}
+            onLoad={() => setImgLoaded(true)}
             itemProp="image"
             draggable={false}
           />
@@ -469,7 +471,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           </h1>
 
           {/* Microdata extras */}
-          {(_id || (product as any)?.sku) && <meta itemProp="sku" content={String(_id || (product as any).sku)} />}
+          {(_id || (product as unknown)?.sku) && <meta itemProp="sku" content={String(_id || (product as unknown).sku)} />}
           {brand && <meta itemProp="brand" content={String(brand)} />}
 
           <div className="mt-3 flex flex-wrap items-center gap-3">
@@ -705,3 +707,5 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     </motion.section>
   )
 }
+
+

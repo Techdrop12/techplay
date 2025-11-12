@@ -1,20 +1,19 @@
 'use client'
 
-import { useState, useMemo } from 'react'
 import Fuse from 'fuse.js'
+import { useState, useMemo } from 'react'
 
-import { Product } from '@/types/product'
-import ProductGrid from '@/components/ProductGrid'
-import SectionWrapper from '@/components/SectionWrapper'
-import SectionTitle from '@/components/SectionTitle'
-import SearchBar from '@/components/catalogue/SearchBar'
-import FilterPanel from '@/components/catalogue/FilterPanel'
-import SortDropdown from '@/components/catalogue/SortDropdown'
-
-import ScrollToTop from '@/components/ScrollToTop'
-import BackToTopButton from '@/components/BackToTopButton'
 import Analytics from '@/components/Analytics'
+import BackToTopButton from '@/components/BackToTopButton'
+import FilterPanel from '@/components/catalogue/FilterPanel'
+import SearchBar from '@/components/catalogue/SearchBar'
+import SortDropdown from '@/components/catalogue/SortDropdown'
 import MetaPixel from '@/components/MetaPixel'
+import ProductGrid from '@/components/ProductGrid'
+import ScrollToTop from '@/components/ScrollToTop'
+import SectionTitle from '@/components/SectionTitle'
+import SectionWrapper from '@/components/SectionWrapper'
+import { Product } from '@/types/product'
 
 type Props = {
   products: Product[]

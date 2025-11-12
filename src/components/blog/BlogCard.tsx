@@ -1,10 +1,12 @@
 // src/components/blog/BlogCard.tsx
 'use client'
 
-import Link from '@/components/LocalizedLink'
-import Image from 'next/image'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
+
 import type { BlogPost } from '@/types/blog'
+
+import Link from '@/components/LocalizedLink'
 
 interface BlogCardProps {
   article: BlogPost

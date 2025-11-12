@@ -2,6 +2,9 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
+
+import { event as gaEvent } from '@/lib/ga'
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 import {
   languages as SUPPORTED_LOCALES,
   localeLabels,
@@ -9,8 +12,6 @@ import {
   type Locale,
   setLocaleCookie,
 } from '@/lib/language'
-import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
-import { event as gaEvent } from '@/lib/ga'
 
 export default function LanguageSwitcher() {
   const pathname = usePathname() || '/'
@@ -31,8 +32,8 @@ export default function LanguageSwitcher() {
     // 2) Tracking (GA4 + fallback GTM dataLayer)
     try {
       gaEvent?.({ action: 'change_language', category: 'engagement', label: next })
-      ;(window as any).dataLayer = (window as any).dataLayer || []
-      ;(window as any).dataLayer.push({ event: 'change_language', locale: next })
+      ;(window as unknown).dataLayer = (window as unknown).dataLayer || []
+      ;(window as unknown).dataLayer.push({ event: 'change_language', locale: next })
     } catch {}
 
     // 3) URL localisée + conservation query + hash
@@ -72,3 +73,4 @@ export default function LanguageSwitcher() {
     </div>
   )
 }
+

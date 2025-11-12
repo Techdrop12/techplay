@@ -1,6 +1,7 @@
+import data from './import.json';
+
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
-import data from './import.json';
 
 type Row = {
   title: string; slug: string; category?: string; price: number; image?: string; description?: string; stock?: number; sku?: string;

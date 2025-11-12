@@ -1,15 +1,16 @@
 // src/components/WishlistButton.tsx — premium (hook-based, i18n toasts/aria)
 'use client'
 
-import { useMemo, useRef, useState, useEffect } from 'react'
-import { useTranslations } from 'next-intl'
-import { Heart, HeartCrack, AlertTriangle } from 'lucide-react'
 import { motion, useReducedMotion } from 'framer-motion'
+import { Heart, HeartCrack, AlertTriangle } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { useMemo, useRef, useState, useEffect } from 'react'
 import { toast } from 'react-hot-toast'
-import { logEvent } from '@/lib/logEvent'
-import { trackAddToWishlist } from '@/lib/ga'
-import { cn } from '@/lib/utils'
+
 import { useWishlist } from '@/hooks/useWishlist'
+import { trackAddToWishlist } from '@/lib/ga'
+import { logEvent } from '@/lib/logEvent'
+import { cn } from '@/lib/utils'
 
 interface WishlistProduct {
   _id?: string
@@ -18,7 +19,7 @@ interface WishlistProduct {
   title?: string
   price?: number
   image?: string
-  [k: string]: any
+  [k: string]: unknown
 }
 
 interface WishlistButtonProps {
@@ -101,7 +102,7 @@ export default function WishlistButton({
     }
 
     const canonical = { ...product, id: pid }
-    add(canonical as any)
+    add(canonical as unknown)
     setSr(tWL('added'))
     toast.success(tToast('added_to_wishlist'), {
       icon: <Heart size={18} className="text-red-500" />,
@@ -172,3 +173,4 @@ export default function WishlistButton({
     </>
   )
 }
+

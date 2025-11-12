@@ -1,6 +1,7 @@
 // src/app/commande/success/page.tsx — SUCCESS ++ (noindex, wrapper client pour dynamic)
-import type { Metadata } from 'next'
 import PurchaseTrackerClient from './PurchaseTrackerClient'
+
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Commande réussie',

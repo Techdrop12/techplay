@@ -46,10 +46,10 @@ function savePrefs(p: Prefs) {
   } catch {}
 }
 
-function pushDL(event: string, detail: Record<string, any>) {
+function pushDL(event: string, detail: Record<string, unknown>) {
   try {
-    ;(window as any).dataLayer = (window as any).dataLayer || []
-    ;(window as any).dataLayer.push({ event, ...detail })
+    (window as unknown).dataLayer = (window as unknown).dataLayer || []
+    ;(window as unknown).dataLayer.push({ event, ...detail })
   } catch {}
 }
 
@@ -78,9 +78,9 @@ export default function ConsentBanner() {
 
   useEffect(() => {
     const dnt =
-      (navigator as any).doNotTrack === '1' ||
-      (window as any).doNotTrack === '1' ||
-      (navigator as any).msDoNotTrack === '1'
+      (navigator as unknown).doNotTrack === '1' ||
+      (window as unknown).doNotTrack === '1' ||
+      (navigator as unknown).msDoNotTrack === '1'
     if (dnt || readDecided()) return
     setPrefs(readPrefs())
     setShow(true)
@@ -215,3 +215,4 @@ export default function ConsentBanner() {
     </div>
   )
 }
+

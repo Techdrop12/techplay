@@ -1,13 +1,14 @@
 // src/components/cart/CartPageClient.tsx
 'use client'
 
-import { useEffect, useMemo, useRef } from 'react'
-import Link from '@/components/LocalizedLink'
 import { motion, useReducedMotion } from 'framer-motion'
-import { useCart } from '@/hooks/useCart'
+import { useEffect, useMemo, useRef } from 'react'
+
 import CartList from '@/components/cart/CartList'
 import CartSummary from '@/components/cart/CartSummary'
 import EmptyCart from '@/components/cart/EmptyCart'
+import Link from '@/components/LocalizedLink'
+import { useCart } from '@/hooks/useCart'
 import { event as gaEvent } from '@/lib/ga'
 
 export default function CartPageClient() {
@@ -93,11 +94,12 @@ export default function CartPageClient() {
           transition={{ duration: 0.25 }}
         >
           <div className="lg:col-span-2">
-            <CartList items={safeCart as any} />
+            <CartList items={safeCart as unknown} />
           </div>
-          <CartSummary items={safeCart as any} />
+          <CartSummary items={safeCart as unknown} />
         </motion.section>
       )}
     </main>
   )
 }
+

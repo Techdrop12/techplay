@@ -1,8 +1,9 @@
 'use client'
 
-import { memo, useMemo } from 'react'
-import Link from '@/components/LocalizedLink'
 import { motion, useReducedMotion } from 'framer-motion'
+import { memo, useMemo } from 'react'
+
+import Link from '@/components/LocalizedLink'
 import { cn } from '@/lib/utils'
 
 type IconName =

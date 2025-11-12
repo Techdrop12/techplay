@@ -2,8 +2,9 @@
 'use client'
 
 import * as React from 'react'
-import { cn } from '@/lib/utils'
+
 import RatingStars from '@/components/RatingStars'
+import { cn } from '@/lib/utils'
 
 type Note = 1 | 2 | 3 | 4 | 5
 export interface RatingSummaryProps {
@@ -160,7 +161,7 @@ export default function RatingSummary({
       {jsonLdData && (
         <script
           type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
+           
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }}
         />
       )}

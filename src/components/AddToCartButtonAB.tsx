@@ -2,11 +2,13 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
+import type { Product } from '@/types/product'
+
 import AddToCartButton from '@/components/AddToCartButton'
 import { getABVariant } from '@/lib/ab-test'
 import { logEvent, pushDataLayer } from '@/lib/ga'
 import { pixelInitiateCheckout } from '@/lib/meta-pixel'
-import type { Product } from '@/types/product'
 
 type MinimalProduct = Pick<Product, '_id' | 'slug' | 'title' | 'image' | 'price'> & {
   quantity?: number
@@ -22,7 +24,7 @@ interface Props {
   variants?: Record<string, VariantConfig>
   className?: string
   // …les autres props sont forwardées à AddToCartButton via {...rest}
-  [k: string]: any
+  [k: string]: unknown
 }
 
 const SEEN = new Set<string>()
@@ -75,7 +77,7 @@ export default function AddToCartButtonAB({
         logEvent('ab_assign', { ab_name: testKey, ab_variant: v })
       } catch {}
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [testKey])
 
   // Impression CTA
@@ -87,7 +89,7 @@ export default function AddToCartButtonAB({
       pushDataLayer({ event: 'ab_impression', ab_name: testKey, ab_variant: variant, pid: product._id })
       logEvent('ab_impression', { ab_name: testKey, ab_variant: variant, pid: product._id })
     } catch {}
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [variant])
 
   if (!variant) return null
@@ -95,7 +97,7 @@ export default function AddToCartButtonAB({
 
   // Tracking click CTA (pas d’envoi Pixel AddToCart ici → on laisse le bouton le faire après succès)
   const handleWrapperClick = useCallback(
-    async (e: any) => {
+    async (e: unknown) => {
       const base = {
         ab_name: testKey,
         ab_variant: variant,
@@ -154,3 +156,4 @@ export default function AddToCartButtonAB({
     </span>
   )
 }
+

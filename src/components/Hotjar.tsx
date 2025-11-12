@@ -1,9 +1,10 @@
 // src/components/Hotjar.tsx — FINAL++++ (Consent-aware, CMP reactive, SPA stateChange, no double-init, strict revoke option)
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Script from 'next/script'
+import { useEffect, useRef, useState } from 'react'
+
 import { eligibleHotjar, hjStateChange } from '@/lib/hotjar'
 
 const HOTJAR_ID = Number(process.env.NEXT_PUBLIC_HOTJAR_ID ?? 0)
@@ -13,7 +14,7 @@ const STRICT_RELOAD = (process.env.NEXT_PUBLIC_HOTJAR_STRICT_RELOAD || '').toLow
 
 function hasAnalyticsConsent(): boolean {
   try {
-    const s: any = (window as any).__consentState || {}
+    const s: unknown = (window as unknown).__consentState || {}
     const ok = s.analytics_storage !== 'denied'
     const ls = localStorage.getItem('consent:analytics') === '1'
     return ok || ls
@@ -24,9 +25,9 @@ function eligibleNow(): boolean {
   if (!HOTJAR_ID) return false
   if (typeof window === 'undefined') return false
   const dnt =
-    (navigator as any).doNotTrack === '1' ||
-    (window as any).doNotTrack === '1' ||
-    (navigator as any).msDoNotTrack === '1'
+    (navigator as unknown).doNotTrack === '1' ||
+    (window as unknown).doNotTrack === '1' ||
+    (navigator as unknown).msDoNotTrack === '1'
   let optedOut = false
   try {
     optedOut = localStorage.getItem('hotjar:disabled') === '1' || localStorage.getItem('analytics:disabled') === '1'
@@ -86,3 +87,4 @@ export default function Hotjar() {
     </Script>
   )
 }
+

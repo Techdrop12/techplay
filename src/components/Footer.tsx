@@ -1,8 +1,9 @@
 // src/components/Footer.tsx — ULTIME+++ (i18n, tokens, SEO, newsletter, CMP, a11y polish: cookies role=button)
 'use client'
 
-import { useId, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import { useId, useMemo, useState } from 'react'
+import { toast } from 'react-hot-toast'
 import {
   FaFacebookF,
   FaTwitter,
@@ -16,9 +17,9 @@ import {
   FaCcMastercard,
   FaCcPaypal,
 } from 'react-icons/fa'
-import { event as gaEvent, logEvent } from '@/lib/ga'
-import { toast } from 'react-hot-toast'
+
 import Link from '@/components/LocalizedLink'
+import { event as gaEvent, logEvent } from '@/lib/ga'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
 type FooterLink = { label: string; href: string; external?: boolean }
@@ -91,7 +92,7 @@ const DEFAULT_GROUPS: NavGroup[] = [
 const isValidEmail = (v: string) => /^\S+@\S+\.\S+$/.test(String(v || '').trim())
 
 // GA helper – tolérant
-const track = (action: string, data: Record<string, any> = {}) => {
+const track = (action: string, data: Record<string, unknown> = {}) => {
   try {
     gaEvent?.({
       action,
@@ -102,7 +103,7 @@ const track = (action: string, data: Record<string, any> = {}) => {
     })
   } catch {}
   try {
-    ;(logEvent as any)?.(action, data)
+    (logEvent as unknown)?.(action, data)
   } catch {}
 }
 
@@ -170,7 +171,7 @@ export default function Footer({
   const openConsentManager = (e?: { preventDefault?: () => void }) => {
     e?.preventDefault?.()
     // ✅ Compat totale avec ton CMP (ConsentBanner.tsx expose tpOpenConsent)
-    try { ;(window as any).tpOpenConsent?.() } catch {}
+    try { (window as unknown).tpOpenConsent?.() } catch {}
     // Fallback event (si tu relies ailleurs)
     try { window.dispatchEvent(new CustomEvent('open-consent-manager')) } catch {}
     track('open_consent_manager', { location: 'footer' })
@@ -208,7 +209,7 @@ export default function Footer({
       setMessage('Inscription confirmée. Bienvenue chez TechPlay !')
       setEmail('')
       try { toast.success('Vous êtes inscrit(e) 🎉') } catch {}
-    } catch (err: any) {
+    } catch (err: unknown) {
       setStatus('error')
       setMessage(err?.message || 'Une erreur est survenue. Réessayez.')
       try { toast.error('Inscription impossible pour le moment') } catch {}
@@ -552,3 +553,4 @@ export default function Footer({
     </footer>
   )
 }
+

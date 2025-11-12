@@ -1,4 +1,4 @@
-export default function ProductBadges({ product }: { product: any }) {
+export default function ProductBadges({ product }: { product: unknown }) {
   return (
     <div className="flex gap-2 mt-2">
       {product.freeShipping && (
@@ -12,3 +12,4 @@ export default function ProductBadges({ product }: { product: any }) {
     </div>
   )
 }
+

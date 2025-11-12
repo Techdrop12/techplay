@@ -1,16 +1,18 @@
 // src/components/PackCard.tsx — ULTIME++ (futuriste, a11y/SEO/UX/Perf max)
 'use client'
 
-import Link from '@/components/LocalizedLink'
-import Image from 'next/image'
-import { formatPrice, cn } from '@/lib/utils'
 import { motion, useReducedMotion } from 'framer-motion'
+import Image from 'next/image'
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react'
+
 import type { Pack } from '@/types/product'
+
 import FreeShippingBadge from '@/components/FreeShippingBadge'
-import { logEvent } from '@/lib/logEvent'
+import Link from '@/components/LocalizedLink'
 import { pushDataLayer } from '@/lib/ga'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
+import { logEvent } from '@/lib/logEvent'
+import { formatPrice, cn } from '@/lib/utils'
 
 interface PackCardProps {
   pack: Pack
@@ -39,7 +41,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
   } = pack
 
   // Champs étendus (robustes à tous les shapes)
-  const x = pack as any
+  const x = pack as unknown
   const images: string[] | undefined = Array.isArray(x.images) ? x.images : undefined
   const compareAtPrice: number | undefined =
     typeof x.compareAtPrice === 'number' ? x.compareAtPrice
@@ -51,7 +53,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
   const isNew: boolean | undefined = typeof x.isNew === 'boolean' ? x.isNew : x.new
   const isBestSeller: boolean | undefined = typeof x.isBestSeller === 'boolean' ? x.isBestSeller : (x.bestSeller || x.bestseller)
   const stock: number | undefined = typeof x.stock === 'number' ? x.stock : undefined
-  const items: any[] = Array.isArray(x.items) ? x.items : Array.isArray(x.contents) ? x.contents : []
+  const items: unknown[] = Array.isArray(x.items) ? x.items : Array.isArray(x.contents) ? x.contents : []
   const rating: number | undefined = typeof x.rating === 'number' ? x.rating : undefined
   const reviewsCount: number | undefined =
     typeof x.reviewsCount === 'number' ? x.reviewsCount
@@ -200,7 +202,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
       )}
       style={
         !prefersReducedMotion
-          ? { perspective: 1000, ['--ring-progress' as any]: String(conicPercent) }
+          ? { perspective: 1000, ['--ring-progress' as unknown]: String(conicPercent) }
           : { perspective: 1000 }
       }
       whileHover={!prefersReducedMotion ? { scale: 1.015 } : undefined}
@@ -263,7 +265,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
               placeholder="blur"
               blurDataURL={BLUR_DATA_URL}
               quality={85}
-              onLoadingComplete={() => setImgLoaded(true)}
+              onLoad={() => setImgLoaded(true)}
               onError={() => setImgError(true)}
               decoding="async"
               draggable={false}
@@ -404,3 +406,5 @@ export default function PackCard({ pack, priority = false, className }: PackCard
     </motion.article>
   )
 }
+
+

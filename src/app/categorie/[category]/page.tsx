@@ -1,8 +1,9 @@
-import type { Metadata } from 'next'
-import Link from '@/components/LocalizedLink'
-import { getAllProducts } from '@/lib/data'
 import type { Product } from '@/types/product'
+import type { Metadata } from 'next'
+
+import Link from '@/components/LocalizedLink'
 import ProductGrid from '@/components/ProductGrid'
+import { getAllProducts } from '@/lib/data'
 import { generateMeta, jsonLdBreadcrumbs } from '@/lib/seo'
 
 export const revalidate = 900
@@ -17,17 +18,17 @@ interface Props {
 
 // --- icônes inline pour l'entête
 const Icon = {
-  Headphones: (p: any) => (<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" {...p}><path fill="currentColor" d="M12 3a9 9 0 0 0-9 9v6a3 3 0 0 0 3 3h1a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H5a7 7 0 0 1 14 0h-2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h1a3 3 0 0 0 3-3v-6a9 9 0 0 0-9-9z"/></svg>),
-  Keyboard: (p: any) => (<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" {...p}><path fill="currentColor" d="M3 6h18a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Zm2 3h2v2H5V9Zm3 0h2v2H8V9Zm3 0h2v2h-2V9Zm3 0h2v2h-2V9Zm3 0h2v2h-2V9ZM5 12h2v2H5v-2Zm3 0h2v2H8v-2Zm3 0h5v2h-5v-2Z"/></svg>),
-  Mouse: (p: any) => (<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" {...p}><path fill="currentColor" d="M12 2a6 6 0 0 1 6 6v8a6 6 0 0 1-12 0V8a6 6 0 0 1 6-6Zm0 2a4 4 0 0 0-4 4v2h8V8a4 4 0 0 0-4-4Zm-.5 1h1v3h-1V5Z"/></svg>),
-  Camera: (p: any) => (<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" {...p}><path fill="currentColor" d="M9 4h6l1.5 2H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3L9 4Zm3 4a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"/></svg>),
-  Battery: (p: any) => (<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" {...p}><path fill="currentColor" d="M2 8a3 3 0 0 1 3-3h11a3 3 0 0 1 3 3v1h1a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-1v1a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V8Zm9 1-3 5h2v3l3-5h-2V9Z"/></svg>),
-  Speaker: (p: any) => (<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" {...p}><path fill="currentColor" d="M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm5 2a2 2 0 1 0 .001 3.999A2 2 0 0 0 12 6Zm0 6a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/></svg>),
-  Drive: (p: any) => (<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" {...p}><path fill="currentColor" d="M4 7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7Zm3 1h10v3H7V8Zm0 5h6v4H7v-4Z"/></svg>),
-  Monitor: (p: any) => (<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" {...p}><path fill="currentColor" d="M3 5h18a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7v2h3v2H7v-2h3v-2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/></svg>),
+  Headphones: (p: unknown) => (<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" {...p}><path fill="currentColor" d="M12 3a9 9 0 0 0-9 9v6a3 3 0 0 0 3 3h1a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H5a7 7 0 0 1 14 0h-2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h1a3 3 0 0 0 3-3v-6a9 9 0 0 0-9-9z"/></svg>),
+  Keyboard: (p: unknown) => (<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" {...p}><path fill="currentColor" d="M3 6h18a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Zm2 3h2v2H5V9Zm3 0h2v2H8V9Zm3 0h2v2h-2V9Zm3 0h2v2h-2V9Zm3 0h2v2h-2V9ZM5 12h2v2H5v-2Zm3 0h2v2H8v-2Zm3 0h5v2h-5v-2Z"/></svg>),
+  Mouse: (p: unknown) => (<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" {...p}><path fill="currentColor" d="M12 2a6 6 0 0 1 6 6v8a6 6 0 0 1-12 0V8a6 6 0 0 1 6-6Zm0 2a4 4 0 0 0-4 4v2h8V8a4 4 0 0 0-4-4Zm-.5 1h1v3h-1V5Z"/></svg>),
+  Camera: (p: unknown) => (<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" {...p}><path fill="currentColor" d="M9 4h6l1.5 2H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3L9 4Zm3 4a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"/></svg>),
+  Battery: (p: unknown) => (<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" {...p}><path fill="currentColor" d="M2 8a3 3 0 0 1 3-3h11a3 3 0 0 1 3 3v1h1a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-1v1a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V8Zm9 1-3 5h2v3l3-5h-2V9Z"/></svg>),
+  Speaker: (p: unknown) => (<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" {...p}><path fill="currentColor" d="M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm5 2a2 2 0 1 0 .001 3.999A2 2 0 0 0 12 6Zm0 6a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/></svg>),
+  Drive: (p: unknown) => (<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" {...p}><path fill="currentColor" d="M4 7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7Zm3 1h10v3H7V8Zm0 5h6v4H7v-4Z"/></svg>),
+  Monitor: (p: unknown) => (<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" {...p}><path fill="currentColor" d="M3 5h18a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7v2h3v2H7v-2h3v-2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/></svg>),
 }
 
-const ICON_BY_SLUG: Record<string, (p: any) => JSX.Element> = {
+const ICON_BY_SLUG: Record<string, (p: unknown) => JSX.Element> = {
   casques: Icon.Headphones,
   claviers: Icon.Keyboard,
   souris: Icon.Mouse,
@@ -77,12 +78,12 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const page = Math.max(1, Number(searchParams?.page ?? 1))
 
   const all = (await getAllProducts()) as Product[]
-  let filtered = all.filter((p) => (p as any).category === category)
+  let filtered = all.filter((p) => (p as unknown).category === category)
 
   if (q) {
     filtered = filtered.filter((p) => {
       const hay =
-        `${p.title ?? ''} ${(p as any).description ?? ''} ${Array.isArray((p as any).tags) ? (p as any).tags.join(' ') : ''}`.toLowerCase()
+        `${p.title ?? ''} ${(p as unknown).description ?? ''} ${Array.isArray((p as unknown).tags) ? (p as unknown).tags.join(' ') : ''}`.toLowerCase()
       return hay.includes(q)
     })
   }
@@ -92,10 +93,10 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   filtered.sort((a, b) => {
     const pa = a.price ?? 0
     const pb = b.price ?? 0
-    const ra = (a as any).rating ?? 0
-    const rb = (b as any).rating ?? 0
-    const newA = (a as any).isNew ? 1 : 0
-    const newB = (b as any).isNew ? 1 : 0
+    const ra = (a as unknown).rating ?? 0
+    const rb = (b as unknown).rating ?? 0
+    const newA = (a as unknown).isNew ? 1 : 0
+    const newB = (b as unknown).isNew ? 1 : 0
     const discA =
       a.oldPrice && a.oldPrice > pa ? Math.round(((a.oldPrice - pa) / a.oldPrice) * 100) : 0
     const discB =
@@ -251,3 +252,4 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     </main>
   )
 }
+

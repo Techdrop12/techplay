@@ -2,6 +2,15 @@
 'use client'
 
 import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from 'framer-motion'
+import Image from 'next/image'
+import { usePathname } from 'next/navigation'
+import {
   useCallback,
   useEffect,
   useMemo,
@@ -10,18 +19,10 @@ import {
   useId,
   type SyntheticEvent,
 } from 'react'
-import Image from 'next/image'
-import { usePathname } from 'next/navigation'
+
 import Link from '@/components/LocalizedLink'
-import {
-  AnimatePresence,
-  motion,
-  useReducedMotion,
-  useScroll,
-  useTransform,
-} from 'framer-motion'
-import { cn } from '@/lib/utils'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
+import { cn } from '@/lib/utils'
 import '@/styles/hero-carousel.css' // ← styles overlay/fx
 
 /* ------------------------ Premium inline icons ------------------------ */
@@ -123,7 +124,7 @@ const BLUR_DATA_URL = 'data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA='
 
 function pushDL(event: string, payload?: Record<string, unknown>) {
   try {
-    ;(window as any).dataLayer?.push({ event, ...payload })
+    (window as unknown).dataLayer?.push({ event, ...payload })
   } catch {}
 }
 
@@ -363,7 +364,7 @@ export default function HeroCarousel({
           exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0.25, scale: 0.99 }}
           transition={{ duration: prefersReducedMotion ? 0 : 0.6, ease: 'easeOut' }}
           className="absolute inset-0 z-0 will-change-transform"
-          style={parallaxStyle as any}
+          style={parallaxStyle as unknown}
           aria-roledescription="slide"
           aria-label={slideAria}
         >
@@ -405,7 +406,7 @@ export default function HeroCarousel({
                   placeholder="blur"
                   blurDataURL={BLUR_DATA_URL}
                   draggable={false}
-                  onError={(e) => { ;(e.currentTarget as any).style.display = 'none' }}
+                  onError={(e) => { (e.currentTarget as unknown).style.display = 'none' }}
                 />
                 <Image
                   src={desktopSrc}
@@ -419,7 +420,7 @@ export default function HeroCarousel({
                   placeholder="blur"
                   blurDataURL={BLUR_DATA_URL}
                   draggable={false}
-                  onError={(e) => { ;(e.currentTarget as any).style.display = 'none' }}
+                  onError={(e) => { (e.currentTarget as unknown).style.display = 'none' }}
                 />
               </>
             )}
@@ -643,3 +644,4 @@ export default function HeroCarousel({
     </section>
   )
 }
+

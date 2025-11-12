@@ -1,16 +1,16 @@
 // src/components/Clarity.tsx — FINAL++++ (ConsentV2, revoke propre, SPA-safe, no double-init)
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Script from 'next/script'
+import { useEffect, useRef, useState } from 'react'
 
 const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID ?? ''
 const ENABLE_IN_DEV = (process.env.NEXT_PUBLIC_CLARITY_IN_DEV || '').toLowerCase() === 'true'
 
 function consentState() {
   try {
-    const s: any = (window as any).__consentState || {}
+    const s: unknown = (window as unknown).__consentState || {}
     const analyticsGranted = s.analytics_storage === 'granted' || localStorage.getItem('consent:analytics') === '1'
     const adsGranted =
       s.ad_storage === 'granted' ||
@@ -30,9 +30,9 @@ function eligibleNow(): boolean {
   if (!CLARITY_ID) return false
   if (typeof window === 'undefined') return false
   const dnt =
-    (navigator as any).doNotTrack === '1' ||
-    (window as any).doNotTrack === '1' ||
-    (navigator as any).msDoNotTrack === '1'
+    (navigator as unknown).doNotTrack === '1' ||
+    (window as unknown).doNotTrack === '1' ||
+    (navigator as unknown).msDoNotTrack === '1'
   let optedOut = false
   try {
     optedOut = localStorage.getItem('clarity:disabled') === '1' || localStorage.getItem('analytics:disabled') === '1'
@@ -55,11 +55,11 @@ export default function Clarity() {
       setShouldLoad(ok)
       try {
         const cs = consentState()
-        if ((window as any).clarity && typeof (window as any).clarity === 'function') {
+        if ((window as unknown).clarity && typeof (window as unknown).clarity === 'function') {
           if (cs.ad_storage === 'denied' && cs.analytics_storage === 'denied') {
-            ;(window as any).clarity('consent', false)
+            (window as unknown).clarity('consent', false)
           } else {
-            ;(window as any).clarity('consentv2', cs)
+            (window as unknown).clarity('consentv2', cs)
           }
         }
       } catch {}
@@ -75,7 +75,7 @@ export default function Clarity() {
   return (
     <Script id="clarity" strategy="afterInteractive" onLoad={() => {
       loadedRef.current = true
-      try { (window as any).clarity && (window as any).clarity('consentv2', consentState()) } catch {}
+      try { (window as unknown).clarity && (window as unknown).clarity('consentv2', consentState()) } catch {}
     }}>
       {`
         (function(c,l,a,r,i,t,y){
@@ -88,3 +88,4 @@ export default function Clarity() {
     </Script>
   )
 }
+

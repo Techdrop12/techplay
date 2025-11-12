@@ -7,20 +7,20 @@ function normalizeId(idLike: unknown): string {
   return String(idLike ?? '').trim()
 }
 
-function toCanonical(product: any): { id: string } & Record<string, any> | null {
+function toCanonical(product: unknown): { id: string } & Record<string, unknown> | null {
   if (!product || typeof product !== 'object') return null
   const id = normalizeId(product.id ?? product._id)
   if (!id) return null
   return { ...product, id }
 }
 
-export function getWishlist(): any[] {
+export function getWishlist(): unknown[] {
   if (!isBrowser()) return []
   try {
     const raw = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || '[]') || []
     // petite sanitization à la volée
     const seen = new Set<string>()
-    const out: any[] = []
+    const out: unknown[] = []
     for (const it of Array.isArray(raw) ? raw : []) {
       const c = toCanonical(it)
       if (!c) continue
@@ -47,7 +47,7 @@ export function isInWishlist(productId: string): boolean {
   }
 }
 
-export function toggleWishlistItem(product: any): void {
+export function toggleWishlistItem(product: unknown): void {
   if (!isBrowser()) return
   const c = toCanonical(product)
   if (!c) return
@@ -69,3 +69,4 @@ export function toggleWishlistItem(product: any): void {
     // ℹ️ Inter-onglets natif: le setItem déclenche 'storage' sur les autres onglets
   } catch {}
 }
+

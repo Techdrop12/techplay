@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
+
 import { event } from '@/lib/ga'
 import { cn } from '@/lib/utils'
 
@@ -148,7 +149,7 @@ export default function InvoiceButton({
       } catch {
         /* ignore */
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg =
         err?.name === 'AbortError'
           ? 'La génération de la facture a expiré. Réessayez.'
@@ -192,3 +193,4 @@ export default function InvoiceButton({
     </div>
   )
 }
+

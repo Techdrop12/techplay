@@ -1,7 +1,7 @@
 // src/lib/notifications.ts — Web Push (VAPID) full options
 import webPush, { type PushSubscription } from 'web-push'
 
-type PushData = Record<string, any> | string
+type PushData = Record<string, unknown> | string
 export type PushSubscriptionLike =
   | PushSubscription
   | { endpoint: string; keys: { auth: string; p256dh: string } }
@@ -45,13 +45,13 @@ export async function sendPushNotification(
   const { ttl = 3600, urgency = 'normal', topic } = opts
 
   try {
-    const res = await webPush.sendNotification(subscription as any, payload, {
+    const res = await webPush.sendNotification(subscription as unknown, payload, {
       TTL: ttl,
       headers: { Urgency: urgency, ...(topic ? { Topic: topic } : {}) },
     })
     return res
-  } catch (err: any) {
-    if (err?.statusCode === 404 || err?.statusCode === 410) (err as any).shouldDelete = true
+  } catch (err: unknown) {
+    if (err?.statusCode === 404 || err?.statusCode === 410) (err as unknown).shouldDelete = true
     throw err
   }
 }
@@ -77,3 +77,4 @@ export async function broadcastPush(
 }
 
 export default sendPushNotification
+

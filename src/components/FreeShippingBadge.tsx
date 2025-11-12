@@ -2,8 +2,9 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { cn, formatPrice } from '@/lib/utils';
 import { useEffect, useRef, useState } from 'react';
+
+import { cn, formatPrice } from '@/lib/utils';
 
 interface FreeShippingBadgeProps {
   price: number;
@@ -141,7 +142,7 @@ export default function FreeShippingBadge({
       if (!reachedOnce.current) {
         reachedOnce.current = true;
         try { onReach?.() } catch {}
-        try { (window as any).dataLayer?.push({ event: 'free_shipping_reached', threshold }) } catch {}
+        try { (window as unknown).dataLayer?.push({ event: 'free_shipping_reached', threshold }) } catch {}
         if (persistKey) {
           try { sessionStorage.setItem(persistKey, '1') } catch {}
         }
@@ -237,7 +238,7 @@ export default function FreeShippingBadge({
                 <a
                   href={policyHref}
                   className="ml-2 underline decoration-dotted underline-offset-2"
-                  onClick={() => { try { (window as any).dataLayer?.push({ event: 'free_shipping_policy_click' }) } catch {} }}
+                  onClick={() => { try { (window as unknown).dataLayer?.push({ event: 'free_shipping_policy_click' }) } catch {} }}
                 >
                   {T.policy}
                 </a>
@@ -298,7 +299,7 @@ export default function FreeShippingBadge({
               <a
                 href={policyHref}
                 className="ml-2 underline decoration-dotted underline-offset-2"
-                onClick={() => { try { (window as any).dataLayer?.push({ event: 'free_shipping_policy_click' }) } catch {} }}
+                onClick={() => { try { (window as unknown).dataLayer?.push({ event: 'free_shipping_policy_click' }) } catch {} }}
               >
                 {T.policy}
               </a>
@@ -339,7 +340,7 @@ export default function FreeShippingBadge({
           <a
             href={policyHref}
             className="ml-2 underline decoration-dotted underline-offset-2"
-            onClick={() => { try { (window as any).dataLayer?.push({ event: 'free_shipping_policy_click' }) } catch {} }}
+            onClick={() => { try { (window as unknown).dataLayer?.push({ event: 'free_shipping_policy_click' }) } catch {} }}
           >
             {T.policy}
           </a>
@@ -376,3 +377,4 @@ export default function FreeShippingBadge({
     </div>
   );
 }
+

@@ -2,6 +2,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+
 import Button from '@/components/Button'
 import { showToast } from '@/components/ToastSystem'
 import { logEvent } from '@/lib/ga'
@@ -14,7 +15,7 @@ type BeforeInstallPromptEvent = Event & {
 declare global {
   interface Window {
     __TP_INSTALL_SEEN?: boolean
-    safari?: any
+    safari?: unknown
   }
 }
 
@@ -27,13 +28,13 @@ function now() { return Date.now() }
 function isInstalled(): boolean {
   if (typeof window === 'undefined') return false
   const mql = window.matchMedia?.('(display-mode: standalone)')
-  const iosStandalone = (window.navigator as any).standalone === true
+  const iosStandalone = (window.navigator as unknown).standalone === true
   return !!(mql?.matches || iosStandalone)
 }
 
 function isIosSafari(): boolean {
   if (typeof navigator === 'undefined') return false
-  const ua = navigator.userAgent || navigator.vendor || (window as any).opera || ''
+  const ua = navigator.userAgent || navigator.vendor || (window as unknown).opera || ''
   const isIOS = /iPad|iPhone|iPod/.test(ua)
   const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua)
   return isIOS && isSafari
@@ -92,10 +93,10 @@ export default function AppInstallPrompt() {
     }
 
     window.addEventListener('appinstalled', onAppInstalled)
-    window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt as any)
+    window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt as unknown)
     return () => {
       window.removeEventListener('appinstalled', onAppInstalled)
-      window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt as any)
+      window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt as unknown)
     }
   }, [installed, canShowBIP])
 
@@ -185,3 +186,4 @@ export default function AppInstallPrompt() {
     </div>
   )
 }
+

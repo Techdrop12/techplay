@@ -1,15 +1,16 @@
 // src/components/layout/MobileNav.tsx — FINAL+++ (i18n-safe, icônes premium, catégories centralisées, a11y polish, placeholders harmonisés, wishlist live region)
 'use client'
 
-import Link from '@/components/LocalizedLink'
-import { useEffect, useMemo, useRef, useState, useId } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useMemo, useRef, useState, useId } from 'react'
+
+import Link from '@/components/LocalizedLink'
+import ThemeToggle from '@/components/ui/ThemeToggle'
 import { useCart } from '@/hooks/useCart'
 import { useWishlist } from '@/hooks/useWishlist'
-import ThemeToggle from '@/components/ui/ThemeToggle'
-import { event as gaEvent, logEvent } from '@/lib/ga'
 import { getCategories } from '@/lib/categories'
+import { event as gaEvent, logEvent } from '@/lib/ga'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
 /* ----------------------------- i18n strings ------------------------------ */
@@ -132,19 +133,19 @@ const norm = (s: string) => s.trim().replace(/\s+/g, ' ')
 const same = (a: string, b: string) => a.toLocaleLowerCase() === b.toLocaleLowerCase()
 
 /* Tracking tolérant */
-const track = (args: { action: string; category?: string; label?: string; value?: number; [k: string]: any }) => {
+const track = (args: { action: string; category?: string; label?: string; value?: number; [k: string]: unknown }) => {
   const { action, category, label, value, ...rest } = args
   const payload = { action, category: category ?? 'navigation', label: label ?? action, value: value ?? 1, ...rest }
   try { gaEvent?.(payload) } catch {}
-  try { (logEvent as any)?.(action, payload) } catch {}
+  try { (logEvent as unknown)?.(action, payload) } catch {}
 }
 
 /* --- Hooks optionnels sûrs : respect strict de la règle des hooks --- */
-function useOptionalCart(): any {
-  try { return useCart() as any } catch { return {} }
+function useOptionalCart(): unknown {
+  try { return useCart() as unknown } catch { return {} }
 }
-function useOptionalWishlist(): any {
-  try { return useWishlist() as any } catch { return {} }
+function useOptionalWishlist(): unknown {
+  try { return useWishlist() as unknown } catch { return {} }
 }
 
 const PLACEHOLDER_MS = 4000 // harmonisé avec Header
@@ -174,9 +175,9 @@ export default function MobileNav() {
   const cartCount = useMemo(() => {
     try {
       return Array.isArray(cart)
-        ? cart.reduce((tt: number, i: any) => tt + (i?.quantity || 1), 0)
+        ? cart.reduce((tt: number, i: unknown) => tt + (i?.quantity || 1), 0)
         : Array.isArray(cart?.items)
-        ? cart.items.reduce((tt: number, i: any) => tt + (i?.quantity || 1), 0)
+        ? cart.items.reduce((tt: number, i: unknown) => tt + (i?.quantity || 1), 0)
         : Number(cart?.count ?? cart?.size ?? 0) || 0
     } catch { return 0 }
   }, [cart])
@@ -206,10 +207,10 @@ export default function MobileNav() {
   const [catsOpen, setCatsOpen] = useState(false)
 
   // PWA
-  const deferredPrompt = useRef<any>(null)
+  const deferredPrompt = useRef<unknown>(null)
   const [canInstall, setCanInstall] = useState(false)
   useEffect(() => {
-    const onBeforeInstall = (e: any) => { e.preventDefault(); deferredPrompt.current = e; setCanInstall(true) }
+    const onBeforeInstall = (e: unknown) => { e.preventDefault(); deferredPrompt.current = e; setCanInstall(true) }
     const onInstalled = () => setCanInstall(false)
     window.addEventListener('beforeinstallprompt', onBeforeInstall)
     window.addEventListener('appinstalled', onInstalled)
@@ -246,7 +247,7 @@ export default function MobileNav() {
     const main = document.getElementById('main') as HTMLElement | null
     if (main) {
       mainRef.current = main
-      try { ;(main as any).inert = true } catch {}
+      try { (main as unknown).inert = true } catch {}
       main.setAttribute('aria-hidden', 'true')
     }
   }
@@ -261,13 +262,13 @@ export default function MobileNav() {
     body.style.paddingRight = ''
     window.scrollTo(0, savedScrollY.current)
     if (mainRef.current) {
-      try { ;(mainRef.current as any).inert = false } catch {}
+      try { (mainRef.current as unknown).inert = false } catch {}
       mainRef.current.removeAttribute('aria-hidden')
       mainRef.current = null
     }
   }
 
-  const openMenu = () => { setOpen(true); try { navigator.vibrate?.(8) } catch {}; track({ action: 'mobile_nav_open', label: 'hamburger' }) }
+  const openMenu = () => { setOpen(true); try { navigator.vibrate?.(8) } catch {} track({ action: 'mobile_nav_open', label: 'hamburger' }) }
   const closeMenu = (reason: string = 'close_btn') => { setOpen(false); track({ action: 'mobile_nav_close', label: reason }) }
 
   // Focus trap + ESC
@@ -513,7 +514,7 @@ export default function MobileNav() {
                     ))}
                     <button
                       type="button"
-                      onClick={() => { try { localStorage.removeItem('recent:q') } catch {}; setRecentQs([]) }}
+                      onClick={() => { try { localStorage.removeItem('recent:q') } catch {} setRecentQs([]) }}
                       className="ml-2 rounded-full bg-token-surface-2 px-3 py-1.5 text-xs text-token-text/70 hover:bg-token-surface focus-ring"
                       aria-label={t.ui.clear}
                     >
@@ -628,7 +629,7 @@ export default function MobileNav() {
                 <ul className="grid grid-cols-1 gap-2 text-lg">
                   {t.nav.map((item) => {
                     const { href, label } = item
-                    const promo = (item as any).promo === true || href.includes('promo=1')
+                    const promo = (item as unknown).promo === true || href.includes('promo=1')
 
                     if (href === '/categorie') {
                       return (
@@ -717,3 +718,4 @@ export default function MobileNav() {
     </>
   )
 }
+

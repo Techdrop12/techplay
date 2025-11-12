@@ -9,8 +9,8 @@ label?: string
 
 export function reportWebVitals(metric: WebVitalMetric) {
 try {
-if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
-;(window as any).gtag('event', metric.name, {
+if (typeof window !== 'undefined' && typeof (window as unknown).gtag === 'function') {
+(window as unknown).gtag('event', metric.name, {
 value: Math.round(metric.value),
 event_category: 'Web Vitals',
 event_label: metric.id || 'vital',

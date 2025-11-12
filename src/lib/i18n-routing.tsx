@@ -47,12 +47,12 @@ function readCookie(name: string): string | undefined {
 export function getCurrentLocale(pathname?: string): (typeof SUPPORTED_LOCALES)[number] {
   const p = pathname ?? getCurrentPathname()
   const first = p.split('/').filter(Boolean)[0]
-  if (isSupported(first)) return first as any
+  if (isSupported(first)) return first as unknown
 
   const fromCookie = readCookie(LOCALE_COOKIE)
-  if (isSupported(fromCookie)) return fromCookie as any
+  if (isSupported(fromCookie)) return fromCookie as unknown
 
-  return DEFAULT_LOCALE as any
+  return DEFAULT_LOCALE as unknown
 }
 
 /** Retire un éventuel préfixe de locale du pathname fourni */
@@ -84,7 +84,7 @@ export function localizePath(
 
   const base = ensureLeadingSlash(path || opts.currentPathname || getCurrentPathname())
   const bare = stripLocalePrefix(base)
-  const withLocale = _withLocale(bare, locale as any)
+  const withLocale = _withLocale(bare, locale as unknown)
 
   const query =
     opts.customQuery ??
@@ -102,6 +102,7 @@ export function altLocales(pathname?: string) {
   const p = pathname ?? getCurrentPathname()
   return (SUPPORTED_LOCALES as readonly string[]).map((l) => ({
     locale: l,
-    href: localizePath(p, l as any, { keepQuery: true, keepHash: true }),
+    href: localizePath(p, l as unknown, { keepQuery: true, keepHash: true }),
   }))
 }
+

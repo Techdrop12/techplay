@@ -3,6 +3,7 @@
 
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
+
 import { cn } from '@/lib/utils'
 
 /* ============================ Types & API ============================ */
@@ -57,16 +58,16 @@ function lockBodyScroll(lock: boolean) {
   if (lock) {
     if (bodyLockCount === 0) {
       const { overflow } = document.body.style
-      ;(document.body as any).__prevOverflow = overflow
+      ;(document.body as unknown).__prevOverflow = overflow
       document.body.style.overflow = 'hidden'
     }
     bodyLockCount++
   } else {
     bodyLockCount = Math.max(0, bodyLockCount - 1)
     if (bodyLockCount === 0) {
-      const prev = (document.body as any).__prevOverflow as string | undefined
+      const prev = (document.body as unknown).__prevOverflow as string | undefined
       document.body.style.overflow = prev ?? ''
-      ;(document.body as any).__prevOverflow = undefined
+      ;(document.body as unknown).__prevOverflow = undefined
     }
   }
 }
@@ -276,10 +277,11 @@ const Modal: React.FC<ModalProps> & { Header: typeof Header; Body: typeof Body; 
     if (!mounted) return null
     const container = props.container ?? document.body
     return ReactDOM.createPortal(<ModalRoot {...props} />, container)
-  }) as any
+  }) as unknown
 
 Modal.Header = Header
 Modal.Body = Body
 Modal.Footer = Footer
 
 export default Modal
+

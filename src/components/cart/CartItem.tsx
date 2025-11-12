@@ -1,11 +1,12 @@
 // src/components/cart/CartItem.tsx
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import Image from 'next/image';
-import Link from '@/components/LocalizedLink'
-import { Minus, Plus, Trash2 } from 'lucide-react';
 import { motion, useReducedMotion } from 'framer-motion';
+import { Minus, Plus, Trash2 } from 'lucide-react';
+import Image from 'next/image';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+
+import Link from '@/components/LocalizedLink'
 import { useCart } from '@/hooks/useCart';
 import { formatPrice } from '@/lib/utils';
 // import { logEvent } from '@/lib/ga' // Décommente si tracking activé

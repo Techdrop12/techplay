@@ -2,10 +2,11 @@
 'use client'
 
 import NextLink from 'next/link'
-import LocalizedLink from '@/components/LocalizedLink'
-import { cn } from '@/lib/utils'
 import { useId } from 'react'
+
+import LocalizedLink from '@/components/LocalizedLink'
 import { getCurrentLocale, localizePath, type Locale } from '@/lib/i18n-routing'
+import { cn } from '@/lib/utils'
 
 interface LogoProps {
   className?: string

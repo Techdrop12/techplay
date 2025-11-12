@@ -22,7 +22,7 @@ function Idle({ children, delay = 0 }: { children: React.ReactNode; delay?: numb
   const [ready, setReady] = useState(false)
   useEffect(() => {
     let t = window.setTimeout(() => setReady(true), delay || 0)
-    const ric: any = (window as any).requestIdleCallback
+    const ric: unknown = (window as unknown).requestIdleCallback
     let idleId: number | null = null
     if (typeof ric === 'function') {
       idleId = ric(() => { window.clearTimeout(t); setReady(true) })
@@ -30,7 +30,7 @@ function Idle({ children, delay = 0 }: { children: React.ReactNode; delay?: numb
     return () => {
       window.clearTimeout(t)
       if (idleId != null) {
-        const cancel = (window as any).cancelIdleCallback
+        const cancel = (window as unknown).cancelIdleCallback
         if (typeof cancel === 'function') cancel(idleId)
       }
     }
@@ -42,7 +42,7 @@ type ConsentBooleans = { analytics: boolean; ads: boolean }
 
 function readInitialConsent(): ConsentBooleans {
   try {
-    const s: any = (window as any).__consentState || {}
+    const s: unknown = (window as unknown).__consentState || {}
     const analytics = s.analytics_storage === 'granted'
     const ads = s.ad_storage === 'granted' || s.ad_user_data === 'granted' || s.ad_personalization === 'granted'
     const lsA = localStorage.getItem('consent:analytics') === '1'
@@ -63,7 +63,7 @@ export default function Tracking() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-    const apply = (next: any) => {
+    const apply = (next: unknown) => {
       if (typeof next?.analytics === 'boolean' || typeof next?.ads === 'boolean') {
         setConsent((prev) => ({
           analytics: typeof next.analytics === 'boolean' ? next.analytics : prev.analytics,
@@ -81,12 +81,12 @@ export default function Tracking() {
     if (!wrappedRef.current) {
       wrappedRef.current = true
       try {
-        const w: any = window as any
+        const w: unknown = window as unknown
         const orig = w.__applyConsent
         if (typeof orig === 'function') {
-          w.__applyConsent = function (next: any) {
+          w.__applyConsent = function (next: unknown) {
             try { apply(next) } catch {}
-            return orig.apply(this, arguments as any)
+            return orig.apply(this, arguments as unknown)
           }
         }
       } catch {}
@@ -117,3 +117,4 @@ export default function Tracking() {
     </>
   )
 }
+

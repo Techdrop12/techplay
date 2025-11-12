@@ -3,8 +3,10 @@
 // fallback env, headers (List-Unsubscribe), et helpers prêts pour tes templates.
 
 import nodemailer from "nodemailer";
-import type Mail from "nodemailer/lib/mailer";
+
 import { renderTemplate, type RenderedEmail } from "./emailTemplates";
+
+import type Mail from "nodemailer/lib/mailer";
 
 const SMTP_URL = process.env.SMTP_URL; // ex: smtp://user:pass@smtp.mailgun.org:587
 const SMTP_HOST = process.env.SMTP_HOST;
@@ -39,7 +41,7 @@ function createTransport(): Mail {
               privateKey: DKIM_PRIVATE_KEY,
             }
           : undefined,
-    } as any);
+    } as unknown);
   }
 
   return nodemailer.createTransport({
@@ -123,7 +125,7 @@ export { sendEmailRaw as sendEmail };
 export async function sendTemplate<K extends Parameters<typeof renderTemplate>[0]>(
   templateKey: K,
   to: string,
-  vars: Record<string, any> = {}
+  vars: Record<string, unknown> = {}
 ) {
   const rendered: RenderedEmail = renderTemplate(templateKey, { ...vars, to });
 
@@ -152,3 +154,4 @@ export async function sendAbandonedCart(to: string, product: string) {
 export async function sendResetPassword(to: string, link: string) {
   return sendTemplate("resetPassword", to, { link });
 }
+

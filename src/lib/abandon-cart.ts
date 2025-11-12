@@ -61,7 +61,7 @@ export async function sendAbandonCartReminder(email: string, cart: CartItem[]) {
     }
   }
 
-  let lastErr: any
+  let lastErr: unknown
   for (let i = 0; i < 2; i++) {
     try {
       const res = await doFetch(i)
@@ -72,6 +72,7 @@ export async function sendAbandonCartReminder(email: string, cart: CartItem[]) {
       await new Promise((r) => setTimeout(r, 400 * (i + 1)))
     }
   }
-  // eslint-disable-next-line no-console
+   
   console.warn('[abandon-cart] échec envoi :', lastErr)
 }
+

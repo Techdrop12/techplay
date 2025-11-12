@@ -158,7 +158,7 @@ export function generateArticleMeta(base: MetaProps, extras: ArticleMetaExtras =
       authors,
       section,
       tags,
-    } as any,
+    } as unknown,
   }
 }
 
@@ -246,3 +246,4 @@ export function jsonLdProduct(params: {
 }
 
 export { ORIGIN, SITE_NAME, TWITTER_HANDLE }
+

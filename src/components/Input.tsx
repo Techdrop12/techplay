@@ -2,6 +2,7 @@
 'use client'
 
 import * as React from 'react'
+
 import { cn } from '@/lib/utils'
 
 type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
@@ -129,7 +130,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const hasError = Boolean(error)
 
     // Clearable (affichage surtout utile en contrôle)
-    const controlledValue = (props as any)?.value
+    const controlledValue = (props as unknown)?.value
     const showClear =
       clearable && !isPassword && controlledValue != null && String(controlledValue).length > 0
 
@@ -256,3 +257,4 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 )
 
 export default Input
+

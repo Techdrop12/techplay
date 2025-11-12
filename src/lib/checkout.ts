@@ -79,7 +79,7 @@ function clampLen(s: unknown, max: number) {
 }
 
 /** Tri clé/valeur récursif pour un JSON stable (objets/arrays) */
-function stableStringify(x: any): string {
+function stableStringify(x: unknown): string {
   if (x === null || typeof x !== 'object') return JSON.stringify(x)
   if (Array.isArray(x)) return `[${x.map(stableStringify).join(',')}]`
   const keys = Object.keys(x).sort()
@@ -91,7 +91,7 @@ function stableStringify(x: any): string {
 function safeLocale(l?: string) {
   if (l && typeof l === 'string' && l.length <= 10) return l
   if (typeof navigator !== 'undefined') {
-    const cand = (navigator as any).language || (navigator as any).userLanguage
+    const cand = (navigator as unknown).language || (navigator as unknown).userLanguage
     if (cand) return String(cand).slice(0, 10)
   }
   return 'fr'
@@ -133,7 +133,7 @@ function buildIdempotencyKey(payload: Omit<CreateCheckoutInput, 'idempotencyKey'
       crypto.getRandomValues(arr)
       salt = `${arr[0].toString(16)}${arr[1].toString(16)}`
     } else if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-      salt = (crypto as any).randomUUID()
+      salt = (crypto as unknown).randomUUID()
     } else {
       salt = Math.random().toString(16).slice(2)
     }
@@ -248,7 +248,7 @@ export async function createCheckoutSession(input: CreateCheckoutInput): Promise
       keepalive: true, // utile si l’utilisateur quitte la page juste après
     })
 
-    let data: any
+    let data: unknown
     try {
       data = await res.json()
     } catch {
@@ -261,7 +261,7 @@ export async function createCheckoutSession(input: CreateCheckoutInput): Promise
     }
 
     return data as CheckoutResponse
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err?.name === 'AbortError') {
       throw new Error('Délai dépassé lors de la création de la session')
     }
@@ -284,3 +284,4 @@ function sanitizeMetadata(meta?: Record<string, string>): Record<string, string>
 }
 
 export default createCheckoutSession
+

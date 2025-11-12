@@ -1,16 +1,19 @@
 // src/components/StickyCartSummary.tsx — PREMIUM (no emoji, SVG icons, a11y/SEO ok) + FIX pointer-events
 'use client'
 
-import Link from '@/components/LocalizedLink'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { useEffect, useMemo, useRef, useState } from 'react'
+
+import Link from '@/components/LocalizedLink'
 import { useCart } from '@/hooks/useCart'
-import { cn } from '@/lib/utils'
 import { formatPrice } from '@/lib/formatPrice'
 import { event, logEvent } from '@/lib/ga'
-import { useTranslations } from 'next-intl'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
+import { cn } from '@/lib/utils'
+
+
 
 type AppLocale = 'fr' | 'en'
 
@@ -72,11 +75,11 @@ export default function StickyCartSummary({
   const prefersReduced = useReducedMotion()
 
   // i18n (fallback si pas de provider) — sans emoji
-  let t: any
+  let t: unknown
   try {
     t = useTranslations('cart')
   } catch {
-    t = ((key: string, _v?: Record<string, any>) => {
+    t = ((key: string, _v?: Record<string, unknown>) => {
       const dict: Record<string, string> = {
         mobile_summary: 'Résumé de votre panier',
         show: 'Afficher',
@@ -98,10 +101,10 @@ export default function StickyCartSummary({
         shipping: 'Livraison',
       }
       return dict[key] ?? key
-    }) as any
+    }) as unknown
   }
-  const tx = (key: string, fallback: string, values?: Record<string, any>) => {
-    try { return values ? t(key as any, values as any) : (t(key as any) as any) } catch { return fallback }
+  const tx = (key: string, fallback: string, values?: Record<string, unknown>) => {
+    try { return values ? t(key as unknown, values as unknown) : (t(key as unknown) as unknown) } catch { return fallback }
   }
 
   // Panier (du contexte)
@@ -128,7 +131,7 @@ export default function StickyCartSummary({
 
   // Totaux dérivés (avec garde-fous)
   const subtotal = useMemo(
-    () => (Number.isFinite(total) ? total : (cart ?? []).reduce((s, it: any) => s + (it?.price || 0) * (it?.quantity || 1), 0)),
+    () => (Number.isFinite(total) ? total : (cart ?? []).reduce((s, it: unknown) => s + (it?.price || 0) * (it?.quantity || 1), 0)),
     [total, cart]
   )
   const remaining = useMemo(
@@ -368,3 +371,4 @@ function Line({
     </div>
   )
 }
+

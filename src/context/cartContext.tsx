@@ -10,11 +10,12 @@ import React, {
   useState,
   useCallback,
 } from 'react';
-import { event as gaEvent, trackAddToCart } from '@/lib/ga';
+
 import {
   createCheckoutSessionFromCart,
   type CheckoutResponse,
 } from '@/lib/checkout';
+import { event as gaEvent, trackAddToCart } from '@/lib/ga';
 
 /** ----------------------- Constantes & env ----------------------- */
 const STORAGE_KEY = 'cart';
@@ -102,11 +103,11 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 const ensureItemShape = (it: Partial<CartItem>): CartItem => ([
   '_id','slug','title','image','price','quantity'
 ] as const).reduce((acc, key) => {
-  (acc as any)[key] = key === 'price'
-    ? (Number.isFinite(Number((it as any)[key])) ? Number((it as any)[key]) : 0)
+  (acc as unknown)[key] = key === 'price'
+    ? (Number.isFinite(Number((it as unknown)[key])) ? Number((it as unknown)[key]) : 0)
     : key === 'quantity'
-      ? clamp(Math.trunc(Number((it as any)[key] ?? 1)), MIN_QTY, MAX_QTY)
-      : String((it as any)[key] ?? (key === 'title' ? 'Produit' : ''));
+      ? clamp(Math.trunc(Number((it as unknown)[key] ?? 1)), MIN_QTY, MAX_QTY)
+      : String((it as unknown)[key] ?? (key === 'title' ? 'Produit' : ''));
   return acc;
 }, { sku: it.sku ? String(it.sku) : undefined } as CartItem);
 
@@ -133,7 +134,7 @@ function readCart(): CartItem[] {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     const arr: unknown[] = Array.isArray(parsed) ? parsed : parsed?.items ?? [];
-    return (arr as any[]).filter(Boolean).map(ensureItemShape);
+    return (arr as unknown[]).filter(Boolean).map(ensureItemShape);
   } catch {
     return [];
   }
@@ -240,7 +241,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (!hydrated.current) return;
     if (writeTimer.current) window.clearTimeout(writeTimer.current);
     writeTimer.current = window.setTimeout(() => writeCart(cart), 80);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [cart]);
 
   useEffect(() => {
@@ -519,3 +520,4 @@ export function useCart(): CartContextValue {
   if (!ctx) throw new Error('useCart must be used inside <CartProvider />');
   return ctx;
 }
+

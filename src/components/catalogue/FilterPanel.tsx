@@ -1,10 +1,11 @@
 // src/components/catalogue/FilterPanel.tsx
 'use client'
 
-import { useEffect, useMemo, useRef, useState, useId } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { cn } from '@/lib/utils'
+import { useEffect, useMemo, useRef, useState, useId } from 'react'
+
 import { event as gaEvent, logEvent, pushDataLayer } from '@/lib/ga'
+import { cn } from '@/lib/utils'
 
 type Props = {
   categories: string[]
@@ -72,7 +73,7 @@ const toKey = (s: string) =>
     .replace(/(^-|-$)/g, '')
 
 /** Dictionnaire catégorie → icône */
-const CAT_ICONS: Record<string, (p: any) => JSX.Element> = {
+const CAT_ICONS: Record<string, (p: unknown) => JSX.Element> = {
   casques: Icon.Headphones,
   claviers: Icon.Keyboard,
   souris: Icon.Mouse,
@@ -114,7 +115,7 @@ export default function FilterPanel({
         if (selected === null && normalized) setSelected(normalized)
       }
     } catch {}
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [])
 
   // --- state -> URL
@@ -256,3 +257,4 @@ export default function FilterPanel({
     </div>
   )
 }
+

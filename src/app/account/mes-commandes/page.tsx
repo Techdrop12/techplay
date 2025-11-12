@@ -3,7 +3,9 @@ export const dynamic = 'force-dynamic'   // ✅ pas de SSG pour une page compte
 export const revalidate = 0              // ✅ toujours frais côté serveur
 
 import { Suspense } from 'react'
+
 import type { Metadata } from 'next'
+
 import OrderList from '@/components/account/OrderList'
 
 export const metadata: Metadata = {

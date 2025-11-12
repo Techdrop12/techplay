@@ -1,9 +1,11 @@
-import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+
 import type { Pack } from '@/types/product'
-import { getPackBySlug } from '@/lib/data'
-import PackDetails from '@/components/PackDetails'
+import type { Metadata } from 'next'
+
 import ProductJsonLd from '@/components/JsonLd/ProductJsonLd'
+import PackDetails from '@/components/PackDetails'
+import { getPackBySlug } from '@/lib/data'
 
 export const revalidate = 1800
 

@@ -1,4 +1,5 @@
 import BlogCard from './BlogCard'
+
 import type { BlogPost } from '@/types/blog'
 
 interface BlogListProps {

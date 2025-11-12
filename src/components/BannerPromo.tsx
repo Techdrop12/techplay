@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
-import Link from '@/components/LocalizedLink'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
+
+import Link from '@/components/LocalizedLink'
 import { cn } from '@/lib/utils'
 
 type Promo = {

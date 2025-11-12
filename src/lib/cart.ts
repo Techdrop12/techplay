@@ -17,7 +17,7 @@ export type CartInput = Omit<CartItem, 'quantity'> & { quantity?: number }
 
 const isBrowser = typeof window !== 'undefined'
 
-function sanitizeItem(i: any): CartItem | null {
+function sanitizeItem(i: unknown): CartItem | null {
   if (!i) return null
   const _id = String(i._id ?? '')
   const slug = String(i.slug ?? '')
@@ -55,7 +55,7 @@ export function saveCart(cart: CartItem[]): void {
     window.dispatchEvent(new CustomEvent('cart-updated', { detail: cart }))
   } catch {
     // quota plein → on évite de crasher
-    // eslint-disable-next-line no-console
+     
     console.warn('[cart] unable to persist cart')
   }
 }
@@ -121,3 +121,4 @@ export function subscribeToCart(cb: (cart: CartItem[]) => void): () => void {
     window.removeEventListener('cart-updated', onCustom as EventListener)
   }
 }
+

@@ -3,9 +3,9 @@ export {}
 
 declare global {
   interface Window {
-    fbq?: (...args: any[]) => void
-    _fbq?: any
-    hj?: (...args: any[]) => void
+    fbq?: (...args: unknown[]) => void
+    _fbq?: unknown
+    hj?: (...args: unknown[]) => void
     _hjSettings?: { hjid: number; hjsv: number }
     tpConsentUpdate?: (p: {
       analytics?: boolean
@@ -16,3 +16,4 @@ declare global {
     }) => void
   }
 }
+

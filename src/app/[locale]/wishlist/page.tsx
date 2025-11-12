@@ -1,13 +1,16 @@
 // src/app/[locale]/wishlist/page.tsx — FINAL (i18n + hook unifié)
 'use client'
 
-import { useEffect, useMemo } from 'react'
 import { useTranslations } from 'next-intl'
-import SEOHead from '@/components/SEOHead'
+import { useEffect, useMemo } from 'react'
+
+import type { Product } from '@/types/product'
+
 import ProductCard from '@/components/ProductCard'
+import SEOHead from '@/components/SEOHead'
 import { useWishlist } from '@/hooks/useWishlist'
 import { sendEvent } from '@/lib/analytics'
-import type { Product } from '@/types/product'
+
 
 export default function WishlistPage() {
   const tSeo = useTranslations('seo')
@@ -51,7 +54,7 @@ export default function WishlistPage() {
             {wishlist.map((product, i) =>
               product ? (
                 <ProductCard
-                  key={(product as any)._id ?? (product as any).slug ?? i}
+                  key={(product as unknown)._id ?? (product as unknown).slug ?? i}
                   product={{
                     ...product,
                     title: product.title ?? 'Product',
@@ -66,3 +69,4 @@ export default function WishlistPage() {
     </>
   )
 }
+

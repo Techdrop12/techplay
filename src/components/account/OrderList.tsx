@@ -1,8 +1,10 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import Link from '@/components/LocalizedLink'
+
 import InvoiceButton from './InvoiceButton'
+
+import Link from '@/components/LocalizedLink'
 import { cn, formatPrice } from '@/lib/utils'
 
 type OrderStatus = 'pending' | 'paid' | 'shipped' | 'delivered' | 'canceled' | string
@@ -126,7 +128,7 @@ export default function OrderList({ orders = [], className }: Props) {
             <span className="sr-only">Trier</span>
             <select
               value={sort}
-              onChange={(e) => setSort(e.target.value as any)}
+              onChange={(e) => setSort(e.target.value as unknown)}
               className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-zinc-900"
               aria-label="Trier les commandes"
             >
@@ -199,3 +201,4 @@ export default function OrderList({ orders = [], className }: Props) {
     </section>
   )
 }
+

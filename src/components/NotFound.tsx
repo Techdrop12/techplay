@@ -1,9 +1,10 @@
 // src/components/NotFound.tsx
 'use client'
 
-import Link from '@/components/LocalizedLink'
-import { useEffect, useMemo, useRef } from 'react'
 import { usePathname, useSearchParams, useRouter } from 'next/navigation'
+import { useEffect, useMemo, useRef } from 'react'
+
+import Link from '@/components/LocalizedLink'
 
 export default function NotFound() {
   const pathname = usePathname()

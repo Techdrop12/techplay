@@ -1,25 +1,26 @@
-// src/app/layout.tsx — Root layout (lang from cookie or Accept-Language), default-locale without prefix + hreflang/canonical
+// src/app/layout.tsx â€” Root layout (lang from cookie or Accept-Language), default-locale without prefix + hreflang/canonical
 import './globals.css'
-import type { Metadata, Viewport } from 'next'
 import { Inter, Sora } from 'next/font/google'
-import { Suspense } from 'react'
-import Script from 'next/script'
-import type React from 'react'
 import { cookies, headers } from 'next/headers'
-
-import Layout from '@/components/layout/Layout'
-import RootLayoutClient from '@/components/RootLayoutClient'
-import AfterIdleClient from '@/components/AfterIdleClient'
-import ThemeProvider from '@/context/themeContext'
-import DarkModeScript from '@/components/DarkModeScript'
-import AccessibilitySkip from '@/components/AccessibilitySkip'
-import StickyFreeShippingBar from '@/components/ui/StickyFreeShippingBar'
-import StickyCartSummary from '@/components/StickyCartSummary'
+import Script from 'next/script'
+import { Suspense } from 'react'
 import { Toaster } from 'react-hot-toast'
-import Tracking from '@/components/Tracking'
+
+import type { Metadata, Viewport } from 'next'
+import type React from 'react'
+
+
+import AccessibilitySkip from '@/components/AccessibilitySkip'
+import AfterIdleClient from '@/components/AfterIdleClient'
 import AppInstallPrompt from '@/components/AppInstallPrompt'
 import ConsentBanner from '@/components/ConsentBanner'
-
+import DarkModeScript from '@/components/DarkModeScript'
+import Layout from '@/components/layout/Layout'
+import RootLayoutClient from '@/components/RootLayoutClient'
+import StickyCartSummary from '@/components/StickyCartSummary'
+import Tracking from '@/components/Tracking'
+import StickyFreeShippingBar from '@/components/ui/StickyFreeShippingBar'
+import ThemeProvider from '@/context/themeContext'
 import {
   LOCALE_COOKIE,
   isLocale,
@@ -46,7 +47,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const acceptLang = (await headers()).get('accept-language') || undefined
   const locale: Locale = isLocale(cookieLocale) ? (cookieLocale as Locale) : pickBestLocale(acceptLang)
 
-  // hreflang/canonical pour la racine (les pages spécifiques peuvent exporter leurs propres alternates)
+  // hreflang/canonical pour la racine (les pages spÃ©cifiques peuvent exporter leurs propres alternates)
   const alternates: Metadata['alternates'] = {
     canonical: SITE_URL,
     languages: {
@@ -58,23 +59,23 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(SITE_URL),
     applicationName: SITE_NAME,
-    title: { default: 'TechPlay – Boutique high-tech innovante', template: '%s | TechPlay' },
+    title: { default: 'TechPlay â€“ Boutique high-tech innovante', template: '%s | TechPlay' },
     description:
-      'TechPlay, votre boutique high-tech : audio, gaming, accessoires et packs exclusifs. Qualité, rapidité, satisfaction garantie.',
+      'TechPlay, votre boutique high-tech : audio, gaming, accessoires et packs exclusifs. QualitÃ©, rapiditÃ©, satisfaction garantie.',
     keywords: ['high-tech', 'gaming', 'audio', 'accessoires', 'e-commerce', 'TechPlay', 'packs exclusifs'],
     openGraph: {
-      title: 'TechPlay – Boutique high-tech innovante',
+      title: 'TechPlay â€“ Boutique high-tech innovante',
       description: 'TechPlay, votre boutique high-tech : audio, gaming, accessoires.',
       url: SITE_URL,
       siteName: SITE_NAME,
-      images: [{ url: DEFAULT_OG, width: 1200, height: 630, alt: 'TechPlay – Boutique high-tech' }],
+      images: [{ url: DEFAULT_OG, width: 1200, height: 630, alt: 'TechPlay â€“ Boutique high-tech' }],
       locale: toOgLocale(locale),
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
-      title: 'TechPlay – Boutique high-tech innovante',
-      description: 'TechPlay…',
+      title: 'TechPlay â€“ Boutique high-tech innovante',
+      description: 'TechPlayâ€¦',
       images: [DEFAULT_OG],
     },
     icons: {
@@ -123,7 +124,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta httpEquiv="content-language" content={currentLocale || DEFAULT_LOCALE} />
         <DarkModeScript />
 
-        {/* Consent Mode v2 par défaut (denied) + helpers globaux */}
+        {/* Consent Mode v2 par dÃ©faut (denied) + helpers globaux */}
         <script
           id="consent-default"
           dangerouslySetInnerHTML={{
@@ -271,3 +272,4 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     </html>
   )
 }
+

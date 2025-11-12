@@ -1,0 +1,5 @@
+# husky
+. "$(dirname "$0")/_/husky.sh"
+
+# Lancer lint-staged (ESLint --fix sur fichiers staged)
+npx --no lint-staged
