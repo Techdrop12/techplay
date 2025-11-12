@@ -1,1 +1,1 @@
-HUSKY_LF=OK | ESLINT_ANY=1 | TS_HEAD=src/app/api/checkout/route.ts(122,47): error TS2322: Type 'unknown' is not assignable to type '"2023-10-16" | undefined'. | COMMIT=ced1cb7
+HUSKY_LF=OK | ESLINT_ANY=1 | TS_HEAD=src/app/api/checkout/route.ts(122,47): error TS2322: Type 'unknown' is not assignable to type '"2023-10-16" | undefined'. | COMMIT=62dda94
