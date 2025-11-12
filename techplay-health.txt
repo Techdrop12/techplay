@@ -1,1 +1,1 @@
-HUSKY_LF=OK | ESLINT_ANY=0 | TS_HEAD=src/app/api/checkout/route.ts(172,11): error TS2322: Type 'unknown' is not assignable to type 'Locale | undefined'. | COMMIT=d4e8dde
+TS_HEAD=src/app/api/checkout/route.ts(2,10): error TS2724: '"@/i18n/config"' has no exported member named 'locales'. Did you mean 'Locale'? | COMMIT=7a84af6

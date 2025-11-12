@@ -1,5 +1,10 @@
-src/app/api/checkout/route.ts(172,11): error TS2322: Type 'unknown' is not assignable to type 'Locale | undefined'.
-src/app/api/checkout/route.ts(194,71): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/checkout/route.ts(2,10): error TS2724: '"@/i18n/config"' has no exported member named 'locales'. Did you mean 'Locale'?
+src/app/api/checkout/route.ts(54,3): error TS2322: Type 'string | undefined' is not assignable to type 'ZodTypeAny'.
+  Type 'undefined' is not assignable to type 'ZodType<any, any, any>'.
+src/app/api/checkout/route.ts(149,29): error TS7006: Parameter 'it' implicitly has an 'any' type.
+src/app/api/checkout/route.ts(187,47): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/app/api/checkout/route.ts(187,50): error TS7006: Parameter 'i' implicitly has an 'any' type.
+src/app/api/checkout/route.ts(206,71): error TS2339: Property 'message' does not exist on type '{}'.
 src/app/api/invoice/route.ts(41,20): error TS2339: Property 'orderId' does not exist on type '{}'.
 src/app/api/invoice/route.ts(41,37): error TS2339: Property 'id' does not exist on type '{}'.
 src/app/api/invoice/route.ts(42,32): error TS2339: Property 'currency' does not exist on type '{}'.

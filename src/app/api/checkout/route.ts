@@ -1,3 +1,15 @@
+import type { Locale } from '@/i18n/config';
+import { locales as __locales } from '@/i18n/config';
+
+function toLocale(input: unknown): Locale | undefined {
+  if (typeof input !== "string") return undefined;
+  const primary = input.toLowerCase().split(/[-_]/)[0];
+  // On valide par rapport à la liste de locales exposée par le projet
+  if ((__locales as readonly string[]).includes(primary)) {
+    return primary as Locale;
+  }
+  return undefined;
+}
 function toAllowedCountries(input: unknown): string[] {
   if (Array.isArray(input)) {
     return input.filter((s): s is string => typeof s === "string").map(s => s.toUpperCase());
@@ -39,7 +51,7 @@ const BodySchema = z.object({
   address: z.string().min(6),
   items: z.array(LineItem).optional(),
   currency: z.enum(['EUR', 'GBP', 'USD']).optional(), // fallback sur items / EUR
-  locale: z.string().optional(),                      // ex: 'fr', 'en'
+  locale: toLocale(z.string().optional()),                      // ex: 'fr', 'en'
   idempotencyKey: z.string().optional(),              // idempotency proposé par le client
 })
 
@@ -169,7 +181,7 @@ export async function POST(request: Request) {
           // Laisse Stripe gérer Apple Pay / Google Pay selon compte + domaine
           automatic_tax: { enabled: false },
           // Localisation de l’UI Checkout
-          locale: (body.locale || 'auto') as unknown, // 'auto' / 'fr' / 'en' …
+          locale: toLocale((body.locale || 'auto') as unknown), // 'auto' / 'fr' / 'en' …
           metadata: {
             address: body.address.slice(0, 500),
             items_count: (body.items?.reduce((a, i) => a + i.quantity, 0) || 1).toString(),
