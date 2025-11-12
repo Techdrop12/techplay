@@ -1,3 +1,8 @@
+function getErrorMessage(e: unknown): string {
+  if (e instanceof Error) return getErrorMessage(e);
+  if (typeof e === "string") return e;
+  try { return JSON.stringify(e); } catch { return String(e); }
+}
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { NextResponse } from 'next/server'
 
@@ -16,7 +21,7 @@ export async function POST(req: Request) {
     if (path) revalidatePath(path)
     return NextResponse.json({ ok: true })
   } catch (e: unknown) {
-    return NextResponse.json({ ok: false, error: e?.message || 'error' }, { status: 500 })
+    return NextResponse.json({ ok: false, error: getErrorMessage(e) || 'error' }, { status: 500 })
   }
 }
 

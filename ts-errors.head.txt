@@ -1,4 +1,3 @@
-src/app/api/admin/revalidate/route.ts(19,53): error TS2339: Property 'message' does not exist on type '{}'.
 src/app/api/checkout/route.ts(122,47): error TS2322: Type 'unknown' is not assignable to type '"2023-10-16" | undefined'.
 src/app/api/checkout/route.ts(156,42): error TS2322: Type 'unknown' is not assignable to type 'AllowedCountry[]'.
 src/app/api/checkout/route.ts(163,11): error TS2322: Type 'unknown' is not assignable to type 'Locale | undefined'.
@@ -148,3 +147,4 @@ src/components/AppInstallPrompt.tsx(96,12): error TS2769: No overload matches th
 src/components/AppInstallPrompt.tsx(99,14): error TS2769: No overload matches this call.
   Overload 1 of 3, '(type: keyof WindowEventMap, listener: (this: Window, ev: Event | MessageEvent<any> | ErrorEvent | PromiseRejectionEvent | ... 27 more ... | PopStateEvent) => any, options?: boolean | ... 1 more ... | undefined): void', gave the following error.
     Argument of type '"beforeinstallprompt"' is not assignable to parameter of type 'keyof WindowEventMap'.
+  Overload 2 of 3, '(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions | undefined): void', gave the following error.

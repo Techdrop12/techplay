@@ -1,1 +1,1 @@
-HUSKY_LF=OK | ESLINT_ANY=1 | TS_HEAD=src/app/api/admin/revalidate/route.ts(19,53): error TS2339: Property 'message' does not exist on type '{}'. | COMMIT=8c2cd43
+HUSKY_LF=OK | ESLINT_ANY=1 | TS_HEAD=src/app/api/checkout/route.ts(122,47): error TS2322: Type 'unknown' is not assignable to type '"2023-10-16" | undefined'. | COMMIT=ced1cb7
