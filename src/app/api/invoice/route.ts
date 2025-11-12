@@ -1,3 +1,14 @@
+function readDiscountCode(x: any, fallback: string = ''): string {
+  if (!x || typeof x !== "object") return fallback
+  const d: any = (x as any).discount
+  const c1 = (d && typeof d === "object") ? d.code : undefined
+  const c2 = (x as any).coupon?.code
+  const c3 = (x as any).promoCode ?? (x as any).promotionCode ?? (x as any).discountCode
+  const v = typeof c1 === "string" ? c1
+        : (typeof c2 === "string" ? c2
+        : (typeof c3 === "string" ? c3 : undefined))
+  return (typeof v === "string" && v.trim()) ? v : fallback
+}
 function readDiscountLabel(x: any, fallback: string = "Remise"): string {
   const hasObj = x && typeof x === "object";
   const d = hasObj ? (x as any).discount : undefined;
