@@ -1,1 +1,1 @@
-TS_HEAD=src/app/api/checkout/route.ts(46,3): error TS2322: Type 'string | undefined' is not assignable to type 'ZodTypeAny'.
+TS_HEAD=src/app/api/checkout/route.ts(176,11): error TS2322: Type 'ZodOptional<ZodString>' is not assignable to type 'Locale | undefined'.

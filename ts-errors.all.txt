@@ -1,8 +1,4 @@
-src/app/api/checkout/route.ts(46,3): error TS2322: Type 'string | undefined' is not assignable to type 'ZodTypeAny'.
-  Type 'undefined' is not assignable to type 'ZodType<any, any, any>'.
-src/app/api/checkout/route.ts(141,29): error TS7006: Parameter 'it' implicitly has an 'any' type.
-src/app/api/checkout/route.ts(179,47): error TS7006: Parameter 'a' implicitly has an 'any' type.
-src/app/api/checkout/route.ts(179,50): error TS7006: Parameter 'i' implicitly has an 'any' type.
+src/app/api/checkout/route.ts(176,11): error TS2322: Type 'ZodOptional<ZodString>' is not assignable to type 'Locale | undefined'.
 src/app/api/checkout/route.ts(198,71): error TS2339: Property 'message' does not exist on type '{}'.
 src/app/api/invoice/route.ts(41,20): error TS2339: Property 'orderId' does not exist on type '{}'.
 src/app/api/invoice/route.ts(41,37): error TS2339: Property 'id' does not exist on type '{}'.
