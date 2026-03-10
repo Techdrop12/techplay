@@ -1,13 +1,12 @@
-// src/components/ProductDetail.tsx — OPTI MAX (SEO/a11y/UX/Perf) — CENTRAL JSON-LD GÉRÉ EN PAGE — FINAL
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
 import Image from 'next/image'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
-import { FaCcVisa, FaCcMastercard, FaCcPaypal } from 'react-icons/fa'
+import { FaCcMastercard, FaCcPaypal, FaCcVisa } from 'react-icons/fa'
 
-import type { Product, Review, AggregateRating } from '@/types/product'
+import type { AggregateRating, Product, Review } from '@/types/product'
 
 import AddToCartButtonAB from '@/components/AddToCartButtonAB'
 import FreeShippingBadge from '@/components/FreeShippingBadge'
@@ -23,20 +22,19 @@ import StickyCartSummary from '@/components/StickyCartSummary'
 import DeliveryEstimate from '@/components/ui/DeliveryEstimate'
 import WishlistButton from '@/components/WishlistButton'
 import {
-  trackViewItem,
+  mapProductToGaItem,
   trackAddToCart,
   trackAddToWishlist,
   trackSelectItem,
-  mapProductToGaItem,
+  trackViewItem,
 } from '@/lib/ga'
 import { DEFAULT_LOCALE, isLocale, type AppLocale } from '@/lib/language'
 import { logEvent } from '@/lib/logEvent'
 import { pixelViewContent } from '@/lib/meta-pixel'
-import { formatPrice, cn } from '@/lib/utils'
+import { cn, formatPrice } from '@/lib/utils'
 
 interface Props {
   product: Product
-  /** string tolérée ici, on normalise juste avant usage */
   locale?: string
 }
 
@@ -56,11 +54,9 @@ function toGaSource(p: Product): GaSource {
   return p as unknown as GaSource
 }
 
-// très petit blur inline (évite un asset supplémentaire)
 const BLUR_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+'
 
-/** Icône “share” (inline, pas d’emoji) */
 function IconShare({ size = 18, className = '' }: { size?: number; className?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className={className}>
@@ -72,18 +68,17 @@ function IconShare({ size = 18, className = '' }: { size?: number; className?: s
   )
 }
 
-/** Cast “safe number” (accepte string/number) */
 const toNum = (v: unknown): number | undefined => {
-  const n = typeof v === 'number' ? v : Number(v)
+  const n = typeof v === "number" ? v : Number(v)
   return Number.isFinite(n) ? n : undefined
 }
 
-/** Détection devise simple (EUR/GBP/USD) */
 function detectCurrency(): 'EUR' | 'GBP' | 'USD' {
   try {
     const htmlLang = typeof document !== 'undefined' ? document.documentElement.lang || '' : ''
     const nav = typeof navigator !== 'undefined' ? navigator.language || '' : ''
     const src = (htmlLang || nav).toLowerCase()
+
     if (src.includes('gb') || src.endsWith('-uk') || src.includes('en-gb')) return 'GBP'
     if (src.includes('us') || src.includes('en-us')) return 'USD'
     if (src.startsWith('en')) return 'USD'
@@ -93,7 +88,6 @@ function detectCurrency(): 'EUR' | 'GBP' | 'USD' {
   }
 }
 
-/** Agrégat reviews robuste (fallback si l’API ne fournit pas aggregateRating) */
 function computeAggregate(
   ratingFromProduct: number | undefined,
   reviews: Review[] | undefined,
@@ -142,12 +136,10 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
   const viewedRef = useRef(false)
   const sectionRef = useRef<HTMLElement | null>(null)
 
-  // zoom/tilt image
   const mediaRef = useRef<HTMLDivElement | null>(null)
   const [zoomed, setZoomed] = useState(false)
   const [origin, setOrigin] = useState<{ x: number; y: number }>({ x: 50, y: 50 })
 
-  // Unpack produit
   const {
     _id,
     slug = '',
@@ -168,15 +160,12 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     reviewsCount,
   } = product ?? {}
 
-  // ✅ Normalisation des prix (tolère string)
   const price = Math.max(0, toNum(priceRaw) ?? 0)
   const oldPrice = toNum(oldPriceRaw)
   const currency = detectCurrency()
 
-  // ✅ Extraction tolérante de `tags`
   const tags: string[] | undefined = (product as Partial<Product> & { tags?: string[] }).tags
 
-  // Galerie (images[] -> max 8)
   const gallery: string[] = useMemo(() => {
     const arr = Array.isArray(images) && images.length ? images : [image].filter(Boolean)
     return Array.from(new Set(arr)).slice(0, 8)
@@ -200,7 +189,6 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
   const lowStock = typeof stock === 'number' && stock > 0 && stock <= 5
   const total = useMemo(() => price * quantity, [price, quantity])
 
-  // Agrégat reviews sécurisé
   const agg = useMemo(
     () => computeAggregate(rating, reviews, aggregateRating),
     [rating, reviews, aggregateRating],
@@ -208,11 +196,6 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
 
   const totalReviews = agg.total || reviewsCount || 0
 
-  /* ------------------------------------------------------------------------ */
-  /*                           Tracking / Recently viewed                     */
-  /* ------------------------------------------------------------------------ */
-
-  // GA4 + Pixel “ViewContent” quand la section devient visible (une seule fois)
   useEffect(() => {
     if (!sectionRef.current || viewedRef.current) return
 
@@ -257,7 +240,6 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             })
           } catch {}
 
-          // Ajout "vu récemment"
           try {
             const key = 'recent:products'
             const prev = JSON.parse(localStorage.getItem(key) || '[]') as RecentProduct[]
@@ -276,34 +258,6 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     return () => io.disconnect()
   }, [product, title, price, _id, slug, image, gallery, currency])
 
-  // Raccourcis clavier
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement)?.tagName
-      const editable =
-        tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable
-
-      if (editable) return
-
-      if (e.key === '+') setQuantity((q) => clamp(q + 1, 1, 99))
-      if (e.key === '-') setQuantity((q) => clamp(q - 1, 1, 99))
-      if (e.key.toLowerCase() === 'a') {
-        e.preventDefault()
-        onAddToCart()
-      }
-      if (e.key.toLowerCase() === 'w') {
-        e.preventDefault()
-        onAddWishlist()
-      }
-      if (e.key === 'ArrowLeft') setActiveIdx((i) => (i > 0 ? i - 1 : i))
-      if (e.key === 'ArrowRight') setActiveIdx((i) => (i < gallery.length - 1 ? i + 1 : i))
-    }
-
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [gallery.length])
-
-  // Handlers e-commerce
   const onAddToCart = useCallback(() => {
     try {
       logEvent({ action: 'add_to_cart', category: 'ecommerce', label: title, value: total })
@@ -332,6 +286,32 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     } catch {}
   }, [title, price, product, currency])
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName
+      const editable =
+        tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable
+
+      if (editable) return
+
+      if (e.key === '+') setQuantity((q) => clamp(q + 1, 1, 99))
+      if (e.key === '-') setQuantity((q) => clamp(q - 1, 1, 99))
+      if (e.key.toLowerCase() === 'a') {
+        e.preventDefault()
+        onAddToCart()
+      }
+      if (e.key.toLowerCase() === 'w') {
+        e.preventDefault()
+        onAddWishlist()
+      }
+      if (e.key === 'ArrowLeft') setActiveIdx((i) => (i > 0 ? i - 1 : i))
+      if (e.key === 'ArrowRight') setActiveIdx((i) => (i < gallery.length - 1 ? i + 1 : i))
+    }
+
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [gallery.length, onAddToCart, onAddWishlist])
+
   const onThumbSelect = (idx: number) => {
     setActiveIdx(idx)
     try {
@@ -344,11 +324,14 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     } catch {}
   }
 
-  // Partage & copie
   const share = async () => {
     try {
       const url = typeof window !== 'undefined' ? window.location.href : ''
-      if (typeof navigator !== 'undefined' && 'share' in navigator && typeof navigator.share === 'function') {
+      if (
+        typeof navigator !== 'undefined' &&
+        'share' in navigator &&
+        typeof navigator.share === 'function'
+      ) {
         await navigator.share({ title, text: title, url })
       } else if (navigator.clipboard) {
         await navigator.clipboard.writeText(url)
@@ -356,10 +339,6 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
       }
     } catch {}
   }
-
-  /* ------------------------------------------------------------------------ */
-  /*                              Image interactions                           */
-  /* ------------------------------------------------------------------------ */
 
   const onPointerMove: React.PointerEventHandler<HTMLDivElement> = (e) => {
     if (!mediaRef.current) return
@@ -387,7 +366,6 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     }
   }
 
-  // Prefetch next/prev images
   useEffect(() => {
     if (typeof window === 'undefined' || gallery.length <= 1) return
     const n = (activeIdx + 1) % gallery.length
@@ -399,7 +377,6 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     })
   }, [activeIdx, gallery])
 
-  // ✅ Normalisation de la locale → AppLocale
   const safeLocale: AppLocale = isLocale(locale) ? locale : DEFAULT_LOCALE
   const skuValue = (product as Partial<Product> & { sku?: string }).sku
 
@@ -418,7 +395,6 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
       itemScope
       itemType="https://schema.org/Product"
     >
-      {/* Galerie */}
       <div className="grid gap-4">
         <div
           ref={mediaRef}
@@ -461,7 +437,6 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             />
           )}
 
-          {/* Badges & pricing overlays */}
           <div className="absolute bottom-4 right-4 z-10">
             <PricingBadge price={price} oldPrice={oldPrice} showDiscountLabel showOldPrice />
           </div>
@@ -484,7 +459,6 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             )}
           </div>
 
-          {/* Actions coin droit */}
           <div className="absolute top-4 right-4 flex gap-2 z-10">
             <button
               onClick={share}
@@ -540,7 +514,6 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         )}
       </div>
 
-      {/* Infos + actions */}
       <div className="flex flex-col justify-between space-y-8">
         <div>
           <h1
@@ -552,7 +525,6 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             {title}
           </h1>
 
-          {/* Microdata extras */}
           {(_id || skuValue) && <meta itemProp="sku" content={String(_id || skuValue)} />}
           {brand && <meta itemProp="brand" content={String(brand)} />}
 
@@ -662,7 +634,6 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             </div>
           )}
 
-          {/* Garanties & infos */}
           <div className="mt-6 grid gap-3 text-sm text-gray-600 dark:text-gray-400">
             <div className="flex items-center gap-2">
               <span aria-hidden>✅</span> Garantie 2 ans & retours sous 30 jours
@@ -676,7 +647,6 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           </div>
         </div>
 
-        {/* Actions */}
         <div className="space-y-6">
           <div className="flex items-center gap-4">
             <label htmlFor="quantity" className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -790,10 +760,8 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         </div>
       </div>
 
-      {/* Résumé sticky (mobile) */}
       <StickyCartSummary locale={safeLocale} />
 
-      {/* Avis */}
       <div className="lg:col-span-2 mt-12" id="reviews" aria-label="Avis clients">
         <div className="mb-6">
           <RatingSummary
@@ -812,8 +780,6 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
 
         <ReviewForm productId={_id} />
       </div>
-
-      {/* NOTE: Le JSON-LD est injecté au niveau de la page (/products/[slug]) via <ProductJsonLd /> */}
     </motion.section>
   )
 }

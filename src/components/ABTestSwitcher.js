@@ -2,6 +2,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+
 import { getABVariant } from '@/lib/ab-test'
 import { logEvent, pushDataLayer } from '@/lib/ga'
 

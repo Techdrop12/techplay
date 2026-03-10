@@ -1,7 +1,5 @@
 'use client';
 
-import Link from '@/components/LocalizedLink'
-import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Package,
@@ -12,6 +10,9 @@ import {
   PlusSquare,
   BarChart,
 } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+
+import Link from '@/components/LocalizedLink'
 
 const links = [
   { href: '/fr/admin/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },

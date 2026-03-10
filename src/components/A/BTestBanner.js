@@ -3,6 +3,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+
 import { logEvent } from '@/lib/logEvent';
 
 export default function ABTestBanner({ variantA, variantB }) {

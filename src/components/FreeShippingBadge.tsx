@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { cn, formatPrice } from '@/lib/utils'
 
-interface FreeShippingBadgeProps {
+export interface FreeShippingBadgeProps {
   price: number
   threshold?: number
   className?: string
@@ -57,6 +57,7 @@ function ConfettiSVG() {
       >
         <circle cx="5" cy="5" r="5" fill="currentColor" className="opacity-80" />
       </motion.svg>
+
       <motion.svg
         initial={{ y: 4, opacity: 0, rotate: 12 }}
         animate={{ y: -12, opacity: 1, rotate: 18 }}
@@ -66,8 +67,17 @@ function ConfettiSVG() {
         viewBox="0 0 10 10"
         className="absolute -top-1 left-3"
       >
-        <rect x="1.5" y="1.5" width="7" height="7" rx="1.5" fill="currentColor" className="opacity-70" />
+        <rect
+          x="1.5"
+          y="1.5"
+          width="7"
+          height="7"
+          rx="1.5"
+          fill="currentColor"
+          className="opacity-70"
+        />
       </motion.svg>
+
       <motion.svg
         initial={{ y: 4, opacity: 0, rotate: 0 }}
         animate={{ y: -9, opacity: 1, rotate: 8 }}
@@ -99,13 +109,62 @@ export default function FreeShippingBadge({
   ringMode = 'conic',
 }: FreeShippingBadgeProps) {
   const prefersReduced = useReducedMotion()
+  const [reachedPersisted, setReachedPersisted] = useState(false)
+  const reachedOnce = useRef(false)
 
-  if (!Number.isFinite(price) || price < 0) return null
-  if (!Number.isFinite(threshold) || threshold <= 0) return null
+  const safePrice = Number.isFinite(price) ? Math.max(0, price) : NaN
+  const safeThreshold = Number.isFinite(threshold) ? threshold : NaN
 
   const autoLocale =
     locale || (typeof document !== 'undefined' ? document.documentElement.lang || 'fr' : 'fr')
   const isFr = String(autoLocale).toLowerCase().startsWith('fr')
+
+  const remaining =
+    Number.isFinite(safePrice) && Number.isFinite(safeThreshold)
+      ? Math.max(0, safeThreshold - safePrice)
+      : 0
+
+  const isEligible =
+    Number.isFinite(safePrice) && Number.isFinite(safeThreshold) ? remaining <= 0 : false
+
+  const progress =
+    Number.isFinite(safePrice) && Number.isFinite(safeThreshold) && safeThreshold > 0
+      ? Math.min(100, Math.round((safePrice / safeThreshold) * 100))
+      : 0
+
+  useEffect(() => {
+    if (!persistKey) return
+    try {
+      setReachedPersisted(sessionStorage.getItem(persistKey) === '1')
+    } catch {}
+  }, [persistKey])
+
+  useEffect(() => {
+    if (isEligible) {
+      if (!reachedOnce.current) {
+        reachedOnce.current = true
+
+        try {
+          onReach?.()
+        } catch {}
+
+        try {
+          window.dataLayer?.push({ event: 'free_shipping_reached', threshold: safeThreshold })
+        } catch {}
+
+        if (persistKey) {
+          try {
+            sessionStorage.setItem(persistKey, '1')
+          } catch {}
+        }
+      }
+    } else {
+      reachedOnce.current = false
+    }
+  }, [isEligible, onReach, persistKey, safeThreshold])
+
+  if (!Number.isFinite(safePrice) || safePrice < 0) return null
+  if (!Number.isFinite(safeThreshold) || safeThreshold <= 0) return null
 
   const T = {
     eligibleShort: isFr ? 'Livraison offerte' : 'Free shipping',
@@ -126,43 +185,7 @@ export default function FreeShippingBadge({
     policy: isFr ? 'Voir conditions' : 'See policy',
   }
 
-  const remaining = Math.max(0, threshold - price)
-  const isEligible = remaining <= 0
-  const progress = Math.min(100, Math.round((price / threshold) * 100))
-
-  const [reachedPersisted, setReachedPersisted] = useState(false)
-
-  useEffect(() => {
-    if (!persistKey) return
-    try {
-      setReachedPersisted(sessionStorage.getItem(persistKey) === '1')
-    } catch {}
-  }, [persistKey])
-
-  const reachedOnce = useRef(false)
-
-  useEffect(() => {
-    if (isEligible) {
-      if (!reachedOnce.current) {
-        reachedOnce.current = true
-        try {
-          onReach?.()
-        } catch {}
-        try {
-          window.dataLayer?.push({ event: 'free_shipping_reached', threshold })
-        } catch {}
-        if (persistKey) {
-          try {
-            sessionStorage.setItem(persistKey, '1')
-          } catch {}
-        }
-      }
-    } else {
-      reachedOnce.current = false
-    }
-  }, [isEligible, onReach, persistKey, threshold])
-
-  const Confetti = () =>
+  const Confetti =
     celebrate && isEligible && !prefersReduced && !reachedPersisted ? <ConfettiSVG /> : null
 
   const ringDim = size === 'sm' ? 36 : 44
@@ -202,7 +225,12 @@ export default function FreeShippingBadge({
             aria-valuetext={isEligible ? (isFr ? '100% atteint' : '100% reached') : `${pct}%`}
             style={{ width: ringDim, height: ringDim }}
           >
-            <svg width={ringDim} height={ringDim} viewBox={`0 0 ${ringDim} ${ringDim}`} className="rotate-[-90deg]">
+            <svg
+              width={ringDim}
+              height={ringDim}
+              viewBox={`0 0 ${ringDim} ${ringDim}`}
+              className="rotate-[-90deg]"
+            >
               <circle
                 cx={ringDim / 2}
                 cy={ringDim / 2}
@@ -228,7 +256,10 @@ export default function FreeShippingBadge({
               />
             </svg>
 
-            <div className="absolute inset-1 grid place-items-center rounded-full bg-white dark:bg-zinc-900" aria-hidden>
+            <div
+              className="absolute inset-1 grid place-items-center rounded-full bg-white dark:bg-zinc-900"
+              aria-hidden
+            >
               {isEligible ? (
                 <IconCheckCircle className="text-green-600 dark:text-green-400" />
               ) : (
@@ -237,7 +268,10 @@ export default function FreeShippingBadge({
             </div>
 
             {isEligible && (
-              <span className="absolute inset-0 rounded-full shadow-glow-accent pointer-events-none" aria-hidden />
+              <span
+                className="absolute inset-0 rounded-full shadow-glow-accent pointer-events-none"
+                aria-hidden
+              />
             )}
           </div>
 
@@ -247,8 +281,10 @@ export default function FreeShippingBadge({
               role={isEligible ? 'status' : 'alert'}
               aria-live="polite"
             >
-              <Confetti />
-              <span>{isEligible ? (minimal ? T.eligibleShort : T.eligibleLong) : T.missing(remaining)}</span>
+              {Confetti}
+              <span>
+                {isEligible ? (minimal ? T.eligibleShort : T.eligibleLong) : T.missing(remaining)}
+              </span>
               {policyHref && (
                 <a
                   href={policyHref}
@@ -266,7 +302,7 @@ export default function FreeShippingBadge({
           </div>
 
           <span className="sr-only" role="status" aria-live="polite">
-            {isEligible ? T.srEligible(threshold) : T.srMissing(remaining, threshold)}
+            {isEligible ? T.srEligible(safeThreshold) : T.srMissing(remaining, safeThreshold)}
           </span>
         </div>
       )
@@ -303,7 +339,10 @@ export default function FreeShippingBadge({
           </div>
 
           {isEligible && (
-            <span className="absolute inset-0 rounded-full shadow-glow-accent pointer-events-none" aria-hidden />
+            <span
+              className="absolute inset-0 rounded-full shadow-glow-accent pointer-events-none"
+              aria-hidden
+            />
           )}
         </div>
 
@@ -313,8 +352,10 @@ export default function FreeShippingBadge({
             role={isEligible ? 'status' : 'alert'}
             aria-live="polite"
           >
-            <Confetti />
-            <span>{isEligible ? (minimal ? T.eligibleShort : T.eligibleLong) : T.missing(remaining)}</span>
+            {Confetti}
+            <span>
+              {isEligible ? (minimal ? T.eligibleShort : T.eligibleLong) : T.missing(remaining)}
+            </span>
             {policyHref && (
               <a
                 href={policyHref}
@@ -332,7 +373,7 @@ export default function FreeShippingBadge({
         </div>
 
         <span className="sr-only" role="status" aria-live="polite">
-          {isEligible ? T.srEligible(threshold) : T.srMissing(remaining, threshold)}
+          {isEligible ? T.srEligible(safeThreshold) : T.srMissing(remaining, safeThreshold)}
         </span>
       </div>
     )
@@ -354,7 +395,7 @@ export default function FreeShippingBadge({
         aria-live="polite"
         className={cn(baseChip, isEligible ? okChip : warnChip)}
       >
-        <Confetti />
+        {Confetti}
         <span aria-hidden="true" className="inline-flex">
           {isEligible ? (
             <IconCheckCircle className="text-green-600 dark:text-green-400" />
@@ -403,7 +444,7 @@ export default function FreeShippingBadge({
       )}
 
       <span className="sr-only" role="status" aria-live="polite">
-        {isEligible ? T.srEligible(threshold) : T.srMissing(remaining, threshold)}
+        {isEligible ? T.srEligible(safeThreshold) : T.srMissing(remaining, safeThreshold)}
       </span>
     </div>
   )

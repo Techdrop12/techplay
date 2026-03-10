@@ -1,8 +1,51 @@
-// src/components/ShippingSimulator.js
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useEffect, useMemo, useRef, useState } from 'react';
+
+const toYMD = (d) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+    d.getDate()
+  ).padStart(2, '0')}`;
+
+const isWeekend = (d) => d.getDay() === 0 || d.getDay() === 6;
+
+const addBusinessDays = (date, days, isHoliday) => {
+  const out = new Date(date);
+  let added = 0;
+
+  while (added < days) {
+    out.setDate(out.getDate() + 1);
+    if (!isWeekend(out) && !isHoliday(out)) added++;
+  }
+
+  return out;
+};
+
+const addCalendarDays = (date, days) => {
+  const out = new Date(date);
+  out.setDate(out.getDate() + days);
+  return out;
+};
+
+const seeded = (seedStr) => {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < seedStr.length; i++) {
+    h ^= seedStr.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+
+  return () => {
+    h += h << 13;
+    h ^= h >>> 7;
+    h += h << 3;
+    h ^= h >>> 17;
+    h += h << 5;
+    return (h >>> 0) / 4294967295;
+  };
+};
+
+const plural = (n, s, p) => (n > 1 ? p : s);
 
 /**
  * ShippingSimulator
@@ -14,13 +57,13 @@ export default function ShippingSimulator({
   maxDays = 5,
   businessDaysOnly = true,
   cutoffHourLocal = 15,
-  holidays = [],                 // ['2025-12-25', '2026-01-01']
-  varianceExtraDays = 1,         // ajoute aléatoirement 0..N jours au max
-  productKey,                    // id/slug; fallback: pathname
+  holidays = [],
+  varianceExtraDays = 1,
+  productKey,
   showDates = true,
   locale = 'fr-FR',
-  timeZone,                      // ex: 'Europe/Paris' (facultatif)
-  persist = 'local',             // 'local' | 'session'
+  timeZone,
+  persist = 'local',
   className = '',
   icon = '🚚',
 }) {
@@ -28,55 +71,18 @@ export default function ShippingSimulator({
     shipToday: false,
     daysMin: minDays,
     daysMax: maxDays,
-    etaStart: null, // Date | null
-    etaEnd: null,   // Date | null
+    etaStart: null,
+    etaEnd: null,
   });
+
   const srRef = useRef(null);
 
-  // --- utils ---
-  const toYMD = (d) =>
-    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
-      d.getDate()
-    ).padStart(2, '0')}`;
-
-  // Set pour lookup O(1) (et robustesse si array recréé)
-  const holidaysSet = useMemo(
-    () => new Set((holidays || []).filter(Boolean)),
-    // JSON stringify pour mémo stable même si nouvelle référence
-    [JSON.stringify(holidays || [])]
+  const normalizedHolidays = useMemo(
+    () => (Array.isArray(holidays) ? holidays.filter(Boolean) : []),
+    [holidays]
   );
 
-  const isHoliday = (d) => holidaysSet.has(toYMD(d));
-  const isWeekend = (d) => d.getDay() === 0 || d.getDay() === 6;
-
-  const addBusinessDays = (date, days) => {
-    const out = new Date(date);
-    let added = 0;
-    while (added < days) {
-      out.setDate(out.getDate() + 1);
-      if (!isWeekend(out) && !isHoliday(out)) added++;
-    }
-    return out;
-  };
-  const addCalendarDays = (date, days) => {
-    const out = new Date(date);
-    out.setDate(out.getDate() + days);
-    return out;
-  };
-  const addDays = businessDaysOnly ? addBusinessDays : addCalendarDays;
-
-  // petit random stable (seed string)
-  const seeded = (seedStr) => {
-    let h = 2166136261 >>> 0;
-    for (let i = 0; i < seedStr.length; i++) {
-      h ^= seedStr.charCodeAt(i);
-      h = Math.imul(h, 16777619);
-    }
-    return () => {
-      h += h << 13; h ^= h >>> 7; h += h << 3; h ^= h >>> 17; h += h << 5;
-      return (h >>> 0) / 4294967295;
-    };
-  };
+  const holidaysSet = useMemo(() => new Set(normalizedHolidays), [normalizedHolidays]);
 
   const fmtDate = useMemo(
     () =>
@@ -88,7 +94,6 @@ export default function ShippingSimulator({
       }),
     [locale, timeZone]
   );
-  const plural = (n, s, p) => (n > 1 ? p : s);
 
   useEffect(() => {
     const now = new Date();
@@ -96,19 +101,26 @@ export default function ShippingSimulator({
     const pathname =
       typeof window !== 'undefined' ? window.location.pathname : '/';
     const rawKey = productKey || pathname;
-    // clé storage “safe”
     const safeKey = encodeURIComponent(rawKey);
-    const LS_KEY = `tp_ship_${safeKey}`;
+    const storageKey = `tp_ship_${safeKey}`;
 
     const storage =
       persist === 'session'
-        ? (typeof window !== 'undefined' ? window.sessionStorage : undefined)
-        : (typeof window !== 'undefined' ? window.localStorage : undefined);
+        ? typeof window !== 'undefined'
+          ? window.sessionStorage
+          : undefined
+        : typeof window !== 'undefined'
+          ? window.localStorage
+          : undefined;
 
-    // Reprendre valeur stable (<24h)
+    const isHoliday = (d) => holidaysSet.has(toYMD(d));
+    const addDays = businessDaysOnly
+      ? (date, days) => addBusinessDays(date, days, isHoliday)
+      : addCalendarDays;
+
     let persisted;
     try {
-      const raw = storage?.getItem(LS_KEY);
+      const raw = storage?.getItem(storageKey);
       if (raw) {
         const obj = JSON.parse(raw);
         if (obj && obj.exp > Date.now()) persisted = obj;
@@ -122,52 +134,56 @@ export default function ShippingSimulator({
       daysBaseMin = persisted.daysBaseMin;
       daysBaseMax = persisted.daysBaseMax;
     } else {
-      // random stable: varie chaque jour, stable pour la journée
       const rnd = seeded(`${rawKey}-${toYMD(now)}`);
-      const extra = Math.floor(rnd() * (Math.max(0, varianceExtraDays) + 1)); // 0..N
+      const extra = Math.floor(rnd() * (Math.max(0, varianceExtraDays) + 1));
       const span = Math.max(0, maxDays - minDays);
-      const bump = Math.floor(rnd() * (span + 1)); // 0..span
+      const bump = Math.floor(rnd() * (span + 1));
+
       daysBaseMin = minDays + Math.min(bump, span);
       daysBaseMax = Math.max(daysBaseMin + 1, maxDays + extra);
 
       try {
         storage?.setItem(
-          LS_KEY,
+          storageKey,
           JSON.stringify({
             daysBaseMin,
             daysBaseMax,
-            exp: Date.now() + 24 * 60 * 60 * 1000, // 24h
+            exp: Date.now() + 24 * 60 * 60 * 1000,
           })
         );
       } catch {}
     }
 
-    // Cutoff & jour ouvré actuel
     const isBeforeCutoff = now.getHours() < cutoffHourLocal;
     const todayIsWorking = !isWeekend(now) && !isHoliday(now);
     const shipToday = isBeforeCutoff && todayIsWorking;
 
-    // Point de départ d’expédition
     const shipStart = new Date(now);
+
     if (!shipToday) {
-      let start = new Date(now);
-      // si weekend/jour férié OU cutoff dépassé -> +1 puis (si businessDaysOnly) saute wkd/holidays
+      const start = new Date(now);
+
       if (isWeekend(start) || isHoliday(start) || !isBeforeCutoff) {
         start.setDate(start.getDate() + 1);
         while (businessDaysOnly && (isWeekend(start) || isHoliday(start))) {
           start.setDate(start.getDate() + 1);
         }
       }
+
       shipStart.setTime(start.getTime());
     }
 
-    // Fenêtre ETA
     const etaStart = addDays(shipStart, daysBaseMin);
     const etaEnd = addDays(shipStart, daysBaseMax);
 
-    setState({ shipToday, daysMin: daysBaseMin, daysMax: daysBaseMax, etaStart, etaEnd });
+    setState({
+      shipToday,
+      daysMin: daysBaseMin,
+      daysMax: daysBaseMax,
+      etaStart,
+      etaEnd,
+    });
 
-    // Live region (SR)
     try {
       if (srRef.current) {
         const txt = shipToday
@@ -180,7 +196,6 @@ export default function ShippingSimulator({
         srRef.current.textContent = txt;
       }
     } catch {}
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     productKey,
     minDays,
@@ -188,10 +203,8 @@ export default function ShippingSimulator({
     businessDaysOnly,
     cutoffHourLocal,
     varianceExtraDays,
-    // holi via Set mémoïsé :
     holidaysSet,
-    locale,
-    timeZone,
+    fmtDate,
     persist,
   ]);
 
@@ -199,15 +212,19 @@ export default function ShippingSimulator({
 
   const line = useMemo(() => {
     if (!daysMin || !daysMax) return null;
+
     const rangeTxt =
       daysMin === daysMax
         ? `${daysMin} ${plural(daysMin, 'jour', 'jours')}`
         : `${daysMin}–${daysMax} jours`;
+
     const datesTxt =
       showDates && etaStart && etaEnd
         ? ` • ${fmtDate.format(etaStart)} → ${fmtDate.format(etaEnd)}`
         : '';
+
     const shipTxt = shipToday ? 'Expédié aujourd’hui' : 'Expédition prochaine';
+
     return `${shipTxt} · Livraison estimée sous ${rangeTxt}${datesTxt}`;
   }, [shipToday, daysMin, daysMax, etaStart, etaEnd, fmtDate, showDates]);
 

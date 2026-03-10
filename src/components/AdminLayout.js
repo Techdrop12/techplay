@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import ToastContainer from '@/components/ToastContainer';
-import AdminSidebar from '@/components/AdminSidebar';
+
 import AdminHeader from '@/components/AdminHeader';
+import AdminSidebar from '@/components/AdminSidebar';
+import ToastContainer from '@/components/ToastContainer';
 
 export default function AdminLayout({ children }) {
   const [accessGranted, setAccessGranted] = useState(false);

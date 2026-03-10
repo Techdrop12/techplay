@@ -130,29 +130,33 @@ const toAbs = (u?: string) =>
   !u ? '' : u.startsWith('http') ? u : typeof window !== 'undefined' ? window.location.origin + u : u
 
 export default function PackCard({ pack, priority = false, className }: PackCardProps) {
-  const {
-    slug,
-    title = 'Pack',
-    description,
-    image,
-    price = 0,
-    oldPrice,
-  } = pack
+  const { slug, title = 'Pack', description, image, price = 0, oldPrice } = pack
 
-  const packRecord: UnknownRecord = isRecord(pack) ? pack : {}
+  const normalized = useMemo(() => {
+    const record: UnknownRecord = isRecord(pack) ? pack : {}
 
-  const images = readImageList(packRecord, ['images'])
-  const compareAtPrice =
-    readNumber(packRecord, ['compareAtPrice', 'compare_at_price', 'referencePrice', 'reference_price'])
+    return {
+      packRecord: record,
+      images: readImageList(record, ['images']),
+      compareAtPrice: readNumber(record, [
+        'compareAtPrice',
+        'compare_at_price',
+        'referencePrice',
+        'reference_price',
+      ]),
+      isNew: readBoolean(record, ['isNew', 'new']),
+      isBestSeller: readBoolean(record, ['isBestSeller', 'bestSeller', 'bestseller']),
+      stock: readNumber(record, ['stock']),
+      items: readArray(record, ['items', 'contents']) ?? [],
+      rating: readNumber(record, ['rating']),
+      reviewsCount: readNumber(record, ['reviewsCount', 'reviews']),
+      sku: readString(record, ['sku']) ?? readIdString(record, ['id']),
+      brand: readString(record, ['brand']),
+    }
+  }, [pack])
 
-  const isNew = readBoolean(packRecord, ['isNew', 'new'])
-  const isBestSeller = readBoolean(packRecord, ['isBestSeller', 'bestSeller', 'bestseller'])
-  const stock = readNumber(packRecord, ['stock'])
-  const items = readArray(packRecord, ['items', 'contents']) ?? []
-  const rating = readNumber(packRecord, ['rating'])
-  const reviewsCount = readNumber(packRecord, ['reviewsCount', 'reviews'])
-  const sku = readString(packRecord, ['sku']) ?? readIdString(packRecord, ['id'])
-  const brand = readString(packRecord, ['brand'])
+  const { images, compareAtPrice, isNew, isBestSeller, stock, items, rating, reviewsCount, sku, brand } =
+    normalized
 
   const prefersReducedMotion = useReducedMotion()
   const [imgLoaded, setImgLoaded] = useState(false)
@@ -294,11 +298,13 @@ export default function PackCard({ pack, priority = false, className }: PackCard
   )
 
   const srId = useId()
-  const describe: string[] = []
-
-  if (typeof discountPct === 'number') describe.push(`Économie ${discountPct}%`)
-  if (lowStock) describe.push('Stock faible')
-  if (outOfStock) describe.push('Rupture')
+  const describe = useMemo(() => {
+    const parts: string[] = []
+    if (typeof discountPct === 'number') parts.push(`Économie ${discountPct}%`)
+    if (lowStock) parts.push('Stock faible')
+    if (outOfStock) parts.push('Rupture')
+    return parts
+  }, [discountPct, lowStock, outOfStock])
 
   const ariaDescribedBy = describe.length > 0 ? srId : undefined
 

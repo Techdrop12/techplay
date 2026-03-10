@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Star } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState, useMemo } from 'react';
 
 function timeAgo(date) {
   const d = new Date(date);

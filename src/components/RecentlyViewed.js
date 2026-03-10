@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+
 import Link from '@/components/LocalizedLink'
 
 export default function RecentlyViewed() {

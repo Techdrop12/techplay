@@ -77,7 +77,8 @@ function readString(record: PackRecord, keys: readonly string[]): string | undef
 function readNumber(record: PackRecord, keys: readonly string[]): number | undefined {
   for (const key of keys) {
     const value = record[key]
-    const parsed = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : NaN
+    const parsed =
+      typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : NaN
     if (Number.isFinite(parsed)) return parsed
   }
   return undefined
@@ -143,7 +144,22 @@ function isPromo(pack: Pack): boolean {
   return getSavingsPercent(pack) > 0
 }
 
-export default function PacksSection({
+function PacksSectionEmpty({ className }: { className?: string }) {
+  return (
+    <section className={cn('max-w-6xl mx-auto px-6 py-16', className)}>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="skeleton h-48 rounded-2xl" aria-hidden="true" />
+        ))}
+      </div>
+      <p className="mt-6 text-center text-sm text-token-text/70" role="status" aria-live="polite">
+        Chargement des packs recommandés…
+      </p>
+    </section>
+  )
+}
+
+function PacksSectionInner({
   packs,
   className,
   showHeader = true,
@@ -166,23 +182,6 @@ export default function PacksSection({
   const [sortBy, setSortBy] = useState<'savings' | 'priceAsc' | 'priceDesc' | 'items'>(initialSort)
   const [filterPromo, setFilterPromo] = useState(false)
   const [filterStock, setFilterStock] = useState(false)
-
-  const isEmpty = !Array.isArray(packs) || packs.length === 0
-
-  if (isEmpty) {
-    return (
-      <section className={cn('max-w-6xl mx-auto px-6 py-16', className)}>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="skeleton h-48 rounded-2xl" aria-hidden="true" />
-          ))}
-        </div>
-        <p className="mt-6 text-center text-sm text-token-text/70" role="status" aria-live="polite">
-          Chargement des packs recommandés…
-        </p>
-      </section>
-    )
-  }
 
   const filteredSorted = useMemo(() => {
     let arr = packs.filter(Boolean)
@@ -280,7 +279,10 @@ export default function PacksSection({
           >
             Voir tous les packs
             <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" className="opacity-90">
-              <path fill="currentColor" d="M13.172 12L8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z" />
+              <path
+                fill="currentColor"
+                d="M13.172 12L8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"
+              />
             </svg>
           </Link>
         </div>
@@ -417,3 +419,13 @@ export default function PacksSection({
   )
 }
 
+export default function PacksSection(props: Props) {
+  const { packs, className } = props
+  const isEmpty = !Array.isArray(packs) || packs.length === 0
+
+  if (isEmpty) {
+    return <PacksSectionEmpty className={className} />
+  }
+
+  return <PacksSectionInner {...props} packs={packs} />
+}

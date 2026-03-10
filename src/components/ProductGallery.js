@@ -1,17 +1,12 @@
-// src/components/ProductGallery.js
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 const BLUR = 'data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=';
 const PLACEHOLDER = '/default.jpg';
 
-/**
- * images: (string | { src: string, kind?: 'image'|'video', poster?: string })[]
- * - rétro-compatible: un simple tableau de strings fonctionne comme avant.
- */
 export default function ProductGallery({
   images = [],
   altBase = 'Image du produit',
@@ -19,13 +14,11 @@ export default function ProductGallery({
   startIndex = 0,
   onIndexChange,
   loop = true,
-  // options bonus (facultatives)
   edgeFade = true,
   showIndex = true,
 }) {
   const prefersReducedMotion = useReducedMotion();
 
-  /** Normalisation des médias (string -> {src, kind:'image'}) */
   const media = useMemo(() => {
     const arr = Array.isArray(images) ? images : [];
     return arr
@@ -39,33 +32,45 @@ export default function ProductGallery({
   }, [images]);
 
   const [index, setIndex] = useState(
-    Number.isFinite(startIndex) ? Math.max(0, Math.min(startIndex, Math.max(0, media.length - 1))) : 0
+    Number.isFinite(startIndex)
+      ? Math.max(0, Math.min(startIndex, Math.max(0, media.length - 1)))
+      : 0
   );
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
-  // zoom/pan dans la lightbox
-  const [zoom, setZoom] = useState(1); // 1..3
-  const [origin, setOrigin] = useState({ x: 50, y: 50 });
+  const [zoom, setZoom] = useState(1);
   const [dragging, setDragging] = useState(false);
   const lastPosRef = useRef({ x: 0, y: 0 });
-  const panRef = useRef({ x: 0, y: 0 }); // translateX/Y en px
+  const panRef = useRef({ x: 0, y: 0 });
 
-  // erreurs d’images: { [i]: true } -> fallback
   const [imgErrors, setImgErrors] = useState({});
 
-  // Refs & a11y
   const thumbsRef = useRef(null);
   const thumbBtnsRef = useRef([]);
   const lastFocusedRef = useRef(null);
   const lightboxRef = useRef(null);
   const liveRef = useRef(null);
 
-  // Gestes tactiles (lightbox)
   const touchStartX = useRef(0);
   const touchDeltaX = useRef(0);
   const pinchStartDist = useRef(null);
 
-  // Clamp index si la liste change
+  const goNext = useCallback(() => {
+    setIndex((prev) => {
+      if (!media.length) return 0;
+      const nextIndex = prev + 1;
+      return nextIndex >= media.length ? (loop ? 0 : media.length - 1) : nextIndex;
+    });
+  }, [media.length, loop]);
+
+  const goPrev = useCallback(() => {
+    setIndex((prev) => {
+      if (!media.length) return 0;
+      const nextIndex = prev - 1;
+      return nextIndex < 0 ? (loop ? media.length - 1 : 0) : nextIndex;
+    });
+  }, [media.length, loop]);
+
   useEffect(() => {
     if (!media.length) setIndex(0);
     else if (index > media.length - 1) setIndex(media.length - 1);
@@ -74,12 +79,12 @@ export default function ProductGallery({
   const current = media[index] || media[0];
   const isImage = current?.kind !== 'video';
 
-  // Préchargement des voisins (images uniquement)
   useEffect(() => {
     if (typeof window === 'undefined' || media.length <= 1) return;
-    const n = media[(index + 1) % media.length];
-    const p = media[(index - 1 + media.length) % media.length];
-    [n, p]
+    const nextMedia = media[(index + 1) % media.length];
+    const prevMedia = media[(index - 1 + media.length) % media.length];
+
+    [nextMedia, prevMedia]
       .filter((m) => m && m.kind !== 'video')
       .forEach((m) => {
         const img = new window.Image();
@@ -87,10 +92,8 @@ export default function ProductGallery({
       });
   }, [index, media]);
 
-  // notifier parent
   useEffect(() => {
     onIndexChange?.(index);
-    // live region SR
     try {
       if (liveRef.current) {
         liveRef.current.textContent = `Image ${index + 1} sur ${media.length}`;
@@ -98,11 +101,11 @@ export default function ProductGallery({
     } catch {}
   }, [index, media.length, onIndexChange]);
 
-  // Scroll auto vers la miniature active
   useEffect(() => {
     const container = thumbsRef.current;
     const btn = thumbBtnsRef.current[index];
     if (!container || !btn) return;
+
     const btnRect = btn.getBoundingClientRect();
     const contRect = container.getBoundingClientRect();
     const visible =
@@ -120,7 +123,6 @@ export default function ProductGallery({
     }
   }, [index]);
 
-  // Lightbox: focus/scroll body
   useEffect(() => {
     if (lightboxOpen) {
       lastFocusedRef.current = document.activeElement;
@@ -128,7 +130,6 @@ export default function ProductGallery({
       setTimeout(() => {
         lightboxRef.current?.querySelector('[data-close]')?.focus?.();
       }, 0);
-      // reset zoom/pan
       setZoom(1);
       panRef.current = { x: 0, y: 0 };
     } else {
@@ -136,82 +137,90 @@ export default function ProductGallery({
       const btn = thumbBtnsRef.current[index];
       btn?.focus?.({ preventScroll: true });
     }
+
     return () => {
       document.body.style.overflow = '';
     };
   }, [lightboxOpen, index]);
 
-  // Clavier global en lightbox (et trap)
   useEffect(() => {
     if (!lightboxOpen) return;
+
     const onKey = (e) => {
-      if (e.key === 'ArrowRight') { e.preventDefault(); goNext(); }
-      else if (e.key === 'ArrowLeft') { e.preventDefault(); goPrev(); }
-      else if (e.key === 'Escape') { e.preventDefault(); setLightboxOpen(false); }
-      else if ((e.key === '+' || e.key === '=') && isImage) { e.preventDefault(); setZoom((z) => Math.min(3, z + 0.2)); }
-      else if ((e.key === '-' || e.key === '_') && isImage) { e.preventDefault(); setZoom((z) => Math.max(1, z - 0.2)); }
-      else if (e.key === '0' && isImage) { e.preventDefault(); setZoom(1); panRef.current = { x: 0, y: 0 }; }
-      else if (e.key === 'Tab') {
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        goNext();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        goPrev();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        setLightboxOpen(false);
+      } else if ((e.key === '+' || e.key === '=') && isImage) {
+        e.preventDefault();
+        setZoom((z) => Math.min(3, z + 0.2));
+      } else if ((e.key === '-' || e.key === '_') && isImage) {
+        e.preventDefault();
+        setZoom((z) => Math.max(1, z - 0.2));
+      } else if (e.key === '0' && isImage) {
+        e.preventDefault();
+        setZoom(1);
+        panRef.current = { x: 0, y: 0 };
+      } else if (e.key === 'Tab') {
         const root = lightboxRef.current;
         if (!root) return;
-        const focusables = root.querySelectorAll('button,[href],[tabindex]:not([tabindex="-1"])');
+        const focusables = root.querySelectorAll(
+          'button,[href],[tabindex]:not([tabindex="-1"])'
+        );
         if (!focusables.length) return;
         const first = focusables[0];
         const last = focusables[focusables.length - 1];
         const active = document.activeElement;
-        if (e.shiftKey && active === first) { e.preventDefault(); last.focus(); }
-        else if (!e.shiftKey && active === last) { e.preventDefault(); first.focus(); }
+        if (e.shiftKey && active === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && active === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
     };
+
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [lightboxOpen, isImage]);
-
-  // Navigation
-  const goNext = useCallback(() => {
-    if (!media.length) return;
-    setIndex((prev) => {
-      const nextIndex = prev + 1;
-      return nextIndex >= media.length ? (loop ? 0 : media.length - 1) : nextIndex;
-    });
-  }, [media.length, loop]);
-
-  const goPrev = useCallback(() => {
-    if (!media.length) return;
-    setIndex((prev) => {
-      const nextIndex = prev - 1;
-      return nextIndex < 0 ? (loop ? media.length - 1 : 0) : nextIndex;
-    });
-  }, [media.length, loop]);
+  }, [lightboxOpen, isImage, goNext, goPrev]);
 
   const handleThumbClick = (i) => setIndex(i);
 
-  // Roving tabIndex sur vignettes (flèches)
   const onThumbsKeyDown = (e) => {
-    if (!['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(e.key)) return;
+    if (!['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(e.key)) {
+      return;
+    }
+
     e.preventDefault();
     let next = index;
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = Math.min(media.length - 1, index + 1);
     if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = Math.max(0, index - 1);
     if (e.key === 'Home') next = 0;
     if (e.key === 'End') next = media.length - 1;
+
     setIndex(next);
     thumbBtnsRef.current[next]?.focus?.();
   };
 
-  // clavier sur image principale (hors lightbox)
   const onMainKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       setLightboxOpen(true);
     } else if (e.key === 'ArrowRight') {
-      e.preventDefault(); goNext();
+      e.preventDefault();
+      goNext();
     } else if (e.key === 'ArrowLeft') {
-      e.preventDefault(); goPrev();
+      e.preventDefault();
+      goPrev();
     }
   };
 
-  // Touch swipe en lightbox (et pinch-to-zoom)
   const onTouchStart = (e) => {
     if (!lightboxOpen) return;
     if (e.touches.length === 2) {
@@ -223,35 +232,40 @@ export default function ProductGallery({
       touchDeltaX.current = 0;
     }
   };
+
   const onTouchMove = (e) => {
     if (!lightboxOpen) return;
+
     if (e.touches.length === 2 && isImage) {
       const [a, b] = e.touches;
       const d = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
       if (pinchStartDist.current) {
-        const delta = (d - pinchStartDist.current) / 200; // sensibilité
+        const delta = (d - pinchStartDist.current) / 200;
         setZoom((z) => Math.max(1, Math.min(3, z + delta)));
       }
     } else {
       touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
     }
   };
+
   const onTouchEnd = () => {
     if (!lightboxOpen) return;
+
     if (pinchStartDist.current != null) {
       pinchStartDist.current = null;
       return;
     }
+
     const abs = Math.abs(touchDeltaX.current);
     if (abs > 40) {
       if (touchDeltaX.current < 0) goNext();
       else goPrev();
     }
+
     touchStartX.current = 0;
     touchDeltaX.current = 0;
   };
 
-  // Wheel zoom (desktop) + pan à la souris
   const onWheel = (e) => {
     if (!lightboxOpen || !isImage) return;
     if (!e.ctrlKey && Math.abs(e.deltaY) < 10) return;
@@ -264,6 +278,7 @@ export default function ProductGallery({
     setDragging(true);
     lastPosRef.current = { x: e.clientX, y: e.clientY };
   };
+
   const onPointerMove = (e) => {
     if (!dragging || !isImage || zoom <= 1) return;
     const dx = e.clientX - lastPosRef.current.x;
@@ -274,9 +289,12 @@ export default function ProductGallery({
       y: panRef.current.y + dy,
     };
   };
+
   const onPointerUp = () => setDragging(false);
 
-  const imgOnError = (i) => setImgErrors((m) => ({ ...m, [i]: true }));
+  const imgOnError = (i) => {
+    setImgErrors((m) => ({ ...m, [i]: true }));
+  };
 
   return (
     <div
@@ -284,10 +302,8 @@ export default function ProductGallery({
       aria-roledescription="carousel"
       aria-label="Galerie produit"
     >
-      {/* Live region pour lecteur d’écran */}
       <span ref={liveRef} className="sr-only" role="status" aria-live="polite" />
 
-      {/* Miniatures */}
       <div
         ref={thumbsRef}
         className="flex md:flex-col gap-2 md:w-24 overflow-x-auto md:overflow-y-auto mb-4 scroll-smooth"
@@ -298,10 +314,13 @@ export default function ProductGallery({
         {media.map((m, i) => {
           const selected = i === index;
           const src = imgErrors[i] ? PLACEHOLDER : m.src;
+
           return (
             <button
               key={(src || PLACEHOLDER) + i}
-              ref={(el) => (thumbBtnsRef.current[i] = el)}
+              ref={(el) => {
+                thumbBtnsRef.current[i] = el;
+              }}
               onClick={() => handleThumbClick(i)}
               type="button"
               className={[
@@ -337,7 +356,6 @@ export default function ProductGallery({
         })}
       </div>
 
-      {/* Image/Média principal */}
       <div className="relative">
         <motion.button
           key={current?.src || PLACEHOLDER}
@@ -350,7 +368,6 @@ export default function ProductGallery({
           className="relative w-full aspect-[4/3] md:aspect-square cursor-zoom-in rounded-2xl overflow-hidden shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           aria-label="Agrandir le média"
         >
-          {/* Edge fade pour le relief visuel */}
           {edgeFade && (
             <>
               <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-black/15 to-transparent z-[1]" />
@@ -384,7 +401,6 @@ export default function ProductGallery({
             </video>
           )}
 
-          {/* Compteur */}
           {showIndex && media.length > 1 && (
             <span
               className="absolute bottom-2 left-2 text-xs bg-black/60 text-white px-2 py-1 rounded z-[2]"
@@ -394,13 +410,11 @@ export default function ProductGallery({
             </span>
           )}
 
-          {/* Aide zoom */}
           <span className="absolute bottom-2 right-2 text-xs bg-black/70 text-white px-2 py-1 rounded z-[2]">
             Cliquer pour zoom
           </span>
         </motion.button>
 
-        {/* Flèches navigation rapide (desktop) */}
         {media.length > 1 && (
           <>
             <button
@@ -423,7 +437,6 @@ export default function ProductGallery({
         )}
       </div>
 
-      {/* Lightbox */}
       <AnimatePresence>
         {lightboxOpen && (
           <motion.div
@@ -490,7 +503,6 @@ export default function ProductGallery({
                 </video>
               )}
 
-              {/* Contrôles */}
               {media.length > 1 && (
                 <>
                   <button
@@ -513,10 +525,10 @@ export default function ProductGallery({
               )}
 
               <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-white/90">
-                {index + 1}/{media.length}{isImage && ` — zoom ${Math.round(zoom * 100)}%`}
+                {index + 1}/{media.length}
+                {isImage && ` — zoom ${Math.round(zoom * 100)}%`}
               </div>
 
-              {/* Boutons zoom (images) */}
               {isImage && (
                 <div className="absolute top-2 left-2 flex gap-2">
                   <button
@@ -537,7 +549,10 @@ export default function ProductGallery({
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setZoom(1); panRef.current = { x: 0, y: 0 }; }}
+                    onClick={() => {
+                      setZoom(1);
+                      panRef.current = { x: 0, y: 0 };
+                    }}
                     aria-label="Réinitialiser le zoom"
                     className="h-10 px-3 rounded-full bg-white/20 text-white text-sm backdrop-blur hover:bg-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                   >

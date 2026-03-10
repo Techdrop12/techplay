@@ -3,8 +3,8 @@
 // - Par défaut : *soft-delete* (archive=true) au lieu de deleteMany.
 // - Options : months, onlyOutOfStock, mode ('soft' | 'hard'), dryRun, batchSize.
 
-import dbConnect from '../dbConnect.js'
 import Product from '../../models/Product.js'
+import dbConnect from '../dbConnect.js'
 
 /**
  * @typedef {Object} CleanOptions

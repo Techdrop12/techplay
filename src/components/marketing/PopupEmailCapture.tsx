@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 type Props = {
   delayMs?: number
@@ -46,7 +46,7 @@ export default function PopupEmailCapture({
     [hideOnRoutes, pathname]
   )
 
-  const isDismissed = () => {
+  const isDismissed = useCallback(() => {
     try {
       const raw = localStorage.getItem(dismissKey)
       const until = raw ? parseInt(raw, 10) : 0
@@ -54,21 +54,32 @@ export default function PopupEmailCapture({
     } catch {
       return false
     }
-  }
+  }, [dismissKey])
 
-  const persistDismiss = () => {
+  const persistDismiss = useCallback(() => {
     try {
       const until = Date.now() + ttlDays * 24 * 60 * 60 * 1000
       localStorage.setItem(dismissKey, String(until))
     } catch {}
-  }
+  }, [dismissKey, ttlDays])
+
+  const announce = useCallback((msg: string) => {
+    setStatus(msg)
+    if (srRef.current) srRef.current.textContent = msg
+  }, [])
+
+  const close = useCallback(() => {
+    setOpen(false)
+    persistDismiss()
+    announce('Fenêtre fermée')
+  }, [announce, persistDismiss])
 
   useEffect(() => {
     if (hiddenByRoute || isDismissed()) return
 
     const timer = window.setTimeout(() => setOpen(true), delayMs)
     return () => clearTimeout(timer)
-  }, [hiddenByRoute, delayMs])
+  }, [hiddenByRoute, isDismissed, delayMs])
 
   useEffect(() => {
     if (!open) return
@@ -84,18 +95,7 @@ export default function PopupEmailCapture({
 
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [open])
-
-  const announce = (msg: string) => {
-    setStatus(msg)
-    if (srRef.current) srRef.current.textContent = msg
-  }
-
-  const close = () => {
-    setOpen(false)
-    persistDismiss()
-    announce('Fenêtre fermée')
-  }
+  }, [open, close])
 
   const onBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) close()

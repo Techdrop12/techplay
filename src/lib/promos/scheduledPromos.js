@@ -1,6 +1,6 @@
 // src/lib/promos/scheduledPromos.js
-import dbConnect from '../dbConnect';
 import Product from '../../models/Product';
+import dbConnect from '../dbConnect';
 
 /**
  * Convention: champ product.promo = { startDate, endDate, percent?, price? }

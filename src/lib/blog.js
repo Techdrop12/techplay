@@ -2,6 +2,7 @@
 // Gestion des articles (recherche, filtres, pagination, related) – server-only
 import 'server-only'
 import dbConnect from './dbConnect'
+
 import Blog from '@/models/Blog'
 
 /** ---------- Config ---------- */

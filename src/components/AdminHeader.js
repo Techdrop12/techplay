@@ -1,7 +1,7 @@
 'use client';
 
-import { useSession, signOut } from 'next-auth/react';
 import { LogOut, Menu, User } from 'lucide-react';
+import { useSession, signOut } from 'next-auth/react';
 import { useState } from 'react';
 
 export default function AdminHeader() {

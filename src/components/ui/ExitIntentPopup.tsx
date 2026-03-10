@@ -1,7 +1,7 @@
-// src/components/ui/ExitIntentPopup.tsx
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { usePathname } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import Link from '@/components/LocalizedLink'
 
@@ -35,6 +35,7 @@ export default function ExitIntentPopup({
   ctaHref = '/commande',
   promoCode = 'WELCOME10',
 }: Props) {
+  const pathname = usePathname() || ''
   const [open, setOpen] = useState(false)
   const [eligible, setEligible] = useState(!requireCartItems)
   const timerRef = useRef<number | null>(null)
@@ -47,12 +48,10 @@ export default function ExitIntentPopup({
   }, [])
 
   const hiddenByRoute = useMemo(() => {
-    if (!isBrowser()) return false
-    const path = window.location.pathname || ''
-    return hideOnRoutes.some((route) => path.startsWith(route))
-  }, [hideOnRoutes])
+    return hideOnRoutes.some((route) => pathname.startsWith(route))
+  }, [hideOnRoutes, pathname])
 
-  const isDismissed = () => {
+  const isDismissed = useCallback(() => {
     if (!isBrowser()) return false
     try {
       const raw = localStorage.getItem(storageKey)
@@ -61,15 +60,21 @@ export default function ExitIntentPopup({
     } catch {
       return false
     }
-  }
+  }, [storageKey])
 
-  const persistDismiss = () => {
+  const persistDismiss = useCallback(() => {
     if (!isBrowser()) return
     try {
       const until = Date.now() + ttlDays * 24 * 60 * 60 * 1000
       localStorage.setItem(storageKey, String(until))
     } catch {}
-  }
+  }, [storageKey, ttlDays])
+
+  const close = useCallback(() => {
+    setOpen(false)
+    persistDismiss()
+    pushDL('exit_intent_closed')
+  }, [persistDismiss])
 
   useEffect(() => {
     if (!isBrowser() || !requireCartItems) return
@@ -113,13 +118,7 @@ export default function ExitIntentPopup({
 
     document.addEventListener('mouseout', onMouseOut)
     return () => document.removeEventListener('mouseout', onMouseOut)
-  }, [eligible, hiddenByRoute, triggerAtTopY])
-
-  const close = () => {
-    setOpen(false)
-    persistDismiss()
-    pushDL('exit_intent_closed')
-  }
+  }, [eligible, hiddenByRoute, triggerAtTopY, isDismissed])
 
   useEffect(() => {
     if (!open || !isBrowser()) return
@@ -133,7 +132,7 @@ export default function ExitIntentPopup({
 
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [open])
+  }, [open, close])
 
   const onBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) close()

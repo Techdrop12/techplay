@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { getRecentProducts } from '@/lib/recentProducts'
-import Link from '@/components/LocalizedLink'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
+
+import Link from '@/components/LocalizedLink'
+import { getRecentProducts } from '@/lib/recentProducts'
 
 export default function RecentProducts() {
   const [products, setProducts] = useState([])

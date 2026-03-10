@@ -1,4 +1,3 @@
-// src/components/ConsentBanner.tsx
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
@@ -76,9 +75,7 @@ function applyConsent(p: Prefs) {
   } catch {}
 }
 
-export default function ConsentBanner() {
-  if (DISABLED) return null
-
+function ConsentBannerInner() {
   const [open, setOpen] = useState(false)
   const [prefs, setPrefs] = useState<Prefs>({
     analytics: false,
@@ -145,8 +142,6 @@ export default function ConsentBanner() {
     return () => window.removeEventListener('keydown', onKey)
   }, [open])
 
-  if (!show) return null
-
   const acceptAll = () => {
     const p: Prefs = { analytics: true, ads: true, functionality: true }
     savePrefs(p)
@@ -176,6 +171,8 @@ export default function ConsentBanner() {
     })
     setShow(false)
   }
+
+  if (!show) return null
 
   return (
     <div
@@ -295,4 +292,9 @@ export default function ConsentBanner() {
       </div>
     </div>
   )
+}
+
+export default function ConsentBanner() {
+  if (DISABLED) return null
+  return <ConsentBannerInner />
 }

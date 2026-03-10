@@ -1,8 +1,9 @@
 // ✅ /src/components/DynamicPromoBanner.js (promo selon panier, date…)
 'use client';
 
-import { useCart } from '@/context/cartContext';
 import { useState, useEffect } from 'react';
+
+import { useCart } from '@/context/cartContext';
 
 export default function DynamicPromoBanner() {
   const { cart } = useCart();

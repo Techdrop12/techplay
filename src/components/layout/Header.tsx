@@ -3,7 +3,7 @@
 
 import NextLink from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
 
 import Logo from '../Logo'
 
@@ -11,10 +11,10 @@ import MobileNav from './MobileNav'
 
 import Link from '@/components/LocalizedLink'
 import {
-  SearchIcon as Search,
+  CartIcon as Cart,
   FlameIcon as Flame,
   HeartIcon as Heart,
-  CartIcon as Cart,
+  SearchIcon as Search,
   UserIcon as User,
 } from '@/components/ui/premium-icons'
 import ThemeToggle from '@/components/ui/ThemeToggle'
@@ -128,7 +128,7 @@ const SCROLL_HIDE_OFFSET = 80
 const HOVER_PREFETCH_DELAY = 120
 const PLACEHOLDER_MS = 4000
 
-const ActionBadge = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+const ActionBadge = ({ children, className }: { children: ReactNode; className?: string }) => (
   <span
     className={cn(
       'inline-flex h-9 w-9 items-center justify-center rounded-xl',
@@ -235,7 +235,7 @@ export default function Header() {
 
   const trends: string[] = useMemo(() => [...STR[locale].trends], [locale])
   const [placeholder, setPlaceholder] = useState<string>(() => trends[0] ?? '')
-  const saveData = useRef<boolean>(false)
+  const saveData = useRef(false)
 
   const [catOpen, setCatOpen] = useState(false)
   const catBtnRef = useRef<HTMLButtonElement | null>(null)
@@ -269,6 +269,7 @@ export default function Header() {
         catBtnRef.current?.focus()
       }
     }
+
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [catOpen])
@@ -280,6 +281,7 @@ export default function Header() {
       if (catPanelRef.current?.contains(target) || catBtnRef.current?.contains(target)) return
       setCatOpen(false)
     }
+
     window.addEventListener('mousedown', onClick)
     return () => window.removeEventListener('mousedown', onClick)
   }, [catOpen])
@@ -338,7 +340,8 @@ export default function Header() {
       }
 
       if (e.key === 'Escape' && searchRef.current === document.activeElement) {
-        (e.target as HTMLInputElement | null)?.blur?.()
+        const input = e.target as HTMLInputElement | null
+        input?.blur?.()
       }
     }
 
@@ -359,19 +362,22 @@ export default function Header() {
   }, [trends])
 
   useEffect(() => {
+    const timers = prefetchTimers.current
+
     return () => {
-      prefetchTimers.current.forEach((timer) => clearTimeout(timer))
-      prefetchTimers.current.clear()
+      timers.forEach((timer) => clearTimeout(timer))
+      timers.clear()
     }
   }, [])
 
   const isActive = (href: string) => {
     const localized = L(href)
-    return localized === pathname || pathname.startsWith(localized + '/')
+    return localized === pathname || pathname.startsWith(`${localized}/`)
   }
 
   const prefetchViaLink = (href: string) => {
     if (saveData.current) return
+
     try {
       router.prefetch(href)
       const el = document.createElement('link')
@@ -454,7 +460,7 @@ export default function Header() {
         hidden ? '-translate-y-full' : 'translate-y-0'
       )}
     >
-      <div className="container-app flex h-16 md:h-20 items-center justify-between gap-2 sm:gap-3">
+      <div className="container-app flex h-16 items-center justify-between gap-2 sm:gap-3 md:h-20">
         <NextLink
           href={L('/')}
           prefetch={false}
@@ -479,7 +485,7 @@ export default function Header() {
           role="search"
           aria-label={t.searchAria}
           onSubmit={onSearchSubmit}
-          className="relative hidden md:flex min-w-0 flex-1 items-center lg:max-w-md xl:max-w-lg"
+          className="relative hidden min-w-0 flex-1 items-center md:flex lg:max-w-md xl:max-w-lg"
         >
           <label htmlFor="header-search" className="sr-only">
             {t.searchAria}
@@ -506,15 +512,18 @@ export default function Header() {
             aria-controls="search-status"
             aria-describedby="search-hint"
           />
+
           <datalist id="header-search-suggestions">
             {trends.map((s) => (
               <option value={s} key={s} />
             ))}
           </datalist>
+
           <div id="search-hint" className="sr-only">
             {t.searchHint}
           </div>
           <div id="search-status" aria-live="polite" aria-atomic="true" className="sr-only" />
+
           <div className="absolute inset-y-0 right-1.5 flex items-center">
             <button
               type="submit"
@@ -529,7 +538,7 @@ export default function Header() {
         </form>
 
         <nav
-          className="hidden lg:flex gap-5 xl:gap-7 tracking-tight font-medium text-token-text text-[15px] xl:text-base whitespace-nowrap"
+          className="hidden gap-5 whitespace-nowrap text-[15px] font-medium tracking-tight text-token-text lg:flex xl:gap-7 xl:text-base"
           aria-label={t.headerNavAria}
         >
           {LINKS.map(({ href, labelKey }) => {
@@ -556,9 +565,9 @@ export default function Header() {
                     onBlur={() => closeCats(80)}
                     onMouseDown={(e) => e.preventDefault()}
                     className={cn(
-                      'relative transition-colors duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded-sm px-0.5',
+                      'group relative rounded-sm px-0.5 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]',
                       active
-                        ? 'text-[hsl(var(--accent))] font-semibold after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-[hsl(var(--accent))]'
+                        ? 'font-semibold text-[hsl(var(--accent))] after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-[hsl(var(--accent))]'
                         : 'hover:text-[hsl(var(--accent))] focus-visible:text-[hsl(var(--accent))]'
                     )}
                     data-gtm="header_mega_btn"
@@ -582,8 +591,8 @@ export default function Header() {
                       'border-token-border bg-token-surface/90 shadow-2xl backdrop-blur supports-backdrop:bg-token-surface/80',
                       'transition-all duration-200',
                       catOpen
-                        ? 'pointer-events-auto opacity-100 translate-y-0'
-                        : 'pointer-events-none opacity-0 -translate-y-1'
+                        ? 'pointer-events-auto translate-y-0 opacity-100'
+                        : 'pointer-events-none -translate-y-1 opacity-0'
                     )}
                     onFocus={openCats}
                     onBlur={() => closeCats(80)}
@@ -591,7 +600,10 @@ export default function Header() {
                     tabIndex={catOpen ? 0 : -1}
                   >
                     <div className="grid grid-cols-1 gap-2 p-3 md:grid-cols-3 md:p-4">
-                      <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:col-span-2 md:gap-3" role="none">
+                      <ul
+                        className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:col-span-2 md:gap-3"
+                        role="none"
+                      >
                         {categories.map((c) => (
                           <li key={c.href} role="none">
                             <Link
@@ -603,9 +615,8 @@ export default function Header() {
                               onFocus={() => smartPrefetchStart(c.href)}
                               onBlur={() => smartPrefetchCancel(c.href)}
                               className={cn(
-                                'group flex items-center gap-3 rounded-xl border transform-gpu p-3 transition',
-                                'border-transparent bg-token-surface/80 hover:bg-token-surface shadow-sm hover:shadow-md',
-                                'hover:border-[hsl(var(--accent)/.30)] hover:-translate-y-0.5'
+                                'group flex items-center gap-3 rounded-xl border p-3 transition',
+                                'border-transparent bg-token-surface/80 shadow-sm hover:-translate-y-0.5 hover:border-[hsl(var(--accent)/.30)] hover:bg-token-surface hover:shadow-md'
                               )}
                               data-gtm="header_mega_cat"
                             >
@@ -629,12 +640,13 @@ export default function Header() {
                       </ul>
 
                       <div className="md:col-span-1">
-                        <div className="h-full rounded-xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.10)] via-transparent to-token-surface p-4 md:p-5 shadow-md">
+                        <div className="h-full rounded-xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.10)] via-transparent to-token-surface p-4 shadow-md md:p-5">
                           <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent)/.90)]">
                             {t.selection}
                           </p>
                           <h3 className="mt-1 text-lg font-extrabold">{t.packsTitle}</h3>
                           <p className="mt-2 text-sm text-token-text/70">{t.packsDesc}</p>
+
                           <div className="mt-3 flex flex-wrap gap-2">
                             <Link
                               href="/products/packs"
@@ -648,6 +660,7 @@ export default function Header() {
                             >
                               {t.viewPacks}
                             </Link>
+
                             <Link
                               href="/products"
                               prefetch={false}
@@ -680,9 +693,9 @@ export default function Header() {
                 onBlur={() => smartPrefetchCancel(href)}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'relative group rounded-sm transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]',
+                  'group relative rounded-sm transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]',
                   active
-                    ? 'text-[hsl(var(--accent))] font-semibold after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-[hsl(var(--accent))]'
+                    ? 'font-semibold text-[hsl(var(--accent))] after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-[hsl(var(--accent))]'
                     : 'hover:text-[hsl(var(--accent))] focus-visible:text-[hsl(var(--accent))]'
                 )}
                 data-gtm={`header_nav_${labelKey}`}
@@ -699,7 +712,7 @@ export default function Header() {
           })}
         </nav>
 
-        <div className="hidden items-center gap-2 sm:gap-3 md:flex">
+        <div className="hidden items-center gap-2 md:flex sm:gap-3">
           <ThemeToggle size="sm" />
           <LocaleSwitch pathname={pathname} />
 
@@ -710,7 +723,7 @@ export default function Header() {
             onPointerLeave={() => smartPrefetchCancel('/products?promo=1')}
             onFocus={() => smartPrefetchStart('/products?promo=1')}
             onBlur={() => smartPrefetchCancel('/products?promo=1')}
-            className="xl:hidden inline-flex items-center justify-center p-0.5 rounded-lg hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
+            className="inline-flex items-center justify-center rounded-lg p-0.5 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)] xl:hidden"
             aria-label={t.deals.aria}
             title={t.deals.title}
             data-gtm="header_deals_icon"
@@ -727,7 +740,7 @@ export default function Header() {
             onPointerLeave={() => smartPrefetchCancel('/products?promo=1')}
             onFocus={() => smartPrefetchStart('/products?promo=1')}
             onBlur={() => smartPrefetchCancel('/products?promo=1')}
-            className="group hidden xl:inline-flex items-center gap-2 rounded-full border border-token-border bg-token-surface/60 px-3 py-1.5 text-sm font-medium text-token-text hover:bg-token-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
+            className="group hidden items-center gap-2 rounded-full border border-token-border bg-token-surface/60 px-3 py-1.5 text-sm font-medium text-token-text hover:bg-token-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)] xl:inline-flex"
             aria-label={t.deals.aria}
             title={t.deals.title}
             data-gtm="header_deals"
@@ -747,7 +760,7 @@ export default function Header() {
               onPointerLeave={() => smartPrefetchCancel('/wishlist')}
               onFocus={() => smartPrefetchStart('/wishlist')}
               onBlur={() => smartPrefetchCancel('/wishlist')}
-              className="relative hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 rounded-lg p-0.5"
+              className="relative rounded-lg p-0.5 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
               aria-label={t.wishlistAria(wishlistCount)}
               data-gtm="header_wishlist"
             >
@@ -755,6 +768,7 @@ export default function Header() {
                 <Heart />
               </ActionBadge>
             </Link>
+
             {wishlistCount > 0 && (
               <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
                 <span className="rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm">
@@ -773,7 +787,7 @@ export default function Header() {
               onPointerLeave={() => smartPrefetchCancel('/commande')}
               onFocus={() => smartPrefetchStart('/commande')}
               onBlur={() => smartPrefetchCancel('/commande')}
-              className="relative hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 rounded-lg p-0.5"
+              className="relative rounded-lg p-0.5 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
               aria-label={t.cartAria(cartCount)}
               data-gtm="header_cart"
               data-cart-icon
@@ -782,6 +796,7 @@ export default function Header() {
                 <Cart />
               </ActionBadge>
             </Link>
+
             {cartCount > 0 && (
               <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
                 <span className="animate-[pulse_2s_ease-in-out_infinite] rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm">
@@ -799,7 +814,7 @@ export default function Header() {
             onPointerLeave={() => smartPrefetchCancel('/login')}
             onFocus={() => smartPrefetchStart('/login')}
             onBlur={() => smartPrefetchCancel('/login')}
-            className="hidden xl:inline-flex items-center justify-center rounded-lg p-0.5 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+            className="hidden items-center justify-center rounded-lg p-0.5 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] xl:inline-flex"
             aria-label={t.account.aria}
             title={t.account.title}
             data-gtm="header_account"

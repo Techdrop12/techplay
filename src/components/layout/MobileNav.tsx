@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 
@@ -40,7 +40,14 @@ const STR = {
       dealsAria: 'Voir les offres du jour',
       dealsTitle: 'Offres du jour',
     },
-    trends: ['écouteurs bluetooth', 'casque gaming', 'chargeur rapide USB-C', 'pack starter', 'power bank', 'souris sans fil'],
+    trends: [
+      'écouteurs bluetooth',
+      'casque gaming',
+      'chargeur rapide USB-C',
+      'pack starter',
+      'power bank',
+      'souris sans fil',
+    ],
   },
   en: {
     nav: [
@@ -69,7 +76,14 @@ const STR = {
       dealsAria: "See today's deals",
       dealsTitle: "Today's deals",
     },
-    trends: ['bluetooth earbuds', 'gaming headset', 'USB-C fast charger', 'starter pack', 'power bank', 'wireless mouse'],
+    trends: [
+      'bluetooth earbuds',
+      'gaming headset',
+      'USB-C fast charger',
+      'starter pack',
+      'power bank',
+      'wireless mouse',
+    ],
   },
 } as const
 
@@ -105,7 +119,13 @@ const Icon = {
     </svg>
   ),
   Chevron: ({ open = false }: { open?: boolean }) => (
-    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" className={`transition-transform ${open ? 'rotate-180' : ''}`}>
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={`transition-transform ${open ? 'rotate-180' : ''}`}
+    >
       <path fill="currentColor" d="M12 15.5 4.5 8 6 6.5l6 6 6-6L19.5 8 12 15.5z" />
     </svg>
   ),
@@ -122,8 +142,16 @@ const Icon = {
 }
 
 type CartItemLike = { quantity?: number }
-type CartCollection = CartItemLike[] | { items?: CartItemLike[]; count?: number; size?: number } | null | undefined
-type WishlistCollection = unknown[] | { items?: unknown[]; count?: number; size?: number } | null | undefined
+type CartCollection =
+  | CartItemLike[]
+  | { items?: CartItemLike[]; count?: number; size?: number }
+  | null
+  | undefined
+type WishlistCollection =
+  | unknown[]
+  | { items?: unknown[]; count?: number; size?: number }
+  | null
+  | undefined
 type CartStoreLike = { cart?: CartCollection }
 type WishlistStoreLike = { wishlist?: WishlistCollection }
 
@@ -155,23 +183,13 @@ function getQuantity(item: unknown): number {
   return Number.isFinite(quantity) && quantity > 0 ? quantity : 1
 }
 
-function getCartStoreSafe(): CartStoreLike {
-  try {
-    return useCart() as CartStoreLike
-  } catch {
-    return {}
-  }
-}
-
-function getWishlistStoreSafe(): WishlistStoreLike {
-  try {
-    return useWishlist() as WishlistStoreLike
-  } catch {
-    return {}
-  }
-}
-
-function track(args: { action: string; category?: string; label?: string; value?: number; [k: string]: unknown }) {
+function track(args: {
+  action: string
+  category?: string
+  label?: string
+  value?: number
+  [k: string]: unknown
+}) {
   const { action, category, label, value, ...rest } = args
   try {
     gaEvent?.({
@@ -198,8 +216,8 @@ export default function MobileNav() {
   const titleId = `${dialogId}-title`
   const catsPanelId = useId()
 
-  const cartStore = getCartStoreSafe()
-  const wishlistStore = getWishlistStoreSafe()
+  const cartStore = (useCart() as CartStoreLike) ?? {}
+  const wishlistStore = (useWishlist() as WishlistStoreLike) ?? {}
 
   const cart = cartStore.cart
   const wishlist = wishlistStore.wishlist
@@ -386,7 +404,7 @@ export default function MobileNav() {
 
   useEffect(() => {
     if (open) closeMenu('route_change')
-  }, [pathname])
+  }, [pathname, open])
 
   const startY = useRef<number | null>(null)
 
@@ -416,7 +434,11 @@ export default function MobileNav() {
 
   const sheetVariants = {
     hidden: { y: reducedMotion ? 0 : '10%', opacity: 0.001 },
-    visible: { y: 0, opacity: 1, transition: { duration: reducedMotion ? 0 : 0.22, ease: 'easeOut' } },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: reducedMotion ? 0 : 0.22, ease: 'easeOut' },
+    },
     exit: { y: reducedMotion ? 0 : '10%', opacity: 0, transition: { duration: 0.16 } },
   }
 
@@ -762,7 +784,13 @@ export default function MobileNav() {
                                 <span className="block text-sm font-semibold">{c.label}</span>
                                 <span className="block text-xs text-token-text/60">{c.desc}</span>
                               </span>
-                              <svg width="18" height="18" viewBox="0 0 24 24" className="opacity-50 group-hover:opacity-90" aria-hidden="true">
+                              <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                className="opacity-50 group-hover:opacity-90"
+                                aria-hidden="true"
+                              >
                                 <path fill="currentColor" d="M9 18l6-6-6-6v12z" />
                               </svg>
                             </Link>

@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { BarChart2, ShoppingCart, Package, ShoppingBag } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { BarChart2, ShoppingCart, Package, ShoppingBag } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export default function AdminStatsBlock() {
   const [stats, setStats] = useState(null);

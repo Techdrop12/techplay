@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useCart } from '@/context/cartContext';
+
 import ProductCard from './ProductCard';
+
+import { useCart } from '@/context/cartContext';
 
 export default function UpsellProducts() {
   const { cart } = useCart();

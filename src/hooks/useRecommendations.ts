@@ -20,11 +20,13 @@ interface State {
 export default function useRecommendations(category?: string, excludeId?: string) {
   const [state, setState] = useState<State>({ data: [], loading: false });
   const cache = useRef<string>('');
+  const dataLength = state.data.length;
 
   useEffect(() => {
     if (!category) return;
+
     const key = `${category}|${excludeId ?? ''}`;
-    if (cache.current === key && state.data.length) return;
+    if (cache.current === key && dataLength > 0) return;
 
     const controller = new AbortController();
     const url = `/api/products/recommendations?category=${encodeURIComponent(category)}${
@@ -45,8 +47,7 @@ export default function useRecommendations(category?: string, excludeId?: string
       });
 
     return () => controller.abort();
-     
-  }, [category, excludeId]);
+  }, [category, excludeId, dataLength]);
 
   return useMemo(() => state, [state]);
 }

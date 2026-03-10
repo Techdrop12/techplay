@@ -1,4 +1,3 @@
-// src/components/Tracking.tsx
 'use client'
 
 import dynamic from 'next/dynamic'
@@ -90,9 +89,7 @@ function applyConsentState(
   setConsent({ analytics, ads })
 }
 
-export default function Tracking() {
-  if (DISABLED) return null
-
+function TrackingInner() {
   const [consent, setConsent] = useState<ConsentBooleans>(() =>
     typeof window === 'undefined' ? { analytics: false, ads: false } : readInitialConsent()
   )
@@ -179,4 +176,9 @@ export default function Tracking() {
       )}
     </>
   )
+}
+
+export default function Tracking() {
+  if (DISABLED) return null
+  return <TrackingInner />
 }

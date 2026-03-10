@@ -6,39 +6,36 @@ import { getABVariant } from '@/lib/ab-test'
 import { logEvent, pushDataLayer } from '@/lib/ga'
 
 type Props = {
-  /** nom du test (clé de persistance / tracking) */
   name?: string
-  /** liste des variants possibles */
   variants?: string[]
-  /** TTL en jours pour l’assignation */
   ttlDays?: number
-  /** libellés à afficher par variant (sinon le nom du variant) */
   labels?: Record<string, string>
-  /** classes CSS supplémentaires */
   className?: string
 }
 
 export default function ABTestBanner({
   name = 'banner',
-  variants = ['A', 'B'],
+  variants,
   ttlDays = 90,
   labels,
   className,
 }: Props) {
   const [variant, setVariant] = useState<string | null>(null)
 
-  // Choix du variant côté client (persisté)
+  const resolvedVariants = useMemo(
+    () => (Array.isArray(variants) && variants.length > 0 ? variants : ['A', 'B']),
+    [variants]
+  )
+
   useEffect(() => {
-    const v = getABVariant(name, variants, { ttlDays })
+    const v = getABVariant(name, resolvedVariants, { ttlDays })
     setVariant(v)
 
-    // Tracking (une seule fois à l'assignation)
     try {
       pushDataLayer({ event: 'ab_assign', ab_name: name, ab_variant: v })
       logEvent('ab_assign', { ab_name: name, ab_variant: v })
     } catch {}
-     
-  }, [name])
+  }, [name, resolvedVariants, ttlDays])
 
   const label = useMemo(() => {
     if (!variant) return ''
@@ -49,10 +46,7 @@ export default function ABTestBanner({
 
   return (
     <div
-      className={
-        className ??
-        'bg-blue-100 text-blue-800 text-center py-2 text-sm'
-      }
+      className={className ?? 'bg-blue-100 text-blue-800 text-center py-2 text-sm'}
       data-ab-name={name}
       data-ab-variant={variant}
       role="status"

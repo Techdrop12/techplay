@@ -1,7 +1,7 @@
 // /src/lib/db/users.js
 // Helpers MongoDB pour les utilisateurs
-import dbConnect from '../dbConnect.js'
 import User from '../../models/User.js'
+import dbConnect from '../dbConnect.js'
 
 /** @param {string} email */
 export async function getUserByEmail (email) {

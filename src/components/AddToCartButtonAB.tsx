@@ -1,4 +1,3 @@
-// src/components/AddToCartButtonAB.tsx — A/B wrapper (A = add, B = buy now) — FIXED
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -14,7 +13,10 @@ type MinimalProduct = Pick<Product, '_id' | 'slug' | 'title' | 'image' | 'price'
   quantity?: number
 }
 
-type VariantConfig = { label: string; instantCheckout?: boolean }
+type VariantConfig = {
+  label: string
+  instantCheckout?: boolean
+}
 
 interface Props {
   product: MinimalProduct
@@ -23,21 +25,31 @@ interface Props {
   ttlDays?: number
   variants?: Record<string, VariantConfig>
   className?: string
-  // …les autres props sont forwardées à AddToCartButton via {...rest}
   [k: string]: unknown
 }
 
 const SEEN = new Set<string>()
-const dedupe = (sig: string, ms = 1000) => {
+
+function dedupe(sig: string, ms = 1000) {
   if (SEEN.has(sig)) return true
   SEEN.add(sig)
-  setTimeout(() => SEEN.delete(sig), ms)
+  window.setTimeout(() => SEEN.delete(sig), ms)
   return false
 }
 
-// Mini helper monnaie pour l’event “buy now”
 function detectCurrency(locale?: string): 'EUR' | 'GBP' | 'USD' {
-  if (locale && locale.startsWith('en')) return 'USD'
+  if (!locale) return 'EUR'
+
+  const normalized = locale.toLowerCase()
+
+  if (normalized.includes('gb') || normalized.includes('uk') || normalized === 'en-gb') {
+    return 'GBP'
+  }
+
+  if (normalized.startsWith('en')) {
+    return 'USD'
+  }
+
   return 'EUR'
 }
 
@@ -50,9 +62,10 @@ export default function AddToCartButtonAB({
   className,
   ...rest
 }: Props) {
-  const presets: Record<string, VariantConfig> =
-    variants ??
-    (locale === 'fr'
+  const presets = useMemo<Record<string, VariantConfig>>(() => {
+    if (variants && Object.keys(variants).length > 0) return variants
+
+    return locale === 'fr'
       ? {
           A: { label: 'Ajouter au panier', instantCheckout: false },
           B: { label: '🛒 Commander maintenant', instantCheckout: true },
@@ -60,44 +73,82 @@ export default function AddToCartButtonAB({
       : {
           A: { label: 'Add to cart', instantCheckout: false },
           B: { label: '🛒 Buy now', instantCheckout: true },
-        })
+        }
+  }, [locale, variants])
 
   const keys = useMemo(() => Object.keys(presets), [presets])
   const [variant, setVariant] = useState<string | null>(null)
   const assignedRef = useRef(false)
 
-  // Assignation A/B (une seule fois)
   useEffect(() => {
-    const v = getABVariant(testKey, keys, { ttlDays, allowUrlOverride: true })
-    setVariant(v)
+    if (keys.length === 0) return
+
+    const selected = getABVariant(testKey, keys, {
+      ttlDays,
+      allowUrlOverride: true,
+    })
+
+    setVariant(selected)
+
     if (!assignedRef.current) {
       assignedRef.current = true
+
       try {
-        pushDataLayer({ event: 'ab_assign', ab_name: testKey, ab_variant: v })
-        logEvent('ab_assign', { ab_name: testKey, ab_variant: v })
+        pushDataLayer({
+          event: 'ab_assign',
+          ab_name: testKey,
+          ab_variant: selected,
+        })
+
+        logEvent('ab_assign', {
+          ab_name: testKey,
+          ab_variant: selected,
+        })
       } catch {}
     }
-     
-  }, [testKey])
+  }, [keys, testKey, ttlDays])
 
-  // Impression CTA
   useEffect(() => {
     if (!variant) return
+
     const sig = `ab_impression:${testKey}:${variant}:${product._id}`
     if (dedupe(sig, 1500)) return
+
     try {
-      pushDataLayer({ event: 'ab_impression', ab_name: testKey, ab_variant: variant, pid: product._id })
-      logEvent('ab_impression', { ab_name: testKey, ab_variant: variant, pid: product._id })
+      pushDataLayer({
+        event: 'ab_impression',
+        ab_name: testKey,
+        ab_variant: variant,
+        pid: product._id,
+      })
+
+      logEvent('ab_impression', {
+        ab_name: testKey,
+        ab_variant: variant,
+        pid: product._id,
+      })
     } catch {}
-     
-  }, [variant])
+  }, [product._id, testKey, variant])
 
-  if (!variant) return null
-  const conf = presets[variant] || presets[keys[0]]
+  const conf = useMemo(() => {
+    if (!variant) return null
+    return presets[variant] ?? presets[keys[0]] ?? null
+  }, [keys, presets, variant])
 
-  // Tracking click CTA (pas d’envoi Pixel AddToCart ici → on laisse le bouton le faire après succès)
+  const forwardedOnClick =
+    typeof rest.onClick === 'function'
+      ? (rest.onClick as (event: unknown) => unknown | Promise<unknown>)
+      : undefined
+
+  const extraGtm =
+    typeof rest.gtmExtra === 'object' && rest.gtmExtra !== null
+      ? (rest.gtmExtra as Record<string, unknown>)
+      : {}
+
   const handleWrapperClick = useCallback(
-    async (e: unknown) => {
+    async (event: unknown) => {
+      if (!conf) return
+
       const base = {
         ab_name: testKey,
         ab_variant: variant,
@@ -107,15 +158,27 @@ export default function AddToCartButtonAB({
       }
 
       try {
-        pushDataLayer({ event: 'cta_click', cta: 'add_to_cart_ab', ...base })
-        logEvent('cta_click', { cta: 'add_to_cart_ab', ...base })
+        pushDataLayer({
+          event: 'cta_click',
+          cta: 'add_to_cart_ab',
+          ...base,
+        })
+
+        logEvent('cta_click', {
+          cta: 'add_to_cart_ab',
+          ...base,
+        })
       } catch {}
 
-      // Variant B → “Buy now” : Pixel InitiateCheckout
       if (conf.instantCheckout) {
         try {
-          pushDataLayer({ event: 'buy_now_click', ...base })
+          pushDataLayer({
+            event: 'buy_now_click',
+            ...base,
+          })
+
           logEvent('buy_now_click', base)
+
           pixelInitiateCheckout({
             value: Number(product.price) || undefined,
             currency: detectCurrency(locale),
@@ -131,29 +194,32 @@ export default function AddToCartButtonAB({
         } catch {}
       }
 
-      // Si le parent a passé un onClick au wrapper AB, on l'appelle quand même
-      if (typeof rest?.onClick === 'function') {
+      if (forwardedOnClick) {
         try {
-          await rest.onClick(e)
+          await forwardedOnClick(event)
         } catch {}
       }
     },
-    [conf.instantCheckout, locale, product, testKey, variant, rest]
+    [conf, forwardedOnClick, locale, product, testKey, variant]
   )
 
+  if (!variant || !conf) return null
+
   return (
-    // className "contents" = pas de boîte supplémentaire (Tailwind)
     <span className="contents" onClickCapture={handleWrapperClick}>
       <AddToCartButton
+        {...rest}
         product={product}
         locale={locale}
         idleText={conf.label}
-        instantCheckout={!!conf.instantCheckout}
+        instantCheckout={Boolean(conf.instantCheckout)}
         className={className}
-        gtmExtra={{ ab_name: testKey, ab_variant: variant, ...(rest?.gtmExtra || {}) }}
-        {...rest}
+        gtmExtra={{
+          ab_name: testKey,
+          ab_variant: variant,
+          ...extraGtm,
+        }}
       />
     </span>
   )
 }
-

@@ -1,11 +1,12 @@
 'use client';
 
-import { useCart } from '@/context/cartContext';
-import { useContext } from 'react';
-import { CartAnimationContext } from '@/context/cartAnimationContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingCart } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useContext } from 'react';
+
+import { CartAnimationContext } from '@/context/cartAnimationContext';
+import { useCart } from '@/context/cartContext';
 
 export default function CartIndicator() {
   const { cart } = useCart();

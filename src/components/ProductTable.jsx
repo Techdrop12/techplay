@@ -1,59 +1,75 @@
-'use client';
+'use client'
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'react-hot-toast';
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { toast } from 'react-hot-toast'
 
 export default function ProductTable() {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  const router = useRouter()
+  const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let mounted = true
+
     const fetchProducts = async () => {
       try {
-        const res = await fetch('/api/admin/products');
-        if (!res.ok) throw new Error('Erreur API');
-        const data = await res.json();
-        setProducts(data);
-      } catch (err) {
-        toast.error('Erreur chargement produits');
+        const res = await fetch('/api/admin/products')
+        if (!res.ok) throw new Error('Erreur API')
+
+        const data = await res.json()
+        if (mounted) {
+          setProducts(Array.isArray(data) ? data : [])
+        }
+      } catch {
+        toast.error('Erreur chargement produits')
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false)
+        }
       }
-    };
-    fetchProducts();
-  }, []);
+    }
+
+    void fetchProducts()
+
+    return () => {
+      mounted = false
+    }
+  }, [])
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Confirmer la suppression de ce produit ?')) return;
+    if (!window.confirm('Confirmer la suppression de ce produit ?')) return
+
     try {
-      const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Suppression échouée');
-      setProducts((prev) => prev.filter((p) => p._id !== id));
-      toast.success('Produit supprimé');
+      const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Suppression échouée')
+
+      setProducts((prev) => prev.filter((product) => product._id !== id))
+      toast.success('Produit supprimé')
     } catch {
-      toast.error('Erreur lors de la suppression');
+      toast.error('Erreur lors de la suppression')
     }
-  };
+  }
 
   if (loading) {
-    return <p className="text-center text-gray-500 dark:text-gray-300">Chargement...</p>;
+    return <p className="text-center text-gray-500 dark:text-gray-300">Chargement...</p>
   }
 
   return (
     <div className="overflow-x-auto p-4">
-      <h2 className="text-2xl font-bold mb-4">📦 Produits en base</h2>
-      <table className="min-w-full text-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 shadow">
+      <h2 className="mb-4 text-2xl font-bold">📦 Produits en base</h2>
+
+      <table className="min-w-full border border-gray-300 bg-white text-sm shadow dark:border-gray-700 dark:bg-gray-900">
         <thead>
-          <tr className="bg-gray-100 dark:bg-gray-800 text-left">
-            <th className="p-2 border">Titre</th>
-            <th className="p-2 border">Prix</th>
-            <th className="p-2 border">Stock</th>
-            <th className="p-2 border">Slug</th>
-            <th className="p-2 border text-center">Actions</th>
+          <tr className="bg-gray-100 text-left dark:bg-gray-800">
+            <th className="border p-2">Titre</th>
+            <th className="border p-2">Prix</th>
+            <th className="border p-2">Stock</th>
+            <th className="border p-2">Slug</th>
+            <th className="border p-2 text-center">Actions</th>
           </tr>
         </thead>
+
         <tbody>
           {products.length === 0 ? (
             <tr>
@@ -62,22 +78,27 @@ export default function ProductTable() {
               </td>
             </tr>
           ) : (
-            products.map((p) => (
-              <tr key={p._id} className="hover:bg-gray-50 dark:hover:bg-gray-800 border-t">
-                <td className="p-2 border">{p.title}</td>
-                <td className="p-2 border">{p.price.toFixed(2)} €</td>
-                <td className="p-2 border">{p.stock}</td>
-                <td className="p-2 border">{p.slug}</td>
-                <td className="p-2 border flex justify-center gap-2">
+            products.map((product) => (
+              <tr key={product._id} className="border-t hover:bg-gray-50 dark:hover:bg-gray-800">
+                <td className="border p-2">{product.title}</td>
+                <td className="border p-2">
+                  {Number(product.price ?? 0).toFixed(2)} €
+                </td>
+                <td className="border p-2">{product.stock}</td>
+                <td className="border p-2">{product.slug}</td>
+                <td className="flex justify-center gap-2 border p-2">
                   <button
-                    onClick={() => router.push(`/fr/admin/produit/${p._id}`)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition"
+                    type="button"
+                    onClick={() => router.push(`/fr/admin/produit/${product._id}`)}
+                    className="rounded bg-blue-600 px-3 py-1 text-white transition hover:bg-blue-700"
                   >
                     Modifier
                   </button>
+
                   <button
-                    onClick={() => handleDelete(p._id)}
-                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition"
+                    type="button"
+                    onClick={() => handleDelete(product._id)}
+                    className="rounded bg-red-600 px-3 py-1 text-white transition hover:bg-red-700"
                   >
                     Supprimer
                   </button>
@@ -88,5 +109,5 @@ export default function ProductTable() {
         </tbody>
       </table>
     </div>
-  );
+  )
 }

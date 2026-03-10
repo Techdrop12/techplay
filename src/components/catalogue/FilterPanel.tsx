@@ -1,7 +1,15 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
-import { useEffect, useId, useMemo, useRef, useState, type KeyboardEventHandler, type SVGProps } from 'react'
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEventHandler,
+  type SVGProps,
+} from 'react'
 
 import { event as gaEvent, logEvent, pushDataLayer } from '@/lib/ga'
 import { cn } from '@/lib/utils'
@@ -94,8 +102,9 @@ export default function FilterPanel({
   className,
 }: Props) {
   const reduced = useReducedMotion()
-  const groupId = id || useId()
+  const autoGroupId = useId()
   const liveId = useId()
+  const groupId = id || autoGroupId
   const containerRef = useRef<HTMLDivElement | null>(null)
   const btnRefs = useRef<Array<HTMLButtonElement | null>>([])
   const [announcement, setAnnouncement] = useState('')
