@@ -1,8 +1,7 @@
-// src/app/products/[slug]/page.tsx — SEO/Perf+ (cached fetch, hreflang, robust OG)
+// src/app/products/[slug]/page.tsx — SEO/Perf+ version typée proprement
 import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
-
 
 import type { Product } from '@/types/product'
 import type { Metadata } from 'next'
@@ -10,21 +9,86 @@ import type { Metadata } from 'next'
 import ProductJsonLd from '@/components/JsonLd/ProductJsonLd'
 import ProductDetail from '@/components/ProductDetail'
 import { getProductBySlug } from '@/lib/data'
-import { DEFAULT_LOCALE, isLocale } from '@/lib/language'
+import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale, type Locale } from '@/lib/language'
 import { getFallbackDescription } from '@/lib/meta'
 import { generateProductMeta, jsonLdBreadcrumbs } from '@/lib/seo'
 
 export const revalidate = 1800
 
-// Déduplication du fetch entre generateMetadata() et la page
 const getProductCached = cache(async (slug: string) => getProductBySlug(slug))
 
+type ProductSeoRecord = Product & Record<string, unknown>
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+function toSeoRecord(product: Product | null): ProductSeoRecord | null {
+  if (!product || !isRecord(product)) return null
+  return product as ProductSeoRecord
+}
+
+function readString(record: Record<string, unknown>, keys: readonly string[]): string | undefined {
+  for (const key of keys) {
+    const value = record[key]
+    if (typeof value === 'string' && value.trim()) return value.trim()
+  }
+  return undefined
+}
+
+function readNumber(record: Record<string, unknown>, keys: readonly string[]): number | undefined {
+  for (const key of keys) {
+    const value = record[key]
+    const parsed =
+      typeof value === 'number'
+        ? value
+        : typeof value === 'string' && value.trim()
+          ? Number(value)
+          : NaN
+
+    if (Number.isFinite(parsed)) return parsed
+  }
+  return undefined
+}
+
+function readBoolean(record: Record<string, unknown>, keys: readonly string[]): boolean | undefined {
+  for (const key of keys) {
+    const value = record[key]
+    if (typeof value === 'boolean') return value
+  }
+  return undefined
+}
+
+function readImage(record: Record<string, unknown>): string {
+  const direct = readString(record, ['image'])
+  if (direct) return direct
+
+  const images = record.images
+  if (Array.isArray(images)) {
+    const first = images.find((item): item is string => typeof item === 'string' && item.trim().length > 0)
+    if (first) return first
+  }
+
+  const gallery = record.gallery
+  if (Array.isArray(gallery)) {
+    const first = gallery.find((item): item is string => typeof item === 'string' && item.trim().length > 0)
+    if (first) return first
+  }
+
+  return '/og-image.jpg'
+}
+
 /* ---------------------- Metadata dynamique ---------------------- */
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string }
+}): Promise<Metadata> {
   const product = await getProductCached(params.slug)
+  const productRecord = toSeoRecord(product)
   const path = `/products/${params.slug}`
 
-  if (!product) {
+  if (!product || !productRecord) {
     return {
       title: 'Produit introuvable',
       description: 'Le produit demandé est introuvable.',
@@ -32,76 +96,78 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     }
   }
 
-  const title = product.title ?? 'Produit'
+  const title = product.title?.trim() || 'Produit'
+  const brand = readString(productRecord, ['brand'])
   const description = getFallbackDescription(
     {
       title: product.title,
-      brand: (product as unknown).brand,
-      description: (product as unknown).description,
-      price: (product as unknown).price,
+      brand,
+      description: product.description,
+      price: readNumber(productRecord, ['price']),
       currency: 'EUR',
     },
     { maxLen: 160 }
   )
-  const image = (product as unknown).image ?? '/og-image.jpg'
-  const noindex = (product as unknown)?.noindex === true
+
+  const image = readImage(productRecord)
+  const noindex = readBoolean(productRecord, ['noindex']) === true
+  const price = readNumber(productRecord, ['price'])
 
   const base = generateProductMeta({
     title,
     description,
-    url: path,       // relatif : helper gère absolu + hreflang
+    url: path,
     image,
   })
 
   return {
     ...base,
-    // noindex tout en conservant follow pour préserver le maillage interne
     robots: noindex ? { index: false, follow: true } : { index: true, follow: true },
-    // Tags additionnels OG "product:*" (non typés par Next, via 'other')
     other: {
-      ...(typeof (product as unknown).price === 'number'
+      ...(typeof price === 'number'
         ? {
-            'product:price:amount': String((product as unknown).price),
+            'product:price:amount': String(price),
             'product:price:currency': 'EUR',
           }
         : {}),
-      ...(product && (product as unknown).brand ? { 'product:brand': String((product as unknown).brand) } : {}),
+      ...(brand ? { 'product:brand': brand } : {}),
     },
   }
 }
 
 /* ------------------------------ Page ----------------------------- */
-export default async function ProductPage({ params }: { params: { slug: string } }) {
+export default async function ProductPage({
+  params,
+}: {
+  params: { slug: string }
+}) {
   const product = await getProductCached(params.slug)
-  if (!product) return notFound()
 
-  const safeProduct = product as Product
+  if (!product) {
+    notFound()
+  }
 
-  // Locale depuis le cookie (cohérent avec RootLayout)
   const cookieStore = await cookies()
-  const cookieLocale = cookieStore.get('NEXT_LOCALE')?.value
-  const locale = isLocale(cookieLocale || '') ? (cookieLocale as string) : (DEFAULT_LOCALE as string)
+  const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value ?? ''
+  const locale: Locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE
 
   const crumbs = jsonLdBreadcrumbs([
     { name: 'Accueil', url: '/' },
     { name: 'Produits', url: '/products' },
-    { name: safeProduct.title ?? 'Produit', url: `/products/${safeProduct.slug}` },
+    { name: product.title?.trim() || 'Produit', url: `/products/${product.slug}` },
   ])
 
   return (
     <>
       <main
         className="max-w-6xl mx-auto px-4 py-10"
-        aria-label={`Page produit : ${safeProduct.title ?? 'Produit'}`}
+        aria-label={`Page produit : ${product.title?.trim() || 'Produit'}`}
       >
-        {/* On passe la locale au client pour cohérence (ex. StickyCartSummary) */}
-        <ProductDetail product={safeProduct} locale={locale} />
+        <ProductDetail product={product} locale={locale} />
       </main>
 
-      {/* JSON-LD Produit (centralisé dans ce composant pour éviter tout doublon) */}
-      <ProductJsonLd product={safeProduct} maxReviews={3} />
+      <ProductJsonLd product={product} maxReviews={3} />
 
-      {/* Breadcrumb JSON-LD */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }}
@@ -109,4 +175,3 @@ export default async function ProductPage({ params }: { params: { slug: string }
     </>
   )
 }
-

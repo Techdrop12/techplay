@@ -1,15 +1,41 @@
+// src/components/Product/ProductBadges.tsx
+
+type ProductBadgeLike = {
+  freeShipping?: boolean
+  isNew?: boolean
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+function getProductBadges(product: unknown): ProductBadgeLike {
+  if (!isRecord(product)) return {}
+
+  return {
+    freeShipping: product.freeShipping === true,
+    isNew: product.isNew === true,
+  }
+}
+
 export default function ProductBadges({ product }: { product: unknown }) {
+  const { freeShipping, isNew } = getProductBadges(product)
+
+  if (!freeShipping && !isNew) return null
+
   return (
-    <div className="flex gap-2 mt-2">
-      {product.freeShipping && (
-        <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+    <div className="mt-2 flex gap-2">
+      {freeShipping && (
+        <span className="rounded bg-green-100 px-2 py-1 text-xs text-green-800">
           Livraison gratuite
         </span>
       )}
-      {product.isNew && (
-        <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">Nouveau</span>
+
+      {isNew && (
+        <span className="rounded bg-blue-100 px-2 py-1 text-xs text-blue-800">
+          Nouveau
+        </span>
       )}
     </div>
   )
 }
-

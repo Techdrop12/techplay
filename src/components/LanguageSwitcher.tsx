@@ -1,4 +1,4 @@
-// src/components/LanguageSwitcher.tsx — polish mineur (anti-blur mousedown, dataLayer + cookie util)
+// src/components/LanguageSwitcher.tsx
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
@@ -8,7 +8,6 @@ import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 import {
   languages as SUPPORTED_LOCALES,
   localeLabels,
-  LOCALE_COOKIE,
   type Locale,
   setLocaleCookie,
 } from '@/lib/language'
@@ -21,25 +20,17 @@ export default function LanguageSwitcher() {
   const changeLanguage = (next: Locale) => {
     if (next === current) return
 
-    // 1) Persistance cookie (1 an) — une seule écriture via util
     try {
       setLocaleCookie(next)
-      // double guard côté document.cookie (utile en cas d’environnement custom)
-      const secure = typeof location !== 'undefined' && location.protocol === 'https:' ? '; Secure' : ''
-      document.cookie = `${LOCALE_COOKIE}=${encodeURIComponent(next)}; Max-Age=31536000; Path=/; SameSite=Lax${secure}`
     } catch {}
 
-    // 2) Tracking (GA4 + fallback GTM dataLayer)
     try {
       gaEvent?.({ action: 'change_language', category: 'engagement', label: next })
-      ;(window as unknown).dataLayer = (window as unknown).dataLayer || []
-      ;(window as unknown).dataLayer.push({ event: 'change_language', locale: next })
+      window.dataLayer = window.dataLayer || []
+      window.dataLayer.push({ event: 'change_language', locale: next })
     } catch {}
 
-    // 3) URL localisée + conservation query + hash
     const href = localizePath(pathname, next, { keepQuery: true, keepHash: true })
-
-    // 4) Remplacer l’entrée (pas d’empilement d’historique)
     router.replace(href)
   }
 
@@ -52,7 +43,7 @@ export default function LanguageSwitcher() {
             key={lang}
             type="button"
             onClick={() => changeLanguage(lang)}
-            onMouseDown={(e) => e.preventDefault()} // évite le blur
+            onMouseDown={(e) => e.preventDefault()}
             disabled={active}
             aria-pressed={active}
             aria-current={active ? 'true' : undefined}
@@ -73,4 +64,3 @@ export default function LanguageSwitcher() {
     </div>
   )
 }
-

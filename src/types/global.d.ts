@@ -1,86 +1,146 @@
-// Global window augmentations for analytics, pixels, PWA helpers, etc.
-export {};
+// src/types/global.d.ts
+export {}
 
 declare global {
-  // ---- Google gtag() ----
   namespace Gtag {
     interface Config {
-      page_title?: string;
-      page_location?: string;
-      page_path?: string;
-      anonymize_ip?: boolean;
-      allow_ad_personalization_signals?: boolean;
-      allow_google_signals?: boolean;
-      send_page_view?: boolean;
-      [key: string]: unknown;
+      page_title?: string
+      page_location?: string
+      page_path?: string
+      anonymize_ip?: boolean
+      allow_ad_personalization_signals?: boolean
+      allow_google_signals?: boolean
+      send_page_view?: boolean
+      [key: string]: unknown
     }
 
     interface EventParams {
-      event_category?: string;
-      event_label?: string;
-      value?: number;
-      non_interaction?: boolean;
-      debug_mode?: boolean;
-      [key: string]: unknown;
+      event_category?: string
+      event_label?: string
+      value?: number
+      non_interaction?: boolean
+      currency?: string
+      items?: Record<string, unknown>[]
+      debug_mode?: boolean
+      [key: string]: unknown
     }
 
-    type ConsentValue = 'granted' | 'denied';
+    type ConsentValue = 'granted' | 'denied'
+
     interface ConsentUpdate {
-      ad_storage?: ConsentValue;
-      analytics_storage?: ConsentValue;
-      ad_user_data?: ConsentValue;
-      ad_personalization?: ConsentValue;
-      wait_for_update?: number;
-      [key: string]: unknown;
+      ad_storage?: ConsentValue
+      analytics_storage?: ConsentValue
+      ad_user_data?: ConsentValue
+      ad_personalization?: ConsentValue
+      functionality_storage?: ConsentValue
+      security_storage?: ConsentValue
+      wait_for_update?: number
+      [key: string]: unknown
     }
+
+    type Command =
+      | ['js', Date]
+      | ['config', string, Config?]
+      | ['event', string, EventParams?]
+      | ['consent', 'default' | 'update', ConsentUpdate]
+      | ['set', Record<string, unknown>]
+      | ['set', 'user_properties', Record<string, unknown>]
+      | ['get', string, string, (value: unknown) => void]
+  }
+
+  type DataLayerEntry = Record<string, unknown> | Gtag.Command
+
+  interface BeforeInstallPromptEvent extends Event {
+    readonly platforms?: string[]
+    prompt: () => Promise<void>
+    userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform?: string }>
+  }
+
+  interface IdleDeadline {
+    readonly didTimeout: boolean
+    timeRemaining: () => number
+  }
+
+  interface IdleRequestOptions {
+    timeout?: number
+  }
+
+  interface NetworkInformation {
+    effectiveType?: 'slow-2g' | '2g' | '3g' | '4g'
+    downlink?: number
+    rtt?: number
+    saveData?: boolean
+  }
+
+  interface WindowEventMap {
+    beforeinstallprompt: BeforeInstallPromptEvent
   }
 
   interface Window {
-    /** Google Tag global data layer (gtag.js) */
-    dataLayer: unknown[];
+    dataLayer?: DataLayerEntry[]
 
-    /**
-     * gtag signatures supportées par ton code:
-     *  - 'js', Date
-     *  - 'config', id, Config?
-     *  - 'event', name, EventParams?
-     *  - 'consent', 'default'|'update', ConsentUpdate
-     *  - 'set', { ... }  (ex: { user_id })
-     *  - 'set', 'user_properties', { ... }
-     *  - 'get', id, field, callback
-     */
-    gtag: (
-      ...args:
-        | ['js', Date]
-        | ['config', string, Gtag.Config?]
-        | ['event', string, Gtag.EventParams?]
-        | ['consent', 'default' | 'update', Gtag.ConsentUpdate]
-        | ['set', Record<string, unknown>]
-        | ['set', 'user_properties', Record<string, unknown>]
-        | ['get', string, string, (value: unknown) => void]
-    ) => void;
+    gtag?: (...args: Gtag.Command) => void
 
-    /** Meta/Facebook Pixel */
     fbq?: (
       ...args:
         | ['init', string]
         | ['track', string, Record<string, unknown>?]
         | ['consent', 'revoke' | 'grant']
-    ) => void;
+    ) => void
 
-    /** Hotjar */
-    hj?: (method: 'trigger' | 'identify' | 'stateChange', value: unknown) => void;
+    hj?: (...args: unknown[]) => void
+    clarity?: (...args: unknown[]) => void
 
-    /** Workbox (PWA) – si tu utilises workbox-window */
     workbox?: {
-      messageSW: (data: unknown) => Promise<void>;
-      register: () => Promise<void>;
-      active?: ServiceWorker;
-    };
+      messageSW: (data: unknown) => Promise<void>
+      register: () => Promise<void>
+      active?: ServiceWorker | null
+    }
 
-    /** Flags internes (utilisés dans ton code) */
-    __TP_INSTALL_SEEN?: boolean;
-    __ga_inited?: boolean;
-    __ga_consent_default?: boolean;
+    __TP_INSTALL_SEEN?: boolean
+    __ga_inited?: boolean
+    __ga_consent_default?: boolean
+
+    __consentState?: Gtag.ConsentUpdate
+    __applyConsent?: (next: Partial<Gtag.ConsentUpdate> | Record<string, unknown>) => void
+
+    tpOpenConsent?: () => void
+    tpResetConsent?: () => void
+    tpConsentUpdate?: (p: {
+      analytics?: boolean
+      ads?: boolean
+      ad_user_data?: boolean
+      ad_personalization?: boolean
+      functionality?: boolean
+    }) => void
+
+    __prevOverflow?: string
+    __pixelUser?: Record<string, unknown> | null
+
+    doNotTrack?: string
+    opera?: string
+
+    requestIdleCallback?: (
+      callback: (deadline: IdleDeadline) => void,
+      options?: IdleRequestOptions
+    ) => number
+
+    cancelIdleCallback?: (handle: number) => void
+  }
+
+  interface Navigator {
+    userLanguage?: string
+    doNotTrack?: string
+    msDoNotTrack?: string
+    standalone?: boolean
+    connection?: NetworkInformation
+  }
+
+  interface HTMLElement {
+    inert?: boolean
+  }
+
+  interface HTMLBodyElement {
+    __prevOverflow?: string
   }
 }

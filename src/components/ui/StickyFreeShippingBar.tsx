@@ -1,4 +1,4 @@
-// src/components/ui/StickyFreeShippingBar.tsx — FINAL (i18n + routes harmonisées) + FIX pointer-events
+// src/components/ui/StickyFreeShippingBar.tsx
 'use client'
 
 import { usePathname } from 'next/navigation'
@@ -13,28 +13,35 @@ import { cn } from '@/lib/utils'
 type Position = 'bottom' | 'top'
 
 type Props = {
-  /** Seuil d’activation (fallback env -> 50€) */
   threshold?: number
-  /** Délai d’apparition si pas de scroll (ms) */
   autoShowDelayMs?: number
-  /** Position d’apparition après scroll (px) */
   minScrollY?: number
-  /** Clé de persistance pour le dismiss (localStorage) */
   dismissKey?: string
-  /** Routes où la barre est cachée */
   hideOnRoutes?: string[]
-  /** Position de la barre (bottom par défaut) */
   position?: Position
-  /** Afficher quand panier vide ? (par défaut false) */
   showOnEmptyCart?: boolean
-  /** Afficher même lorsque le seuil est atteint ? (par défaut true) */
   showWhenReached?: boolean
-  /** URL et libellé du CTA */
   ctaHref?: string
   ctaLabel?: string
-  /** Lien vers conditions d’expédition (passé à FreeShippingBadge) */
   policyHref?: string
   className?: string
+}
+
+type CartLikeItem = {
+  price?: number
+  unitPrice?: number
+  quantity?: number
+  qty?: number
+  product?: {
+    price?: number
+  }
+}
+
+function pushDL(event: string, extra?: Record<string, unknown>) {
+  try {
+    window.dataLayer = window.dataLayer ?? []
+    window.dataLayer.push({ event, ...(extra ?? {}) })
+  } catch {}
 }
 
 export default function StickyFreeShippingBar({
@@ -53,14 +60,14 @@ export default function StickyFreeShippingBar({
 }: Props) {
   const pathname = usePathname() || '/'
   const locale = getCurrentLocale(pathname)
-  const { cart } = useCart() as unknown
+  const { cart } = useCart()
 
-  // ── State
   const [visible, setVisible] = useState(false)
   const [dismissed, setDismissed] = useState(false)
-  const shownOnceRef = useRef(false)
 
-  // ── Persist dismiss
+  const shownOnceRef = useRef(false)
+  const ticking = useRef(false)
+
   useEffect(() => {
     try {
       if (localStorage.getItem(dismissKey) === '1') setDismissed(true)
@@ -70,86 +77,77 @@ export default function StickyFreeShippingBar({
   const onClose = () => {
     try {
       localStorage.setItem(dismissKey, '1')
-      ;(window as unknown).dataLayer?.push({ event: 'free_shipping_bar_close' })
+      pushDL('free_shipping_bar_close')
     } catch {}
     setVisible(false)
     setDismissed(true)
   }
 
-  // ── Hide by route
   const hiddenByRoute = useMemo(
-    () => hideOnRoutes.some((r) => pathname?.startsWith(localizePath(r, locale))),
+    () => hideOnRoutes.some((route) => pathname.startsWith(localizePath(route, locale))),
     [pathname, hideOnRoutes, locale]
   )
 
-  // ── Subtotal (robuste)
-  const subtotal: number = useMemo(() => {
+  const subtotal = useMemo(() => {
     if (!Array.isArray(cart)) return 0
-    return cart.reduce((sum: number, it: unknown) => {
-      const price = Number(it?.price ?? it?.unitPrice ?? it?.product?.price ?? 0)
-      const qty = Number(it?.quantity ?? it?.qty ?? 1)
-      const p = Number.isFinite(price) ? price : 0
-      const q = Number.isFinite(qty) ? qty : 1
-      return sum + p * q
+
+    return cart.reduce((sum: number, item: CartLikeItem) => {
+      const price = Number(item.price ?? item.unitPrice ?? item.product?.price ?? 0)
+      const qty = Number(item.quantity ?? item.qty ?? 1)
+
+      const safePrice = Number.isFinite(price) ? price : 0
+      const safeQty = Number.isFinite(qty) ? qty : 1
+
+      return sum + safePrice * safeQty
     }, 0)
   }, [cart])
 
   const remaining = Math.max(threshold - subtotal, 0)
   const reached = remaining === 0
 
-  // ── Scroll + auto show (RAF)
-  const ticking = useRef(false)
   useEffect(() => {
     if (hiddenByRoute || dismissed) return
 
     const check = () => {
       const y = window.scrollY
-      setVisible((v) => v || y > minScrollY)
+      setVisible((prev) => prev || y > minScrollY)
       ticking.current = false
     }
+
     const onScroll = () => {
-      if (!ticking.current) {
-        window.requestAnimationFrame(check)
-        ticking.current = true
-      }
+      if (ticking.current) return
+      ticking.current = true
+      window.requestAnimationFrame(check)
     }
 
     const timer = window.setTimeout(() => setVisible(true), autoShowDelayMs)
 
     window.addEventListener('scroll', onScroll, { passive: true })
+
     return () => {
       window.clearTimeout(timer)
       window.removeEventListener('scroll', onScroll)
     }
   }, [autoShowDelayMs, minScrollY, hiddenByRoute, dismissed])
 
-  // ── Track first show
   useEffect(() => {
-    if (visible && !shownOnceRef.current) {
-      shownOnceRef.current = true
-      try {
-        (window as unknown).dataLayer?.push({
-          event: 'free_shipping_bar_show',
-          reached,
-          subtotal,
-          threshold,
-        })
-      } catch {}
-    }
+    if (!visible || shownOnceRef.current) return
+    shownOnceRef.current = true
+    pushDL('free_shipping_bar_show', { reached, subtotal, threshold })
   }, [visible, reached, subtotal, threshold])
 
-  // ── Locale & libellés
-  const isFr = String(typeof document !== 'undefined' ? document.documentElement.lang : 'fr-FR')
+  const isFr = String(
+    typeof document !== 'undefined' ? document.documentElement.lang : 'fr-FR'
+  )
     .toLowerCase()
     .startsWith('fr')
+
   const labelCart = ctaLabel ?? (isFr ? 'Voir le panier' : 'View cart')
 
-  // ── Conditions d’affichage
   if (dismissed || hiddenByRoute || !visible) return null
   if (!showOnEmptyCart && subtotal <= 0) return null
   if (!showWhenReached && reached) return null
 
-  // ── Render
   const sideClasses =
     position === 'bottom'
       ? 'left-0 right-0 bottom-0 pb-[calc(env(safe-area-inset-bottom,0)+8px)] pt-2'
@@ -157,20 +155,20 @@ export default function StickyFreeShippingBar({
 
   return (
     <div
-      className={cn('fixed z-50 px-3 sm:px-4 pointer-events-none', sideClasses, className)}
+      className={cn('pointer-events-none fixed z-50 px-3 sm:px-4', sideClasses, className)}
       role="region"
       aria-label={isFr ? 'Barre livraison offerte' : 'Free shipping bar'}
       data-position={position}
     >
       <div
         className={cn(
-          'mx-auto max-w-5xl rounded-xl shadow-lg border',
-          'bg-white/90 dark:bg-zinc-900/90 border-gray-200 dark:border-zinc-800',
+          'mx-auto max-w-5xl rounded-xl border shadow-lg',
+          'border-gray-200 bg-white/90 dark:border-zinc-800 dark:bg-zinc-900/90',
           'supports-[backdrop-filter]:backdrop-blur-lg',
           'pointer-events-auto'
         )}
       >
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 px-3 sm:px-4 py-2">
+        <div className="flex flex-col items-center justify-between gap-2 px-3 py-2 sm:flex-row sm:gap-4 sm:px-4">
           <FreeShippingBadge
             price={subtotal}
             threshold={threshold}
@@ -184,25 +182,22 @@ export default function StickyFreeShippingBar({
             <Link
               href={localizePath(ctaHref, locale)}
               className={cn(
-                'hidden sm:inline-flex items-center rounded-full px-4 py-1.5 text-sm font-semibold shadow',
+                'hidden items-center rounded-full px-4 py-1.5 text-sm font-semibold shadow sm:inline-flex',
                 reached
                   ? 'bg-emerald-600 text-white hover:bg-emerald-600/90'
                   : 'bg-[hsl(var(--accent))] text-white hover:opacity-90'
               )}
               aria-label={labelCart}
-              onClick={() => {
-                try {
-                  (window as unknown).dataLayer?.push({ event: 'free_shipping_bar_cta', reached })
-                } catch {}
-              }}
+              onClick={() => pushDL('free_shipping_bar_cta', { reached })}
             >
               {labelCart}
             </Link>
 
             <button
+              type="button"
               onClick={onClose}
               aria-label={isFr ? 'Fermer la barre' : 'Close bar'}
-              className="rounded-full px-2 py-1 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))]"
+              className="rounded-full px-2 py-1 text-sm text-gray-500 hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-200"
             >
               ✕
             </button>
@@ -212,4 +207,3 @@ export default function StickyFreeShippingBar({
     </div>
   )
 }
-

@@ -2,7 +2,7 @@
 import type { Metadata } from 'next'
 
 type SiteLocale = 'fr' | 'en'
-type OpenGraphType = 'website' | 'article'
+type MetaOgType = 'website' | 'article'
 
 interface MetaProps {
   title: string
@@ -36,17 +36,18 @@ const DEFAULT_LOCALE: SiteLocale = 'fr'
 
 function getOrigin(): string {
   try {
-    const u = new URL(RAW_ORIGIN)
-    return u.origin
+    return new URL(RAW_ORIGIN).origin
   } catch {
     return 'https://techplay.example.com'
   }
 }
+
 const ORIGIN = getOrigin()
 
 function abs(u?: string | null, fallback: string = DEFAULT_OG): string {
   const v = (u || '').trim()
   const effective = v || fallback
+
   try {
     return new URL(effective).toString()
   } catch {
@@ -58,22 +59,71 @@ function abs(u?: string | null, fallback: string = DEFAULT_OG): string {
 const ensureLeadingSlash = (p: string) => (p.startsWith('/') ? p : `/${p}`)
 const stripLocalePrefix = (pathname: string) => pathname.replace(/^\/(fr|en)(?=\/|$)/, '')
 const toHreflang = (loc: SiteLocale) => (loc === 'fr' ? 'fr-FR' : 'en-US')
-
-function inferLocaleFromPath(pathname: string): SiteLocale {
-  const m = pathname.match(/^\/(fr|en)(?=\/|$)/)
-  return (m?.[1] as SiteLocale) || DEFAULT_LOCALE
-}
-
 const toOgLocale = (loc: SiteLocale): 'fr_FR' | 'en_US' => (loc === 'en' ? 'en_US' : 'fr_FR')
 
-function buildLanguageAlternates(pathname: string) {
+function inferLocaleFromPath(pathname: string): SiteLocale {
+  const match = pathname.match(/^\/(fr|en)(?=\/|$)/)
+  return match?.[1] === 'en' ? 'en' : DEFAULT_LOCALE
+}
+
+function buildLanguageAlternates(pathname: string): NonNullable<Metadata['alternates']>['languages'] {
   const pathNoLocale = stripLocalePrefix(pathname) || '/'
   const frPath = pathNoLocale
   const enPath = pathNoLocale === '/' ? '/en' : `/en${pathNoLocale}`
+
   return {
     [toHreflang('fr')]: frPath,
     [toHreflang('en')]: enPath,
     'x-default': '/',
+  }
+}
+
+function resolvePathnameFromUrl(url: string): string {
+  try {
+    return new URL(abs(url)).pathname || '/'
+  } catch {
+    return ensureLeadingSlash(url)
+  }
+}
+
+function toOpenGraphType(type: MetaProps['type']): MetaOgType {
+  return type === 'article' ? 'article' : 'website'
+}
+
+function buildOpenGraph(input: {
+  title: string
+  description: string
+  canonicalUrl: string
+  imageAbs: string
+  locale: 'fr_FR' | 'en_US'
+  type: MetaOgType
+  extras?: Partial<{
+    publishedTime: string
+    modifiedTime: string
+    authors: string[]
+    section: string
+    tags: string[]
+  }>
+}): NonNullable<Metadata['openGraph']> {
+  const { title, description, canonicalUrl, imageAbs, locale, type, extras } = input
+
+  return {
+    title,
+    description,
+    type,
+    locale,
+    url: canonicalUrl,
+    siteName: SITE_NAME,
+    images: [{ url: imageAbs }],
+    ...(type === 'article'
+      ? {
+          ...(extras?.publishedTime ? { publishedTime: extras.publishedTime } : {}),
+          ...(extras?.modifiedTime ? { modifiedTime: extras.modifiedTime } : {}),
+          ...(extras?.authors?.length ? { authors: extras.authors } : {}),
+          ...(extras?.section ? { section: extras.section } : {}),
+          ...(extras?.tags?.length ? { tags: extras.tags } : {}),
+        }
+      : {}),
   }
 }
 
@@ -87,19 +137,11 @@ export function generateMeta({
   noindex = false,
 }: MetaProps): Metadata {
   const canonicalAbs = abs(url)
-
-  let pathname = '/'
-  try {
-    pathname = new URL(canonicalAbs).pathname || '/'
-  } catch {
-    pathname = ensureLeadingSlash(url)
-  }
-
+  const pathname = resolvePathnameFromUrl(url)
   const siteLocale = inferLocaleFromPath(pathname)
-  const ogLocale = (locale ?? toOgLocale(siteLocale)) as 'fr_FR' | 'en_US'
+  const ogLocale = locale ?? toOgLocale(siteLocale)
   const languages = buildLanguageAlternates(pathname)
   const imageAbs = abs(image)
-  const ogType: OpenGraphType = type === 'article' ? 'article' : 'website'
 
   return {
     title,
@@ -124,17 +166,19 @@ export function generateMeta({
       : {
           index: true,
           follow: true,
-          googleBot: { index: true, follow: true },
+          googleBot: {
+            index: true,
+            follow: true,
+          },
         },
-    openGraph: {
+    openGraph: buildOpenGraph({
       title,
       description,
-      type: ogType,
+      canonicalUrl: canonicalAbs,
+      imageAbs,
       locale: ogLocale,
-      url: canonicalAbs,
-      siteName: SITE_NAME,
-      images: [{ url: imageAbs }],
-    },
+      type: toOpenGraphType(type),
+    }),
     twitter: {
       card: 'summary_large_image',
       title,
@@ -146,19 +190,23 @@ export function generateMeta({
 }
 
 export function generateArticleMeta(base: MetaProps, extras: ArticleMetaExtras = {}): Metadata {
-  const m = generateMeta({ ...base, type: 'article' })
-  const { publishedTime, modifiedTime, authors, section, tags } = extras
+  const canonicalAbs = abs(base.url)
+  const pathname = resolvePathnameFromUrl(base.url)
+  const siteLocale = inferLocaleFromPath(pathname)
+  const ogLocale = base.locale ?? toOgLocale(siteLocale)
+  const imageAbs = abs(base.image || DEFAULT_OG)
+
   return {
-    ...m,
-    openGraph: {
-      ...m.openGraph,
+    ...generateMeta({ ...base, type: 'article' }),
+    openGraph: buildOpenGraph({
+      title: base.title,
+      description: base.description,
+      canonicalUrl: canonicalAbs,
+      imageAbs,
+      locale: ogLocale,
       type: 'article',
-      publishedTime,
-      modifiedTime,
-      authors,
-      section,
-      tags,
-    } as unknown,
+      extras,
+    }),
   }
 }
 
@@ -190,7 +238,12 @@ export function jsonLdArticle(params: {
   publisherName?: string
   publisherLogo?: string
 }) {
-  const authors = Array.isArray(params.authorName) ? params.authorName : [params.authorName].filter(Boolean) as string[]
+  const authors = Array.isArray(params.authorName)
+    ? params.authorName
+    : params.authorName
+      ? [params.authorName]
+      : []
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -205,7 +258,14 @@ export function jsonLdArticle(params: {
       ? {
           '@type': 'Organization',
           name: params.publisherName,
-          logo: params.publisherLogo ? { '@type': 'ImageObject', url: abs(params.publisherLogo) } : undefined,
+          ...(params.publisherLogo
+            ? {
+                logo: {
+                  '@type': 'ImageObject',
+                  url: abs(params.publisherLogo),
+                },
+              }
+            : {}),
         }
       : undefined,
   }
@@ -221,17 +281,23 @@ export function jsonLdProduct(params: {
   price?: { amount: number; currency: string }
   availability?: 'InStock' | 'OutOfStock' | 'PreOrder'
 }) {
-  const images = Array.isArray(params.image) ? params.image.map((u) => abs(u)) : params.image ? [abs(params.image)] : [abs(DEFAULT_OG)]
-  const offers =
-    params.price
-      ? {
-          '@type': 'Offer',
-          priceCurrency: params.price.currency,
-          price: params.price.amount,
-          availability: params.availability ? `https://schema.org/${params.availability}` : undefined,
-          url: abs(params.url),
-        }
-      : undefined
+  const images = Array.isArray(params.image)
+    ? params.image.map((u) => abs(u))
+    : params.image
+      ? [abs(params.image)]
+      : [abs(DEFAULT_OG)]
+
+  const offers = params.price
+    ? {
+        '@type': 'Offer',
+        priceCurrency: params.price.currency,
+        price: params.price.amount,
+        availability: params.availability
+          ? `https://schema.org/${params.availability}`
+          : undefined,
+        url: abs(params.url),
+      }
+    : undefined
 
   return {
     '@context': 'https://schema.org',
@@ -246,4 +312,3 @@ export function jsonLdProduct(params: {
 }
 
 export { ORIGIN, SITE_NAME, TWITTER_HANDLE }
-

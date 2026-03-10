@@ -1,27 +1,58 @@
 // src/lib/performance.ts — router des Web Vitals vers analytics ou API
+
 export type WebVitalMetric = {
-name: string
-value: number
-id?: string
-label?: string
+  name: string
+  value: number
+  id?: string
+  label?: string
 }
 
+function normalizeMetricValue(metric: WebVitalMetric): number {
+  // CLS est souvent très petit, on le remonte pour un reporting plus lisible
+  if (metric.name === 'CLS') {
+    return Math.round(metric.value * 1000)
+  }
 
-export function reportWebVitals(metric: WebVitalMetric) {
-try {
-if (typeof window !== 'undefined' && typeof (window as unknown).gtag === 'function') {
-(window as unknown).gtag('event', metric.name, {
-value: Math.round(metric.value),
-event_category: 'Web Vitals',
-event_label: metric.id || 'vital',
-non_interaction: true,
-})
+  return Math.round(metric.value)
 }
-// Optionnel : POST à une API route pour stockage serveur
-if (typeof navigator !== 'undefined' && 'sendBeacon' in navigator) {
-const body = JSON.stringify(metric)
-navigator.sendBeacon('/api/vitals', body)
+
+function sendToGoogleAnalytics(metric: WebVitalMetric): void {
+  if (typeof window === 'undefined') return
+  if (typeof window.gtag !== 'function') return
+
+  window.gtag('event', metric.name, {
+    value: normalizeMetricValue(metric),
+    event_category: 'Web Vitals',
+    event_label: metric.id || metric.label || 'vital',
+    non_interaction: true,
+  })
 }
-if (process.env.NODE_ENV === 'development') console.debug('[Perf]', metric.name, metric.value)
-} catch {}
+
+function sendToVitalsApi(metric: WebVitalMetric): void {
+  if (typeof navigator === 'undefined') return
+  if (typeof navigator.sendBeacon !== 'function') return
+
+  const payload = new Blob([JSON.stringify(metric)], {
+    type: 'application/json',
+  })
+
+  navigator.sendBeacon('/api/vitals', payload)
+}
+
+export function reportWebVitals(metric: WebVitalMetric): void {
+  try {
+    sendToGoogleAnalytics(metric)
+    sendToVitalsApi(metric)
+
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('[Perf]', {
+        name: metric.name,
+        value: metric.value,
+        id: metric.id,
+        label: metric.label,
+      })
+    }
+  } catch {
+    // no-op
+  }
 }

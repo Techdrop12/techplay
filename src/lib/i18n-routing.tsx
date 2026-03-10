@@ -5,20 +5,19 @@ import {
   languages as SUPPORTED_LOCALES,
   DEFAULT_LOCALE,
   LOCALE_COOKIE,
-  type Locale,
-  isLocale,
   stripLocalePrefix as _strip,
   withLocale as _withLocale,
 } from '@/lib/language'
 
 export { SUPPORTED_LOCALES, DEFAULT_LOCALE, LOCALE_COOKIE }
-export type { Locale }
+export type Locale = (typeof SUPPORTED_LOCALES)[number]
 
-const isSupported = (v?: string): v is (typeof SUPPORTED_LOCALES)[number] =>
-  !!v && (SUPPORTED_LOCALES as readonly string[]).includes(v as string)
+const isSupported = (v?: string): v is Locale =>
+  !!v && (SUPPORTED_LOCALES as readonly string[]).includes(v)
 
-const ensureLeadingSlash = (p: string) => (p?.startsWith('/') ? p : `/${p || ''}`)
-const isExternalUrl = (p: string) => /^([a-z][a-z0-9+\-.]*:)?\/\//i.test(p) || p.startsWith('mailto:') || p.startsWith('tel:')
+const ensureLeadingSlash = (p: string) => (p.startsWith('/') ? p : `/${p}`)
+const isExternalUrl = (p: string) =>
+  /^([a-z][a-z0-9+\-.]*:)?\/\//i.test(p) || p.startsWith('mailto:') || p.startsWith('tel:')
 
 export function getCurrentPathname(): string {
   if (typeof window === 'undefined') return '/'
@@ -31,28 +30,32 @@ export function getCurrentPathname(): string {
 
 function readCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined
+
   try {
-    const raw = document.cookie.split('; ').find((c) => c.startsWith(`${name}=`))
+    const raw = document.cookie
+      .split('; ')
+      .find((c) => c.startsWith(`${name}=`))
+
     if (!raw) return undefined
-    const v = raw.split('=').slice(1).join('=')
-    return decodeURIComponent(v)
+    return decodeURIComponent(raw.split('=').slice(1).join('='))
   } catch {
     return undefined
   }
 }
 
 /**
- * Locale courante (priorité URL, puis cookie LOCALE_COOKIE, sinon défaut)
+ * Locale courante : URL > cookie > défaut
  */
-export function getCurrentLocale(pathname?: string): (typeof SUPPORTED_LOCALES)[number] {
+export function getCurrentLocale(pathname?: string): Locale {
   const p = pathname ?? getCurrentPathname()
   const first = p.split('/').filter(Boolean)[0]
-  if (isSupported(first)) return first as unknown
+
+  if (isSupported(first)) return first
 
   const fromCookie = readCookie(LOCALE_COOKIE)
-  if (isSupported(fromCookie)) return fromCookie as unknown
+  if (isSupported(fromCookie)) return fromCookie
 
-  return DEFAULT_LOCALE as unknown
+  return DEFAULT_LOCALE
 }
 
 /** Retire un éventuel préfixe de locale du pathname fourni */
@@ -64,27 +67,27 @@ type LocalizeOptions = {
   keepQuery?: boolean
   keepHash?: boolean
   currentPathname?: string
-  customQuery?: string // si fourni, prime sur keepQuery
-  customHash?: string  // si fourni, prime sur keepHash
+  customQuery?: string
+  customHash?: string
 }
 
 /**
  * Construit un chemin localisé.
- * - `fr` (locale par défaut) → pas de préfixe
- * - Autres locales → `/<locale>/…`
- * - Laisse intacts les liens externes (http, https, mailto, tel)
+ * - fr (par défaut) => pas de préfixe
+ * - autres => /<locale>/...
+ * - laisse les liens externes intacts
  */
 export function localizePath(
   path: string,
-  locale: (typeof SUPPORTED_LOCALES)[number],
+  locale: Locale,
   opts: LocalizeOptions = {}
 ): string {
-  if (!path) path = opts.currentPathname || ''
-  if (isExternalUrl(path)) return path
+  const input = path || opts.currentPathname || getCurrentPathname()
+  if (isExternalUrl(input)) return input
 
-  const base = ensureLeadingSlash(path || opts.currentPathname || getCurrentPathname())
+  const base = ensureLeadingSlash(input)
   const bare = stripLocalePrefix(base)
-  const withLocale = _withLocale(bare, locale as unknown)
+  const localized = _withLocale(bare, locale)
 
   const query =
     opts.customQuery ??
@@ -94,15 +97,15 @@ export function localizePath(
     opts.customHash ??
     (opts.keepHash && typeof window !== 'undefined' ? window.location.hash || '' : '')
 
-  return withLocale + query + hash
+  return `${localized}${query}${hash}`
 }
 
 /** URLs alternatives (hreflang) pour un pathname donné */
 export function altLocales(pathname?: string) {
   const p = pathname ?? getCurrentPathname()
-  return (SUPPORTED_LOCALES as readonly string[]).map((l) => ({
-    locale: l,
-    href: localizePath(p, l as unknown, { keepQuery: true, keepHash: true }),
+
+  return SUPPORTED_LOCALES.map((locale) => ({
+    locale,
+    href: localizePath(p, locale, { keepQuery: true, keepHash: true }),
   }))
 }
-

@@ -10,27 +10,17 @@ type Variant = 'solid' | 'outline' | 'ghost'
 
 export interface InputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
-  /** Label au-dessus du champ (optionnel) */
   label?: React.ReactNode
-  /** Texte d’aide (sous le champ) */
   help?: React.ReactNode
-  /** Message d’erreur (style erreur + a11y) */
   error?: React.ReactNode
-  /** Taille visuelle */
   size?: Size
-  /** Style visuel */
   variant?: Variant
-  /** Largeur 100% */
   fullWidth?: boolean
-  /** Icônes décoratives à gauche / droite */
   leadingIcon?: React.ReactNode
   trailingIcon?: React.ReactNode
-  /** Classes supplémentaires */
   inputClassName?: string
   containerClassName?: string
-  /** Afficher le bouton pour révéler un mot de passe si type="password" */
   showPasswordToggle?: boolean
-  /** Afficher un bouton pour effacer le champ (contrôlé de préférence) */
   clearable?: boolean
 }
 
@@ -61,6 +51,7 @@ function EyeIcon(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   )
 }
+
 function EyeOffIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
@@ -108,7 +99,6 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const isPassword = type === 'password'
     const effectiveType = isPassword && reveal ? 'text' : type
 
-    // Valeurs par défaut intelligentes (sans écraser les props)
     const effectiveAutoComplete =
       autoComplete ??
       (isPassword ? 'current-password' :
@@ -129,23 +119,22 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     const hasError = Boolean(error)
 
-    // Clearable (affichage surtout utile en contrôle)
-    const controlledValue = (props as unknown)?.value
+    const controlledValue = props.value
     const showClear =
       clearable && !isPassword && controlledValue != null && String(controlledValue).length > 0
 
-    // ref interne pour clear/mesures
     const innerRef = React.useRef<HTMLInputElement>(null)
     React.useImperativeHandle(ref, () => innerRef.current as HTMLInputElement)
 
     const clearValue = () => {
       const el = innerRef.current
       if (!el) return
-      // Vide la valeur et déclenche un event input pour synchroniser les states contrôlés
+
       const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
         window.HTMLInputElement.prototype,
         'value'
       )?.set
+
       nativeInputValueSetter?.call(el, '')
       el.dispatchEvent(new Event('input', { bubbles: true }))
       el.focus()
@@ -204,7 +193,6 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
 
-          {/* Zone d’icônes à droite : clear > eye-toggle > trailingIcon */}
           {showClear ? (
             <button
               type="button"
@@ -214,7 +202,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               className="absolute inset-y-0 right-0 grid w-10 place-items-center text-gray-600 hover:text-gray-800 dark:text-gray-300"
             >
               <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
-                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </button>
           ) : isPassword && showPasswordToggle ? (
@@ -257,4 +245,3 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 )
 
 export default Input
-

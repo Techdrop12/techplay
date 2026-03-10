@@ -1,72 +1,89 @@
-// src/components/AfterIdleClient.tsx — FINAL+ (idle mount + SW register/updates)
+// src/components/AfterIdleClient.tsx
 'use client'
 
-import { ReactNode, useEffect, useState, useRef } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
+
+function scheduleWhenIdle(cb: () => void, timeout = 1): number {
+  if (typeof window === 'undefined') return 0
+
+  if (typeof window.requestIdleCallback === 'function') {
+    return window.requestIdleCallback(() => cb(), { timeout })
+  }
+
+  return window.setTimeout(cb, timeout)
+}
+
+function cancelScheduledWork(id: number) {
+  if (typeof window === 'undefined') return
+
+  if (typeof window.cancelIdleCallback === 'function') {
+    window.cancelIdleCallback(id)
+    return
+  }
+
+  window.clearTimeout(id)
+}
 
 export default function AfterIdleClient({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false)
   const reloadedRef = useRef(false)
 
   useEffect(() => {
-    const ric: unknown = (window as unknown).requestIdleCallback ?? ((cb: unknown) => setTimeout(cb, 1))
-    const id = ric(() => setReady(true))
-    return () => {
-      (window as unknown).cancelIdleCallback?.(id)
-      clearTimeout(id)
-    }
+    const id = scheduleWhenIdle(() => setReady(true), 1)
+    return () => cancelScheduledWork(id)
   }, [])
 
-  // Enregistrement SW après idle
   useEffect(() => {
     if (!ready) return
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return
 
+    let cancelled = false
+    let removeControllerChange: (() => void) | undefined
+
     const register = async () => {
       try {
-        // L’URL standard générée par next-pwa
-        const swUrl = '/sw.js'
-        const reg = await navigator.serviceWorker.register(swUrl, { scope: '/' })
+        const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' })
+        if (cancelled) return
 
-        // Si un SW "waiting" existe déjà => active immédiatement
         if (reg.waiting) {
           reg.waiting.postMessage({ type: 'SKIP_WAITING' })
         }
 
-        // Nouveau SW trouvé
         reg.addEventListener('updatefound', () => {
-          const nw = reg.installing
-          if (!nw) return
-          nw.addEventListener('statechange', () => {
-            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-              // Un nouveau SW est prêt -> active tout de suite
+          const nextWorker = reg.installing
+          if (!nextWorker) return
+
+          nextWorker.addEventListener('statechange', () => {
+            if (nextWorker.state === 'installed' && navigator.serviceWorker.controller) {
               reg.waiting?.postMessage({ type: 'SKIP_WAITING' })
             }
           })
         })
 
-        // Quand le contrôleur change (nouvel SW actif), recharge une fois
-        const onCtrl = () => {
+        const onControllerChange = () => {
           if (reloadedRef.current) return
           reloadedRef.current = true
-          // Petit délai pour laisser l’activation se terminer proprement
-          setTimeout(() => window.location.reload(), 80)
+          window.setTimeout(() => window.location.reload(), 80)
         }
-        navigator.serviceWorker.addEventListener('controllerchange', onCtrl)
-        return () => navigator.serviceWorker.removeEventListener('controllerchange', onCtrl)
+
+        navigator.serviceWorker.addEventListener('controllerchange', onControllerChange)
+        removeControllerChange = () => {
+          navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange)
+        }
       } catch {}
     }
 
-    const idle = (cb: () => void) =>
-      ('requestIdleCallback' in window ? (window as unknown).requestIdleCallback(cb) : setTimeout(cb, 500))
+    const id = scheduleWhenIdle(() => {
+      void register()
+    }, 500)
 
-    const id = idle(register)
     return () => {
-      (window as unknown).cancelIdleCallback?.(id)
-      clearTimeout(id)
+      cancelled = true
+      removeControllerChange?.()
+      cancelScheduledWork(id)
     }
   }, [ready])
 
   if (!ready) return null
   return <>{children}</>
 }
-

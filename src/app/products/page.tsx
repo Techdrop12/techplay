@@ -1,11 +1,12 @@
-/* src/app/products/page.tsx — version autonome (await searchParams + JSON-safe + rendu simple) */
-import Link from "next/link"
+/* src/app/products/page.tsx — version SSR robuste, typée, JSON-safe */
+import Link from 'next/link'
 
-import type { Metadata } from "next"
+import type { Metadata } from 'next'
 
-import { generateMeta } from "@/lib/seo"
+import { generateMeta } from '@/lib/seo'
 
-type SortKey = "new" | "price_asc" | "price_desc"
+type SortKey = 'new' | 'price_asc' | 'price_desc'
+
 type Query = {
   q?: string
   sort?: SortKey
@@ -15,111 +16,223 @@ type Query = {
   cat?: string
 }
 
-/* Helpers */
-function toPlain<T>(x: T): T {
-  try { return JSON.parse(JSON.stringify(x)) } catch { return x as T }
-}
-
-async function fetchProductsServer(q: {
+type NormalizedQuery = {
   q: string
   sort: SortKey
   page: number
   min?: number
   max?: number
-  cat?: string | null
-}): Promise<{ items: unknown[]; total: number }> {
-  // Essaie d'utiliser l'API interne si elle existe
-  const base = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") || "http://localhost:3000"
+  cat: string | null
+}
+
+type ProductListItem = {
+  slug?: string
+  title?: string
+  price?: number
+}
+
+type ProductApiResult = {
+  items: ProductListItem[]
+  total: number
+}
+
+/* -------------------------------- Helpers ------------------------------- */
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+function isPromiseLike<T>(value: unknown): value is Promise<T> {
+  return (
+    (typeof value === 'object' || typeof value === 'function') &&
+    value !== null &&
+    'then' in value &&
+    typeof (value as { then?: unknown }).then === 'function'
+  )
+}
+
+function toPlain<T>(value: T): T {
+  try {
+    return JSON.parse(JSON.stringify(value)) as T
+  } catch {
+    return value
+  }
+}
+
+function readString(value: unknown, fallback = ''): string {
+  if (typeof value === 'string') return value
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value)
+  return fallback
+}
+
+function readNumber(value: unknown): number | undefined {
+  const parsed =
+    typeof value === 'number'
+      ? value
+      : typeof value === 'string' && value.trim() !== ''
+        ? Number(value)
+        : NaN
+
+  return Number.isFinite(parsed) ? parsed : undefined
+}
+
+async function resolveSearchParams(
+  searchParams?: Promise<Query> | Query
+): Promise<Query | undefined> {
+  if (isPromiseLike<Query>(searchParams)) return await searchParams
+  return searchParams
+}
+
+function normalizeSearchParams(sp?: Query): NormalizedQuery {
+  const q = readString(sp?.q).trim()
+
+  const rawSort = readString(sp?.sort, 'new') as SortKey
+  const sort: SortKey = ['new', 'price_asc', 'price_desc'].includes(rawSort)
+    ? rawSort
+    : 'new'
+
+  const page = Math.max(1, readNumber(sp?.page) ?? 1)
+
+  const minRaw = readNumber(sp?.min)
+  const maxRaw = readNumber(sp?.max)
+
+  const min = typeof minRaw === 'number' && minRaw >= 0 ? minRaw : undefined
+  const max = typeof maxRaw === 'number' && maxRaw >= 0 ? maxRaw : undefined
+
+  const cat = readString(sp?.cat).trim() || null
+
+  return { q, sort, page, min, max, cat }
+}
+
+function normalizeProductList(items: unknown[]): ProductListItem[] {
+  return items.map((item) => {
+    const record = isRecord(item) ? item : {}
+
+    return {
+      slug: readString(record.slug).trim() || undefined,
+      title: readString(record.title).trim() || undefined,
+      price: readNumber(record.price),
+    }
+  })
+}
+
+/* ----------------------------- Server fetch ----------------------------- */
+
+async function fetchProductsServer(query: NormalizedQuery): Promise<ProductApiResult> {
+  const base =
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, '') || 'http://localhost:3000'
+
   const params = new URLSearchParams()
-  if (q.q) params.set("q", q.q)
-  if (q.sort) params.set("sort", q.sort)
-  if (q.page) params.set("page", String(q.page))
-  if (typeof q.min === "number") params.set("min", String(q.min))
-  if (typeof q.max === "number") params.set("max", String(q.max))
-  if (q.cat) params.set("cat", q.cat)
+
+  if (query.q) params.set('q', query.q)
+  params.set('sort', query.sort)
+  params.set('page', String(query.page))
+  if (typeof query.min === 'number') params.set('min', String(query.min))
+  if (typeof query.max === 'number') params.set('max', String(query.max))
+  if (query.cat) params.set('cat', query.cat)
 
   try {
-    const res = await fetch(`${base}/api/products?${params.toString()}`, { cache: "no-store" })
+    const res = await fetch(`${base}/api/products?${params.toString()}`, {
+      cache: 'no-store',
+    })
+
     if (!res.ok) return { items: [], total: 0 }
-    const data = await res.json().catch(() => null)
-    const items = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : []
-    const total = Number(data?.total ?? items.length) || 0
-    return { items, total }
+
+    const data: unknown = await res.json().catch(() => null)
+
+    if (Array.isArray(data)) {
+      const items = normalizeProductList(toPlain(data))
+      return { items, total: items.length }
+    }
+
+    if (isRecord(data)) {
+      const rawItems = Array.isArray(data.items) ? data.items : []
+      const items = normalizeProductList(toPlain(rawItems))
+      const total = readNumber(data.total) ?? items.length
+      return { items, total }
+    }
+
+    return { items: [], total: 0 }
   } catch {
     return { items: [], total: 0 }
   }
 }
 
-/* ---------- Metadata ---------- */
-export async function generateMetadata(
-  { searchParams }: { searchParams?: Promise<Query> | Query }
-): Promise<Metadata> {
-  const sp = (searchParams && typeof (searchParams as unknown).then === "function")
-    ? await (searchParams as Promise<Query>)
-    : (searchParams as Query | undefined)
+/* ------------------------------- Metadata ------------------------------- */
 
-  const q = (sp?.q ?? "").toString().trim()
-  const sort = ((sp?.sort ?? "new") as SortKey)
-  const page = Math.max(1, Number(sp?.page ?? 1))
-  const min = sp?.min
-  const max = sp?.max
-  const cat = (sp?.cat ?? "").toString().trim()
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams?: Promise<Query> | Query
+}): Promise<Metadata> {
+  const sp = await resolveSearchParams(searchParams)
+  const query = normalizeSearchParams(sp)
 
   const bits: string[] = []
-  if (q) bits.push(`Recherche: "${q}"`)
-  if (cat) bits.push(`Catégorie: ${cat}`)
-  if (min || max) bits.push(`Prix${min ? " ≥ " + min : ""}${max ? " ≤ " + max : ""}`)
-  if (sort !== "new") bits.push(`Tri: ${sort}`)
 
-  const title = bits.length ? `Produits — ${bits.join(" · ")}` : "Tous les produits"
-  const description = "Découvrez notre catalogue de produits high-tech."
+  if (query.q) bits.push(`Recherche: "${query.q}"`)
+  if (query.cat) bits.push(`Catégorie: ${query.cat}`)
+  if (typeof query.min === 'number' || typeof query.max === 'number') {
+    bits.push(
+      `Prix${typeof query.min === 'number' ? ` ≥ ${query.min}` : ''}${
+        typeof query.max === 'number' ? ` ≤ ${query.max}` : ''
+      }`
+    )
+  }
+  if (query.sort !== 'new') bits.push(`Tri: ${query.sort}`)
+
+  const title = bits.length ? `Produits — ${bits.join(' · ')}` : 'Tous les produits'
+  const description = 'Découvrez notre catalogue de produits high-tech.'
 
   return generateMeta({
     title,
     description,
-    url: "/products",
-    image: "/og-products.jpg",
+    url: '/products',
+    image: '/og-products.jpg',
   })
 }
 
-/* ---------- Page ---------- */
-export default async function ProductsPage(
-  { searchParams }: { searchParams?: Promise<Query> | Query }
-) {
-  const sp = (searchParams && typeof (searchParams as unknown).then === "function")
-    ? await (searchParams as Promise<Query>)
-    : (searchParams as Query | undefined)
+/* --------------------------------- Page --------------------------------- */
 
-  const q = (sp?.q ?? "").toString().trim()
-  const rawSort = (sp?.sort ?? "new") as SortKey
-  const sort: SortKey = (["new","price_asc","price_desc"] as SortKey[]).includes(rawSort) ? rawSort : "new"
-  const minNum = Number(sp?.min)
-  const maxNum = Number(sp?.max)
-  const min = Number.isFinite(minNum) && minNum >= 0 ? minNum : undefined
-  const max = Number.isFinite(maxNum) && maxNum >= 0 ? maxNum : undefined
-  const page = Math.max(1, Number(sp?.page ?? 1))
-  const cat = (sp?.cat ?? "").toString().trim() || null
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Query> | Query
+}) {
+  const sp = await resolveSearchParams(searchParams)
+  const query = normalizeSearchParams(sp)
 
-  const { items, total } = await fetchProductsServer({ q, sort, min, max, page, cat })
-  const list = toPlain(items) as Array<{ slug?: string; title?: string; price?: number }>
+  const { items, total } = await fetchProductsServer(query)
 
   return (
     <main className="mx-auto max-w-6xl p-6">
-      <h1 className="text-2xl font-semibold mb-4">Produits</h1>
-      <p className="text-sm opacity-70 mb-6">{total} résultat(s)</p>
+      <h1 className="mb-4 text-2xl font-semibold">Produits</h1>
 
-      {list.length === 0 ? (
+      <p className="mb-2 text-sm opacity-70">{total} résultat(s)</p>
+
+      {(query.q || query.cat || typeof query.min === 'number' || typeof query.max === 'number') && (
+        <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">
+          {query.q ? <>Recherche : <strong>{query.q}</strong>. </> : null}
+          {query.cat ? <>Catégorie : <strong>{query.cat}</strong>. </> : null}
+          {typeof query.min === 'number' ? <>Min : <strong>{query.min} €</strong>. </> : null}
+          {typeof query.max === 'number' ? <>Max : <strong>{query.max} €</strong>. </> : null}
+        </p>
+      )}
+
+      {items.length === 0 ? (
         <p>Aucun produit trouvé.</p>
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {list.map((p, i) => (
-            <li key={p?.slug ?? i} className="border rounded-xl p-4">
-              <h3 className="font-medium">{p?.title ?? "Produit"}</h3>
-              {"price" in (p || {}) && typeof p?.price === "number" ? (
-                <p className="mt-1">{p.price} €</p>
-              ) : null}
-              {p?.slug ? (
-                <Link href={`/products/${p.slug}`} className="inline-block mt-2 underline">Voir</Link>
+          {items.map((product, idx) => (
+            <li key={product.slug ?? `product-${idx}`} className="rounded-xl border p-4">
+              <h2 className="font-medium">{product.title ?? 'Produit'}</h2>
+
+              {typeof product.price === 'number' ? <p className="mt-1">{product.price} €</p> : null}
+
+              {product.slug ? (
+                <Link href={`/products/${product.slug}`} className="mt-2 inline-block underline">
+                  Voir
+                </Link>
               ) : null}
             </li>
           ))}
@@ -128,4 +241,3 @@ export default async function ProductsPage(
     </main>
   )
 }
-

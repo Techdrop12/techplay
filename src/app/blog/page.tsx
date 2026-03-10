@@ -7,28 +7,203 @@ import BlogCard from '@/components/blog/BlogCard'
 import Link from '@/components/LocalizedLink'
 import { getPosts } from '@/lib/blog'
 import { localizePath } from '@/lib/i18n-routing'
-import { LOCALE_COOKIE, isLocale, pickBestLocale, type Locale } from '@/lib/language'
+import {
+  DEFAULT_LOCALE,
+  LOCALE_COOKIE,
+  isLocale,
+  pickBestLocale,
+  type Locale,
+} from '@/lib/language'
 import { generateMeta, jsonLdBreadcrumbs } from '@/lib/seo'
 
 export const revalidate = 60
 
-type SR = Record<string, string | string[] | undefined>
-
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
 
-/* ---------------------- Metadata dynamique ---------------------- */
-export async function generateMetadata(
-  { searchParams }: { searchParams?: SR }
-): Promise<Metadata> {
-  const q: string = typeof searchParams?.q === 'string' ? searchParams.q : ''
-  const page = Math.max(1, Number(searchParams?.page || 1))
+type SearchParams = Record<string, string | string[] | undefined>
+
+type PageProps = {
+  params?: Record<string, string | string[] | undefined>
+  searchParams?: SearchParams
+}
+
+type BlogListOpts = {
+  page: number
+  limit: number
+  publishedOnly: boolean
+  tag: string
+  category: string
+  q: string
+  sort: string
+}
+
+type BlogListItem = {
+  _id?: string
+  id?: string
+  slug?: string
+  title?: string
+  content?: string
+  description?: string
+  summary?: string
+  excerpt?: string
+  image?: string
+  author?: string
+  published?: boolean
+  publishedAt?: string | Date
+  createdAt?: string | Date
+  updatedAt?: string | Date
+  category?: string
+  tags?: string[]
+}
+
+type BlogCardArticle = {
+  _id: string
+  id: string
+  slug: string
+  title: string
+  content: string
+  description: string
+  summary: string
+  excerpt: string
+  image: string
+  author: string
+  published: boolean
+  publishedAt: string
+  createdAt: string
+  updatedAt: string
+  category: string
+  tags: string[]
+}
+
+type Pagination = {
+  page: number
+  limit: number
+  total: number
+  pages: number
+}
+
+type GetPostsResult = {
+  items: BlogListItem[]
+  pagination: Pagination
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+function getFirstString(value: unknown): string | undefined {
+  if (typeof value === 'string') {
+    const trimmed = value.trim()
+    return trimmed || undefined
+  }
+
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      if (typeof item === 'string') {
+        const trimmed = item.trim()
+        if (trimmed) return trimmed
+      }
+    }
+  }
+
+  return undefined
+}
+
+function getString(value: unknown, fallback = ''): string {
+  return typeof value === 'string' ? value : fallback
+}
+
+function getNumber(value: unknown, fallback: number): number {
+  const n = typeof value === 'number' ? value : Number(value)
+  return Number.isFinite(n) ? n : fallback
+}
+
+function getSearchParam(searchParams: SearchParams | undefined, key: string, fallback = ''): string {
+  if (!searchParams) return fallback
+  return getFirstString(searchParams[key]) ?? fallback
+}
+
+function toIsoString(value: unknown, fallback = new Date().toISOString()): string {
+  if (value instanceof Date) {
+    return Number.isFinite(value.getTime()) ? value.toISOString() : fallback
+  }
+
+  if (typeof value === 'string' || typeof value === 'number') {
+    const d = new Date(value)
+    return Number.isFinite(d.getTime()) ? d.toISOString() : fallback
+  }
+
+  return fallback
+}
+
+function toBlogOptions(searchParams: SearchParams | undefined): BlogListOpts {
+  return {
+    page: Math.max(1, getNumber(getSearchParam(searchParams, 'page', '1'), 1)),
+    limit: Math.max(1, Math.min(24, getNumber(getSearchParam(searchParams, 'limit', '12'), 12))),
+    publishedOnly: true,
+    tag: getSearchParam(searchParams, 'tag', ''),
+    category: getSearchParam(searchParams, 'category', ''),
+    q: getSearchParam(searchParams, 'q', '').trim(),
+    sort: getSearchParam(searchParams, 'sort', 'newest'),
+  }
+}
+
+function normalizeBlogItem(item: unknown, idx: number): BlogCardArticle {
+  const record = isRecord(item) ? item : {}
+
+  const slug = getString(record.slug, '')
+  const title = getString(record.title, 'Article sans titre')
+  const summary = getString(record.summary, '')
+  const excerpt = getString(record.excerpt, summary)
+  const description = getString(record.description, excerpt || summary)
+  const content = getString(record.content, description || summary || title)
+  const image = getString(record.image, '/og-image.jpg')
+  const author = getString(record.author, 'TechPlay')
+  const category = getString(record.category, '')
+  const tags = Array.isArray(record.tags)
+    ? record.tags.filter((tag): tag is string => typeof tag === 'string')
+    : []
+
+  const rawId =
+    getString(record._id, '') ||
+    getString(record.id, '') ||
+    (slug ? `post-${slug}` : `post-${idx}`)
+
+  const createdAt = toIsoString(record.createdAt ?? record.publishedAt)
+  const publishedAt = toIsoString(record.publishedAt ?? record.createdAt, createdAt)
+  const updatedAt = toIsoString(record.updatedAt ?? record.createdAt, createdAt)
+
+  return {
+    _id: rawId,
+    id: rawId,
+    slug,
+    title,
+    content,
+    description,
+    summary,
+    excerpt,
+    image,
+    author,
+    published: record.published === true,
+    publishedAt,
+    createdAt,
+    updatedAt,
+    category,
+    tags,
+  }
+}
+
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+  const opts = toBlogOptions(searchParams)
+  const q = opts.q
+  const page = opts.page
 
   const baseTitle = 'Blog TechPlay – Conseils et nouveautés'
   const title = q
     ? `Résultats pour “${q}” – Page ${page}`
     : page > 1
-    ? `Blog TechPlay – Page ${page}`
-    : baseTitle
+      ? `Blog TechPlay – Page ${page}`
+      : baseTitle
 
   const description = q
     ? `Articles correspondant à “${q}” sur le blog TechPlay.`
@@ -38,64 +213,66 @@ export async function generateMetadata(
   if (q) sp.set('q', q)
   if (page > 1) sp.set('page', String(page))
 
-  const path = `/blog${sp.toString() ? `?${sp}` : ''}`
+  const path = `/blog${sp.toString() ? `?${sp.toString()}` : ''}`
 
-  // hreflang/canonical/OG absolus + noindex pour les pages de recherche
   return generateMeta({
     title,
     description,
     url: path,
     image: '/og-image.jpg',
-    noindex: !!q,
+    noindex: Boolean(q),
   })
 }
 
-/* ------------------------------ Page ----------------------------- */
-export default async function BlogPage({ searchParams }: { searchParams?: SR }) {
+export default async function BlogPage({ searchParams }: { searchParams?: SearchParams }) {
   const cookieStore = await cookies()
-  const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value
+  const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value ?? ''
   const acceptLang = (await headers()).get('accept-language') || ''
-  const locale: Locale = isLocale(cookieLocale || '') ? (cookieLocale as Locale) : pickBestLocale(acceptLang)
+  const pickedLocale = pickBestLocale(acceptLang)
 
-  const page = Math.max(1, Number(searchParams?.page || 1))
-  const limit = Math.max(1, Math.min(24, Number(searchParams?.limit || 12)))
+  const locale: Locale = isLocale(cookieLocale)
+    ? cookieLocale
+    : isLocale(pickedLocale)
+      ? pickedLocale
+      : DEFAULT_LOCALE
 
-  // Toujours des strings (jamais undefined) pour l’UI
-  const q: string = typeof searchParams?.q === 'string' ? searchParams.q.trim() : ''
-  const tagStr: string = typeof searchParams?.tag === 'string' ? searchParams.tag : ''
-  const categoryStr: string =
-    typeof searchParams?.category === 'string' ? searchParams.category : ''
-  const sort: string =
-    typeof searchParams?.sort === 'string' ? searchParams.sort : 'newest'
+  const opts = toBlogOptions(searchParams)
 
-  // ✅ Construire l’objet params sans passer "undefined"
-  const params: unknown = {
-    page,
-    limit,
-    q,
-    sort,
-    publishedOnly: true,
+  const q = opts.q
+  const tagStr = opts.tag
+  const categoryStr = opts.category
+  const sort = opts.sort
+  const page = opts.page
+  const limit = opts.limit
+
+  const data = (await getPosts(opts)) as GetPostsResult
+
+  const rawPosts = Array.isArray(data?.items) ? data.items : []
+  const posts: BlogCardArticle[] = rawPosts.map((post, idx) => normalizeBlogItem(post, idx))
+
+  const pagination: Pagination = {
+    page: getNumber(data?.pagination?.page, page),
+    limit: getNumber(data?.pagination?.limit, limit),
+    total: getNumber(data?.pagination?.total, posts.length),
+    pages: Math.max(1, getNumber(data?.pagination?.pages, 1)),
   }
-  if (tagStr) params.tag = tagStr as string
-  if (categoryStr) params.category = categoryStr as string
 
-  const { items: posts, pagination } = await getPosts(params)
-
-  // Conserver les filtres dans les liens (LocalizedLink ajoutera le préfixe de locale)
   const persist = (
     next: Partial<Record<'page' | 'limit' | 'q' | 'tag' | 'category' | 'sort', string | number>>
   ) => {
     const sp = new URLSearchParams()
+
     if (q) sp.set('q', q)
     if (tagStr) sp.set('tag', tagStr)
     if (categoryStr) sp.set('category', categoryStr)
     if (sort) sp.set('sort', sort)
-    sp.set('limit', String(limit))
+
+    sp.set('limit', String(next.limit ?? limit))
     sp.set('page', String(next.page ?? page))
+
     return `/blog?${sp.toString()}`
   }
 
-  // JSON-LD Breadcrumbs (localisé)
   const crumbs = jsonLdBreadcrumbs([
     { name: 'Accueil', url: localizePath('/', locale) },
     { name: 'Blog', url: localizePath('/blog', locale) },
@@ -110,7 +287,6 @@ export default async function BlogPage({ searchParams }: { searchParams?: SR }) 
         {q ? `Résultats pour “${q}”` : 'Nos articles de blog'}
       </h1>
 
-      {/* Recherche / tri */}
       <form
         role="search"
         className="mb-8 grid grid-cols-1 sm:grid-cols-3 gap-3"
@@ -125,6 +301,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: SR }) 
           className="rounded-lg border border-gray-300 dark:border-zinc-700 bg-white/90 dark:bg-zinc-900/80 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
           aria-label="Rechercher dans le blog"
         />
+
         <select
           name="sort"
           defaultValue={sort}
@@ -145,33 +322,38 @@ export default async function BlogPage({ searchParams }: { searchParams?: SR }) 
           >
             Filtrer
           </button>
+
           {(q || tagStr || categoryStr) && (
-            <Link href="/blog" className="text-sm text-gray-600 hover:underline dark:text-gray-400" prefetch={false}>
+            <Link
+              href="/blog"
+              className="text-sm text-gray-600 hover:underline dark:text-gray-400"
+              prefetch={false}
+            >
               Réinitialiser
             </Link>
           )}
         </div>
 
-        {/* Hidden: toujours des strings */}
         <input type="hidden" name="limit" value={String(limit)} />
-        <input type="hidden" name="tag" value={tagStr || ''} />
-        <input type="hidden" name="category" value={categoryStr || ''} />
+        <input type="hidden" name="tag" value={tagStr} />
+        <input type="hidden" name="category" value={categoryStr} />
       </form>
 
-      {/* Liste */}
       {posts.length === 0 ? (
         <p className="text-center text-gray-500 dark:text-gray-400 text-lg" role="status" aria-live="polite">
           Aucun article {q ? `pour “${q}”` : 'disponible'}.
         </p>
       ) : (
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" aria-label="Liste des articles">
-          {posts.map((post: unknown, idx: number) => (
-            <BlogCard key={(post._id as string) ?? (post.slug as string) ?? `post-${idx}`} article={post} />
+          {posts.map((post, idx) => (
+            <BlogCard
+              key={post._id || post.slug || `post-${idx}`}
+              article={post}
+            />
           ))}
         </section>
       )}
 
-      {/* Pagination */}
       {pagination.pages > 1 && (
         <nav className="mt-10 flex items-center justify-center gap-2" aria-label="Pagination des articles">
           <Link
@@ -189,6 +371,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: SR }) 
 
           {Array.from({ length: pagination.pages }).map((_, i) => {
             const n = i + 1
+
             if (n === 1 || n === pagination.pages || Math.abs(n - page) <= 1) {
               return (
                 <Link
@@ -206,9 +389,15 @@ export default async function BlogPage({ searchParams }: { searchParams?: SR }) 
                 </Link>
               )
             }
-            if (n === 2 && page > 3) return <span key="dots-left" className="px-2 text-gray-400">…</span>
-            if (n === pagination.pages - 1 && page < pagination.pages - 2)
+
+            if (n === 2 && page > 3) {
+              return <span key="dots-left" className="px-2 text-gray-400">…</span>
+            }
+
+            if (n === pagination.pages - 1 && page < pagination.pages - 2) {
               return <span key="dots-right" className="px-2 text-gray-400">…</span>
+            }
+
             return null
           })}
 
@@ -227,11 +416,11 @@ export default async function BlogPage({ searchParams }: { searchParams?: SR }) 
         </nav>
       )}
 
-      {/* JSON-LD (Breadcrumbs + ItemList) */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }}
       />
+
       {posts.length > 0 && (
         <script
           type="application/ld+json"
@@ -239,11 +428,11 @@ export default async function BlogPage({ searchParams }: { searchParams?: SR }) 
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'ItemList',
-              itemListElement: posts.map((p: unknown, idx: number) => ({
+              itemListElement: posts.map((post, idx) => ({
                 '@type': 'ListItem',
                 position: idx + 1 + (page - 1) * limit,
-                url: `${SITE}${localizePath(`/blog/${String(p.slug || '')}`, locale)}`,
-                name: String(p.title || ''),
+                url: `${SITE}${localizePath(`/blog/${post.slug}`, locale)}`,
+                name: post.title,
               })),
             }),
           }}
@@ -252,4 +441,3 @@ export default async function BlogPage({ searchParams }: { searchParams?: SR }) 
     </main>
   )
 }
-

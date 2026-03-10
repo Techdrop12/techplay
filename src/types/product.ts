@@ -1,60 +1,59 @@
 // src/types/product.ts
 
-/** Avis client unitaire (1..5, entier) */
+export type ReviewRating = 1 | 2 | 3 | 4 | 5
+export type ProductAttributeValue = string | number | boolean
+
+/** Avis client unitaire */
 export interface Review {
+  [key: string]: unknown
+
   _id: string
   productId?: string
-  /** Note entière de 1 à 5 */
-  rating: 1 | 2 | 3 | 4 | 5
-  /** Corps de l'avis */
+  rating: ReviewRating
   comment: string
-  /** Auteur affiché (pseudo/prénom) */
   author?: string
-  /** Titre optionnel */
   title?: string
-  /** ISO date */
   createdAt?: string | Date
 }
 
 /** Agrégation des avis */
 export interface AggregateRating {
-  /** Moyenne 0..5 (décimale) */
+  [key: string]: unknown
+
   average: number
-  /** Total d’avis */
   total: number
-  /** Répartition (comptes) 5→1 */
-  breakdownCount?: Partial<Record<1 | 2 | 3 | 4 | 5, number>>
+  breakdownCount?: Partial<Record<ReviewRating, number>>
+}
+
+/** Promotion stockée côté back */
+export interface Promo {
+  [key: string]: unknown
+
+  price?: number
+  startDate?: string | Date
+  endDate?: string | Date
 }
 
 /** Produit unitaire vendu à l'item */
 export interface Product {
+  [key: string]: unknown
+
   _id: string
   slug: string
 
   title?: string
   description?: string
 
-  /** Prix courant (déjà calculé côté back si promo active) */
   price: number
-  /** Ancien prix si promo (sinon undefined) */
   oldPrice?: number
 
-  /** Image principale */
   image?: string
-
-  /** Galerie d’images (alias : certaines collections utilisent `gallery`) */
   images?: string[]
-  /** Alias pour compat DB existante */
   gallery?: string[]
 
-  /** Moyenne des notes (0..5) */
   rating?: number
-  /** Nombre d’avis (utilisé pour le JSON-LD/affichage) */
   reviewsCount?: number
-
-  /** (optionnel) détails d'avis si chargés */
   reviews?: Review[]
-  /** (optionnel) agrégation côté API si fournie */
   aggregateRating?: AggregateRating
 
   isNew?: boolean
@@ -63,23 +62,16 @@ export interface Product {
   category?: string
   brand?: string
   sku?: string
-
-  /** Stock disponible (<=0 = rupture) */
   stock?: number
 
-  /** Promo brute telle que stockée côté DB (optionnelle) */
-  promo?: {
-    price?: number
-    startDate?: string | Date
-    endDate?: string | Date
-  }
-
-  /** Libre : specs/attributs techniques */
-  attributes?: Record<string, string | number | boolean>
+  promo?: Promo
+  attributes?: Record<string, ProductAttributeValue>
 }
 
-// Pour le panier (réutilisé partout)
-export type CartItem = {
+/** Utilisé dans le panier */
+export interface CartItem {
+  [key: string]: unknown
+
   _id: string
   slug: string
   title?: string
@@ -88,32 +80,67 @@ export type CartItem = {
   quantity: number
 }
 
-/** Pack/bundle de plusieurs produits. */
+/** Item contenu dans un pack */
+export interface PackItem {
+  [key: string]: unknown
+
+  _id?: string
+  id?: string | number
+  slug?: string
+
+  title?: string
+  name?: string
+  label?: string
+
+  image?: string
+
+  price?: number
+  prix?: number
+  amount?: number
+  value?: number
+
+  quantity?: number
+}
+
+/** Pack/bundle de plusieurs produits */
 export interface Pack {
+  [key: string]: unknown
+
   _id: string
+  id?: string | number
+
   slug: string
   title: string
   description: string
+
   price: number
   oldPrice?: number
+
   compareAtPrice?: number
+  compare_at_price?: number
+  referencePrice?: number
+  reference_price?: number
+
   rating?: number
   reviewsCount?: number
+
   tags?: string[]
 
   image?: string
   images?: string[]
 
   isNew?: boolean
+  new?: boolean
+
   isBestSeller?: boolean
+  bestSeller?: boolean
+  bestseller?: boolean
+
   stock?: number
 
-  items?: Array<{
-    _id?: string
-    slug?: string
-    title?: string
-    image?: string
-    price?: number
-    quantity?: number
-  }>
+  brand?: string
+  sku?: string
+
+  items?: PackItem[]
+  contents?: PackItem[]
 }

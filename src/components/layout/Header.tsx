@@ -1,9 +1,9 @@
 // src/components/layout/Header.tsx — ULTIME+++ (i18n switch FR/EN actif, mega-menu a11y, perf/UX/a11y, micro-polish)
 'use client'
 
-import NextLink from 'next/link' // logo
+import NextLink from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useId, useRef, useState, useMemo } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import Logo from '../Logo'
 
@@ -25,16 +25,28 @@ import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 import { LOCALE_COOKIE, setLocaleCookie } from '@/lib/language'
 import { cn } from '@/lib/utils'
 
-/* ----------------------------- i18n strings ------------------------------ */
 const STR = {
   fr: {
-    nav: { categories: 'Catégories', products: 'Produits', wishlist: 'Wishlist', blog: 'Blog', contact: 'Contact' },
+    nav: {
+      categories: 'Catégories',
+      products: 'Produits',
+      wishlist: 'Wishlist',
+      blog: 'Blog',
+      contact: 'Contact',
+    },
     headerNavAria: 'Navigation principale',
     searchAria: 'Recherche produits',
     searchHint: 'Raccourcis : « / » ou « Ctrl/⌘ K » pour rechercher.',
     placeholderPrefix: 'Rechercher… ex:',
-    trends: ['écouteurs bluetooth', 'casque gaming', 'chargeur rapide USB-C', 'pack starter', 'power bank', 'souris sans fil'],
-    deals: { text: 'Offres', title: 'Offres du jour', aria: "Voir les offres du jour" },
+    trends: [
+      'écouteurs bluetooth',
+      'casque gaming',
+      'chargeur rapide USB-C',
+      'pack starter',
+      'power bank',
+      'souris sans fil',
+    ],
+    deals: { text: 'Offres', title: 'Offres du jour', aria: 'Voir les offres du jour' },
     selection: 'Sélection',
     packsTitle: 'Packs recommandés',
     packsDesc: 'Les meilleures combinaisons pour booster ton setup.',
@@ -47,12 +59,25 @@ const STR = {
     logoAria: 'TechPlay — Accueil',
   },
   en: {
-    nav: { categories: 'Categories', products: 'Products', wishlist: 'Wishlist', blog: 'Blog', contact: 'Contact' },
+    nav: {
+      categories: 'Categories',
+      products: 'Products',
+      wishlist: 'Wishlist',
+      blog: 'Blog',
+      contact: 'Contact',
+    },
     headerNavAria: 'Primary navigation',
     searchAria: 'Product search',
     searchHint: 'Shortcuts: “/” or “Ctrl/⌘ K” to search.',
     placeholderPrefix: 'Search… e.g.',
-    trends: ['bluetooth earbuds', 'gaming headset', 'USB-C fast charger', 'starter pack', 'power bank', 'wireless mouse'],
+    trends: [
+      'bluetooth earbuds',
+      'gaming headset',
+      'USB-C fast charger',
+      'starter pack',
+      'power bank',
+      'wireless mouse',
+    ],
     deals: { text: 'Deals', title: "Today's deals", aria: "See today's deals" },
     selection: 'Featured',
     packsTitle: 'Recommended packs',
@@ -67,7 +92,29 @@ const STR = {
   },
 } as const
 
-type NavLink = { href: string; labelKey: keyof typeof STR['fr']['nav'] }
+type NavLink = { href: string; labelKey: keyof typeof STR.fr.nav }
+
+type CartEntry = { quantity?: number }
+type CartStateLike =
+  | CartEntry[]
+  | {
+      items?: CartEntry[]
+      count?: number
+      size?: number
+    }
+  | undefined
+
+type WishlistStateLike =
+  | unknown[]
+  | {
+      items?: unknown[]
+      count?: number
+      size?: number
+    }
+  | undefined
+
+type CartStoreLike = { cart?: CartStateLike }
+type WishlistStoreLike = { wishlist?: WishlistStateLike }
 
 const LINKS: NavLink[] = [
   { href: '/categorie', labelKey: 'categories' },
@@ -79,9 +126,8 @@ const LINKS: NavLink[] = [
 
 const SCROLL_HIDE_OFFSET = 80
 const HOVER_PREFETCH_DELAY = 120
-const PLACEHOLDER_MS = 4000 // harmonisé avec mobile
+const PLACEHOLDER_MS = 4000
 
-/** Badge premium */
 const ActionBadge = ({ children, className }: { children: React.ReactNode; className?: string }) => (
   <span
     className={cn(
@@ -95,17 +141,20 @@ const ActionBadge = ({ children, className }: { children: React.ReactNode; class
   </span>
 )
 
-/** Sélecteur de langue FR/EN (persiste NEXT_LOCALE + navigation localisée) */
 function LocaleSwitch({ pathname }: { pathname: string }) {
   const router = useRouter()
   const locale = getCurrentLocale(pathname)
+
   const setLang = (newLocale: 'fr' | 'en') => {
     if (newLocale === locale) return
+
     try {
-      const secure = typeof location !== 'undefined' && location.protocol === 'https:' ? '; Secure' : ''
+      const secure =
+        typeof location !== 'undefined' && location.protocol === 'https:' ? '; Secure' : ''
       document.cookie = `${LOCALE_COOKIE}=${encodeURIComponent(newLocale)}; Max-Age=31536000; Path=/; SameSite=Lax${secure}`
       setLocaleCookie(newLocale)
     } catch {}
+
     const next = localizePath(pathname, newLocale)
     router.replace(next)
   }
@@ -123,10 +172,9 @@ function LocaleSwitch({ pathname }: { pathname: string }) {
             key={l}
             type="button"
             onClick={() => setLang(l)}
-            onMouseDown={(e) => e.preventDefault()} // supprime le blur parasite dans certains navigateurs
+            onMouseDown={(e) => e.preventDefault()}
             disabled={active}
             aria-pressed={active}
-            aria-current={active ? 'true' : undefined}
             className={cn(
               'px-2.5 py-1.5 text-xs font-semibold rounded-full transition outline-none focus:ring-2',
               active
@@ -151,16 +199,21 @@ export default function Header() {
   const L = (p: string) => localizePath(p, locale)
   const SEARCH_ACTION = L('/products')
 
-  // catégories i18n
   const categories = useMemo(() => getCategories(locale), [locale])
 
-  // stores
-  const { cart } = useCart() as unknown
-  const { wishlist } = useWishlist() as unknown
+  const cartStore = useCart() as CartStoreLike
+  const wishlistStore = useWishlist() as WishlistStoreLike
+
+  const cart = cartStore?.cart
+  const wishlist = wishlistStore?.wishlist
 
   const cartCount = useMemo(() => {
-    if (Array.isArray(cart)) return cart.reduce((tot: number, it: unknown) => tot + (it?.quantity || 1), 0)
-    if (Array.isArray(cart?.items)) return cart.items.reduce((tot: number, it: unknown) => tot + (it?.quantity || 1), 0)
+    if (Array.isArray(cart)) {
+      return cart.reduce((tot, it) => tot + Math.max(1, Number(it.quantity ?? 1)), 0)
+    }
+    if (Array.isArray(cart?.items)) {
+      return cart.items.reduce((tot, it) => tot + Math.max(1, Number(it.quantity ?? 1)), 0)
+    }
     const n = Number(cart?.count ?? cart?.size ?? 0)
     return Number.isFinite(n) ? n : 0
   }, [cart])
@@ -172,7 +225,6 @@ export default function Header() {
     return Number.isFinite(n) ? n : 0
   }, [wishlist])
 
-  // ui state
   const [hidden, setHidden] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const lastY = useRef(0)
@@ -181,12 +233,10 @@ export default function Header() {
   const prefetchTimers = useRef<Map<string, number>>(new Map())
   const searchRef = useRef<HTMLInputElement | null>(null)
 
-  // tendances recherche i18n (⚠️ typées en string[] pour éviter les unions littérales)
-  const trends: string[] = useMemo(() => [...(STR[locale].trends as readonly string[])], [locale])
+  const trends: string[] = useMemo(() => [...STR[locale].trends], [locale])
   const [placeholder, setPlaceholder] = useState<string>(() => trends[0] ?? '')
   const saveData = useRef<boolean>(false)
 
-  // mega menu
   const [catOpen, setCatOpen] = useState(false)
   const catBtnRef = useRef<HTMLButtonElement | null>(null)
   const catPanelRef = useRef<HTMLDivElement | null>(null)
@@ -195,12 +245,19 @@ export default function Header() {
   const catPanelId = useId()
 
   const openCats = () => {
-    if (catTimer.current) { clearTimeout(catTimer.current); catTimer.current = null }
+    if (catTimer.current) {
+      clearTimeout(catTimer.current)
+      catTimer.current = null
+    }
     setCatOpen(true)
   }
+
   const closeCats = (delay = 80) => {
-    if (catTimer.current) { clearTimeout(catTimer.current); catTimer.current = null }
-    catTimer.current = window.setTimeout(() => setCatOpen(false), delay) as unknown as number
+    if (catTimer.current) {
+      clearTimeout(catTimer.current)
+      catTimer.current = null
+    }
+    catTimer.current = window.setTimeout(() => setCatOpen(false), delay)
   }
 
   useEffect(() => {
@@ -219,8 +276,8 @@ export default function Header() {
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       if (!catOpen) return
-      const tEl = e.target as HTMLElement
-      if (catPanelRef.current?.contains(tEl) || catBtnRef.current?.contains(tEl)) return
+      const target = e.target as Node
+      if (catPanelRef.current?.contains(target) || catBtnRef.current?.contains(target)) return
       setCatOpen(false)
     }
     window.addEventListener('mousedown', onClick)
@@ -230,19 +287,19 @@ export default function Header() {
   useEffect(() => {
     const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)')
     reducedMotion.current = !!mq?.matches
+
     const onChange = () => {
       reducedMotion.current = !!mq?.matches
       if (reducedMotion.current) setHidden(false)
     }
+
     mq?.addEventListener?.('change', onChange)
     return () => mq?.removeEventListener?.('change', onChange)
   }, [])
 
   useEffect(() => {
-    // Détecte Data Saver pour éviter les prefetch agressifs
     try {
-      const conn = (navigator as unknown)?.connection
-      saveData.current = !!conn?.saveData
+      saveData.current = !!navigator.connection?.saveData
     } catch {}
   }, [])
 
@@ -250,6 +307,7 @@ export default function Header() {
     const onScroll = () => {
       const y = window.scrollY
       if (ticking.current) return
+
       ticking.current = true
       window.requestAnimationFrame(() => {
         setScrolled(y > 2)
@@ -259,46 +317,50 @@ export default function Header() {
         ticking.current = false
       })
     }
+
     window.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Hotkeys: "/" ou Ctrl/Cmd+K
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement)?.tagName
-      const editable =
-        tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable
+      const target = e.target as HTMLElement | null
+      const tag = target?.tagName
+      const editable = tag === 'INPUT' || tag === 'TEXTAREA' || target?.isContentEditable
       const cmdK = e.key.toLowerCase() === 'k' && (e.metaKey || e.ctrlKey)
       const slash = e.key === '/'
+
       if (!editable && (cmdK || slash)) {
         e.preventDefault()
         searchRef.current?.focus()
         searchRef.current?.select()
       }
+
       if (e.key === 'Escape' && searchRef.current === document.activeElement) {
-        (e.target as HTMLInputElement)?.blur()
+        (e.target as HTMLInputElement | null)?.blur?.()
       }
     }
+
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  // placeholder tournant selon langue (→ state typé string)
   useEffect(() => {
     setPlaceholder(trends[0] ?? '')
     let i = 0
+
     const id = window.setInterval(() => {
       i = (i + 1) % trends.length
       setPlaceholder(trends[i] ?? '')
     }, PLACEHOLDER_MS)
+
     return () => clearInterval(id)
   }, [trends])
 
   useEffect(() => {
     return () => {
-      prefetchTimers.current.forEach((t) => clearTimeout(t))
+      prefetchTimers.current.forEach((timer) => clearTimeout(timer))
       prefetchTimers.current.clear()
     }
   }, [])
@@ -311,7 +373,7 @@ export default function Header() {
   const prefetchViaLink = (href: string) => {
     if (saveData.current) return
     try {
-      router.prefetch?.(href)
+      router.prefetch(href)
       const el = document.createElement('link')
       el.rel = 'prefetch'
       el.href = href
@@ -325,36 +387,50 @@ export default function Header() {
     const target = L(href)
     if (!target || isActive(href)) return
     if (prefetchTimers.current.has(target)) return
-    const tmo = window.setTimeout(() => {
+
+    const timer = window.setTimeout(() => {
       prefetchViaLink(target)
       prefetchTimers.current.delete(target)
     }, HOVER_PREFETCH_DELAY)
-    prefetchTimers.current.set(target, tmo)
+
+    prefetchTimers.current.set(target, timer)
   }
+
   const smartPrefetchCancel = (href: string) => {
     const target = L(href)
-    const tmo = prefetchTimers.current.get(target)
-    if (tmo) { clearTimeout(tmo); prefetchTimers.current.delete(target) }
+    const timer = prefetchTimers.current.get(target)
+    if (timer) {
+      clearTimeout(timer)
+      prefetchTimers.current.delete(target)
+    }
   }
 
   const onSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     const form = e.currentTarget
     const data = new FormData(form)
     const q = String(data.get('q') || '').trim()
+
     if (!q) {
       e.preventDefault()
       searchRef.current?.focus()
       return
     }
-    try { localStorage.setItem('last:q', q) } catch {}
+
+    try {
+      localStorage.setItem('last:q', q)
+    } catch {}
   }
 
-  /** LOGO → ACCUEIL (garanti) */
   const onLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (e.metaKey || e.ctrlKey || e.button === 1) return
     e.preventDefault()
+
     const url = L('/')
-    try { router.push(url) } catch {}
+
+    try {
+      router.push(url)
+    } catch {}
+
     setTimeout(() => {
       try {
         if (window.location.pathname !== url) window.location.assign(url)
@@ -379,7 +455,6 @@ export default function Header() {
       )}
     >
       <div className="container-app flex h-16 md:h-20 items-center justify-between gap-2 sm:gap-3">
-        {/* Logo — clique → Accueil */}
         <NextLink
           href={L('/')}
           prefetch={false}
@@ -398,7 +473,6 @@ export default function Header() {
           />
         </NextLink>
 
-        {/* Recherche */}
         <form
           action={SEARCH_ACTION}
           method="get"
@@ -407,7 +481,6 @@ export default function Header() {
           onSubmit={onSearchSubmit}
           className="relative hidden md:flex min-w-0 flex-1 items-center lg:max-w-md xl:max-w-lg"
         >
-          {/* label accessible lié à l'input */}
           <label htmlFor="header-search" className="sr-only">
             {t.searchAria}
           </label>
@@ -434,9 +507,13 @@ export default function Header() {
             aria-describedby="search-hint"
           />
           <datalist id="header-search-suggestions">
-            {trends.map((s) => (<option value={s} key={s} />))}
+            {trends.map((s) => (
+              <option value={s} key={s} />
+            ))}
           </datalist>
-          <div id="search-hint" className="sr-only">{t.searchHint}</div>
+          <div id="search-hint" className="sr-only">
+            {t.searchHint}
+          </div>
           <div id="search-status" aria-live="polite" aria-atomic="true" className="sr-only" />
           <div className="absolute inset-y-0 right-1.5 flex items-center">
             <button
@@ -451,7 +528,6 @@ export default function Header() {
           </div>
         </form>
 
-        {/* Desktop nav */}
         <nav
           className="hidden lg:flex gap-5 xl:gap-7 tracking-tight font-medium text-token-text text-[15px] xl:text-base whitespace-nowrap"
           aria-label={t.headerNavAria}
@@ -462,7 +538,12 @@ export default function Header() {
 
             if (labelKey === 'categories') {
               return (
-                <div key="mega-cats" className="relative" onMouseEnter={openCats} onMouseLeave={() => closeCats()}>
+                <div
+                  key="mega-cats"
+                  className="relative"
+                  onMouseEnter={openCats}
+                  onMouseLeave={() => closeCats()}
+                >
                   <button
                     ref={catBtnRef}
                     id={catBtnId}
@@ -473,7 +554,7 @@ export default function Header() {
                     onClick={() => setCatOpen((v) => !v)}
                     onFocus={openCats}
                     onBlur={() => closeCats(80)}
-                    onMouseDown={(e) => e.preventDefault()} // évite blur + fermeture pendant un drag
+                    onMouseDown={(e) => e.preventDefault()}
                     className={cn(
                       'relative transition-colors duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded-sm px-0.5',
                       active
@@ -484,7 +565,10 @@ export default function Header() {
                   >
                     {label}
                     {!active && (
-                      <span className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-[hsl(var(--accent))] transition-all duration-300 group-hover:w-full" aria-hidden="true" />
+                      <span
+                        className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-[hsl(var(--accent))] transition-all duration-300 group-hover:w-full"
+                        aria-hidden="true"
+                      />
                     )}
                   </button>
 
@@ -497,7 +581,9 @@ export default function Header() {
                       'absolute left-1/2 top-[calc(100%+10px)] z-50 w-[min(860px,92vw)] -translate-x-1/2 rounded-2xl border',
                       'border-token-border bg-token-surface/90 shadow-2xl backdrop-blur supports-backdrop:bg-token-surface/80',
                       'transition-all duration-200',
-                      catOpen ? 'pointer-events-auto opacity-100 translate-y-0' : 'pointer-events-none opacity-0 -translate-y-1'
+                      catOpen
+                        ? 'pointer-events-auto opacity-100 translate-y-0'
+                        : 'pointer-events-none opacity-0 -translate-y-1'
                     )}
                     onFocus={openCats}
                     onBlur={() => closeCats(80)}
@@ -528,7 +614,13 @@ export default function Header() {
                                 <span className="block text-sm font-semibold">{c.label}</span>
                                 <span className="block text-xs text-token-text/60">{c.desc}</span>
                               </span>
-                              <svg width="18" height="18" viewBox="0 0 24 24" className="opacity-50 group-hover:opacity-90" aria-hidden="true">
+                              <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                className="opacity-50 group-hover:opacity-90"
+                                aria-hidden="true"
+                              >
                                 <path fill="currentColor" d="M9 18l6-6-6-6v12z" />
                               </svg>
                             </Link>
@@ -538,7 +630,9 @@ export default function Header() {
 
                       <div className="md:col-span-1">
                         <div className="h-full rounded-xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.10)] via-transparent to-token-surface p-4 md:p-5 shadow-md">
-                          <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent)/.90)]">{t.selection}</p>
+                          <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent)/.90)]">
+                            {t.selection}
+                          </p>
                           <h3 className="mt-1 text-lg font-extrabold">{t.packsTitle}</h3>
                           <p className="mt-2 text-sm text-token-text/70">{t.packsDesc}</p>
                           <div className="mt-3 flex flex-wrap gap-2">
@@ -591,23 +685,24 @@ export default function Header() {
                     ? 'text-[hsl(var(--accent))] font-semibold after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-[hsl(var(--accent))]'
                     : 'hover:text-[hsl(var(--accent))] focus-visible:text-[hsl(var(--accent))]'
                 )}
-                data-gtm={'header_nav_' + labelKey}
+                data-gtm={`header_nav_${labelKey}`}
               >
                 {label}
                 {!active && (
-                  <span className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-[hsl(var(--accent))] transition-all duration-300 group-hover:w-full" aria-hidden="true" />
+                  <span
+                    className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-[hsl(var(--accent))] transition-all duration-300 group-hover:w-full"
+                    aria-hidden="true"
+                  />
                 )}
               </Link>
             )
           })}
         </nav>
 
-        {/* Actions droites */}
         <div className="hidden items-center gap-2 sm:gap-3 md:flex">
           <ThemeToggle size="sm" />
           <LocaleSwitch pathname={pathname} />
 
-          {/* Offres compact */}
           <Link
             href="/products?promo=1"
             prefetch={false}
@@ -620,10 +715,11 @@ export default function Header() {
             title={t.deals.title}
             data-gtm="header_deals_icon"
           >
-            <ActionBadge><Flame /></ActionBadge>
+            <ActionBadge>
+              <Flame />
+            </ActionBadge>
           </Link>
 
-          {/* Offres bouton texte */}
           <Link
             href="/products?promo=1"
             prefetch={false}
@@ -643,7 +739,6 @@ export default function Header() {
             <span>{t.deals.text}</span>
           </Link>
 
-          {/* Wishlist */}
           <div className="relative">
             <Link
               href="/wishlist"
@@ -656,18 +751,20 @@ export default function Header() {
               aria-label={t.wishlistAria(wishlistCount)}
               data-gtm="header_wishlist"
             >
-              <ActionBadge><Heart /></ActionBadge>
+              <ActionBadge>
+                <Heart />
+              </ActionBadge>
             </Link>
             {wishlistCount > 0 && (
               <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
                 <span className="rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm">
-                  <span className="sr-only">Wishlist count: </span>{wishlistCount}
+                  <span className="sr-only">Wishlist count: </span>
+                  {wishlistCount}
                 </span>
               </div>
             )}
           </div>
 
-          {/* Panier */}
           <div className="relative">
             <Link
               href="/commande"
@@ -681,18 +778,20 @@ export default function Header() {
               data-gtm="header_cart"
               data-cart-icon
             >
-              <ActionBadge><Cart /></ActionBadge>
+              <ActionBadge>
+                <Cart />
+              </ActionBadge>
             </Link>
             {cartCount > 0 && (
               <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
                 <span className="animate-[pulse_2s_ease-in-out_infinite] rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm">
-                  <span className="sr-only">Cart count: </span>{cartCount}
+                  <span className="sr-only">Cart count: </span>
+                  {cartCount}
                 </span>
               </div>
             )}
           </div>
 
-          {/* Compte */}
           <Link
             href="/login"
             prefetch={false}
@@ -705,17 +804,19 @@ export default function Header() {
             title={t.account.title}
             data-gtm="header_account"
           >
-            <ActionBadge><User /></ActionBadge>
+            <ActionBadge>
+              <User />
+            </ActionBadge>
           </Link>
         </div>
 
-        {/* Menu mobile */}
         <MobileNav />
       </div>
 
-      {/* Liseré subtil */}
-      <div aria-hidden className="pointer-events-none h-[2px] w-full bg-gradient-to-r from-transparent via-[hsl(var(--accent)/.40)] to-transparent" />
+      <div
+        aria-hidden
+        className="pointer-events-none h-[2px] w-full bg-gradient-to-r from-transparent via-[hsl(var(--accent)/.40)] to-transparent"
+      />
     </header>
   )
 }
-

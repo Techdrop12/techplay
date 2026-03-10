@@ -1,37 +1,85 @@
-// src/components/checkout/CheckoutForm.tsx — PREMIUM+ (a11y/UX/Perf/Tracking)
-// - UX/a11y : SR live, focus management, hints, fieldset disabled, role=alert, ids stables
-// - Perf    : pas d’objets recréés inutilement, LS + QS safe
-// - Tracking: GA4 + dataLayer + Meta Pixel (InitiateCheckout & add_shipping_info)
-// - Flux    : Stripe Checkout via createCheckoutSession (Apple Pay/GPay support côté Checkout)
-// - Devise  : auto (EUR/GBP/USD) selon langue/locale navigateur
 'use client'
 
-import { useCallback, useEffect, useId, useRef, useState, useMemo } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
 import { useCart } from '@/hooks/useCart'
 import { createCheckoutSession } from '@/lib/checkout'
-// GA: on tolère le nom d’export chez toi (event/logEvent) pour préfill events
-import { event as gaEvent, mapProductToGaItem, trackAddShippingInfo, pushDataLayer } from '@/lib/ga'
+import { event as gaEvent, trackAddShippingInfo, pushDataLayer } from '@/lib/ga'
 import { pixelInitiateCheckout } from '@/lib/meta-pixel'
 
 type FormErrors = { email?: string; address?: string }
+
+type CartItemLike = {
+  _id?: string
+  slug?: string
+  sku?: string
+  title?: string
+  name?: string
+  brand?: string
+  category?: string
+  variant?: string
+  price?: number
+  quantity?: number
+}
+
+type CheckoutSessionResult = {
+  url?: string
+}
 
 const LS_EMAIL_KEY = 'checkout_email'
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i
 
 const isEmail = (v: string) => EMAIL_RE.test(String(v || '').trim())
 const isAddress = (v: string) => String(v || '').trim().length >= 6
-
-// Helper ARIA pour composer plusieurs ids
 const joinIds = (...ids: Array<string | undefined>) => ids.filter(Boolean).join(' ')
 
-// Devise auto (EUR/GBP/USD)
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+function toNumber(value: unknown, fallback = 0): number {
+  const n = Number(value)
+  return Number.isFinite(n) ? n : fallback
+}
+
+function toStringSafe(value: unknown, fallback = ''): string {
+  return typeof value === 'string' && value.trim() ? value : fallback
+}
+
+function getCartItems(input: unknown): CartItemLike[] {
+  if (!Array.isArray(input)) return []
+
+  return input.map((item) => {
+    if (!isRecord(item)) return {}
+
+    return {
+      _id: toStringSafe(item._id),
+      slug: toStringSafe(item.slug),
+      sku: toStringSafe(item.sku),
+      title: toStringSafe(item.title),
+      name: toStringSafe(item.name),
+      brand: toStringSafe(item.brand),
+      category: toStringSafe(item.category),
+      variant: toStringSafe(item.variant),
+      price: toNumber(item.price, 0),
+      quantity: Math.max(1, Math.trunc(toNumber(item.quantity, 1))),
+    }
+  })
+}
+
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error && err.message) return err.message
+  if (isRecord(err) && typeof err.message === 'string' && err.message.trim()) return err.message
+  return 'Une erreur est survenue. Réessayez.'
+}
+
 function detectCurrency(): 'EUR' | 'GBP' | 'USD' {
   try {
     const htmlLang = typeof document !== 'undefined' ? document.documentElement.lang || '' : ''
     const nav = typeof navigator !== 'undefined' ? navigator.language || '' : ''
     const src = (htmlLang || nav).toLowerCase()
+
     if (src.includes('gb') || src.endsWith('-uk') || src.includes('en-gb')) return 'GBP'
     if (src.includes('us') || src.includes('en-us')) return 'USD'
     if (src.startsWith('en')) return 'USD'
@@ -41,7 +89,6 @@ function detectCurrency(): 'EUR' | 'GBP' | 'USD' {
   }
 }
 
-/** Icône carte bancaire (SVG, sans emoji) */
 function IconCard({ size = 18, className = '' }: { size?: number; className?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className={className}>
@@ -58,8 +105,8 @@ export default function CheckoutForm() {
   const [address, setAddress] = useState('')
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
-  const [status, setStatus] = useState<string>('') // SR live region
-  const [hp, setHp] = useState('') // honeypot
+  const [status, setStatus] = useState('')
+  const [hp, setHp] = useState('')
   const [currency, setCurrency] = useState<'EUR' | 'GBP' | 'USD'>(() => detectCurrency())
 
   const formRef = useRef<HTMLFormElement | null>(null)
@@ -67,66 +114,78 @@ export default function CheckoutForm() {
   const addressRef = useRef<HTMLInputElement | null>(null)
   const srRef = useRef<HTMLParagraphElement | null>(null)
 
-  // Ids stables pour hints / erreurs
   const emailHintId = useId()
   const addressHintId = useId()
   const srStatusId = useId()
 
-  // Cart (pour envoyer add_shipping_info propre)
   const { cart } = useCart()
+
   const { subtotal, itemsCount, gaItems, pixelContents } = useMemo(() => {
-    const items = Array.isArray(cart) ? cart : []
+    const items = getCartItems(cart)
+
     const subtotal = items.reduce(
-      (s, it: unknown) => s + (Number(it?.price) || 0) * Math.max(1, Number(it?.quantity || 1)),
+      (sum, item) => sum + toNumber(item.price, 0) * Math.max(1, toNumber(item.quantity, 1)),
       0
     )
-    const gaItems = items.map((it: unknown) =>
-      mapProductToGaItem(it, {
-        quantity: Math.max(1, Number(it?.quantity || 1)),
-      })
+
+    const itemsCount = items.reduce(
+      (sum, item) => sum + Math.max(1, toNumber(item.quantity, 1)),
+      0
     )
-    const pixelContents = items.map((it: unknown) => ({
-      id: String(it?._id || it?.slug),
-      quantity: Math.max(1, Number(it?.quantity || 1)),
-      item_price: Number(it?.price) || 0,
+
+    const gaItems = items.map((item) => {
+      const quantity = Math.max(1, toNumber(item.quantity, 1))
+      const price = toNumber(item.price, 0)
+
+      return {
+        item_id: item._id || item.slug || item.sku || 'unknown-item',
+        item_name: item.title || item.name || 'Produit',
+        price,
+        quantity,
+        item_brand: item.brand || undefined,
+        item_category: item.category || undefined,
+        item_variant: item.variant || undefined,
+      }
+    })
+
+    const pixelContents = items.map((item) => ({
+      id: item._id || item.slug || item.sku || 'unknown-item',
+      quantity: Math.max(1, toNumber(item.quantity, 1)),
+      item_price: toNumber(item.price, 0),
     }))
-    const itemsCount = items.reduce((s, it: unknown) => s + Math.max(1, Number(it?.quantity || 1)), 0)
+
     return { subtotal, itemsCount, gaItems, pixelContents }
   }, [cart])
 
-  /* ----------------------------- Prefill email ---------------------------- */
   useEffect(() => {
     try {
-      // 1) Querystring ?email=
-      const qsEmail =
-        typeof window !== 'undefined'
-          ? new URLSearchParams(window.location.search).get('email')
-          : null
+      const qsEmail = typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search).get('email')
+        : null
+
       if (qsEmail && isEmail(qsEmail)) {
         setEmail(qsEmail)
         try {
           gaEvent?.({ action: 'checkout_prefill_email_qs', category: 'checkout', label: 'querystring' })
-          ;(window as unknown).dataLayer?.push({ event: 'checkout_prefill_email_qs' })
+          pushDataLayer?.({ event: 'checkout_prefill_email_qs' })
         } catch {}
         return
       }
 
-      // 2) LocalStorage
       const saved = localStorage.getItem(LS_EMAIL_KEY)
       if (saved && isEmail(saved)) {
         setEmail(saved)
         try {
           gaEvent?.({ action: 'checkout_prefill_email_ls', category: 'checkout', label: 'localstorage' })
-          ;(window as unknown).dataLayer?.push({ event: 'checkout_prefill_email_ls' })
+          pushDataLayer?.({ event: 'checkout_prefill_email_ls' })
         } catch {}
       }
     } catch {}
   }, [])
 
-  // Recalcule devise si la langue HTML change (rare, mais safe)
   useEffect(() => {
     setCurrency(detectCurrency())
-  }, [typeof document !== 'undefined' ? document.documentElement.lang : ''])
+  }, [])
 
   const announce = useCallback((msg: string) => {
     setStatus(msg)
@@ -135,26 +194,30 @@ export default function CheckoutForm() {
 
   const validate = useCallback((): boolean => {
     const next: FormErrors = {}
+
     if (!isEmail(email)) next.email = 'Adresse email invalide'
     if (!isAddress(address)) next.address = 'Adresse trop courte'
+
     setErrors(next)
 
     if (next.email) {
       emailRef.current?.focus()
       return false
     }
+
     if (next.address) {
       addressRef.current?.focus()
       return false
     }
+
     return true
-  }, [email, address])
+  }, [address, email])
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault()
       if (loading) return
-      if (hp) return // bot
+      if (hp) return
       if (!validate()) return
 
       setLoading(true)
@@ -162,7 +225,6 @@ export default function CheckoutForm() {
       formRef.current?.setAttribute('aria-busy', 'true')
 
       try {
-        // Étape funnel: add_shipping_info (avant redirection)
         try {
           trackAddShippingInfo({
             currency,
@@ -173,17 +235,21 @@ export default function CheckoutForm() {
         } catch {}
 
         try {
-          pushDataLayer({
+          pushDataLayer?.({
             event: 'add_shipping_info',
             currency,
             value: subtotal,
-            ecommerce: { currency, value: subtotal, items: gaItems, shipping_tier: 'standard' },
+            ecommerce: {
+              currency,
+              value: subtotal,
+              items: gaItems,
+              shipping_tier: 'standard',
+            },
           })
         } catch {}
 
         try {
-          // Pixel: on signale l’intention (utilise la valeur si on l’a)
-          pixelInitiateCheckout({
+          pixelInitiateCheckout?.({
             currency,
             value: subtotal || undefined,
             num_items: itemsCount || undefined,
@@ -191,59 +257,73 @@ export default function CheckoutForm() {
           })
         } catch {}
 
-        // Sauvegarde opportuniste de l’email
-        try { localStorage.setItem(LS_EMAIL_KEY, email) } catch {}
+        try {
+          localStorage.setItem(LS_EMAIL_KEY, email)
+        } catch {}
 
         announce('Création de la session de paiement…')
-        const session = await createCheckoutSession({
+
+        const session = (await createCheckoutSession({
           email,
           address,
-          currency, // ✅ on envoie la devise au backend
+          currency,
           locale:
             typeof document !== 'undefined'
               ? (document.documentElement.lang || 'fr').slice(0, 2)
               : 'fr',
-        })
+        })) as CheckoutSessionResult | null | undefined
 
-        if (session?.url) {
+        if (session && typeof session.url === 'string' && session.url) {
           toast('Redirection vers le paiement…', {
             icon: <IconCard className="text-[hsl(var(--accent))]" />,
           })
           announce('Redirection vers Stripe')
-          pushDataLayer({ event: 'checkout_redirect', provider: 'stripe_checkout', currency })
+
+          try {
+            pushDataLayer?.({
+              event: 'checkout_redirect',
+              provider: 'stripe_checkout',
+              currency,
+            })
+          } catch {}
+
           window.location.href = session.url
           return
         }
+
         throw new Error('Session invalide')
       } catch (err: unknown) {
+        const msg = getErrorMessage(err)
         console.error('[Checkout] error:', err)
-        const msg = err?.message || 'Une erreur est survenue. Réessayez.'
         announce(msg)
         toast.error('Une erreur est survenue. Veuillez réessayer.')
-        pushDataLayer({ event: 'checkout_error', message: msg })
+
+        try {
+          pushDataLayer?.({ event: 'checkout_error', message: msg })
+        } catch {}
       } finally {
         setLoading(false)
         formRef.current?.setAttribute('aria-busy', 'false')
       }
     },
-    [address, email, hp, loading, validate, announce, currency, subtotal, gaItems, itemsCount, pixelContents]
+    [address, announce, currency, email, gaItems, hp, itemsCount, loading, pixelContents, subtotal, validate]
   )
 
-  /* -------------------------- Micro UX améliorations ---------------------- */
-  // Enregistrer l’email au blur (en plus du submit)
   const onEmailBlur = useCallback(() => {
-    if (isEmail(email)) {
-      try { localStorage.setItem(LS_EMAIL_KEY, email) } catch {}
-    }
+    if (!isEmail(email)) return
+    try {
+      localStorage.setItem(LS_EMAIL_KEY, email)
+    } catch {}
   }, [email])
 
-  // Enter dans l’email quand il est valide → focus adresse
-  const onEmailKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && isEmail(email)) {
+  const onEmailKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key !== 'Enter' || !isEmail(email)) return
       e.preventDefault()
       addressRef.current?.focus()
-    }
-  }, [email])
+    },
+    [email]
+  )
 
   const emailDescribedBy = joinIds(errors.email ? 'email-error' : undefined, emailHintId)
   const addressDescribedBy = joinIds(errors.address ? 'address-error' : undefined, addressHintId)
@@ -256,9 +336,7 @@ export default function CheckoutForm() {
       noValidate
       aria-labelledby="checkout-form-title"
       aria-describedby={srStatusId}
-      aria-live="polite"
     >
-      {/* SR live region */}
       <p
         id={srStatusId}
         ref={srRef}
@@ -274,9 +352,7 @@ export default function CheckoutForm() {
         Coordonnées
       </h3>
 
-      {/* On désactive tous les champs pendant le chargement */}
       <fieldset disabled={loading} className="space-y-6">
-        {/* Email */}
         <div>
           <label htmlFor="email" className="block text-sm font-medium mb-1">
             Email
@@ -299,7 +375,7 @@ export default function CheckoutForm() {
             value={email}
             onChange={(e) => {
               setEmail(e.target.value)
-              if (errors.email) setErrors((p) => ({ ...p, email: undefined }))
+              if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }))
             }}
             onBlur={onEmailBlur}
             onKeyDown={onEmailKeyDown}
@@ -325,7 +401,6 @@ export default function CheckoutForm() {
           )}
         </div>
 
-        {/* Adresse */}
         <div>
           <label htmlFor="address" className="block text-sm font-medium mb-1">
             Adresse de livraison
@@ -346,7 +421,7 @@ export default function CheckoutForm() {
             value={address}
             onChange={(e) => {
               setAddress(e.target.value)
-              if (errors.address) setErrors((p) => ({ ...p, address: undefined }))
+              if (errors.address) setErrors((prev) => ({ ...prev, address: undefined }))
             }}
             required
             autoComplete="shipping street-address"
@@ -367,7 +442,6 @@ export default function CheckoutForm() {
           )}
         </div>
 
-        {/* Honeypot invisible (anti-bot) */}
         <div className="hidden" aria-hidden="true">
           <label htmlFor="website">Site web</label>
           <input
@@ -380,7 +454,6 @@ export default function CheckoutForm() {
           />
         </div>
 
-        {/* CTA */}
         <button
           type="submit"
           className="w-full bg-accent hover:bg-accent/90 text-white font-semibold py-3 px-4 rounded-xl shadow transition disabled:opacity-60 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40"
@@ -399,4 +472,3 @@ export default function CheckoutForm() {
     </form>
   )
 }
-

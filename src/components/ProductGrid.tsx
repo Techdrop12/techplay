@@ -1,8 +1,7 @@
-// src/components/ProductGrid.tsx
 'use client'
 
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { useEffect, useMemo, useRef, memo } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 import type { Product } from '@/types/product'
 
@@ -30,15 +29,17 @@ export interface Props {
 function colsToClass(cols?: Cols) {
   const c = { base: 2, sm: 3, lg: 4, ...(cols || {}) }
   const parts: string[] = []
+
   if (c.base) parts.push(`grid-cols-${c.base}`)
   if (c.sm) parts.push(`sm:grid-cols-${c.sm}`)
   if (c.md) parts.push(`md:grid-cols-${c.md}`)
   if (c.lg) parts.push(`lg:grid-cols-${c.lg}`)
   if (c.xl) parts.push(`xl:grid-cols-${c.xl}`)
+
   return parts.join(' ')
 }
 
-function ProductGrid({
+export default function ProductGrid({
   products,
   emptyMessage,
   isLoading = false,
@@ -46,7 +47,7 @@ function ProductGrid({
   onLoadMore,
   observeMore = true,
   loadingCount = 8,
-  showWishlistIcon = false,
+  showWishlistIcon: _showWishlistIcon = false,
   columns,
   className = '',
   listName = 'product_grid',
@@ -59,26 +60,6 @@ function ProductGrid({
   const gridRef = useRef<HTMLDivElement | null>(null)
   const prevLenRef = useRef<number>(0)
 
-  useEffect(() => {
-    if (!observeMore || !hasMore || !onLoadMore || !sentinelRef.current) return
-    const el = sentinelRef.current
-    const io = new IntersectionObserver(
-      (entries) => {
-        const hit = entries.some((e) => e.isIntersecting)
-        if (!hit || loadingGateRef.current) return
-        loadingGateRef.current = true
-        try { onLoadMore() } finally {
-          window.setTimeout(() => { loadingGateRef.current = false }, 500)
-        }
-      },
-      { rootMargin: '200px 0px 400px 0px', threshold: 0.01 }
-    )
-    io.observe(el)
-    return () => io.disconnect()
-  }, [observeMore, hasMore, onLoadMore])
-
-  useEffect(() => { if (!isLoading) loadingGateRef.current = false }, [isLoading])
-
   const isEmpty = useMemo(() => !products || products.length === 0, [products])
 
   const countMsg = useMemo(() => {
@@ -88,79 +69,132 @@ function ProductGrid({
   }, [isLoading, isEmpty, products.length, emptyMessage])
 
   useEffect(() => {
+    if (!observeMore || !hasMore || !onLoadMore || !sentinelRef.current) return
+
+    const el = sentinelRef.current
+    const io = new IntersectionObserver(
+      (entries) => {
+        const hit = entries.some((entry) => entry.isIntersecting)
+        if (!hit || loadingGateRef.current) return
+
+        loadingGateRef.current = true
+
+        try {
+          onLoadMore()
+        } finally {
+          window.setTimeout(() => {
+            loadingGateRef.current = false
+          }, 500)
+        }
+      },
+      { rootMargin: '200px 0px 400px 0px', threshold: 0.01 }
+    )
+
+    io.observe(el)
+    return () => io.disconnect()
+  }, [observeMore, hasMore, onLoadMore])
+
+  useEffect(() => {
+    if (!isLoading) loadingGateRef.current = false
+  }, [isLoading])
+
+  useEffect(() => {
     const prev = prevLenRef.current
     const curr = products?.length ?? 0
+
     if (curr > prev && prev > 0 && statusRef.current) {
       const diff = curr - prev
       statusRef.current.textContent = `${diff} produit${diff > 1 ? 's' : ''} ajouté${diff > 1 ? 's' : ''}.`
     } else if (prev === 0 && curr > 0 && statusRef.current) {
       statusRef.current.textContent = countMsg
     }
+
     prevLenRef.current = curr
   }, [products, countMsg])
 
   const itemListJsonLd = useMemo(() => {
     if (!products?.length) return null
+
     const base = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
+
     return {
       '@context': 'https://schema.org',
       '@type': 'ItemList',
-      itemListElement: products.slice(0, 12).map((p, i) => ({
+      itemListElement: products.slice(0, 12).map((product, index) => ({
         '@type': 'ListItem',
-        position: i + 1,
-        url: p?.slug ? `${base}/products/${p.slug}` : `${base}/products`,
-        name: p?.title || 'Produit',
+        position: index + 1,
+        url: product?.slug ? `${base}/products/${product.slug}` : `${base}/products`,
+        name: product?.title || 'Produit',
       })),
     }
   }, [products])
 
-  // GA4 batch view_item_list
   const seenRef = useRef<Set<string>>(new Set())
   const batchRef = useRef<{ id: string; name: string; price?: number }[]>([])
-  const flushTimeout = useRef<number | null>(null)
-  const flushBatch = () => {
+  const flushTimeoutRef = useRef<number | null>(null)
+
+  const flushBatch = useCallback(() => {
     if (!batchRef.current.length) return
+
     try {
       pushDataLayer({
         event: 'view_item_list',
         item_list_name: listName,
-        items: batchRef.current.map((it) => ({
-          item_id: it.id,
-          item_name: it.name,
-          price: it.price,
+        items: batchRef.current.map((item) => ({
+          item_id: item.id,
+          item_name: item.name,
+          price: item.price,
         })),
       })
     } catch {}
+
     batchRef.current = []
-    if (flushTimeout.current) { window.clearTimeout(flushTimeout.current); flushTimeout.current = null }
-  }
+
+    if (flushTimeoutRef.current) {
+      window.clearTimeout(flushTimeoutRef.current)
+      flushTimeoutRef.current = null
+    }
+  }, [listName])
 
   useEffect(() => {
     seenRef.current.clear()
     batchRef.current = []
+
     if (!gridRef.current) return
+
     const nodes = Array.from(gridRef.current.querySelectorAll<HTMLElement>('[data-product-id]'))
     if (!nodes.length) return
+
     const io = new IntersectionObserver(
       (entries) => {
-        entries.forEach((e) => {
-          if (!e.isIntersecting) return
-          const id = e.target.getAttribute('data-product-id') || ''
-          const name = e.target.getAttribute('aria-label')?.replace(/^Produit : /, '') || ''
-          if (!id || seenRef.current.has(id)) return
-          seenRef.current.add(id)
-          const prod = products.find((p) => String(p._id) === id || p.slug === id)
-          batchRef.current.push({ id, name, price: prod?.price })
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return
+
+          const productId = entry.target.getAttribute('data-product-id') || ''
+          const name = entry.target.getAttribute('aria-label')?.replace(/^Produit : /, '') || ''
+
+          if (!productId || seenRef.current.has(productId)) return
+
+          seenRef.current.add(productId)
+
+          const product = products.find((p) => String(p._id) === productId || p.slug === productId)
+          batchRef.current.push({ id: productId, name, price: product?.price })
         })
-        if (!flushTimeout.current && batchRef.current.length) {
-          flushTimeout.current = window.setTimeout(flushBatch, 250)
+
+        if (!flushTimeoutRef.current && batchRef.current.length) {
+          flushTimeoutRef.current = window.setTimeout(flushBatch, 250)
         }
       },
       { threshold: 0.35, rootMargin: '0px 0px 100px 0px' }
     )
-    nodes.forEach((n) => io.observe(n))
-    return () => { io.disconnect(); flushBatch() }
-  }, [products, listName])
+
+    nodes.forEach((node) => io.observe(node))
+
+    return () => {
+      io.disconnect()
+      flushBatch()
+    }
+  }, [products, flushBatch])
 
   if (isEmpty && !isLoading) {
     return (
@@ -187,15 +221,19 @@ function ProductGrid({
           role="list"
           id={id}
         >
-          {products.map((product, i) => (
-            <motion.div key={String(product._id ?? product.slug ?? i)} layout={!prefersReducedMotion} role="listitem">
-              <ProductCard product={product} showWishlistIcon={showWishlistIcon} priority={i < 4} />
+          {products.map((product, index) => (
+            <motion.div
+              key={String(product._id ?? product.slug ?? index)}
+              layout={!prefersReducedMotion}
+              role="listitem"
+            >
+              <ProductCard product={product} />
             </motion.div>
           ))}
 
           {isLoading &&
-            Array.from({ length: loadingCount }).map((_, i) => (
-              <div key={`skeleton-${i}`} aria-hidden="true">
+            Array.from({ length: loadingCount }).map((_, index) => (
+              <div key={`skeleton-${index}`} aria-hidden="true">
                 <ProductSkeleton />
               </div>
             ))}
@@ -203,12 +241,12 @@ function ProductGrid({
       </AnimatePresence>
 
       {(hasMore || isLoading) && onLoadMore && (
-        <div className="flex items-center justify-center mt-8">
+        <div className="mt-8 flex items-center justify-center">
           <button
             type="button"
             onClick={onLoadMore}
             disabled={isLoading}
-            className="rounded-lg bg-accent text-white px-5 py-2 font-semibold shadow hover:bg-accent/90 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40 disabled:opacity-60"
+            className="rounded-lg bg-accent px-5 py-2 font-semibold text-white shadow hover:bg-accent/90 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40 disabled:opacity-60"
             aria-label="Charger plus de produits"
             data-gtm="grid_load_more"
           >
@@ -225,5 +263,3 @@ function ProductGrid({
     </>
   )
 }
-
-export default memo(ProductGrid)

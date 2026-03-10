@@ -32,6 +32,7 @@ function highlight(text: string, matches?: ReadonlyArray<FuseResultMatch>) {
 
   const parts: React.ReactNode[] = []
   let last = 0
+
   indices.forEach(([start, end], i) => {
     if (start > last) parts.push(text.slice(last, start))
     parts.push(
@@ -41,16 +42,19 @@ function highlight(text: string, matches?: ReadonlyArray<FuseResultMatch>) {
     )
     last = end + 1
   })
+
   if (last < text.length) parts.push(text.slice(last))
   return parts
 }
 
 function useDebounced<T>(value: T, delay = 180) {
   const [debounced, setDebounced] = useState(value)
+
   useEffect(() => {
     const id = setTimeout(() => setDebounced(value), delay)
     return () => clearTimeout(id)
   }, [value, delay])
+
   return debounced
 }
 
@@ -87,7 +91,7 @@ export default function SearchBar({
   const results: FuseResult<Product>[] = useMemo(() => {
     const q = debouncedQuery.trim()
     if (!q) return []
-    return (fuse.search(q, { limit }) as FuseResult<Product>[]) ?? []
+    return fuse.search(q, { limit }) ?? []
   }, [fuse, debouncedQuery, limit])
 
   useEffect(() => {
@@ -99,7 +103,12 @@ export default function SearchBar({
   useEffect(() => {
     try {
       const raw = localStorage.getItem(RECENTS_KEY)
-      if (raw) setRecents(JSON.parse(raw))
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        if (Array.isArray(parsed)) {
+          setRecents(parsed.filter((v): v is string => typeof v === 'string'))
+        }
+      }
     } catch {}
   }, [])
 
@@ -120,59 +129,71 @@ export default function SearchBar({
       }
       if (e.key === 'Escape') setOpen(false)
     }
+
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
   useEffect(() => {
     const onDown = (e: Event) => {
-      const target = e.target as Node
-      if (!inputRef.current) return
+      const target = e.target as Node | null
+      if (!inputRef.current || !target) return
       const root = inputRef.current.closest('[data-search-root="true"]')
       if (root && !root.contains(target)) setOpen(false)
     }
-    document.addEventListener('mousedown', onDown, { passive: true } as unknown)
-    document.addEventListener('touchstart', onDown, { passive: true } as unknown)
+
+    const passiveOptions: AddEventListenerOptions = { passive: true }
+
+    document.addEventListener('mousedown', onDown, passiveOptions)
+    document.addEventListener('touchstart', onDown, passiveOptions)
+
     return () => {
-      document.removeEventListener('mousedown', onDown as EventListener)
-      document.removeEventListener('touchstart', onDown as EventListener)
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('touchstart', onDown)
     }
   }, [])
 
   const goToProduct = (slug: string, title?: string) => {
     setOpen(false)
     saveRecent(query)
+
     try {
       gaEvent?.({ action: 'search_select', category: 'search', label: title || slug, value: 1 })
       logEvent?.('search_select', { query, slug })
     } catch {}
-    router.push(`/products/${slug}`) // ✅ fix route
+
+    router.push(`/products/${slug}`)
   }
 
   const submitToListing = (q: string) => {
     const value = q.trim()
     saveRecent(value)
+
     try {
       gaEvent?.({ action: 'search_submit', category: 'search', label: value, value: results.length })
       logEvent?.('search_submit', { query: value, count: results.length })
     } catch {}
-    router.push(`/products?q=${encodeURIComponent(q.trim())}`)
+
+    router.push(`/products?q=${encodeURIComponent(value)}`)
     setOpen(false)
   }
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+
     if (results.length > 0) {
       const index = highlighted >= 0 ? highlighted : 0
       const p = results[index]?.item
       if (p) return goToProduct(p.slug, p.title)
     }
+
     submitToListing(query)
   }
 
   const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
     if (!open && results.length) setOpen(true)
     if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && results.length === 0) return
+
     if (e.key === 'ArrowDown') {
       e.preventDefault()
       setHighlighted((h) => (h + 1) % results.length)
@@ -243,6 +264,7 @@ export default function SearchBar({
               {results.map((res, i) => {
                 const p = res.item
                 const active = i === highlighted
+
                 return (
                   <li
                     key={p._id ?? p.slug ?? i}
@@ -259,13 +281,14 @@ export default function SearchBar({
                   >
                     <span className="truncate">{highlight(p.title ?? '', res.matches)}</span>
                     <span className="ml-3 text-xs text-gray-400 dark:text-gray-500 truncate max-w-[40%]">
-                      {Number.isFinite(p.price as unknown)
+                      {Number.isFinite(Number(p.price))
                         ? formatPrice(Number(p.price), { locale, currency, stripZeros: true })
                         : ''}
                     </span>
                   </li>
                 )
               })}
+
               <li className="border-t border-gray-200 dark:border-gray-800">
                 <button
                   type="button"
@@ -294,6 +317,7 @@ export default function SearchBar({
                     {q}
                   </button>
                 ))}
+
                 {recents.length > 0 && (
                   <button
                     type="button"
@@ -316,4 +340,3 @@ export default function SearchBar({
     </div>
   )
 }
-

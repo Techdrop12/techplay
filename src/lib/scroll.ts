@@ -10,6 +10,7 @@ const isBrowser = (): boolean =>
 export function prefersReducedMotion(): boolean {
   if (!isBrowser()) return false
   if (!('matchMedia' in window)) return false
+
   try {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches
   } catch {
@@ -42,6 +43,7 @@ export function scrollToY(
 
 export function saveScrollPosition(key = 'scroll'): void {
   if (!isBrowser()) return
+
   try {
     sessionStorage.setItem(key, String(window.scrollY || 0))
   } catch {}
@@ -49,6 +51,7 @@ export function saveScrollPosition(key = 'scroll'): void {
 
 export function restoreScrollPosition(key = 'scroll', fallback = 0): void {
   if (!isBrowser()) return
+
   try {
     const y = Number(sessionStorage.getItem(key) ?? fallback)
     scrollToY(y)
@@ -77,15 +80,24 @@ export type ScrollToSnapOptions = {
 
 function getElement(target: string | Element): Element | null {
   if (!isBrowser()) return null
+
   if (typeof target === 'string') {
     const id = target.startsWith('#') ? target.slice(1) : target
-    return (
-      document.getElementById(id) ||
-      document.querySelector(target) ||
-      null
-    )
+
+    return document.getElementById(id) || document.querySelector(target) || null
   }
+
   return target ?? null
+}
+
+function getScrollableContainer(container?: string | Element): HTMLElement | null {
+  if (!isBrowser() || !container) return null
+
+  if (typeof container === 'string') {
+    return document.querySelector<HTMLElement>(container)
+  }
+
+  return container instanceof HTMLElement ? container : null
 }
 
 export function scrollToSnap(
@@ -108,46 +120,43 @@ export function scrollToSnap(
   if (!el) return false
 
   const resolvedBehavior = resolveBehavior(behavior)
+  const root = getScrollableContainer(container)
 
-  // Scroll dans un conteneur custom si fourni
-  if (container) {
-    const root =
-      typeof container === 'string'
-        ? (document.querySelector(container) as Element | null)
-        : container
-    if (root && 'scrollTop' in (root as unknown)) {
-      const rect = el.getBoundingClientRect()
-      const rootRect = (root as Element).getBoundingClientRect()
-      const top = (root as unknown).scrollTop + (rect.top - rootRect.top) - offset
-      ;(root as unknown).scrollTo({ top, behavior: resolvedBehavior })
-    } else {
-      el.scrollIntoView({ behavior: resolvedBehavior, block, inline })
-    }
+  if (root) {
+    const rect = el.getBoundingClientRect()
+    const rootRect = root.getBoundingClientRect()
+    const top = root.scrollTop + (rect.top - rootRect.top) - offset
+    root.scrollTo({ top, behavior: resolvedBehavior })
+  } else if (offset) {
+    const y = (window.scrollY || 0) + el.getBoundingClientRect().top - offset
+    window.scrollTo({ top: y, behavior: resolvedBehavior })
   } else {
-    if (offset) {
-      const y = (window.scrollY || 0) + el.getBoundingClientRect().top - offset
-      window.scrollTo({ top: y, behavior: resolvedBehavior })
-    } else {
-      el.scrollIntoView({ behavior: resolvedBehavior, block, inline })
-    }
+    el.scrollIntoView({ behavior: resolvedBehavior, block, inline })
   }
 
   if (focus && el instanceof HTMLElement) {
-    const prev = el.getAttribute('tabindex')
-    if (prev === null) el.setAttribute('tabindex', '-1')
+    const prevTabIndex = el.getAttribute('tabindex')
+
+    if (prevTabIndex === null) {
+      el.setAttribute('tabindex', '-1')
+    }
+
     try {
       el.focus({ preventScroll: true })
     } catch {}
-    if (prev === null) el.removeAttribute('tabindex')
+
+    if (prevTabIndex === null) {
+      el.removeAttribute('tabindex')
+    }
   }
 
-  if (highlight && el instanceof HTMLElement && 'animate' in el) {
+  if (highlight && el instanceof HTMLElement && typeof el.animate === 'function') {
     try {
       el.animate(
         [
-          { boxShadow: '0 0 0 0px rgba(99,102,241,0.0)' },
+          { boxShadow: '0 0 0 0px rgba(99,102,241,0)' },
           { boxShadow: '0 0 0 6px rgba(99,102,241,0.28)' },
-          { boxShadow: '0 0 0 0px rgba(99,102,241,0.0)' },
+          { boxShadow: '0 0 0 0px rgba(99,102,241,0)' },
         ],
         { duration: 1000 }
       )
@@ -177,46 +186,59 @@ export function getScrollDirection(
 
 export function isNearBottom(offset = 300): boolean {
   if (!isBrowser()) return false
+
   const { scrollY, innerHeight } = window
   const { scrollHeight } = document.documentElement
-  return (scrollY + innerHeight) >= (scrollHeight - Math.max(0, offset))
+
+  return scrollY + innerHeight >= scrollHeight - Math.max(0, offset)
 }
 
 /* ============================ Body lock (modals) ============================ */
 
 export function lockBodyScroll(): void {
   if (!isBrowser()) return
+
   const scrollBar = window.innerWidth - document.documentElement.clientWidth
   document.body.style.overflow = 'hidden'
-  if (scrollBar) document.body.style.paddingRight = `${scrollBar}px`
+
+  if (scrollBar) {
+    document.body.style.paddingRight = `${scrollBar}px`
+  }
 }
 
 export function unlockBodyScroll(): void {
   if (!isBrowser()) return
+
   document.body.style.overflow = ''
   document.body.style.paddingRight = ''
 }
 
 /* ============================ Throttle util ============================ */
 
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- throttle générique: "any" requis pour Parameters/ReturnType */
-
-export function throttle<T extends (...args: unknown[]) => unknown>(fn: T, wait = 100) {
+export function throttle<T extends (...args: Parameters<T>) => ReturnType<T>>(
+  fn: T,
+  wait = 100
+) {
   let last = 0
-  let timeout: unknown
+  let timeout: ReturnType<typeof setTimeout> | null = null
+
   return (...args: Parameters<T>) => {
     const now = Date.now()
     const remaining = wait - (now - last)
+
     if (remaining <= 0) {
       last = now
       fn(...args)
-    } else {
-      clearTimeout(timeout)
-      timeout = setTimeout(() => {
-        last = Date.now()
-        fn(...args)
-      }, remaining)
+      return
     }
+
+    if (timeout) {
+      clearTimeout(timeout)
+    }
+
+    timeout = setTimeout(() => {
+      last = Date.now()
+      fn(...args)
+    }, remaining)
   }
 }
-

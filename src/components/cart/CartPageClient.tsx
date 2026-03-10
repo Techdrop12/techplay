@@ -4,6 +4,8 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useMemo, useRef } from 'react'
 
+import type { Product } from '@/types/product'
+
 import CartList from '@/components/cart/CartList'
 import CartSummary from '@/components/cart/CartSummary'
 import EmptyCart from '@/components/cart/EmptyCart'
@@ -11,24 +13,32 @@ import Link from '@/components/LocalizedLink'
 import { useCart } from '@/hooks/useCart'
 import { event as gaEvent } from '@/lib/ga'
 
+type CartProduct = Product & { quantity: number }
+
 export default function CartPageClient() {
   const { cart } = useCart()
   const prefersReduced = useReducedMotion()
   const srRef = useRef<HTMLParagraphElement | null>(null)
 
-  const safeCart = useMemo(() => (Array.isArray(cart) ? cart : []), [cart])
+  const safeCart = useMemo<CartProduct[]>(() => {
+    return Array.isArray(cart) ? (cart as CartProduct[]) : []
+  }, [cart])
+
   const isEmpty = safeCart.length === 0
+
   const count = useMemo(
     () => safeCart.reduce((s, it) => s + (Number(it.quantity) || 0), 0),
     [safeCart]
   )
 
-  // SR announce on quantity changes
   const prevCountRef = useRef<number>(0)
+
   useEffect(() => {
     if (!srRef.current) return
+
     const prev = prevCountRef.current
     let text = ''
+
     if (count === 0) text = 'Panier vide'
     else if (prev === 0) text = `${count} article${count > 1 ? 's' : ''} dans le panier`
     else if (count > prev) {
@@ -40,11 +50,11 @@ export default function CartPageClient() {
     } else {
       text = `${count} article${count > 1 ? 's' : ''} dans le panier`
     }
+
     srRef.current.textContent = text
     prevCountRef.current = count
   }, [count])
 
-  // GA: view_cart
   useEffect(() => {
     try {
       gaEvent?.({ action: 'view_cart', category: 'ecommerce', label: 'cart_page', value: count })
@@ -94,12 +104,11 @@ export default function CartPageClient() {
           transition={{ duration: 0.25 }}
         >
           <div className="lg:col-span-2">
-            <CartList items={safeCart as unknown} />
+            <CartList items={safeCart} />
           </div>
-          <CartSummary items={safeCart as unknown} />
+          <CartSummary items={safeCart} />
         </motion.section>
       )}
     </main>
   )
 }
-

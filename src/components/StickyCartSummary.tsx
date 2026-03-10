@@ -1,9 +1,7 @@
-// src/components/StickyCartSummary.tsx — PREMIUM (no emoji, SVG icons, a11y/SEO ok) + FIX pointer-events
 'use client'
 
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { usePathname } from 'next/navigation'
-import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import Link from '@/components/LocalizedLink'
@@ -13,20 +11,94 @@ import { event, logEvent } from '@/lib/ga'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 import { cn } from '@/lib/utils'
 
-
-
 type AppLocale = 'fr' | 'en'
 
 type Props = {
   locale?: AppLocale
-  cartHref?: string        // ex: '/cart'
-  checkoutHref?: string    // ex: '/commande'
+  cartHref?: string
+  checkoutHref?: string
   excludePaths?: string[]
   freeShippingThreshold?: number
   className?: string
 }
 
-/* ------------------------ Inline SVG icons (no emoji) ------------------------ */
+type MessageKey =
+  | 'mobile_summary'
+  | 'show'
+  | 'hide'
+  | 'item'
+  | 'items'
+  | 'total'
+  | 'free_shipping'
+  | 'free_shipping_progress'
+  | 'free_shipping_remaining'
+  | 'free_shipping_unlocked'
+  | 'view_cart'
+  | 'checkout'
+  | 'secure_payment'
+  | 'fast_shipping'
+  | 'support'
+  | 'subtotal'
+  | 'discount'
+  | 'vat'
+  | 'shipping'
+  | 'offered'
+
+const MESSAGES: Record<AppLocale, Record<MessageKey, string>> = {
+  fr: {
+    mobile_summary: 'Résumé de votre panier',
+    show: 'Afficher',
+    hide: 'Masquer',
+    item: 'article',
+    items: 'articles',
+    total: 'Total',
+    free_shipping: 'Livraison offerte',
+    free_shipping_progress: 'Progression vers la livraison offerte',
+    free_shipping_remaining: 'Plus que {amount} pour la livraison gratuite.',
+    free_shipping_unlocked: 'Bravo ! La livraison est offerte.',
+    view_cart: 'Voir le panier',
+    checkout: 'Commander',
+    secure_payment: 'Paiement sécurisé',
+    fast_shipping: '48h',
+    support: 'Support 7j/7',
+    subtotal: 'Sous-total',
+    discount: 'Remise',
+    vat: 'TVA (est.)',
+    shipping: 'Livraison',
+    offered: 'Offerte',
+  },
+  en: {
+    mobile_summary: 'Cart summary',
+    show: 'Show',
+    hide: 'Hide',
+    item: 'item',
+    items: 'items',
+    total: 'Total',
+    free_shipping: 'Free shipping',
+    free_shipping_progress: 'Progress towards free shipping',
+    free_shipping_remaining: '{amount} left to unlock free shipping.',
+    free_shipping_unlocked: 'Nice! Free shipping unlocked.',
+    view_cart: 'View cart',
+    checkout: 'Checkout',
+    secure_payment: 'Secure payment',
+    fast_shipping: '48h',
+    support: 'Support 7/7',
+    subtotal: 'Subtotal',
+    discount: 'Discount',
+    vat: 'VAT (est.)',
+    shipping: 'Shipping',
+    offered: 'Free',
+  },
+}
+
+function formatMessage(
+  template: string,
+  values?: Record<string, string | number>
+): string {
+  if (!values) return template
+  return template.replace(/\{(\w+)\}/g, (_, key: string) => String(values[key] ?? ''))
+}
+
 function IconLock({ size = 14, className = '' }: { size?: number; className?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className={className}>
@@ -37,6 +109,7 @@ function IconLock({ size = 14, className = '' }: { size?: number; className?: st
     </svg>
   )
 }
+
 function IconRocket({ size = 14, className = '' }: { size?: number; className?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className={className}>
@@ -47,6 +120,7 @@ function IconRocket({ size = 14, className = '' }: { size?: number; className?: 
     </svg>
   )
 }
+
 function IconHeadset({ size = 14, className = '' }: { size?: number; className?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className={className}>
@@ -58,56 +132,23 @@ function IconHeadset({ size = 14, className = '' }: { size?: number; className?:
   )
 }
 
-/* --------------------------------------------------------------------------- */
-
 export default function StickyCartSummary({
   locale,
-  cartHref,
-  checkoutHref,
+  cartHref = '/cart',
+  checkoutHref = '/commande',
   excludePaths = ['/checkout', '/commande', '/cart', '/panier', '/404', '/_not-found'],
   freeShippingThreshold,
   className,
 }: Props) {
-  // ── TOUS les hooks sont appelés inconditionnellement (pas d’early return avant)
   const pathname = usePathname() || ''
   const detectedLocale = getCurrentLocale(pathname) as AppLocale
   const loc: AppLocale = locale ?? detectedLocale
   const prefersReduced = useReducedMotion()
 
-  // i18n (fallback si pas de provider) — sans emoji
-  let t: unknown
-  try {
-    t = useTranslations('cart')
-  } catch {
-    t = ((key: string, _v?: Record<string, unknown>) => {
-      const dict: Record<string, string> = {
-        mobile_summary: 'Résumé de votre panier',
-        show: 'Afficher',
-        hide: 'Masquer',
-        item: 'article',
-        total: 'Total',
-        free_shipping: 'Livraison offerte',
-        free_shipping_progress: 'Progression vers la livraison offerte',
-        free_shipping_remaining: 'Plus que {amount} pour la livraison gratuite.',
-        free_shipping_unlocked: 'Bravo ! La livraison est offerte.',
-        view_cart: 'Voir le panier',
-        checkout: 'Commander',
-        secure_payment: 'Paiement sécurisé',
-        fast_shipping: '48h',
-        support: 'Support 7j/7',
-        subtotal: 'Sous-total',
-        discount: 'Remise',
-        vat: 'TVA (est.)',
-        shipping: 'Livraison',
-      }
-      return dict[key] ?? key
-    }) as unknown
-  }
-  const tx = (key: string, fallback: string, values?: Record<string, unknown>) => {
-    try { return values ? t(key as unknown, values as unknown) : (t(key as unknown) as unknown) } catch { return fallback }
-  }
+  const messages = MESSAGES[loc] ?? MESSAGES.fr
+  const tx = (key: MessageKey, values?: Record<string, string | number>) =>
+    formatMessage(messages[key], values)
 
-  // Panier (du contexte)
   const {
     cart,
     count,
@@ -121,90 +162,138 @@ export default function StickyCartSummary({
     freeShippingThreshold: ctxThreshold,
   } = useCart()
 
-  // Seuil livraison offerte
   const FREE_SHIP = useMemo(() => {
     if (typeof freeShippingThreshold === 'number' && freeShippingThreshold > 0) return freeShippingThreshold
     if (typeof ctxThreshold === 'number' && ctxThreshold > 0) return ctxThreshold
+
     const env = Number(process.env.NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD)
     return Number.isFinite(env) && env > 0 ? env : 50
   }, [freeShippingThreshold, ctxThreshold])
 
-  // Totaux dérivés (avec garde-fous)
   const subtotal = useMemo(
-    () => (Number.isFinite(total) ? total : (cart ?? []).reduce((s, it: unknown) => s + (it?.price || 0) * (it?.quantity || 1), 0)),
+    () => (
+      Number.isFinite(total)
+        ? total
+        : (cart ?? []).reduce((s, it) => s + (it.price || 0) * (it.quantity || 1), 0)
+    ),
     [total, cart]
   )
+
   const remaining = useMemo(
-    () => (Number.isFinite(amountToFreeShipping) ? amountToFreeShipping : Math.max(0, FREE_SHIP - subtotal)),
+    () => (
+      Number.isFinite(amountToFreeShipping)
+        ? amountToFreeShipping
+        : Math.max(0, FREE_SHIP - subtotal)
+    ),
     [amountToFreeShipping, FREE_SHIP, subtotal]
   )
+
   const progress = useMemo(
-    () => (Number.isFinite(progressToFreeShipping) ? progressToFreeShipping : Math.min(100, Math.round((subtotal / FREE_SHIP) * 100))),
+    () => (
+      Number.isFinite(progressToFreeShipping)
+        ? progressToFreeShipping
+        : Math.min(100, Math.round((subtotal / FREE_SHIP) * 100))
+    ),
     [progressToFreeShipping, subtotal, FREE_SHIP]
   )
+
   const payable = useMemo(
-    () => (Number.isFinite(grandTotal) ? grandTotal : subtotal + (Number.isFinite(shipping) ? shipping : 0) + (Number.isFinite(tax) ? tax : 0)),
+    () => (
+      Number.isFinite(grandTotal)
+        ? grandTotal
+        : subtotal + (Number.isFinite(shipping) ? shipping : 0) + (Number.isFinite(tax) ? tax : 0)
+    ),
     [grandTotal, subtotal, shipping, tax]
   )
 
-  // État UI + persistance
   const [mounted, setMounted] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
+
   useEffect(() => {
     setMounted(true)
-    try { const saved = localStorage.getItem('tp_cart_sticky_collapsed'); if (saved === '1') setCollapsed(true) } catch {}
+    try {
+      const saved = localStorage.getItem('tp_cart_sticky_collapsed')
+      if (saved === '1') setCollapsed(true)
+    } catch {}
   }, [])
-  const setCollapsedPersist = (v: boolean) => {
-    setCollapsed(v)
-    try { localStorage.setItem('tp_cart_sticky_collapsed', v ? '1' : '0') } catch {}
+
+  const setCollapsedPersist = (value: boolean) => {
+    setCollapsed(value)
+    try {
+      localStorage.setItem('tp_cart_sticky_collapsed', value ? '1' : '0')
+    } catch {}
   }
 
-  // Écoute l’événement global “cart-added” pour déplier brièvement
   useEffect(() => {
     const onAdded = () => {
       setCollapsedPersist(false)
+
       if (!prefersReduced) {
         try {
           const el = document.querySelector('[data-visible="true"]') as HTMLElement | null
-          el?.animate?.([{ boxShadow: '0 0 0 0 rgba(16,185,129,0.0)' }, { boxShadow: '0 0 0 10px rgba(16,185,129,0.25)' }, { boxShadow: '0 0 0 0 rgba(16,185,129,0.0)' }], { duration: 800, easing: 'ease-out' })
+          el?.animate?.(
+            [
+              { boxShadow: '0 0 0 0 rgba(16,185,129,0.0)' },
+              { boxShadow: '0 0 0 10px rgba(16,185,129,0.25)' },
+              { boxShadow: '0 0 0 0 rgba(16,185,129,0.0)' },
+            ],
+            { duration: 800, easing: 'ease-out' }
+          )
         } catch {}
       }
     }
+
     window.addEventListener('cart-added', onAdded as EventListener)
     return () => window.removeEventListener('cart-added', onAdded as EventListener)
   }, [prefersReduced])
 
-  // Visibilité + routes exclues (évaluées APRÈS tous les hooks)
-  const visible = mounted && (count ?? 0) > 0
-  const gotoCart = useMemo(() => localizePath(cartHref || '/cart', loc), [cartHref, loc])
-  const gotoCheckout = useMemo(() => localizePath(checkoutHref || '/commande', loc), [checkoutHref, loc])
+  const visible = mounted && count > 0
+
   const isExcluded = useMemo(
     () => excludePaths.some((p) => pathname.startsWith(localizePath(p, loc))),
     [excludePaths, pathname, loc]
   )
 
-  // Tracking apparition
   const trackedRef = useRef(false)
   useEffect(() => {
     if (visible && !trackedRef.current) {
       trackedRef.current = true
-      try { event({ action: 'sticky_cart_visible', category: 'engagement', label: 'sticky_cart', value: count }) } catch {}
+      try {
+        event?.({
+          action: 'sticky_cart_visible',
+          category: 'engagement',
+          label: 'sticky_cart',
+          value: count,
+        })
+      } catch {}
     }
   }, [visible, count])
 
   const onCta = (label: string) => {
     try {
-      event({ action: 'sticky_cart_click', category: 'engagement', label, value: subtotal })
-      logEvent?.('sticky_cart_click', { page: pathname, cart_count: count, total_price: subtotal, label })
+      event?.({
+        action: 'sticky_cart_click',
+        category: 'engagement',
+        label,
+        value: subtotal,
+      })
+      logEvent?.('sticky_cart_click', {
+        page: pathname,
+        cart_count: count,
+        total_price: subtotal,
+        label,
+      })
     } catch {}
   }
 
-  // ⛔️ Masquage APRÈS les hooks → pas d’erreur React #300
   if (!visible || isExcluded) return null
 
-  // Affichage “Livraison” robuste (indéfinie / offerte / prix)
   const shippingDisplay =
-    Number.isFinite(shipping) ? (shipping === 0 ? 'Offerte' : formatPrice(shipping as number)) : '—'
+    Number.isFinite(shipping)
+      ? shipping === 0
+        ? tx('offered')
+        : formatPrice(shipping)
+      : '—'
 
   return (
     <AnimatePresence mode="wait">
@@ -222,11 +311,10 @@ export default function StickyCartSummary({
           className
         )}
         role="region"
-        aria-label={tx('mobile_summary', 'Résumé de votre panier', { count })}
+        aria-label={tx('mobile_summary')}
         data-visible="true"
       >
         <div className="pointer-events-auto">
-          {/* Barre supérieure */}
           <div className="flex items-center justify-between px-4 py-2">
             <button
               type="button"
@@ -235,16 +323,15 @@ export default function StickyCartSummary({
               aria-expanded={!collapsed}
               aria-controls="sticky-cart-panel"
             >
-              {collapsed ? tx('show', 'Afficher') : tx('hide', 'Masquer')} · {count}{' '}
-              {tx('item', (count ?? 0) > 1 ? 'articles' : 'article', { count })}
+              {collapsed ? tx('show') : tx('hide')} · {count}{' '}
+              {count > 1 ? tx('items') : tx('item')}
             </button>
 
             <div className="text-sm text-gray-800 dark:text-gray-100" aria-live="polite">
-              {tx('total', 'Total')} : <strong className="ml-1">{formatPrice(payable)}</strong>
+              {tx('total')} : <strong className="ml-1">{formatPrice(payable)}</strong>
             </div>
           </div>
 
-          {/* Panneau détaillé */}
           <AnimatePresence initial={false}>
             {!collapsed && (
               <motion.div
@@ -256,22 +343,25 @@ export default function StickyCartSummary({
                 transition={{ duration: 0.22, ease: 'easeInOut' }}
                 className="overflow-hidden"
               >
-                {/* Progress “livraison offerte” */}
                 <div className="px-4 pt-1">
                   <div className="mb-1 flex items-center justify-between text-[11px] text-gray-600 dark:text-gray-300">
-                    <span>{tx('free_shipping', 'Livraison offerte')}</span>
+                    <span>{tx('free_shipping')}</span>
                     <span aria-hidden="true">{progress}%</span>
                   </div>
+
                   <div
                     className="h-2 w-full overflow-hidden rounded-full bg-gray-200/70 dark:bg-zinc-800"
-                    aria-label={tx('free_shipping_progress', 'Progression vers la livraison offerte')}
+                    aria-label={tx('free_shipping_progress')}
                     role="progressbar"
                     aria-valuemin={0}
                     aria-valuemax={100}
                     aria-valuenow={progress}
                   >
                     <motion.div
-                      className={cn('h-full rounded-full', progress >= 100 ? 'bg-green-500' : 'bg-[hsl(var(--accent))]')}
+                      className={cn(
+                        'h-full rounded-full',
+                        progress >= 100 ? 'bg-green-500' : 'bg-[hsl(var(--accent))]'
+                      )}
                       initial={{ width: 0 }}
                       animate={{ width: `${progress}%` }}
                       transition={{ duration: 0.35 }}
@@ -281,62 +371,63 @@ export default function StickyCartSummary({
                   <p
                     className={cn(
                       'mt-2 text-xs',
-                      remaining > 0 ? 'text-gray-600 dark:text-gray-300' : 'text-green-600 dark:text-green-400 font-semibold'
+                      remaining > 0
+                        ? 'text-gray-600 dark:text-gray-300'
+                        : 'text-green-600 dark:text-green-400 font-semibold'
                     )}
                     aria-live="polite"
                   >
                     {remaining > 0
-                      ? tx('free_shipping_remaining', 'Plus que {amount} pour la livraison gratuite.', {
-                          amount: formatPrice(remaining),
-                        })
-                      : tx('free_shipping_unlocked', 'Bravo ! La livraison est offerte.')}
+                      ? tx('free_shipping_remaining', { amount: formatPrice(remaining) })
+                      : tx('free_shipping_unlocked')}
                   </p>
                 </div>
 
-                {/* Lignes montants */}
                 <div className="px-4 pt-2 text-[13px] text-gray-700 dark:text-gray-300 space-y-1">
-                  <Line label={tx('subtotal', 'Sous-total')} value={formatPrice(subtotal)} />
-                  {discount > 0 && <Line label={tx('discount', 'Remise')} value={`- ${formatPrice(discount)}`} accent />}
-                  <Line label={tx('vat', 'TVA (est.)')} value={Number.isFinite(tax) && (tax as number) > 0 ? formatPrice(tax as number) : '—'} />
-                  <Line label={tx('shipping', 'Livraison')} value={shippingDisplay} />
+                  <Line label={tx('subtotal')} value={formatPrice(subtotal)} />
+                  {discount > 0 && <Line label={tx('discount')} value={`- ${formatPrice(discount)}`} accent />}
+                  <Line
+                    label={tx('vat')}
+                    value={Number.isFinite(tax) && tax > 0 ? formatPrice(tax) : '—'}
+                  />
+                  <Line label={tx('shipping')} value={shippingDisplay} />
                   <div className="my-2 border-t border-gray-300 dark:border-zinc-700" />
-                  <Line label={tx('total', 'Total')} value={formatPrice(payable)} bold />
+                  <Line label={tx('total')} value={formatPrice(payable)} bold />
                 </div>
 
-                {/* CTAs */}
                 <div className="grid grid-cols-2 gap-2 px-4 py-3">
                   <Link
-                    href={gotoCart}
+                    href={cartHref}
                     onClick={() => onCta('voir_panier')}
                     className="inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-zinc-700 px-3 py-2 text-sm font-semibold text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
-                    aria-label={tx('view_cart', 'Voir le panier')}
+                    aria-label={tx('view_cart')}
                   >
-                    {tx('view_cart', 'Voir le panier')}
+                    {tx('view_cart')}
                   </Link>
+
                   <Link
-                    href={gotoCheckout}
+                    href={checkoutHref}
                     onClick={() => onCta('commander')}
                     className="inline-flex items-center justify-center rounded-lg bg-[hsl(var(--accent))] text-white px-3 py-2 text-sm font-extrabold shadow-md hover:opacity-90 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
-                    aria-label={tx('checkout', 'Commander')}
+                    aria-label={tx('checkout')}
                   >
-                    {tx('checkout', 'Commander')} →
+                    {tx('checkout')} →
                   </Link>
                 </div>
 
-                {/* Trust line (no emoji) */}
                 <div className="px-4 pb-3 -mt-1">
                   <ul className="flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
                     <li className="flex items-center gap-1.5">
                       <IconLock className="text-gray-600 dark:text-gray-300" />
-                      <span>{tx('secure_payment', 'Paiement sécurisé')}</span>
+                      <span>{tx('secure_payment')}</span>
                     </li>
                     <li className="flex items-center gap-1.5">
                       <IconRocket className="text-gray-600 dark:text-gray-300" />
-                      <span>{tx('fast_shipping', '48h')}</span>
+                      <span>{tx('fast_shipping')}</span>
                     </li>
                     <li className="flex items-center gap-1.5">
                       <IconHeadset className="text-gray-600 dark:text-gray-300" />
-                      <span>{tx('support', 'Support 7j/7')}</span>
+                      <span>{tx('support')}</span>
                     </li>
                   </ul>
                 </div>
@@ -354,7 +445,12 @@ function Line({
   value,
   bold = false,
   accent = false,
-}: { label: string; value: string; bold?: boolean; accent?: boolean }) {
+}: {
+  label: string
+  value: string
+  bold?: boolean
+  accent?: boolean
+}) {
   return (
     <div className="flex items-center justify-between">
       <span className={cn('text-gray-700 dark:text-gray-300', bold && 'font-semibold')}>{label}</span>
@@ -371,4 +467,3 @@ function Line({
     </div>
   )
 }
-

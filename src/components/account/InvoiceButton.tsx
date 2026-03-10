@@ -13,8 +13,6 @@ type InvoiceItem = {
 
 interface InvoiceButtonProps {
   orderId: string
-  /** Surcharges facultatives si tu veux passer les données depuis le client.
-   * Si non fournis, l’API doit aller chercher depuis la base côté serveur. */
   customerName?: string
   items?: InvoiceItem[]
   total?: number
@@ -22,6 +20,68 @@ interface InvoiceButtonProps {
   label?: string
   variant?: 'link' | 'primary' | 'ghost'
   size?: 'sm' | 'md'
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    if (error.name === 'AbortError') {
+      return 'La génération de la facture a expiré. Réessayez.'
+    }
+    return error.message || 'Impossible de générer la facture.'
+  }
+
+  if (isRecord(error)) {
+    const name = typeof error.name === 'string' ? error.name : ''
+    const message = typeof error.message === 'string' ? error.message : ''
+
+    if (name === 'AbortError') {
+      return 'La génération de la facture a expiré. Réessayez.'
+    }
+
+    if (message) return message
+  }
+
+  return 'Impossible de générer la facture.'
+}
+
+function extractFilename(disposition: string | null, fallback: string): string {
+  if (!disposition) return fallback
+
+  const utf8Match = /filename\*=UTF-8''([^;]+)/i.exec(disposition)
+  if (utf8Match?.[1]) {
+    try {
+      return decodeURIComponent(utf8Match[1])
+    } catch {
+      return utf8Match[1]
+    }
+  }
+
+  const classicMatch = /filename="?([^"]+)"?/i.exec(disposition)
+  if (classicMatch?.[1]) return classicMatch[1]
+
+  return fallback
+}
+
+function downloadBlob(blob: Blob, filename: string): void {
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+
+  a.href = url
+  a.download = filename
+  a.rel = 'noopener'
+  a.style.display = 'none'
+
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+
+  window.setTimeout(() => {
+    URL.revokeObjectURL(url)
+  }, 1000)
 }
 
 export default function InvoiceButton({
@@ -39,59 +99,34 @@ export default function InvoiceButton({
 
   const payload = useMemo(() => {
     const base: Record<string, unknown> = { orderId }
+
     if (customerName) base.customerName = customerName
     if (Array.isArray(items)) base.items = items
     if (typeof total === 'number') base.total = total
+
     return base
   }, [orderId, customerName, items, total])
 
   const buttonClasses = cn(
-    'inline-flex items-center justify-center transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent rounded',
+    'inline-flex items-center justify-center rounded transition focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
     variant === 'primary' &&
-      'bg-accent text-white hover:bg-accent/90 px-3 py-2 font-semibold',
+      'bg-accent px-3 py-2 font-semibold text-white hover:bg-accent/90',
     variant === 'link' &&
       'text-blue-600 underline underline-offset-2 hover:opacity-80',
     variant === 'ghost' &&
-      'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-800 px-3 py-2',
+      'px-3 py-2 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-zinc-800',
     size === 'sm' && variant !== 'link' && 'text-sm',
     size === 'md' && variant !== 'link' && 'text-base',
-    loading && 'opacity-60 cursor-not-allowed',
+    loading && 'cursor-not-allowed opacity-60',
     className
   )
 
-  const extractFilename = (disposition: string | null, fallback: string) => {
-    if (!disposition) return fallback
-    // content-disposition: attachment; filename="facture-123.pdf"
-    const match = /filename\*?=(?:UTF-8''|")?([^";]+)/i.exec(disposition)
-    if (match?.[1]) {
-      try {
-        return decodeURIComponent(match[1])
-      } catch {
-        return match[1]
-      }
-    }
-    return fallback
-  }
-
-  const downloadBlob = (blob: Blob, filename: string) => {
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = filename
-    // iOS / Safari fallback
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    // Libère l’URL
-    setTimeout(() => URL.revokeObjectURL(url), 1000)
-  }
-
   const handleDownload = useCallback(async () => {
     if (loading) return
+
     setLoading(true)
     setErrorMsg(null)
 
-    // GA (optionnel, no-op si pas configuré)
     try {
       event({
         action: 'download_invoice_click',
@@ -99,12 +134,10 @@ export default function InvoiceButton({
         label: orderId,
         value: 1,
       })
-    } catch {
-      /* ignore */
-    }
+    } catch {}
 
     const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 30_000) // 30s
+    const timeout = window.setTimeout(() => controller.abort(), 30_000)
 
     try {
       const res = await fetch('/api/invoice', {
@@ -115,30 +148,31 @@ export default function InvoiceButton({
       })
 
       if (!res.ok) {
-        // essaie de lire l’erreur JSON propre si dispo
-        let msg = `Erreur serveur (${res.status})`
+        let message = `Erreur serveur (${res.status})`
+
         try {
-          const j = await res.json()
-          if (j?.error) msg = String(j.error)
-        } catch {
-          /* ignore */
-        }
-        throw new Error(msg)
+          const json: unknown = await res.json()
+          if (isRecord(json) && typeof json.error === 'string' && json.error.trim()) {
+            message = json.error
+          }
+        } catch {}
+
+        throw new Error(message)
       }
 
       const contentType = res.headers.get('content-type') || ''
       if (!contentType.toLowerCase().includes('pdf')) {
-        throw new Error('Réponse inattendue: ce n’est pas un PDF.')
+        throw new Error('Réponse inattendue : ce n’est pas un PDF.')
       }
 
       const blob = await res.blob()
-      const suggested = extractFilename(
+      const filename = extractFilename(
         res.headers.get('content-disposition'),
         `facture-${orderId}.pdf`
       )
-      downloadBlob(blob, suggested)
 
-      // GA succès
+      downloadBlob(blob, filename)
+
       try {
         event({
           action: 'download_invoice_success',
@@ -146,17 +180,11 @@ export default function InvoiceButton({
           label: orderId,
           value: 1,
         })
-      } catch {
-        /* ignore */
-      }
-    } catch (err: unknown) {
-      const msg =
-        err?.name === 'AbortError'
-          ? 'La génération de la facture a expiré. Réessayez.'
-          : err?.message || 'Impossible de générer la facture.'
-      setErrorMsg(msg)
+      } catch {}
+    } catch (error: unknown) {
+      const message = getErrorMessage(error)
+      setErrorMsg(message)
 
-      // GA erreur
       try {
         event({
           action: 'download_invoice_error',
@@ -164,11 +192,9 @@ export default function InvoiceButton({
           label: orderId,
           value: 1,
         })
-      } catch {
-        /* ignore */
-      }
+      } catch {}
     } finally {
-      clearTimeout(timeout)
+      window.clearTimeout(timeout)
       setLoading(false)
     }
   }, [loading, orderId, payload])
@@ -185,6 +211,7 @@ export default function InvoiceButton({
       >
         {loading ? 'Génération…' : label}
       </button>
+
       {errorMsg && (
         <p className="text-xs text-red-600 dark:text-red-400" role="alert">
           {errorMsg}
@@ -193,4 +220,3 @@ export default function InvoiceButton({
     </div>
   )
 }
-

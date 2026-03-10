@@ -1,29 +1,32 @@
 'use client'
 
-import Head from 'next/head'
-import React from 'react'
-
 import type { BlogPost } from '@/types/blog'
 
 import { localizePath, type Locale } from '@/lib/i18n-routing'
 
+type BlogJsonLdPost = BlogPost & {
+  createdAt?: string | number | Date
+  updatedAt?: string | number | Date
+  author?: string
+}
+
 interface BlogJsonLdProps {
-  posts: BlogPost[]
+  posts: BlogJsonLdPost[]
   locale?: Locale
   siteUrl?: string
 }
 
 const ORIGIN = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
 
-function iso(d?: unknown): string | undefined {
+function iso(d?: string | number | Date): string | undefined {
   if (!d) return undefined
-  const x = d instanceof Date ? d : new Date(d as unknown)
+  const x = d instanceof Date ? d : new Date(d)
   return Number.isFinite(x.getTime()) ? x.toISOString() : undefined
 }
 
 export default function BlogJsonLd({
   posts = [],
-  locale = 'fr' as Locale,
+  locale = 'fr',
   siteUrl = ORIGIN,
 }: BlogJsonLdProps) {
   if (!Array.isArray(posts) || posts.length === 0) return null
@@ -47,15 +50,18 @@ export default function BlogJsonLd({
     },
     blogPost: posts.map((post) => {
       const postUrl = `${siteUrl}${localizePath(`/blog/${post.slug}`, locale)}`
+      const datePublished = iso(post.createdAt)
+      const dateModified = iso(post.updatedAt)
+
       return {
         '@type': 'BlogPosting',
         headline: post.title,
         url: postUrl,
-        ...(iso((post as unknown).createdAt) && { datePublished: iso((post as unknown).createdAt) }),
-        ...(iso((post as unknown).updatedAt) && { dateModified: iso((post as unknown).updatedAt) }),
+        ...(datePublished ? { datePublished } : {}),
+        ...(dateModified ? { dateModified } : {}),
         author: {
           '@type': 'Person',
-          name: (post as unknown).author || 'TechPlay',
+          name: post.author || 'TechPlay',
         },
       }
     }),
@@ -73,9 +79,9 @@ export default function BlogJsonLd({
   }
 
   return (
-    <Head>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-    </Head>
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
   )
 }
-

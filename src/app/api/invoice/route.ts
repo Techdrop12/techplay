@@ -1,128 +1,10 @@
-function readCode(x: any, fallback: string = ''): string {
-  const v = (x && typeof x === "object") ? (x as any).code : undefined
-  return (typeof v === "string" && v.trim()) ? v : fallback
-}
-function readDiscountCode(x: any, fallback: string = ''): string {
-  if (!x || typeof x !== "object") return fallback
-  const d: any = (x as any).discount
-  const c1 = (d && typeof d === "object") ? d.code : undefined
-  const c2 = (x as any).coupon?.code
-  const c3 = (x as any).promoCode ?? (x as any).promotionCode ?? (x as any).discountCode
-  const v = typeof c1 === "string" ? c1
-        : (typeof c2 === "string" ? c2
-        : (typeof c3 === "string" ? c3 : undefined))
-  return (typeof v === "string" && v.trim()) ? v : fallback
-}
-function readDiscountLabel(x: any, fallback: string = "Remise"): string {
-  const hasObj = x && typeof x === "object";
-  const d = hasObj ? (x as any).discount : undefined;
-  const lbl = hasObj ? (x as any).discountLabel : undefined;
-  const fromObj = (d && typeof d === "object" && typeof (d as any).label === "string") ? (d as any).label : undefined;
-  const v = typeof fromObj === "string" ? fromObj : (typeof lbl === "string" ? lbl : undefined);
-  return (typeof v === "string" && v.trim()) ? v : fallback;
-}
-function readDiscountAmount(x: any, fallback: number = 0): number {
-  const hasObj = x && typeof x === "object";
-  const d = hasObj ? (x as any).discount : undefined;
-  const da = hasObj ? (x as any).discountAmount : undefined;
-  // formats supportés: discount:number | discount:{amount:number,label?:string} | discountAmount:number
-  const n1 = typeof d === "number" ? d : Number((d as any)?.amount);
-  const n2 = Number(da);
-  const n  = Number.isFinite(n1) ? n1 : (Number.isFinite(n2) ? n2 : NaN);
-  return Number.isFinite(n) ? n : fallback;
-}
-function readDiscount(x: any, fallback: number = 0): number {
-  const v = (x && typeof x === "object") ? (x as any).discount : undefined
-  const n = Number(v)
-  return Number.isFinite(n) ? n : fallback
-}
-function readCustomer(x: any): any {
-  const c = (x && typeof x === "object") ? (x as any).customer : undefined
-  return (c && typeof c === "object") ? c : {}
-}
-function readCustomerName(x: any, fallback: string = ''): string {
-  const cn = (x && typeof x === "object") ? (x as any).customerName : undefined
-  if (typeof cn === "string" && cn.trim()) return cn
-  const c = readCustomer(x)
-  const n = (c as any).name
-  return (typeof n === "string") ? n : fallback
-}
-function readCustomerField(x: any, key: string, fallback: string = ''): string {
-  const c = readCustomer(x)
-  const v = (c as any)?.[key]
-  return (typeof v === "string") ? v : fallback
-}
-function readCreatedAt(x: any, fallback: number = Date.now()): number {
-  const v = (x && typeof x === "object") ? (x as any).createdAt : undefined
-  if (typeof v === "number" && Number.isFinite(v)) return v
-  if (typeof v === "string") {
-    const t = Date.parse(v)
-    if (!Number.isNaN(t)) return t
-  }
-  return fallback
-}
-function readTaxRateDefault(x: any, fallback: number = 0): number {
-  const v = (x && typeof x === "object") ? (x as any).taxRateDefault : undefined
-  const n = Number(v)
-  return Number.isFinite(n) ? n : fallback
-}
-function readShippingTaxRate(x: any, fallback: number = 0): number {
-  const v = (x && typeof x === "object") ? (x as any).shippingTaxRate : undefined
-  const n = Number(v)
-  return Number.isFinite(n) ? n : fallback
-}
-function readShippingPrice(x: any, fallback: number = 0): number {
-  const v = (x && typeof x === "object") ? (x as any).shippingPrice : undefined
-  const n = Number(v)
-  return Number.isFinite(n) ? n : fallback
-}
-function readShipping(x: any): any {
-  const s = (x && typeof x === "object") ? (x as any).shipping : undefined
-  if (s && typeof s === "object") return s
-  return {}
-}
-function readItems(x: any): any[] {
-  const it = (x && typeof x === "object") ? (x as any).items : undefined
-  return Array.isArray(it) ? it : []
-}
-function readEmail(x: any, fallback: string = ''): string {
-  const e = (x && typeof x === "object") ? (x as any).email : undefined
-  return (typeof e === "string") ? e : fallback
-}
-function readAddress(x: any, fallback: string = ''): string {
-  const a = (x && typeof x === "object") ? (x as any).address : undefined
-  return (typeof a === "string") ? a : fallback
-}
-function readCurrency(x: any, fallback: string = 'EUR'): string {
-  const c = readCurrency(x)
-  if (typeof c === "string" && c.trim()) return c
-  return fallback
-}
-function readId(x: any): string {
-  const id = readId(x)
-  if (typeof id !== "string" || !id.trim()) throw new Error("Missing id")
-  return id
-}
-function readOrderId(x: any): string {
-  const id = readOrderId(x);
-  if (typeof id !== "string" || !id.trim()) throw new Error("Missing orderId");
-  return id;
-}
-async function getInvoiceBody(req: Request): Promise<InvoiceBody> {
-  const j = await getInvoiceBody(req);
-  const id = (j as any)?.orderId;
-  if (typeof id !== "string" || !id.trim()) {
-    throw new Error("Missing orderId");
-  }
-  return { orderId: id };
-}
-type InvoiceBody = { orderId: string }
-
-// src/app/api/invoice/route.ts — Invoice PDF (App Router, Node runtime)
-// - Utilise la source unique: formatInvoiceData + renderInvoicePDFStream
-// - Validation douce / coercition des champs
-// - i18n € fr-FR, filename propre, headers cache-safe
-// - Bonus: GET ?debug=json pour déboguer rapidement
+// src/app/api/invoice/route.ts
+// Invoice PDF (App Router, Node runtime)
+// - Source unique: formatInvoiceData + renderInvoicePDFStream
+// - Validation/coercition douce sans dépendance externe
+// - Compatible payloads souples (items/title/name, shipping imbriqué ou plat, discount imbriqué ou plat)
+// - Debug JSON via ?debug=json
+// - Zéro récursion cassée, zéro any
 
 import { NextResponse } from 'next/server'
 
@@ -136,97 +18,281 @@ import {
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-/* ---------- Helpers de validation/coercition (sans dépendance externe) ---------- */
+type InvoiceBody = {
+  order?: Record<string, unknown>
+  orderId?: string
+  id?: string
+  createdAt?: string | number | Date
+  currency?: string
+  customerName?: string
+  email?: string
+  items?: unknown[]
+  shipping?: unknown
+  shippingPrice?: number
+  shippingTaxRate?: number
+  taxRateDefault?: number
+  discount?: unknown
+  discountAmount?: number
+  coupon?: unknown
+  promoCode?: string
+  promotionCode?: string
+  discountCode?: string
+  customer?: unknown
+}
 
-function toNum(n: unknown, def = 0): number {
-  const v = Number(n)
-  return Number.isFinite(v) ? v : def
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
 }
-function toStr(s: unknown, def = ''): string {
-  return typeof s === 'string' ? s : def
+
+function getRecord(value: unknown): Record<string, unknown> {
+  return isRecord(value) ? value : {}
 }
-function asItems(arr: unknown): OrderItem[] {
-  if (!Array.isArray(arr)) return []
-  return arr
-    .map((x) => ({
-      name: toStr(x?.name || x?.title || 'Article'),
-      price: toNum(x?.price, 0),
-      quantity: Math.max(1, Math.floor(toNum(x?.quantity, 1))),
-      taxRate: Number.isFinite(x?.taxRate) ? Number(x.taxRate) : undefined,
-    }))
-    .filter((it) => it.name && it.quantity > 0)
+
+function getNonEmptyString(value: unknown, fallback = ''): string {
+  return typeof value === 'string' && value.trim() ? value.trim() : fallback
+}
+
+function getNumber(value: unknown, fallback = 0): number {
+  const n = Number(value)
+  return Number.isFinite(n) ? n : fallback
+}
+
+function getOptionalNumber(value: unknown): number | undefined {
+  const n = Number(value)
+  return Number.isFinite(n) ? n : undefined
+}
+
+function getDate(value: unknown, fallback = Date.now()): Date {
+  if (value instanceof Date && Number.isFinite(value.getTime())) {
+    return value
+  }
+
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return new Date(value)
+  }
+
+  if (typeof value === 'string' && value.trim()) {
+    const ts = Date.parse(value)
+    if (!Number.isNaN(ts)) return new Date(ts)
+  }
+
+  return new Date(fallback)
+}
+
+function getArray(value: unknown): unknown[] {
+  return Array.isArray(value) ? value : []
+}
+
+function readRoot(body: unknown): Record<string, unknown> {
+  const root = getRecord(body)
+  const nestedOrder = root.order
+  return isRecord(nestedOrder) ? nestedOrder : root
+}
+
+function readId(root: Record<string, unknown>): string {
+  const candidates = [root.orderId, root.id, root._id, root.invoiceId]
+
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string' && candidate.trim()) {
+      return candidate.trim()
+    }
+    if (typeof candidate === 'number' && Number.isFinite(candidate)) {
+      return String(candidate)
+    }
+  }
+
+  return `order-${Date.now()}`
+}
+
+function readCurrency(root: Record<string, unknown>, fallback = 'EUR'): string {
+  const value = getNonEmptyString(root.currency, fallback).toUpperCase()
+  return value || fallback
+}
+
+function readCustomer(root: Record<string, unknown>): Record<string, unknown> {
+  return getRecord(root.customer)
+}
+
+function readCustomerName(root: Record<string, unknown>): string {
+  const customer = readCustomer(root)
+
+  const firstName = getNonEmptyString(customer.firstName)
+  const lastName = getNonEmptyString(customer.lastName)
+  const fullNameFromParts =
+    firstName || lastName ? `${firstName} ${lastName}`.trim() : ''
+
+  return (
+    getNonEmptyString(root.customerName) ||
+    getNonEmptyString(customer.name) ||
+    getNonEmptyString(customer.fullName) ||
+    fullNameFromParts ||
+    ''
+  )
+}
+
+function readCustomerField(
+  root: Record<string, unknown>,
+  key: string,
+  fallback = ''
+): string {
+  const customer = readCustomer(root)
+  return getNonEmptyString(customer[key], fallback)
+}
+
+function readEmail(root: Record<string, unknown>, fallback = ''): string {
+  return (
+    getNonEmptyString(root.email) ||
+    getNonEmptyString(readCustomer(root).email) ||
+    fallback
+  )
+}
+
+function readShipping(root: Record<string, unknown>): Record<string, unknown> {
+  return getRecord(root.shipping)
+}
+
+function readShippingPrice(root: Record<string, unknown>): number | undefined {
+  const shipping = readShipping(root)
+  return getOptionalNumber(shipping.price) ?? getOptionalNumber(root.shippingPrice)
+}
+
+function readShippingTaxRate(root: Record<string, unknown>): number | undefined {
+  const shipping = readShipping(root)
+  return (
+    getOptionalNumber(shipping.taxRate) ??
+    getOptionalNumber(root.shippingTaxRate) ??
+    getOptionalNumber(root.taxRateDefault)
+  )
+}
+
+function readCouponCode(root: Record<string, unknown>): string {
+  const discount = getRecord(root.discount)
+  const coupon = getRecord(root.coupon)
+
+  return (
+    getNonEmptyString(discount.code) ||
+    getNonEmptyString(coupon.code) ||
+    getNonEmptyString(root.promoCode) ||
+    getNonEmptyString(root.promotionCode) ||
+    getNonEmptyString(root.discountCode) ||
+    ''
+  )
+}
+
+function readDiscountAmount(root: Record<string, unknown>): number | undefined {
+  const discount = root.discount
+
+  if (typeof discount === 'number' && Number.isFinite(discount)) {
+    return discount
+  }
+
+  if (isRecord(discount)) {
+    return getOptionalNumber(discount.amount)
+  }
+
+  return getOptionalNumber(root.discountAmount)
+}
+
+function readItems(root: Record<string, unknown>): OrderItem[] {
+  return getArray(root.items)
+    .map((item): OrderItem | null => {
+      const it = getRecord(item)
+
+      const name =
+        getNonEmptyString(it.name) ||
+        getNonEmptyString(it.title) ||
+        'Article'
+
+      const price = Math.max(0, getNumber(it.price, 0))
+      const quantity = Math.max(1, Math.floor(getNumber(it.quantity ?? it.qty, 1)))
+      const taxRate =
+        getOptionalNumber(it.taxRate) ??
+        getOptionalNumber(it.vatRate) ??
+        getOptionalNumber(it.tva)
+
+      if (!name || quantity <= 0) return null
+
+      return {
+        name,
+        price,
+        quantity,
+        ...(typeof taxRate === 'number' ? { taxRate } : {}),
+      }
+    })
+    .filter((item): item is OrderItem => item !== null)
 }
 
 function buildOrderFromBody(body: unknown): Order {
-  const id = readOrderId(body) ?? readId(body) ?? Date.now()
-  const currency = readCurrency(body, 'EUR')
+  const root = readRoot(body)
+  const shipping = readShipping(root)
 
-  const shippingPrice = readShipping(body)?.price ?? readShippingPrice(body)
-  const shippingRate =
-    readShipping(body)?.taxRate ?? readShippingTaxRate(body) ?? readTaxRateDefault(body)
+  const shippingPrice = readShippingPrice(root)
+  const shippingTaxRate = readShippingTaxRate(root)
+  const discountAmount = readDiscountAmount(root)
+  const discountCode = readCouponCode(root)
+  const taxRateDefault = getOptionalNumber(root.taxRateDefault)
 
   return {
-    id,
-    createdAt: new Date(readCreatedAt(body)),
-    customerName: readCustomerName(body),
+    id: readId(root),
+    createdAt: getDate(root.createdAt),
+    customerName: readCustomerName(root),
     customer: {
-      name: readCustomerField(body, 'name'),
-      company: readCustomerField(body, 'company'),
-      address1: readCustomerField(body, 'address1'),
-      address2: readCustomerField(body, 'address2'),
-      postcode: readCustomerField(body, 'postcode'),
-      city: readCustomerField(body, 'city'),
-      country: readCustomerField(body, 'country'),
-email: readCustomerField(body, 'email') || readEmail(body),
-      phone: readCustomerField(body, 'phone'),
+      name: readCustomerField(root, 'name'),
+      company: readCustomerField(root, 'company'),
+      address1: readCustomerField(root, 'address1') || readCustomerField(root, 'address'),
+      address2: readCustomerField(root, 'address2'),
+      postcode: readCustomerField(root, 'postcode') || readCustomerField(root, 'zip'),
+      city: readCustomerField(root, 'city'),
+      country: readCustomerField(root, 'country'),
+      email: readEmail(root),
+      phone: readCustomerField(root, 'phone'),
     },
-    items: asItems(readItems(body)),
-    shipping:
-      shippingPrice != null
-        ? {
-            label: toStr(readShipping(body)?.label, 'Livraison'),
-            price: toNum(shippingPrice, 0),
-            taxRate: Number.isFinite(shippingRate) ? Number(shippingRate) : undefined,
-          }
-        : undefined,
-    discount:
-      readDiscountAmount(body) != null || readDiscountAmount(body) != null
-        ? {
-            code: readCode(toStr(readDiscount(body)) ?? body?.coupon),
-            amount: toNum(readDiscountAmount(body) ?? readDiscountAmount(body), 0),
-          }
-        : undefined,
-    currency,
-    taxRateDefault: Number.isFinite(readTaxRateDefault(body)) ? Number(readTaxRateDefault(body)) : undefined,
+    items: readItems(root),
+    ...(typeof shippingPrice === 'number'
+      ? {
+          shipping: {
+            label: getNonEmptyString(shipping.label, 'Livraison'),
+            price: shippingPrice,
+            ...(typeof shippingTaxRate === 'number' ? { taxRate: shippingTaxRate } : {}),
+          },
+        }
+      : {}),
+    ...(typeof discountAmount === 'number'
+      ? {
+          discount: {
+            code: discountCode,
+            amount: discountAmount,
+          },
+        }
+      : {}),
+    currency: readCurrency(root, 'EUR'),
+    ...(typeof taxRateDefault === 'number' ? { taxRateDefault } : {}),
   }
 }
 
-/* --------------------------------- POST --------------------------------- */
-
 export async function POST(req: Request) {
   let body: unknown = {}
+
   try {
-    body = await req.json() as InvoiceBody
+    body = (await req.json()) as InvoiceBody
   } catch {
-    // body restera {}
+    body = {}
   }
 
   const order = buildOrderFromBody(body)
 
-  if (!readItems(order) || readItems(order).length === 0) {
+  if (!Array.isArray(order.items) || order.items.length === 0) {
     return NextResponse.json(
       { error: 'Aucun article dans la commande.' },
       { status: 400 }
     )
   }
 
-  // Prépare les datas + PDF stream
   const data = formatInvoiceData(order, {
-    defaultTaxRate: 0.2, // fallback 20% si rien fourni
-    discountAffectsTaxBase: false, // change à true si remise avant TVA
+    defaultTaxRate: 0.2,
+    discountAffectsTaxBase: false,
   })
 
-  // mode debug JSON: ajouter ?debug=json à l’URL de la requête (pratique pour tester)
   const url = new URL(req.url)
   if (url.searchParams.get('debug') === 'json') {
     return NextResponse.json(data, { status: 200 })
@@ -241,7 +307,7 @@ export async function POST(req: Request) {
       email: process.env.BRAND_EMAIL || '',
       vatNumber: process.env.BRAND_VAT || '',
       siret: process.env.BRAND_SIRET || '',
-      logoPath: process.env.BRAND_LOGO_PATH || '', // optionnel
+      logoPath: process.env.BRAND_LOGO_PATH || '',
     },
     locale: 'fr-FR',
     title: `Facture ${data.invoiceNumber}`,
@@ -258,8 +324,6 @@ export async function POST(req: Request) {
   })
 }
 
-/* ------------------------------- OPTIONS ------------------------------- */
-// (si tu envoies la route depuis un autre domaine / préflight CORS)
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
@@ -270,4 +334,3 @@ export async function OPTIONS() {
     },
   })
 }
-

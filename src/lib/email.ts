@@ -2,11 +2,9 @@
 // ✅ Transport SMTP robuste (pool, TLS, DKIM optionnel, idempotency),
 // fallback env, headers (List-Unsubscribe), et helpers prêts pour tes templates.
 
-import nodemailer from "nodemailer";
+import nodemailer from 'nodemailer';
 
-import { renderTemplate, type RenderedEmail } from "./emailTemplates";
-
-import type Mail from "nodemailer/lib/mailer";
+import { renderTemplate, type RenderedEmail } from './emailTemplates';
 
 const SMTP_URL = process.env.SMTP_URL; // ex: smtp://user:pass@smtp.mailgun.org:587
 const SMTP_HOST = process.env.SMTP_HOST;
@@ -16,60 +14,81 @@ const SMTP_PASS = process.env.SMTP_PASS;
 
 const EMAIL_FROM =
   process.env.EMAIL_FROM ||
-  (SMTP_USER ? `TechPlay <${SMTP_USER}>` : "TechPlay <no-reply@techplay.example.com>");
-const REPLY_TO = process.env.EMAIL_REPLY_TO || "support@techplay.example.com";
+  (SMTP_USER ? `TechPlay <${SMTP_USER}>` : 'TechPlay <no-reply@techplay.example.com>');
+const REPLY_TO = process.env.EMAIL_REPLY_TO || 'support@techplay.example.com';
 
 const DKIM_DOMAIN = process.env.DKIM_DOMAIN;
 const DKIM_SELECTOR = process.env.DKIM_SELECTOR;
 const DKIM_PRIVATE_KEY = process.env.DKIM_PRIVATE_KEY;
 
-let transporterPromise: Promise<Mail> | null = null;
+type AppTransport = ReturnType<typeof nodemailer.createTransport>;
 
-function createTransport(): Mail {
-  if (SMTP_URL) {
-    return nodemailer.createTransport({
-      pool: true,
-      url: SMTP_URL,
-      maxConnections: 5,
-      maxMessages: 100,
-      tls: { rejectUnauthorized: true },
-      dkim:
-        DKIM_DOMAIN && DKIM_SELECTOR && DKIM_PRIVATE_KEY
-          ? {
-              domainName: DKIM_DOMAIN,
-              keySelector: DKIM_SELECTOR,
-              privateKey: DKIM_PRIVATE_KEY,
-            }
-          : undefined,
-    } as unknown);
-  }
+let transporterPromise: Promise<AppTransport> | null = null;
 
-  return nodemailer.createTransport({
+function getDkimConfig() {
+  if (!DKIM_DOMAIN || !DKIM_SELECTOR || !DKIM_PRIVATE_KEY) return undefined;
+
+  return {
+    domainName: DKIM_DOMAIN,
+    keySelector: DKIM_SELECTOR,
+    privateKey: DKIM_PRIVATE_KEY,
+  };
+}
+
+function buildTransportOptions() {
+  const common = {
     pool: true,
-    host: SMTP_HOST || "smtp.gmail.com",
-    port: SMTP_PORT,
-    secure: SMTP_PORT === 465,
-    auth: SMTP_USER && SMTP_PASS ? { user: SMTP_USER, pass: SMTP_PASS } : undefined,
     maxConnections: 5,
     maxMessages: 100,
     tls: { rejectUnauthorized: true },
-    dkim:
-      DKIM_DOMAIN && DKIM_SELECTOR && DKIM_PRIVATE_KEY
-        ? {
-            domainName: DKIM_DOMAIN,
-            keySelector: DKIM_SELECTOR,
-            privateKey: DKIM_PRIVATE_KEY,
-          }
-        : undefined,
-  });
+    ...(getDkimConfig() ? { dkim: getDkimConfig() } : {}),
+  };
+
+  if (SMTP_URL) {
+    return {
+      ...common,
+      url: SMTP_URL,
+    };
+  }
+
+  return {
+    ...common,
+    host: SMTP_HOST || 'smtp.gmail.com',
+    port: SMTP_PORT,
+    secure: SMTP_PORT === 465,
+    ...(SMTP_USER && SMTP_PASS
+      ? {
+          auth: {
+            user: SMTP_USER,
+            pass: SMTP_PASS,
+          },
+        }
+      : {}),
+  };
 }
 
-async function getTransport(): Promise<Mail> {
+function createTransport(): AppTransport {
+  return nodemailer.createTransport(buildTransportOptions());
+}
+
+async function getTransport(): Promise<AppTransport> {
   if (!transporterPromise) {
-    const tr = createTransport();
-    transporterPromise = tr.verify().then(() => tr);
+    const transport = createTransport();
+
+    transporterPromise = transport
+      .verify()
+      .then(() => transport)
+      .catch((error) => {
+        transporterPromise = null;
+        throw error;
+      });
   }
+
   return transporterPromise;
+}
+
+function sanitizeMessageIdPart(value: string): string {
+  return value.replace(/[^a-zA-Z0-9._-]/g, '_');
 }
 
 export type SendEmailOptions = {
@@ -79,33 +98,35 @@ export type SendEmailOptions = {
   text?: string;
   headers?: Record<string, string>;
   idempotencyKey?: string; // pour éviter les doublons (à toi de stocker si besoin)
-  priority?: "high" | "normal" | "low";
+  priority?: 'high' | 'normal' | 'low';
   listUnsubscribe?: string; // ex: <mailto:unsubscribe@techplay.com>, <https://...>
 };
 
 export async function sendEmailRaw({
   to,
-  subject = "",
-  html = "",
-  text = "",
+  subject = '',
+  html = '',
+  text = '',
   headers,
   idempotencyKey,
-  priority = "normal",
+  priority = 'normal',
   listUnsubscribe,
 }: SendEmailOptions) {
   const transport = await getTransport();
 
   const messageId =
-    headers?.["Message-ID"] ||
-    (idempotencyKey ? `<${idempotencyKey}@techplay>` : undefined);
+    headers?.['Message-ID'] ||
+    (idempotencyKey
+      ? `<${sanitizeMessageIdPart(idempotencyKey)}@techplay>`
+      : undefined);
 
   const finalHeaders: Record<string, string> = {
-    "X-Entity-Ref-ID": idempotencyKey || "",
-    ...(listUnsubscribe ? { "List-Unsubscribe": listUnsubscribe } : {}),
-    ...headers,
+    ...(idempotencyKey ? { 'X-Entity-Ref-ID': idempotencyKey } : {}),
+    ...(listUnsubscribe ? { 'List-Unsubscribe': listUnsubscribe } : {}),
+    ...(headers || {}),
   };
 
-  await transport.sendMail({
+  return transport.sendMail({
     from: EMAIL_FROM,
     to,
     replyTo: REPLY_TO,
@@ -114,7 +135,7 @@ export async function sendEmailRaw({
     text,
     headers: finalHeaders,
     priority,
-    messageId,
+    ...(messageId ? { messageId } : {}),
   });
 }
 
@@ -130,28 +151,32 @@ export async function sendTemplate<K extends Parameters<typeof renderTemplate>[0
   const rendered: RenderedEmail = renderTemplate(templateKey, { ...vars, to });
 
   // Unsubscribe header (les webmails l’affichent joliment)
-  const unsubscribeUrl =
-    process.env.NEXT_PUBLIC_SITE_URL
-      ? `<${process.env.NEXT_PUBLIC_SITE_URL}/unsubscribe>`
-      : undefined;
+  const unsubscribeUrl = process.env.NEXT_PUBLIC_SITE_URL
+    ? `<${process.env.NEXT_PUBLIC_SITE_URL.replace(/\/+$/, '')}/unsubscribe>`
+    : undefined;
 
-  await sendEmailRaw({
+  return sendEmailRaw({
     to,
     subject: rendered.subject,
     html: rendered.html,
     text: rendered.text,
-    listUnsubscribe: unsubscribeUrl,
+    ...(unsubscribeUrl ? { listUnsubscribe: unsubscribeUrl } : {}),
   });
 }
 
 // Exemples prêts à l’emploi
-export async function sendOrderConfirmation(to: string, name: string, orderId?: string) {
-  return sendTemplate("confirmation", to, { name, orderId });
-}
-export async function sendAbandonedCart(to: string, product: string) {
-  return sendTemplate("abandonPanier", to, { product });
-}
-export async function sendResetPassword(to: string, link: string) {
-  return sendTemplate("resetPassword", to, { link });
+export async function sendOrderConfirmation(
+  to: string,
+  name: string,
+  orderId?: string
+) {
+  return sendTemplate('confirmation', to, { name, orderId });
 }
 
+export async function sendAbandonedCart(to: string, product: string) {
+  return sendTemplate('abandonPanier', to, { product });
+}
+
+export async function sendResetPassword(to: string, link: string) {
+  return sendTemplate('resetPassword', to, { link });
+}

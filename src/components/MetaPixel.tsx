@@ -1,49 +1,64 @@
-// src/components/MetaPixel.tsx — Ultra+ : consent-aware, SPA PV, advanced matching, anti double-init, debug
 'use client'
 
 import { usePathname } from 'next/navigation'
 import Script from 'next/script'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { pixelPageView, isPixelReady } from '@/lib/meta-pixel'
+import { isPixelReady, pixelPageView } from '@/lib/meta-pixel'
 
 declare global {
   interface Window {
-    fbq?: (...args: unknown[]) => void
     _fbq?: unknown
     __pixelInited?: boolean
     __pixelHashedAM?: Record<string, string> | null
-    __pixelUser?: Partial<{
-      email: string
-      phone: string
-      first_name: string
-      last_name: string
-      city: string
-      state: string
-      zip: string
-      country: string
-      external_id: string
-    }>
   }
 }
+
+type PixelUser = Partial<{
+  email: string
+  phone: string
+  first_name: string
+  last_name: string
+  city: string
+  state: string
+  zip: string
+  country: string
+  external_id: string
+}>
 
 const PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID ?? ''
 const ENABLE_IN_DEV = (process.env.NEXT_PUBLIC_PIXEL_IN_DEV || '').toLowerCase() === 'true'
 const DEBUG = (process.env.NEXT_PUBLIC_PIXEL_DEBUG || '').toLowerCase() === 'true'
 
-/* ----------------------------- Eligibility ---------------------------- */
+function getPixelUser(): PixelUser | null {
+  if (typeof window === 'undefined' || !window.__pixelUser || typeof window.__pixelUser !== 'object') {
+    return null
+  }
+
+  const record = window.__pixelUser as Record<string, unknown>
+
+  return {
+    email: typeof record.email === 'string' ? record.email : undefined,
+    phone: typeof record.phone === 'string' ? record.phone : undefined,
+    first_name: typeof record.first_name === 'string' ? record.first_name : undefined,
+    last_name: typeof record.last_name === 'string' ? record.last_name : undefined,
+    city: typeof record.city === 'string' ? record.city : undefined,
+    state: typeof record.state === 'string' ? record.state : undefined,
+    zip: typeof record.zip === 'string' ? record.zip : undefined,
+    country: typeof record.country === 'string' ? record.country : undefined,
+    external_id: typeof record.external_id === 'string' ? record.external_id : undefined,
+  }
+}
 
 function eligibleNow(): boolean {
   if (!PIXEL_ID) return false
   if (typeof window === 'undefined') return false
 
-  // Respect Do Not Track
   const dnt =
-    (navigator as unknown).doNotTrack === '1' ||
-    (window as unknown).doNotTrack === '1' ||
-    (navigator as unknown).msDoNotTrack === '1'
+    navigator.doNotTrack === '1' ||
+    window.doNotTrack === '1' ||
+    navigator.msDoNotTrack === '1'
 
-  // Opt-out locaux
   let optedOut = false
   try {
     optedOut =
@@ -54,15 +69,14 @@ function eligibleNow(): boolean {
   if (dnt || optedOut) return false
   if (process.env.NODE_ENV !== 'production' && !ENABLE_IN_DEV) return false
 
-  // Consent pubs requis (ga.ts émet des events 'tp:consent')
   try {
-    const s: unknown = (window as unknown).__consentState || {}
+    const consent = window.__consentState ?? {}
     const adsGranted =
-      s.ad_storage !== 'denied' ||
-      s.ad_user_data !== 'denied' ||
-      s.ad_personalization !== 'denied'
-    const ls = localStorage.getItem('consent:ads') === '1'
-    if (!adsGranted && !ls) return false
+      consent.ad_storage === 'granted' ||
+      consent.ad_user_data === 'granted' ||
+      consent.ad_personalization === 'granted'
+    const localConsent = localStorage.getItem('consent:ads') === '1'
+    if (!adsGranted && !localConsent) return false
   } catch {
     return false
   }
@@ -70,25 +84,24 @@ function eligibleNow(): boolean {
   return true
 }
 
-/* ------------------------- Advanced Matching (AM) -------------------------- */
-const normalizers: Record<string, (v: string) => string> = {
-  em: (v) => v.trim().toLowerCase(),
-  ph: (v) => v.replace(/[^0-9]/g, ''),
-  fn: (v) => v.trim().toLowerCase(),
-  ln: (v) => v.trim().toLowerCase(),
-  ct: (v) => v.trim().toLowerCase(),
-  st: (v) => v.trim().toLowerCase(),
-  zp: (v) => v.trim(),
-  country: (v) => v.trim().toLowerCase(),
-  external_id: (v) => v.trim(),
+const normalizers: Record<string, (value: string) => string> = {
+  em: (value) => value.trim().toLowerCase(),
+  ph: (value) => value.replace(/[^0-9]/g, ''),
+  fn: (value) => value.trim().toLowerCase(),
+  ln: (value) => value.trim().toLowerCase(),
+  ct: (value) => value.trim().toLowerCase(),
+  st: (value) => value.trim().toLowerCase(),
+  zp: (value) => value.trim(),
+  country: (value) => value.trim().toLowerCase(),
+  external_id: (value) => value.trim(),
 }
 
 async function sha256Hex(input: string): Promise<string> {
   try {
-    const enc = new TextEncoder().encode(input)
-    const buf = await crypto.subtle.digest('SHA-256', enc)
-    return Array.from(new Uint8Array(buf))
-      .map((b) => b.toString(16).padStart(2, '0'))
+    const encoded = new TextEncoder().encode(input)
+    const buffer = await crypto.subtle.digest('SHA-256', encoded)
+    return Array.from(new Uint8Array(buffer))
+      .map((byte) => byte.toString(16).padStart(2, '0'))
       .join('')
   } catch {
     return ''
@@ -97,93 +110,99 @@ async function sha256Hex(input: string): Promise<string> {
 
 async function buildAdvancedMatching(): Promise<Record<string, string> | null> {
   if (typeof window !== 'undefined' && window.__pixelHashedAM) return window.__pixelHashedAM
-  const u = (typeof window !== 'undefined' && (window as unknown).__pixelUser) || null
-  if (!u) return null
-  const raw: Array<[keyof typeof normalizers, string | undefined]> = [
-    ['em', u.email],
-    ['ph', u.phone],
-    ['fn', u.first_name],
-    ['ln', u.last_name],
-    ['ct', u.city],
-    ['st', u.state],
-    ['zp', u.zip],
-    ['country', u.country],
-    ['external_id', u.external_id],
-  ]
-  const entries: Array<[string, string]> = []
-  for (const [k, v] of raw) {
-    if (!v || !String(v).trim()) continue
-    const norm = normalizers[k](String(v))
-    const hashed = await sha256Hex(norm)
-    if (hashed) entries.push([k, hashed])
-  }
-  const out = entries.length ? Object.fromEntries(entries) : null
-  if (typeof window !== 'undefined') window.__pixelHashedAM = out
-  return out
-}
 
-/* --------------------------------- Component ------------------------------- */
+  const user = getPixelUser()
+  if (!user) return null
+
+  const raw: Array<[keyof typeof normalizers, string | undefined]> = [
+    ['em', user.email],
+    ['ph', user.phone],
+    ['fn', user.first_name],
+    ['ln', user.last_name],
+    ['ct', user.city],
+    ['st', user.state],
+    ['zp', user.zip],
+    ['country', user.country],
+    ['external_id', user.external_id],
+  ]
+
+  const entries: Array<[string, string]> = []
+
+  for (const [key, value] of raw) {
+    if (!value || !String(value).trim()) continue
+    const normalized = normalizers[key](String(value))
+    const hashed = await sha256Hex(normalized)
+    if (hashed) entries.push([key, hashed])
+  }
+
+  const output = entries.length ? Object.fromEntries(entries) : null
+  if (typeof window !== 'undefined') window.__pixelHashedAM = output
+  return output
+}
 
 export default function MetaPixel() {
   const pathname = usePathname() || '/'
   const [shouldLoad, setShouldLoad] = useState(false)
   const [am, setAM] = useState<Record<string, string> | null>(null)
-  const lastPathRef = useRef<string>('')
+  const lastPathRef = useRef('')
 
   const debugLog = useMemo(
     () => (...args: unknown[]) => {
       if (!DEBUG) return
-       
       console.log('[Pixel]', ...args)
     },
     []
   )
 
-  // 1) Éligibilité à l'arrivée
   useEffect(() => {
     setShouldLoad(eligibleNow())
   }, [])
 
-  // 2) Recalcule à chaque MAJ consent OU update user (AM)
   useEffect(() => {
     const onConsent = () => {
-      const ok = eligibleNow()
-      setShouldLoad(ok)
-      if (!ok) lastPathRef.current = ''
-      debugLog('Consent update, eligible =', ok)
+      const eligible = eligibleNow()
+      setShouldLoad(eligible)
+      if (!eligible) lastPathRef.current = ''
+      debugLog('Consent update, eligible =', eligible)
     }
+
     const onUser = async () => {
       try {
-        const adv = await buildAdvancedMatching()
-        setAM(adv || null)
-        if (adv) debugLog('Advanced Matching updated:', Object.keys(adv))
+        const advancedMatching = await buildAdvancedMatching()
+        setAM(advancedMatching || null)
+        if (advancedMatching) debugLog('Advanced Matching updated:', Object.keys(advancedMatching))
       } catch {}
     }
+
     window.addEventListener('tp:consent', onConsent as EventListener)
     window.addEventListener('tp:pixel-user', onUser as EventListener)
+
     return () => {
       window.removeEventListener('tp:consent', onConsent as EventListener)
       window.removeEventListener('tp:pixel-user', onUser as EventListener)
     }
   }, [debugLog])
 
-  // 3) Prépare l’Advanced Matching (si dispo) — asynchrone et idempotent
   useEffect(() => {
     let cancelled = false
+
     ;(async () => {
       try {
-        const adv = await buildAdvancedMatching()
-        if (!cancelled) setAM(adv)
-        if (adv) debugLog('Advanced Matching ready:', Object.keys(adv))
+        const advancedMatching = await buildAdvancedMatching()
+        if (!cancelled) setAM(advancedMatching)
+        if (advancedMatching) debugLog('Advanced Matching ready:', Object.keys(advancedMatching))
       } catch {}
     })()
-    return () => { cancelled = true }
+
+    return () => {
+      cancelled = true
+    }
   }, [pathname, debugLog])
 
-  // 4) Fire PageView sur chaque navigation (dédup)
   useEffect(() => {
     if (!shouldLoad) return
     if (lastPathRef.current === pathname) return
+
     lastPathRef.current = pathname
 
     const fire = () => {
@@ -191,7 +210,7 @@ export default function MetaPixel() {
         debugLog('PageView', pathname)
         pixelPageView()
       } else {
-        setTimeout(() => {
+        window.setTimeout(() => {
           if (isPixelReady()) {
             debugLog('PageView (late)', pathname)
             pixelPageView()
@@ -199,6 +218,7 @@ export default function MetaPixel() {
         }, 0)
       }
     }
+
     fire()
   }, [pathname, shouldLoad, debugLog])
 
@@ -206,11 +226,10 @@ export default function MetaPixel() {
 
   return (
     <>
-      {/* Snippet officiel Meta Pixel — init sans PageView auto */}
       <Script id="meta-pixel" strategy="afterInteractive" onReady={() => debugLog('fbevents.js loaded')}>
         {`
           (function(f,b,e,v,n,t,s){
-            if (f.__pixelInited) return; // anti-double init
+            if (f.__pixelInited) return;
             if (f.fbq) { f.__pixelInited = true; return; }
             n=f.fbq=function(){n.callMethod ? n.callMethod.apply(n,arguments) : n.queue.push(arguments)};
             if (!f._fbq) f._fbq=n; n.push=n; n.loaded=!0; n.version='2.0';
@@ -219,30 +238,20 @@ export default function MetaPixel() {
             f.__pixelInited = true;
           })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
           try { fbq('init', '${PIXEL_ID}'); } catch(e) {}
-          // Pas de 'PageView' auto ici — SPA gérée via pixelPageView()
         `}
       </Script>
 
-      {/* Si l’Advanced Matching arrive après l’init, on “complète” l’init */}
       {am && (
-        <Script
-          id="meta-pixel-advanced-matching"
-          strategy="afterInteractive"
-          onReady={() => debugLog('Advanced Matching applied')}
-        >
+        <Script id="meta-pixel-advanced-matching" strategy="afterInteractive" onReady={() => debugLog('Advanced Matching applied')}>
           {`try{ fbq('init', '${PIXEL_ID}', ${JSON.stringify(am)}); }catch(e){}`}
         </Script>
       )}
 
-      {/* Noscript de courtoisie (ne respecte pas le consent runtime) */}
       <noscript
-         
         dangerouslySetInnerHTML={{
           __html: `
             <img height="1" width="1" style="display:none"
-                 src="https://www.facebook.com/tr?id=${encodeURIComponent(
-                   PIXEL_ID
-                 )}&ev=PageView&noscript=1"/>
+                 src="https://www.facebook.com/tr?id=${encodeURIComponent(PIXEL_ID)}&ev=PageView&noscript=1"/>
           `,
         }}
       />

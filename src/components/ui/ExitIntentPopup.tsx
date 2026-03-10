@@ -1,4 +1,4 @@
-// src/components/ui/ExitIntentPopup.tsx — FINAL (fusion + robustesse)
+// src/components/ui/ExitIntentPopup.tsx
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -6,25 +6,24 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from '@/components/LocalizedLink'
 
 type Props = {
-  /** Afficher seulement si le panier contient des items */
   requireCartItems?: boolean
-  /** Masquer sur ces routes (prefix match) */
   hideOnRoutes?: string[]
-  /** Ne pas ré-afficher pendant X jours (persistance) */
   ttlDays?: number
-  /** Clé de persistance */
   storageKey?: string
-  /** Y max déclenchement (<= 0 = bord haut) */
   triggerAtTopY?: number
-  /** Masquer automatiquement après X ms (0 = jamais) */
   autoHideMs?: number
-  /** Lien CTA */
   ctaHref?: string
-  /** Texte du code promo (facultatif) */
   promoCode?: string
 }
 
 const isBrowser = () => typeof window !== 'undefined' && typeof document !== 'undefined'
+
+function pushDL(event: string, extra?: Record<string, unknown>) {
+  try {
+    window.dataLayer = window.dataLayer ?? []
+    window.dataLayer.push({ event, ...(extra ?? {}) })
+  } catch {}
+}
 
 export default function ExitIntentPopup({
   requireCartItems = true,
@@ -37,35 +36,33 @@ export default function ExitIntentPopup({
   promoCode = 'WELCOME10',
 }: Props) {
   const [open, setOpen] = useState(false)
-  const [eligible, setEligible] = useState(!requireCartItems) // sera validé au mount
+  const [eligible, setEligible] = useState(!requireCartItems)
   const timerRef = useRef<number | null>(null)
   const shownOnce = useRef(false)
 
-  // i18n light
   const isFr = useMemo(() => {
     if (!isBrowser()) return true
     const lang = document.documentElement.lang || 'fr'
     return lang.toLowerCase().startsWith('fr')
   }, [])
 
-  // route guard
   const hiddenByRoute = useMemo(() => {
     if (!isBrowser()) return false
-    const path = window.location?.pathname || ''
-    return hideOnRoutes.some((p) => path.startsWith(p))
+    const path = window.location.pathname || ''
+    return hideOnRoutes.some((route) => path.startsWith(route))
   }, [hideOnRoutes])
 
-  // persistance
   const isDismissed = () => {
     if (!isBrowser()) return false
     try {
       const raw = localStorage.getItem(storageKey)
-      const until = raw ? parseInt(raw, 10) : 0
+      const until = raw ? Number.parseInt(raw, 10) : 0
       return Date.now() < until
     } catch {
       return false
     }
   }
+
   const persistDismiss = () => {
     if (!isBrowser()) return
     try {
@@ -74,72 +71,71 @@ export default function ExitIntentPopup({
     } catch {}
   }
 
-  // lire le panier (fallback localStorage pour éviter la dépendance forte)
   useEffect(() => {
     if (!isBrowser() || !requireCartItems) return
+
     try {
-      // essaie le localStorage `cart`
-      const cart = JSON.parse(localStorage.getItem('cart') || '[]')
-      setEligible(Array.isArray(cart) && cart.length > 0)
+      const parsed = JSON.parse(localStorage.getItem('cart') || '[]')
+      const items = Array.isArray(parsed) ? parsed : Array.isArray(parsed?.items) ? parsed.items : []
+      setEligible(items.length > 0)
     } catch {
       setEligible(false)
     }
   }, [requireCartItems])
 
-  // auto-hide
   useEffect(() => {
     if (!open || autoHideMs <= 0) return
-    timerRef.current = window.setTimeout(() => setOpen(false), autoHideMs) as unknown as number
+
+    timerRef.current = window.setTimeout(() => setOpen(false), autoHideMs)
+
     return () => {
       if (timerRef.current) window.clearTimeout(timerRef.current)
       timerRef.current = null
     }
   }, [open, autoHideMs])
 
-  // handler exit-intent (souris vers le haut / sortie fenêtre)
   useEffect(() => {
     if (!isBrowser() || hiddenByRoute || isDismissed() || !eligible) return
 
+    const hasFinePointer = window.matchMedia?.('(pointer: fine)').matches ?? true
+    if (!hasFinePointer) return
+
     const onMouseOut = (e: MouseEvent) => {
-      // relatedTarget null = sortie du document
-      const leavingDoc = !e.relatedTarget && e.clientY <= triggerAtTopY
-      if (leavingDoc && !shownOnce.current) {
+      const leavingDocument = !e.relatedTarget && e.clientY <= triggerAtTopY
+
+      if (leavingDocument && !shownOnce.current) {
         shownOnce.current = true
         setOpen(true)
-        // analytics (optionnel)
-        try { (window as unknown).dataLayer?.push({ event: 'exit_intent_shown' }) } catch {}
+        pushDL('exit_intent_shown')
         document.removeEventListener('mouseout', onMouseOut)
       }
     }
-
-    // mobile: on ne déclenche pas (pas de curseur)
-    const hasPointer = window.matchMedia?.('(pointer: fine)').matches ?? true
-    if (!hasPointer) return
 
     document.addEventListener('mouseout', onMouseOut)
     return () => document.removeEventListener('mouseout', onMouseOut)
   }, [eligible, hiddenByRoute, triggerAtTopY])
 
-  // ESC pour fermer
+  const close = () => {
+    setOpen(false)
+    persistDismiss()
+    pushDL('exit_intent_closed')
+  }
+
   useEffect(() => {
     if (!open || !isBrowser()) return
+
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault()
         close()
       }
     }
+
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [open])
 
-  const close = () => {
-    setOpen(false)
-    persistDismiss()
-    try { (window as unknown).dataLayer?.push({ event: 'exit_intent_closed' }) } catch {}
-  }
-
-  const onBackdrop = (e: React.MouseEvent) => {
+  const onBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) close()
   }
 
@@ -156,13 +152,14 @@ export default function ExitIntentPopup({
         aria-modal="true"
         aria-labelledby="exit-intent-title"
         aria-describedby="exit-intent-desc"
-        className="mx-3 w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-xl outline-none dark:bg-zinc-900 dark:text-white border border-gray-200 dark:border-zinc-800"
+        className="mx-3 w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 text-center shadow-xl outline-none dark:border-zinc-800 dark:bg-zinc-900 dark:text-white"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <h3 id="exit-intent-title" className="text-xl font-bold mb-2">
+        <h3 id="exit-intent-title" className="mb-2 text-xl font-bold">
           {isFr ? 'Avant de partir…' : 'Before you go…'}
         </h3>
-        <p id="exit-intent-desc" className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+
+        <p id="exit-intent-desc" className="mb-4 text-sm text-gray-600 dark:text-gray-300">
           {isFr
             ? `Profitez de -10 % avec le code ${promoCode}`
             : `Enjoy -10% with code ${promoCode}`}
@@ -174,12 +171,14 @@ export default function ExitIntentPopup({
             className="inline-flex items-center justify-center rounded-lg bg-[hsl(var(--accent))] px-4 py-2 font-semibold text-white shadow hover:opacity-90"
             onClick={() => {
               persistDismiss()
-              try { (window as unknown).dataLayer?.push({ event: 'exit_intent_cta_click' }) } catch {}
+              pushDL('exit_intent_cta_click')
             }}
           >
             {isFr ? 'Voir mon panier →' : 'Go to cart →'}
           </Link>
+
           <button
+            type="button"
             onClick={close}
             className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:border-zinc-700 dark:text-gray-200 dark:hover:bg-zinc-800"
           >
@@ -190,4 +189,3 @@ export default function ExitIntentPopup({
     </div>
   )
 }
-

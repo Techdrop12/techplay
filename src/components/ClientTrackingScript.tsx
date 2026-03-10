@@ -7,24 +7,14 @@ import { logEvent } from '@/lib/ga'
 import { trackPixel, pixelReadyAndConsented } from '@/lib/meta-pixel'
 
 type Props = {
-  /** Nom d'événement GA4 (ex: 'add_to_cart', 'cta_click', 'purchase'...) */
   event: string
-  /** Paramètres additionnels envoyés avec l'événement */
   params?: Record<string, unknown>
-  /** N’émettre qu’une seule fois après montage (par défaut: true) */
   once?: boolean
-  /**
-   * Clé personnalisée pour la déduplication (par défaut: event + JSON(params)).
-   * Utile si tu veux dédoublonner à l’écran plutôt qu’à la session entière.
-   */
   onceKey?: string
-  /** Pousser aussi dans dataLayer (utile pour GTM/tests) */
   fallbackToDataLayer?: boolean
-  /** Émettre aussi vers Meta Pixel (si consent autorisé et Pixel prêt) */
   mirrorToMetaPixel?: boolean
 }
 
-/** Mapping basique GA4 -> Meta (extensible) */
 const META_EVENT_MAP: Record<string, string> = {
   page_view: 'PageView',
   view_item: 'ViewContent',
@@ -39,13 +29,6 @@ function toOnceKey(evt: string, params?: Record<string, unknown>, custom?: strin
   return `cts:${evt}:${p}`
 }
 
-/**
- * Déclenche un événement client de façon sûre :
- *  - GA4 via nos helpers (queue/offline/SSR-safe)
- *  - dataLayer (GTM) en fallback
- *  - Miroir Meta Pixel si prêt + consent
- *  - Dédup via sessionStorage
- */
 export default function ClientTrackingScript({
   event,
   params,
@@ -62,33 +45,31 @@ export default function ClientTrackingScript({
       if (fired.current) return
       if (typeof window !== 'undefined' && sessionStorage.getItem(key) === '1') return
     }
+
     fired.current = true
 
-    // 1) GA4
-    try { logEvent(event, params) } catch {}
+    try {
+      logEvent(event, params)
+    } catch {}
 
-    // 2) dataLayer fallback (GTM)
     if (fallbackToDataLayer) {
       try {
-        (window as unknown).dataLayer = (window as unknown).dataLayer || []
-        ;(window as unknown).dataLayer.push({ event, ...(params || {}) })
+        window.dataLayer = window.dataLayer || []
+        window.dataLayer.push({ event, ...(params || {}) })
       } catch {}
     }
 
-    // 3) Meta Pixel mirror (respect consent + readiness)
     if (mirrorToMetaPixel && pixelReadyAndConsented()) {
       try {
         const metaEvt = META_EVENT_MAP[event] || event
-        trackPixel(metaEvt as unknown, params as unknown)
+        trackPixel(metaEvt, params)
       } catch {}
     }
 
     if (once && typeof window !== 'undefined') {
       try { sessionStorage.setItem(key, '1') } catch {}
     }
-    // on déclenche si la clé change (donc si event OU params/onceKey changent)
-  }, [key, fallbackToDataLayer, mirrorToMetaPixel])
+  }, [event, key, params, once, fallbackToDataLayer, mirrorToMetaPixel])
 
   return null
 }
-

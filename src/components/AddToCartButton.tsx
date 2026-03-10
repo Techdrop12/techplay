@@ -1,19 +1,20 @@
-// src/components/AddToCartButton.tsx — ultra premium (compat + a11y + analytics + AB-ready)
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { useRef, useState, useId, useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useId, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
 import { toast } from 'react-hot-toast'
 
 import type { Product } from '@/types/product'
-import type React from 'react'
 
 import Button from '@/components/Button'
 import { useCart } from '@/hooks/useCart'
-import { trackAddToCart } from '@/lib/ga'
-import { logEvent } from '@/lib/logEvent'
-import { pixelAddToCart, pixelInitiateCheckout } from '@/lib/meta-pixel'
+import { trackAddToCart as rawTrackAddToCart } from '@/lib/ga'
+import { logEvent as rawLogEvent } from '@/lib/logEvent'
+import {
+  pixelAddToCart as rawPixelAddToCart,
+  pixelInitiateCheckout as rawPixelInitiateCheckout,
+} from '@/lib/meta-pixel'
 
 type MinimalProduct = Pick<Product, '_id' | 'slug' | 'title' | 'image' | 'price'>
 
@@ -39,7 +40,6 @@ interface Props {
 
   pendingText?: string
   successText?: string
-  /** (nouveau) — remplace le libellé par défaut du bouton */
   idleText?: string
   debounceMs?: number
   ariaLabel?: string
@@ -47,21 +47,46 @@ interface Props {
   disableDataLayer?: boolean
   gtmExtra?: Record<string, unknown>
 
-  /** (nouveau) — A/B: redirige vers /:locale/commande après l'ajout */
   instantCheckout?: boolean
-  /** (nouveau) — locale pour la redirection instantCheckout */
   locale?: string
 }
 
-const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n))
-const isClient = typeof window !== 'undefined'
+type AnyFn = (...args: unknown[]) => unknown
+type CartAddPayload = {
+  _id: string
+  slug: string
+  title: string
+  image: string
+  price: number
+  quantity: number
+}
 
-/** devise simple (EUR/GBP/USD) alignée avec le checkout */
+type CartHookLike = {
+  addToCart?: unknown
+}
+
+type WindowWithDataLayer = Window & {
+  dataLayer?: Array<Record<string, unknown>>
+}
+
+function canUseDOM(): boolean {
+  return typeof window !== 'undefined'
+}
+
+function isFunction(value: unknown): value is AnyFn {
+  return typeof value === 'function'
+}
+
+function clamp(n: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, n))
+}
+
 function detectCurrency(): 'EUR' | 'GBP' | 'USD' {
   try {
     const htmlLang = typeof document !== 'undefined' ? document.documentElement.lang || '' : ''
     const nav = typeof navigator !== 'undefined' ? navigator.language || '' : ''
     const src = (htmlLang || nav).toLowerCase()
+
     if (src.includes('gb') || src.endsWith('-uk') || src.includes('en-gb')) return 'GBP'
     if (src.includes('us') || src.includes('en-us')) return 'USD'
     if (src.startsWith('en')) return 'USD'
@@ -71,8 +96,32 @@ function detectCurrency(): 'EUR' | 'GBP' | 'USD' {
   }
 }
 
-/** ripple visuel sans CSS global (WAAPI) */
-function spawnRipple(e: React.MouseEvent<HTMLElement>) {
+function getDataLayer(): Array<Record<string, unknown>> | null {
+  if (!canUseDOM()) return null
+  const w = window as WindowWithDataLayer
+  if (!Array.isArray(w.dataLayer)) w.dataLayer = []
+  return w.dataLayer
+}
+
+function pushToDataLayer(payload: Record<string, unknown>): void {
+  try {
+    const dl = getDataLayer()
+    dl?.push(payload)
+  } catch {}
+}
+
+function safeCall(fn: unknown, ...args: unknown[]): unknown {
+  if (!isFunction(fn)) return undefined
+  try {
+    return fn(...args)
+  } catch {
+    return undefined
+  }
+}
+
+function spawnRipple(e: ReactMouseEvent<HTMLElement>) {
+  if (!canUseDOM()) return
+
   const target = e.currentTarget as HTMLElement
   const rect = target.getBoundingClientRect()
   const x = e.clientX - rect.left
@@ -89,6 +138,7 @@ function spawnRipple(e: React.MouseEvent<HTMLElement>) {
   span.style.pointerEvents = 'none'
   span.style.background = 'rgba(255,255,255,0.35)'
   span.style.mixBlendMode = 'overlay'
+
   if (!target.style.position) target.style.position = 'relative'
   target.appendChild(span)
 
@@ -96,18 +146,21 @@ function spawnRipple(e: React.MouseEvent<HTMLElement>) {
     [{ transform: 'scale(0.6)', opacity: 0.35 }, { transform: 'scale(1.3)', opacity: 0 }],
     { duration: 520, easing: 'ease-out' }
   )
+
   anim.onfinish = () => span.remove()
 }
 
-/** petite bille qui “vole” vers l’icône panier */
-function flyTo(el: HTMLElement, target: HTMLElement, prefersReduced: boolean) {
+function flyTo(source: HTMLElement, target: HTMLElement, prefersReduced: boolean) {
+  if (!canUseDOM()) return
+
   const dot = document.createElement('div')
-  const { left, top, width, height } = el.getBoundingClientRect()
-  const t = target.getBoundingClientRect()
-  const startX = left + width / 2
-  const startY = top + height / 2
-  const endX = t.left + t.width / 2
-  const endY = t.top + t.height / 2
+  const from = source.getBoundingClientRect()
+  const to = target.getBoundingClientRect()
+
+  const startX = from.left + from.width / 2
+  const startY = from.top + from.height / 2
+  const endX = to.left + to.width / 2
+  const endY = to.top + to.height / 2
 
   dot.style.position = 'fixed'
   dot.style.left = `${startX}px`
@@ -119,6 +172,7 @@ function flyTo(el: HTMLElement, target: HTMLElement, prefersReduced: boolean) {
   dot.style.boxShadow = '0 0 0 6px rgba(37,99,235,0.15)'
   dot.style.zIndex = '999999'
   dot.style.pointerEvents = 'none'
+
   document.body.appendChild(dot)
 
   const duration = prefersReduced ? 200 : 650
@@ -126,16 +180,29 @@ function flyTo(el: HTMLElement, target: HTMLElement, prefersReduced: boolean) {
   const curveY = Math.min(startY, endY) - 120
 
   const keyframes: Keyframe[] = [
-    { transform: `translate(-50%,-50%) scale(1)`, opacity: 1, offset: 0 },
-    { transform: `translate(${curveX - startX}px, ${curveY - startY}px) scale(0.9)`, opacity: 0.95, offset: 0.6 },
-    { transform: `translate(${endX - startX}px, ${endY - startY}px) scale(0.6)`, opacity: 0, offset: 1 },
+    { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0 },
+    {
+      transform: `translate(${curveX - startX}px, ${curveY - startY}px) scale(0.9)`,
+      opacity: 0.95,
+      offset: 0.6,
+    },
+    {
+      transform: `translate(${endX - startX}px, ${endY - startY}px) scale(0.6)`,
+      opacity: 0,
+      offset: 1,
+    },
   ]
-  dot.animate(keyframes, { duration, easing: prefersReduced ? 'linear' : 'cubic-bezier(.2,.8,.2,1)' }).onfinish = () => dot.remove()
+
+  dot
+    .animate(keyframes, {
+      duration,
+      easing: prefersReduced ? 'linear' : 'cubic-bezier(.2,.8,.2,1)',
+    })
+    .onfinish = () => dot.remove()
 }
 
-/* ---------- Inline icons ---------- */
 const Spinner = () => (
-  <svg className="animate-spin -ml-0.5 mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
+  <svg className="mr-2 -ml-0.5 h-4 w-4 animate-spin" viewBox="0 0 24 24" aria-hidden="true">
     <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.25" strokeWidth="4" fill="none" />
     <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" fill="none" />
   </svg>
@@ -172,7 +239,6 @@ export default function AddToCartButton({
   haptic = true,
   ripple = true,
   flyToCart = true,
-  // 🎯 couvre /commande et /fr/commande, /en/commande, etc.
   flyToCartSelector = "[data-cart-icon], a[href$='/commande']",
   scrollToStickyOnMobile = true,
   afterAddFocus = 'none',
@@ -190,90 +256,93 @@ export default function AddToCartButton({
   locale = 'fr',
 }: Props) {
   const router = useRouter()
-  const { addToCart } = useCart()
+  const cartApi = useCart() as CartHookLike
+  const addToCartFn = isFunction(cartApi?.addToCart) ? cartApi.addToCart : null
+
   const [loading, setLoading] = useState(false)
   const [added, setAdded] = useState(false)
   const [srMessage, setSrMessage] = useState('')
+
   const prefersReduced = useReducedMotion()
   const lastClickRef = useRef<number>(0)
   const labelId = useId()
   const wrapperRef = useRef<HTMLDivElement | null>(null)
-  const currency = useMemo(detectCurrency, [])
+  const currency = useMemo(() => detectCurrency(), [])
 
-  const sizeClasses = useMemo(
-    () =>
-      size === 'sm'
-        ? 'py-2 px-3 text-sm rounded-lg'
-        : size === 'lg'
-        ? 'py-5 px-6 text-lg rounded-2xl'
-        : 'py-4 px-4 text-base rounded-xl',
-    [size]
-  )
+  const sizeClasses = useMemo(() => {
+    if (size === 'sm') return 'px-3 py-2 text-sm rounded-lg'
+    if (size === 'lg') return 'px-6 py-5 text-lg rounded-2xl'
+    return 'px-4 py-4 text-base rounded-xl'
+  }, [size])
 
-  const variantClasses = useMemo(
-    () =>
-      variant === 'outline'
-        ? 'bg-transparent text-[hsl(var(--accent))] border border-[hsl(var(--accent)/.4)] hover:bg-[hsl(var(--accent)/.08)]'
-        : variant === 'glass'
-        ? 'bg-white/15 text-white border border-white/20 backdrop-blur-md hover:bg-white/20 dark:bg-zinc-900/30 dark:border-white/10'
-        : 'bg-[hsl(var(--accent))] text-white hover:bg-[hsl(var(--accent)/.90)]',
-    [variant]
-  )
+  const variantClasses = useMemo(() => {
+    if (variant === 'outline') {
+      return 'bg-transparent text-[hsl(var(--accent))] border border-[hsl(var(--accent)/.4)] hover:bg-[hsl(var(--accent)/.08)]'
+    }
+    if (variant === 'glass') {
+      return 'bg-white/15 text-white border border-white/20 backdrop-blur-md hover:bg-white/20 dark:bg-zinc-900/30 dark:border-white/10'
+    }
+    return 'bg-[hsl(var(--accent))] text-white hover:bg-[hsl(var(--accent)/.90)]'
+  }, [variant])
 
   const doDataLayerPush = useCallback(
-    (detail: Record<string, unknown>) => {
-      if (disableDataLayer || !isClient) return
-      try {
-        (window as unknown).dataLayer = (window as unknown).dataLayer || []
-        ;(window as unknown).dataLayer.push({
-          event: 'add_to_cart',
-          ecommerce: {
-            currency,
-            value: (detail as unknown).value,
-            items: [
-              {
-                item_id: detail.id,
-                item_name: detail.title,
-                price: detail.price,
-                quantity: detail.quantity,
-                item_variant: (detail as unknown).variant,
-                item_brand: (detail as unknown).brand,
-                item_category: (detail as unknown).category,
-              },
-            ],
-          },
-          ...gtmExtra,
-        })
-      } catch {}
+    (detail: {
+      id: string
+      title: string
+      price: number
+      quantity: number
+      value: number
+      slug: string
+    }) => {
+      if (disableDataLayer) return
+
+      pushToDataLayer({
+        event: 'add_to_cart',
+        ecommerce: {
+          currency,
+          value: detail.value,
+          items: [
+            {
+              item_id: detail.id,
+              item_name: detail.title,
+              price: detail.price,
+              quantity: detail.quantity,
+              slug: detail.slug,
+            },
+          ],
+        },
+        ...(gtmExtra ?? {}),
+      })
     },
     [disableDataLayer, gtmExtra, currency]
   )
 
-  const focusCartIcon = () => {
-    if (!isClient) return
+  const focusCartIcon = useCallback(() => {
+    if (!canUseDOM()) return
     try {
       const target = document.querySelector<HTMLElement>(flyToCartSelector)
       target?.focus?.()
     } catch {}
-  }
+  }, [flyToCartSelector])
 
   const handleClick = useCallback(
-    async (e?: React.MouseEvent) => {
+    async (e?: ReactMouseEvent) => {
       if (stopPropagation && e) {
         e.preventDefault()
         e.stopPropagation()
       }
+
       if (loading || disabled) return
 
       const now = Date.now()
-      if (now - (lastClickRef.current || 0) < Math.max(0, debounceMs)) return
+      if (now - lastClickRef.current < Math.max(0, debounceMs)) return
       lastClickRef.current = now
 
-      const id = String(product?._id || '')
-      const slug = String(product?.slug || '')
-      const title = (product?.title || 'Produit').toString()
-      const image = product?.image || '/placeholder.png'
-      const price = Number(product?.price) || 0
+      const id = String(product?._id ?? '')
+      const slug = String(product?.slug ?? '')
+      const title = String(product?.title ?? 'Produit')
+      const image = String(product?.image ?? '/placeholder.png')
+      const price = Number(product?.price ?? 0)
       const quantity = clamp(Math.trunc(Number(product?.quantity ?? 1)), 1, 99)
 
       if (!id) {
@@ -283,42 +352,63 @@ export default function AddToCartButton({
         return
       }
 
+      if (!addToCartFn) {
+        const err = new Error('Fonction panier indisponible')
+        toast.error(err.message)
+        onError?.(err)
+        return
+      }
+
       setLoading(true)
 
       try {
-        const result = addToCart({ _id: id, slug, title, image, price, quantity })
-        await Promise.resolve(result)
+        const payload: CartAddPayload = {
+          _id: id,
+          slug,
+          title,
+          image,
+          price,
+          quantity,
+        }
 
-        // analytics
-        try {
-          (logEvent as unknown)?.({ action: 'add_to_cart', category: 'ecommerce', label: title, value: price * quantity })
-        } catch {}
-        try {
-          trackAddToCart?.({
-            currency,
-            value: price * quantity,
-            items: [{ item_id: id, item_name: title, price, quantity }],
-          })
-        } catch {}
-        try {
-          pixelAddToCart?.({
-            value: price * quantity,
-            currency,
-            contents: [{ id, quantity, item_price: price }],
-          })
-        } catch {}
-        doDataLayerPush({ id, title, price, quantity, value: price * quantity, slug })
+        await Promise.resolve(addToCartFn(payload))
 
-        // haptique
-        if (haptic && isClient && 'vibrate' in navigator) {
+        safeCall(rawLogEvent, {
+          action: 'add_to_cart',
+          category: 'ecommerce',
+          label: title,
+          value: price * quantity,
+        })
+
+        safeCall(rawTrackAddToCart, {
+          currency,
+          value: price * quantity,
+          items: [{ item_id: id, item_name: title, price, quantity }],
+        })
+
+        safeCall(rawPixelAddToCart, {
+          value: price * quantity,
+          currency,
+          contents: [{ id, quantity, item_price: price }],
+        })
+
+        doDataLayerPush({
+          id,
+          title,
+          price,
+          quantity,
+          value: price * quantity,
+          slug,
+        })
+
+        if (haptic && typeof navigator !== 'undefined' && 'vibrate' in navigator) {
           try {
-            navigator.vibrate?.(prefersReduced ? 10 : [8, 12, 8])
+            navigator.vibrate(prefersReduced ? 10 : [8, 12, 8])
           } catch {}
         }
 
-        // fly-to-cart
-        if (flyToCart && isClient && wrapperRef.current) {
-          const target = document.querySelector(flyToCartSelector) as HTMLElement | null
+        if (flyToCart && canUseDOM() && wrapperRef.current) {
+          const target = document.querySelector<HTMLElement>(flyToCartSelector)
           if (target) flyTo(wrapperRef.current, target, !!prefersReduced)
         }
 
@@ -332,49 +422,65 @@ export default function AddToCartButton({
         setSrMessage(`${title} ajouté au panier`)
         setAdded(true)
 
-        if (scrollToStickyOnMobile && isClient && window.innerWidth < 768) {
+        if (scrollToStickyOnMobile && canUseDOM() && window.innerWidth < 768) {
           const sticky =
-            document.querySelector('aside[role="region"][data-visible="true"]') ||
-            document.querySelector('aside[role="region"]')
-          sticky && sticky.scrollIntoView({ behavior: 'smooth', block: 'end' })
+            document.querySelector<HTMLElement>('aside[role="region"][data-visible="true"]') ??
+            document.querySelector<HTMLElement>('aside[role="region"]')
+          sticky?.scrollIntoView({ behavior: 'smooth', block: 'end' })
         }
 
-        try {
-          isClient && window.dispatchEvent(new CustomEvent('cart-added', { detail: { id, title, price, quantity, slug } }))
-        } catch {}
+        if (canUseDOM()) {
+          try {
+            window.dispatchEvent(
+              new CustomEvent('cart-added', {
+                detail: { id, title, price, quantity, slug },
+              })
+            )
+          } catch {}
+        }
 
         if (afterAddFocus === 'cart') focusCartIcon()
-        else if (afterAddFocus === 'button') (wrapperRef.current as HTMLElement | null)?.focus?.()
+        if (afterAddFocus === 'button') wrapperRef.current?.focus?.()
 
         onAdd?.()
 
-        // (nouveau) — "Buy now" / instant checkout
         if (instantCheckout) {
-          try {
-            (logEvent as unknown)?.({ action: 'buy_now_click', category: 'ecommerce', label: title })
-            ;(window as unknown).dataLayer?.push({ event: 'buy_now_click', ...gtmExtra })
-            pixelInitiateCheckout?.({
-              value: price * quantity,
-              currency,
-              num_items: 1,
-              contents: [{ id, quantity, item_price: price }],
-            })
-          } catch {}
+          safeCall(rawLogEvent, {
+            action: 'buy_now_click',
+            category: 'ecommerce',
+            label: title,
+          })
 
-          const path = `/${locale}/commande`
+          if (!disableDataLayer) {
+            pushToDataLayer({
+              event: 'buy_now_click',
+              ...(gtmExtra ?? {}),
+            })
+          }
+
+          safeCall(rawPixelInitiateCheckout, {
+            value: price * quantity,
+            currency,
+            num_items: 1,
+            contents: [{ id, quantity, item_price: price }],
+          })
+
+          const normalizedLocale = locale || 'fr'
+          const path = `/${normalizedLocale}/commande`
+
           try {
             router.push(path)
           } catch {
-            if (isClient) window.location.href = path
+            if (canUseDOM()) window.location.href = path
           }
         }
-      } catch (err) {
+      } catch (err: unknown) {
         toast.error("Impossible d'ajouter au panier. Réessayez.")
         onError?.(err)
       } finally {
-        setTimeout(() => setLoading(false), 420)
-        setTimeout(() => setSrMessage(''), 1800)
-        setTimeout(() => setAdded(false), 1200)
+        window.setTimeout(() => setLoading(false), 420)
+        window.setTimeout(() => setSrMessage(''), 1800)
+        window.setTimeout(() => setAdded(false), 1200)
       }
     },
     [
@@ -382,38 +488,33 @@ export default function AddToCartButton({
       loading,
       disabled,
       debounceMs,
-      product?._id,
-      product?.slug,
-      product?.title,
-      product?.image,
-      product?.price,
-      product?.quantity,
+      product,
+      addToCartFn,
       haptic,
       prefersReduced,
       flyToCart,
       flyToCartSelector,
-      scrollToStickyOnMobile,
       successText,
+      scrollToStickyOnMobile,
       afterAddFocus,
       onAdd,
       onError,
       doDataLayerPush,
-      addToCart,
       instantCheckout,
       locale,
       router,
       currency,
+      disableDataLayer,
       gtmExtra,
+      focusCartIcon,
     ]
   )
-
-  useEffect(() => () => setSrMessage(''), [])
 
   const idleLabel = idleText ?? 'Ajouter au panier'
 
   return (
     <>
-      <span className="sr-only" role="status" aria-live="polite">
+      <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
         {srMessage}
       </span>
 
@@ -421,32 +522,33 @@ export default function AddToCartButton({
         ref={wrapperRef}
         whileTap={prefersReduced ? undefined : { scale: 0.96 }}
         className={fullWidth ? 'w-full' : undefined}
+        tabIndex={afterAddFocus === 'button' ? -1 : undefined}
       >
         <Button
+          type="button"
           onMouseDown={(e) => {
-            if (!prefersReduced && ripple && isClient) spawnRipple(e)
+            if (!prefersReduced && ripple && canUseDOM()) spawnRipple(e)
           }}
           onClick={handleClick}
           {...(ariaLabel ? { 'aria-label': ariaLabel } : { 'aria-labelledby': labelId })}
           aria-disabled={loading || disabled ? true : undefined}
-          type="button"
-          data-loading={loading ? 'true' : 'false'}
           aria-busy={loading ? 'true' : 'false'}
+          data-loading={loading ? 'true' : 'false'}
+          data-qty={product.quantity ?? 1}
+          data-product-id={product._id}
+          data-action="add-to-cart"
+          data-price={product.price}
+          disabled={loading || disabled}
           className={[
             fullWidth ? 'w-full' : '',
             'font-extrabold shadow-lg transition-colors active:scale-95 focus:outline-none focus-visible:ring-4',
             'focus-visible:ring-[hsl(var(--accent)/.55)]',
             variantClasses,
             sizeClasses,
-            loading || disabled ? 'opacity-80 cursor-not-allowed' : 'cursor-pointer',
+            loading || disabled ? 'cursor-not-allowed opacity-80' : 'cursor-pointer',
             added ? 'ring-4 ring-emerald-400/40' : '',
-            className || '',
+            className ?? '',
           ].join(' ')}
-          disabled={loading || disabled}
-          data-qty={product.quantity ?? 1}
-          data-product-id={product._id}
-          data-action="add-to-cart"
-          data-price={product.price}
         >
           <span id={labelId} className="inline-flex items-center gap-2">
             {loading && <Spinner />}
@@ -459,4 +561,3 @@ export default function AddToCartButton({
     </>
   )
 }
-

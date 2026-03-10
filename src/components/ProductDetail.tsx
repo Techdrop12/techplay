@@ -40,7 +40,21 @@ interface Props {
   locale?: string
 }
 
+type RecentProduct = {
+  _id: string
+  slug: string
+  title: string
+  price: number
+  image: string
+}
+
+type GaSource = Record<string, unknown>
+
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n))
+
+function toGaSource(p: Product): GaSource {
+  return p as unknown as GaSource
+}
 
 // très petit blur inline (évite un asset supplémentaire)
 const BLUR_DATA_URL =
@@ -86,11 +100,14 @@ function computeAggregate(
   aggregate?: AggregateRating,
 ): AggregateRating {
   if (aggregate?.total && aggregate.average) return aggregate
+
   const list = Array.isArray(reviews) ? reviews : []
   const total = list.length
+
   if (total > 0) {
     const counts: Record<1 | 2 | 3 | 4 | 5, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
     let sum = 0
+
     for (const r of list) {
       const v = (r?.rating as 1 | 2 | 3 | 4 | 5) ?? 0
       if (v >= 1 && v <= 5) {
@@ -98,15 +115,20 @@ function computeAggregate(
         sum += v
       }
     }
+
     return {
       average: total ? Math.max(0, Math.min(5, sum / total)) : ratingFromProduct ?? 0,
       total,
       breakdownCount: counts,
     }
   }
+
   return {
-    average: typeof ratingFromProduct === 'number' ? Math.max(0, Math.min(5, ratingFromProduct)) : 0,
-    total: (aggregate?.total as number) ?? 0,
+    average:
+      typeof ratingFromProduct === 'number'
+        ? Math.max(0, Math.min(5, ratingFromProduct))
+        : 0,
+    total: aggregate?.total ?? 0,
     breakdownCount: aggregate?.breakdownCount,
   }
 }
@@ -125,7 +147,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
   const [zoomed, setZoomed] = useState(false)
   const [origin, setOrigin] = useState<{ x: number; y: number }>({ x: 50, y: 50 })
 
-  // Unpack produit — ⚠️ on ne sort PAS `tags` ici (voir plus bas)
+  // Unpack produit
   const {
     _id,
     slug = '',
@@ -149,11 +171,10 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
   // ✅ Normalisation des prix (tolère string)
   const price = Math.max(0, toNum(priceRaw) ?? 0)
   const oldPrice = toNum(oldPriceRaw)
-  const currency = (detectCurrency?.() ?? 'EUR') as 'EUR' | 'GBP' | 'USD'
+  const currency = detectCurrency()
 
   // ✅ Extraction tolérante de `tags`
-  const tags: string[] | undefined =
-    (product as Partial<Product> & { tags?: string[] }).tags
+  const tags: string[] | undefined = (product as Partial<Product> & { tags?: string[] }).tags
 
   // Galerie (images[] -> max 8)
   const gallery: string[] = useMemo(() => {
@@ -168,20 +189,23 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
       : null
 
   const priceStr = useMemo(() => price.toFixed(2), [price])
+
   const availability =
     typeof stock === 'number'
       ? stock > 0
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock'
       : 'https://schema.org/InStock'
+
   const lowStock = typeof stock === 'number' && stock > 0 && stock <= 5
   const total = useMemo(() => price * quantity, [price, quantity])
 
   // Agrégat reviews sécurisé
   const agg = useMemo(
-    () => computeAggregate(rating, reviews as unknown, aggregateRating),
+    () => computeAggregate(rating, reviews, aggregateRating),
     [rating, reviews, aggregateRating],
   )
+
   const totalReviews = agg.total || reviewsCount || 0
 
   /* ------------------------------------------------------------------------ */
@@ -191,21 +215,31 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
   // GA4 + Pixel “ViewContent” quand la section devient visible (une seule fois)
   useEffect(() => {
     if (!sectionRef.current || viewedRef.current) return
+
     const el = sectionRef.current
     const io = new IntersectionObserver(
       (entries) => {
         if (entries.some((e) => e.isIntersecting) && !viewedRef.current) {
           viewedRef.current = true
+
           try {
-            logEvent({ action: 'product_detail_view', category: 'engagement', label: title, value: price })
+            logEvent({
+              action: 'product_detail_view',
+              category: 'engagement',
+              label: title,
+              value: price,
+            })
           } catch {}
+
           try {
+            const item = { ...mapProductToGaItem(toGaSource(product)), quantity: 1 }
             trackViewItem({
               currency,
               value: price,
-              items: [mapProductToGaItem(product, { quantity: 1 })],
+              items: [item],
             })
           } catch {}
+
           try {
             pixelViewContent({
               value: price,
@@ -213,60 +247,87 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
               content_name: title,
               content_type: 'product',
               content_ids: [String(product?._id ?? product?.slug ?? '')].filter(Boolean),
-              contents: [{ id: String(product?._id ?? product?.slug ?? ''), quantity: 1, item_price: price }],
+              contents: [
+                {
+                  id: String(product?._id ?? product?.slug ?? ''),
+                  quantity: 1,
+                  item_price: price,
+                },
+              ],
             })
           } catch {}
-          // Ajout "vu récemment" (tolérant)
+
+          // Ajout "vu récemment"
           try {
             const key = 'recent:products'
-            const prev = JSON.parse(localStorage.getItem(key) || '[]') as unknown[]
-            const next = [{ _id, slug, title, price, image: gallery[0] ?? image }, ...prev.filter(p => p?._id !== _id)].slice(0, 16)
+            const prev = JSON.parse(localStorage.getItem(key) || '[]') as RecentProduct[]
+            const next = [
+              { _id, slug, title, price, image: gallery[0] ?? image },
+              ...prev.filter((p) => p._id !== _id),
+            ].slice(0, 16)
             localStorage.setItem(key, JSON.stringify(next))
           } catch {}
         }
       },
-      { threshold: 0.35 }
+      { threshold: 0.35 },
     )
+
     io.observe(el)
     return () => io.disconnect()
-  }, [product, title, price, _id, image, gallery, currency])
+  }, [product, title, price, _id, slug, image, gallery, currency])
 
   // Raccourcis clavier
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName
-      const editable = tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable
+      const editable =
+        tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable
+
       if (editable) return
+
       if (e.key === '+') setQuantity((q) => clamp(q + 1, 1, 99))
       if (e.key === '-') setQuantity((q) => clamp(q - 1, 1, 99))
-      if (e.key.toLowerCase() === 'a') { e.preventDefault(); onAddToCart() }
-      if (e.key.toLowerCase() === 'w') { e.preventDefault(); onAddWishlist() }
+      if (e.key.toLowerCase() === 'a') {
+        e.preventDefault()
+        onAddToCart()
+      }
+      if (e.key.toLowerCase() === 'w') {
+        e.preventDefault()
+        onAddWishlist()
+      }
       if (e.key === 'ArrowLeft') setActiveIdx((i) => (i > 0 ? i - 1 : i))
       if (e.key === 'ArrowRight') setActiveIdx((i) => (i < gallery.length - 1 ? i + 1 : i))
     }
+
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [gallery.length])
 
   // Handlers e-commerce
   const onAddToCart = useCallback(() => {
-    try { logEvent({ action: 'add_to_cart', category: 'ecommerce', label: title, value: total }) } catch {}
+    try {
+      logEvent({ action: 'add_to_cart', category: 'ecommerce', label: title, value: total })
+    } catch {}
+
     try {
       trackAddToCart({
         currency,
         value: total,
-        items: [mapProductToGaItem(product, { quantity })],
+        items: [{ ...mapProductToGaItem(toGaSource(product)), quantity }],
       })
     } catch {}
   }, [title, total, product, quantity, currency])
 
   const onAddWishlist = useCallback(() => {
-    try { logEvent({ action: 'add_to_wishlist', category: 'ecommerce', label: title, value: price }) } catch {}
+    try {
+      logEvent({ action: 'add_to_wishlist', category: 'ecommerce', label: title, value: price })
+    } catch {}
+
     try {
       trackAddToWishlist({
         currency,
         value: price,
-        items: [mapProductToGaItem(product, { quantity: 1 })],
+        items: [{ ...mapProductToGaItem(toGaSource(product)), quantity: 1 }],
       })
     } catch {}
   }, [title, price, product, currency])
@@ -277,7 +338,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
       trackSelectItem({
         currency,
         value: price,
-        items: [mapProductToGaItem(product, { quantity: 1 })],
+        items: [{ ...mapProductToGaItem(toGaSource(product)), quantity: 1 }],
         item_list_name: 'product_gallery',
       })
     } catch {}
@@ -287,8 +348,8 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
   const share = async () => {
     try {
       const url = typeof window !== 'undefined' ? window.location.href : ''
-      if ((navigator as unknown).share) {
-        await (navigator as unknown).share({ title, text: title, url })
+      if (typeof navigator !== 'undefined' && 'share' in navigator && typeof navigator.share === 'function') {
+        await navigator.share({ title, text: title, url })
       } else if (navigator.clipboard) {
         await navigator.clipboard.writeText(url)
         toast.success('Lien copié dans le presse-papier')
@@ -299,9 +360,11 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
   /* ------------------------------------------------------------------------ */
   /*                              Image interactions                           */
   /* ------------------------------------------------------------------------ */
+
   const onPointerMove: React.PointerEventHandler<HTMLDivElement> = (e) => {
     if (!mediaRef.current) return
     if (!zoomed) return
+
     const rect = mediaRef.current.getBoundingClientRect()
     const x = ((e.clientX - rect.left) / rect.width) * 100
     const y = ((e.clientY - rect.top) / rect.height) * 100
@@ -324,19 +387,21 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     }
   }
 
-  // Prefetch next/prev images (très léger)
+  // Prefetch next/prev images
   useEffect(() => {
     if (typeof window === 'undefined' || gallery.length <= 1) return
     const n = (activeIdx + 1) % gallery.length
     const p = (activeIdx - 1 + gallery.length) % gallery.length
+
     ;[gallery[n], gallery[p]].filter(Boolean).forEach((src) => {
       const img = new window.Image()
-      img.src = src!
+      img.src = src
     })
   }, [activeIdx, gallery])
 
   // ✅ Normalisation de la locale → AppLocale
-  const safeLocale: AppLocale = isLocale(locale) ? (locale as AppLocale) : DEFAULT_LOCALE
+  const safeLocale: AppLocale = isLocale(locale) ? locale : DEFAULT_LOCALE
+  const skuValue = (product as Partial<Product> & { sku?: string }).sku
 
   return (
     <motion.section
@@ -359,7 +424,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           ref={mediaRef}
           className={cn(
             'relative w-full aspect-square rounded-3xl overflow-hidden border',
-            'border-gray-200 dark:border-gray-700 shadow-xl bg-gray-50 dark:bg-zinc-900'
+            'border-gray-200 dark:border-gray-700 shadow-xl bg-gray-50 dark:bg-zinc-900',
           )}
           onPointerMove={onPointerMove}
           onPointerLeave={() => setZoomed(false)}
@@ -377,7 +442,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             fill
             className={cn(
               'object-cover transition-transform duration-700 will-change-transform',
-              zoomed ? 'scale-125 cursor-zoom-out' : 'hover:scale-[1.03] cursor-zoom-in'
+              zoomed ? 'scale-125 cursor-zoom-out' : 'hover:scale-[1.03] cursor-zoom-in',
             )}
             style={{ transformOrigin: `${origin.x}% ${origin.y}%` }}
             sizes="(min-width: 1024px) 50vw, 100vw"
@@ -388,6 +453,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             itemProp="image"
             draggable={false}
           />
+
           {!imgLoaded && (
             <div
               className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-200/70 to-gray-100/40 dark:from-zinc-800/60 dark:to-zinc-900/40"
@@ -399,10 +465,23 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           <div className="absolute bottom-4 right-4 z-10">
             <PricingBadge price={price} oldPrice={oldPrice} showDiscountLabel showOldPrice />
           </div>
+
           <div className="absolute top-4 left-4 flex flex-col gap-2 pointer-events-none select-none z-10">
-            {isNew && <span className="bg-green-600 text-white px-3 py-1 rounded-full font-semibold text-sm shadow-md">Nouveau</span>}
-            {isBestSeller && <span className="bg-yellow-400 text-black px-3 py-1 rounded-full font-semibold text-sm shadow-md">Best Seller</span>}
-            {discount && <span className="bg-red-600 text-white px-3 py-1 rounded-full font-semibold text-sm shadow-md">-{discount}%</span>}
+            {isNew && (
+              <span className="bg-green-600 text-white px-3 py-1 rounded-full font-semibold text-sm shadow-md">
+                Nouveau
+              </span>
+            )}
+            {isBestSeller && (
+              <span className="bg-yellow-400 text-black px-3 py-1 rounded-full font-semibold text-sm shadow-md">
+                Best Seller
+              </span>
+            )}
+            {discount && (
+              <span className="bg-red-600 text-white px-3 py-1 rounded-full font-semibold text-sm shadow-md">
+                -{discount}%
+              </span>
+            )}
           </div>
 
           {/* Actions coin droit */}
@@ -417,7 +496,9 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             </button>
           </div>
 
-          <p className="sr-only">Cliquer ou appuyer sur Entrée/Espace pour {zoomed ? 'dézoomer' : 'zoomer'} l’image.</p>
+          <p className="sr-only">
+            Cliquer ou appuyer sur Entrée/Espace pour {zoomed ? 'dézoomer' : 'zoomer'} l’image.
+          </p>
         </div>
 
         {gallery.length > 1 && (
@@ -425,6 +506,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             <ul role="list" className="grid grid-cols-5 sm:grid-cols-6 gap-3">
               {gallery.map((src, i) => {
                 const active = i === activeIdx
+
                 return (
                   <li key={`${src}-${i}`}>
                     <button
@@ -434,7 +516,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
                         'relative block aspect-square rounded-xl overflow-hidden border transition',
                         active
                           ? 'border-accent ring-2 ring-accent'
-                          : 'border-gray-200 dark:border-gray-700 hover:border-accent/60'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-accent/60',
                       )}
                       aria-label={`Voir l’image ${i + 1}`}
                       aria-current={active ? 'true' : 'false'}
@@ -471,23 +553,28 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           </h1>
 
           {/* Microdata extras */}
-          {(_id || (product as unknown)?.sku) && <meta itemProp="sku" content={String(_id || (product as unknown).sku)} />}
+          {(_id || skuValue) && <meta itemProp="sku" content={String(_id || skuValue)} />}
           {brand && <meta itemProp="brand" content={String(brand)} />}
 
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <RatingStars value={agg.average || (hasRating ? rating! : 4)} editable={false} />
+
             {totalReviews > 0 && (
               <a
                 href="#reviews"
                 className="text-sm text-accent underline underline-offset-2"
                 onClick={() => {
-                  try { logEvent({ action: 'jump_to_reviews', category: 'engagement', label: slug }) } catch {}
+                  try {
+                    logEvent({ action: 'jump_to_reviews', category: 'engagement', label: slug })
+                  } catch {}
                 }}
               >
                 {totalReviews} avis
               </a>
             )}
+
             <FreeShippingBadge price={price} minimal />
+
             {typeof stock === 'number' && (
               <span
                 className={cn(
@@ -496,7 +583,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
                     ? lowStock
                       ? 'border-amber-300 text-amber-700 dark:text-amber-300'
                       : 'border-emerald-300 text-emerald-700 dark:text-emerald-300'
-                    : 'border-red-300 text-red-600 dark:text-red-400'
+                    : 'border-red-300 text-red-600 dark:text-red-400',
                 )}
                 aria-live="polite"
               >
@@ -507,13 +594,18 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
 
           {lowStock && (
             <div className="mt-2">
-              <div className="h-2 w-full rounded-full bg-amber-100 dark:bg-amber-900/30 overflow-hidden" aria-hidden>
+              <div
+                className="h-2 w-full rounded-full bg-amber-100 dark:bg-amber-900/30 overflow-hidden"
+                aria-hidden
+              >
                 <div
                   className="h-full bg-amber-500 transition-all"
-                  style={{ width: `${Math.min(100, (stock! / 5) * 100)}%` }}
+                  style={{ width: `${Math.min(100, (stock / 5) * 100)}%` }}
                 />
               </div>
-              <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">Dépêchez-vous, bientôt épuisé</p>
+              <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
+                Dépêchez-vous, bientôt épuisé
+              </p>
             </div>
           )}
 
@@ -530,17 +622,23 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
               <meta itemProp="availability" content={availability} />
               {formatPrice(price, { currency })}
             </span>
+
             {typeof oldPrice === 'number' && oldPrice > price && (
-              <span className="line-through text-gray-400 dark:text-gray-500">{formatPrice(oldPrice, { currency })}</span>
+              <span className="line-through text-gray-400 dark:text-gray-500">
+                {formatPrice(oldPrice, { currency })}
+              </span>
             )}
+
             {discount && typeof oldPrice === 'number' && (
               <span className="text-sm text-emerald-600 dark:text-emerald-400 font-semibold">
                 Économisez {formatPrice(oldPrice - price, { currency })} ({discount}%)
               </span>
             )}
+
             {quantity > 1 && (
               <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
-                Total ({quantity}×)&nbsp;: <span className="font-semibold">{formatPrice(total, { currency })}</span>
+                Total ({quantity}×)&nbsp;:{' '}
+                <span className="font-semibold">{formatPrice(total, { currency })}</span>
               </span>
             )}
           </div>
@@ -564,7 +662,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             </div>
           )}
 
-          {/* Garanties & infos (légères, sans deps) */}
+          {/* Garanties & infos */}
           <div className="mt-6 grid gap-3 text-sm text-gray-600 dark:text-gray-400">
             <div className="flex items-center gap-2">
               <span aria-hidden>✅</span> Garantie 2 ans & retours sous 30 jours
@@ -591,7 +689,10 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
               aria-describedby="quantity-desc"
             />
           </div>
-          <p id="quantity-desc" className="sr-only">Sélectionnez la quantité à ajouter au panier</p>
+
+          <p id="quantity-desc" className="sr-only">
+            Sélectionnez la quantité à ajouter au panier
+          </p>
 
           {!(typeof stock === 'number' && stock <= 0) ? (
             <AddToCartButtonAB
@@ -626,7 +727,6 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           )}
 
           <div className="flex flex-wrap items-center gap-3">
-            {/* WishlistButton ne possède pas de prop onClick → on entoure d’un wrapper cliquable */}
             <div className="inline-block" onClick={onAddWishlist}>
               <WishlistButton
                 product={{ _id, slug, title, price, image: gallery[0] ?? image }}
@@ -645,22 +745,25 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
               <span>Partager</span>
             </button>
 
-            {/* Moyens de paiement (logos accessibles, theme-aware) */}
             <div className="mt-2 ml-auto flex items-center gap-3 text-2xl text-token-text/60">
               <span className="text-xs font-medium mr-1">Paiements :</span>
               <FaCcVisa aria-hidden="true" title="Visa" className="transition-opacity hover:opacity-90" />
-              <FaCcMastercard aria-hidden="true" title="Mastercard" className="transition-opacity hover:opacity-90" />
+              <FaCcMastercard
+                aria-hidden="true"
+                title="Mastercard"
+                className="transition-opacity hover:opacity-90"
+              />
               <FaCcPaypal aria-hidden="true" title="PayPal" className="transition-opacity hover:opacity-90" />
-              <span className="sr-only" id="pay-methods">Paiements acceptés : Visa, Mastercard, PayPal</span>
+              <span className="sr-only" id="pay-methods">
+                Paiements acceptés : Visa, Mastercard, PayPal
+              </span>
             </div>
           </div>
 
-          {/* Simulateur d’expédition — props requis */}
           <div className="mt-2">
             <ShippingSimulator minDays={2} maxDays={3} businessDaysOnly />
           </div>
 
-          {/* Infos supplémentaires */}
           <div className="mt-2 grid gap-2">
             <details className="rounded-xl border border-gray-200 dark:border-gray-700 p-3">
               <summary className="cursor-pointer font-semibold">Livraison & retours</summary>
@@ -670,10 +773,17 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
                 <li>Suivi colis temps réel</li>
               </ul>
             </details>
+
             <details className="rounded-xl border border-gray-200 dark:border-gray-700 p-3">
               <summary className="cursor-pointer font-semibold">Spécifications</summary>
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                {brand ? <>Marque&nbsp;: <strong>{String(brand)}</strong></> : 'Caractéristiques détaillées disponibles sur la fiche.'}
+                {brand ? (
+                  <>
+                    Marque&nbsp;: <strong>{String(brand)}</strong>
+                  </>
+                ) : (
+                  'Caractéristiques détaillées disponibles sur la fiche.'
+                )}
               </p>
             </details>
           </div>
@@ -707,5 +817,3 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     </motion.section>
   )
 }
-
-

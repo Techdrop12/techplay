@@ -1,4 +1,11 @@
-import mongoose, { Schema, InferSchemaType } from 'mongoose';
+import mongoose, { InferSchemaType, Schema, Types } from 'mongoose'
+
+type SerializedToken = {
+  _id?: Types.ObjectId | string
+  __v?: unknown
+  id?: string
+  [key: string]: unknown
+}
 
 const TokenSchema = new Schema(
   {
@@ -6,7 +13,6 @@ const TokenSchema = new Schema(
     type: { type: String, enum: ['push', 'email'] as const, required: true, index: true },
     token: { type: String, required: true, index: true },
     createdAt: { type: Date, default: Date.now },
-    // TTL basé sur la date stockée : expire dès que "expiresAt" est dépassé
     expiresAt: { type: Date, expires: 0, index: true },
   },
   {
@@ -14,20 +20,24 @@ const TokenSchema = new Schema(
     toJSON: {
       virtuals: true,
       versionKey: false,
-      transform: (_doc, ret: unknown) => {
-        ret.id = ret._id?.toString?.() ?? ret._id;
-        const { _id, __v, ...rest } = ret;
-        return rest;
+      transform: (_doc, ret) => {
+        const serialized = ret as SerializedToken
+        if (serialized._id != null) serialized.id = String(serialized._id)
+        const { _id, __v, ...rest } = serialized
+        return rest
       },
     },
   }
-);
+)
 
-TokenSchema.virtual('id').get(function (this: unknown) {
-  return this._id.toString();
-});
+TokenSchema.virtual('id').get(function (this: { _id: Types.ObjectId }) {
+  return this._id.toString()
+})
 
-export type Token = InferSchemaType<typeof TokenSchema>;
-export default (mongoose.models.Token as mongoose.Model<Token>) ||
-  mongoose.model<Token>('Token', TokenSchema);
+export type Token = InferSchemaType<typeof TokenSchema>
 
+const TokenModel =
+  (mongoose.models.Token as mongoose.Model<Token> | undefined) ||
+  mongoose.model<Token>('Token', TokenSchema)
+
+export default TokenModel

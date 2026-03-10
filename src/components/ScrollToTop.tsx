@@ -6,13 +6,9 @@ import * as React from 'react'
 import { cn } from '@/lib/utils'
 
 export interface ScrollToTopProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  /** Seuil d’apparition en pixels (par défaut 320) */
   threshold?: number
-  /** Position: classes utilitaires Tailwind (ex: 'bottom-6 right-6') */
   positionClassName?: string
-  /** Texte a11y */
   ariaLabel?: string
-  /** Active le mode plein contraste */
   highContrast?: boolean
 }
 
@@ -30,27 +26,35 @@ export default function ScrollToTop({
   React.useEffect(() => {
     const onScroll = () => {
       if (rafRef.current != null) return
+
       rafRef.current = window.requestAnimationFrame(() => {
         setVisible(window.scrollY > threshold)
-        rafRef.current && window.cancelAnimationFrame(rafRef.current)
+
+        if (rafRef.current != null) {
+          window.cancelAnimationFrame(rafRef.current)
+        }
         rafRef.current = null
       })
     }
+
     window.addEventListener('scroll', onScroll, { passive: true })
-    onScroll() // état initial
+    onScroll()
+
     return () => {
       window.removeEventListener('scroll', onScroll)
-      if (rafRef.current) window.cancelAnimationFrame(rafRef.current)
+      if (rafRef.current != null) {
+        window.cancelAnimationFrame(rafRef.current)
+      }
     }
   }, [threshold])
 
   if (!visible) return null
 
   const scrollTop = () => {
-    // Respecte reduce-motion
     const prefersReduced =
       typeof window !== 'undefined' &&
       window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+
     window.scrollTo({ top: 0, behavior: prefersReduced ? 'auto' : 'smooth' })
   }
 
@@ -71,7 +75,6 @@ export default function ScrollToTop({
       title={ariaLabel}
       {...props}
     >
-      {/* Icône flèche (inline, pas de dépendance) */}
       <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
         <path d="M12 5l7 7-1.4 1.4L13 8.8V20h-2V8.8L6.4 13.4 5 12z" fill="currentColor" />
       </svg>

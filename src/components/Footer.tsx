@@ -1,8 +1,14 @@
-// src/components/Footer.tsx — ULTIME+++ (i18n, tokens, SEO, newsletter, CMP, a11y polish: cookies role=button)
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { useId, useMemo, useState } from 'react'
+import {
+  useId,
+  useMemo,
+  useState,
+  type FormEvent,
+  type MouseEvent as ReactMouseEvent,
+  type ReactNode,
+} from 'react'
 import { toast } from 'react-hot-toast'
 import {
   FaFacebookF,
@@ -19,7 +25,6 @@ import {
 } from 'react-icons/fa'
 
 import Link from '@/components/LocalizedLink'
-import { event as gaEvent, logEvent } from '@/lib/ga'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
 type FooterLink = { label: string; href: string; external?: boolean }
@@ -27,12 +32,10 @@ type NavGroup = { title: string; links: FooterLink[] }
 
 interface FooterProps {
   groups?: NavGroup[]
-  /** Remplace la colonne “Légal” si fourni */
   links?: FooterLink[]
   companyName?: string
   compact?: boolean
-  children?: React.ReactNode
-  /** Endpoint d’inscription : POST { email, locale, pathname } */
+  children?: ReactNode
   subscribeEndpoint?: string
   siteUrl?: string
   contact?: {
@@ -47,16 +50,25 @@ interface FooterProps {
   }
 }
 
+type FooterWindow = Window & {
+  tpOpenConsent?: () => void
+  dataLayer?: Array<Record<string, unknown>>
+}
+
+type SubscribeResponse = {
+  message?: string
+}
+
 const DEFAULT_LEGAL: FooterLink[] = [
   { label: 'Mentions légales', href: '/mentions-legales' },
   { label: 'Confidentialité', href: '/confidentialite' },
   { label: 'CGV', href: '/cgv' },
-  { label: 'Préférences cookies', href: '#cookies' }, // ouvre le CMP
+  { label: 'Préférences cookies', href: '#cookies' },
 ]
 
-// Normalisation d’anciennes routes -> nouvelles routes canoniques
-const normalizeHref = (href: string) => {
-  if (!href?.startsWith('/')) return href
+const normalizeHref = (href: string): string => {
+  if (!href || !href.startsWith('/')) return href
+
   return href
     .replace(/^\/produit(?!s)/, '/products')
     .replace(/^\/pack(?!s)/, '/products/packs')
@@ -86,32 +98,49 @@ const DEFAULT_GROUPS: NavGroup[] = [
       { label: 'Promo du jour', href: '/products?promo=1' },
     ],
   },
-  { title: 'Légal', links: DEFAULT_LEGAL },
+  {
+    title: 'Légal',
+    links: DEFAULT_LEGAL,
+  },
 ]
 
-const isValidEmail = (v: string) => /^\S+@\S+\.\S+$/.test(String(v || '').trim())
+function isValidEmail(value: string): boolean {
+  return /^\S+@\S+\.\S+$/.test(String(value || '').trim())
+}
 
-// GA helper – tolérant
-const track = (action: string, data: Record<string, unknown> = {}) => {
+function getSafeWindow(): FooterWindow | null {
+  if (typeof window === 'undefined') return null
+  return window as FooterWindow
+}
+
+function pushDataLayer(eventName: string, payload: Record<string, unknown> = {}): void {
   try {
-    gaEvent?.({
-      action,
-      category: data.category ?? 'engagement',
-      label: data.label ?? action,
-      value: data.value ?? 1,
-      params: data.params ?? undefined,
-    })
+    const w = getSafeWindow()
+    if (!w) return
+    if (!Array.isArray(w.dataLayer)) w.dataLayer = []
+    w.dataLayer.push({ event: eventName, ...payload })
   } catch {}
-  try {
-    (logEvent as unknown)?.(action, data)
-  } catch {}
+}
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error && error.message.trim()) return error.message
+  if (typeof error === 'string' && error.trim()) return error
+  return fallback
 }
 
 function LegalIcon({ label }: { label: string }) {
   const lower = label.toLowerCase()
-  if (lower.includes('mention')) return <FaFileAlt className="text-[hsl(var(--accent))]" aria-hidden="true" />
-  if (lower.includes('confidential')) return <FaLock className="text-[hsl(var(--accent))]" aria-hidden="true" />
-  if (lower.includes('cgv')) return <FaFileAlt className="text-[hsl(var(--accent))]" aria-hidden="true" />
+
+  if (lower.includes('mention')) {
+    return <FaFileAlt className="text-[hsl(var(--accent))]" aria-hidden="true" />
+  }
+  if (lower.includes('confidential')) {
+    return <FaLock className="text-[hsl(var(--accent))]" aria-hidden="true" />
+  }
+  if (lower.includes('cgv')) {
+    return <FaFileAlt className="text-[hsl(var(--accent))]" aria-hidden="true" />
+  }
+
   return null
 }
 
@@ -135,22 +164,40 @@ export default function Footer({
   },
 }: FooterProps) {
   const pathname = usePathname() || '/'
-  const locale = getCurrentLocale(pathname)
+  const rawLocale = getCurrentLocale(pathname)
+  const locale: 'fr' | 'en' = rawLocale === 'en' ? 'en' : 'fr'
   const origin = String(siteUrl || '').replace(/\/$/, '')
 
-  // Remplace la colonne "Légal" si props.links fourni + normalise hrefs
   const navGroups = useMemo<NavGroup[]>(() => {
-    const normalizeGroup = (g: NavGroup): NavGroup => ({
-      title: g.title,
-      links: g.links.map((l) => ({ ...l, href: normalizeHref(l.href) })),
+    const normalizeGroup = (group: NavGroup): NavGroup => ({
+      title: group.title,
+      links: group.links.map((link) => ({
+        ...link,
+        href: normalizeHref(link.href),
+      })),
     })
+
     const base = groups.map(normalizeGroup)
+
     if (!links) return base
+
+    const normalizedLegal = links.map((link) => ({
+      ...link,
+      href: normalizeHref(link.href),
+    }))
+
     const clone = [...base]
-    const idx = clone.findIndex((g) => g.title.toLowerCase().includes('légal'))
-    const normalizedLegal = links.map((l) => ({ ...l, href: normalizeHref(l.href) }))
-    if (idx >= 0) clone[idx] = { title: clone[idx].title, links: normalizedLegal }
-    else clone.push({ title: 'Légal', links: normalizedLegal })
+    const index = clone.findIndex((group) => group.title.toLowerCase().includes('légal'))
+
+    if (index >= 0) {
+      clone[index] = {
+        title: clone[index].title,
+        links: normalizedLegal,
+      }
+    } else {
+      clone.push({ title: 'Légal', links: normalizedLegal })
+    }
+
     return clone
   }, [groups, links])
 
@@ -159,33 +206,41 @@ export default function Footer({
   const msgId = useId()
   const consentId = useId()
 
-  // Newsletter state
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-  const [message, setMessage] = useState<string>('')
-
-  // Honey-pot + consent
+  const [message, setMessage] = useState('')
   const [website, setWebsite] = useState('')
   const [consent, setConsent] = useState(true)
 
-  const openConsentManager = (e?: { preventDefault?: () => void }) => {
+  const openConsentManager = (
+    e?: Pick<ReactMouseEvent<HTMLElement>, 'preventDefault'> | { preventDefault?: () => void }
+  ) => {
     e?.preventDefault?.()
-    // ✅ Compat totale avec ton CMP (ConsentBanner.tsx expose tpOpenConsent)
-    try { (window as unknown).tpOpenConsent?.() } catch {}
-    // Fallback event (si tu relies ailleurs)
-    try { window.dispatchEvent(new CustomEvent('open-consent-manager')) } catch {}
-    track('open_consent_manager', { location: 'footer' })
+
+    try {
+      const w = getSafeWindow()
+      w?.tpOpenConsent?.()
+    } catch {}
+
+    try {
+      window.dispatchEvent(new CustomEvent('open-consent-manager'))
+    } catch {}
+
+    pushDataLayer('open_consent_manager', { location: 'footer' })
   }
 
-  const onSubscribe = async (e: React.FormEvent) => {
+  const onSubscribe = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
     if (status === 'loading') return
-    if (website) return // bot
+    if (website) return
+
     if (!isValidEmail(email)) {
       setStatus('error')
       setMessage('Merci d’entrer une adresse email valide.')
       return
     }
+
     if (!consent) {
       setStatus('error')
       setMessage('Vous devez accepter la politique de confidentialité.')
@@ -194,38 +249,67 @@ export default function Footer({
 
     setStatus('loading')
     setMessage('')
+
     try {
       const res = await fetch(subscribeEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, locale, pathname }),
       })
+
       if (!res.ok) {
-        const maybe = await res.json().catch(() => null)
+        const maybe = (await res.json().catch(() => null)) as SubscribeResponse | null
         throw new Error(maybe?.message || 'Erreur API')
       }
-      track('newsletter_subscribe', { location: 'footer', params: { locale } })
+
+      pushDataLayer('newsletter_subscribe', {
+        location: 'footer',
+        locale,
+        pathname,
+      })
+
       setStatus('success')
       setMessage('Inscription confirmée. Bienvenue chez TechPlay !')
       setEmail('')
-      try { toast.success('Vous êtes inscrit(e) 🎉') } catch {}
-    } catch (err: unknown) {
+
+      try {
+        toast.success('Vous êtes inscrit(e) 🎉')
+      } catch {}
+    } catch (error: unknown) {
       setStatus('error')
-      setMessage(err?.message || 'Une erreur est survenue. Réessayez.')
-      try { toast.error('Inscription impossible pour le moment') } catch {}
+      setMessage(getErrorMessage(error, 'Une erreur est survenue. Réessayez.'))
+
+      try {
+        toast.error('Inscription impossible pour le moment')
+      } catch {}
     }
   }
 
-  const onSocialClick = (network: 'facebook' | 'twitter' | 'instagram') =>
-    track('social_click', { network, category: 'social', location: 'footer' })
+  const onSocialClick = (network: 'facebook' | 'twitter' | 'instagram') => {
+    pushDataLayer('social_click', {
+      network,
+      location: 'footer',
+      pathname,
+    })
+  }
 
-  const onNavClick = (groupTitle: string, label: string, href: string, e?: React.MouseEvent) => {
-    // Si clic sur "Préférences cookies" => ouvre le CMP et ne navigue pas
+  const onNavClick = (
+    groupTitle: string,
+    label: string,
+    href: string,
+    e?: ReactMouseEvent<HTMLElement>
+  ) => {
     if (label.toLowerCase().includes('cookie')) {
       openConsentManager(e)
       return
     }
-    track('footer_nav_click', { group: groupTitle, label, href, from: pathname })
+
+    pushDataLayer('footer_nav_click', {
+      group: groupTitle,
+      label,
+      href,
+      from: pathname,
+    })
   }
 
   return (
@@ -234,23 +318,24 @@ export default function Footer({
       role="contentinfo"
       aria-label="Pied de page"
     >
-      {/* Fond premium (dégradés + léger blur) */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_600px_at_80%_-20%,rgba(37,99,235,0.08),transparent),radial-gradient(800px_400px_at_10%_120%,rgba(16,185,129,0.06),transparent)]"
       />
       <div className="absolute inset-0 backdrop-blur-[2px]" aria-hidden="true" />
 
-      <div className="relative mx-auto max-w-screen-xl px-6 pt-12 pb-6">
-        <h2 className="sr-only" id="footer-heading">Informations et navigation secondaire</h2>
+      <div className="relative mx-auto max-w-screen-xl px-6 pb-6 pt-12">
+        <h2 className="sr-only" id="footer-heading">
+          Informations et navigation secondaire
+        </h2>
 
         <div className="grid grid-cols-1 gap-10 md:grid-cols-12">
-          {/* Col 1 — brand + garanties + contacts */}
           <div className="space-y-5 md:col-span-5">
             <p className="text-xl font-extrabold tracking-tight">
               <span className="text-brand dark:text-white">{companyName}</span>
               <span className="text-[hsl(var(--accent))]">.</span>
             </p>
+
             <p className="text-sm leading-relaxed text-token-text/70">
               Des accessoires et packs sélectionnés pour la performance, l’innovation et le style.
             </p>
@@ -259,17 +344,19 @@ export default function Footer({
               <>
                 <ul className="mt-3 grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
                   <li className="flex items-center gap-2 rounded-lg border border-token-border bg-token-surface/80 px-3 py-2 backdrop-blur">
-                    <FaShieldAlt className="text-emerald-500" aria-hidden="true" /> Paiement sécurisé
+                    <FaShieldAlt className="text-emerald-500" aria-hidden="true" />
+                    Paiement sécurisé
                   </li>
                   <li className="flex items-center gap-2 rounded-lg border border-token-border bg-token-surface/80 px-3 py-2 backdrop-blur">
-                    <FaTruck className="text-[hsl(var(--accent))]" aria-hidden="true" /> Liv. 48–72h
+                    <FaTruck className="text-[hsl(var(--accent))]" aria-hidden="true" />
+                    Liv. 48–72h
                   </li>
                   <li className="flex items-center gap-2 rounded-lg border border-token-border bg-token-surface/80 px-3 py-2 backdrop-blur">
-                    <FaHeadset className="text-amber-400" aria-hidden="true" /> Support 7j/7
+                    <FaHeadset className="text-amber-400" aria-hidden="true" />
+                    Support 7j/7
                   </li>
                 </ul>
 
-                {/* Paiements */}
                 <div className="flex items-center gap-3 pt-1 text-2xl text-token-text/60">
                   <FaCcVisa aria-label="Visa" />
                   <FaCcMastercard aria-label="Mastercard" />
@@ -278,7 +365,6 @@ export default function Footer({
               </>
             )}
 
-            {/* Coordonnées */}
             <ul className="space-y-1 pt-2 text-sm">
               {contact?.email && (
                 <li>
@@ -290,6 +376,7 @@ export default function Footer({
                   </a>
                 </li>
               )}
+
               {contact?.phone && (
                 <li>
                   <a
@@ -300,6 +387,7 @@ export default function Footer({
                   </a>
                 </li>
               )}
+
               {contact?.address?.streetAddress && (
                 <li className="text-token-text/60">
                   {contact.address.streetAddress}
@@ -311,32 +399,32 @@ export default function Footer({
             </ul>
           </div>
 
-          {/* Col 2/3/4 — Groupes + Newsletter */}
           <div className="grid grid-cols-2 gap-8 md:col-span-7 sm:grid-cols-3">
             {navGroups.map((group) => (
               <nav key={group.title} aria-label={group.title} className="space-y-2">
                 <h3 className="text-sm font-semibold uppercase tracking-wide text-token-text/60">
                   {group.title}
                 </h3>
+
                 <ul className="space-y-2">
                   {group.links.map(({ href, label, external }) => {
                     const finalHref = localizePath(href, locale)
                     const active =
                       href === '/'
                         ? pathname === finalHref || pathname === '/'
-                        : pathname === finalHref || pathname.startsWith(finalHref + '/')
+                        : pathname === finalHref || pathname.startsWith(`${finalHref}/`)
 
-                    const item = (
+                    const isCookie = label.toLowerCase().includes('cookie')
+
+                    const content = (
                       <>
                         {group.title.toLowerCase().includes('légal') ? <LegalIcon label={label} /> : null}
                         <span>{label}</span>
                       </>
                     )
 
-                    const isCookie = label.toLowerCase().includes('cookie')
-
                     return (
-                      <li key={`${group.title}-${href}`}>
+                      <li key={`${group.title}-${href}-${label}`}>
                         {external ? (
                           <a
                             href={href}
@@ -346,7 +434,7 @@ export default function Footer({
                             onClick={(e) => onNavClick(group.title, label, href, e)}
                             data-gtm="footer_link_external"
                           >
-                            {item}
+                            {content}
                           </a>
                         ) : isCookie ? (
                           <a
@@ -357,7 +445,7 @@ export default function Footer({
                             onClick={(e) => onNavClick(group.title, label, '#cookies', e)}
                             data-gtm="footer_link_cookies"
                           >
-                            {item}
+                            {content}
                           </a>
                         ) : (
                           <Link
@@ -368,7 +456,7 @@ export default function Footer({
                             onClick={(e) => onNavClick(group.title, label, href, e)}
                             data-gtm="footer_link_internal"
                           >
-                            {item}
+                            {content}
                           </Link>
                         )}
                       </li>
@@ -380,7 +468,6 @@ export default function Footer({
 
             {!compact && (
               <div className="col-span-2 space-y-5 sm:col-span-1">
-                {/* Newsletter */}
                 <form
                   onSubmit={onSubscribe}
                   noValidate
@@ -389,7 +476,10 @@ export default function Footer({
                   aria-busy={status === 'loading'}
                   aria-describedby={message ? msgId : undefined}
                 >
-                  <h3 className="text-sm font-semibold uppercase tracking-wide text-token-text/60">Newsletter</h3>
+                  <h3 className="text-sm font-semibold uppercase tracking-wide text-token-text/60">
+                    Newsletter
+                  </h3>
+
                   <div className="flex gap-2">
                     <input
                       id={emailId}
@@ -427,14 +517,17 @@ export default function Footer({
                     />
                     <span>
                       J’accepte de recevoir vos emails et la{' '}
-                      <Link href="/confidentialite" prefetch={false} className="underline hover:text-[hsl(var(--accent))]">
+                      <Link
+                        href="/confidentialite"
+                        prefetch={false}
+                        className="underline hover:text-[hsl(var(--accent))]"
+                      >
                         politique de confidentialité
                       </Link>
                       .
                     </span>
                   </label>
 
-                  {/* Honeypot */}
                   <div className="hidden" aria-hidden="true">
                     <label htmlFor="website">Votre site web</label>
                     <input
@@ -459,7 +552,6 @@ export default function Footer({
                   )}
                 </form>
 
-                {/* Réseaux sociaux */}
                 <div className="flex items-center gap-6 text-xl text-token-text/60">
                   <a
                     href="https://facebook.com/techplay"
@@ -472,6 +564,7 @@ export default function Footer({
                   >
                     <FaFacebookF />
                   </a>
+
                   <a
                     href="https://twitter.com/techplay"
                     target="_blank"
@@ -483,6 +576,7 @@ export default function Footer({
                   >
                     <FaTwitter />
                   </a>
+
                   <a
                     href="https://instagram.com/techplay"
                     target="_blank"
@@ -500,10 +594,8 @@ export default function Footer({
           </div>
         </div>
 
-        {/* Slot enfants éventuels */}
         {children && <div className="mt-10 text-center">{children}</div>}
 
-        {/* Sous-footer */}
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-token-border pt-5 text-sm md:flex-row">
           <p className="text-token-text/70">
             © {currentYear} <span className="font-semibold text-token-text">{companyName}</span>. Tous droits réservés.
@@ -531,7 +623,6 @@ export default function Footer({
         </div>
       </div>
 
-      {/* JSON-LD SiteNavigationElement (✅ pas d’Organization ici pour éviter le doublon avec le layout) */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -540,11 +631,15 @@ export default function Footer({
             '@type': 'SiteNavigationElement',
             name: 'Footer Navigation',
             url: origin,
-            hasPart: navGroups.flatMap((g) =>
-              g.links.map((l) =>
-                l.external
-                  ? { '@type': 'WebPage', name: l.label, url: l.href }
-                  : { '@type': 'WebPage', name: l.label, url: `${origin}${localizePath(l.href, locale)}` }
+            hasPart: navGroups.flatMap((group) =>
+              group.links.map((link) =>
+                link.external
+                  ? { '@type': 'WebPage', name: link.label, url: link.href }
+                  : {
+                      '@type': 'WebPage',
+                      name: link.label,
+                      url: `${origin}${localizePath(link.href, locale)}`,
+                    }
               )
             ),
           }),
@@ -553,4 +648,3 @@ export default function Footer({
     </footer>
   )
 }
-

@@ -1,4 +1,4 @@
-// src/components/Hotjar.tsx — FINAL++++ (Consent-aware, CMP reactive, SPA stateChange, no double-init, strict revoke option)
+// src/components/Hotjar.tsx
 'use client'
 
 import { usePathname } from 'next/navigation'
@@ -14,27 +14,35 @@ const STRICT_RELOAD = (process.env.NEXT_PUBLIC_HOTJAR_STRICT_RELOAD || '').toLow
 
 function hasAnalyticsConsent(): boolean {
   try {
-    const s: unknown = (window as unknown).__consentState || {}
+    const s = window.__consentState || {}
     const ok = s.analytics_storage !== 'denied'
     const ls = localStorage.getItem('consent:analytics') === '1'
     return ok || ls
-  } catch { return false }
+  } catch {
+    return false
+  }
 }
 
 function eligibleNow(): boolean {
   if (!HOTJAR_ID) return false
   if (typeof window === 'undefined') return false
+
   const dnt =
-    (navigator as unknown).doNotTrack === '1' ||
-    (window as unknown).doNotTrack === '1' ||
-    (navigator as unknown).msDoNotTrack === '1'
+    navigator.doNotTrack === '1' ||
+    window.doNotTrack === '1' ||
+    navigator.msDoNotTrack === '1'
+
   let optedOut = false
   try {
-    optedOut = localStorage.getItem('hotjar:disabled') === '1' || localStorage.getItem('analytics:disabled') === '1'
+    optedOut =
+      localStorage.getItem('hotjar:disabled') === '1' ||
+      localStorage.getItem('analytics:disabled') === '1'
   } catch {}
+
   if (dnt || optedOut) return false
   if (process.env.NODE_ENV !== 'production' && !ENABLE_IN_DEV) return false
   if (!hasAnalyticsConsent()) return false
+
   return true
 }
 
@@ -44,7 +52,11 @@ export default function Hotjar() {
   const loadedRef = useRef(false)
 
   useEffect(() => {
-    const ok = (process.env.NODE_ENV === 'production' || ENABLE_IN_DEV) && eligibleHotjar(HOTJAR_ID) && eligibleNow()
+    const ok =
+      (process.env.NODE_ENV === 'production' || ENABLE_IN_DEV) &&
+      eligibleHotjar(HOTJAR_ID) &&
+      eligibleNow()
+
     setShouldLoad(ok)
   }, [])
 
@@ -60,6 +72,7 @@ export default function Hotjar() {
         }
       }
     }
+
     window.addEventListener('tp:consent', recheck as EventListener)
     return () => window.removeEventListener('tp:consent', recheck as EventListener)
   }, [])
@@ -75,7 +88,7 @@ export default function Hotjar() {
     <Script id="hotjar-init" strategy="afterInteractive" onLoad={() => { loadedRef.current = true }}>
       {`
         (function(h,o,t,j,a,r){
-          if (h.hj) return; // idempotent
+          if (h.hj) return;
           h.hj=function(){(h.hj.q=h.hj.q||[]).push(arguments)};
           h._hjSettings={hjid:${HOTJAR_ID},hjsv:${HOTJAR_SV}};
           a=o.getElementsByTagName('head')[0];
@@ -87,4 +100,3 @@ export default function Hotjar() {
     </Script>
   )
 }
-

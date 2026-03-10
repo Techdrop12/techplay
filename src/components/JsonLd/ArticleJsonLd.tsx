@@ -7,13 +7,20 @@ import type { BlogPost } from '@/types/blog'
 
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
-interface ArticleJsonLdProps {
-  post: BlogPost
+type BlogPostJsonLd = BlogPost & {
+  createdAt?: string | number | Date
+  updatedAt?: string | number | Date
+  author?: string
+  image?: string
 }
 
-function iso(d?: unknown): string | undefined {
+interface ArticleJsonLdProps {
+  post: BlogPostJsonLd
+}
+
+function iso(d?: string | number | Date): string | undefined {
   if (!d) return undefined
-  const x = d instanceof Date ? d : new Date(d as unknown)
+  const x = d instanceof Date ? d : new Date(d)
   return Number.isFinite(x.getTime()) ? x.toISOString() : undefined
 }
 
@@ -28,15 +35,15 @@ export default function ArticleJsonLd({ post }: ArticleJsonLdProps) {
     '@type': 'Article',
     headline: post.title,
     description: post.description || '',
-    datePublished: iso((post as unknown).createdAt) || iso(Date.now()),
-    dateModified: iso((post as unknown).updatedAt) || iso((post as unknown).createdAt) || iso(Date.now()),
+    datePublished: iso(post.createdAt) || iso(Date.now()),
+    dateModified: iso(post.updatedAt) || iso(post.createdAt) || iso(Date.now()),
     author: {
       '@type': 'Person',
-      name: (post as unknown).author || 'TechPlay',
+      name: post.author || 'TechPlay',
     },
     image: {
       '@type': 'ImageObject',
-      url: (post as unknown).image || `${siteUrl}/placeholder.png`,
+      url: post.image || `${siteUrl}/placeholder.png`,
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
@@ -59,4 +66,3 @@ export default function ArticleJsonLd({ post }: ArticleJsonLdProps) {
     />
   )
 }
-

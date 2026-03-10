@@ -6,11 +6,6 @@ import { useEffect, useState } from 'react'
 import { useCart } from '@/context/cartContext'
 import { pageview } from '@/lib/analytics'
 
-interface CartItem {
-  title?: string
-  [key: string]: unknown
-}
-
 export default function CartReminder() {
   const { cart } = useCart()
   const router = useRouter()
@@ -19,39 +14,46 @@ export default function CartReminder() {
 
   // Enregistre le panier dans localStorage pour un rappel persistant
   useEffect(() => {
-    if (typeof window !== 'undefined' && cart.length > 0) {
+    if (cart.length > 0) {
       localStorage.setItem('techplay_last_cart', JSON.stringify(cart))
     }
   }, [cart])
 
   // Déclenche le rappel après 30s d'inactivité
   useEffect(() => {
-    if (cart.length > 0) {
-      const timer = setTimeout(() => setShow(true), 30000)
-      return () => clearTimeout(timer)
+    if (cart.length === 0) {
+      setShow(false)
+      return
     }
+
+    const timer = window.setTimeout(() => setShow(true), 30_000)
+    return () => window.clearTimeout(timer)
   }, [cart])
 
   // Génère une suggestion basée sur le dernier produit ajouté
   useEffect(() => {
-    if (cart.length > 0) {
-      const lastProduct = cart[cart.length - 1] as CartItem
-      const fallback = 'Cliquez ici pour reprendre votre commande.'
-      setSuggestion(lastProduct?.title ? `Vous aimerez peut-être : ${lastProduct.title}` : fallback)
+    if (cart.length === 0) {
+      setSuggestion(null)
+      return
     }
+
+    const lastProduct = cart[cart.length - 1]
+    const fallback = 'Cliquez ici pour reprendre votre commande.'
+    setSuggestion(lastProduct?.title ? `Vous aimerez peut-être : ${lastProduct.title}` : fallback)
   }, [cart])
 
   // Tracking pageview + gtag si dispo
   useEffect(() => {
-    if (show) {
-      pageview('/cart-reminder')
+    if (!show) return
 
-      if (
-        typeof window !== 'undefined' &&
-        typeof (window as unknown).gtag === 'function'
-      ) {
-        (window as unknown).gtag('event', 'cart_reminder_displayed')
+    pageview('/cart-reminder')
+
+    try {
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'cart_reminder_displayed')
       }
+    } catch {
+      // no-op
     }
   }, [show])
 
@@ -60,22 +62,18 @@ export default function CartReminder() {
     router.push('/cart')
   }
 
-  if (!show) return null
+  if (!show || !suggestion) return null
 
   return (
     <div
       role="alert"
       aria-live="polite"
       aria-label="Rappel panier"
-      className="fixed bottom-4 right-4 max-w-sm w-[90%] sm:w-auto bg-blue-600 text-white px-4 py-3 rounded-lg shadow-xl z-50 cursor-pointer transition-opacity hover:opacity-90 animate-fadeIn"
+      className="fixed bottom-4 right-4 z-50 w-[90%] max-w-sm cursor-pointer rounded-lg bg-blue-600 px-4 py-3 text-white shadow-xl transition-opacity hover:opacity-90 sm:w-auto animate-fadeIn"
       onClick={handleClick}
     >
-      <strong className="block font-semibold mb-1">
-        🛒 Vous avez un panier en attente
-      </strong>
+      <strong className="mb-1 block font-semibold">🛒 Vous avez un panier en attente</strong>
       <span className="text-sm">{suggestion}</span>
     </div>
   )
 }
-
-

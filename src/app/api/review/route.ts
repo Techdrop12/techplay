@@ -22,27 +22,11 @@ const ReviewSchemaZ = z.object({
   comment: z.string().trim().min(3).max(1000),
   email: z.string().email().optional(),
   recaptchaToken: z.string().optional(),
-  hp: z.string().optional(), // champ honeypot -> doit rester vide
+  hp: z.string().optional(), // honeypot -> doit rester vide
 })
 
-// ------------- ReCAPTCHA (optionnel) -------------
-async function verifyRecaptcha(token: string | undefined, ip: string) {
-  const secret = process.env.RECAPTCHA_SECRET_KEY
-  if (!secret || !token) return { ok: true, score: 0 } // pas configuré -> on laisse passer
-  const body = new URLSearchParams({ secret, response: token, remoteip: ip })
-  const res = await fetch('https://www.google.com/recaptcha/api/siteverify', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
-    // timeout / abort non nécessaire ici
-  })
-  const json = (await res.json()) as unknown
-  const ok = !!json.success && (json.score == null || json.score >= 0.4)
-  return { ok, score: json.score ?? 0 }
-}
-
-// ------------- Mongo (optionnel) -------------
-const MONGO_URI = process.env.MONGODB_URI
+// ------------- Types -------------
+type ReviewInput = z.infer<typeof ReviewSchemaZ>
 
 type ReviewDoc = {
   productId: string
@@ -54,64 +38,150 @@ type ReviewDoc = {
   createdAt: Date
 }
 
-let ReviewModel: mongoose.Model<ReviewDoc>
-if (MONGO_URI) {
-  const ReviewMongooseSchema =
-    (models.Review as mongoose.Model<ReviewDoc> | undefined)?.schema ??
-    new Schema<ReviewDoc>(
-      {
-        productId: { type: String, index: true, required: true },
-        email: { type: String, index: true },
-        rating: { type: Number, min: 1, max: 5, required: true },
-        comment: { type: String, required: true },
-        ip: { type: String, index: true },
-        idempotencyKey: { type: String, unique: true, index: true },
-        createdAt: { type: Date, default: () => new Date(), index: true },
-      },
-      { versionKey: false }
-    )
-
-  ReviewModel = models.Review || model<ReviewDoc>('Review', ReviewMongooseSchema)
+type RecaptchaResponse = {
+  success?: boolean
+  score?: number
 }
 
-// ------------- Idempotency (fallback mémoire si pas de DB) -------------
-const memIds = (globalThis as unknown).__REV_MEM__ || new Set<string>()
-;(globalThis as unknown).__REV_MEM__ = memIds
+type MongoLikeError = {
+  code?: unknown
+  message?: unknown
+}
 
-function makeIdemKey(input: { productId: string; email?: string; comment: string; ip: string }) {
+// ------------- ReCAPTCHA (optionnel) -------------
+async function verifyRecaptcha(token: string | undefined, ip: string) {
+  const secret = process.env.RECAPTCHA_SECRET_KEY
+
+  if (!secret || !token) {
+    return { ok: true, score: 0 }
+  }
+
+  const body = new URLSearchParams({
+    secret,
+    response: token,
+    remoteip: ip,
+  })
+
+  const res = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  })
+
+  const json = (await res.json()) as RecaptchaResponse
+  const ok = Boolean(json.success) && (json.score == null || json.score >= 0.4)
+
+  return { ok, score: json.score ?? 0 }
+}
+
+// ------------- Mongo (optionnel) -------------
+const MONGO_URI = process.env.MONGODB_URI
+
+function getReviewModel(): mongoose.Model<ReviewDoc> {
+  const existing = models.Review as mongoose.Model<ReviewDoc> | undefined
+  if (existing) return existing
+
+  const reviewMongooseSchema = new Schema<ReviewDoc>(
+    {
+      productId: { type: String, index: true, required: true },
+      email: { type: String, index: true },
+      rating: { type: Number, min: 1, max: 5, required: true },
+      comment: { type: String, required: true },
+      ip: { type: String, index: true },
+      idempotencyKey: { type: String, unique: true, index: true },
+      createdAt: { type: Date, default: () => new Date(), index: true },
+    },
+    { versionKey: false }
+  )
+
+  return model<ReviewDoc>('Review', reviewMongooseSchema)
+}
+
+// ------------- Idempotency mémoire (fallback si pas de DB) -------------
+type ReviewMemoryGlobal = typeof globalThis & {
+  __REV_MEM__?: Set<string>
+}
+
+const reviewGlobal = globalThis as ReviewMemoryGlobal
+const memIds = reviewGlobal.__REV_MEM__ ?? new Set<string>()
+reviewGlobal.__REV_MEM__ = memIds
+
+function makeIdemKey(input: {
+  productId: string
+  email?: string
+  comment: string
+  ip: string
+}) {
   const base = `${input.productId}|${(input.email || '').toLowerCase()}|${input.comment.trim()}|${input.ip}`
   return crypto.createHash('sha256').update(base).digest('hex')
 }
 
-// ------------- Petite sanitation anti-HTML -------------
-function stripTags(s: string) {
-  return s.replace(/<[^>]*>/g, '').trim()
+// ------------- Helpers -------------
+function stripTags(value: string) {
+  return value.replace(/<[^>]*>/g, '').trim()
 }
 
-// ------------- Handler principal (protégé par rate limit) -------------
+function getErrorMessage(error: unknown, fallback = 'Payload invalide'): string {
+  if (error instanceof z.ZodError) {
+    return error.issues[0]?.message || fallback
+  }
+  if (error instanceof Error) {
+    return error.message || fallback
+  }
+  return fallback
+}
+
+function getErrorCode(error: unknown): string | number | undefined {
+  if (typeof error !== 'object' || error === null) return undefined
+
+  const code = (error as MongoLikeError).code
+  if (typeof code === 'string' || typeof code === 'number') return code
+
+  return undefined
+}
+
+function isDuplicateKeyError(error: unknown): boolean {
+  const code = getErrorCode(error)
+  if (code === 11000 || code === '11000') return true
+
+  if (error instanceof Error) {
+    return /E11000/i.test(error.message)
+  }
+
+  const maybeMessage =
+    typeof error === 'object' && error !== null
+      ? (error as MongoLikeError).message
+      : undefined
+
+  return typeof maybeMessage === 'string' && /E11000/i.test(maybeMessage)
+}
+
+// ------------- Handler principal -------------
 async function handler(request: Request) {
   const ip = ipFromRequest(request)
 
-  let payload: z.infer<typeof ReviewSchemaZ>
+  let payload: ReviewInput
   try {
     payload = ReviewSchemaZ.parse(await request.json())
-  } catch (e) {
-    const msg = (e as unknown)?.errors?.[0]?.message || 'Payload invalide'
-    const res = limiter.check(ip)
-    return NextResponse.json({ success: false, error: msg }, { status: 400, headers: limiter.headers(res) })
+  } catch (error: unknown) {
+    return NextResponse.json(
+      { success: false, error: getErrorMessage(error) },
+      { status: 400 }
+    )
   }
 
   // Honeypot
   if (payload.hp && payload.hp.trim() !== '') {
-    const res = limiter.check(ip)
-    return NextResponse.json({ success: true, message: 'Ok' }, { status: 200, headers: limiter.headers(res) })
+    return NextResponse.json({ success: true, message: 'Ok' }, { status: 200 })
   }
 
   // reCAPTCHA si configuré
   const captcha = await verifyRecaptcha(payload.recaptchaToken, ip)
   if (!captcha.ok) {
-    const res = limiter.check(ip)
-    return NextResponse.json({ success: false, error: 'Captcha invalide' }, { status: 400, headers: limiter.headers(res) })
+    return NextResponse.json(
+      { success: false, error: 'Captcha invalide' },
+      { status: 400 }
+    )
   }
 
   const doc: Omit<ReviewDoc, 'createdAt'> = {
@@ -120,41 +190,60 @@ async function handler(request: Request) {
     rating: payload.rating,
     comment: stripTags(payload.comment),
     ip,
-    idempotencyKey: makeIdemKey({ productId: payload.productId, email: payload.email, comment: payload.comment, ip }),
+    idempotencyKey: makeIdemKey({
+      productId: payload.productId,
+      email: payload.email,
+      comment: payload.comment,
+      ip,
+    }),
   }
 
-  // Déduplication mémoire (si pas de DB)
+  // Déduplication mémoire si pas de DB
   if (!MONGO_URI) {
     if (memIds.has(doc.idempotencyKey)) {
-      const res = limiter.check(ip)
-      return NextResponse.json({ success: true, message: 'Avis déjà reçu' }, { status: 200, headers: limiter.headers(res) })
+      return NextResponse.json(
+        { success: true, message: 'Avis déjà reçu' },
+        { status: 200 }
+      )
     }
+
     memIds.add(doc.idempotencyKey)
+
+    return NextResponse.json(
+      { success: true, message: 'Avis reçu' },
+      { status: 200 }
+    )
   }
 
   // Insertion DB si MONGO_URI configuré
-  if (MONGO_URI) {
-    if (mongoose.connection.readyState === 0) {
-      await mongoose.connect(MONGO_URI)
-    }
-    try {
-      await ReviewModel.create({ ...doc, createdAt: new Date() })
-    } catch (err: unknown) {
-      // duplication (idempotency)
-      if (err?.code === 11000) {
-        const res = limiter.check(ip)
-        return NextResponse.json({ success: true, message: 'Avis déjà reçu' }, { status: 200, headers: limiter.headers(res) })
-      }
-      console.error('[review] DB error:', err)
-      const res = limiter.check(ip)
-      return NextResponse.json({ success: false, error: 'Erreur serveur' }, { status: 500, headers: limiter.headers(res) })
-    }
+  if (mongoose.connection.readyState === 0) {
+    await mongoose.connect(MONGO_URI)
   }
 
-  const res = limiter.check(ip)
-  return NextResponse.json({ success: true, message: 'Avis reçu' }, { status: 200, headers: limiter.headers(res) })
+  try {
+    const ReviewModel = getReviewModel()
+    await ReviewModel.create({ ...doc, createdAt: new Date() })
+  } catch (error: unknown) {
+    if (isDuplicateKeyError(error)) {
+      return NextResponse.json(
+        { success: true, message: 'Avis déjà reçu' },
+        { status: 200 }
+      )
+    }
+
+    console.error('[review] DB error:', error)
+
+    return NextResponse.json(
+      { success: false, error: 'Erreur serveur' },
+      { status: 500 }
+    )
+  }
+
+  return NextResponse.json(
+    { success: true, message: 'Avis reçu' },
+    { status: 200 }
+  )
 }
 
-// 👉 export: on enveloppe le handler avec le middleware de rate limit pour retour des bons headers 429
+// Middleware rate limit -> ajoute les bons headers et gère 429
 export const POST = withRateLimit(handler, limiter)
-

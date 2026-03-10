@@ -1,7 +1,8 @@
-// src/app/commande/page.tsx — FINAL (GA4 begin_checkout helper + GTM + UX)
 'use client'
 
 import { useEffect, useMemo, useRef } from 'react'
+
+import type { Product } from '@/types/product'
 
 import CartList from '@/components/cart/CartList'
 import CartSummary from '@/components/cart/CartSummary'
@@ -9,20 +10,79 @@ import CheckoutForm from '@/components/checkout/CheckoutForm'
 import FreeShippingBadge from '@/components/FreeShippingBadge'
 import Link from '@/components/LocalizedLink'
 import { useCart } from '@/hooks/useCart'
-import { mapProductToGaItem, trackBeginCheckout, pushDataLayer } from '@/lib/ga'
+import { mapProductToGaItem, pushDataLayer, trackBeginCheckout } from '@/lib/ga'
 
-/** Devise simple (EUR/GBP/USD) */
+type CheckoutItem = Product & { quantity: number }
+
 function detectCurrency(): 'EUR' | 'GBP' | 'USD' {
   try {
     const htmlLang = typeof document !== 'undefined' ? document.documentElement.lang || '' : ''
     const nav = typeof navigator !== 'undefined' ? navigator.language || '' : ''
-    const src = (htmlLang || nav).toLowerCase()
-    if (src.includes('gb') || src.endsWith('-uk') || src.includes('en-gb')) return 'GBP'
-    if (src.includes('us') || src.includes('en-us')) return 'USD'
-    if (src.startsWith('en')) return 'USD'
+    const source = (htmlLang || nav).toLowerCase()
+
+    if (source.includes('gb') || source.endsWith('-uk') || source.includes('en-gb')) return 'GBP'
+    if (source.includes('us') || source.includes('en-us')) return 'USD'
+    if (source.startsWith('en')) return 'USD'
+
     return 'EUR'
   } catch {
     return 'EUR'
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+function readString(record: Record<string, unknown>, keys: readonly string[]): string | undefined {
+  for (const key of keys) {
+    const value = record[key]
+    if (typeof value === 'string' && value.trim()) return value.trim()
+    if (typeof value === 'number' && Number.isFinite(value)) return String(value)
+  }
+  return undefined
+}
+
+function readNumber(record: Record<string, unknown>, keys: readonly string[]): number | undefined {
+  for (const key of keys) {
+    const value = record[key]
+    const parsed =
+      typeof value === 'number'
+        ? value
+        : typeof value === 'string' && value.trim()
+          ? Number(value)
+          : NaN
+
+    if (Number.isFinite(parsed)) return parsed
+  }
+  return undefined
+}
+
+function normalizeCartItem(value: unknown): CheckoutItem | null {
+  if (!isRecord(value)) return null
+
+  const slug = readString(value, ['slug']) ?? readString(value, ['_id', 'id'])
+  const id = readString(value, ['_id', 'id', 'slug']) ?? slug
+  const price = readNumber(value, ['price'])
+  const quantity = Math.max(1, readNumber(value, ['quantity', 'qty']) ?? 1)
+
+  if (!slug || !id || typeof price !== 'number') return null
+
+  return {
+    _id: id,
+    slug,
+    price,
+    quantity,
+    title: readString(value, ['title', 'name']),
+    image: readString(value, ['image']),
+    description: readString(value, ['description']),
+    category: readString(value, ['category']),
+    brand: readString(value, ['brand']),
+    sku: readString(value, ['sku']),
+    stock: readNumber(value, ['stock']),
+    rating: readNumber(value, ['rating']),
+    reviewsCount: readNumber(value, ['reviewsCount']),
+    oldPrice: readNumber(value, ['oldPrice', 'compareAtPrice']),
   }
 }
 
@@ -30,61 +90,85 @@ export default function CheckoutPage() {
   const { cart } = useCart()
   const hasFiredRef = useRef(false)
 
-  // Items GA4 + totaux
-  const { itemsCount, subtotal, gaItems, currency } = useMemo(() => {
-    const items = Array.isArray(cart) ? cart : []
-    const itemsCount = items.reduce((s, it: unknown) => s + Math.max(1, Number(it?.quantity || 1)), 0)
-    const subtotal = items.reduce(
-      (s, it: unknown) => s + (Number(it?.price) || 0) * Math.max(1, Number(it?.quantity || 1)),
-      0
-    )
-    const gaItems = items.map((it: unknown) =>
-      mapProductToGaItem(it, {
-        quantity: Math.max(1, Number(it?.quantity || 1)),
-      })
-    )
-    const currency = detectCurrency()
-    return { itemsCount, subtotal, gaItems, currency }
+  const { items, itemsCount, subtotal, gaItems, currency } = useMemo(() => {
+    const normalizedItems = (Array.isArray(cart) ? cart : [])
+      .map(normalizeCartItem)
+      .filter((item): item is CheckoutItem => item !== null)
+
+    const totalItems = normalizedItems.reduce((sum, item) => sum + item.quantity, 0)
+    const totalSubtotal = normalizedItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+
+    const analyticsItems = normalizedItems.map((item) => {
+      const source: Record<string, unknown> = {
+        _id: item._id,
+        slug: item.slug,
+        title: item.title,
+        price: item.price,
+        image: item.image,
+        category: item.category,
+        brand: item.brand,
+        sku: item.sku,
+        quantity: item.quantity,
+      }
+
+      return mapProductToGaItem(source)
+    })
+
+    return {
+      items: normalizedItems,
+      itemsCount: totalItems,
+      subtotal: totalSubtotal,
+      gaItems: analyticsItems,
+      currency: detectCurrency(),
+    }
   }, [cart])
 
-  // Scroll top + begin_checkout une seule fois quand il y a du contenu
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
-    if (!cart?.length || hasFiredRef.current) return
+
+    if (items.length === 0 || hasFiredRef.current) return
     hasFiredRef.current = true
 
     try {
-      // GA4 “canonique”
-      trackBeginCheckout({ currency, value: subtotal, items: gaItems })
+      trackBeginCheckout({
+        currency,
+        value: subtotal,
+        items: gaItems,
+      })
     } catch {}
 
     try {
-      // GTM (si tu lis dans le dataLayer)
       pushDataLayer({
         event: 'begin_checkout',
         currency,
         value: subtotal,
-        ecommerce: { currency, value: subtotal, items: gaItems },
+        ecommerce: {
+          currency,
+          value: subtotal,
+          items: gaItems,
+        },
       })
     } catch {}
-     
-  }, [cart?.length])
+  }, [items.length, subtotal, currency, gaItems])
 
-  const isEmpty = !cart || cart.length === 0
+  const isEmpty = items.length === 0
 
   return (
     <main
-      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-24"
+      className="max-w-7xl mx-auto px-4 pt-28 pb-24 sm:px-6 lg:px-8"
       aria-labelledby="checkout-title"
       role="main"
     >
-      {/* Fil d'Ariane simple */}
       <nav aria-label="Fil d’Ariane" className="mb-6 text-sm text-gray-500 dark:text-gray-400">
         <ol className="flex items-center gap-2">
-          <li><Link href="/" className="hover:underline">Accueil</Link></li>
+          <li>
+            <Link href="/" className="hover:underline">
+              Accueil
+            </Link>
+          </li>
           <li aria-hidden="true">/</li>
           <li>
-            <Link href="/commande" aria-current="page" className="text-gray-700 dark:text-gray-200 font-medium">
+            <Link href="/commande" aria-current="page" className="font-medium text-gray-700 dark:text-gray-200">
               Commande
             </Link>
           </li>
@@ -93,15 +177,15 @@ export default function CheckoutPage() {
 
       <h1
         id="checkout-title"
-        className="text-4xl font-extrabold text-center mb-3 text-brand dark:text-white tracking-tight"
+        className="mb-3 text-center text-4xl font-extrabold tracking-tight text-brand dark:text-white"
       >
         Finaliser ma commande
       </h1>
+
       <p className="text-center text-sm text-gray-500 dark:text-gray-400">
         {itemsCount} article{itemsCount > 1 ? 's' : ''} dans votre panier
       </p>
 
-      {/* Badge livraison gratuite basé sur le sous-total */}
       {!isEmpty && (
         <div className="mt-6 flex justify-center">
           <FreeShippingBadge price={subtotal} withProgress />
@@ -110,21 +194,23 @@ export default function CheckoutPage() {
 
       {isEmpty ? (
         <section
-          className="mt-12 text-center text-gray-600 dark:text-gray-400 text-lg"
+          className="mt-12 text-center text-lg text-gray-600 dark:text-gray-400"
           role="alert"
           aria-live="polite"
         >
           <p className="mb-6">Votre panier est vide.</p>
+
           <div className="flex items-center justify-center gap-3">
             <Link
-              href="/produit"
-              className="rounded-lg bg-accent text-white px-5 py-2 font-semibold shadow hover:bg-accent/90 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40"
+              href="/products"
+              className="rounded-lg bg-accent px-5 py-2 font-semibold text-white shadow hover:bg-accent/90 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40"
             >
               Parcourir les produits
             </Link>
+
             <Link
-              href="/pack"
-              className="rounded-lg border border-gray-300 dark:border-zinc-700 px-5 py-2 font-semibold hover:bg-gray-50 dark:hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              href="/products/packs"
+              className="rounded-lg border border-gray-300 px-5 py-2 font-semibold hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent dark:border-zinc-700 dark:hover:bg-zinc-800"
             >
               Voir les packs
             </Link>
@@ -132,26 +218,23 @@ export default function CheckoutPage() {
         </section>
       ) : (
         <>
-          <div className="mt-10 grid lg:grid-cols-3 gap-10 items-start" aria-live="polite">
-            {/* Liste panier */}
-            <section className="lg:col-span-2 space-y-8" aria-label="Articles du panier">
-              <CartList items={cart} />
+          <div className="mt-10 grid items-start gap-10 lg:grid-cols-3" aria-live="polite">
+            <section className="space-y-8 lg:col-span-2" aria-label="Articles du panier">
+              <CartList items={items} />
             </section>
 
-            {/* Résumé + Paiement */}
             <aside
               id="paiement"
-              className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-2xl shadow-xl p-6 space-y-8 h-fit sticky top-24"
+              className="sticky top-24 h-fit space-y-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-xl dark:border-zinc-700 dark:bg-zinc-900"
               aria-label="Résumé et paiement"
             >
-              <CartSummary items={cart} />
+              <CartSummary items={items} />
               <CheckoutForm />
             </aside>
           </div>
 
-          {/* CTA mobile sticky vers la zone paiement */}
-          <div className="lg:hidden fixed inset-x-0 bottom-0 z-40">
-            <div className="mx-4 mb-4 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white/95 dark:bg-zinc-900/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 shadow-xl">
+          <div className="fixed inset-x-0 bottom-0 z-40 lg:hidden">
+            <div className="mx-4 mb-4 rounded-xl border border-gray-200 bg-white/95 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:border-zinc-700 dark:bg-zinc-900/95">
               <div className="flex items-center justify-between p-3">
                 <div className="text-sm">
                   <p className="font-semibold text-gray-900 dark:text-white">Sous-total</p>
@@ -159,15 +242,17 @@ export default function CheckoutPage() {
                     {new Intl.NumberFormat('fr-FR', { style: 'currency', currency }).format(subtotal)}
                   </p>
                 </div>
+
                 <a
                   href="#paiement"
-                  className="rounded-lg bg-accent text-white px-4 py-2 font-semibold shadow hover:bg-accent/90 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40"
+                  className="rounded-lg bg-accent px-4 py-2 font-semibold text-white shadow hover:bg-accent/90 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40"
                   aria-label="Aller au paiement"
                 >
                   Payer
                 </a>
               </div>
             </div>
+
             <div className="h-20" aria-hidden="true" />
           </div>
         </>
@@ -175,4 +260,3 @@ export default function CheckoutPage() {
     </main>
   )
 }
-

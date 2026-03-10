@@ -6,13 +6,9 @@ import * as React from 'react'
 import { cn } from '@/lib/utils'
 
 export interface ScrollProgressProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Position de la barre */
   position?: 'top' | 'bottom'
-  /** Hauteur en px */
   height?: number
-  /** Classe de couleur du fill (ex: 'bg-accent') */
   barClassName?: string
-  /** Container className */
   containerClassName?: string
 }
 
@@ -30,19 +26,27 @@ export default function ScrollProgress({
   React.useEffect(() => {
     const onScroll = () => {
       if (rafRef.current != null) return
+
       rafRef.current = window.requestAnimationFrame(() => {
         const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
         const y = Math.min(max, window.scrollY)
         setPct((y / max) * 100)
-        rafRef.current && window.cancelAnimationFrame(rafRef.current)
+
+        if (rafRef.current != null) {
+          window.cancelAnimationFrame(rafRef.current)
+        }
         rafRef.current = null
       })
     }
+
     window.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
+
     return () => {
       window.removeEventListener('scroll', onScroll)
-      if (rafRef.current) window.cancelAnimationFrame(rafRef.current)
+      if (rafRef.current != null) {
+        window.cancelAnimationFrame(rafRef.current)
+      }
     }
   }, [])
 

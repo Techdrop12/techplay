@@ -1,19 +1,18 @@
-// src/components/marketing/PopupEmailCapture.tsx — FINAL
 'use client'
 
+import { usePathname } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 type Props = {
-  /** Délai avant apparition (ms) */
   delayMs?: number
-  /** Jours pendant lesquels on ne réaffiche pas après dismiss/succès */
   ttlDays?: number
-  /** Clé LS de persistance */
   dismissKey?: string
-  /** Masquer sur ces routes */
   hideOnRoutes?: string[]
-  /** Classe supplémentaire */
   className?: string
+}
+
+type WelcomeResponse = {
+  error?: string
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i
@@ -25,16 +24,16 @@ export default function PopupEmailCapture({
   hideOnRoutes = ['/checkout', '/commande', '/success'],
   className,
 }: Props) {
+  const pathname = usePathname() || ''
   const [open, setOpen] = useState(false)
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [status, setStatus] = useState<string>('') // screen reader
-  const dialogRef = useRef<HTMLDivElement | null>(null)
+  const [status, setStatus] = useState('')
+
   const inputRef = useRef<HTMLInputElement | null>(null)
   const srRef = useRef<HTMLParagraphElement | null>(null)
 
-  // Pré-remplir avec l'email du checkout si présent
   useEffect(() => {
     try {
       const saved = localStorage.getItem('checkout_email')
@@ -42,14 +41,11 @@ export default function PopupEmailCapture({
     } catch {}
   }, [])
 
-  // Routes exclues
-  const hiddenByRoute = useMemo(() => {
-    if (typeof window === 'undefined') return false
-    const p = window.location?.pathname || ''
-    return hideOnRoutes.some((r) => p.startsWith(r))
-  }, [hideOnRoutes])
+  const hiddenByRoute = useMemo(
+    () => hideOnRoutes.some((route) => pathname.startsWith(route)),
+    [hideOnRoutes, pathname]
+  )
 
-  // Ne pas réafficher pendant ttl
   const isDismissed = () => {
     try {
       const raw = localStorage.getItem(dismissKey)
@@ -59,6 +55,7 @@ export default function PopupEmailCapture({
       return false
     }
   }
+
   const persistDismiss = () => {
     try {
       const until = Date.now() + ttlDays * 24 * 60 * 60 * 1000
@@ -66,32 +63,32 @@ export default function PopupEmailCapture({
     } catch {}
   }
 
-  // Timer apparition
   useEffect(() => {
     if (hiddenByRoute || isDismissed()) return
-    const t = setTimeout(() => setOpen(true), delayMs)
-    return () => clearTimeout(t)
-     
+
+    const timer = window.setTimeout(() => setOpen(true), delayMs)
+    return () => clearTimeout(timer)
   }, [hiddenByRoute, delayMs])
 
-  // Focus & ESC
   useEffect(() => {
     if (!open) return
-    // focus input à l’ouverture
-    inputRef.current?.focus?.()
+
+    inputRef.current?.focus()
+
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault()
         close()
       }
     }
+
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [open])
 
   const announce = (msg: string) => {
     setStatus(msg)
-    srRef.current && (srRef.current.textContent = msg)
+    if (srRef.current) srRef.current.textContent = msg
   }
 
   const close = () => {
@@ -100,15 +97,16 @@ export default function PopupEmailCapture({
     announce('Fenêtre fermée')
   }
 
-  const onBackdrop = (e: React.MouseEvent) => {
+  const onBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) close()
   }
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (loading) return
-    const valid = EMAIL_RE.test(email.trim())
-    if (!valid) {
+
+    const value = email.trim()
+    if (!EMAIL_RE.test(value)) {
       setError('Adresse email invalide')
       inputRef.current?.focus()
       return
@@ -122,25 +120,27 @@ export default function PopupEmailCapture({
       const res = await fetch('/api/email/welcome', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ email: value }),
         cache: 'no-store',
         keepalive: true,
       })
 
       if (!res.ok) {
-        const { error: msg } = await safeJson(res)
-        throw new Error(msg || `Erreur ${res.status}`)
+        const body = await safeJson(res)
+        throw new Error(body.error || `Erreur ${res.status}`)
       }
 
       try {
-        (window as unknown).dataLayer?.push({ event: 'email_capture_success' })
+        window.dataLayer?.push({ event: 'email_capture_success' })
       } catch {}
+
       announce('Inscription réussie')
       persistDismiss()
       setOpen(false)
     } catch (err: unknown) {
-      setError(err?.message || 'Une erreur est survenue')
-      announce('Échec de l’inscription')
+      const message = err instanceof Error ? err.message : 'Une erreur est survenue'
+      setError(message)
+      announce("Échec de l'inscription")
     } finally {
       setLoading(false)
     }
@@ -159,13 +159,11 @@ export default function PopupEmailCapture({
       onMouseDown={onBackdrop}
       role="presentation"
     >
-      {/* SR live region */}
       <p ref={srRef} className="sr-only" role="status" aria-live="polite">
         {status}
       </p>
 
       <div
-        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="email-popup-title"
@@ -181,6 +179,7 @@ export default function PopupEmailCapture({
           <h3 id="email-popup-title" className="text-lg font-bold">
             {isFr ? 'Restez informé' : 'Stay in the loop'}
           </h3>
+
           <button
             onClick={close}
             aria-label={isFr ? 'Fermer' : 'Close'}
@@ -206,7 +205,9 @@ export default function PopupEmailCapture({
             className={[
               'w-full rounded-lg border px-3 py-2 text-sm',
               'bg-white dark:bg-zinc-800',
-              error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-zinc-700 focus:ring-2 focus:ring-accent focus:outline-none',
+              error
+                ? 'border-red-500 focus:ring-red-500'
+                : 'border-gray-300 dark:border-zinc-700 focus:ring-2 focus:ring-accent focus:outline-none',
             ].join(' ')}
             placeholder={isFr ? 'Votre email' : 'Your email'}
             value={email}
@@ -214,7 +215,7 @@ export default function PopupEmailCapture({
               setEmail(e.target.value)
               if (error) setError(null)
             }}
-            aria-invalid={!!error}
+            aria-invalid={Boolean(error)}
             aria-describedby={error ? 'email-popup-error' : undefined}
             maxLength={120}
           />
@@ -255,12 +256,11 @@ export default function PopupEmailCapture({
   )
 }
 
-/* ------------------------------ Helpers ------------------------------ */
-async function safeJson(res: Response) {
+async function safeJson(res: Response): Promise<WelcomeResponse> {
   try {
-    return await res.json()
+    const data: unknown = await res.json()
+    return typeof data === 'object' && data !== null ? (data as WelcomeResponse) : {}
   } catch {
     return {}
   }
 }
-

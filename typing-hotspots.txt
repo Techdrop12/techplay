@@ -1,0 +1,284 @@
+
+src\data\types.ts:6:export function isSupplierStockItem(x: unknown): x is SupplierStockItem {
+src\hooks\useRecommendations.ts:11:  [k: string]: unknown;
+src\hooks\useRecommendations.ts:44:        setState({ data: [], loading: false, error: e?.message ?? 'Unknown error' });
+src\hooks\useWishlist.ts:6:export type WishlistItemBase = { id: string } & Record<string, unknown>
+src\hooks\useWishlist.ts:19:function normalizeId(idLike: unknown): string {
+src\hooks\useWishlist.ts:23:function isRecord(value: unknown): value is Record<string, unknown> {
+src\hooks\useWishlist.ts:27:function getItemId(item: unknown): string {
+src\hooks\useWishlist.ts:32:function toCanonical<T extends Record<string, unknown>>(
+src\hooks\useWishlist.ts:44:function sanitizeArray<T extends Record<string, unknown>>(arr: unknown): T[] {
+src\i18n\config.ts:9:export function isLocale(x: unknown): x is Locale {
+src\i18n\config.ts:10:  return typeof x === 'string' && (languages as readonly string[]).includes(x as unknown)
+src\i18n\loadMessages.ts:6:export type Messages = Record<string, unknown>
+src\i18n\loadMessages.ts:12:export default async function loadMessages(localeInput: string | unknown): Promise<Messages> {
+src\lib\abandon-cart.ts:43:    ...(imageUrl ? { imageUrl } : image ? { imageUrl: image } : {}),
+src\lib\abandon-cart.ts:64:  let lastErr: unknown
+src\lib\analytics.ts:4:export type AnalyticsParams = Record<string, unknown>
+src\lib\api-client.ts:4:type Json = Record<string, unknown>
+src\lib\auth-options.ts:60:          (req as unknown)?.headers?.['x-forwarded-for'] ||
+src\lib\auth-options.ts:61:          (req as unknown)?.headers?.['x-real-ip'] ||
+src\lib\auth-options.ts:62:          'unknown'
+src\lib\auth-options.ts:87:        token.userId = (user as unknown).id
+src\lib\auth-options.ts:88:        token.role = (user as unknown).role ?? 'user'
+src\lib\auth-options.ts:94:        (session.user as unknown).id = token.userId as string | undefined
+src\lib\auth-options.ts:95:        ;(session.user as unknown).role = (token.role as string) || 'user'
+src\lib\cart.ts:18:function isRecord(value: unknown): value is Record<string, unknown> {
+src\lib\cart.ts:22:function sanitizeItem(input: unknown): CartItem | null {
+src\lib\cart.ts:46:function parseCart(raw: unknown): CartItem[] {
+src\lib\checkout.ts:43:  [k: string]: unknown
+src\lib\checkout.ts:65:function clampInt(n: unknown, min: number, def = min) {
+src\lib\checkout.ts:71:function toNumber(n: unknown, def = 0) {
+src\lib\checkout.ts:76:function clampLen(s: unknown, max: number) {
+src\lib\checkout.ts:82:function stableStringify(x: unknown): string {
+src\lib\checkout.ts:94:    const cand = (navigator as unknown).language || (navigator as unknown).userLanguage
+src\lib\checkout.ts:136:      salt = (crypto as unknown).randomUUID()
+src\lib\checkout.ts:251:    let data: unknown
+src\lib\checkout.ts:264:  } catch (err: unknown) {
+src\lib\data.ts:19:    .lean()) as unknown as ProductType[]
+src\lib\data.ts:26:    .lean()) as unknown as ProductType[]
+src\lib\data.ts:37:  return (await Pack.find({ recommended: true }).limit(6).lean()) as unknown as PackType[]
+src\lib\data.ts:48:  return (await Blog.find({}).sort({ createdAt: -1 }).limit(10).lean()) as unknown as BlogPost[]
+src\lib\data.ts:118:  const textMatch: Record<string, unknown> = {}
+src\lib\data.ts:179:              ...(typeof min === 'number' ? { $gte: min } : {}),
+src\lib\data.ts:180:              ...(typeof max === 'number' ? { $lte: max } : {}),
+src\lib\data.ts:198:  const pipeline: unknown[] = [
+src\lib\email.ts:44:    } as unknown);
+src\lib\email.ts:104:    ...(listUnsubscribe ? { "List-Unsubscribe": listUnsubscribe } : {}),
+src\lib\email.ts:128:  vars: Record<string, unknown> = {}
+src\lib\emailTemplates.ts:22:function escapeHtml(input: unknown): string {
+src\lib\fetcher.ts:3:export async function fetcher<T = unknown>(url: string, init: FetcherInit = {}): Promise<T> {
+src\lib\fetcher.ts:8:  let lastErr: unknown
+src\lib\ga.ts:9:export type GAParams = Record<string, unknown>
+src\lib\ga.ts:40:  | ['get', string, string, (value: unknown) => void]
+src\lib\ga.ts:44:    dataLayer: Array<Record<string, unknown>>
+src\lib\ga.ts:48:    __consentState?: Record<string, unknown>
+src\lib\ga.ts:59:function ensureDataLayer(): Array<Record<string, unknown>> {
+src\lib\ga.ts:65:export function pushDataLayer(obj: Record<string, unknown>): void {
+src\lib\ga.ts:82:      window.dataLayer.push(args as unknown as Record<string, unknown>)
+src\lib\ga.ts:148:function str(v: unknown, fallback = ''): string {
+src\lib\ga.ts:152:function num(v: unknown): number | undefined {
+src\lib\ga.ts:157:export function mapProductToGaItem(product: Record<string, unknown>): GAItem {
+src\lib\ga.ts:163:    'unknown-item'
+src\lib\hotjar.ts:6:    hj?: (...args:unknown[]) => void
+src\lib\hotjar.ts:13:    (navigator as unknown).doNotTrack === "1" ||
+src\lib\hotjar.ts:14:    (window as unknown).doNotTrack === "1" ||
+src\lib\hotjar.ts:15:    (navigator as unknown).msDoNotTrack === "1"
+src\lib\language.ts:21:export function isLocale(x: unknown): x is Locale {
+src\lib\language.ts:26:export function normalizeLocale(x: unknown): Locale {
+src\lib\logEvent.ts:10:  params?: Record<string, unknown>
+src\lib\logEvent.ts:13:export function logEvent(nameOrObj: string | GAObjectEvent, params?: Record<string, unknown>) {
+src\lib\meta-pixel.ts:4:export type PixelParams = Record<string, unknown>
+src\lib\meta-pixel.ts:8:    fbq?: (...args: unknown[]) => void
+src\lib\meta-pixel.ts:9:    __consentState?: Record<string, unknown>
+src\lib\notifications.ts:4:type PushData = Record<string, unknown> | string
+src\lib\notifications.ts:48:    const res = await webPush.sendNotification(subscription as unknown, payload, {
+src\lib\notifications.ts:50:      headers: { Urgency: urgency, ...(topic ? { Topic: topic } : {}) },
+src\lib\notifications.ts:53:  } catch (err: unknown) {
+src\lib\notifications.ts:54:    if (err?.statusCode === 404 || err?.statusCode === 410) (err as unknown).shouldDelete = true
+src\lib\pdf.ts:242:    Author: (opts.brand?.name || process.env.BRAND_NAME || 'TechPlay') as unknown,
+src\lib\pdf.ts:248:function drawInvoice(doc: unknown, data: InvoiceData, opts: PdfRenderOptions) {
+src\lib\pdf.ts:369:function drawTableHeader(doc: unknown, opt?: { yStart?: number }) {
+src\lib\pdf.ts:417:  const stream: Readable = doc as unknown
+src\lib\pdf.ts:432:function toNumber(n: unknown): number {
+src\lib\performance.ts:12:if (typeof window !== 'undefined' && typeof (window as unknown).gtag === 'function') {
+src\lib\performance.ts:13:(window as unknown).gtag('event', metric.name, {
+src\lib\rateLimit.ts:51:  const g = globalThis as unknown;
+src\lib\rateLimit.ts:162:  const h: Headers = (req as unknown).headers || new Headers();
+src\lib\rateLimit.ts:170:    (req as unknown).ip ||
+src\lib\rateLimit.ts:171:    'unknown';
+src\lib\scroll.ts:118:    if (root && 'scrollTop' in (root as unknown)) {
+src\lib\scroll.ts:121:      const top = (root as unknown).scrollTop + (rect.top - rootRect.top) - offset
+src\lib\scroll.ts:122:      ;(root as unknown).scrollTo({ top, behavior: resolvedBehavior })
+src\lib\scroll.ts:204:export function throttle<T extends (...args: unknown[]) => unknown>(fn: T, wait = 100) {
+src\lib\scroll.ts:206:  let timeout: unknown
+src\lib\seo.ts:161:    } as unknown,
+src\lib\toLocale.ts:3:export function toLocale(input: unknown): Locale | undefined {
+src\lib\wishlist.ts:5:type WishlistRecord = { id: string } & Record<string, unknown>
+src\lib\wishlist.ts:9:function normalizeId(idLike: unknown): string {
+src\lib\wishlist.ts:13:function isRecord(value: unknown): value is Record<string, unknown> {
+src\lib\wishlist.ts:17:function getRecordId(value: unknown): string {
+src\lib\wishlist.ts:22:function toCanonical(product: unknown): WishlistRecord | null {
+src\lib\wishlist.ts:65:export function toggleWishlistItem(product: unknown): void {
+src\lib\zodSchemas.ts:70:export function safeParseOrThrow<T extends ZodTypeAny>(schema: T, data: unknown) {
+src\models\Article.ts:20:      transform: (_doc, ret: unknown) => {
+src\models\Article.ts:29:ArticleSchema.virtual('id').get(function (this: unknown) {
+src\models\Blog.ts:19:      transform: (_doc, ret: unknown) => {
+src\models\Blog.ts:28:BlogSchema.virtual('id').get(function (this: unknown) {
+src\models\Category.ts:15:      transform: (_doc, ret: unknown) => {
+src\models\Category.ts:24:CategorySchema.virtual('id').get(function (this: unknown) {
+src\models\Email.ts:23:      transform: (_doc, ret: unknown) => {
+src\models\Email.ts:32:EmailSchema.virtual('id').get(function (this: unknown) {
+src\models\Pack.ts:16:      transform: (_doc, ret: unknown) => {
+src\models\Pack.ts:25:PackSchema.virtual('id').get(function (this: unknown) {
+src\models\Product.ts:30:      transform: (_doc, ret: unknown) => {
+src\models\Product.ts:39:ProductSchema.virtual('id').get(function (this: unknown) {
+src\models\Review.ts:21:      transform: (_doc, ret: unknown) => {
+src\models\Review.ts:30:ReviewSchema.virtual('id').get(function (this: unknown) {
+src\models\Token.ts:17:      transform: (_doc, ret: unknown) => {
+src\models\Token.ts:26:TokenSchema.virtual('id').get(function (this: unknown) {
+src\models\TrackingEvent.ts:15:      transform: (_doc, ret: unknown) => {
+src\models\TrackingEvent.ts:24:TrackingEventSchema.virtual('id').get(function (this: unknown) {
+src\models\User.ts:15:      transform: (_doc, ret: unknown) => {
+src\models\User.ts:24:UserSchema.virtual('id').get(function (this: unknown) {
+src\models\User.ts:31:  toSafeObject(user: unknown): Omit<User, 'password'> & { id: string };
+src\models\User.ts:33:UserSchema.statics.toSafeObject = (user: unknown) => {
+src\models\User.ts:34:  const { password, ...safe } = (user?.toJSON ? user.toJSON() : user) as unknown;
+src\types\analytics.ts:1:export type GAParams = Record<string, unknown>
+src\types\externals.d.ts:6:    fbq?: (...args: unknown[]) => void
+src\types\externals.d.ts:7:    _fbq?: unknown
+src\types\externals.d.ts:8:    hj?: (...args: unknown[]) => void
+src\types\global.d.ts:14:      [key: string]: unknown
+src\types\global.d.ts:23:      items?: Record<string, unknown>[]
+src\types\global.d.ts:25:      [key: string]: unknown
+src\types\global.d.ts:38:      [key: string]: unknown
+src\types\global.d.ts:48:    dataLayer?: Record<string, unknown>[]
+src\types\global.d.ts:55:        | ['set', Record<string, unknown>]
+src\types\global.d.ts:56:        | ['set', 'user_properties', Record<string, unknown>]
+src\types\global.d.ts:57:        | ['get', string, string, (value: unknown) => void]
+src\types\global.d.ts:63:        | ['track', string, Record<string, unknown>?]
+src\types\global.d.ts:67:    hj?: (method: 'trigger' | 'identify' | 'stateChange', value: unknown) => void
+src\types\global.d.ts:70:      messageSW: (data: unknown) => Promise<void>
+src\types\global.d.ts:80:    __applyConsent?: (next: Partial<Gtag.ConsentUpdate> | Record<string, unknown>) => void
+src\app\page.tsx:161:      style={{ contentVisibility: 'auto', containIntrinsicSize: '300px' } as unknown}
+src\app\page.tsx:269:          itemListElement: bestProducts.slice(0, 8).map((p: unknown, idx: number) => ({
+src\app\page.tsx:302:          style={{ contentVisibility: 'auto', containIntrinsicSize: '600px' } as unknown}
+src\app\page.tsx:320:          style={{ contentVisibility: 'auto', containIntrinsicSize: '600px' } as unknown}
+src\app\page.tsx:340:          style={{ contentVisibility: 'auto', containIntrinsicSize: '500px' } as unknown}
+src\components\AddToCartButton.tsx:23:  onError?: (err: unknown) => void
+src\components\AddToCartButton.tsx:48:  gtmExtra?: Record<string, unknown>
+src\components\AddToCartButton.tsx:224:    (detail: Record<string, unknown>) => {
+src\components\AddToCartButton.tsx:227:        (window as unknown).dataLayer = (window as unknown).dataLayer || []
+src\components\AddToCartButton.tsx:228:        ;(window as unknown).dataLayer.push({
+src\components\AddToCartButton.tsx:232:            value: (detail as unknown).value,
+src\components\AddToCartButton.tsx:239:                item_variant: (detail as unknown).variant,
+src\components\AddToCartButton.tsx:240:                item_brand: (detail as unknown).brand,
+src\components\AddToCartButton.tsx:241:                item_category: (detail as unknown).category,
+src\components\AddToCartButton.tsx:294:          (logEvent as unknown)?.({ action: 'add_to_cart', category: 'ecommerce', label: title, value: price * quantity })
+src\components\AddToCartButton.tsx:354:            (logEvent as unknown)?.({ action: 'buy_now_click', category: 'ecommerce', label: title })
+src\components\AddToCartButton.tsx:355:            ;(window as unknown).dataLayer?.push({ event: 'buy_now_click', ...gtmExtra })
+src\components\AddToCartButtonAB.tsx:27:  [k: string]: unknown
+src\components\AddToCartButtonAB.tsx:100:    async (e: unknown) => {
+src\components\AfterIdleClient.tsx:11:    const ric: unknown = (window as unknown).requestIdleCallback ?? ((cb: unknown) => setTimeout(cb, 1))
+src\components\AfterIdleClient.tsx:14:      (window as unknown).cancelIdleCallback?.(id)
+src\components\AfterIdleClient.tsx:60:      ('requestIdleCallback' in window ? (window as unknown).requestIdleCallback(cb) : setTimeout(cb, 500))
+src\components\AfterIdleClient.tsx:64:      (window as unknown).cancelIdleCallback?.(id)
+src\components\AppInstallPrompt.tsx:18:    safari?: unknown
+src\components\AppInstallPrompt.tsx:31:  const iosStandalone = (window.navigator as unknown).standalone === true
+src\components\AppInstallPrompt.tsx:37:  const ua = navigator.userAgent || navigator.vendor || (window as unknown).opera || ''
+src\components\AppInstallPrompt.tsx:96:    window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt as unknown)
+src\components\AppInstallPrompt.tsx:99:      window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt as unknown)
+src\components\BestProducts.tsx:26:type AnyProduct = Record<string, unknown>
+src\components\BestProducts.tsx:41:function pushDL(event: string, payload?: Record<string, unknown>) {
+src\components\BestProducts.tsx:42:  try { (window as unknown).dataLayer?.push({ event, ...payload }) } catch {}
+src\components\BestProducts.tsx:237:      style={{ contentVisibility: 'auto', containIntrinsicSize: '800px' } as unknown}
+src\components\BestProducts.tsx:326:        {...(!reduceMotion ? { variants: containerVariants, initial: 'hidden', whileInView: 'show' } : {})}
+src\components\BestProducts.tsx:335:            (product as unknown)?._id ??
+src\components\BestProducts.tsx:336:            (product as unknown)?.slug ??
+src\components\BestProducts.tsx:337:            (product as unknown)?.id ??
+src\components\BestProducts.tsx:343:              {...(!reduceMotion ? { variants: itemVariants } : {})}
+src\components\BestProducts.tsx:344:              {...(!reduceMotion ? { whileHover: { y: -4 } } : {})}
+src\components\BestProducts.tsx:352:                  title: (product as unknown).title ?? (product as unknown).name ?? 'Produit sans titre',
+src\components\BestProducts.tsx:354:                    (product as unknown).image ??
+src\components\BestProducts.tsx:355:                    (product as unknown).imageUrl ??
+src\components\BestProducts.tsx:356:                    (product as unknown).images?.[0] ??
+src\components\Breadcrumbs.tsx:76:            ...(c.href ? { item: joinUrl(baseUrl, c.href) } : {}),
+src\components\Clarity.tsx:13:    const s: unknown = (window as unknown).__consentState || {}
+src\components\Clarity.tsx:33:    (navigator as unknown).doNotTrack === '1' ||
+src\components\Clarity.tsx:34:    (window as unknown).doNotTrack === '1' ||
+src\components\Clarity.tsx:35:    (navigator as unknown).msDoNotTrack === '1'
+src\components\Clarity.tsx:58:        if ((window as unknown).clarity && typeof (window as unknown).clarity === 'function') {
+src\components\Clarity.tsx:60:            (window as unknown).clarity('consent', false)
+src\components\Clarity.tsx:62:            (window as unknown).clarity('consentv2', cs)
+src\components\Clarity.tsx:78:      try { (window as unknown).clarity && (window as unknown).clarity('consentv2', consentState()) } catch {}
+src\components\ClientOnly.tsx:7:interface ClientOnlyProps<T extends Record<string, unknown>> {
+src\components\ClientOnly.tsx:13:export default function ClientOnly<T extends Record<string, unknown>>({
+src\components\ClientTrackingScript.tsx:13:  params?: Record<string, unknown>
+src\components\ClientTrackingScript.tsx:36:function toOnceKey(evt: string, params?: Record<string, unknown>, custom?: string) {
+src\components\ClientTrackingScript.tsx:73:        (window as unknown).dataLayer = (window as unknown).dataLayer || []
+src\components\ClientTrackingScript.tsx:74:        ;(window as unknown).dataLayer.push({ event, ...(params || {}) })
+src\components\ClientTrackingScript.tsx:82:        trackPixel(metaEvt as unknown, params as unknown)
+src\components\ConsentBanner.tsx:49:function pushDL(event: string, detail: Record<string, unknown>) {
+src\components\ConsentBanner.tsx:51:    (window as unknown).dataLayer = (window as unknown).dataLayer || []
+src\components\ConsentBanner.tsx:52:    ;(window as unknown).dataLayer.push({ event, ...detail })
+src\components\ConsentBanner.tsx:81:      (navigator as unknown).doNotTrack === '1' ||
+src\components\ConsentBanner.tsx:82:      (window as unknown).doNotTrack === '1' ||
+src\components\ConsentBanner.tsx:83:      (navigator as unknown).msDoNotTrack === '1'
+src\components\Footer.tsx:95:const track = (action: string, data: Record<string, unknown> = {}) => {
+src\components\Footer.tsx:106:    (logEvent as unknown)?.(action, data)
+src\components\Footer.tsx:174:    try { (window as unknown).tpOpenConsent?.() } catch {}
+src\components\Footer.tsx:212:    } catch (err: unknown) {
+src\components\FreeShippingBadge.tsx:145:        try { (window as unknown).dataLayer?.push({ event: 'free_shipping_reached', threshold }) } catch {}
+src\components\FreeShippingBadge.tsx:241:                  onClick={() => { try { (window as unknown).dataLayer?.push({ event: 'free_shipping_policy_click' }) } catch {} }}
+src\components\FreeShippingBadge.tsx:302:                onClick={() => { try { (window as unknown).dataLayer?.push({ event: 'free_shipping_policy_click' }) } catch {} }}
+src\components\FreeShippingBadge.tsx:343:            onClick={() => { try { (window as unknown).dataLayer?.push({ event: 'free_shipping_policy_click' }) } catch {} }}
+src\components\HeroCarousel.tsx:125:function pushDL(event: string, payload?: Record<string, unknown>) {
+src\components\HeroCarousel.tsx:127:    (window as unknown).dataLayer?.push({ event, ...payload })
+src\components\HeroCarousel.tsx:367:          style={parallaxStyle as unknown}
+src\components\HeroCarousel.tsx:409:                  onError={(e) => { (e.currentTarget as unknown).style.display = 'none' }}
+src\components\HeroCarousel.tsx:423:                  onError={(e) => { (e.currentTarget as unknown).style.display = 'none' }}
+src\components\Hotjar.tsx:17:    const s: unknown = (window as unknown).__consentState || {}
+src\components\Hotjar.tsx:28:    (navigator as unknown).doNotTrack === '1' ||
+src\components\Hotjar.tsx:29:    (window as unknown).doNotTrack === '1' ||
+src\components\Hotjar.tsx:30:    (navigator as unknown).msDoNotTrack === '1'
+src\components\Input.tsx:133:    const controlledValue = (props as unknown)?.value
+src\components\LanguageSwitcher.tsx:35:      ;(window as unknown).dataLayer = (window as unknown).dataLayer || []
+src\components\LanguageSwitcher.tsx:36:      ;(window as unknown).dataLayer.push({ event: 'change_language', locale: next })
+src\components\LiveChat.tsx:7:    $crisp: unknown[];
+src\components\LocalizedLink.tsx:50:  return <NextLink ref={ref} href={finalHref as unknown} {...rest} />
+src\components\MetaPixel.tsx:12:    fbq?: (...args: unknown[]) => void
+src\components\MetaPixel.tsx:13:    _fbq?: unknown
+src\components\MetaPixel.tsx:42:    (navigator as unknown).doNotTrack === '1' ||
+src\components\MetaPixel.tsx:43:    (window as unknown).doNotTrack === '1' ||
+src\components\MetaPixel.tsx:44:    (navigator as unknown).msDoNotTrack === '1'
+src\components\MetaPixel.tsx:59:    const s: unknown = (window as unknown).__consentState || {}
+src\components\MetaPixel.tsx:100:  const u = (typeof window !== 'undefined' && (window as unknown).__pixelUser) || null
+src\components\MetaPixel.tsx:134:    () => (...args: unknown[]) => {
+src\components\Modal.tsx:61:      ;(document.body as unknown).__prevOverflow = overflow
+src\components\Modal.tsx:68:      const prev = (document.body as unknown).__prevOverflow as string | undefined
+src\components\Modal.tsx:70:      ;(document.body as unknown).__prevOverflow = undefined
+src\components\Modal.tsx:280:  }) as unknown
+src\components\PackCard.tsx:32:type UnknownRecord = Record<string, unknown>
+src\components\PackCard.tsx:39:const isRecord = (value: unknown): value is UnknownRecord =>
+src\components\PackCard.tsx:42:const getFirstValue = (record: UnknownRecord, keys: readonly string[]): unknown => {
+src\components\PackCard.tsx:50:const toFiniteNumber = (value: unknown): number | undefined => {
+src\components\PackCard.tsx:83:const readArray = (record: UnknownRecord, keys: readonly string[]): unknown[] | undefined => {
+src\components\PackCard.tsx:88:const normalizeImageSrc = (value: unknown): string | undefined => {
+src\components\PackCard.tsx:118:const readItemPrice = (item: unknown): number | undefined => {
+src\components\PackCard.tsx:123:const readItemLabel = (item: unknown): string | undefined => {
+src\components\PackCard.tsx:142:  const packRecord: UnknownRecord = isRecord(pack) ? pack : {}
+src\components\PackCard.tsx:384:            : {}
+src\components\PacksSection.tsx:29:type AnyPack = Record<string, unknown>
+src\components\PacksSection.tsx:57:function pushDL(event: string, payload?: Record<string, unknown>) {
+src\components\PacksSection.tsx:59:    (window as unknown).dataLayer?.push({ event, ...payload })
+src\components\PacksSection.tsx:69:function getItems(p: AnyPack): unknown[] {
+src\components\PacksSection.tsx:74:function getItemPrice(it: Record<string, unknown>): number {
+src\components\PacksSection.tsx:82:  return items.reduce((acc: number, it: unknown) => acc + getItemPrice(it || {}), 0)
+src\components\PacksSection.tsx:316:        {...(!reduceMotion ? { variants: containerVariants, initial: 'hidden', whileInView: 'show' } : {})}
+src\components\PacksSection.tsx:324:          const key = (pack as unknown)?.slug ?? (pack as unknown)?._id ?? ('pk-' + i)
+src\components\PacksSection.tsx:328:              {...(!reduceMotion ? { variants: itemVariants } : {})}
+src\components\PacksSection.tsx:329:              {...(!reduceMotion ? { whileHover: { y: -4 } } : {})}
+src\components\ProductCard.tsx:22:  [k: string]: unknown
+src\components\ProductDetail.tsx:51:type GaSource = Record<string, unknown>
+src\components\ProductDetail.tsx:56:  return p as unknown as GaSource
+src\components\ProductDetail.tsx:76:const toNum = (v: unknown): number | undefined => {
+src\components\RatingSummary.tsx:104:          ...(jsonLd.id ? { '@id': jsonLd.id } : {}),
+src\components\RatingSummary.tsx:105:          ...(jsonLd.productSku ? { sku: jsonLd.productSku } : {}),
+src\components\RatingSummary.tsx:106:          ...(jsonLd.productName ? { name: jsonLd.productName } : {}),
+src\components\ReviewForm.tsx:67:      timerRef.current = window.setInterval(update, 300) as unknown as number
+src\components\ReviewForm.tsx:169:    }, 300) as unknown as number
+src\components\StickyCartSummary.tsx:78:  let t: unknown
+src\components\StickyCartSummary.tsx:82:    t = ((key: string, _v?: Record<string, unknown>) => {
+src\components\StickyCartSummary.tsx:104:    }) as unknown
+src\components\StickyCartSummary.tsx:106:  const tx = (key: string, fallback: string, values?: Record<string, unknown>) => {
+src\components\StickyCartSummary.tsx:107:    try { return values ? t(key as unknown, values as unknown) : (t(key as unknown) as unknown) } catch { return fallback }
+src\components\StickyCartSummary.tsx:134:    () => (Number.isFinite(total) ? total : (cart ?? []).reduce((s, it: unknown) => s + (it?.price || 0) * (it?.quantity || 1), 0)),
+src\components\Tracking.tsx:73:  next: Partial<Gtag.ConsentUpdate> & Record<string, unknown>,
+src\components\Tracking.tsx:107:        Record<string, unknown>
+src\components\Tracking.tsx:121:              (next ?? {}) as Partial<Gtag.ConsentUpdate> & Record<string, unknown>,
+src\components\WishlistButton.tsx:22:  [k: string]: unknown
+src\context\cartContext.tsx:93:function isRecord(value: unknown): value is Record<string, unknown> {
+src\context\cartContext.tsx:97:function ensureItemShape(input: Partial<CartItem> | unknown): CartItem {
+src\context\cartContext.tsx:98:  const source = isRecord(input) ? input : {}
+src\context\cartContext.tsx:138:      .map((item: unknown) => ensureItemShape(item))
+

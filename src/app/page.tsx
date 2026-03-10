@@ -1,9 +1,9 @@
-// src/app/page.tsx — Home i18n-ready (FR/EN via cookie), catégories localisées, SEO centralisé
+// src/app/page.tsx — Home i18n-ready, typée proprement, sans cast `unknown`
 import dynamic from 'next/dynamic'
 import { cookies } from 'next/headers'
-import { Suspense } from 'react'
+import { Suspense, type CSSProperties } from 'react'
 
-import type { Product, Pack } from '@/types/product'
+import type { Pack, Product } from '@/types/product'
 import type { Metadata } from 'next'
 
 import ClientTrackingScript from '@/components/ClientTrackingScript'
@@ -11,7 +11,7 @@ import Link from '@/components/LocalizedLink'
 import TrustBadges from '@/components/TrustBadges'
 import { getCategories } from '@/lib/categories'
 import { getBestProducts, getRecommendedPacks } from '@/lib/data'
-import { isLocale, DEFAULT_LOCALE, LOCALE_COOKIE, type Locale } from '@/lib/language'
+import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale, type Locale } from '@/lib/language'
 import { generateMeta } from '@/lib/seo'
 
 const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'))
@@ -25,7 +25,22 @@ const FAQ = dynamic(() => import('@/components/FAQ'), {
   loading: () => <SectionSkeleton title="…" />,
 })
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://techplay.example.com'
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
+
+const lazySectionStyle600: CSSProperties = {
+  contentVisibility: 'auto',
+  containIntrinsicSize: '600px',
+}
+
+const lazySectionStyle500: CSSProperties = {
+  contentVisibility: 'auto',
+  containIntrinsicSize: '500px',
+}
+
+const lazySectionStyle300: CSSProperties = {
+  contentVisibility: 'auto',
+  containIntrinsicSize: '300px',
+}
 
 /* ----------------------------- i18n strings ------------------------------ */
 const STR = {
@@ -50,6 +65,11 @@ const STR = {
     ctaPacks: 'Découvrir les packs',
     ctaProducts: 'Voir les produits',
     seeCat: 'Voir →',
+    testimonialsTitle: 'Les clients en parlent',
+    testimonialsKicker: 'Avis',
+    testimonialsSub: 'Des retours authentiques sur l’expérience TechPlay.',
+    faqKicker: 'FAQ',
+    noscriptProducts: 'Voir les produits',
   },
   en: {
     homeTitle: 'TechPlay – High-tech store & exclusive bundles',
@@ -72,10 +92,17 @@ const STR = {
     ctaPacks: 'Discover bundles',
     ctaProducts: 'View products',
     seeCat: 'See →',
+    testimonialsTitle: 'What customers say',
+    testimonialsKicker: 'Reviews',
+    testimonialsSub: 'Real feedback about the TechPlay experience.',
+    faqKicker: 'FAQ',
+    noscriptProducts: 'View products',
   },
 } as const
 
-// SEO: on génère via lib/seo puis on force un titre absolute (évite le suffixe du layout)
+type HomeLocale = keyof typeof STR
+
+// SEO
 const BASE_META = generateMeta({
   title: 'TechPlay – Boutique high-tech & packs exclusifs',
   description:
@@ -85,38 +112,63 @@ const BASE_META = generateMeta({
   type: 'website',
   locale: 'fr_FR',
 })
+
 export const metadata: Metadata = {
   ...BASE_META,
   title: { absolute: 'TechPlay – Boutique high-tech & packs exclusifs' },
 }
 
-// ISR revalidation
 export const revalidate = 300
+
+/* ------------------------------- helpers -------------------------------- */
+
+function isHomeLocale(value: string): value is HomeLocale {
+  return value === 'fr' || value === 'en'
+}
+
+function getProductUrl(product: Product): string {
+  return product.slug ? `${SITE_URL}/products/${product.slug}` : `${SITE_URL}/products`
+}
+
+function getProductName(product: Product): string {
+  return product.title?.trim() || 'Produit'
+}
 
 /* -------------------------- UI helpers (section) -------------------------- */
 function SectionHeader({
-  kicker, title, sub, center = true, as = 'h2',
+  kicker,
+  title,
+  sub,
+  center = true,
+  as = 'h2',
 }: {
-  kicker?: string; title: string; sub?: string; center?: boolean; as?: 'h2' | 'h3'
+  kicker?: string
+  title: string
+  sub?: string
+  center?: boolean
+  as?: 'h2' | 'h3'
 }) {
   const Tag = as
+
   return (
-    <header className={center ? 'text-center max-w-3xl mx-auto' : ''}>
+    <header className={center ? 'mx-auto max-w-3xl text-center' : ''}>
       {kicker && (
-        <p className="text-xs tracking-widest uppercase font-bold text-[hsl(var(--accent))]/90">
+        <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent))]/90">
           {kicker}
         </p>
       )}
+
       <Tag className="mt-2 text-balance font-extrabold tracking-tight text-[clamp(1.75rem,3vw+1rem,2.5rem)]">
         <span className="text-gradient">{title}</span>
       </Tag>
-      {sub && <p className="mt-3 text-sm sm:text-base text-token-text/70">{sub}</p>}
+
+      {sub ? <p className="mt-3 text-sm text-token-text/70 sm:text-base">{sub}</p> : null}
     </header>
   )
 }
 
 /* --------------------- Catégories (icônes premium centrales) -------------------- */
-function FeaturedCategories({ locale }: { locale: 'fr' | 'en' }) {
+function FeaturedCategories({ locale }: { locale: HomeLocale }) {
   const items = getCategories(locale).slice(0, 8)
 
   return (
@@ -126,22 +178,25 @@ function FeaturedCategories({ locale }: { locale: 'fr' | 'en' }) {
         title={STR[locale].catsTitle}
         sub={STR[locale].catsSub}
       />
-      <h3 id="cats-title" className="sr-only">{STR[locale].catsTitle}</h3>
+
+      <h2 id="cats-title" className="sr-only">
+        {STR[locale].catsTitle}
+      </h2>
 
       <ul role="list" className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-6">
-        {items.map((c) => (
-          <li key={c.href}>
+        {items.map((category) => (
+          <li key={category.href}>
             <Link
-              href={c.href}
+              href={category.href}
               prefetch={false}
-              className="group block rounded-2xl border border-token-border bg-token-surface/70 backdrop-blur shadow-sm transition hover:shadow-elevated focus-ring p-4 sm:p-5"
+              className="group block rounded-2xl border border-token-border bg-token-surface/70 p-4 shadow-sm backdrop-blur transition hover:shadow-elevated focus-ring sm:p-5"
               data-gtm="home_cat_card"
-              data-cat={c.label}
-              aria-label={`${c.label} — ${c.desc}`}
+              data-cat={category.label}
+              aria-label={`${category.label} — ${category.desc}`}
             >
-              <c.Icon className="opacity-80" />
-              <div className="mt-3 font-semibold">{c.label}</div>
-              <div className="text-xs text-token-text/60">{c.desc}</div>
+              <category.Icon className="opacity-80" />
+              <div className="mt-3 font-semibold">{category.label}</div>
+              <div className="text-xs text-token-text/60">{category.desc}</div>
               <div className="mt-3 text-xs font-semibold text-[hsl(var(--accent))] opacity-0 transition group-hover:opacity-100">
                 {STR[locale].seeCat}
               </div>
@@ -153,27 +208,35 @@ function FeaturedCategories({ locale }: { locale: 'fr' | 'en' }) {
   )
 }
 
-function SplitCTA({ locale }: { locale: 'fr' | 'en' }) {
+function SplitCTA({ locale }: { locale: HomeLocale }) {
   return (
     <section
       aria-label={STR[locale].ctaTitle}
-      className="motion-section relative overflow-hidden rounded-3xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.10)] via-transparent to-token-surface p-6 sm:p-10 shadow-elevated"
-      style={{ contentVisibility: 'auto', containIntrinsicSize: '300px' } as unknown}
+      className="motion-section relative overflow-hidden rounded-3xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.10)] via-transparent to-token-surface p-6 shadow-elevated sm:p-10"
+      style={lazySectionStyle300}
     >
-      <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[hsl(var(--accent)/.20)] blur-3xl" />
-      <div aria-hidden className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-token-text/10 blur-3xl" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[hsl(var(--accent)/.20)] blur-3xl"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-token-text/10 blur-3xl"
+      />
+
       <div className="relative grid items-center gap-6 lg:grid-cols-2">
         <div>
-          <p className="text-xs uppercase tracking-widest font-bold text-[hsl(var(--accent))]/90">
+          <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent))]/90">
             {STR[locale].ctaOffer}
           </p>
-          <h3 className="mt-2 text-2xl sm:text-3xl font-extrabold">
+
+          <h3 className="mt-2 text-2xl font-extrabold sm:text-3xl">
             {STR[locale].ctaHeadline}
             <span className="text-gradient">{STR[locale].ctaSpan}</span>
           </h3>
-          <p className="mt-3 text-sm sm:text-base text-token-text/70">
-            {STR[locale].ctaText}
-          </p>
+
+          <p className="mt-3 text-sm text-token-text/70 sm:text-base">{STR[locale].ctaText}</p>
+
           <div className="mt-5 flex flex-wrap gap-3">
             <Link
               href="/products/packs"
@@ -183,6 +246,7 @@ function SplitCTA({ locale }: { locale: 'fr' | 'en' }) {
             >
               {STR[locale].ctaPacks}
             </Link>
+
             <Link
               href="/products"
               prefetch={false}
@@ -193,34 +257,43 @@ function SplitCTA({ locale }: { locale: 'fr' | 'en' }) {
             </Link>
           </div>
         </div>
+
         <div className="min-h-[180px] rounded-2xl border border-token-border bg-token-surface/60 shadow-elevated" />
       </div>
     </section>
   )
 }
 
-function Testimonials({ locale }: { locale: 'fr' | 'en' }) {
+function Testimonials({ locale }: { locale: HomeLocale }) {
   const items =
     locale === 'fr'
       ? [
-          { name: 'Léa',    text: 'Livraison rapide et clavier incroyable, je recommande !' },
+          { name: 'Léa', text: 'Livraison rapide et clavier incroyable, je recommande !' },
           { name: 'Maxime', text: 'Service client réactif, pack super rentable.' },
-          { name: 'Amine',  text: 'Qualité au top, site fluide et clair.' },
+          { name: 'Amine', text: 'Qualité au top, site fluide et clair.' },
         ]
       : [
-          { name: 'Lea',   text: 'Fast delivery and an amazing keyboard, highly recommend!' },
-          { name: 'Max',   text: 'Responsive support, bundle was great value.' },
-          { name: 'Amin',  text: 'Top quality, smooth and clear website.' },
+          { name: 'Lea', text: 'Fast delivery and an amazing keyboard, highly recommend!' },
+          { name: 'Max', text: 'Responsive support, bundle was great value.' },
+          { name: 'Amin', text: 'Top quality, smooth and clear website.' },
         ]
 
   return (
-    <section aria-label="Testimonials" className="motion-section">
-      <SectionHeader kicker="Avis / Reviews" title="Les clients en parlent / What customers say" sub="" />
+    <section aria-label={STR[locale].testimonialsTitle} className="motion-section">
+      <SectionHeader
+        kicker={STR[locale].testimonialsKicker}
+        title={STR[locale].testimonialsTitle}
+        sub={STR[locale].testimonialsSub}
+      />
+
       <ul role="list" className="mt-8 grid gap-4 sm:grid-cols-3">
-        {items.map((t, i) => (
-          <li key={i} className="rounded-2xl border border-token-border bg-token-surface/70 p-5 shadow-soft">
-            <p className="text-sm text-token-text/90">“{t.text}”</p>
-            <p className="mt-3 text-sm font-semibold">— {t.name}</p>
+        {items.map((item, index) => (
+          <li
+            key={`${item.name}-${index}`}
+            className="rounded-2xl border border-token-border bg-token-surface/70 p-5 shadow-soft"
+          >
+            <p className="text-sm text-token-text/90">“{item.text}”</p>
+            <p className="mt-3 text-sm font-semibold">— {item.name}</p>
           </li>
         ))}
       </ul>
@@ -233,8 +306,8 @@ function SectionSkeleton({ title }: { title: string }) {
     <section className="motion-section">
       <SectionHeader title={title} />
       <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="skeleton h-40 rounded-2xl" />
+        {Array.from({ length: 8 }).map((_, index) => (
+          <div key={index} className="skeleton h-40 rounded-2xl" />
         ))}
       </div>
     </section>
@@ -243,34 +316,33 @@ function SectionSkeleton({ title }: { title: string }) {
 
 /* --------------------------------- Page ---------------------------------- */
 export default async function HomePage() {
-  // Locale depuis cookie (fallback DEFAULT_LOCALE)
   const cookieStore = await cookies()
-  const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value
-  const locale = isLocale(cookieLocale || '') ? (cookieLocale as Locale) : (DEFAULT_LOCALE as Locale)
+  const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value ?? ''
+
+  const localeValue: Locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE
+  const locale: HomeLocale = isHomeLocale(localeValue) ? localeValue : 'fr'
   const L = STR[locale]
 
   let bestProducts: Product[] = []
   let recommendedPacks: Pack[] = []
+
   try {
-    [bestProducts, recommendedPacks] = await Promise.all([
-      getBestProducts(),
-      getRecommendedPacks(),
-    ])
+    [bestProducts, recommendedPacks] = await Promise.all([getBestProducts(), getRecommendedPacks()])
   } catch {
-    // soft-fail : skeletons
+    bestProducts = []
+    recommendedPacks = []
   }
 
-  // JSON-LD ItemList (uniquement ici ; WebSite/Organization sont dans le layout)
   const itemListJsonLd =
-    Array.isArray(bestProducts) && bestProducts.length > 0
+    bestProducts.length > 0
       ? {
           '@context': 'https://schema.org',
           '@type': 'ItemList',
-          itemListElement: bestProducts.slice(0, 8).map((p: unknown, idx: number) => ({
+          itemListElement: bestProducts.slice(0, 8).map((product, idx) => ({
             '@type': 'ListItem',
             position: idx + 1,
-            url: p?.slug ? `${SITE_URL}/products/${p.slug}` : `${SITE_URL}/products`,
-            name: p?.title ?? 'Produit',
+            url: getProductUrl(product),
+            name: getProductName(product),
           })),
         }
       : null
@@ -280,16 +352,24 @@ export default async function HomePage() {
       <h1 className="sr-only">{L.homeTitle}</h1>
       <ClientTrackingScript event="homepage_view" />
 
-      {/* Glow décoratif global */}
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute left-1/2 -top-24 h-[420px] w-[620px] -translate-x-1/2 rounded-full bg-[hsl(var(--accent)/.20)] blur-3xl" />
       </div>
 
-      <main id="main" className="mx-auto max-w-screen-xl scroll-smooth px-4 sm:px-6 space-y-24 md:space-y-28" role="main" tabIndex={-1}>
+      <main
+        id="main"
+        className="mx-auto max-w-screen-xl scroll-smooth space-y-24 px-4 sm:px-6 md:space-y-28"
+        role="main"
+        tabIndex={-1}
+      >
         <section aria-label={L.heroAria} className="motion-section" id="hero">
-          <Suspense fallback={<div className="h-40 sm:h-56 lg:h-72 rounded-2xl skeleton" />}>
+          <Suspense fallback={<div className="skeleton h-40 rounded-2xl sm:h-56 lg:h-72" />}>
             <HeroCarousel />
-            <noscript><p><a href="/products">Voir les produits</a></p></noscript>
+            <noscript>
+              <p>
+                <a href="/products">{L.noscriptProducts}</a>
+              </p>
+            </noscript>
           </Suspense>
         </section>
 
@@ -299,16 +379,12 @@ export default async function HomePage() {
           aria-label={L.bestTitle}
           className="motion-section"
           id="best-products"
-          style={{ contentVisibility: 'auto', containIntrinsicSize: '600px' } as unknown}
+          style={lazySectionStyle600}
         >
-          <SectionHeader
-            kicker={L.bestKicker}
-            title={L.bestTitle}
-            sub={L.bestSub}
-          />
+          <SectionHeader kicker={L.bestKicker} title={L.bestTitle} sub={L.bestSub} />
           <div className="mt-8">
             <Suspense fallback={<SectionSkeleton title={L.bestTitle} />}>
-              <BestProducts products={[]} showTitle={false} />
+              <BestProducts products={bestProducts} showTitle={false} />
             </Suspense>
           </div>
         </section>
@@ -317,13 +393,9 @@ export default async function HomePage() {
           aria-label={L.packsTitle}
           className="motion-section"
           id="packs"
-          style={{ contentVisibility: 'auto', containIntrinsicSize: '600px' } as unknown}
+          style={lazySectionStyle600}
         >
-          <SectionHeader
-            kicker={L.packsKicker}
-            title={L.packsTitle}
-            sub={L.packsSub}
-          />
+          <SectionHeader kicker={L.packsKicker} title={L.packsTitle} sub={L.packsSub} />
           <div className="mt-8">
             <Suspense fallback={<SectionSkeleton title={L.packsTitle} />}>
               <PacksSection packs={recommendedPacks} />
@@ -334,12 +406,8 @@ export default async function HomePage() {
         <Testimonials locale={locale} />
         <SplitCTA locale={locale} />
 
-        <section
-          aria-label={L.faqTitle}
-          className="motion-section"
-          style={{ contentVisibility: 'auto', containIntrinsicSize: '500px' } as unknown}
-        >
-          <SectionHeader kicker="FAQ" title={L.faqTitle} />
+        <section aria-label={L.faqTitle} className="motion-section" style={lazySectionStyle500}>
+          <SectionHeader kicker={L.faqKicker} title={L.faqTitle} />
           <div className="mt-8">
             <Suspense fallback={<SectionSkeleton title={L.faqTitle} />}>
               <FAQ />
@@ -351,11 +419,11 @@ export default async function HomePage() {
       </main>
 
       {itemListJsonLd ? (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+        />
       ) : null}
     </>
   )
 }
-
-
-

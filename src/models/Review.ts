@@ -1,4 +1,11 @@
-import mongoose, { Schema, InferSchemaType, Types } from 'mongoose';
+import mongoose, { InferSchemaType, Schema, Types } from 'mongoose'
+
+type SerializedReview = {
+  _id?: Types.ObjectId | string
+  __v?: unknown
+  id?: string
+  [key: string]: unknown
+}
 
 const ReviewSchema = new Schema(
   {
@@ -11,28 +18,38 @@ const ReviewSchema = new Schema(
     comment: { type: String, trim: true },
     verified: { type: Boolean, default: false, index: true },
     helpfulCount: { type: Number, default: 0 },
-    status: { type: String, default: 'published', enum: ['published', 'pending', 'rejected'], index: true },
+    status: {
+      type: String,
+      default: 'published',
+      enum: ['published', 'pending', 'rejected'],
+      index: true,
+    },
   },
   {
     timestamps: true,
     toJSON: {
       virtuals: true,
       versionKey: false,
-      transform: (_doc, ret: unknown) => {
-        ret.id = ret._id?.toString?.() ?? ret._id;
-        const { _id, __v, ...rest } = ret;
-        return rest;
+      transform: (_doc, ret) => {
+        const serialized = ret as SerializedReview
+        if (serialized._id != null) serialized.id = String(serialized._id)
+        const { _id, __v, ...rest } = serialized
+        return rest
       },
     },
   }
-);
+)
 
-ReviewSchema.virtual('id').get(function (this: unknown) {
-  return this._id.toString();
-});
-ReviewSchema.index({ product: 1, createdAt: -1 });
+ReviewSchema.virtual('id').get(function (this: { _id: Types.ObjectId }) {
+  return this._id.toString()
+})
 
-export type Review = InferSchemaType<typeof ReviewSchema> & { product: Types.ObjectId };
-export default (mongoose.models.Review as mongoose.Model<Review>) ||
-  mongoose.model<Review>('Review', ReviewSchema);
+ReviewSchema.index({ product: 1, createdAt: -1 })
 
+export type Review = InferSchemaType<typeof ReviewSchema> & { product: Types.ObjectId }
+
+const ReviewModel =
+  (mongoose.models.Review as mongoose.Model<Review> | undefined) ||
+  mongoose.model<Review>('Review', ReviewSchema)
+
+export default ReviewModel

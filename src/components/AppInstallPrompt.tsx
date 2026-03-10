@@ -1,4 +1,4 @@
-// src/components/AppInstallPrompt.tsx — FINAL
+// src/components/AppInstallPrompt.tsx
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -7,36 +7,30 @@ import Button from '@/components/Button'
 import { showToast } from '@/components/ToastSystem'
 import { logEvent } from '@/lib/ga'
 
-type BeforeInstallPromptEvent = Event & {
-  prompt: () => Promise<void>
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform?: string }>
-}
-
-declare global {
-  interface Window {
-    __TP_INSTALL_SEEN?: boolean
-    safari?: unknown
-  }
-}
-
 const DISMISS_UNTIL_KEY = 'pwa:install:dismiss_until'
 const DISMISS_DAYS = 14
 const SHOW_TOASTS = true
 
-function now() { return Date.now() }
+function now() {
+  return Date.now()
+}
 
 function isInstalled(): boolean {
   if (typeof window === 'undefined') return false
+
   const mql = window.matchMedia?.('(display-mode: standalone)')
-  const iosStandalone = (window.navigator as unknown).standalone === true
-  return !!(mql?.matches || iosStandalone)
+  const iosStandalone = window.navigator.standalone === true
+
+  return Boolean(mql?.matches || iosStandalone)
 }
 
 function isIosSafari(): boolean {
   if (typeof navigator === 'undefined') return false
-  const ua = navigator.userAgent || navigator.vendor || (window as unknown).opera || ''
+
+  const ua = navigator.userAgent || ''
   const isIOS = /iPad|iPhone|iPod/.test(ua)
   const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua)
+
   return isIOS && isSafari
 }
 
@@ -44,7 +38,9 @@ function getDismissUntil(): number {
   try {
     const v = localStorage.getItem(DISMISS_UNTIL_KEY)
     return v ? Number(v) || 0 : 0
-  } catch { return 0 }
+  } catch {
+    return 0
+  }
 }
 
 function setDismissForDays(days = DISMISS_DAYS) {
@@ -68,42 +64,62 @@ export default function AppInstallPrompt() {
 
   useEffect(() => {
     if (installed) {
-      try { localStorage.removeItem(DISMISS_UNTIL_KEY) } catch {}
-      setDeferredPrompt(null); setVisible(false); setIosHelp(false)
+      try {
+        localStorage.removeItem(DISMISS_UNTIL_KEY)
+      } catch {}
+
+      setDeferredPrompt(null)
+      setVisible(false)
+      setIosHelp(false)
       return
     }
 
     const onAppInstalled = () => {
-      setVisible(false); setDeferredPrompt(null); setIosHelp(false)
-      try { localStorage.removeItem(DISMISS_UNTIL_KEY) } catch {}
+      setVisible(false)
+      setDeferredPrompt(null)
+      setIosHelp(false)
+
+      try {
+        localStorage.removeItem(DISMISS_UNTIL_KEY)
+      } catch {}
+
       window.__TP_INSTALL_SEEN = true
-      if (SHOW_TOASTS) showToast?.({ type: 'success', message: 'Application installée 🎉' })
+
+      if (SHOW_TOASTS) {
+        showToast?.({ type: 'success', message: 'Application installée 🎉' })
+      }
+
       logEvent('pwa_app_installed')
     }
 
-    const onBeforeInstallPrompt = (e: Event) => {
+    const onBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
       if (window.__TP_INSTALL_SEEN) return
       if (!canShowBIP) return
+
       e.preventDefault()
       window.__TP_INSTALL_SEEN = true
-      setDeferredPrompt(e as BeforeInstallPromptEvent)
+      setDeferredPrompt(e)
       setVisible(true)
       seenRef.current = true
+
       logEvent('pwa_prompt_shown', { platform: 'android_chrome' })
     }
 
     window.addEventListener('appinstalled', onAppInstalled)
-    window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt as unknown)
+    window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt)
+
     return () => {
       window.removeEventListener('appinstalled', onAppInstalled)
-      window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt as unknown)
+      window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt)
     }
   }, [installed, canShowBIP])
 
   useEffect(() => {
     if (installed || seenRef.current || window.__TP_INSTALL_SEEN) return
+
     if (canShowIOSHelp) {
-      setIosHelp(true); setVisible(true)
+      setIosHelp(true)
+      setVisible(true)
       window.__TP_INSTALL_SEEN = true
       seenRef.current = true
       logEvent('pwa_ios_help_shown')
@@ -111,27 +127,39 @@ export default function AppInstallPrompt() {
   }, [installed, canShowIOSHelp])
 
   const dismiss = useCallback(() => {
-    setVisible(false); setIosHelp(false)
+    setVisible(false)
+    setIosHelp(false)
     setDismissForDays()
     logEvent('pwa_prompt_dismiss', { ios })
   }, [ios])
 
   const handleInstall = useCallback(async () => {
     if (!deferredPrompt) return
+
     try {
       await deferredPrompt.prompt()
       const { outcome, platform } = await deferredPrompt.userChoice
+
       logEvent('pwa_install_click', { outcome, platform })
+
       if (outcome === 'accepted') {
-        if (SHOW_TOASTS) showToast?.({ type: 'success', message: 'Installation lancée ✅' })
+        if (SHOW_TOASTS) {
+          showToast?.({ type: 'success', message: 'Installation lancée ✅' })
+        }
       } else {
-        if (SHOW_TOASTS) showToast?.({ type: 'info', message: 'Installation annulée.' })
+        if (SHOW_TOASTS) {
+          showToast?.({ type: 'info', message: 'Installation annulée.' })
+        }
       }
     } catch {
-      if (SHOW_TOASTS) showToast?.({ type: 'error', message: 'Impossible de lancer l’installation.' })
+      if (SHOW_TOASTS) {
+        showToast?.({ type: 'error', message: 'Impossible de lancer l’installation.' })
+      }
       logEvent('pwa_install_error')
     } finally {
-      setDeferredPrompt(null); setVisible(false); setDismissForDays()
+      setDeferredPrompt(null)
+      setVisible(false)
+      setDismissForDays()
     }
   }, [deferredPrompt])
 
@@ -139,13 +167,15 @@ export default function AppInstallPrompt() {
 
   return (
     <div
-      className="fixed inset-x-3 bottom-4 z-[95] mx-auto max-w-xl rounded-2xl border border-token-border bg-token-surface px-4 py-3 shadow-elevated md:inset-x-auto md:left-6 md:right-auto"
+      className="fixed inset-x-3 bottom-4 z-[95] mx-auto max-w-xl rounded-2xl border border-token-border bg-token-surface px-4 py-3 shadow-elevated md:left-6 md:right-auto md:inset-x-auto"
       role="dialog"
       aria-labelledby="pwa-install-title"
       aria-describedby="pwa-install-desc"
     >
       <div className="flex items-start gap-3">
-        <div className="mt-0.5 text-2xl" aria-hidden>📲</div>
+        <div className="mt-0.5 text-2xl" aria-hidden>
+          📲
+        </div>
 
         <div className="flex-1">
           <h2 id="pwa-install-title" className="text-sm font-bold">
@@ -173,7 +203,12 @@ export default function AppInstallPrompt() {
           </Button>
 
           {!iosHelp && deferredPrompt ? (
-            <Button variant="accent" size="sm" onClick={handleInstall} aria-label="Installer l’application">
+            <Button
+              variant="accent"
+              size="sm"
+              onClick={handleInstall}
+              aria-label="Installer l’application"
+            >
               Installer
             </Button>
           ) : (
@@ -186,4 +221,3 @@ export default function AppInstallPrompt() {
     </div>
   )
 }
-
