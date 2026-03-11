@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion, useReducedMotion, type Variants } from 'framer-motion'
 import { usePathname } from 'next/navigation'
 import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from 'react'
 
@@ -24,18 +24,27 @@ interface BestProductsProps {
   autoLoadOnIntersect?: boolean
 }
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0, y: 24 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.55, ease: 'easeOut', when: 'beforeChildren', staggerChildren: 0.06 },
+    transition: {
+      duration: 0.55,
+      ease: 'easeOut',
+      when: 'beforeChildren',
+      staggerChildren: 0.06,
+    },
   },
 }
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 14 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.32, ease: 'easeOut' } },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.32, ease: 'easeOut' },
+  },
 }
 
 const sectionStyle: CSSProperties = {

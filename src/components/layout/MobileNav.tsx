@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { motion, AnimatePresence, useReducedMotion, type Variants } from 'framer-motion'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 
@@ -408,15 +408,19 @@ export default function MobileNav() {
     startY.current = null
   }
 
-  const overlayVariants = {
+  const overlayVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { duration: reducedMotion ? 0 : 0.18 } },
     exit: { opacity: 0, transition: { duration: 0.12 } },
   }
 
-  const sheetVariants = {
+  const sheetVariants: Variants = {
     hidden: { y: reducedMotion ? 0 : '10%', opacity: 0.001 },
-    visible: { y: 0, opacity: 1, transition: { duration: reducedMotion ? 0 : 0.22, ease: 'easeOut' } },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: reducedMotion ? 0 : 0.22, ease: 'easeOut' },
+    },
     exit: { y: reducedMotion ? 0 : '10%', opacity: 0, transition: { duration: 0.16 } },
   }
 

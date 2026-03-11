@@ -1,4 +1,3 @@
-// src/components/WishlistButton.tsx
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
@@ -173,7 +172,7 @@ export default function WishlistButton({
             className="pointer-events-none absolute inset-0 rounded-full"
             initial={{ scale: 0.6, opacity: 0.35 }}
             animate={{ scale: 1.25, opacity: 0 }}
-            transition={{ duration: 0.6, ease: 'ease-out' }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
             style={{ boxShadow: '0 0 0 6px rgba(239,68,68,0.15)' }}
             aria-hidden
           />
