@@ -52,7 +52,6 @@
   },
   "devDependencies": {
     "@sentry/nextjs": "^9.47.1",
-    "@storybook/react": "^9.0.17",
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/typography": "^0.5.19",
     "@types/bcryptjs": "^2.4.6",
