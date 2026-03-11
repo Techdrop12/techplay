@@ -48,10 +48,10 @@ const config: Config = {
         },
         success: '#16a34a',
         warning: '#eab308',
-        danger:  '#dc2626',
+        danger: '#dc2626',
 
         surface: { DEFAULT: '#ffffff', muted: '#f8fafc', dark: '#0b0f14' },
-        border:  { DEFAULT: '#e5e7eb',  dark: '#262b35' },
+        border: { DEFAULT: '#e5e7eb', dark: '#262b35' },
 
         token: {
           bg: 'hsl(var(--bg) / <alpha-value>)',
@@ -109,11 +109,21 @@ const config: Config = {
 
       keyframes: {
         fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
-        slideUp: { '0%': { transform: 'translateY(10px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
+        slideUp: {
+          '0%': { transform: 'translateY(10px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
         pulse: { '0%,100%': { opacity: '1' }, '50%': { opacity: '.5' } },
-        shake: { '0%,100%': { transform: 'translateX(0)' }, '25%,75%': { transform: 'translateX(-5px)' }, '50%': { transform: 'translateX(5px)' } },
+        shake: {
+          '0%,100%': { transform: 'translateX(0)' },
+          '25%,75%': { transform: 'translateX(-5px)' },
+          '50%': { transform: 'translateX(5px)' },
+        },
         bounce: { '0%,100%': { transform: 'translateY(-5%)' }, '50%': { transform: 'translateY(0)' } },
-        fadeUp: { '0%': { transform: 'translateY(8px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
+        fadeUp: {
+          '0%': { transform: 'translateY(8px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
         scaleIn: { '0%': { transform: 'scale(0.98)', opacity: '0' }, '100%': { transform: 'scale(1)', opacity: '1' } },
         accordionDown: { from: { height: '0' }, to: { height: 'var(--radix-accordion-content-height)' } },
         accordionUp: { from: { height: 'var(--radix-accordion-content-height)' }, to: { height: '0' } },
@@ -127,21 +137,47 @@ const config: Config = {
         DEFAULT: {
           css: {
             color: theme('colors.brand.DEFAULT') as string,
-            a: { color: theme('colors.accent.600') as string, textDecoration: 'none', fontWeight: 600, '&:hover': { color: theme('colors.accent.700') as string } },
-            h1: { fontFamily: String(theme('fontFamily.heading')), fontWeight: 800, letterSpacing: '-0.02em' },
-            h2: { fontFamily: String(theme('fontFamily.heading')), fontWeight: 700, letterSpacing: '-0.01em' },
+            a: {
+              color: theme('colors.accent.600') as string,
+              textDecoration: 'none',
+              fontWeight: 600,
+              '&:hover': { color: theme('colors.accent.700') as string },
+            },
+            h1: {
+              fontFamily: String(theme('fontFamily.heading')),
+              fontWeight: 800,
+              letterSpacing: '-0.02em',
+            },
+            h2: {
+              fontFamily: String(theme('fontFamily.heading')),
+              fontWeight: 700,
+              letterSpacing: '-0.01em',
+            },
             h3: { fontFamily: String(theme('fontFamily.heading')), fontWeight: 700 },
-            code: { backgroundColor: theme('colors.surface.muted') as string, padding: '0.15rem 0.35rem', borderRadius: '0.4rem' },
+            code: {
+              backgroundColor: theme('colors.surface.muted') as string,
+              padding: '0.15rem 0.35rem',
+              borderRadius: '0.4rem',
+            },
             'code::before, code::after': { content: 'none' },
-            blockquote: { borderLeftColor: theme('colors.accent.300') as string, color: '#334155' },
+            blockquote: {
+              borderLeftColor: theme('colors.accent.300') as string,
+              color: '#334155',
+            },
           },
         },
         invert: {
           css: {
             color: '#e5e7eb',
-            a: { color: theme('colors.accent.400') as string, '&:hover': { color: theme('colors.accent.300') as string } },
+            a: {
+              color: theme('colors.accent.400') as string,
+              '&:hover': { color: theme('colors.accent.300') as string },
+            },
             code: { backgroundColor: '#0f172a' },
-            blockquote: { borderLeftColor: theme('colors.accent.500') as string, color: '#cbd5e1' },
+            blockquote: {
+              borderLeftColor: theme('colors.accent.500') as string,
+              color: '#cbd5e1',
+            },
           },
         },
       }),
@@ -164,7 +200,6 @@ const config: Config = {
       addVariant('data-open', '&[data-state="open"]')
       addVariant('data-closed', '&[data-state="closed"]')
       addVariant('disabled', '&:disabled')
-      addVariant('supports-backdrop', '@supports(backdrop-filter: blur(2px)) &')
 
       // Utils (sans doublonner ce qui est déjà dans globals.css)
       addUtilities({
@@ -183,7 +218,7 @@ const config: Config = {
         '.card-pressable': {
           backgroundColor: 'hsl(var(--surface))',
           border: '1px solid hsl(var(--border))',
-          borderRadius: '1.25rem', // = var(--radius-2xl)
+          borderRadius: '1.25rem',
           boxShadow: '0 1px 2px rgba(0,0,0,0.04), 0 6px 16px rgba(0,0,0,0.06)',
           transition: 'transform 250ms var(--ease, cubic-bezier(.2,.8,.2,1)), box-shadow 250ms',
           willChange: 'transform',
@@ -198,14 +233,9 @@ const config: Config = {
 
   // Génère les classes utilisées dynamiquement / par tokens
   safelist: [
-    // Accent palette
     { pattern: /(bg|text|border)-accent-(50|100|200|300|400|500|600|700|800|900)/ },
     { pattern: /(from|via|to)-accent-(400|500|600|700)/ },
-
-    // Mapping tokens (HSL via CSS vars)
     { pattern: /(bg|text|border)-token-(bg|text|text-muted|surface|surface-2|border|accent)/ },
-
-    // Variantes d’opacité les plus fréquentes (utilisées dans le Header/Layout)
     'bg-token-surface/60',
     'bg-token-surface/65',
     'bg-token-surface/70',

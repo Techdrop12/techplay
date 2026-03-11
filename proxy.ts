@@ -132,7 +132,7 @@ function setCommonHeaders(res: NextResponse, lang: 'fr' | 'en') {
 }
 
 /** ───────────────────── Middleware principal ───────────────────── **/
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // 0) Normalisation basique (doublons slash / trailing slash)

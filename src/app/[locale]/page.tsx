@@ -1,2 +1,8 @@
 // src/app/[locale]/page.tsx
-export { default, metadata, revalidate } from '../page'
+import HomePage, { metadata } from '../page'
+
+export { metadata }
+
+export const revalidate = 300
+
+export default HomePage

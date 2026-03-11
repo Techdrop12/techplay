@@ -1,7 +1,16 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
-import { useEffect, useId, useMemo, useRef, useState, type KeyboardEventHandler, type SVGProps } from 'react'
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEventHandler,
+  type SVGProps,
+  type JSX,
+} from 'react';
 
 import { event as gaEvent, logEvent, pushDataLayer } from '@/lib/ga'
 import { cn } from '@/lib/utils'

@@ -538,7 +538,7 @@ export default function HeroCarousel({
       )}
 
       {showCounter && total > 1 && (
-        <div className="supports-backdrop:glass absolute left-1/2 top-4 z-20 -translate-x-1/2 rounded-full bg-black/35 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
+        <div className="glass absolute left-1/2 top-4 z-20 -translate-x-1/2 rounded-full bg-black/35 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
           {index + 1} / {total}
         </div>
       )}
@@ -600,7 +600,7 @@ export default function HeroCarousel({
             type="button"
             aria-label={t.prev}
             className={cn(
-              'supports-backdrop:glass absolute left-2 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-token-surface/70 text-white shadow-soft hover:bg-token-surface',
+              'glass absolute left-2 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-token-surface/70 text-white shadow-soft hover:bg-token-surface',
               'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60 sm:left-4 sm:h-12 sm:w-12'
             )}
             data-gtm="hero_prev"
@@ -619,7 +619,7 @@ export default function HeroCarousel({
             type="button"
             aria-label={t.next}
             className={cn(
-              'supports-backdrop:glass absolute right-2 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-token-surface/70 text-white shadow-soft hover:bg-token-surface',
+              'glass absolute right-2 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-token-surface/70 text-white shadow-soft hover:bg-token-surface',
               'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60 sm:right-4 sm:h-12 sm:w-12'
             )}
             data-gtm="hero_next"
@@ -646,7 +646,7 @@ export default function HeroCarousel({
           aria-label={userPausedRef.current ? t.play : t.pause}
           aria-pressed={userPausedRef.current}
           className={cn(
-            'supports-backdrop:glass absolute right-3 top-3 z-20 rounded-full px-3 py-2 text-xs font-semibold text-white',
+            'glass absolute right-3 top-3 z-20 rounded-full px-3 py-2 text-xs font-semibold text-white',
             'bg-black/40 backdrop-blur hover:bg-black/55 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60'
           )}
           data-gtm="hero_toggle"

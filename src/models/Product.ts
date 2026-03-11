@@ -6,6 +6,8 @@ type JsonRecord = Record<string, unknown> & {
   _id?: Types.ObjectId | { toString(): string }
   __v?: number
   id?: string
+  images?: string[]
+  gallery?: string[]
 }
 
 const ProductSchema = new Schema(
@@ -39,6 +41,7 @@ const ProductSchema = new Schema(
   },
   {
     timestamps: true,
+    suppressReservedKeysWarning: true,
     toJSON: {
       virtuals: true,
       versionKey: false,

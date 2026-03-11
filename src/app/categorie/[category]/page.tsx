@@ -1,6 +1,6 @@
 import type { Product } from '@/types/product'
 import type { Metadata } from 'next'
-import type { SVGProps } from 'react'
+import type { SVGProps, JSX } from 'react';
 
 
 import Link from '@/components/LocalizedLink'

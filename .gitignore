@@ -45,3 +45,5 @@ storybook-static/
 .backup_*/
 .__eslint.json
 .eslint-warnings-*.txt
+
+_audit_chatgpt/

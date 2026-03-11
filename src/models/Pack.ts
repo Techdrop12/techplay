@@ -30,6 +30,7 @@ const PackSchema = new Schema(
   },
   {
     timestamps: true,
+    suppressReservedKeysWarning: true,
     toJSON: {
       virtuals: true,
       versionKey: false,
@@ -46,11 +47,12 @@ const PackSchema = new Schema(
 
         raw.id = raw._id?.toString?.() ?? String(raw._id ?? '')
 
-        const title = typeof raw.title === 'string' && raw.title.trim()
-          ? raw.title
-          : typeof raw.name === 'string' && raw.name.trim()
-            ? raw.name
-            : 'Pack'
+        const title =
+          typeof raw.title === 'string' && raw.title.trim()
+            ? raw.title
+            : typeof raw.name === 'string' && raw.name.trim()
+              ? raw.name
+              : 'Pack'
 
         raw.title = title
 

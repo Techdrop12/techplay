@@ -2,8 +2,8 @@
 'use client'
 
 import NextLink from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import {usePathname, useRouter} from 'next/navigation'
+import {useEffect, useId, useMemo, useRef, useState, type ReactNode} from 'react'
 
 import Logo from '../Logo'
 
@@ -11,19 +11,19 @@ import MobileNav from './MobileNav'
 
 import Link from '@/components/LocalizedLink'
 import {
-  SearchIcon as Search,
+  CartIcon as Cart,
   FlameIcon as Flame,
   HeartIcon as Heart,
-  CartIcon as Cart,
-  UserIcon as User,
+  SearchIcon as Search,
+  UserIcon as User
 } from '@/components/ui/premium-icons'
 import ThemeToggle from '@/components/ui/ThemeToggle'
-import { useCart } from '@/hooks/useCart'
-import { useWishlist } from '@/hooks/useWishlist'
-import { getCategories } from '@/lib/categories'
-import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
-import { LOCALE_COOKIE, setLocaleCookie } from '@/lib/language'
-import { cn } from '@/lib/utils'
+import {useCart} from '@/hooks/useCart'
+import {useWishlist} from '@/hooks/useWishlist'
+import {getCategories} from '@/lib/categories'
+import {getCurrentLocale, localizePath} from '@/lib/i18n-routing'
+import {LOCALE_COOKIE, setLocaleCookie} from '@/lib/language'
+import {cn} from '@/lib/utils'
 
 const STR = {
   fr: {
@@ -32,7 +32,7 @@ const STR = {
       products: 'Produits',
       wishlist: 'Wishlist',
       blog: 'Blog',
-      contact: 'Contact',
+      contact: 'Contact'
     },
     headerNavAria: 'Navigation principale',
     searchAria: 'Recherche produits',
@@ -44,9 +44,9 @@ const STR = {
       'chargeur rapide USB-C',
       'pack starter',
       'power bank',
-      'souris sans fil',
+      'souris sans fil'
     ],
-    deals: { text: 'Offres', title: 'Offres du jour', aria: 'Voir les offres du jour' },
+    deals: {text: 'Offres', title: 'Offres du jour', aria: 'Voir les offres du jour'},
     selection: 'Sélection',
     packsTitle: 'Packs recommandés',
     packsDesc: 'Les meilleures combinaisons pour booster ton setup.',
@@ -54,9 +54,10 @@ const STR = {
     allProducts: 'Tous les produits',
     wishlistAria: (n: number) => (n > 0 ? `Voir la wishlist (${n})` : 'Voir la wishlist'),
     cartAria: (n: number) => (n > 0 ? `Voir le panier (${n})` : 'Voir le panier'),
-    account: { aria: 'Espace client', title: 'Espace client' },
+    account: {aria: 'Espace client', title: 'Espace client'},
     headerAria: 'En-tête du site',
     logoAria: 'TechPlay — Accueil',
+    localeSwitcherAria: 'Sélecteur de langue'
   },
   en: {
     nav: {
@@ -64,7 +65,7 @@ const STR = {
       products: 'Products',
       wishlist: 'Wishlist',
       blog: 'Blog',
-      contact: 'Contact',
+      contact: 'Contact'
     },
     headerNavAria: 'Primary navigation',
     searchAria: 'Product search',
@@ -76,9 +77,9 @@ const STR = {
       'USB-C fast charger',
       'starter pack',
       'power bank',
-      'wireless mouse',
+      'wireless mouse'
     ],
-    deals: { text: 'Deals', title: "Today's deals", aria: "See today's deals" },
+    deals: {text: 'Deals', title: "Today's deals", aria: "See today's deals"},
     selection: 'Featured',
     packsTitle: 'Recommended packs',
     packsDesc: 'Best combos to boost your setup.',
@@ -86,15 +87,17 @@ const STR = {
     allProducts: 'All products',
     wishlistAria: (n: number) => (n > 0 ? `View wishlist (${n})` : 'View wishlist'),
     cartAria: (n: number) => (n > 0 ? `View cart (${n})` : 'View cart'),
-    account: { aria: 'Account', title: 'Account' },
+    account: {aria: 'Account', title: 'Account'},
     headerAria: 'Site header',
     logoAria: 'TechPlay — Home',
-  },
+    localeSwitcherAria: 'Language selector'
+  }
 } as const
 
-type NavLink = { href: string; labelKey: keyof typeof STR.fr.nav }
+type NavLink = {href: string; labelKey: keyof typeof STR.fr.nav}
 
-type CartEntry = { quantity?: number }
+type CartEntry = {quantity?: number}
+
 type CartStateLike =
   | CartEntry[]
   | {
@@ -113,22 +116,22 @@ type WishlistStateLike =
     }
   | undefined
 
-type CartStoreLike = { cart?: CartStateLike }
-type WishlistStoreLike = { wishlist?: WishlistStateLike }
+type CartStoreLike = {cart?: CartStateLike}
+type WishlistStoreLike = {wishlist?: WishlistStateLike}
 
 const LINKS: NavLink[] = [
-  { href: '/categorie', labelKey: 'categories' },
-  { href: '/products', labelKey: 'products' },
-  { href: '/wishlist', labelKey: 'wishlist' },
-  { href: '/blog', labelKey: 'blog' },
-  { href: '/contact', labelKey: 'contact' },
+  {href: '/categorie', labelKey: 'categories'},
+  {href: '/products', labelKey: 'products'},
+  {href: '/wishlist', labelKey: 'wishlist'},
+  {href: '/blog', labelKey: 'blog'},
+  {href: '/contact', labelKey: 'contact'}
 ]
 
 const SCROLL_HIDE_OFFSET = 80
 const HOVER_PREFETCH_DELAY = 120
 const PLACEHOLDER_MS = 4000
 
-const ActionBadge = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+const ActionBadge = ({children, className}: {children: ReactNode; className?: string}) => (
   <span
     className={cn(
       'inline-flex h-9 w-9 items-center justify-center rounded-xl',
@@ -141,9 +144,10 @@ const ActionBadge = ({ children, className }: { children: React.ReactNode; class
   </span>
 )
 
-function LocaleSwitch({ pathname }: { pathname: string }) {
+function LocaleSwitch({pathname}: {pathname: string}) {
   const router = useRouter()
   const locale = getCurrentLocale(pathname)
+  const t = STR[locale]
 
   const setLang = (newLocale: 'fr' | 'en') => {
     if (newLocale === locale) return
@@ -162,11 +166,12 @@ function LocaleSwitch({ pathname }: { pathname: string }) {
   return (
     <div
       role="group"
-      aria-label="Sélecteur de langue"
+      aria-label={t.localeSwitcherAria}
       className="inline-flex items-center rounded-full border border-token-border bg-token-surface/60 p-0.5"
     >
       {(['fr', 'en'] as const).map((l) => {
         const active = locale === l
+
         return (
           <button
             key={l}
@@ -176,9 +181,9 @@ function LocaleSwitch({ pathname }: { pathname: string }) {
             disabled={active}
             aria-pressed={active}
             className={cn(
-              'px-2.5 py-1.5 text-xs font-semibold rounded-full transition outline-none focus:ring-2',
+              'rounded-full px-2.5 py-1.5 text-xs font-semibold transition outline-none focus:ring-2',
               active
-                ? 'bg-blue-600 text-white cursor-default focus:ring-blue-400'
+                ? 'cursor-default bg-blue-600 text-white focus:ring-blue-400'
                 : 'bg-transparent text-token-text hover:opacity-90 focus:ring-blue-400'
             )}
             title={l === 'fr' ? 'Français' : 'English'}
@@ -211,9 +216,11 @@ export default function Header() {
     if (Array.isArray(cart)) {
       return cart.reduce((tot, it) => tot + Math.max(1, Number(it.quantity ?? 1)), 0)
     }
+
     if (Array.isArray(cart?.items)) {
       return cart.items.reduce((tot, it) => tot + Math.max(1, Number(it.quantity ?? 1)), 0)
     }
+
     const n = Number(cart?.count ?? cart?.size ?? 0)
     return Number.isFinite(n) ? n : 0
   }, [cart])
@@ -221,12 +228,14 @@ export default function Header() {
   const wishlistCount = useMemo(() => {
     if (Array.isArray(wishlist)) return wishlist.length
     if (Array.isArray(wishlist?.items)) return wishlist.items.length
+
     const n = Number(wishlist?.count ?? wishlist?.size ?? 0)
     return Number.isFinite(n) ? n : 0
   }, [wishlist])
 
   const [hidden, setHidden] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+
   const lastY = useRef(0)
   const ticking = useRef(false)
   const reducedMotion = useRef(false)
@@ -263,12 +272,14 @@ export default function Header() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!catOpen) return
+
       if (e.key === 'Escape') {
         e.preventDefault()
         setCatOpen(false)
         catBtnRef.current?.focus()
       }
     }
+
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [catOpen])
@@ -276,10 +287,13 @@ export default function Header() {
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       if (!catOpen) return
+
       const target = e.target as Node
       if (catPanelRef.current?.contains(target) || catBtnRef.current?.contains(target)) return
+
       setCatOpen(false)
     }
+
     window.addEventListener('mousedown', onClick)
     return () => window.removeEventListener('mousedown', onClick)
   }, [catOpen])
@@ -309,17 +323,24 @@ export default function Header() {
       if (ticking.current) return
 
       ticking.current = true
+
       window.requestAnimationFrame(() => {
         setScrolled(y > 2)
-        if (!reducedMotion.current) setHidden(y > lastY.current && y > SCROLL_HIDE_OFFSET)
-        else setHidden(false)
+
+        if (!reducedMotion.current) {
+          setHidden(y > lastY.current && y > SCROLL_HIDE_OFFSET)
+        } else {
+          setHidden(false)
+        }
+
         lastY.current = y
         ticking.current = false
       })
     }
 
-    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('scroll', onScroll, {passive: true})
     onScroll()
+
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
@@ -338,7 +359,8 @@ export default function Header() {
       }
 
       if (e.key === 'Escape' && searchRef.current === document.activeElement) {
-        (e.target as HTMLInputElement | null)?.blur?.()
+        const inputTarget = e.target as HTMLInputElement | null
+        inputTarget?.blur?.()
       }
     }
 
@@ -359,31 +381,37 @@ export default function Header() {
   }, [trends])
 
   useEffect(() => {
+    const timers = prefetchTimers.current
+
     return () => {
-      prefetchTimers.current.forEach((timer) => clearTimeout(timer))
-      prefetchTimers.current.clear()
+      timers.forEach((timer) => clearTimeout(timer))
+      timers.clear()
     }
   }, [])
 
   const isActive = (href: string) => {
     const localized = L(href)
-    return localized === pathname || pathname.startsWith(localized + '/')
+    return localized === pathname || pathname.startsWith(`${localized}/`)
   }
 
   const prefetchViaLink = (href: string) => {
     if (saveData.current) return
+
     try {
       router.prefetch(href)
+
       const el = document.createElement('link')
       el.rel = 'prefetch'
       el.href = href
       document.head.appendChild(el)
+
       setTimeout(() => el.remove(), 5000)
     } catch {}
   }
 
   const smartPrefetchStart = (href: string) => {
     if (saveData.current) return
+
     const target = L(href)
     if (!target || isActive(href)) return
     if (prefetchTimers.current.has(target)) return
@@ -399,6 +427,7 @@ export default function Header() {
   const smartPrefetchCancel = (href: string) => {
     const target = L(href)
     const timer = prefetchTimers.current.get(target)
+
     if (timer) {
       clearTimeout(timer)
       prefetchTimers.current.delete(target)
@@ -423,6 +452,7 @@ export default function Header() {
 
   const onLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (e.metaKey || e.ctrlKey || e.button === 1) return
+
     e.preventDefault()
 
     const url = L('/')
@@ -445,16 +475,16 @@ export default function Header() {
       data-hidden={hidden ? 'true' : 'false'}
       data-scrolled={scrolled ? 'true' : 'false'}
       className={cn(
-        'fixed top-0 left-0 right-0 z-[80] w-full',
-        'backdrop-blur supports-backdrop:bg-transparent',
-        'border-b transition-all motion-safe:duration-300 motion-safe:ease-out motion-safe:transition-transform',
+        'fixed left-0 right-0 top-0 z-[80] w-full',
+        'backdrop-blur',
+        'border-b transition-all motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-out',
         scrolled
-          ? 'bg-token-surface/85 border-token-border shadow-soft'
-          : 'bg-token-surface/65 border-transparent',
+          ? 'border-token-border bg-token-surface/85 shadow-soft'
+          : 'border-transparent bg-token-surface/65',
         hidden ? '-translate-y-full' : 'translate-y-0'
       )}
     >
-      <div className="container-app flex h-16 md:h-20 items-center justify-between gap-2 sm:gap-3">
+      <div className="container-app flex h-16 items-center justify-between gap-2 sm:gap-3 md:h-20">
         <NextLink
           href={L('/')}
           prefetch={false}
@@ -479,7 +509,7 @@ export default function Header() {
           role="search"
           aria-label={t.searchAria}
           onSubmit={onSearchSubmit}
-          className="relative hidden md:flex min-w-0 flex-1 items-center lg:max-w-md xl:max-w-lg"
+          className="relative hidden min-w-0 flex-1 items-center md:flex lg:max-w-md xl:max-w-lg"
         >
           <label htmlFor="header-search" className="sr-only">
             {t.searchAria}
@@ -506,15 +536,19 @@ export default function Header() {
             aria-controls="search-status"
             aria-describedby="search-hint"
           />
+
           <datalist id="header-search-suggestions">
             {trends.map((s) => (
               <option value={s} key={s} />
             ))}
           </datalist>
+
           <div id="search-hint" className="sr-only">
             {t.searchHint}
           </div>
+
           <div id="search-status" aria-live="polite" aria-atomic="true" className="sr-only" />
+
           <div className="absolute inset-y-0 right-1.5 flex items-center">
             <button
               type="submit"
@@ -529,10 +563,10 @@ export default function Header() {
         </form>
 
         <nav
-          className="hidden lg:flex gap-5 xl:gap-7 tracking-tight font-medium text-token-text text-[15px] xl:text-base whitespace-nowrap"
+          className="hidden whitespace-nowrap text-[15px] font-medium tracking-tight text-token-text lg:flex lg:gap-5 xl:gap-7 xl:text-base"
           aria-label={t.headerNavAria}
         >
-          {LINKS.map(({ href, labelKey }) => {
+          {LINKS.map(({href, labelKey}) => {
             const label = t.nav[labelKey]
             const active = isActive(href)
 
@@ -556,9 +590,9 @@ export default function Header() {
                     onBlur={() => closeCats(80)}
                     onMouseDown={(e) => e.preventDefault()}
                     className={cn(
-                      'relative transition-colors duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded-sm px-0.5',
+                      'group relative rounded-sm px-0.5 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]',
                       active
-                        ? 'text-[hsl(var(--accent))] font-semibold after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-[hsl(var(--accent))]'
+                        ? 'font-semibold text-[hsl(var(--accent))] after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-[hsl(var(--accent))]'
                         : 'hover:text-[hsl(var(--accent))] focus-visible:text-[hsl(var(--accent))]'
                     )}
                     data-gtm="header_mega_btn"
@@ -579,11 +613,11 @@ export default function Header() {
                     aria-labelledby={catBtnId}
                     className={cn(
                       'absolute left-1/2 top-[calc(100%+10px)] z-50 w-[min(860px,92vw)] -translate-x-1/2 rounded-2xl border',
-                      'border-token-border bg-token-surface/90 shadow-2xl backdrop-blur supports-backdrop:bg-token-surface/80',
+                      'border-token-border bg-token-surface/90 shadow-2xl backdrop-blur',
                       'transition-all duration-200',
                       catOpen
-                        ? 'pointer-events-auto opacity-100 translate-y-0'
-                        : 'pointer-events-none opacity-0 -translate-y-1'
+                        ? 'pointer-events-auto translate-y-0 opacity-100'
+                        : 'pointer-events-none -translate-y-1 opacity-0'
                     )}
                     onFocus={openCats}
                     onBlur={() => closeCats(80)}
@@ -591,7 +625,10 @@ export default function Header() {
                     tabIndex={catOpen ? 0 : -1}
                   >
                     <div className="grid grid-cols-1 gap-2 p-3 md:grid-cols-3 md:p-4">
-                      <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:col-span-2 md:gap-3" role="none">
+                      <ul
+                        className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:col-span-2 md:gap-3"
+                        role="none"
+                      >
                         {categories.map((c) => (
                           <li key={c.href} role="none">
                             <Link
@@ -603,9 +640,8 @@ export default function Header() {
                               onFocus={() => smartPrefetchStart(c.href)}
                               onBlur={() => smartPrefetchCancel(c.href)}
                               className={cn(
-                                'group flex items-center gap-3 rounded-xl border transform-gpu p-3 transition',
-                                'border-transparent bg-token-surface/80 hover:bg-token-surface shadow-sm hover:shadow-md',
-                                'hover:border-[hsl(var(--accent)/.30)] hover:-translate-y-0.5'
+                                'group flex transform-gpu items-center gap-3 rounded-xl border p-3 transition',
+                                'border-transparent bg-token-surface/80 shadow-sm hover:-translate-y-0.5 hover:border-[hsl(var(--accent)/.30)] hover:bg-token-surface hover:shadow-md'
                               )}
                               data-gtm="header_mega_cat"
                             >
@@ -629,12 +665,13 @@ export default function Header() {
                       </ul>
 
                       <div className="md:col-span-1">
-                        <div className="h-full rounded-xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.10)] via-transparent to-token-surface p-4 md:p-5 shadow-md">
+                        <div className="h-full rounded-xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.10)] via-transparent to-token-surface p-4 shadow-md md:p-5">
                           <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent)/.90)]">
                             {t.selection}
                           </p>
                           <h3 className="mt-1 text-lg font-extrabold">{t.packsTitle}</h3>
                           <p className="mt-2 text-sm text-token-text/70">{t.packsDesc}</p>
+
                           <div className="mt-3 flex flex-wrap gap-2">
                             <Link
                               href="/products/packs"
@@ -648,6 +685,7 @@ export default function Header() {
                             >
                               {t.viewPacks}
                             </Link>
+
                             <Link
                               href="/products"
                               prefetch={false}
@@ -680,9 +718,9 @@ export default function Header() {
                 onBlur={() => smartPrefetchCancel(href)}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'relative group rounded-sm transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]',
+                  'group relative rounded-sm transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]',
                   active
-                    ? 'text-[hsl(var(--accent))] font-semibold after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-[hsl(var(--accent))]'
+                    ? 'font-semibold text-[hsl(var(--accent))] after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-[hsl(var(--accent))]'
                     : 'hover:text-[hsl(var(--accent))] focus-visible:text-[hsl(var(--accent))]'
                 )}
                 data-gtm={`header_nav_${labelKey}`}
@@ -710,7 +748,7 @@ export default function Header() {
             onPointerLeave={() => smartPrefetchCancel('/products?promo=1')}
             onFocus={() => smartPrefetchStart('/products?promo=1')}
             onBlur={() => smartPrefetchCancel('/products?promo=1')}
-            className="xl:hidden inline-flex items-center justify-center p-0.5 rounded-lg hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
+            className="inline-flex items-center justify-center rounded-lg p-0.5 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)] xl:hidden"
             aria-label={t.deals.aria}
             title={t.deals.title}
             data-gtm="header_deals_icon"
@@ -727,7 +765,7 @@ export default function Header() {
             onPointerLeave={() => smartPrefetchCancel('/products?promo=1')}
             onFocus={() => smartPrefetchStart('/products?promo=1')}
             onBlur={() => smartPrefetchCancel('/products?promo=1')}
-            className="group hidden xl:inline-flex items-center gap-2 rounded-full border border-token-border bg-token-surface/60 px-3 py-1.5 text-sm font-medium text-token-text hover:bg-token-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
+            className="group hidden items-center gap-2 rounded-full border border-token-border bg-token-surface/60 px-3 py-1.5 text-sm font-medium text-token-text hover:bg-token-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)] xl:inline-flex"
             aria-label={t.deals.aria}
             title={t.deals.title}
             data-gtm="header_deals"
@@ -747,7 +785,7 @@ export default function Header() {
               onPointerLeave={() => smartPrefetchCancel('/wishlist')}
               onFocus={() => smartPrefetchStart('/wishlist')}
               onBlur={() => smartPrefetchCancel('/wishlist')}
-              className="relative hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 rounded-lg p-0.5"
+              className="relative rounded-lg p-0.5 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
               aria-label={t.wishlistAria(wishlistCount)}
               data-gtm="header_wishlist"
             >
@@ -755,6 +793,7 @@ export default function Header() {
                 <Heart />
               </ActionBadge>
             </Link>
+
             {wishlistCount > 0 && (
               <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
                 <span className="rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm">
@@ -773,7 +812,7 @@ export default function Header() {
               onPointerLeave={() => smartPrefetchCancel('/commande')}
               onFocus={() => smartPrefetchStart('/commande')}
               onBlur={() => smartPrefetchCancel('/commande')}
-              className="relative hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 rounded-lg p-0.5"
+              className="relative rounded-lg p-0.5 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
               aria-label={t.cartAria(cartCount)}
               data-gtm="header_cart"
               data-cart-icon
@@ -782,6 +821,7 @@ export default function Header() {
                 <Cart />
               </ActionBadge>
             </Link>
+
             {cartCount > 0 && (
               <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
                 <span className="animate-[pulse_2s_ease-in-out_infinite] rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm">
@@ -799,7 +839,7 @@ export default function Header() {
             onPointerLeave={() => smartPrefetchCancel('/login')}
             onFocus={() => smartPrefetchStart('/login')}
             onBlur={() => smartPrefetchCancel('/login')}
-            className="hidden xl:inline-flex items-center justify-center rounded-lg p-0.5 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+            className="hidden items-center justify-center rounded-lg p-0.5 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] xl:inline-flex"
             aria-label={t.account.aria}
             title={t.account.title}
             data-gtm="header_account"
