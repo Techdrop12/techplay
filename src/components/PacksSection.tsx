@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion, useReducedMotion, type Variants } from 'framer-motion'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import type { Pack } from '@/types/product'
@@ -44,18 +44,27 @@ function DuotoneGift({
   )
 }
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0, y: 30 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: 'easeOut', when: 'beforeChildren', staggerChildren: 0.06 },
+    transition: {
+      duration: 0.6,
+      ease: 'easeOut',
+      when: 'beforeChildren',
+      staggerChildren: 0.06,
+    },
   },
 }
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 18 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.35, ease: 'easeOut' },
+  },
 }
 
 function isRecord(value: unknown): value is PackRecord {
@@ -416,4 +425,3 @@ export default function PacksSection({
     </section>
   )
 }
-
