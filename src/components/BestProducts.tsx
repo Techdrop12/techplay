@@ -2,7 +2,14 @@
 
 import { motion, useReducedMotion, type Variants } from 'framer-motion'
 import { usePathname } from 'next/navigation'
-import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from 'react'
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react'
 
 import type { Product } from '@/types/product'
 
@@ -25,31 +32,31 @@ interface BestProductsProps {
 }
 
 const containerVariants: Variants = {
-  hidden: { opacity: 0, y: 24 },
+  hidden: { opacity: 0, y: 18 },
   show: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.55,
+      duration: 0.5,
       ease: 'easeOut',
       when: 'beforeChildren',
-      staggerChildren: 0.06,
+      staggerChildren: 0.05,
     },
   },
 }
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 14 },
+  hidden: { opacity: 0, y: 12 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.32, ease: 'easeOut' },
+    transition: { duration: 0.3, ease: 'easeOut' },
   },
 }
 
 const sectionStyle: CSSProperties = {
   contentVisibility: 'auto',
-  containIntrinsicSize: '800px',
+  containIntrinsicSize: '900px',
 }
 
 function isRecord(value: unknown): value is ProductRecord {
@@ -71,7 +78,13 @@ function readString(record: ProductRecord, keys: readonly string[]): string | un
 function readNumber(record: ProductRecord, keys: readonly string[]): number | undefined {
   for (const key of keys) {
     const value = record[key]
-    const parsed = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : NaN
+    const parsed =
+      typeof value === 'number'
+        ? value
+        : typeof value === 'string' && value.trim()
+          ? Number(value)
+          : NaN
+
     if (Number.isFinite(parsed)) return parsed
   }
   return undefined
@@ -86,56 +99,98 @@ function readBoolean(record: ProductRecord, keys: readonly string[]): boolean | 
 }
 
 function readFirstImage(record: ProductRecord): string | undefined {
+  const direct = readString(record, ['image'])
+  if (direct) return direct
+
   const images = record.images
   if (Array.isArray(images)) {
-    for (const image of images) {
-      if (typeof image === 'string' && image.trim()) return image.trim()
-    }
+    const first = images.find((item): item is string => typeof item === 'string' && item.trim().length > 0)
+    if (first) return first
   }
-  return readString(record, ['image', 'imageUrl'])
+
+  const gallery = record.gallery
+  if (Array.isArray(gallery)) {
+    const first = gallery.find((item): item is string => typeof item === 'string' && item.trim().length > 0)
+    if (first) return first
+  }
+
+  return undefined
 }
 
 function pushDL(event: string, payload?: Record<string, unknown>) {
   try {
     if (!Array.isArray(window.dataLayer)) window.dataLayer = []
     window.dataLayer.push({ event, ...(payload ?? {}) })
-  } catch {}
+  } catch {
+    // no-op
+  }
 }
 
-function getPrice(product: Product): number | undefined {
-  const record = toRecord(product)
-  return readNumber(record, ['price', 'prix', 'amount'])
+function getPrice(product: Product): number {
+  return typeof product.price === 'number' && Number.isFinite(product.price) ? product.price : 0
 }
 
 function getCompareAt(product: Product): number | undefined {
   const record = toRecord(product)
-  return readNumber(record, ['compareAtPrice', 'oldPrice', 'originalPrice'])
+  return readNumber(record, ['compareAtPrice', 'oldPrice', 'referencePrice', 'originalPrice'])
 }
 
 function getRating(product: Product): number {
-  const record = toRecord(product)
-  return readNumber(record, ['rating', 'note']) ?? 0
+  if (product.aggregateRating && typeof product.aggregateRating.average === 'number') {
+    return Math.max(0, Math.min(5, product.aggregateRating.average))
+  }
+
+  if (typeof product.rating === 'number' && Number.isFinite(product.rating)) {
+    return Math.max(0, Math.min(5, product.rating))
+  }
+
+  return 0
 }
 
-function getSales(product: Product): number {
+function getPopularity(product: Product): number {
   const record = toRecord(product)
-  return readNumber(record, ['sales', 'sold']) ?? 0
+  const explicitSales = readNumber(record, ['sales', 'sold', 'ordersCount'])
+  if (typeof explicitSales === 'number') return explicitSales
+
+  const reviews =
+    typeof product.reviewsCount === 'number'
+      ? product.reviewsCount
+      : product.aggregateRating?.total ?? 0
+
+  const ratingBoost = getRating(product) * 10
+  const featuredBoost = readBoolean(record, ['featured', 'isBestSeller']) ? 50 : 0
+
+  return reviews + ratingBoost + featuredBoost
 }
 
 function isPromo(product: Product): boolean {
-  const price = getPrice(product)
+  const current = getPrice(product)
   const compareAt = getCompareAt(product)
-  return typeof price === 'number' && typeof compareAt === 'number' && compareAt > price
+
+  return typeof compareAt === 'number' && compareAt > current
 }
 
 function isInStock(product: Product): boolean {
+  if (typeof product.stock === 'number') return product.stock > 0
+
   const record = toRecord(product)
-  const stock = readNumber(record, ['stock', 'quantity', 'qty'])
+  const stock = readNumber(record, ['quantity', 'qty'])
   const available = readBoolean(record, ['available'])
 
   if (typeof stock === 'number') return stock > 0
   if (typeof available === 'boolean') return available
+
   return true
+}
+
+function normalizeProduct(product: Product): Product {
+  const record = toRecord(product)
+
+  return {
+    ...product,
+    title: product.title?.trim() || readString(record, ['name']) || 'Produit',
+    image: readFirstImage(record) || '/og-image.jpg',
+  }
 }
 
 export default function BestProducts({
@@ -149,7 +204,8 @@ export default function BestProducts({
   autoLoadOnIntersect = true,
 }: BestProductsProps) {
   const pathname = usePathname() || '/'
-  const locale = getCurrentLocale(pathname)
+  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr'
+  const reduceMotion = useReducedMotion()
 
   const t = useMemo(() => {
     if (locale === 'en') {
@@ -158,6 +214,9 @@ export default function BestProducts({
         display: 'Showing',
         promo: 'On sale',
         inStock: 'In stock',
+        reset: 'Reset',
+        empty: 'No products match the current filters.',
+        titleFallback: 'Best sellers',
         filterPromoAria: 'Filter: on sale',
         filterStockAria: 'Filter: in stock',
         sortLabel: 'Sort products',
@@ -168,9 +227,18 @@ export default function BestProducts({
           rating: 'Rating',
         },
         sortAnnounce: (k: SortKey) =>
-          `Sorted by ${k === 'popular' ? 'popularity' : k === 'priceAsc' ? 'price ascending' : k === 'priceDesc' ? 'price descending' : 'rating'}.`,
+          `Sorted by ${
+            k === 'popular'
+              ? 'popularity'
+              : k === 'priceAsc'
+                ? 'price ascending'
+                : k === 'priceDesc'
+                  ? 'price descending'
+                  : 'rating'
+          }.`,
         filterPromoAnnounce: (on: boolean) => `Sale filter ${on ? 'enabled' : 'disabled'}.`,
         filterStockAnnounce: (on: boolean) => `In-stock filter ${on ? 'enabled' : 'disabled'}.`,
+        resetAnnounce: 'Filters reset.',
         seeMore: 'Show more',
         allShown: 'All products are displayed.',
         moreShown: (n: number) => `${n} additional products displayed.`,
@@ -184,8 +252,11 @@ export default function BestProducts({
       display: 'Affichage',
       promo: 'Promo',
       inStock: 'En stock',
-      filterPromoAria: 'Filtrer: en promotion',
-      filterStockAria: 'Filtrer: en stock',
+      reset: 'Réinitialiser',
+      empty: 'Aucun produit ne correspond aux filtres actuels.',
+      titleFallback: 'Nos Meilleures Ventes',
+      filterPromoAria: 'Filtrer : en promotion',
+      filterStockAria: 'Filtrer : en stock',
       sortLabel: 'Trier les produits',
       sort: {
         popular: 'Popularité',
@@ -194,9 +265,18 @@ export default function BestProducts({
         rating: 'Note',
       },
       sortAnnounce: (k: SortKey) =>
-        `Tri par ${k === 'popular' ? 'popularité' : k === 'priceAsc' ? 'prix croissant' : k === 'priceDesc' ? 'prix décroissant' : 'note'}.`,
+        `Tri par ${
+          k === 'popular'
+            ? 'popularité'
+            : k === 'priceAsc'
+              ? 'prix croissant'
+              : k === 'priceDesc'
+                ? 'prix décroissant'
+                : 'note'
+        }.`,
       filterPromoAnnounce: (on: boolean) => `Filtre promotion ${on ? 'activé' : 'désactivé'}.`,
       filterStockAnnounce: (on: boolean) => `Filtre en stock ${on ? 'activé' : 'désactivé'}.`,
+      resetAnnounce: 'Filtres réinitialisés.',
       seeMore: 'Voir plus',
       allShown: 'Tous les produits sont affichés.',
       moreShown: (n: number) => `${n} produits supplémentaires affichés.`,
@@ -216,26 +296,26 @@ export default function BestProducts({
   const [filterPromo, setFilterPromo] = useState(false)
   const [filterStock, setFilterStock] = useState(false)
 
-  const reduceMotion = useReducedMotion()
   const sentinelRef = useRef<HTMLDivElement | null>(null)
 
-  const isEmpty = !Array.isArray(products) || products.length === 0
+  const safeProducts = useMemo(
+    () => (Array.isArray(products) ? products.filter(Boolean).map(normalizeProduct) : []),
+    [products]
+  )
 
   const filteredSorted = useMemo(() => {
-    let arr = products.filter(Boolean)
+    let arr = [...safeProducts]
 
     if (filterPromo) arr = arr.filter(isPromo)
     if (filterStock) arr = arr.filter(isInStock)
 
-    const copy = [...arr]
-
-    copy.sort((a, b) => {
-      const priceA = getPrice(a) ?? Infinity
-      const priceB = getPrice(b) ?? Infinity
+    arr.sort((a, b) => {
+      const priceA = getPrice(a)
+      const priceB = getPrice(b)
       const ratingA = getRating(a)
       const ratingB = getRating(b)
-      const salesA = getSales(a)
-      const salesB = getSales(b)
+      const popA = getPopularity(a)
+      const popB = getPopularity(b)
 
       switch (sortBy) {
         case 'priceAsc':
@@ -243,15 +323,15 @@ export default function BestProducts({
         case 'priceDesc':
           return priceB - priceA
         case 'rating':
-          return ratingB - ratingA
+          return ratingB - ratingA || popB - popA
         case 'popular':
         default:
-          return salesB - salesA
+          return popB - popA || ratingB - ratingA
       }
     })
 
-    return copy
-  }, [products, sortBy, filterPromo, filterStock])
+    return arr
+  }, [safeProducts, sortBy, filterPromo, filterStock])
 
   const list = useMemo(() => {
     if (!limit || expanded) return filteredSorted
@@ -277,21 +357,22 @@ export default function BestProducts({
           pushDL('best_products_autoload')
         }
       },
-      { threshold: 0.3, rootMargin: '120px' }
+      { threshold: 0.25, rootMargin: '120px' }
     )
 
     io.observe(el)
     return () => io.disconnect()
   }, [autoLoadOnIntersect, expanded])
 
-  if (isEmpty) {
+  if (safeProducts.length === 0) {
     return (
-      <section className={cn('max-w-6xl mx-auto px-4 py-10', className)}>
+      <section className={cn('mx-auto max-w-6xl px-4 py-10', className)}>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="skeleton h-44 rounded-2xl" aria-hidden="true" />
           ))}
         </div>
+
         <p className="mt-6 text-center text-sm text-token-text/70" role="status" aria-live="polite">
           {t.loading}
         </p>
@@ -301,10 +382,11 @@ export default function BestProducts({
 
   const totalCount = filteredSorted.length
   const visibleCount = list.length
+  const activeFilters = filterPromo || filterStock
 
   return (
     <section
-      className={cn('max-w-6xl mx-auto px-4 py-10', className)}
+      className={cn('mx-auto max-w-6xl px-4 py-10', className)}
       aria-labelledby={showTitle ? headingId : undefined}
       role="region"
       style={sectionStyle}
@@ -315,8 +397,9 @@ export default function BestProducts({
             id={headingId}
             className="mb-2 text-center text-3xl font-extrabold text-brand dark:text-white sm:text-4xl"
           >
-            {title}
+            {title || t.titleFallback}
           </h2>
+
           <p id={subId} className="mb-6 text-center text-sm text-token-text/70">
             {t.sub}
             <span className="sr-only"> {totalCount} produits disponibles.</span>
@@ -324,7 +407,7 @@ export default function BestProducts({
         </>
       )}
 
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-token-border bg-token-surface/70 p-3 shadow-soft">
         <div className="text-xs text-token-text/70" aria-live="polite">
           {t.display} <span className="font-semibold">{visibleCount}</span> / <span>{totalCount}</span>
         </div>
@@ -399,42 +482,56 @@ export default function BestProducts({
               <option value="priceDesc">{t.sort.priceDesc}</option>
               <option value="rating">{t.sort.rating}</option>
             </select>
+
+            {activeFilters ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setFilterPromo(false)
+                  setFilterStock(false)
+                  setAnnounce(t.resetAnnounce)
+                  pushDL('best_products_reset_filters')
+                }}
+                className="rounded-full border border-token-border bg-token-surface px-3 py-1.5 text-xs font-semibold transition hover:shadow"
+              >
+                {t.reset}
+              </button>
+            ) : null}
           </div>
         )}
       </div>
 
-      <motion.ul
-        {...(!reduceMotion ? { variants: containerVariants, initial: 'hidden', whileInView: 'show' } : {})}
-        viewport={{ once: true, amount: 0.2 }}
-        className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4"
-        role="list"
-        aria-describedby={showTitle ? subId : undefined}
-        id={gridId}
-      >
-        {list.map((product, i) => {
-          const record = toRecord(product)
-          const key = readString(record, ['_id', 'slug', 'id']) ?? `bp-${i}`
+      {totalCount === 0 ? (
+        <div className="rounded-3xl border border-token-border bg-token-surface/70 px-6 py-12 text-center shadow-soft">
+          <p className="text-sm font-semibold text-token-text">{t.empty}</p>
+        </div>
+      ) : (
+        <motion.ul
+          {...(!reduceMotion ? { variants: containerVariants, initial: 'hidden', whileInView: 'show' } : {})}
+          viewport={{ once: true, amount: 0.15 }}
+          className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4"
+          role="list"
+          aria-describedby={showTitle ? subId : undefined}
+          id={gridId}
+        >
+          {list.map((product, i) => {
+            const record = toRecord(product)
+            const key = readString(record, ['_id', 'slug', 'id']) ?? `bp-${i}`
 
-          const normalizedProduct: Product = {
-            ...product,
-            title: product.title ?? readString(record, ['name']) ?? 'Produit sans titre',
-            image: product.image ?? readFirstImage(record) ?? '/og-image.jpg',
-          }
-
-          return (
-            <motion.li
-              key={key}
-              {...(!reduceMotion ? { variants: itemVariants } : {})}
-              {...(!reduceMotion ? { whileHover: { y: -4 } } : {})}
-              transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-              data-gtm="best_products_item"
-              data-idx={i}
-            >
-              <ProductCard product={normalizedProduct} />
-            </motion.li>
-          )
-        })}
-      </motion.ul>
+            return (
+              <motion.li
+                key={key}
+                {...(!reduceMotion ? { variants: itemVariants } : {})}
+                role="listitem"
+                data-gtm="best_products_item"
+                data-idx={i}
+              >
+                <ProductCard product={product} priority={i < 2} />
+              </motion.li>
+            )
+          })}
+        </motion.ul>
+      )}
 
       {!expanded && limit > 0 && totalCount > limit && (
         <div className="mt-8 flex flex-col items-center">
@@ -455,7 +552,9 @@ export default function BestProducts({
             </svg>
           </button>
 
-          {autoLoadOnIntersect && <div ref={sentinelRef} className="h-px w-full opacity-0" aria-hidden="true" />}
+          {autoLoadOnIntersect ? (
+            <div ref={sentinelRef} className="h-px w-full opacity-0" aria-hidden="true" />
+          ) : null}
         </div>
       )}
 

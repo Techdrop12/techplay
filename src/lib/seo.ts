@@ -1,7 +1,8 @@
-// src/lib/seo.ts — Générateur de metadata Next (hreflang, OG absolus, noindex, helpers)
+// src/lib/seo.ts — Générateur de metadata Next robuste (canonical, hreflang, OG, Twitter, JSON-LD)
 import type { Metadata } from 'next'
 
 type SiteLocale = 'fr' | 'en'
+type OgLocale = 'fr_FR' | 'en_US'
 type MetaOgType = 'website' | 'article'
 
 interface MetaProps {
@@ -10,7 +11,7 @@ interface MetaProps {
   url: string
   image?: string
   type?: 'website' | 'article' | 'product'
-  locale?: 'fr_FR' | 'en_US'
+  locale?: OgLocale
   noindex?: boolean
 }
 
@@ -44,26 +45,45 @@ function getOrigin(): string {
 
 const ORIGIN = getOrigin()
 
-function abs(u?: string | null, fallback: string = DEFAULT_OG): string {
-  const v = (u || '').trim()
-  const effective = v || fallback
-
-  try {
-    return new URL(effective).toString()
-  } catch {
-    const path = effective.startsWith('/') ? effective : `/${effective}`
-    return `${ORIGIN}${path}`
-  }
+function ensureLeadingSlash(path: string): string {
+  return path.startsWith('/') ? path : `/${path}`
 }
 
-const ensureLeadingSlash = (p: string) => (p.startsWith('/') ? p : `/${p}`)
-const stripLocalePrefix = (pathname: string) => pathname.replace(/^\/(fr|en)(?=\/|$)/, '')
-const toHreflang = (loc: SiteLocale) => (loc === 'fr' ? 'fr-FR' : 'en-US')
-const toOgLocale = (loc: SiteLocale): 'fr_FR' | 'en_US' => (loc === 'en' ? 'en_US' : 'fr_FR')
+function stripLocalePrefix(pathname: string): string {
+  return pathname.replace(/^\/(fr|en)(?=\/|$)/, '') || '/'
+}
 
 function inferLocaleFromPath(pathname: string): SiteLocale {
   const match = pathname.match(/^\/(fr|en)(?=\/|$)/)
   return match?.[1] === 'en' ? 'en' : DEFAULT_LOCALE
+}
+
+function toOgLocale(locale: SiteLocale): OgLocale {
+  return locale === 'en' ? 'en_US' : 'fr_FR'
+}
+
+function abs(u?: string | null, fallback: string = DEFAULT_OG): string {
+  const raw = (u || '').trim()
+  const effective = raw || fallback
+
+  try {
+    return new URL(effective).toString()
+  } catch {
+    const path = ensureLeadingSlash(effective)
+    return `${ORIGIN}${path}`
+  }
+}
+
+function resolvePathnameFromUrl(url: string): string {
+  try {
+    return new URL(url).pathname || '/'
+  } catch {
+    try {
+      return new URL(abs(url)).pathname || '/'
+    } catch {
+      return ensureLeadingSlash(url.split('?')[0]?.split('#')[0] || '/')
+    }
+  }
 }
 
 function buildLanguageAlternates(pathname: string): NonNullable<Metadata['alternates']>['languages'] {
@@ -72,17 +92,9 @@ function buildLanguageAlternates(pathname: string): NonNullable<Metadata['altern
   const enPath = pathNoLocale === '/' ? '/en' : `/en${pathNoLocale}`
 
   return {
-    [toHreflang('fr')]: frPath,
-    [toHreflang('en')]: enPath,
+    fr: frPath,
+    en: enPath,
     'x-default': '/',
-  }
-}
-
-function resolvePathnameFromUrl(url: string): string {
-  try {
-    return new URL(abs(url)).pathname || '/'
-  } catch {
-    return ensureLeadingSlash(url)
   }
 }
 
@@ -95,7 +107,7 @@ function buildOpenGraph(input: {
   description: string
   canonicalUrl: string
   imageAbs: string
-  locale: 'fr_FR' | 'en_US'
+  locale: OgLocale
   type: MetaOgType
   extras?: Partial<{
     publishedTime: string
@@ -112,9 +124,17 @@ function buildOpenGraph(input: {
     description,
     type,
     locale,
+    alternateLocale: locale === 'fr_FR' ? ['en_US'] : ['fr_FR'],
     url: canonicalUrl,
     siteName: SITE_NAME,
-    images: [{ url: imageAbs }],
+    images: [
+      {
+        url: imageAbs,
+        width: 1200,
+        height: 630,
+        alt: title,
+      },
+    ],
     ...(type === 'article'
       ? {
           ...(extras?.publishedTime ? { publishedTime: extras.publishedTime } : {}),
@@ -140,8 +160,8 @@ export function generateMeta({
   const pathname = resolvePathnameFromUrl(url)
   const siteLocale = inferLocaleFromPath(pathname)
   const ogLocale = locale ?? toOgLocale(siteLocale)
-  const languages = buildLanguageAlternates(pathname)
   const imageAbs = abs(image)
+  const languages = buildLanguageAlternates(pathname)
 
   return {
     title,
@@ -154,13 +174,13 @@ export function generateMeta({
     robots: noindex
       ? {
           index: false,
-          follow: false,
+          follow: true,
           googleBot: {
             index: false,
-            follow: false,
+            follow: true,
             'max-snippet': -1,
             'max-video-preview': -1,
-            'max-image-preview': 'none',
+            'max-image-preview': 'large',
           },
         }
       : {
@@ -210,8 +230,25 @@ export function generateArticleMeta(base: MetaProps, extras: ArticleMetaExtras =
   }
 }
 
-export function generateProductMeta(base: MetaProps, _extras: ProductMetaExtras = {}): Metadata {
-  return generateMeta({ ...base, type: 'product' })
+export function generateProductMeta(
+  base: MetaProps,
+  extras: ProductMetaExtras = {}
+): Metadata {
+  const meta = generateMeta({ ...base, type: 'product' })
+
+  return {
+    ...meta,
+    other: {
+      ...(typeof extras.price?.amount === 'number'
+        ? {
+            'product:price:amount': String(extras.price.amount),
+            'product:price:currency': extras.price.currency,
+          }
+        : {}),
+      ...(extras.sku ? { 'product:retailer_item_id': extras.sku } : {}),
+      ...(extras.brand ? { 'product:brand': extras.brand } : {}),
+    },
+  }
 }
 
 export function jsonLdBreadcrumbs(items: Array<{ name: string; url: string }>) {
@@ -253,7 +290,7 @@ export function jsonLdArticle(params: {
     image: params.image ? [abs(params.image)] : [abs(DEFAULT_OG)],
     datePublished: params.datePublished,
     dateModified: params.dateModified,
-    author: authors.map((a) => ({ '@type': 'Person', name: a })),
+    author: authors.map((name) => ({ '@type': 'Person', name })),
     publisher: params.publisherName
       ? {
           '@type': 'Organization',
@@ -311,4 +348,4 @@ export function jsonLdProduct(params: {
   }
 }
 
-export { ORIGIN, SITE_NAME, TWITTER_HANDLE }
+export { ORIGIN, SITE_NAME, TWITTER_HANDLE, abs as absoluteUrl }

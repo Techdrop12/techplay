@@ -7,8 +7,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from '@/components/LocalizedLink'
 import { useCart } from '@/hooks/useCart'
 import { formatPrice } from '@/lib/formatPrice'
-import { event, logEvent } from '@/lib/ga'
+import { event } from '@/lib/ga'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
+import logEvent from '@/lib/logEvent'
 import { cn } from '@/lib/utils'
 
 type AppLocale = 'fr' | 'en'
@@ -171,38 +172,34 @@ export default function StickyCartSummary({
   }, [freeShippingThreshold, ctxThreshold])
 
   const subtotal = useMemo(
-    () => (
+    () =>
       Number.isFinite(total)
         ? total
-        : (cart ?? []).reduce((s, it) => s + (it.price || 0) * (it.quantity || 1), 0)
-    ),
+        : (cart ?? []).reduce((s, it) => s + (it.price || 0) * (it.quantity || 1), 0),
     [total, cart]
   )
 
   const remaining = useMemo(
-    () => (
+    () =>
       Number.isFinite(amountToFreeShipping)
         ? amountToFreeShipping
-        : Math.max(0, FREE_SHIP - subtotal)
-    ),
+        : Math.max(0, FREE_SHIP - subtotal),
     [amountToFreeShipping, FREE_SHIP, subtotal]
   )
 
   const progress = useMemo(
-    () => (
+    () =>
       Number.isFinite(progressToFreeShipping)
         ? progressToFreeShipping
-        : Math.min(100, Math.round((subtotal / FREE_SHIP) * 100))
-    ),
+        : Math.min(100, Math.round((subtotal / FREE_SHIP) * 100)),
     [progressToFreeShipping, subtotal, FREE_SHIP]
   )
 
   const payable = useMemo(
-    () => (
+    () =>
       Number.isFinite(grandTotal)
         ? grandTotal
-        : subtotal + (Number.isFinite(shipping) ? shipping : 0) + (Number.isFinite(tax) ? tax : 0)
-    ),
+        : subtotal + (Number.isFinite(shipping) ? shipping : 0) + (Number.isFinite(tax) ? tax : 0),
     [grandTotal, subtotal, shipping, tax]
   )
 
@@ -214,14 +211,18 @@ export default function StickyCartSummary({
     try {
       const saved = localStorage.getItem('tp_cart_sticky_collapsed')
       if (saved === '1') setCollapsed(true)
-    } catch {}
+    } catch {
+      // no-op
+    }
   }, [])
 
   const setCollapsedPersist = (value: boolean) => {
     setCollapsed(value)
     try {
       localStorage.setItem('tp_cart_sticky_collapsed', value ? '1' : '0')
-    } catch {}
+    } catch {
+      // no-op
+    }
   }
 
   useEffect(() => {
@@ -239,7 +240,9 @@ export default function StickyCartSummary({
             ],
             { duration: 800, easing: 'ease-out' }
           )
-        } catch {}
+        } catch {
+          // no-op
+        }
       }
     }
 
@@ -265,7 +268,9 @@ export default function StickyCartSummary({
           label: 'sticky_cart',
           value: count,
         })
-      } catch {}
+      } catch {
+        // no-op
+      }
     }
   }, [visible, count])
 
@@ -277,13 +282,20 @@ export default function StickyCartSummary({
         label,
         value: subtotal,
       })
-      logEvent?.('sticky_cart_click', {
-        page: pathname,
-        cart_count: count,
-        total_price: subtotal,
-        label,
+    } catch {
+      // no-op
+    }
+
+    try {
+      logEvent({
+        action: 'sticky_cart_click',
+        category: 'engagement',
+        label: `${label}:${pathname}`,
+        value: Math.round(subtotal),
       })
-    } catch {}
+    } catch {
+      // no-op
+    }
   }
 
   if (!visible || isExcluded) return null
@@ -319,12 +331,11 @@ export default function StickyCartSummary({
             <button
               type="button"
               onClick={() => setCollapsedPersist(!collapsed)}
-              className="text-sm font-semibold text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] rounded-md px-1 -mx-1"
+              className="rounded-md px-1 -mx-1 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] dark:text-gray-100"
               aria-expanded={!collapsed}
               aria-controls="sticky-cart-panel"
             >
-              {collapsed ? tx('show') : tx('hide')} · {count}{' '}
-              {count > 1 ? tx('items') : tx('item')}
+              {collapsed ? tx('show') : tx('hide')} · {count} {count > 1 ? tx('items') : tx('item')}
             </button>
 
             <div className="text-sm text-gray-800 dark:text-gray-100" aria-live="polite">
@@ -373,7 +384,7 @@ export default function StickyCartSummary({
                       'mt-2 text-xs',
                       remaining > 0
                         ? 'text-gray-600 dark:text-gray-300'
-                        : 'text-green-600 dark:text-green-400 font-semibold'
+                        : 'font-semibold text-green-600 dark:text-green-400'
                     )}
                     aria-live="polite"
                   >
@@ -383,7 +394,7 @@ export default function StickyCartSummary({
                   </p>
                 </div>
 
-                <div className="px-4 pt-2 text-[13px] text-gray-700 dark:text-gray-300 space-y-1">
+                <div className="space-y-1 px-4 pt-2 text-[13px] text-gray-700 dark:text-gray-300">
                   <Line label={tx('subtotal')} value={formatPrice(subtotal)} />
                   {discount > 0 && <Line label={tx('discount')} value={`- ${formatPrice(discount)}`} accent />}
                   <Line
@@ -399,7 +410,7 @@ export default function StickyCartSummary({
                   <Link
                     href={cartHref}
                     onClick={() => onCta('voir_panier')}
-                    className="inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-zinc-700 px-3 py-2 text-sm font-semibold text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
+                    className="inline-flex items-center justify-center rounded-lg border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] dark:border-zinc-700 dark:text-gray-100 dark:hover:bg-zinc-800"
                     aria-label={tx('view_cart')}
                   >
                     {tx('view_cart')}
@@ -408,7 +419,7 @@ export default function StickyCartSummary({
                   <Link
                     href={checkoutHref}
                     onClick={() => onCta('commander')}
-                    className="inline-flex items-center justify-center rounded-lg bg-[hsl(var(--accent))] text-white px-3 py-2 text-sm font-extrabold shadow-md hover:opacity-90 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
+                    className="inline-flex items-center justify-center rounded-lg bg-[hsl(var(--accent))] px-3 py-2 text-sm font-extrabold text-white shadow-md hover:opacity-90 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
                     aria-label={tx('checkout')}
                   >
                     {tx('checkout')} →
@@ -458,7 +469,7 @@ function Line({
         className={cn(
           'tabular-nums text-gray-900 dark:text-white',
           bold && 'font-semibold',
-          accent && 'text-emerald-600 dark:text-emerald-400 font-semibold'
+          accent && 'font-semibold text-emerald-600 dark:text-emerald-400'
         )}
         aria-label={label}
       >

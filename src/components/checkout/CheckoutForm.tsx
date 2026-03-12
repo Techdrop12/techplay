@@ -5,10 +5,14 @@ import { toast } from 'react-hot-toast'
 
 import { useCart } from '@/hooks/useCart'
 import { createCheckoutSession } from '@/lib/checkout'
-import { event as gaEvent, trackAddShippingInfo, pushDataLayer } from '@/lib/ga'
+import { event as gaEvent, pushDataLayer, trackAddShippingInfo } from '@/lib/ga'
 import { pixelInitiateCheckout } from '@/lib/meta-pixel'
+import { cn } from '@/lib/utils'
 
-type FormErrors = { email?: string; address?: string }
+type FormErrors = {
+  email?: string
+  address?: string
+}
 
 type CartItemLike = {
   _id?: string
@@ -28,22 +32,26 @@ type CheckoutSessionResult = {
 }
 
 const LS_EMAIL_KEY = 'checkout_email'
+const LS_ADDRESS_KEY = 'checkout_address'
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i
 
-const isEmail = (v: string) => EMAIL_RE.test(String(v || '').trim())
-const isAddress = (v: string) => String(v || '').trim().length >= 6
-const joinIds = (...ids: Array<string | undefined>) => ids.filter(Boolean).join(' ')
+const isEmail = (value: string) => EMAIL_RE.test(String(value || '').trim())
+const isAddress = (value: string) => String(value || '').trim().length >= 6
+
+function joinIds(...ids: Array<string | undefined>) {
+  return ids.filter(Boolean).join(' ')
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
 
-function toNumber(value: unknown, fallback = 0): number {
-  const n = Number(value)
-  return Number.isFinite(n) ? n : fallback
+function toNumber(value: unknown, fallback = 0) {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : fallback
 }
 
-function toStringSafe(value: unknown, fallback = ''): string {
+function toStringSafe(value: unknown, fallback = '') {
   return typeof value === 'string' && value.trim() ? value : fallback
 }
 
@@ -68,9 +76,11 @@ function getCartItems(input: unknown): CartItemLike[] {
   })
 }
 
-function getErrorMessage(err: unknown): string {
-  if (err instanceof Error && err.message) return err.message
-  if (isRecord(err) && typeof err.message === 'string' && err.message.trim()) return err.message
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error && error.message) return error.message
+  if (isRecord(error) && typeof error.message === 'string' && error.message.trim()) {
+    return error.message
+  }
   return 'Une erreur est survenue. Réessayez.'
 }
 
@@ -78,11 +88,11 @@ function detectCurrency(): 'EUR' | 'GBP' | 'USD' {
   try {
     const htmlLang = typeof document !== 'undefined' ? document.documentElement.lang || '' : ''
     const nav = typeof navigator !== 'undefined' ? navigator.language || '' : ''
-    const src = (htmlLang || nav).toLowerCase()
+    const source = (htmlLang || nav).toLowerCase()
 
-    if (src.includes('gb') || src.endsWith('-uk') || src.includes('en-gb')) return 'GBP'
-    if (src.includes('us') || src.includes('en-us')) return 'USD'
-    if (src.startsWith('en')) return 'USD'
+    if (source.includes('gb') || source.endsWith('-uk') || source.includes('en-gb')) return 'GBP'
+    if (source.includes('us') || source.includes('en-us')) return 'USD'
+    if (source.startsWith('en')) return 'USD'
     return 'EUR'
   } catch {
     return 'EUR'
@@ -92,7 +102,11 @@ function detectCurrency(): 'EUR' | 'GBP' | 'USD' {
 function IconCard({ size = 18, className = '' }: { size?: number; className?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className={className}>
-      <path d="M3 6.5C3 5.12 4.12 4 5.5 4h13A2.5 2.5 0 0 1 21 6.5v11A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5v-11Z" fill="currentColor" opacity="0.12" />
+      <path
+        d="M3 6.5C3 5.12 4.12 4 5.5 4h13A2.5 2.5 0 0 1 21 6.5v11A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5v-11Z"
+        fill="currentColor"
+        opacity="0.12"
+      />
       <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none" />
       <rect x="5" y="9" width="14" height="2.25" rx="1" fill="currentColor" />
       <rect x="5" y="14" width="5.5" height="1.75" rx="0.9" fill="currentColor" opacity="0.7" />
@@ -101,24 +115,24 @@ function IconCard({ size = 18, className = '' }: { size?: number; className?: st
 }
 
 export default function CheckoutForm() {
+  const { cart } = useCart()
+
   const [email, setEmail] = useState('')
   const [address, setAddress] = useState('')
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
   const [status, setStatus] = useState('')
-  const [hp, setHp] = useState('')
+  const [honeypot, setHoneypot] = useState('')
   const [currency, setCurrency] = useState<'EUR' | 'GBP' | 'USD'>(() => detectCurrency())
 
   const formRef = useRef<HTMLFormElement | null>(null)
   const emailRef = useRef<HTMLInputElement | null>(null)
-  const addressRef = useRef<HTMLInputElement | null>(null)
-  const srRef = useRef<HTMLParagraphElement | null>(null)
+  const addressRef = useRef<HTMLTextAreaElement | null>(null)
+  const statusRef = useRef<HTMLParagraphElement | null>(null)
 
   const emailHintId = useId()
   const addressHintId = useId()
-  const srStatusId = useId()
-
-  const { cart } = useCart()
+  const statusId = useId()
 
   const { subtotal, itemsCount, gaItems, pixelContents } = useMemo(() => {
     const items = getCartItems(cart)
@@ -159,53 +173,54 @@ export default function CheckoutForm() {
 
   useEffect(() => {
     try {
-      const qsEmail = typeof window !== 'undefined'
-        ? new URLSearchParams(window.location.search).get('email')
-        : null
+      const searchParams =
+        typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
 
-      if (qsEmail && isEmail(qsEmail)) {
-        setEmail(qsEmail)
-        try {
-          gaEvent?.({ action: 'checkout_prefill_email_qs', category: 'checkout', label: 'querystring' })
-          pushDataLayer?.({ event: 'checkout_prefill_email_qs' })
-        } catch {}
+      const queryEmail = searchParams?.get('email')
+      if (queryEmail && isEmail(queryEmail)) {
+        setEmail(queryEmail)
         return
       }
 
-      const saved = localStorage.getItem(LS_EMAIL_KEY)
-      if (saved && isEmail(saved)) {
-        setEmail(saved)
-        try {
-          gaEvent?.({ action: 'checkout_prefill_email_ls', category: 'checkout', label: 'localstorage' })
-          pushDataLayer?.({ event: 'checkout_prefill_email_ls' })
-        } catch {}
+      const storedEmail = localStorage.getItem(LS_EMAIL_KEY)
+      if (storedEmail && isEmail(storedEmail)) {
+        setEmail(storedEmail)
       }
-    } catch {}
+
+      const storedAddress = localStorage.getItem(LS_ADDRESS_KEY)
+      if (storedAddress && isAddress(storedAddress)) {
+        setAddress(storedAddress)
+      }
+    } catch {
+      // no-op
+    }
   }, [])
 
   useEffect(() => {
     setCurrency(detectCurrency())
   }, [])
 
-  const announce = useCallback((msg: string) => {
-    setStatus(msg)
-    if (srRef.current) srRef.current.textContent = msg
+  const announce = useCallback((message: string) => {
+    setStatus(message)
+    if (statusRef.current) {
+      statusRef.current.textContent = message
+    }
   }, [])
 
-  const validate = useCallback((): boolean => {
-    const next: FormErrors = {}
+  const validate = useCallback(() => {
+    const nextErrors: FormErrors = {}
 
-    if (!isEmail(email)) next.email = 'Adresse email invalide'
-    if (!isAddress(address)) next.address = 'Adresse trop courte'
+    if (!isEmail(email)) nextErrors.email = 'Adresse email invalide'
+    if (!isAddress(address)) nextErrors.address = 'Adresse trop courte'
 
-    setErrors(next)
+    setErrors(nextErrors)
 
-    if (next.email) {
+    if (nextErrors.email) {
       emailRef.current?.focus()
       return false
     }
 
-    if (next.address) {
+    if (nextErrors.address) {
       addressRef.current?.focus()
       return false
     }
@@ -214,10 +229,15 @@ export default function CheckoutForm() {
   }, [address, email])
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault()
+    async (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault()
+
       if (loading) return
-      if (hp) return
+      if (honeypot) return
+      if (!gaItems.length) {
+        toast.error('Votre panier est vide.')
+        return
+      }
       if (!validate()) return
 
       setLoading(true)
@@ -232,10 +252,12 @@ export default function CheckoutForm() {
             items: gaItems,
             shipping_tier: 'standard',
           })
-        } catch {}
+        } catch {
+          // no-op
+        }
 
         try {
-          pushDataLayer?.({
+          pushDataLayer({
             event: 'add_shipping_info',
             currency,
             value: subtotal,
@@ -246,7 +268,9 @@ export default function CheckoutForm() {
               shipping_tier: 'standard',
             },
           })
-        } catch {}
+        } catch {
+          // no-op
+        }
 
         try {
           pixelInitiateCheckout?.({
@@ -255,17 +279,33 @@ export default function CheckoutForm() {
             num_items: itemsCount || undefined,
             contents: pixelContents,
           })
-        } catch {}
+        } catch {
+          // no-op
+        }
 
         try {
-          localStorage.setItem(LS_EMAIL_KEY, email)
-        } catch {}
+          localStorage.setItem(LS_EMAIL_KEY, email.trim())
+          localStorage.setItem(LS_ADDRESS_KEY, address.trim())
+        } catch {
+          // no-op
+        }
+
+        try {
+          gaEvent?.({
+            action: 'checkout_submit',
+            category: 'checkout',
+            label: 'begin_checkout',
+            value: subtotal,
+          })
+        } catch {
+          // no-op
+        }
 
         announce('Création de la session de paiement…')
 
         const session = (await createCheckoutSession({
-          email,
-          address,
+          email: email.trim(),
+          address: address.trim(),
           currency,
           locale:
             typeof document !== 'undefined'
@@ -273,57 +313,71 @@ export default function CheckoutForm() {
               : 'fr',
         })) as CheckoutSessionResult | null | undefined
 
-        if (session && typeof session.url === 'string' && session.url) {
+        if (session?.url) {
           toast('Redirection vers le paiement…', {
             icon: <IconCard className="text-[hsl(var(--accent))]" />,
           })
+
           announce('Redirection vers Stripe')
 
           try {
-            pushDataLayer?.({
+            pushDataLayer({
               event: 'checkout_redirect',
               provider: 'stripe_checkout',
               currency,
             })
-          } catch {}
+          } catch {
+            // no-op
+          }
 
           window.location.href = session.url
           return
         }
 
-        throw new Error('Session invalide')
-      } catch (err: unknown) {
-        const msg = getErrorMessage(err)
-        console.error('[Checkout] error:', err)
-        announce(msg)
-        toast.error('Une erreur est survenue. Veuillez réessayer.')
+        throw new Error('Session de paiement invalide')
+      } catch (error: unknown) {
+        const message = getErrorMessage(error)
+
+        console.error('[Checkout] error:', error)
+        announce(message)
+        toast.error(message)
 
         try {
-          pushDataLayer?.({ event: 'checkout_error', message: msg })
-        } catch {}
+          pushDataLayer({
+            event: 'checkout_error',
+            message,
+          })
+        } catch {
+          // no-op
+        }
       } finally {
         setLoading(false)
         formRef.current?.setAttribute('aria-busy', 'false')
       }
     },
-    [address, announce, currency, email, gaItems, hp, itemsCount, loading, pixelContents, subtotal, validate]
+    [
+      address,
+      announce,
+      currency,
+      email,
+      gaItems,
+      honeypot,
+      itemsCount,
+      loading,
+      pixelContents,
+      subtotal,
+      validate,
+    ]
   )
 
-  const onEmailBlur = useCallback(() => {
+  const handleEmailBlur = useCallback(() => {
     if (!isEmail(email)) return
     try {
-      localStorage.setItem(LS_EMAIL_KEY, email)
-    } catch {}
+      localStorage.setItem(LS_EMAIL_KEY, email.trim())
+    } catch {
+      // no-op
+    }
   }, [email])
-
-  const onEmailKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key !== 'Enter' || !isEmail(email)) return
-      e.preventDefault()
-      addressRef.current?.focus()
-    },
-    [email]
-  )
 
   const emailDescribedBy = joinIds(errors.email ? 'email-error' : undefined, emailHintId)
   const addressDescribedBy = joinIds(errors.address ? 'address-error' : undefined, addressHintId)
@@ -335,11 +389,11 @@ export default function CheckoutForm() {
       className="space-y-6"
       noValidate
       aria-labelledby="checkout-form-title"
-      aria-describedby={srStatusId}
+      aria-describedby={statusId}
     >
       <p
-        id={srStatusId}
-        ref={srRef}
+        id={statusId}
+        ref={statusRef}
         className="sr-only"
         role="status"
         aria-live="polite"
@@ -348,98 +402,106 @@ export default function CheckoutForm() {
         {status}
       </p>
 
-      <h3 id="checkout-form-title" className="text-lg font-semibold text-gray-900 dark:text-white">
-        Coordonnées
-      </h3>
+      <div className="space-y-2">
+        <h3 id="checkout-form-title" className="text-lg font-semibold text-gray-900 dark:text-white">
+          Coordonnées
+        </h3>
+        <p className="text-sm text-token-text/70">
+          Renseignez vos informations pour finaliser la commande en toute sécurité.
+        </p>
+      </div>
 
       <fieldset disabled={loading} className="space-y-6">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium mb-1">
+          <label htmlFor="checkout-email" className="mb-1 block text-sm font-medium">
             Email
           </label>
           <input
             ref={emailRef}
-            id="email"
+            id="checkout-email"
             name="email"
             type="email"
             inputMode="email"
             enterKeyHint="next"
-            className={[
-              'w-full border px-3 py-2 rounded-lg text-sm',
-              'bg-white dark:bg-zinc-800',
-              'focus:outline-none focus:ring-2',
-              errors.email
-                ? 'border-red-500 focus:ring-red-500'
-                : 'border-gray-300 dark:border-zinc-700 focus:ring-accent',
-            ].join(' ')}
             value={email}
-            onChange={(e) => {
-              setEmail(e.target.value)
-              if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }))
+            onChange={(event) => {
+              setEmail(event.target.value)
+              if (errors.email) {
+                setErrors((prev) => ({ ...prev, email: undefined }))
+              }
             }}
-            onBlur={onEmailBlur}
-            onKeyDown={onEmailKeyDown}
+            onBlur={handleEmailBlur}
             required
             autoComplete="email"
             autoCapitalize="off"
             autoCorrect="off"
             spellCheck={false}
+            placeholder="vous@exemple.com"
+            maxLength={120}
             aria-required="true"
             aria-invalid={errors.email ? 'true' : 'false'}
             aria-describedby={emailDescribedBy || undefined}
-            placeholder="vous@exemple.com"
-            maxLength={120}
             data-gtm="checkout_email_input"
+            className={cn(
+              'w-full rounded-xl border px-3 py-3 text-sm transition',
+              'bg-white dark:bg-zinc-800',
+              'focus:outline-none focus:ring-2',
+              errors.email
+                ? 'border-red-500 focus:ring-red-500'
+                : 'border-gray-300 dark:border-zinc-700 focus:ring-[hsl(var(--accent))]'
+            )}
           />
-          <p id={emailHintId} className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+          <p id={emailHintId} className="mt-1 text-[11px] text-token-text/60">
             Nous vous enverrons la confirmation et la facture à cette adresse.
           </p>
-          {errors.email && (
-            <p id="email-error" className="mt-1 text-xs text-red-600" role="alert" aria-live="assertive">
+          {errors.email ? (
+            <p id="email-error" className="mt-1 text-xs text-red-600" role="alert">
               {errors.email}
             </p>
-          )}
+          ) : null}
         </div>
 
         <div>
-          <label htmlFor="address" className="block text-sm font-medium mb-1">
+          <label htmlFor="checkout-address" className="mb-1 block text-sm font-medium">
             Adresse de livraison
           </label>
-          <input
+          <textarea
             ref={addressRef}
-            id="address"
+            id="checkout-address"
             name="street-address"
-            type="text"
-            className={[
-              'w-full border px-3 py-2 rounded-lg text-sm',
+            rows={3}
+            value={address}
+            onChange={(event) => {
+              setAddress(event.target.value)
+              if (errors.address) {
+                setErrors((prev) => ({ ...prev, address: undefined }))
+              }
+            }}
+            required
+            autoComplete="shipping street-address"
+            placeholder="12 rue des Fleurs, 75000 Paris"
+            maxLength={220}
+            aria-required="true"
+            aria-invalid={errors.address ? 'true' : 'false'}
+            aria-describedby={addressDescribedBy || undefined}
+            data-gtm="checkout_address_input"
+            className={cn(
+              'w-full rounded-xl border px-3 py-3 text-sm transition resize-y min-h-[96px]',
               'bg-white dark:bg-zinc-800',
               'focus:outline-none focus:ring-2',
               errors.address
                 ? 'border-red-500 focus:ring-red-500'
-                : 'border-gray-300 dark:border-zinc-700 focus:ring-accent',
-            ].join(' ')}
-            value={address}
-            onChange={(e) => {
-              setAddress(e.target.value)
-              if (errors.address) setErrors((prev) => ({ ...prev, address: undefined }))
-            }}
-            required
-            autoComplete="shipping street-address"
-            aria-required="true"
-            aria-invalid={errors.address ? 'true' : 'false'}
-            aria-describedby={addressDescribedBy || undefined}
-            placeholder="12 rue des Fleurs, 75000 Paris"
-            maxLength={160}
-            data-gtm="checkout_address_input"
+                : 'border-gray-300 dark:border-zinc-700 focus:ring-[hsl(var(--accent))]'
+            )}
           />
-          <p id={addressHintId} className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+          <p id={addressHintId} className="mt-1 text-[11px] text-token-text/60">
             Numéro et libellé de rue, code postal, ville.
           </p>
-          {errors.address && (
-            <p id="address-error" className="mt-1 text-xs text-red-600" role="alert" aria-live="assertive">
+          {errors.address ? (
+            <p id="address-error" className="mt-1 text-xs text-red-600" role="alert">
               {errors.address}
             </p>
-          )}
+          ) : null}
         </div>
 
         <div className="hidden" aria-hidden="true">
@@ -449,24 +511,44 @@ export default function CheckoutForm() {
             type="text"
             autoComplete="off"
             tabIndex={-1}
-            value={hp}
-            onChange={(e) => setHp(e.target.value)}
+            value={honeypot}
+            onChange={(event) => setHoneypot(event.target.value)}
           />
+        </div>
+
+        <div className="rounded-2xl border border-token-border bg-token-surface/70 p-4 text-sm">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-token-text/70">Total estimé</span>
+            <span className="font-semibold text-token-text">
+              {subtotal.toFixed(2)} {currency}
+            </span>
+          </div>
+          <div className="mt-1 text-xs text-token-text/60">
+            {itemsCount} article{itemsCount > 1 ? 's' : ''} dans le panier
+          </div>
         </div>
 
         <button
           type="submit"
-          className="w-full bg-accent hover:bg-accent/90 text-white font-semibold py-3 px-4 rounded-xl shadow transition disabled:opacity-60 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40"
           disabled={loading}
           aria-busy={loading ? 'true' : 'false'}
           data-gtm="checkout_submit_btn"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-4 py-3 font-semibold text-white shadow transition hover:bg-[hsl(var(--accent)/.92)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.35)] disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {loading ? 'Redirection…' : 'Payer maintenant'}
+          <IconCard />
+          <span>{loading ? 'Redirection…' : 'Payer maintenant'}</span>
         </button>
 
-        <p className="text-[11px] text-gray-500 dark:text-gray-400">
-          En continuant, vous acceptez nos <a className="underline" href="/cgv">CGV</a> et notre{' '}
-          <a className="underline" href="/confidentialite">politique de confidentialité</a>.
+        <p className="text-[11px] leading-relaxed text-token-text/60">
+          En continuant, vous acceptez nos{' '}
+          <a className="underline underline-offset-2" href="/cgv">
+            CGV
+          </a>{' '}
+          et notre{' '}
+          <a className="underline underline-offset-2" href="/confidentialite">
+            politique de confidentialité
+          </a>
+          .
         </p>
       </fieldset>
     </form>

@@ -13,11 +13,45 @@ export { SUPPORTED_LOCALES, DEFAULT_LOCALE, LOCALE_COOKIE }
 export type Locale = (typeof SUPPORTED_LOCALES)[number]
 
 const isSupported = (v?: string): v is Locale =>
-  !!v && (SUPPORTED_LOCALES as readonly string[]).includes(v)
+  Boolean(v && (SUPPORTED_LOCALES as readonly string[]).includes(v))
 
 const ensureLeadingSlash = (p: string) => (p.startsWith('/') ? p : `/${p}`)
+
 const isExternalUrl = (p: string) =>
   /^([a-z][a-z0-9+\-.]*:)?\/\//i.test(p) || p.startsWith('mailto:') || p.startsWith('tel:')
+
+function parsePath(input: string): {
+  pathname: string
+  search: string
+  hash: string
+} {
+  const value = String(input || '/')
+  const match = value.match(/^([^?#]*)(\?[^#]*)?(#.*)?$/)
+
+  return {
+    pathname: ensureLeadingSlash(match?.[1] || '/'),
+    search: match?.[2] || '',
+    hash: match?.[3] || '',
+  }
+}
+
+function getCurrentSearch(): string {
+  if (typeof window === 'undefined') return ''
+  try {
+    return window.location.search || ''
+  } catch {
+    return ''
+  }
+}
+
+function getCurrentHash(): string {
+  if (typeof window === 'undefined') return ''
+  try {
+    return window.location.hash || ''
+  } catch {
+    return ''
+  }
+}
 
 export function getCurrentPathname(): string {
   if (typeof window === 'undefined') return '/'
@@ -34,7 +68,7 @@ function readCookie(name: string): string | undefined {
   try {
     const raw = document.cookie
       .split('; ')
-      .find((c) => c.startsWith(`${name}=`))
+      .find((cookie) => cookie.startsWith(`${name}=`))
 
     if (!raw) return undefined
     return decodeURIComponent(raw.split('=').slice(1).join('='))
@@ -43,9 +77,6 @@ function readCookie(name: string): string | undefined {
   }
 }
 
-/**
- * Locale courante : URL > cookie > défaut
- */
 export function getCurrentLocale(pathname?: string): Locale {
   const p = pathname ?? getCurrentPathname()
   const first = p.split('/').filter(Boolean)[0]
@@ -58,7 +89,6 @@ export function getCurrentLocale(pathname?: string): Locale {
   return DEFAULT_LOCALE
 }
 
-/** Retire un éventuel préfixe de locale du pathname fourni */
 export function stripLocalePrefix(pathname: string): string {
   return _strip(pathname)
 }
@@ -71,36 +101,26 @@ type LocalizeOptions = {
   customHash?: string
 }
 
-/**
- * Construit un chemin localisé.
- * - fr (par défaut) => pas de préfixe
- * - autres => /<locale>/...
- * - laisse les liens externes intacts
- */
 export function localizePath(
   path: string,
   locale: Locale,
   opts: LocalizeOptions = {}
 ): string {
   const input = path || opts.currentPathname || getCurrentPathname()
-  if (isExternalUrl(input)) return input
+  if (isExternalUrl(input) || input.startsWith('#')) return input
 
-  const base = ensureLeadingSlash(input)
-  const bare = stripLocalePrefix(base)
-  const localized = _withLocale(bare, locale)
+  const parsed = parsePath(input)
+  const localizedPathname = _withLocale(stripLocalePrefix(parsed.pathname), locale)
 
-  const query =
-    opts.customQuery ??
-    (opts.keepQuery && typeof window !== 'undefined' ? window.location.search || '' : '')
+  const search =
+    opts.customQuery ?? (parsed.search || (opts.keepQuery ? getCurrentSearch() : ''))
 
   const hash =
-    opts.customHash ??
-    (opts.keepHash && typeof window !== 'undefined' ? window.location.hash || '' : '')
+    opts.customHash ?? (parsed.hash || (opts.keepHash ? getCurrentHash() : ''))
 
-  return `${localized}${query}${hash}`
+  return `${localizedPathname}${search}${hash}`
 }
 
-/** URLs alternatives (hreflang) pour un pathname donné */
 export function altLocales(pathname?: string) {
   const p = pathname ?? getCurrentPathname()
 

@@ -1,4 +1,3 @@
-// src/components/HeroCarousel.tsx — ULTIME++++ (LCP, i18n CTA, a11y clean, perf polish)
 'use client'
 
 import {
@@ -18,7 +17,10 @@ import {
   useMemo,
   useRef,
   useState,
+  type FocusEventHandler,
+  type KeyboardEventHandler,
   type SyntheticEvent,
+  type TouchEventHandler,
 } from 'react'
 
 import Link from '@/components/LocalizedLink'
@@ -119,10 +121,25 @@ const BLUR_DATA_URL = 'data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA='
 
 function pushDL(event: string, payload?: Record<string, unknown>) {
   try {
-    window.dataLayer?.push({ event, ...payload })
+    const dataLayer = (window as Window & {
+      dataLayer?: Array<Record<string, unknown>>
+    }).dataLayer
+
+    dataLayer?.push({
+      event,
+      ...payload,
+    })
   } catch {
     // no-op
   }
+}
+
+function getImageSrc(slide?: Slide): { desktop: string; mobile: string } {
+  const desktop = slide?.imageDesktop || slide?.image || slide?.poster || '/og-image.jpg'
+  const mobile =
+    slide?.imageMobile || slide?.imageDesktop || slide?.image || slide?.poster || '/og-image.jpg'
+
+  return { desktop, mobile }
 }
 
 export default function HeroCarousel({
@@ -149,21 +166,24 @@ export default function HeroCarousel({
   const locale = getCurrentLocale(pathname)
 
   const total = Math.max(0, slides.length)
+  const canNavigate = total > 1
   const [index, setIndex] = useState(0)
-  const [isPaused, setPaused] = useState(false)
+  const [isPaused, setIsPaused] = useState(false)
+  const [progress, setProgress] = useState(0)
 
   const userPausedRef = useRef(false)
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const touchStartX = useRef<number | null>(null)
   const prefersReducedMotion = useReducedMotion()
   const srId = useId()
   const instructionsId = useId()
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
 
-  const effectiveAutoplay = autoplay && !prefersReducedMotion && total > 1
+  const effectiveAutoplay = autoplay && !prefersReducedMotion && canNavigate
 
   const t = useMemo(() => {
     const en = locale === 'en'
+
     return en
       ? {
           mainLabel: 'TechPlay main carousel',
@@ -178,6 +198,9 @@ export default function HeroCarousel({
           instructions: 'Use left and right arrows to navigate, Space to pause or resume.',
           btnPlay: 'Play',
           btnPause: 'Pause',
+          ctaFallback: 'Discover',
+          noscriptProducts: 'View products',
+          slideWord: 'Slide ',
         }
       : {
           mainLabel: 'Carrousel principal TechPlay',
@@ -193,6 +216,9 @@ export default function HeroCarousel({
             'Utilisez les flèches gauche/droite pour naviguer, Espace pour mettre en pause ou relancer.',
           btnPlay: 'Lire',
           btnPause: 'Pause',
+          ctaFallback: 'Découvrir',
+          noscriptProducts: 'Voir les produits',
+          slideWord: 'Diapositive ',
         }
   }, [locale])
 
@@ -202,93 +228,115 @@ export default function HeroCarousel({
     if (index > Math.max(0, slides.length - 1)) {
       setIndex(0)
     }
-  }, [slides.length, index])
+  }, [index, slides.length])
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end start'],
   })
+
   const y = useTransform(scrollYProgress, [0, 1], [0, parallaxPx])
   const parallaxStyle: MotionStyle | undefined =
     !prefersReducedMotion && parallaxPx > 0 ? { y } : undefined
 
-  const clearTimer = useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current)
-      timerRef.current = null
-    }
-  }, [])
-
   const next = useCallback(() => {
-    setIndex((i) => {
-      const nextIndex = total ? (i + 1) % total : 0
+    setIndex((currentIndex) => {
+      const nextIndex = canNavigate ? (currentIndex + 1) % total : 0
       pushDL('hero_next', { index: nextIndex })
       return nextIndex
     })
-  }, [total])
+  }, [canNavigate, total])
 
   const prev = useCallback(() => {
-    setIndex((i) => {
-      const prevIndex = total ? (i - 1 + total) % total : 0
+    setIndex((currentIndex) => {
+      const prevIndex = canNavigate ? (currentIndex - 1 + total) % total : 0
       pushDL('hero_prev', { index: prevIndex })
       return prevIndex
     })
-  }, [total])
-
-  const startTimer = useCallback(() => {
-    if (!effectiveAutoplay) return
-    clearTimer()
-    timerRef.current = setInterval(next, intervalMs)
-  }, [effectiveAutoplay, clearTimer, intervalMs, next])
+  }, [canNavigate, total])
 
   const pauseUser = useCallback(() => {
     userPausedRef.current = true
-    setPaused(true)
-    clearTimer()
+    setIsPaused(true)
     pushDL('hero_paused_user')
-  }, [clearTimer])
+  }, [])
 
   const resumeUser = useCallback(() => {
     userPausedRef.current = false
-    setPaused(false)
-    startTimer()
+    setIsPaused(false)
     pushDL('hero_resumed_user')
-  }, [startTimer])
+  }, [])
 
   const autoPause = useCallback(() => {
     if (userPausedRef.current) return
-    setPaused(true)
-    clearTimer()
-  }, [clearTimer])
+    setIsPaused(true)
+  }, [])
 
   const autoResume = useCallback(() => {
     if (userPausedRef.current) return
-    setPaused(false)
-    startTimer()
-  }, [startTimer])
+    setIsPaused(false)
+  }, [])
+
+  const runManualAction = useCallback(
+    (action: () => void) => {
+      const shouldResume = !userPausedRef.current && effectiveAutoplay
+      if (shouldResume) setIsPaused(true)
+      action()
+      setProgress(0)
+      if (shouldResume) {
+        requestAnimationFrame(() => setIsPaused(false))
+      }
+    },
+    [effectiveAutoplay]
+  )
 
   useEffect(() => {
-    startTimer()
-    return () => clearTimer()
-  }, [startTimer, clearTimer])
+    setProgress(0)
+  }, [index])
 
   useEffect(() => {
-    const onVis = () => {
+    if (!effectiveAutoplay || isPaused) return
+
+    let rafId = 0
+    const start = performance.now() - (progress / 100) * intervalMs
+
+    const tick = (now: number) => {
+      const elapsed = now - start
+      const ratio = elapsed / intervalMs
+
+      if (ratio >= 1) {
+        setProgress(100)
+        next()
+        return
+      }
+
+      setProgress(ratio * 100)
+      rafId = window.requestAnimationFrame(tick)
+    }
+
+    rafId = window.requestAnimationFrame(tick)
+    return () => window.cancelAnimationFrame(rafId)
+  }, [effectiveAutoplay, intervalMs, isPaused, next, progress])
+
+  useEffect(() => {
+    if (!pauseWhenHidden) return
+
+    const onVisibilityChange = () => {
       if (document.hidden) autoPause()
       else autoResume()
     }
 
-    document.addEventListener('visibilitychange', onVis)
-    return () => document.removeEventListener('visibilitychange', onVis)
-  }, [autoPause, autoResume])
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
+  }, [autoPause, autoResume, pauseWhenHidden])
 
   useEffect(() => {
     if (!pauseWhenHidden || typeof window === 'undefined') return
 
-    const el = containerRef.current
-    if (!el) return
+    const element = containerRef.current
+    if (!element) return
 
-    const io = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries[0]?.isIntersecting
         if (visible) autoResume()
@@ -297,58 +345,65 @@ export default function HeroCarousel({
       { threshold: 0.4 }
     )
 
-    io.observe(el)
-    return () => io.disconnect()
-  }, [pauseWhenHidden, autoPause, autoResume])
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [autoPause, autoResume, pauseWhenHidden])
 
   useEffect(() => {
-    if (typeof window === 'undefined' || total <= 1) return
+    if (typeof window === 'undefined' || !canNavigate) return
 
     const nextIdx = (index + 1) % total
     const prevIdx = (index - 1 + total) % total
+    const nextSlide = slides[nextIdx]
+    const prevSlide = slides[prevIdx]
 
     const urls = [
-      slides[nextIdx]?.imageDesktop || slides[nextIdx]?.image || slides[nextIdx]?.poster,
-      slides[prevIdx]?.imageDesktop || slides[prevIdx]?.image || slides[prevIdx]?.poster,
-      slides[nextIdx]?.imageMobile,
-      slides[prevIdx]?.imageMobile,
-    ].filter((src): src is string => typeof src === 'string' && src.length > 0)
+      getImageSrc(nextSlide).desktop,
+      getImageSrc(nextSlide).mobile,
+      getImageSrc(prevSlide).desktop,
+      getImageSrc(prevSlide).mobile,
+    ].filter(Boolean)
 
     urls.forEach((src) => {
       const img = new window.Image()
       img.src = src
     })
-  }, [index, slides, total])
+  }, [canNavigate, index, slides, total])
 
   useEffect(() => {
-    if (current) {
-      onSlideChange?.(index, current)
-    }
+    if (current) onSlideChange?.(index, current)
 
     try {
       const el = document.getElementById(srId)
       if (el) {
-        el.textContent =
-          (locale === 'en' ? 'Slide ' : 'Diapositive ') +
-          (index + 1) +
-          t.of +
-          total +
-          ': ' +
-          (current?.alt || '')
+        el.textContent = `${t.slideWord}${index + 1}${t.of}${total}${current?.alt ? `: ${current.alt}` : ''}`
       }
     } catch {
       // no-op
     }
-  }, [index, current, total, onSlideChange, srId, t, locale])
+  }, [current, index, onSlideChange, srId, t, total])
 
-  const onTouchStart: React.TouchEventHandler<HTMLDivElement> = (e) => {
-    touchStartX.current = e.touches[0].clientX
-    if (pauseOnHover) autoPause()
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    if (current?.videoUrl) {
+      if (!isPaused && effectiveAutoplay) {
+        void video.play().catch(() => undefined)
+      } else {
+        video.pause()
+      }
+    }
+  }, [current?.videoUrl, effectiveAutoplay, isPaused])
+
+  const onTouchStart: TouchEventHandler<HTMLDivElement> = (e) => {
+    touchStartX.current = e.touches[0]?.clientX ?? null
+    if (pauseOnHover && effectiveAutoplay) autoPause()
   }
 
-  const onTouchEnd: React.TouchEventHandler<HTMLDivElement> = (e) => {
+  const onTouchEnd: TouchEventHandler<HTMLDivElement> = (e) => {
     if (touchStartX.current == null) {
-      autoResume()
+      if (pauseOnHover && effectiveAutoplay) autoResume()
       return
     }
 
@@ -356,52 +411,59 @@ export default function HeroCarousel({
     touchStartX.current = null
 
     if (Math.abs(delta) > swipeThreshold) {
-      if (delta > 0) prev()
-      else next()
+      runManualAction(() => {
+        if (delta > 0) prev()
+        else next()
+      })
     }
 
-    autoResume()
+    if (pauseOnHover && effectiveAutoplay) autoResume()
   }
 
-  const onKeyDown: React.KeyboardEventHandler = (e) => {
+  const onTouchCancel: TouchEventHandler<HTMLDivElement> = () => {
+    touchStartX.current = null
+    if (pauseOnHover && effectiveAutoplay) autoResume()
+  }
+
+  const onKeyDown: KeyboardEventHandler<HTMLElement> = (e) => {
     if (e.key === 'ArrowRight') {
-      autoPause()
-      next()
-      autoResume()
+      runManualAction(next)
     } else if (e.key === 'ArrowLeft') {
-      autoPause()
-      prev()
-      autoResume()
+      runManualAction(prev)
     } else if (e.key === 'Home') {
-      autoPause()
-      setIndex(0)
-      autoResume()
+      runManualAction(() => setIndex(0))
     } else if (e.key === 'End') {
-      autoPause()
-      setIndex(total ? total - 1 : 0)
-      autoResume()
+      runManualAction(() => setIndex(canNavigate ? total - 1 : 0))
     } else if (e.key === ' ' || e.key === 'Spacebar' || e.key === 'Space') {
       e.preventDefault()
-      if (isPaused) resumeUser()
+      if (userPausedRef.current) resumeUser()
       else pauseUser()
     }
+  }
+
+  const onFocusCapture: FocusEventHandler<HTMLElement> = () => {
+    if (pauseOnHover && effectiveAutoplay) autoPause()
+  }
+
+  const onBlurCapture: FocusEventHandler<HTMLElement> = (e) => {
+    if (!pauseOnHover || !effectiveAutoplay) return
+    const nextTarget = e.relatedTarget as Node | null
+    if (nextTarget && e.currentTarget.contains(nextTarget)) return
+    autoResume()
   }
 
   if (total === 0) return null
 
   const localizedHref = (href?: string) => localizePath(href || '/products', locale)
   const slideAria = `${index + 1} / ${total}${current?.alt ? ` — ${current.alt}` : ''}`
-
-  const desktopSrc = current?.imageDesktop || current?.image || current?.poster || '/og-image.jpg'
-  const mobileSrc =
-    current?.imageMobile || current?.imageDesktop || current?.image || current?.poster || '/og-image.jpg'
+  const { desktop: desktopSrc, mobile: mobileSrc } = getImageSrc(current)
 
   return (
     <section
       ref={containerRef}
       className={cn(
-        'relative h-[60vh] sm:h-[72vh] lg:h-[88vh] w-full overflow-hidden rounded-none sm:rounded-3xl shadow-2xl select-none',
-        'bg-token-surface/60 will-change-transform touch-pan-y',
+        'relative h-[60vh] w-full select-none overflow-hidden rounded-none bg-token-surface/60 shadow-2xl sm:h-[72vh] sm:rounded-3xl lg:h-[88vh]',
+        'will-change-transform touch-pan-y',
         className
       )}
       role="region"
@@ -409,13 +471,14 @@ export default function HeroCarousel({
       aria-label={t.mainLabel}
       aria-describedby={instructionsId}
       aria-live="off"
-      onMouseEnter={pauseOnHover ? autoPause : undefined}
-      onMouseLeave={pauseOnHover ? autoResume : undefined}
-      onFocus={pauseOnHover ? autoPause : undefined}
-      onBlur={pauseOnHover ? autoResume : undefined}
+      onMouseEnter={pauseOnHover && effectiveAutoplay ? autoPause : undefined}
+      onMouseLeave={pauseOnHover && effectiveAutoplay ? autoResume : undefined}
+      onFocusCapture={onFocusCapture}
+      onBlurCapture={onBlurCapture}
       onKeyDown={onKeyDown}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
+      onTouchCancel={onTouchCancel}
       tabIndex={0}
     >
       <span id={srId} className="sr-only" role="status" aria-live="polite" aria-atomic="true" />
@@ -423,18 +486,18 @@ export default function HeroCarousel({
         {t.instructions}
       </p>
 
-      {edgeFade && (
+      {edgeFade ? (
         <>
           <div
             className="pointer-events-none absolute inset-y-0 left-0 z-[2] w-24 bg-gradient-to-r from-black/40 to-transparent dark:from-black/60"
-            aria-hidden
+            aria-hidden="true"
           />
           <div
             className="pointer-events-none absolute inset-y-0 right-0 z-[2] w-24 bg-gradient-to-l from-black/40 to-transparent dark:from-black/60"
-            aria-hidden
+            aria-hidden="true"
           />
         </>
-      )}
+      ) : null}
 
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
@@ -457,12 +520,13 @@ export default function HeroCarousel({
           >
             {current?.videoUrl ? (
               <video
+                ref={videoRef}
                 key={String(current.videoUrl)}
                 className="h-full w-full object-cover"
                 playsInline
                 muted
                 loop
-                autoPlay={effectiveAutoplay}
+                autoPlay={effectiveAutoplay && !isPaused}
                 preload="metadata"
                 poster={current.poster || desktopSrc}
                 disablePictureInPicture
@@ -517,48 +581,48 @@ export default function HeroCarousel({
 
       <div className="pointer-events-none absolute inset-0 z-[1]" aria-hidden="true">
         <div className="overlay-hero absolute inset-0" />
-        {showOverlay && (
+        {showOverlay ? (
           <div
             className="absolute inset-0"
             style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity})` }}
           />
-        )}
+        ) : null}
         <div
           className="absolute inset-0 opacity-60 mix-blend-overlay dark:mix-blend-screen"
           style={{ background: 'var(--ring-conic)' }}
         />
       </div>
 
-      {current?.badge && (
+      {current?.badge ? (
         <div className="absolute left-5 top-5 z-20">
           <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-black shadow dark:bg-black/60 dark:text-white">
             {current.badge}
           </span>
         </div>
-      )}
+      ) : null}
 
-      {showCounter && total > 1 && (
-        <div className="glass absolute left-1/2 top-4 z-20 -translate-x-1/2 rounded-full bg-black/35 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
+      {showCounter && canNavigate ? (
+        <div className="glass absolute left-1/2 top-4 z-20 -translate-x-1/2 rounded-full px-3 py-1 text-xs font-semibold text-white">
           {index + 1} / {total}
         </div>
-      )}
+      ) : null}
 
-      {(current?.text || current?.ctaLabel) && (
+      {current?.text || current?.ctaLabel ? (
         <div className="absolute inset-0 z-10 grid place-items-center px-6 text-center sm:px-12">
           <div className="mx-auto max-w-5xl">
-            {current?.text && (
+            {current?.text ? (
               <h2
                 className={cn(
-                  'font-extrabold tracking-tight drop-shadow-xl text-white',
+                  'font-extrabold tracking-tight text-white drop-shadow-xl',
                   'bg-gradient-to-b from-white to-white/80 bg-clip-text text-transparent',
                   TEXT_SIZES[textSize]
                 )}
               >
                 {current.text}
               </h2>
-            )}
+            ) : null}
 
-            {current?.ctaLabel && (
+            {current?.ctaLabel ? (
               <div className="mt-6">
                 <Link
                   href={localizedHref(current.ctaLink)}
@@ -574,7 +638,7 @@ export default function HeroCarousel({
                   data-slide-id={String(current.id)}
                   onClick={() => pushDL('hero_cta', { slideId: current.id })}
                 >
-                  {current.ctaLabel}
+                  {current.ctaLabel || t.ctaFallback}
                   <svg
                     width="18"
                     height="18"
@@ -589,26 +653,22 @@ export default function HeroCarousel({
                   </svg>
                 </Link>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
-      )}
+      ) : null}
 
-      {total > 1 && (
+      {canNavigate ? (
         <>
           <button
             type="button"
             aria-label={t.prev}
             className={cn(
-              'glass absolute left-2 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-token-surface/70 text-white shadow-soft hover:bg-token-surface',
+              'glass absolute left-2 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full text-white shadow-soft hover:bg-token-surface/80',
               'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60 sm:left-4 sm:h-12 sm:w-12'
             )}
             data-gtm="hero_prev"
-            onClick={() => {
-              autoPause()
-              prev()
-              autoResume()
-            }}
+            onClick={() => runManualAction(prev)}
           >
             <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
               <path fill="currentColor" d="M15.78 19.78L8 12l7.78-7.78l1.44 1.44L10.88 12l6.34 6.34z" />
@@ -619,83 +679,75 @@ export default function HeroCarousel({
             type="button"
             aria-label={t.next}
             className={cn(
-              'glass absolute right-2 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-token-surface/70 text-white shadow-soft hover:bg-token-surface',
+              'glass absolute right-2 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full text-white shadow-soft hover:bg-token-surface/80',
               'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60 sm:right-4 sm:h-12 sm:w-12'
             )}
             data-gtm="hero_next"
-            onClick={() => {
-              autoPause()
-              next()
-              autoResume()
-            }}
+            onClick={() => runManualAction(next)}
           >
             <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
               <path fill="currentColor" d="M8.22 4.22L16 12l-7.78 7.78l-1.44-1.44L13.12 12L6.78 5.66z" />
             </svg>
           </button>
         </>
-      )}
+      ) : null}
 
-      {showPlayPause && total > 1 && (
+      {showPlayPause && canNavigate ? (
         <button
           type="button"
           onClick={() => {
             if (userPausedRef.current) resumeUser()
             else pauseUser()
           }}
-          aria-label={userPausedRef.current ? t.play : t.pause}
-          aria-pressed={userPausedRef.current}
+          aria-label={isPaused ? t.play : t.pause}
+          aria-pressed={isPaused}
           className={cn(
             'glass absolute right-3 top-3 z-20 rounded-full px-3 py-2 text-xs font-semibold text-white',
-            'bg-black/40 backdrop-blur hover:bg-black/55 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60'
+            'hover:bg-token-surface/80 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60'
           )}
           data-gtm="hero_toggle"
         >
           <span className="inline-flex items-center gap-1.5">
-            {userPausedRef.current ? <IconPlay /> : <IconPause />}
-            <span>{userPausedRef.current ? t.btnPlay : t.btnPause}</span>
+            {isPaused ? <IconPlay /> : <IconPause />}
+            <span>{isPaused ? t.btnPlay : t.btnPause}</span>
           </span>
         </button>
-      )}
+      ) : null}
 
-      {effectiveAutoplay && (
+      {effectiveAutoplay ? (
         <div
           className="absolute bottom-6 left-1/2 z-20 h-1.5 w-[68%] max-w-3xl -translate-x-1/2 overflow-hidden rounded-full bg-white/25"
           role="presentation"
           aria-hidden="true"
           onClick={(e) => {
-            if (!progressClickable || total <= 1) return
+            if (!progressClickable || !canNavigate) return
 
             const rect = e.currentTarget.getBoundingClientRect()
             const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
             const target = Math.min(total - 1, Math.floor(ratio * total))
 
-            autoPause()
-            setIndex(target)
-            autoResume()
+            runManualAction(() => setIndex(target))
             pushDL('hero_seek', { target })
           }}
           style={progressClickable ? { cursor: 'pointer' } : undefined}
         >
           <motion.div
-            key={index}
             className="h-full rounded-full bg-[hsl(var(--accent))]"
-            initial={{ width: 0 }}
-            animate={{ width: '100%' }}
-            transition={{ duration: intervalMs / 1000, ease: 'linear' }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.1, ease: 'linear' }}
           />
         </div>
-      )}
+      ) : null}
 
-      {showBullets && total > 1 && (
+      {showBullets && canNavigate ? (
         <nav className="absolute bottom-3 left-1/2 z-20 -translate-x-1/2 sm:hidden" aria-label={t.nav}>
           <ul className="flex gap-3">
-            {slides.map((s, i) => {
+            {slides.map((slide, i) => {
               const active = i === index
-              const bulletLabel = t.goTo + (i + 1) + (s.alt ? ` : ${s.alt}` : '')
+              const bulletLabel = t.goTo + (i + 1) + (slide.alt ? ` : ${slide.alt}` : '')
 
               return (
-                <li key={s.id ?? i}>
+                <li key={slide.id ?? i}>
                   <button
                     type="button"
                     className={cn(
@@ -708,28 +760,24 @@ export default function HeroCarousel({
                     aria-current={active ? 'true' : undefined}
                     data-gtm="hero_bullet"
                     data-idx={i}
-                    onClick={() => {
-                      autoPause()
-                      setIndex(i)
-                      autoResume()
-                    }}
+                    onClick={() => runManualAction(() => setIndex(i))}
                   />
                 </li>
               )
             })}
           </ul>
         </nav>
-      )}
+      ) : null}
 
-      {showThumbnails && total > 1 && (
-        <div className="absolute bottom-4 left-1/2 z-20 hidden -translate-x-1/2 sm:block" aria-label={t.thumbs}>
-          <ul className="flex gap-3">
-            {slides.map((s, i) => {
+      {showThumbnails && canNavigate ? (
+        <div className="absolute bottom-4 left-1/2 z-20 hidden -translate-x-1/2 sm:block">
+          <ul className="flex gap-3" aria-label={t.thumbs}>
+            {slides.map((slide, i) => {
               const active = i === index
-              const thumb = s.imageDesktop || s.image || s.poster || '/og-image.jpg'
+              const thumb = getImageSrc(slide).desktop
 
               return (
-                <li key={s.id ?? i}>
+                <li key={slide.id ?? i}>
                   <button
                     type="button"
                     className={cn(
@@ -738,15 +786,11 @@ export default function HeroCarousel({
                         ? 'border-[hsl(var(--accent))] ring-2 ring-[hsl(var(--accent))]'
                         : 'border-white/60 hover:border-white'
                     )}
-                    aria-label={(locale === 'en' ? 'Go to slide ' : 'Aller à la diapositive ') + (i + 1)}
+                    aria-label={`${t.goTo}${i + 1}`}
                     aria-current={active ? 'true' : undefined}
                     data-gtm="hero_thumb"
                     data-idx={i}
-                    onClick={() => {
-                      autoPause()
-                      setIndex(i)
-                      autoResume()
-                    }}
+                    onClick={() => runManualAction(() => setIndex(i))}
                   >
                     <Image
                       src={thumb}
@@ -758,17 +802,20 @@ export default function HeroCarousel({
                       blurDataURL={BLUR_DATA_URL}
                       draggable={false}
                     />
+                    <span className="sr-only">
+                      {slide.alt ? slide.alt : `${t.goTo}${i + 1}`}
+                    </span>
                   </button>
                 </li>
               )
             })}
           </ul>
         </div>
-      )}
+      ) : null}
 
       <noscript>
         <p className="mt-2 text-center">
-          <a href="/products">Voir les produits</a>
+          <a href="/products">{t.noscriptProducts}</a>
         </p>
       </noscript>
     </section>

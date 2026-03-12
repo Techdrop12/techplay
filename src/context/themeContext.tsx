@@ -1,27 +1,24 @@
-// src/context/themeContext.tsx
 'use client'
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
-  type ReactNode
+  type ReactNode,
 } from 'react'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
+type ResolvedTheme = Exclude<ThemeMode, 'system'>
 
 export interface ThemeContextValue {
-  /** Valeur choisie ('light' | 'dark' | 'system') */
   theme: ThemeMode
-  /** Valeur appliquée après résolution de 'system' */
-  resolvedTheme: Exclude<ThemeMode, 'system'>
-  /** Raccourci pratique */
+  resolvedTheme: ResolvedTheme
   isDark: boolean
-  /** Forcer un thème */
   setTheme: (mode: ThemeMode) => void
-  /** Bascule rapide light/dark (si 'system', bascule par rapport au résolu) */
   toggleTheme: () => void
 }
 
@@ -29,110 +26,129 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined)
 
 export const THEME_KEY = 'theme' as const
 
-function applyTheme(mode: Exclude<ThemeMode, 'system'>) {
+function isThemeMode(value: unknown): value is ThemeMode {
+  return value === 'light' || value === 'dark' || value === 'system'
+}
+
+function getSystemTheme(): ResolvedTheme {
+  if (typeof window === 'undefined') return 'light'
+  try {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  } catch {
+    return 'light'
+  }
+}
+
+function resolveTheme(mode: ThemeMode): ResolvedTheme {
+  return mode === 'system' ? getSystemTheme() : mode
+}
+
+function readStoredTheme(): ThemeMode {
+  if (typeof window === 'undefined') return 'system'
+
+  try {
+    const raw = window.localStorage.getItem(THEME_KEY)
+    return isThemeMode(raw) ? raw : 'system'
+  } catch {
+    return 'system'
+  }
+}
+
+function applyTheme(resolvedTheme: ResolvedTheme) {
+  if (typeof document === 'undefined') return
+
   const root = document.documentElement
-  const isDark = mode === 'dark'
+  const isDark = resolvedTheme === 'dark'
+
   root.classList.toggle('dark', isDark)
   root.classList.toggle('light', !isDark)
-  root.setAttribute('data-theme', mode)
+  root.setAttribute('data-theme', resolvedTheme)
   root.style.colorScheme = isDark ? 'dark' : 'light'
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemeMode>('system')
-  const [resolved, setResolved] = useState<Exclude<ThemeMode, 'system'>>('light')
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>('light')
 
-  // Résout la préférence OS
-  const getSystemTheme = () =>
-    typeof window !== 'undefined' &&
-    window.matchMedia &&
-    window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light'
+  const themeRef = useRef<ThemeMode>('system')
 
-  // Lecture initiale + application immédiate
+  const syncTheme = useCallback((nextTheme: ThemeMode) => {
+    const nextResolved = resolveTheme(nextTheme)
+    themeRef.current = nextTheme
+    setThemeState(nextTheme)
+    setResolvedTheme(nextResolved)
+    applyTheme(nextResolved)
+  }, [])
+
   useEffect(() => {
-    const saved: ThemeMode = (() => {
-      try {
-        const v = localStorage.getItem(THEME_KEY)
-        return v === 'light' || v === 'dark' || v === 'system' ? v : 'system'
-      } catch {
-        return 'system'
-      }
-    })()
+    const initialTheme = readStoredTheme()
+    syncTheme(initialTheme)
 
-    const initialResolved =
-      saved === 'system' ? getSystemTheme() : (saved as Exclude<ThemeMode, 'system'>)
+    const mediaQuery =
+      typeof window !== 'undefined'
+        ? window.matchMedia('(prefers-color-scheme: dark)')
+        : null
 
-    setThemeState(saved)
-    setResolved(initialResolved)
-    applyTheme(initialResolved)
-
-    // Suivre la préférence OS si l'utilisateur est en 'system'
-    const mq = window.matchMedia('(prefers-color-scheme: dark)')
-    const onScheme = () => {
-      if (saved === 'system') {
-        const next = getSystemTheme()
-        setResolved(next)
-        applyTheme(next)
-      }
-    }
-    mq.addEventListener?.('change', onScheme)
-
-    // Sync inter-onglets
-    const onStorage = (e: StorageEvent) => {
-      if (e.key !== THEME_KEY) return
-      const next = (e.newValue as ThemeMode) ?? 'system'
-      const nextResolved = next === 'system' ? getSystemTheme() : next
-      setThemeState(next)
-      setResolved(nextResolved)
+    const onSystemSchemeChange = () => {
+      if (themeRef.current !== 'system') return
+      const nextResolved = getSystemTheme()
+      setResolvedTheme(nextResolved)
       applyTheme(nextResolved)
     }
+
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== THEME_KEY) return
+      const nextTheme = isThemeMode(event.newValue) ? event.newValue : 'system'
+      syncTheme(nextTheme)
+    }
+
+    mediaQuery?.addEventListener?.('change', onSystemSchemeChange)
     window.addEventListener('storage', onStorage)
 
     return () => {
-      mq.removeEventListener?.('change', onScheme)
+      mediaQuery?.removeEventListener?.('change', onSystemSchemeChange)
       window.removeEventListener('storage', onStorage)
     }
-     
-  }, [])
+  }, [syncTheme])
 
-  // Setter public
-  const setTheme = (mode: ThemeMode) => {
-    try {
-      localStorage.setItem(THEME_KEY, mode)
-    } catch {}
-    const nextResolved = mode === 'system' ? getSystemTheme() : mode
-    setThemeState(mode)
-    setResolved(nextResolved)
-    applyTheme(nextResolved)
-  }
+  const setTheme = useCallback(
+    (mode: ThemeMode) => {
+      try {
+        window.localStorage.setItem(THEME_KEY, mode)
+      } catch {
+        // no-op
+      }
 
-  // Toggle pratique
-  const toggleTheme = () => {
-    const base: Exclude<ThemeMode, 'system'> = theme === 'system' ? resolved : theme
-    setTheme(base === 'dark' ? 'light' : 'dark')
-  }
+      syncTheme(mode)
+    },
+    [syncTheme]
+  )
+
+  const toggleTheme = useCallback(() => {
+    const currentBase: ResolvedTheme = themeRef.current === 'system' ? resolveTheme('system') : themeRef.current
+    setTheme(currentBase === 'dark' ? 'light' : 'dark')
+  }, [setTheme])
 
   const value = useMemo<ThemeContextValue>(
     () => ({
       theme,
-      resolvedTheme: resolved,
-      isDark: resolved === 'dark',
+      resolvedTheme,
+      isDark: resolvedTheme === 'dark',
       setTheme,
-      toggleTheme
+      toggleTheme,
     }),
-    [theme, resolved]
+    [theme, resolvedTheme, setTheme, toggleTheme]
   )
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }
 
 export function useTheme() {
-  const ctx = useContext(ThemeContext)
-  if (!ctx) throw new Error('useTheme must be used within a ThemeProvider')
-  return ctx
+  const context = useContext(ThemeContext)
+  if (!context) {
+    throw new Error('useTheme must be used within a ThemeProvider')
+  }
+  return context
 }
 
-/** Export par défaut pour compat éventuels imports default */
 export default ThemeProvider

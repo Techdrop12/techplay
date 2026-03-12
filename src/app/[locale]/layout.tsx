@@ -1,22 +1,21 @@
-import {notFound} from 'next/navigation'
-import {setRequestLocale} from 'next-intl/server'
+import { notFound } from 'next/navigation'
+import { setRequestLocale } from 'next-intl/server'
 
-import type {Metadata} from 'next'
-import type {ReactNode} from 'react'
+import type { Metadata } from 'next'
+import type { ReactNode } from 'react'
 
-import {isLocale, type Locale} from '@/i18n/config'
-import {toOgLocale} from '@/lib/language'
+import { isLocale, toOgLocale, type Locale } from '@/lib/language'
 
-export function generateStaticParams(): {locale: Locale}[] {
-  return (['fr', 'en'] as const).map((locale) => ({locale}))
+export function generateStaticParams(): { locale: Locale }[] {
+  return (['fr', 'en'] as const).map((locale) => ({ locale }))
 }
 
 export async function generateMetadata({
-  params
+  params,
 }: {
-  params: Promise<{locale: string}>
+  params: Promise<{ locale: string }>
 }): Promise<Metadata> {
-  const {locale} = await params
+  const { locale } = await params
 
   if (!isLocale(locale)) {
     notFound()
@@ -24,19 +23,19 @@ export async function generateMetadata({
 
   return {
     openGraph: {
-      locale: toOgLocale(locale)
-    }
+      locale: toOgLocale(locale),
+    },
   }
 }
 
 export default async function LocaleLayout({
   children,
-  params
+  params,
 }: {
   children: ReactNode
-  params: Promise<{locale: string}>
+  params: Promise<{ locale: string }>
 }) {
-  const {locale} = await params
+  const { locale } = await params
 
   if (!isLocale(locale)) {
     notFound()

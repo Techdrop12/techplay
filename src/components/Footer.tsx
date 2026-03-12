@@ -11,24 +11,32 @@ import {
 } from 'react'
 import { toast } from 'react-hot-toast'
 import {
-  FaFacebookF,
-  FaTwitter,
-  FaInstagram,
-  FaLock,
-  FaFileAlt,
-  FaShieldAlt,
-  FaTruck,
-  FaHeadset,
-  FaCcVisa,
   FaCcMastercard,
   FaCcPaypal,
+  FaCcVisa,
+  FaFacebookF,
+  FaFileAlt,
+  FaHeadset,
+  FaInstagram,
+  FaLock,
+  FaShieldAlt,
+  FaTruck,
+  FaTwitter,
 } from 'react-icons/fa'
 
 import Link from '@/components/LocalizedLink'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
-type FooterLink = { label: string; href: string; external?: boolean }
-type NavGroup = { title: string; links: FooterLink[] }
+type FooterLink = {
+  label: string
+  href: string
+  external?: boolean
+}
+
+type NavGroup = {
+  title: string
+  links: FooterLink[]
+}
 
 interface FooterProps {
   groups?: NavGroup[]
@@ -59,14 +67,144 @@ type SubscribeResponse = {
   message?: string
 }
 
-const DEFAULT_LEGAL: FooterLink[] = [
-  { label: 'Mentions légales', href: '/mentions-legales' },
-  { label: 'Confidentialité', href: '/confidentialite' },
-  { label: 'CGV', href: '/cgv' },
-  { label: 'Préférences cookies', href: '#cookies' },
-]
+const T = {
+  fr: {
+    ariaFooter: 'Pied de page',
+    footerHeading: 'Informations et navigation secondaire',
+    brandText:
+      'Des accessoires et packs sélectionnés pour la performance, l’innovation et le style.',
+    legalTitle: 'Légal',
+    defaultGroups: [
+      {
+        title: 'Boutique',
+        links: [
+          { label: 'Accueil', href: '/' },
+          { label: 'Catégories', href: '/#categories' },
+          { label: 'Produits', href: '/products' },
+          { label: 'Packs', href: '/products/packs' },
+          { label: 'Wishlist', href: '/wishlist' },
+        ],
+      },
+      {
+        title: 'Support',
+        links: [
+          { label: 'Contact', href: '/contact' },
+          { label: 'FAQ', href: '/#faq' },
+          { label: 'Suivi de commande', href: '/commande' },
+          { label: 'Blog', href: '/blog' },
+          { label: 'Promo du jour', href: '/products?promo=1' },
+        ],
+      },
+      {
+        title: 'Légal',
+        links: [
+          { label: 'Mentions légales', href: '/mentions-legales' },
+          { label: 'Confidentialité', href: '/confidentialite' },
+          { label: 'CGV', href: '/cgv' },
+          { label: 'Préférences cookies', href: '#cookies' },
+        ],
+      },
+    ] as NavGroup[],
+    badges: {
+      secure: 'Paiement sécurisé',
+      shipping: 'Liv. 48–72h',
+      support: 'Support 7j/7',
+    },
+    newsletterTitle: 'Newsletter',
+    newsletterPlaceholder: 'votre@email.com',
+    newsletterButtonIdle: 'S’inscrire',
+    newsletterButtonLoading: 'Envoi…',
+    newsletterFormAria: 'Inscription newsletter',
+    newsletterSuccess: 'Inscription confirmée. Bienvenue chez TechPlay !',
+    newsletterToastSuccess: 'Vous êtes inscrit(e) 🎉',
+    newsletterToastError: 'Inscription impossible pour le moment',
+    invalidEmail: 'Merci d’entrer une adresse email valide.',
+    consentRequired: 'Vous devez accepter la politique de confidentialité.',
+    genericError: 'Une erreur est survenue. Réessayez.',
+    consentTextStart: 'J’accepte de recevoir vos emails et la ',
+    privacyPolicy: 'politique de confidentialité',
+    consentTextEnd: '.',
+    hiddenWebsiteLabel: 'Votre site web',
+    recentLocale: 'FR • EUR',
+    rightsReserved: 'Tous droits réservés.',
+    cookiePrefs: 'Préférences cookies',
+    navigationSchemaName: 'Footer Navigation',
+    social: {
+      facebook: 'Facebook',
+      twitter: 'Twitter / X',
+      instagram: 'Instagram',
+    },
+  },
+  en: {
+    ariaFooter: 'Footer',
+    footerHeading: 'Information and secondary navigation',
+    brandText:
+      'Accessories and bundles selected for performance, innovation and style.',
+    legalTitle: 'Legal',
+    defaultGroups: [
+      {
+        title: 'Store',
+        links: [
+          { label: 'Home', href: '/' },
+          { label: 'Categories', href: '/#categories' },
+          { label: 'Products', href: '/products' },
+          { label: 'Bundles', href: '/products/packs' },
+          { label: 'Wishlist', href: '/wishlist' },
+        ],
+      },
+      {
+        title: 'Support',
+        links: [
+          { label: 'Contact', href: '/contact' },
+          { label: 'FAQ', href: '/#faq' },
+          { label: 'Order tracking', href: '/commande' },
+          { label: 'Blog', href: '/blog' },
+          { label: 'Daily deal', href: '/products?promo=1' },
+        ],
+      },
+      {
+        title: 'Legal',
+        links: [
+          { label: 'Legal notice', href: '/mentions-legales' },
+          { label: 'Privacy', href: '/confidentialite' },
+          { label: 'Terms & conditions', href: '/cgv' },
+          { label: 'Cookie preferences', href: '#cookies' },
+        ],
+      },
+    ] as NavGroup[],
+    badges: {
+      secure: 'Secure payment',
+      shipping: '48–72h delivery',
+      support: 'Support 7/7',
+    },
+    newsletterTitle: 'Newsletter',
+    newsletterPlaceholder: 'your@email.com',
+    newsletterButtonIdle: 'Subscribe',
+    newsletterButtonLoading: 'Sending…',
+    newsletterFormAria: 'Newsletter signup',
+    newsletterSuccess: 'Subscription confirmed. Welcome to TechPlay!',
+    newsletterToastSuccess: 'You are subscribed 🎉',
+    newsletterToastError: 'Subscription is unavailable right now',
+    invalidEmail: 'Please enter a valid email address.',
+    consentRequired: 'You must accept the privacy policy.',
+    genericError: 'Something went wrong. Please try again.',
+    consentTextStart: 'I agree to receive emails and accept the ',
+    privacyPolicy: 'privacy policy',
+    consentTextEnd: '.',
+    hiddenWebsiteLabel: 'Your website',
+    recentLocale: 'EN • EUR',
+    rightsReserved: 'All rights reserved.',
+    cookiePrefs: 'Cookie preferences',
+    navigationSchemaName: 'Footer Navigation',
+    social: {
+      facebook: 'Facebook',
+      twitter: 'Twitter / X',
+      instagram: 'Instagram',
+    },
+  },
+} as const
 
-const normalizeHref = (href: string): string => {
+function normalizeHref(href: string): string {
   if (!href || !href.startsWith('/')) return href
 
   return href
@@ -76,33 +214,6 @@ const normalizeHref = (href: string): string => {
     .replace(/^\/#?categories$/i, '/#categories')
     .replace(/^\/#?faq$/i, '/#faq')
 }
-
-const DEFAULT_GROUPS: NavGroup[] = [
-  {
-    title: 'Boutique',
-    links: [
-      { label: 'Accueil', href: '/' },
-      { label: 'Catégories', href: '/#categories' },
-      { label: 'Produits', href: '/products' },
-      { label: 'Packs', href: '/products/packs' },
-      { label: 'Wishlist', href: '/wishlist' },
-    ],
-  },
-  {
-    title: 'Support',
-    links: [
-      { label: 'Contact', href: '/contact' },
-      { label: 'FAQ', href: '/#faq' },
-      { label: 'Suivi de commande', href: '/commande' },
-      { label: 'Blog', href: '/blog' },
-      { label: 'Promo du jour', href: '/products?promo=1' },
-    ],
-  },
-  {
-    title: 'Légal',
-    links: DEFAULT_LEGAL,
-  },
-]
 
 function isValidEmail(value: string): boolean {
   return /^\S+@\S+\.\S+$/.test(String(value || '').trim())
@@ -119,7 +230,9 @@ function pushDataLayer(eventName: string, payload: Record<string, unknown> = {})
     if (!w) return
     if (!Array.isArray(w.dataLayer)) w.dataLayer = []
     w.dataLayer.push({ event: eventName, ...payload })
-  } catch {}
+  } catch {
+    // no-op
+  }
 }
 
 function getErrorMessage(error: unknown, fallback: string): string {
@@ -131,13 +244,15 @@ function getErrorMessage(error: unknown, fallback: string): string {
 function LegalIcon({ label }: { label: string }) {
   const lower = label.toLowerCase()
 
-  if (lower.includes('mention')) {
+  if (lower.includes('mention') || lower.includes('legal')) {
     return <FaFileAlt className="text-[hsl(var(--accent))]" aria-hidden="true" />
   }
-  if (lower.includes('confidential')) {
+
+  if (lower.includes('confidential') || lower.includes('privacy')) {
     return <FaLock className="text-[hsl(var(--accent))]" aria-hidden="true" />
   }
-  if (lower.includes('cgv')) {
+
+  if (lower.includes('cgv') || lower.includes('terms')) {
     return <FaFileAlt className="text-[hsl(var(--accent))]" aria-hidden="true" />
   }
 
@@ -145,7 +260,7 @@ function LegalIcon({ label }: { label: string }) {
 }
 
 export default function Footer({
-  groups = DEFAULT_GROUPS,
+  groups,
   links,
   companyName = 'TechPlay',
   compact = false,
@@ -164,30 +279,35 @@ export default function Footer({
   },
 }: FooterProps) {
   const pathname = usePathname() || '/'
-  const rawLocale = getCurrentLocale(pathname)
-  const locale: 'fr' | 'en' = rawLocale === 'en' ? 'en' : 'fr'
+  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr'
+  const t = T[locale]
   const origin = String(siteUrl || '').replace(/\/$/, '')
 
-  const navGroups = useMemo<NavGroup[]>(() => {
-    const normalizeGroup = (group: NavGroup): NavGroup => ({
+  const baseGroups = useMemo<NavGroup[]>(() => {
+    const source = groups ?? t.defaultGroups
+
+    return source.map((group) => ({
       title: group.title,
       links: group.links.map((link) => ({
         ...link,
         href: normalizeHref(link.href),
       })),
-    })
+    }))
+  }, [groups, t.defaultGroups])
 
-    const base = groups.map(normalizeGroup)
-
-    if (!links) return base
+  const navGroups = useMemo<NavGroup[]>(() => {
+    if (!links) return baseGroups
 
     const normalizedLegal = links.map((link) => ({
       ...link,
       href: normalizeHref(link.href),
     }))
 
-    const clone = [...base]
-    const index = clone.findIndex((group) => group.title.toLowerCase().includes('légal'))
+    const clone = [...baseGroups]
+    const index = clone.findIndex((group) => {
+      const value = group.title.toLowerCase()
+      return value.includes('légal') || value.includes('legal')
+    })
 
     if (index >= 0) {
       clone[index] = {
@@ -195,15 +315,18 @@ export default function Footer({
         links: normalizedLegal,
       }
     } else {
-      clone.push({ title: 'Légal', links: normalizedLegal })
+      clone.push({
+        title: t.legalTitle,
+        links: normalizedLegal,
+      })
     }
 
     return clone
-  }, [groups, links])
+  }, [baseGroups, links, t.legalTitle])
 
   const currentYear = useMemo(() => new Date().getFullYear(), [])
   const emailId = useId()
-  const msgId = useId()
+  const messageId = useId()
   const consentId = useId()
 
   const [email, setEmail] = useState('')
@@ -220,11 +343,15 @@ export default function Footer({
     try {
       const w = getSafeWindow()
       w?.tpOpenConsent?.()
-    } catch {}
+    } catch {
+      // no-op
+    }
 
     try {
       window.dispatchEvent(new CustomEvent('open-consent-manager'))
-    } catch {}
+    } catch {
+      // no-op
+    }
 
     pushDataLayer('open_consent_manager', { location: 'footer' })
   }
@@ -237,13 +364,13 @@ export default function Footer({
 
     if (!isValidEmail(email)) {
       setStatus('error')
-      setMessage('Merci d’entrer une adresse email valide.')
+      setMessage(t.invalidEmail)
       return
     }
 
     if (!consent) {
       setStatus('error')
-      setMessage('Vous devez accepter la politique de confidentialité.')
+      setMessage(t.consentRequired)
       return
     }
 
@@ -259,7 +386,7 @@ export default function Footer({
 
       if (!res.ok) {
         const maybe = (await res.json().catch(() => null)) as SubscribeResponse | null
-        throw new Error(maybe?.message || 'Erreur API')
+        throw new Error(maybe?.message || t.genericError)
       }
 
       pushDataLayer('newsletter_subscribe', {
@@ -269,19 +396,23 @@ export default function Footer({
       })
 
       setStatus('success')
-      setMessage('Inscription confirmée. Bienvenue chez TechPlay !')
+      setMessage(t.newsletterSuccess)
       setEmail('')
 
       try {
-        toast.success('Vous êtes inscrit(e) 🎉')
-      } catch {}
+        toast.success(t.newsletterToastSuccess)
+      } catch {
+        // no-op
+      }
     } catch (error: unknown) {
       setStatus('error')
-      setMessage(getErrorMessage(error, 'Une erreur est survenue. Réessayez.'))
+      setMessage(getErrorMessage(error, t.genericError))
 
       try {
-        toast.error('Inscription impossible pour le moment')
-      } catch {}
+        toast.error(t.newsletterToastError)
+      } catch {
+        // no-op
+      }
     }
   }
 
@@ -312,11 +443,29 @@ export default function Footer({
     })
   }
 
+  const schemaLinks = navGroups.flatMap((group) =>
+    group.links
+      .filter((link) => !link.label.toLowerCase().includes('cookie'))
+      .map((link) =>
+        link.external
+          ? {
+              '@type': 'WebPage',
+              name: link.label,
+              url: link.href,
+            }
+          : {
+              '@type': 'WebPage',
+              name: link.label,
+              url: `${origin}${localizePath(link.href, locale)}`,
+            }
+      )
+  )
+
   return (
     <footer
       className="relative overflow-hidden border-t border-token-border bg-token-surface text-token-text"
       role="contentinfo"
-      aria-label="Pied de page"
+      aria-label={t.ariaFooter}
     >
       <div
         aria-hidden="true"
@@ -326,7 +475,7 @@ export default function Footer({
 
       <div className="relative mx-auto max-w-screen-xl px-6 pb-6 pt-12">
         <h2 className="sr-only" id="footer-heading">
-          Informations et navigation secondaire
+          {t.footerHeading}
         </h2>
 
         <div className="grid grid-cols-1 gap-10 md:grid-cols-12">
@@ -336,24 +485,22 @@ export default function Footer({
               <span className="text-[hsl(var(--accent))]">.</span>
             </p>
 
-            <p className="text-sm leading-relaxed text-token-text/70">
-              Des accessoires et packs sélectionnés pour la performance, l’innovation et le style.
-            </p>
+            <p className="text-sm leading-relaxed text-token-text/70">{t.brandText}</p>
 
-            {!compact && (
+            {!compact ? (
               <>
                 <ul className="mt-3 grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
                   <li className="flex items-center gap-2 rounded-lg border border-token-border bg-token-surface/80 px-3 py-2 backdrop-blur">
                     <FaShieldAlt className="text-emerald-500" aria-hidden="true" />
-                    Paiement sécurisé
+                    {t.badges.secure}
                   </li>
                   <li className="flex items-center gap-2 rounded-lg border border-token-border bg-token-surface/80 px-3 py-2 backdrop-blur">
                     <FaTruck className="text-[hsl(var(--accent))]" aria-hidden="true" />
-                    Liv. 48–72h
+                    {t.badges.shipping}
                   </li>
                   <li className="flex items-center gap-2 rounded-lg border border-token-border bg-token-surface/80 px-3 py-2 backdrop-blur">
                     <FaHeadset className="text-amber-400" aria-hidden="true" />
-                    Support 7j/7
+                    {t.badges.support}
                   </li>
                 </ul>
 
@@ -363,10 +510,10 @@ export default function Footer({
                   <FaCcPaypal aria-label="PayPal" />
                 </div>
               </>
-            )}
+            ) : null}
 
             <ul className="space-y-1 pt-2 text-sm">
-              {contact?.email && (
+              {contact?.email ? (
                 <li>
                   <a
                     href={`mailto:${contact.email}`}
@@ -375,9 +522,9 @@ export default function Footer({
                     {contact.email}
                   </a>
                 </li>
-              )}
+              ) : null}
 
-              {contact?.phone && (
+              {contact?.phone ? (
                 <li>
                   <a
                     href={`tel:${contact.phone.replace(/\s+/g, '')}`}
@@ -386,16 +533,16 @@ export default function Footer({
                     {contact.phone}
                   </a>
                 </li>
-              )}
+              ) : null}
 
-              {contact?.address?.streetAddress && (
+              {contact?.address?.streetAddress ? (
                 <li className="text-token-text/60">
                   {contact.address.streetAddress}
-                  {contact.address.postalCode && `, ${contact.address.postalCode}`}
-                  {contact.address.addressLocality && ` ${contact.address.addressLocality}`}
-                  {contact.address.addressCountry && ` · ${contact.address.addressCountry}`}
+                  {contact.address.postalCode ? `, ${contact.address.postalCode}` : ''}
+                  {contact.address.addressLocality ? ` ${contact.address.addressLocality}` : ''}
+                  {contact.address.addressCountry ? ` · ${contact.address.addressCountry}` : ''}
                 </li>
-              )}
+              ) : null}
             </ul>
           </div>
 
@@ -418,7 +565,10 @@ export default function Footer({
 
                     const content = (
                       <>
-                        {group.title.toLowerCase().includes('légal') ? <LegalIcon label={label} /> : null}
+                        {group.title.toLowerCase().includes('légal') ||
+                        group.title.toLowerCase().includes('legal') ? (
+                          <LegalIcon label={label} />
+                        ) : null}
                         <span>{label}</span>
                       </>
                     )
@@ -466,18 +616,18 @@ export default function Footer({
               </nav>
             ))}
 
-            {!compact && (
+            {!compact ? (
               <div className="col-span-2 space-y-5 sm:col-span-1">
                 <form
                   onSubmit={onSubscribe}
                   noValidate
                   className="space-y-3"
-                  aria-label="Inscription newsletter"
+                  aria-label={t.newsletterFormAria}
                   aria-busy={status === 'loading'}
-                  aria-describedby={message ? msgId : undefined}
+                  aria-describedby={message ? messageId : undefined}
                 >
                   <h3 className="text-sm font-semibold uppercase tracking-wide text-token-text/60">
-                    Newsletter
+                    {t.newsletterTitle}
                   </h3>
 
                   <div className="flex gap-2">
@@ -486,7 +636,7 @@ export default function Footer({
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="votre@email.com"
+                      placeholder={t.newsletterPlaceholder}
                       className="w-full rounded-md border border-token-border bg-token-surface/90 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
                       aria-required="true"
                       aria-invalid={status === 'error' && !isValidEmail(email) ? 'true' : 'false'}
@@ -500,14 +650,19 @@ export default function Footer({
                       type="submit"
                       disabled={status === 'loading'}
                       className="rounded-md bg-[hsl(var(--accent))] px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-[hsl(var(--accent)/.92)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)] disabled:opacity-60"
-                      aria-label="S’inscrire à la newsletter"
+                      aria-label={t.newsletterButtonIdle}
                       data-gtm="footer_newsletter_submit"
                     >
-                      {status === 'loading' ? 'Envoi…' : 'S’inscrire'}
+                      {status === 'loading'
+                        ? t.newsletterButtonLoading
+                        : t.newsletterButtonIdle}
                     </button>
                   </div>
 
-                  <label htmlFor={consentId} className="flex items-start gap-2 text-[12px] text-token-text/70">
+                  <label
+                    htmlFor={consentId}
+                    className="flex items-start gap-2 text-[12px] text-token-text/70"
+                  >
                     <input
                       id={consentId}
                       type="checkbox"
@@ -516,20 +671,20 @@ export default function Footer({
                       className="mt-0.5"
                     />
                     <span>
-                      J’accepte de recevoir vos emails et la{' '}
+                      {t.consentTextStart}
                       <Link
                         href="/confidentialite"
                         prefetch={false}
                         className="underline hover:text-[hsl(var(--accent))]"
                       >
-                        politique de confidentialité
+                        {t.privacyPolicy}
                       </Link>
-                      .
+                      {t.consentTextEnd}
                     </span>
                   </label>
 
                   <div className="hidden" aria-hidden="true">
-                    <label htmlFor="website">Votre site web</label>
+                    <label htmlFor="website">{t.hiddenWebsiteLabel}</label>
                     <input
                       id="website"
                       type="text"
@@ -540,16 +695,16 @@ export default function Footer({
                     />
                   </div>
 
-                  {message && (
+                  {message ? (
                     <p
-                      id={msgId}
+                      id={messageId}
                       className={status === 'error' ? 'text-xs text-red-600' : 'text-xs text-emerald-600'}
                       role="status"
                       aria-live="polite"
                     >
                       {message}
                     </p>
-                  )}
+                  ) : null}
                 </form>
 
                 <div className="flex items-center gap-6 text-xl text-token-text/60">
@@ -557,7 +712,7 @@ export default function Footer({
                     href="https://facebook.com/techplay"
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label="Facebook"
+                    aria-label={t.social.facebook}
                     className="rounded-sm transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
                     onClick={() => onSocialClick('facebook')}
                     data-gtm="footer_social_facebook"
@@ -569,7 +724,7 @@ export default function Footer({
                     href="https://twitter.com/techplay"
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label="Twitter / X"
+                    aria-label={t.social.twitter}
                     className="rounded-sm transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
                     onClick={() => onSocialClick('twitter')}
                     data-gtm="footer_social_twitter"
@@ -581,7 +736,7 @@ export default function Footer({
                     href="https://instagram.com/techplay"
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label="Instagram"
+                    aria-label={t.social.instagram}
                     className="rounded-sm transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
                     onClick={() => onSocialClick('instagram')}
                     data-gtm="footer_social_instagram"
@@ -590,15 +745,16 @@ export default function Footer({
                   </a>
                 </div>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
 
-        {children && <div className="mt-10 text-center">{children}</div>}
+        {children ? <div className="mt-10 text-center">{children}</div> : null}
 
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-token-border pt-5 text-sm md:flex-row">
           <p className="text-token-text/70">
-            © {currentYear} <span className="font-semibold text-token-text">{companyName}</span>. Tous droits réservés.
+            © {currentYear}{' '}
+            <span className="font-semibold text-token-text">{companyName}</span>. {t.rightsReserved}
           </p>
 
           <ul className="flex flex-wrap items-center gap-3 text-[12px] text-token-text/60">
@@ -606,7 +762,7 @@ export default function Footer({
               <FaLock aria-hidden="true" /> Stripe · Visa · Mastercard · PayPal
             </li>
             <li className="hidden text-token-text/40 sm:inline">•</li>
-            <li>FR • EUR</li>
+            <li>{t.recentLocale}</li>
             <li className="hidden text-token-text/40 sm:inline">•</li>
             <li>
               <a
@@ -616,7 +772,7 @@ export default function Footer({
                 onClick={(e) => openConsentManager(e)}
                 className="underline decoration-dotted underline-offset-2 hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
               >
-                Préférences cookies
+                {t.cookiePrefs}
               </a>
             </li>
           </ul>
@@ -629,19 +785,9 @@ export default function Footer({
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'SiteNavigationElement',
-            name: 'Footer Navigation',
+            name: t.navigationSchemaName,
             url: origin,
-            hasPart: navGroups.flatMap((group) =>
-              group.links.map((link) =>
-                link.external
-                  ? { '@type': 'WebPage', name: link.label, url: link.href }
-                  : {
-                      '@type': 'WebPage',
-                      name: link.label,
-                      url: `${origin}${localizePath(link.href, locale)}`,
-                    }
-              )
-            ),
+            hasPart: schemaLinks,
           }),
         }}
       />

@@ -8,8 +8,15 @@ import type { Product } from '@/types/product'
 import ProductCard from '@/components/ProductCard'
 import ProductSkeleton from '@/components/ProductSkeleton'
 import { pushDataLayer } from '@/lib/ga'
+import { cn } from '@/lib/utils'
 
-type Cols = { base?: number; sm?: number; md?: number; lg?: number; xl?: number }
+type Cols = {
+  base?: 1 | 2
+  sm?: 1 | 2 | 3
+  md?: 1 | 2 | 3 | 4
+  lg?: 1 | 2 | 3 | 4 | 5
+  xl?: 1 | 2 | 3 | 4 | 5 | 6
+}
 
 export interface Props {
   products: Product[]
@@ -26,17 +33,75 @@ export interface Props {
   id?: string
 }
 
-function colsToClass(cols?: Cols) {
-  const c = { base: 2, sm: 3, lg: 4, ...(cols || {}) }
-  const parts: string[] = []
+const GRID_COLS = {
+  base: {
+    1: 'grid-cols-1',
+    2: 'grid-cols-2',
+  },
+  sm: {
+    1: 'sm:grid-cols-1',
+    2: 'sm:grid-cols-2',
+    3: 'sm:grid-cols-3',
+  },
+  md: {
+    1: 'md:grid-cols-1',
+    2: 'md:grid-cols-2',
+    3: 'md:grid-cols-3',
+    4: 'md:grid-cols-4',
+  },
+  lg: {
+    1: 'lg:grid-cols-1',
+    2: 'lg:grid-cols-2',
+    3: 'lg:grid-cols-3',
+    4: 'lg:grid-cols-4',
+    5: 'lg:grid-cols-5',
+  },
+  xl: {
+    1: 'xl:grid-cols-1',
+    2: 'xl:grid-cols-2',
+    3: 'xl:grid-cols-3',
+    4: 'xl:grid-cols-4',
+    5: 'xl:grid-cols-5',
+    6: 'xl:grid-cols-6',
+  },
+} as const
 
-  if (c.base) parts.push(`grid-cols-${c.base}`)
-  if (c.sm) parts.push(`sm:grid-cols-${c.sm}`)
-  if (c.md) parts.push(`md:grid-cols-${c.md}`)
-  if (c.lg) parts.push(`lg:grid-cols-${c.lg}`)
-  if (c.xl) parts.push(`xl:grid-cols-${c.xl}`)
+function getGridClasses(cols?: Cols): string {
+  const safe = {
+    base: cols?.base ?? 2,
+    sm: cols?.sm ?? 3,
+    md: cols?.md,
+    lg: cols?.lg ?? 4,
+    xl: cols?.xl,
+  }
 
-  return parts.join(' ')
+  return [
+    GRID_COLS.base[safe.base],
+    GRID_COLS.sm[safe.sm],
+    safe.md ? GRID_COLS.md[safe.md] : '',
+    GRID_COLS.lg[safe.lg],
+    safe.xl ? GRID_COLS.xl[safe.xl] : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+}
+
+function getProductKey(product: Product, index: number): string {
+  if (typeof product._id === 'string' && product._id.trim()) return product._id
+  if (typeof product.slug === 'string' && product.slug.trim()) return product.slug
+  return `product-${index}`
+}
+
+function normalizeProduct(product: Product): Product {
+  return {
+    ...product,
+    title: product.title?.trim() || 'Produit',
+    image:
+      product.image ||
+      (Array.isArray(product.images) ? product.images.find((img) => typeof img === 'string' && img.trim()) : undefined) ||
+      (Array.isArray(product.gallery) ? product.gallery.find((img) => typeof img === 'string' && img.trim()) : undefined) ||
+      '/og-image.jpg',
+  }
 }
 
 export default function ProductGrid({
@@ -55,23 +120,57 @@ export default function ProductGrid({
 }: Props) {
   const prefersReducedMotion = useReducedMotion()
   const sentinelRef = useRef<HTMLDivElement | null>(null)
-  const loadingGateRef = useRef(false)
   const statusRef = useRef<HTMLParagraphElement | null>(null)
   const gridRef = useRef<HTMLDivElement | null>(null)
-  const prevLenRef = useRef<number>(0)
+  const loadingGateRef = useRef(false)
+  const prevLenRef = useRef(0)
+  const seenRef = useRef<Set<string>>(new Set())
+  const batchRef = useRef<{ id: string; name: string; price?: number }[]>([])
+  const flushTimeoutRef = useRef<number | null>(null)
 
-  const isEmpty = useMemo(() => !products || products.length === 0, [products])
+  const safeProducts = useMemo(
+    () => (Array.isArray(products) ? products.filter(Boolean).map(normalizeProduct) : []),
+    [products]
+  )
+
+  const isEmpty = safeProducts.length === 0
 
   const countMsg = useMemo(() => {
-    if (isLoading && products.length === 0) return 'Chargement des produits…'
+    if (isLoading && isEmpty) return 'Chargement des produits…'
     if (isEmpty) return emptyMessage || 'Aucun produit trouvé.'
-    return `${products.length} produit${products.length > 1 ? 's' : ''} affiché${products.length > 1 ? 's' : ''}.`
-  }, [isLoading, isEmpty, products.length, emptyMessage])
+    return `${safeProducts.length} produit${safeProducts.length > 1 ? 's' : ''} affiché${safeProducts.length > 1 ? 's' : ''}.`
+  }, [emptyMessage, isEmpty, isLoading, safeProducts.length])
+
+  const flushBatch = useCallback(() => {
+    if (!batchRef.current.length) return
+
+    try {
+      pushDataLayer({
+        event: 'view_item_list',
+        item_list_name: listName,
+        items: batchRef.current.map((item) => ({
+          item_id: item.id,
+          item_name: item.name,
+          price: item.price,
+        })),
+      })
+    } catch {
+      // no-op
+    }
+
+    batchRef.current = []
+
+    if (flushTimeoutRef.current) {
+      window.clearTimeout(flushTimeoutRef.current)
+      flushTimeoutRef.current = null
+    }
+  }, [listName])
 
   useEffect(() => {
     if (!observeMore || !hasMore || !onLoadMore || !sentinelRef.current) return
 
     const el = sentinelRef.current
+
     const io = new IntersectionObserver(
       (entries) => {
         const hit = entries.some((entry) => entry.isIntersecting)
@@ -87,12 +186,12 @@ export default function ProductGrid({
           }, 500)
         }
       },
-      { rootMargin: '200px 0px 400px 0px', threshold: 0.01 }
+      { rootMargin: '220px 0px 420px 0px', threshold: 0.01 }
     )
 
     io.observe(el)
     return () => io.disconnect()
-  }, [observeMore, hasMore, onLoadMore])
+  }, [hasMore, observeMore, onLoadMore])
 
   useEffect(() => {
     if (!isLoading) loadingGateRef.current = false
@@ -100,7 +199,7 @@ export default function ProductGrid({
 
   useEffect(() => {
     const prev = prevLenRef.current
-    const curr = products?.length ?? 0
+    const curr = safeProducts.length
 
     if (curr > prev && prev > 0 && statusRef.current) {
       const diff = curr - prev
@@ -110,82 +209,46 @@ export default function ProductGrid({
     }
 
     prevLenRef.current = curr
-  }, [products, countMsg])
-
-  const itemListJsonLd = useMemo(() => {
-    if (!products?.length) return null
-
-    const base = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
-
-    return {
-      '@context': 'https://schema.org',
-      '@type': 'ItemList',
-      itemListElement: products.slice(0, 12).map((product, index) => ({
-        '@type': 'ListItem',
-        position: index + 1,
-        url: product?.slug ? `${base}/products/${product.slug}` : `${base}/products`,
-        name: product?.title || 'Produit',
-      })),
-    }
-  }, [products])
-
-  const seenRef = useRef<Set<string>>(new Set())
-  const batchRef = useRef<{ id: string; name: string; price?: number }[]>([])
-  const flushTimeoutRef = useRef<number | null>(null)
-
-  const flushBatch = useCallback(() => {
-    if (!batchRef.current.length) return
-
-    try {
-      pushDataLayer({
-        event: 'view_item_list',
-        item_list_name: listName,
-        items: batchRef.current.map((item) => ({
-          item_id: item.id,
-          item_name: item.name,
-          price: item.price,
-        })),
-      })
-    } catch {}
-
-    batchRef.current = []
-
-    if (flushTimeoutRef.current) {
-      window.clearTimeout(flushTimeoutRef.current)
-      flushTimeoutRef.current = null
-    }
-  }, [listName])
+  }, [countMsg, safeProducts.length])
 
   useEffect(() => {
     seenRef.current.clear()
     batchRef.current = []
 
-    if (!gridRef.current) return
+    if (!gridRef.current || safeProducts.length === 0) return
 
     const nodes = Array.from(gridRef.current.querySelectorAll<HTMLElement>('[data-product-id]'))
     if (!nodes.length) return
 
     const io = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue
 
           const productId = entry.target.getAttribute('data-product-id') || ''
-          const name = entry.target.getAttribute('aria-label')?.replace(/^Produit : /, '') || ''
+          const name =
+            entry.target.getAttribute('aria-label')?.replace(/^Produit\s:\s/i, '').replace(/^Product:\s/i, '') || ''
 
-          if (!productId || seenRef.current.has(productId)) return
+          if (!productId || seenRef.current.has(productId)) continue
 
           seenRef.current.add(productId)
 
-          const product = products.find((p) => String(p._id) === productId || p.slug === productId)
-          batchRef.current.push({ id: productId, name, price: product?.price })
-        })
+          const product = safeProducts.find(
+            (p) => String(p._id) === productId || String(p.slug) === productId
+          )
+
+          batchRef.current.push({
+            id: productId,
+            name: name || product?.title || 'Produit',
+            price: typeof product?.price === 'number' ? product.price : undefined,
+          })
+        }
 
         if (!flushTimeoutRef.current && batchRef.current.length) {
           flushTimeoutRef.current = window.setTimeout(flushBatch, 250)
         }
       },
-      { threshold: 0.35, rootMargin: '0px 0px 100px 0px' }
+      { threshold: 0.35, rootMargin: '0px 0px 120px 0px' }
     )
 
     nodes.forEach((node) => io.observe(node))
@@ -194,19 +257,38 @@ export default function ProductGrid({
       io.disconnect()
       flushBatch()
     }
-  }, [products, flushBatch])
+  }, [flushBatch, safeProducts])
+
+  const itemListJsonLd = useMemo(() => {
+    if (!safeProducts.length) return null
+
+    const base = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
+
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      itemListElement: safeProducts.slice(0, 12).map((product, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        url: product.slug ? `${base}/products/${product.slug}` : `${base}/products`,
+        name: product.title || 'Produit',
+      })),
+    }
+  }, [safeProducts])
 
   if (isEmpty && !isLoading) {
     return (
-      <div className="py-12 text-center text-gray-500 dark:text-gray-400" role="status">
-        {emptyMessage || 'Aucun produit trouvé.'}
+      <div className="rounded-3xl border border-token-border bg-token-surface/70 px-6 py-12 text-center shadow-soft" role="status">
+        <p className="text-base font-semibold text-token-text">
+          {emptyMessage || 'Aucun produit trouvé.'}
+        </p>
       </div>
     )
   }
 
   return (
     <>
-      <p ref={statusRef} className="sr-only" role="status" aria-live="polite">
+      <p ref={statusRef} className="sr-only" role="status" aria-live="polite" aria-atomic="true">
         {countMsg}
       </p>
 
@@ -215,51 +297,59 @@ export default function ProductGrid({
           key="grid"
           ref={gridRef}
           layout={!prefersReducedMotion}
-          className={`grid ${colsToClass(columns) || 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4'} gap-6 ${className}`}
+          className={cn(
+            'grid gap-6',
+            getGridClasses(columns),
+            className
+          )}
           aria-live="polite"
           aria-busy={isLoading ? 'true' : 'false'}
           role="list"
           id={id}
         >
-          {products.map((product, index) => (
+          {safeProducts.map((product, index) => (
             <motion.div
-              key={String(product._id ?? product.slug ?? index)}
+              key={getProductKey(product, index)}
               layout={!prefersReducedMotion}
               role="listitem"
             >
-              <ProductCard product={product} />
+              <ProductCard product={product} priority={index < 2} />
             </motion.div>
           ))}
 
-          {isLoading &&
-            Array.from({ length: loadingCount }).map((_, index) => (
-              <div key={`skeleton-${index}`} aria-hidden="true">
-                <ProductSkeleton />
-              </div>
-            ))}
+          {isLoading
+            ? Array.from({ length: loadingCount }).map((_, index) => (
+                <div key={`skeleton-${index}`} aria-hidden="true">
+                  <ProductSkeleton />
+                </div>
+              ))
+            : null}
         </motion.div>
       </AnimatePresence>
 
-      {(hasMore || isLoading) && onLoadMore && (
+      {(hasMore || isLoading) && onLoadMore ? (
         <div className="mt-8 flex items-center justify-center">
           <button
             type="button"
             onClick={onLoadMore}
             disabled={isLoading}
-            className="rounded-lg bg-accent px-5 py-2 font-semibold text-white shadow hover:bg-accent/90 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40 disabled:opacity-60"
+            className="rounded-xl bg-[hsl(var(--accent))] px-5 py-2.5 font-semibold text-white shadow transition hover:shadow-lg hover:opacity-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.35)] disabled:cursor-not-allowed disabled:opacity-60"
             aria-label="Charger plus de produits"
             data-gtm="grid_load_more"
           >
             {isLoading ? 'Chargement…' : 'Charger plus'}
           </button>
         </div>
-      )}
+      ) : null}
 
-      {observeMore && hasMore && <div ref={sentinelRef} className="h-1" aria-hidden="true" />}
+      {observeMore && hasMore ? <div ref={sentinelRef} className="h-1" aria-hidden="true" /> : null}
 
-      {itemListJsonLd && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
-      )}
+      {itemListJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+        />
+      ) : null}
     </>
   )
 }

@@ -1,9 +1,8 @@
 'use client'
 
 import NextLink, { type LinkProps } from 'next/link'
-import { forwardRef } from 'react'
+import { forwardRef, type AnchorHTMLAttributes } from 'react'
 
-import type React from 'react'
 import type { UrlObject } from 'url'
 
 import { getCurrentLocale, localizePath, type Locale } from '@/lib/i18n-routing'
@@ -11,16 +10,13 @@ import { getCurrentLocale, localizePath, type Locale } from '@/lib/i18n-routing'
 type NextHref = LinkProps['href']
 
 type Props = Omit<LinkProps, 'href' | 'locale'> &
-  Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> & {
+  Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> & {
     href: string | UrlObject
     locale?: Locale
-    /** Conserve le querystring courant (utile pour garder un tri/filtre) */
     keepQuery?: boolean
-    /** Conserve le hash (#section) courant si true */
     keepHash?: boolean
   }
 
-/** URL absolue (http/https/mailto/tel/…) ou protocole relatif `//` */
 function isAbsolute(href: string): boolean {
   return /^(?:[a-z][a-z0-9+.-]*:)?\/\//i.test(href) || /^[a-z][a-z0-9+.-]*:/i.test(href)
 }
@@ -34,22 +30,30 @@ function normalizeHref(
   const resolvedLocale = locale ?? getCurrentLocale()
 
   if (typeof href === 'string') {
-    return isAbsolute(href)
-      ? href
-      : localizePath(href, resolvedLocale, { keepQuery, keepHash })
+    if (isAbsolute(href) || href.startsWith('#')) return href
+    return localizePath(href, resolvedLocale, { keepQuery, keepHash })
   }
 
   const nextHref: UrlObject = { ...href }
-  const pathname =
-    typeof href.pathname === 'string' && href.pathname.trim()
-      ? href.pathname
-      : undefined
 
-  if (pathname && !isAbsolute(pathname)) {
-    nextHref.pathname = localizePath(pathname, resolvedLocale, {
-      keepQuery,
-      keepHash,
-    })
+  if (typeof href.pathname === 'string' && href.pathname.trim() && !isAbsolute(href.pathname)) {
+    const queryString =
+      typeof href.search === 'string'
+        ? href.search
+        : href.query && Object.keys(href.query).length > 0
+          ? ''
+          : ''
+
+    const hash =
+      typeof href.hash === 'string' && href.hash.startsWith('#')
+        ? href.hash
+        : typeof href.hash === 'string' && href.hash
+          ? `#${href.hash}`
+          : ''
+
+    nextHref.pathname = localizePath(href.pathname, resolvedLocale)
+    if (queryString) nextHref.search = queryString
+    if (hash) nextHref.hash = hash
   }
 
   return nextHref

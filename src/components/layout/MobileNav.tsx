@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, AnimatePresence, useReducedMotion, type Variants } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion, type Variants } from 'framer-motion'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 
@@ -28,7 +28,7 @@ const STR = {
       menu: 'Menu',
       searchAria: 'Recherche produits',
       searchBtn: 'Lancer la recherche',
-      placeholderPrefix: 'Rechercher… ex:',
+      placeholderPrefix: 'Rechercher… ex :',
       recent: 'Recherches récentes',
       clear: 'Effacer',
       categories: 'Catégories',
@@ -39,8 +39,16 @@ const STR = {
       installAppTitle: 'Installer l’application',
       dealsAria: 'Voir les offres du jour',
       dealsTitle: 'Offres du jour',
+      mobileNavAria: 'Navigation mobile',
     },
-    trends: ['écouteurs bluetooth', 'casque gaming', 'chargeur rapide USB-C', 'pack starter', 'power bank', 'souris sans fil'],
+    trends: [
+      'écouteurs bluetooth',
+      'casque gaming',
+      'chargeur rapide USB-C',
+      'pack starter',
+      'power bank',
+      'souris sans fil',
+    ],
   },
   en: {
     nav: [
@@ -57,7 +65,7 @@ const STR = {
       menu: 'Menu',
       searchAria: 'Product search',
       searchBtn: 'Start search',
-      placeholderPrefix: 'Search… e.g.',
+      placeholderPrefix: 'Search… e.g.:',
       recent: 'Recent searches',
       clear: 'Clear',
       categories: 'Categories',
@@ -68,8 +76,16 @@ const STR = {
       installAppTitle: 'Install the app',
       dealsAria: "See today's deals",
       dealsTitle: "Today's deals",
+      mobileNavAria: 'Mobile navigation',
     },
-    trends: ['bluetooth earbuds', 'gaming headset', 'USB-C fast charger', 'starter pack', 'power bank', 'wireless mouse'],
+    trends: [
+      'bluetooth earbuds',
+      'gaming headset',
+      'USB-C fast charger',
+      'starter pack',
+      'power bank',
+      'wireless mouse',
+    ],
   },
 } as const
 
@@ -105,7 +121,13 @@ const Icon = {
     </svg>
   ),
   Chevron: ({ open = false }: { open?: boolean }) => (
-    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" className={`transition-transform ${open ? 'rotate-180' : ''}`}>
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={`transition-transform ${open ? 'rotate-180' : ''}`}
+    >
       <path fill="currentColor" d="M12 15.5 4.5 8 6 6.5l6 6 6-6L19.5 8 12 15.5z" />
     </svg>
   ),
@@ -122,8 +144,16 @@ const Icon = {
 }
 
 type CartItemLike = { quantity?: number }
-type CartCollection = CartItemLike[] | { items?: CartItemLike[]; count?: number; size?: number } | null | undefined
-type WishlistCollection = unknown[] | { items?: unknown[]; count?: number; size?: number } | null | undefined
+type CartCollection =
+  | CartItemLike[]
+  | { items?: CartItemLike[]; count?: number; size?: number }
+  | null
+  | undefined
+type WishlistCollection =
+  | unknown[]
+  | { items?: unknown[]; count?: number; size?: number }
+  | null
+  | undefined
 type CartStoreLike = { cart?: CartCollection }
 type WishlistStoreLike = { wishlist?: WishlistCollection }
 
@@ -146,7 +176,7 @@ const safeParseArray = <T,>(raw: string | null): T[] => {
   }
 }
 
-const norm = (s: string) => s.trim().replace(/\s+/g, ' ')
+const norm = (value: string) => value.trim().replace(/\s+/g, ' ')
 const same = (a: string, b: string) => a.toLocaleLowerCase() === b.toLocaleLowerCase()
 
 function getQuantity(item: unknown): number {
@@ -155,23 +185,13 @@ function getQuantity(item: unknown): number {
   return Number.isFinite(quantity) && quantity > 0 ? quantity : 1
 }
 
-function getCartStoreSafe(): CartStoreLike {
-  try {
-    return useCart() as CartStoreLike
-  } catch {
-    return {}
-  }
-}
-
-function getWishlistStoreSafe(): WishlistStoreLike {
-  try {
-    return useWishlist() as WishlistStoreLike
-  } catch {
-    return {}
-  }
-}
-
-function track(args: { action: string; category?: string; label?: string; value?: number; [k: string]: unknown }) {
+function track(args: {
+  action: string
+  category?: string
+  label?: string
+  value?: number
+  [key: string]: unknown
+}) {
   const { action, category, label, value, ...rest } = args
   try {
     gaEvent?.({
@@ -181,7 +201,9 @@ function track(args: { action: string; category?: string; label?: string; value?
       value: value ?? 1,
       ...rest,
     })
-  } catch {}
+  } catch {
+    // no-op
+  }
 }
 
 export default function MobileNav() {
@@ -189,8 +211,8 @@ export default function MobileNav() {
   const router = useRouter()
   const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr'
   const t = STR[locale]
-  const L = (p: string) => localizePath(p, locale)
-  const SEARCH_ACTION = L('/products')
+  const L = (path: string) => localizePath(path, locale)
+  const searchAction = L('/products')
 
   const categories = useMemo(() => getCategories(locale), [locale])
   const reducedMotion = useReducedMotion()
@@ -198,11 +220,11 @@ export default function MobileNav() {
   const titleId = `${dialogId}-title`
   const catsPanelId = useId()
 
-  const cartStore = getCartStoreSafe()
-  const wishlistStore = getWishlistStoreSafe()
+  const cartStore = useCart() as CartStoreLike
+  const wishlistStore = useWishlist() as WishlistStoreLike
 
-  const cart = cartStore.cart
-  const wishlist = wishlistStore.wishlist
+  const cart = cartStore?.cart
+  const wishlist = wishlistStore?.wishlist
 
   const cartCount = useMemo(() => {
     if (Array.isArray(cart)) {
@@ -213,76 +235,67 @@ export default function MobileNav() {
       return cart.items.reduce((total, item) => total + getQuantity(item), 0)
     }
 
-    if (cart && typeof cart === 'object') {
-      const count = Number(cart.count ?? cart.size ?? 0)
-      return Number.isFinite(count) ? count : 0
-    }
-
-    return 0
+    const count = Number(cart?.count ?? cart?.size ?? 0)
+    return Number.isFinite(count) ? count : 0
   }, [cart])
 
   const wishlistCount = useMemo(() => {
     if (Array.isArray(wishlist)) return wishlist.length
-
     if (wishlist && typeof wishlist === 'object' && Array.isArray(wishlist.items)) {
       return wishlist.items.length
     }
 
-    if (wishlist && typeof wishlist === 'object') {
-      const count = Number(wishlist.count ?? wishlist.size ?? 0)
-      return Number.isFinite(count) ? count : 0
-    }
-
-    return 0
+    const count = Number(wishlist?.count ?? wishlist?.size ?? 0)
+    return Number.isFinite(count) ? count : 0
   }, [wishlist])
 
   const [open, setOpen] = useState(false)
+  const [catsOpen, setCatsOpen] = useState(false)
+  const [placeholder, setPlaceholder] = useState<string>(() => t.trends[0] ?? '')
+  const [searchFocused, setSearchFocused] = useState(false)
+  const [recentQs, setRecentQs] = useState<string[]>([])
+  const [canInstall, setCanInstall] = useState(false)
+
   const triggerRef = useRef<HTMLButtonElement | null>(null)
   const dialogRef = useRef<HTMLDivElement | null>(null)
   const mainRef = useRef<InertHTMLElement | null>(null)
-
   const searchRef = useRef<HTMLInputElement | null>(null)
-  const trends: string[] = useMemo(() => [...t.trends], [t.trends])
-  const [placeholder, setPlaceholder] = useState<string>(() => trends[0] ?? '')
-  const [searchFocused, setSearchFocused] = useState(false)
-  const [recentQs, setRecentQs] = useState<string[]>([])
-  const [catsOpen, setCatsOpen] = useState(false)
-
   const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null)
-  const [canInstall, setCanInstall] = useState(false)
+  const savedScrollY = useRef(0)
+  const startY = useRef<number | null>(null)
 
-  useEffect(() => {
-    const onBeforeInstall = (event: Event) => {
-      const e = event as BeforeInstallPromptEvent
-      e.preventDefault()
-      deferredPrompt.current = e
-      setCanInstall(true)
-    }
-
-    const onInstalled = () => setCanInstall(false)
-
-    window.addEventListener('beforeinstallprompt', onBeforeInstall)
-    window.addEventListener('appinstalled', onInstalled)
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', onBeforeInstall)
-      window.removeEventListener('appinstalled', onInstalled)
-    }
-  }, [])
-
-  const handleInstall = async () => {
-    try {
-      track({ action: 'pwa_install_click', label: 'mobile_nav' })
-      const promptEvent = deferredPrompt.current
-      if (!promptEvent) return
-      await promptEvent.prompt()
-      await promptEvent.userChoice
-      deferredPrompt.current = null
-      setCanInstall(false)
-    } catch {}
+  const overlayVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: reducedMotion ? 0 : 0.18 } },
+    exit: { opacity: 0, transition: { duration: 0.12 } },
   }
 
-  const savedScrollY = useRef(0)
+  const sheetVariants: Variants = {
+    hidden: { y: reducedMotion ? 0 : '10%', opacity: 0.001 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: reducedMotion ? 0 : 0.22, ease: 'easeOut' },
+    },
+    exit: { y: reducedMotion ? 0 : '10%', opacity: 0, transition: { duration: 0.16 } },
+  }
+
+  const isActive = (href: string) => {
+    if (href === '/categorie') return false
+    const localizedHref = L(href)
+    return pathname === localizedHref || pathname.startsWith(`${localizedHref}/`)
+  }
+
+  const prefetchOnPointer = (href: string) => {
+    try {
+      const localizedHref = L(href)
+      if (href !== '/categorie' && localizedHref && !isActive(href)) {
+        router.prefetch(localizedHref)
+      }
+    } catch {
+      // no-op
+    }
+  }
 
   const lockScroll = () => {
     savedScrollY.current = window.scrollY || document.documentElement.scrollTop
@@ -303,7 +316,9 @@ export default function MobileNav() {
       mainRef.current = main
       try {
         main.inert = true
-      } catch {}
+      } catch {
+        // no-op
+      }
       main.setAttribute('aria-hidden', 'true')
     }
   }
@@ -323,7 +338,9 @@ export default function MobileNav() {
     if (mainRef.current) {
       try {
         mainRef.current.inert = false
-      } catch {}
+      } catch {
+        // no-op
+      }
       mainRef.current.removeAttribute('aria-hidden')
       mainRef.current = null
     }
@@ -333,7 +350,9 @@ export default function MobileNav() {
     setOpen(true)
     try {
       navigator.vibrate?.(8)
-    } catch {}
+    } catch {
+      // no-op
+    }
     track({ action: 'mobile_nav_open', label: 'hamburger' })
   }
 
@@ -343,13 +362,83 @@ export default function MobileNav() {
   }
 
   useEffect(() => {
+    const onBeforeInstall = (event: Event) => {
+      const e = event as BeforeInstallPromptEvent
+      e.preventDefault()
+      deferredPrompt.current = e
+      setCanInstall(true)
+    }
+
+    const onInstalled = () => setCanInstall(false)
+
+    window.addEventListener('beforeinstallprompt', onBeforeInstall)
+    window.addEventListener('appinstalled', onInstalled)
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onBeforeInstall)
+      window.removeEventListener('appinstalled', onInstalled)
+    }
+  }, [])
+
+  useEffect(() => {
+    try {
+      const arr = safeParseArray<string>(localStorage.getItem('recent:q'))
+      if (arr.length) setRecentQs(arr.slice(0, 6))
+    } catch {
+      // no-op
+    }
+  }, [])
+
+  useEffect(() => {
+    const trends = [...t.trends]
+    setPlaceholder(trends[0] ?? '')
+
+    let index = 0
+    let intervalId: number | null = null
+
+    const start = () => {
+      if (intervalId || searchFocused || document.visibilityState !== 'visible') return
+      intervalId = window.setInterval(() => {
+        index = (index + 1) % trends.length
+        setPlaceholder(trends[index] ?? '')
+      }, PLACEHOLDER_MS)
+    }
+
+    const stop = () => {
+      if (intervalId) {
+        window.clearInterval(intervalId)
+        intervalId = null
+      }
+    }
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible' && !searchFocused) start()
+      else stop()
+    }
+
+    onVisibility()
+    document.addEventListener('visibilitychange', onVisibility)
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility)
+      stop()
+    }
+  }, [searchFocused, t.trends])
+
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeMenu('escape')
+      if (!open) return
+
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        closeMenu('escape')
+      }
 
       if (e.key === 'Tab' && dialogRef.current) {
         const focusables = dialogRef.current.querySelectorAll<HTMLElement>(
           'a[href],button:not([disabled]),input,select,textarea,[tabindex]:not([tabindex="-1"])'
         )
+
         if (!focusables.length) return
 
         const first = focusables[0]
@@ -388,7 +477,64 @@ export default function MobileNav() {
     if (open) closeMenu('route_change')
   }, [pathname])
 
-  const startY = useRef<number | null>(null)
+  const handleInstall = async () => {
+    try {
+      track({ action: 'pwa_install_click', label: 'mobile_nav' })
+      const promptEvent = deferredPrompt.current
+      if (!promptEvent) return
+      await promptEvent.prompt()
+      await promptEvent.userChoice
+      deferredPrompt.current = null
+      setCanInstall(false)
+    } catch {
+      // no-op
+    }
+  }
+
+  const pushRecent = (q: string) => {
+    const cleaned = norm(q)
+    if (!cleaned) return
+
+    try {
+      const arr = safeParseArray<string>(localStorage.getItem('recent:q'))
+      const next = [cleaned, ...arr.filter((item) => !same(item, cleaned))].slice(0, 6)
+      localStorage.setItem('recent:q', JSON.stringify(next))
+      setRecentQs(next)
+    } catch {
+      // no-op
+    }
+  }
+
+  const onSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const form = e.currentTarget
+    const data = new FormData(form)
+    const q = norm(String(data.get('q') || ''))
+
+    if (!q) {
+      e.preventDefault()
+      searchRef.current?.focus()
+      return
+    }
+
+    try {
+      localStorage.setItem('last:q', q)
+    } catch {
+      // no-op
+    }
+
+    pushRecent(q)
+    track({ action: 'search_submit', label: q })
+  }
+
+  const goSearch = (q: string) => {
+    const cleaned = norm(q)
+    if (!cleaned) return
+
+    pushRecent(cleaned)
+    track({ action: 'search_chip_click', label: cleaned })
+    closeMenu('search_chip')
+    router.push(`${searchAction}?q=${encodeURIComponent(cleaned)}`)
+  }
 
   const onTouchStart = (e: React.TouchEvent) => {
     startY.current = e.touches[0]?.clientY ?? null
@@ -408,126 +554,19 @@ export default function MobileNav() {
     startY.current = null
   }
 
-  const overlayVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: reducedMotion ? 0 : 0.18 } },
-    exit: { opacity: 0, transition: { duration: 0.12 } },
-  }
-
-  const sheetVariants: Variants = {
-    hidden: { y: reducedMotion ? 0 : '10%', opacity: 0.001 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { duration: reducedMotion ? 0 : 0.22, ease: 'easeOut' },
-    },
-    exit: { y: reducedMotion ? 0 : '10%', opacity: 0, transition: { duration: 0.16 } },
-  }
-
-  const isActive = (href: string) => {
-    if (href === '/categorie') return false
-    const localizedHref = L(href)
-    return pathname === localizedHref || pathname.startsWith(`${localizedHref}/`)
-  }
-
-  const prefetchOnPointer = (href: string) => {
-    try {
-      const localizedHref = L(href)
-      if (href !== '/categorie' && localizedHref && !isActive(href)) {
-        router.prefetch(localizedHref)
-      }
-    } catch {}
-  }
-
-  useEffect(() => {
-    let index = 0
-    let intervalId: number | null = null
-
-    const start = () => {
-      if (intervalId || searchFocused || document.visibilityState !== 'visible') return
-      intervalId = window.setInterval(() => {
-        index = (index + 1) % trends.length
-        setPlaceholder(trends[index] ?? '')
-      }, PLACEHOLDER_MS)
-    }
-
-    const stop = () => {
-      if (intervalId) {
-        window.clearInterval(intervalId)
-        intervalId = null
-      }
-    }
-
-    const onVisibility = () => {
-      if (document.visibilityState === 'visible' && !searchFocused) start()
-      else stop()
-    }
-
-    onVisibility()
-    document.addEventListener('visibilitychange', onVisibility)
-
-    return () => {
-      document.removeEventListener('visibilitychange', onVisibility)
-      stop()
-    }
-  }, [searchFocused, trends])
-
-  useEffect(() => {
-    try {
-      const arr = safeParseArray<string>(localStorage.getItem('recent:q'))
-      if (arr.length) setRecentQs(arr.slice(0, 6))
-    } catch {}
-  }, [])
-
-  const pushRecent = (q: string) => {
-    const cleaned = norm(q)
-    if (!cleaned) return
-
-    try {
-      const arr = safeParseArray<string>(localStorage.getItem('recent:q'))
-      const next = [cleaned, ...arr.filter((x) => !same(x, cleaned))].slice(0, 6)
-      localStorage.setItem('recent:q', JSON.stringify(next))
-      setRecentQs(next)
-    } catch {}
-  }
-
-  const onSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    const form = e.currentTarget
-    const data = new FormData(form)
-    const q = norm(String(data.get('q') || ''))
-
-    if (!q) {
-      e.preventDefault()
-      searchRef.current?.focus()
-      return
-    }
-
-    try {
-      localStorage.setItem('last:q', q)
-    } catch {}
-
-    pushRecent(q)
-    track({ action: 'search_submit', label: q })
-  }
-
-  const goSearch = (q: string) => {
-    const cleaned = norm(q)
-    if (!cleaned) return
-
-    pushRecent(cleaned)
-    track({ action: 'search_chip_click', label: cleaned })
-    closeMenu('search_chip')
-    router.push(`${SEARCH_ACTION}?q=${encodeURIComponent(cleaned)}`)
-  }
-
   const openCatsFromNav = () => {
     setCatsOpen(true)
     track({ action: 'mobile_nav_link_click', label: '/categorie' })
 
     requestAnimationFrame(() => {
       try {
-        document.getElementById(catsPanelId)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-      } catch {}
+        document.getElementById(catsPanelId)?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+        })
+      } catch {
+        // no-op
+      }
     })
   }
 
@@ -535,20 +574,20 @@ export default function MobileNav() {
     <>
       <button
         ref={triggerRef}
+        type="button"
         onClick={openMenu}
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={dialogId}
         aria-label={t.ui.openMenu}
         aria-keyshortcuts="Alt+M"
-        type="button"
-        className="md:hidden grid h-10 w-10 place-items-center rounded-xl hover:bg-token-surface-2 focus-ring"
+        className="grid h-10 w-10 place-items-center rounded-xl hover:bg-token-surface/80 md:hidden"
       >
         <Icon.Menu />
       </button>
 
       <AnimatePresence>
-        {open && (
+        {open ? (
           <motion.div
             key="mobile-nav"
             id={dialogId}
@@ -556,7 +595,7 @@ export default function MobileNav() {
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            className="fixed inset-0 z-[9999] flex items-end justify-center sm:items-center overscroll-contain"
+            className="fixed inset-0 z-[9999] flex items-end justify-center overscroll-contain sm:items-center"
             initial="hidden"
             animate="visible"
             exit="exit"
@@ -572,7 +611,7 @@ export default function MobileNav() {
             />
 
             <motion.div
-              className="supports-backdrop:glass supports-backdrop:bg-token-surface/80 relative w-full overflow-hidden border border-token-border bg-token-surface/90 shadow-2xl sm:max-w-md sm:rounded-2xl will-change-transform"
+              className="relative w-full overflow-hidden border border-token-border bg-token-surface/95 shadow-2xl sm:max-w-md sm:rounded-2xl"
               variants={sheetVariants}
               drag={reducedMotion ? false : 'y'}
               dragConstraints={{ top: 0, bottom: 0 }}
@@ -588,10 +627,11 @@ export default function MobileNav() {
                 <h2 id={titleId} className="text-lg font-semibold">
                   {t.ui.menu}
                 </h2>
+
                 <button
                   onClick={() => closeMenu('close_btn')}
                   type="button"
-                  className="rounded px-3 py-2 text-sm hover:bg-token-surface-2 focus-ring"
+                  className="rounded px-3 py-2 text-sm hover:bg-token-surface/80"
                   aria-label={t.ui.closeMenu}
                 >
                   <Icon.Close />
@@ -599,7 +639,7 @@ export default function MobileNav() {
               </div>
 
               <form
-                action={SEARCH_ACTION}
+                action={searchAction}
                 method="get"
                 role="search"
                 aria-label={t.ui.searchAria}
@@ -621,11 +661,13 @@ export default function MobileNav() {
                     onFocus={() => setSearchFocused(true)}
                     onBlur={() => setSearchFocused(false)}
                   />
+
                   <datalist id="mobile-search-suggestions">
-                    {trends.map((s) => (
-                      <option value={s} key={s} />
+                    {t.trends.map((item) => (
+                      <option value={item} key={item} />
                     ))}
                   </datalist>
+
                   <button
                     type="submit"
                     className="absolute right-1.5 top-1.5 inline-flex h-10 w-10 items-center justify-center rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
@@ -637,37 +679,41 @@ export default function MobileNav() {
                 </div>
               </form>
 
-              {recentQs.length > 0 && (
+              {recentQs.length > 0 ? (
                 <div className="px-4 pb-3">
                   <div className="mb-2 text-xs font-semibold text-token-text/60">{t.ui.recent}</div>
+
                   <div className="flex flex-wrap gap-2">
                     {recentQs.map((q) => (
                       <button
                         key={q}
                         type="button"
                         onClick={() => goSearch(q)}
-                        className="rounded-full border border-token-border bg-token-surface px-3 py-1.5 text-sm hover:bg-token-surface-2 focus-ring"
+                        className="focus-ring rounded-full border border-token-border bg-token-surface px-3 py-1.5 text-sm hover:bg-token-surface/80"
                         aria-label={`${t.ui.searchBtn}: ${q}`}
                       >
                         {q.length > 26 ? `${q.slice(0, 24)}…` : q}
                       </button>
                     ))}
+
                     <button
                       type="button"
                       onClick={() => {
                         try {
                           localStorage.removeItem('recent:q')
-                        } catch {}
+                        } catch {
+                          // no-op
+                        }
                         setRecentQs([])
                       }}
-                      className="ml-2 rounded-full bg-token-surface-2 px-3 py-1.5 text-xs text-token-text/70 hover:bg-token-surface focus-ring"
+                      className="focus-ring ml-1 rounded-full bg-token-surface/80 px-3 py-1.5 text-xs text-token-text/70 hover:bg-token-surface"
                       aria-label={t.ui.clear}
                     >
                       {t.ui.clear}
                     </button>
                   </div>
                 </div>
-              )}
+              ) : null}
 
               <div className="flex items-center gap-2 px-4 pb-3">
                 <ThemeToggle size="md" />
@@ -681,18 +727,15 @@ export default function MobileNav() {
                     track({ action: 'mobile_nav_quick_wishlist' })
                     closeMenu('quick_wishlist')
                   }}
-                  className="relative inline-flex items-center gap-2 rounded-lg border border-token-border px-3 py-2 text-sm font-medium hover:bg-token-surface-2 focus-ring"
+                  className="focus-ring relative inline-flex items-center gap-2 rounded-lg border border-token-border px-3 py-2 text-sm font-medium hover:bg-token-surface/80"
                   aria-label={t.ui.wishlist(wishlistCount)}
                 >
                   <Icon.Heart />
-                  <span aria-live="polite" aria-atomic="true" className="sr-only">
-                    {wishlistCount} items in wishlist
-                  </span>
-                  {wishlistCount > 0 && (
+                  {wishlistCount > 0 ? (
                     <span className="rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-[11px] font-bold text-white">
                       {wishlistCount}
                     </span>
-                  )}
+                  ) : null}
                 </Link>
 
                 <Link
@@ -704,13 +747,13 @@ export default function MobileNav() {
                     track({ action: 'mobile_nav_quick_account' })
                     closeMenu('quick_account')
                   }}
-                  className="inline-flex items-center gap-2 rounded-lg border border-token-border px-3 py-2 text-sm font-medium hover:bg-token-surface-2 focus-ring"
+                  className="focus-ring inline-flex items-center gap-2 rounded-lg border border-token-border px-3 py-2 text-sm font-medium hover:bg-token-surface/80"
                   aria-label={t.ui.account}
                 >
                   <Icon.User />
                 </Link>
 
-                {canInstall && (
+                {canInstall ? (
                   <button
                     onClick={handleInstall}
                     type="button"
@@ -720,23 +763,23 @@ export default function MobileNav() {
                   >
                     <Icon.Download /> {t.ui.installApp}
                   </button>
-                )}
+                ) : null}
               </div>
 
               <div className="px-4 pb-3">
                 <button
                   type="button"
-                  onClick={() => setCatsOpen((v) => !v)}
+                  onClick={() => setCatsOpen((value) => !value)}
                   aria-expanded={catsOpen}
                   aria-controls={catsPanelId}
-                  className="flex w-full items-center justify-between rounded-xl border border-token-border bg-token-surface px-4 py-3 text-base font-semibold hover:bg-token-surface-2 focus-ring"
+                  className="focus-ring flex w-full items-center justify-between rounded-xl border border-token-border bg-token-surface px-4 py-3 text-base font-semibold hover:bg-token-surface/80"
                 >
                   {t.ui.categories}
                   <Icon.Chevron open={catsOpen} />
                 </button>
 
                 <AnimatePresence initial={false}>
-                  {catsOpen && (
+                  {catsOpen ? (
                     <motion.div
                       id={catsPanelId}
                       role="region"
@@ -748,25 +791,33 @@ export default function MobileNav() {
                       className="overflow-hidden"
                     >
                       <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                        {categories.map((c) => (
-                          <li key={c.href}>
+                        {categories.map((category) => (
+                          <li key={category.href}>
                             <Link
-                              href={c.href}
+                              href={category.href}
                               prefetch={false}
-                              onPointerDown={() => prefetchOnPointer(c.href)}
-                              onFocus={() => prefetchOnPointer(c.href)}
+                              onPointerDown={() => prefetchOnPointer(category.href)}
+                              onFocus={() => prefetchOnPointer(category.href)}
                               onClick={() => {
-                                track({ action: 'mobile_nav_cat', label: c.href })
+                                track({ action: 'mobile_nav_cat', label: category.href })
                                 closeMenu('cat_click')
                               }}
-                              className="group flex items-center gap-3 rounded-xl border border-transparent bg-token-surface/80 p-3 transition hover:-translate-y-0.5 hover:border-[hsl(var(--accent)/.30)] hover:bg-token-surface shadow-sm hover:shadow-md focus-ring"
+                              className="focus-ring group flex items-center gap-3 rounded-xl border border-transparent bg-token-surface/80 p-3 shadow-sm transition hover:-translate-y-0.5 hover:border-[hsl(var(--accent)/.30)] hover:bg-token-surface hover:shadow-md"
                             >
-                              <c.Icon className="opacity-80" />
+                              <category.Icon className="opacity-80" />
                               <span className="flex-1">
-                                <span className="block text-sm font-semibold">{c.label}</span>
-                                <span className="block text-xs text-token-text/60">{c.desc}</span>
+                                <span className="block text-sm font-semibold">{category.label}</span>
+                                <span className="block text-xs text-token-text/60">
+                                  {category.desc}
+                                </span>
                               </span>
-                              <svg width="18" height="18" viewBox="0 0 24 24" className="opacity-50 group-hover:opacity-90" aria-hidden="true">
+                              <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                className="opacity-50 group-hover:opacity-90"
+                                aria-hidden="true"
+                              >
                                 <path fill="currentColor" d="M9 18l6-6-6-6v12z" />
                               </svg>
                             </Link>
@@ -774,11 +825,11 @@ export default function MobileNav() {
                         ))}
                       </ul>
                     </motion.div>
-                  )}
+                  ) : null}
                 </AnimatePresence>
               </div>
 
-              <nav aria-label="Navigation mobile" className="px-5 pb-4">
+              <nav aria-label={t.ui.mobileNavAria} className="px-5 pb-4">
                 <ul className="grid grid-cols-1 gap-2 text-lg">
                   {t.nav.map((item) => {
                     const { href, label } = item
@@ -792,7 +843,7 @@ export default function MobileNav() {
                             onClick={openCatsFromNav}
                             aria-expanded={catsOpen}
                             aria-controls={catsPanelId}
-                            className="w-full rounded-xl px-4 py-3 text-left transition focus-ring hover:bg-token-surface-2 border border-transparent"
+                            className="focus-ring w-full rounded-xl border border-transparent px-4 py-3 text-left transition hover:bg-token-surface/80"
                           >
                             {label}
                           </button>
@@ -815,20 +866,20 @@ export default function MobileNav() {
                           }}
                           aria-current={active ? 'page' : undefined}
                           className={[
-                            'block rounded-xl px-4 py-3 transition focus-ring',
+                            'focus-ring block rounded-xl px-4 py-3 transition',
                             promo
-                              ? 'bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-white font-semibold shadow-md hover:shadow-lg text-center'
+                              ? 'bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-center font-semibold text-white shadow-md hover:shadow-lg'
                               : active
-                                ? 'bg-[hsl(var(--accent)/.10)] text-[hsl(var(--accent))] font-semibold border border-[hsl(var(--accent)/.30)]'
-                                : 'hover:bg-token-surface-2 border border-transparent',
+                                ? 'border border-[hsl(var(--accent)/.30)] bg-[hsl(var(--accent)/.10)] font-semibold text-[hsl(var(--accent))]'
+                                : 'border border-transparent hover:bg-token-surface/80',
                           ].join(' ')}
                         >
                           {label}
-                          {promo && (
+                          {promo ? (
                             <span className="ml-2 inline-flex align-middle">
                               <Icon.Flame />
                             </span>
-                          )}
+                          ) : null}
                         </Link>
                       </li>
                     )
@@ -836,7 +887,7 @@ export default function MobileNav() {
                 </ul>
               </nav>
 
-              <div className="border-token-border px-4 py-3 flex items-center gap-3 border-t">
+              <div className="flex items-center gap-3 border-t border-token-border px-4 py-3">
                 <Link
                   href="/commande"
                   prefetch={false}
@@ -846,16 +897,15 @@ export default function MobileNav() {
                     track({ action: 'mobile_nav_cart_click', label: 'cart', value: cartCount || 1 })
                     closeMenu('cart_btn')
                   }}
-                  className="relative inline-flex items-center justify-center rounded-lg border border-token-border px-4 py-2 text-base font-semibold hover:bg-token-surface-2 focus-ring"
+                  className="focus-ring relative inline-flex items-center justify-center rounded-lg border border-token-border px-4 py-2 text-base font-semibold hover:bg-token-surface/80"
                   aria-label={t.ui.cart(cartCount)}
                 >
                   <Icon.Cart />
-                  {cartCount > 0 && (
+                  {cartCount > 0 ? (
                     <span className="ml-2 rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white">
-                      <span className="sr-only">Cart count: </span>
                       {cartCount}
                     </span>
-                  )}
+                  ) : null}
                 </Link>
 
                 <button
@@ -871,7 +921,7 @@ export default function MobileNav() {
               <div className="pb-[env(safe-area-inset-bottom)]" />
             </motion.div>
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
     </>
   )

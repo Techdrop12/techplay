@@ -6,7 +6,7 @@ export type MetaDefaults = {
   description: string
   image: string
   type: 'website' | 'article' | 'product'
-  locale: string // ex: 'fr_FR' | 'en_US'
+  locale: string
   siteName?: string
   twitterCard?: 'summary' | 'summary_large_image'
 }
@@ -23,37 +23,37 @@ export const defaultMeta: MetaDefaults = {
   twitterCard: 'summary_large_image',
 }
 
-/** Merge simple avec valeurs par défaut. */
 export function buildMeta(overrides: Partial<MetaDefaults> = {}): MetaDefaults {
   return { ...defaultMeta, ...overrides }
 }
-
-/* -------------------------------------------------------------------------- */
-/*                               Fallback helpers                              */
-/* -------------------------------------------------------------------------- */
 
 type ProductLite = {
   title?: string
   brand?: string
   description?: string
   price?: number | string
-  currency?: string // ex: 'EUR'
+  currency?: string
 }
 
-/** Nettoie le HTML et compacte les espaces. */
 export function stripHtml(s: string): string {
   return String(s)
-    .replace(/<[^>]+>/g, '')
+    .replace(/<[^>]+>/g, ' ')
     .replace(/[\r\n]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
 }
 
-/**
- * Génère une meta description “de secours” à partir d’un produit.
- * - Ajoute titre/brand/prix si disponibles
- * - Ajoute un snippet de description propre (≤ 160 chars)
- */
+function trimToLength(value: string, maxLen: number): string {
+  const clean = stripHtml(value)
+  if (clean.length <= maxLen) return clean
+
+  const sliced = clean.slice(0, Math.max(0, maxLen - 1))
+  const lastSpace = sliced.lastIndexOf(' ')
+  const safe = lastSpace > 80 ? sliced.slice(0, lastSpace) : sliced
+
+  return `${safe.trim()}…`
+}
+
 export function getFallbackDescription(
   product: ProductLite = {},
   {
@@ -63,29 +63,37 @@ export function getFallbackDescription(
   }: { siteName?: string; locale?: string; maxLen?: number } = {}
 ): string {
   const { title, brand, description, price, currency = 'EUR' } = product
+  const isEnglish = String(locale).toLowerCase().startsWith('en')
+
   const parts: string[] = []
-  if (title) parts.push(`Découvrez ${title}`)
-  if (brand) parts.push(`de la marque ${brand}`)
 
-  let out = parts.join(' ')
+  if (title) {
+    parts.push(isEnglish ? `Discover ${title}` : `Découvrez ${title}`)
+  }
 
-  // prix (optionnel)
+  if (brand) {
+    parts.push(isEnglish ? `from ${brand}` : `de la marque ${brand}`)
+  }
+
   if (price != null && String(price).trim() !== '') {
     try {
       const fmt = new Intl.NumberFormat(locale, { style: 'currency', currency })
-      out += (out ? ' ' : '') + `à partir de ${fmt.format(Number(price))}`
+      parts.push(isEnglish ? `from ${fmt.format(Number(price))}` : `à partir de ${fmt.format(Number(price))}`)
     } catch {
-      // ignore: pas de currency si Intl échoue
+      // no-op
     }
   }
-  if (out) out += ` sur ${siteName}. Livraison rapide et SAV premium.`
 
-  // snippet de description
-  if (typeof description === 'string' && description.trim()) {
-    const clean = stripHtml(description)
-    const snippet = clean.length > maxLen ? clean.slice(0, Math.max(0, maxLen - 1)) + '…' : clean
-    out += (out ? ' ' : '') + snippet
-  }
+  const intro = parts.join(' ').trim()
+  const baseLine = intro
+    ? `${intro}${isEnglish ? ` on ${siteName}. Fast delivery and premium support.` : ` sur ${siteName}. Livraison rapide et SAV premium.`}`
+    : isEnglish
+      ? `Discover our products on ${siteName}.`
+      : `Découvrez nos produits sur ${siteName}.`
 
-  return out || `Découvrez nos produits sur ${siteName}.`
+  const cleanDescription =
+    typeof description === 'string' && description.trim() ? stripHtml(description) : ''
+
+  const composed = cleanDescription ? `${baseLine} ${cleanDescription}` : baseLine
+  return trimToLength(composed, maxLen)
 }

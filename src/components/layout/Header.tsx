@@ -1,9 +1,8 @@
-// src/components/layout/Header.tsx — ULTIME+++ (i18n switch FR/EN actif, mega-menu a11y, perf/UX/a11y, micro-polish)
 'use client'
 
 import NextLink from 'next/link'
-import {usePathname, useRouter} from 'next/navigation'
-import {useEffect, useId, useMemo, useRef, useState, type ReactNode} from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
 
 import Logo from '../Logo'
 
@@ -15,15 +14,15 @@ import {
   FlameIcon as Flame,
   HeartIcon as Heart,
   SearchIcon as Search,
-  UserIcon as User
+  UserIcon as User,
 } from '@/components/ui/premium-icons'
 import ThemeToggle from '@/components/ui/ThemeToggle'
-import {useCart} from '@/hooks/useCart'
-import {useWishlist} from '@/hooks/useWishlist'
-import {getCategories} from '@/lib/categories'
-import {getCurrentLocale, localizePath} from '@/lib/i18n-routing'
-import {LOCALE_COOKIE, setLocaleCookie} from '@/lib/language'
-import {cn} from '@/lib/utils'
+import { useCart } from '@/hooks/useCart'
+import { useWishlist } from '@/hooks/useWishlist'
+import { getCategories } from '@/lib/categories'
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
+import { LOCALE_COOKIE, setLocaleCookie } from '@/lib/language'
+import { cn } from '@/lib/utils'
 
 const STR = {
   fr: {
@@ -32,21 +31,25 @@ const STR = {
       products: 'Produits',
       wishlist: 'Wishlist',
       blog: 'Blog',
-      contact: 'Contact'
+      contact: 'Contact',
     },
     headerNavAria: 'Navigation principale',
     searchAria: 'Recherche produits',
     searchHint: 'Raccourcis : « / » ou « Ctrl/⌘ K » pour rechercher.',
-    placeholderPrefix: 'Rechercher… ex:',
+    placeholderPrefix: 'Rechercher… ex :',
     trends: [
       'écouteurs bluetooth',
       'casque gaming',
       'chargeur rapide USB-C',
       'pack starter',
       'power bank',
-      'souris sans fil'
+      'souris sans fil',
     ],
-    deals: {text: 'Offres', title: 'Offres du jour', aria: 'Voir les offres du jour'},
+    deals: {
+      text: 'Offres',
+      title: 'Offres du jour',
+      aria: 'Voir les offres du jour',
+    },
     selection: 'Sélection',
     packsTitle: 'Packs recommandés',
     packsDesc: 'Les meilleures combinaisons pour booster ton setup.',
@@ -54,10 +57,13 @@ const STR = {
     allProducts: 'Tous les produits',
     wishlistAria: (n: number) => (n > 0 ? `Voir la wishlist (${n})` : 'Voir la wishlist'),
     cartAria: (n: number) => (n > 0 ? `Voir le panier (${n})` : 'Voir le panier'),
-    account: {aria: 'Espace client', title: 'Espace client'},
+    account: {
+      aria: 'Espace client',
+      title: 'Espace client',
+    },
     headerAria: 'En-tête du site',
     logoAria: 'TechPlay — Accueil',
-    localeSwitcherAria: 'Sélecteur de langue'
+    localeSwitcherAria: 'Sélecteur de langue',
   },
   en: {
     nav: {
@@ -65,21 +71,25 @@ const STR = {
       products: 'Products',
       wishlist: 'Wishlist',
       blog: 'Blog',
-      contact: 'Contact'
+      contact: 'Contact',
     },
     headerNavAria: 'Primary navigation',
     searchAria: 'Product search',
     searchHint: 'Shortcuts: “/” or “Ctrl/⌘ K” to search.',
-    placeholderPrefix: 'Search… e.g.',
+    placeholderPrefix: 'Search… e.g.:',
     trends: [
       'bluetooth earbuds',
       'gaming headset',
       'USB-C fast charger',
       'starter pack',
       'power bank',
-      'wireless mouse'
+      'wireless mouse',
     ],
-    deals: {text: 'Deals', title: "Today's deals", aria: "See today's deals"},
+    deals: {
+      text: 'Deals',
+      title: "Today's deals",
+      aria: "See today's deals",
+    },
     selection: 'Featured',
     packsTitle: 'Recommended packs',
     packsDesc: 'Best combos to boost your setup.',
@@ -87,80 +97,121 @@ const STR = {
     allProducts: 'All products',
     wishlistAria: (n: number) => (n > 0 ? `View wishlist (${n})` : 'View wishlist'),
     cartAria: (n: number) => (n > 0 ? `View cart (${n})` : 'View cart'),
-    account: {aria: 'Account', title: 'Account'},
+    account: {
+      aria: 'Account',
+      title: 'Account',
+    },
     headerAria: 'Site header',
     logoAria: 'TechPlay — Home',
-    localeSwitcherAria: 'Language selector'
-  }
+    localeSwitcherAria: 'Language selector',
+  },
 } as const
 
-type NavLink = {href: string; labelKey: keyof typeof STR.fr.nav}
+type NavLink = {
+  href: string
+  labelKey: keyof typeof STR.fr.nav
+}
 
-type CartEntry = {quantity?: number}
+type CartItemLike = {
+  quantity?: number
+}
 
-type CartStateLike =
-  | CartEntry[]
-  | {
-      items?: CartEntry[]
-      count?: number
-      size?: number
-    }
+type CartCollection =
+  | CartItemLike[]
+  | { items?: CartItemLike[]; count?: number; size?: number }
   | undefined
 
-type WishlistStateLike =
+type WishlistCollection =
   | unknown[]
-  | {
-      items?: unknown[]
-      count?: number
-      size?: number
-    }
+  | { items?: unknown[]; count?: number; size?: number }
   | undefined
 
-type CartStoreLike = {cart?: CartStateLike}
-type WishlistStoreLike = {wishlist?: WishlistStateLike}
+type CartStoreLike = {
+  cart?: CartCollection
+}
+
+type WishlistStoreLike = {
+  wishlist?: WishlistCollection
+}
 
 const LINKS: NavLink[] = [
-  {href: '/categorie', labelKey: 'categories'},
-  {href: '/products', labelKey: 'products'},
-  {href: '/wishlist', labelKey: 'wishlist'},
-  {href: '/blog', labelKey: 'blog'},
-  {href: '/contact', labelKey: 'contact'}
+  { href: '/categorie', labelKey: 'categories' },
+  { href: '/products', labelKey: 'products' },
+  { href: '/wishlist', labelKey: 'wishlist' },
+  { href: '/blog', labelKey: 'blog' },
+  { href: '/contact', labelKey: 'contact' },
 ]
 
 const SCROLL_HIDE_OFFSET = 80
 const HOVER_PREFETCH_DELAY = 120
 const PLACEHOLDER_MS = 4000
 
-const ActionBadge = ({children, className}: {children: ReactNode; className?: string}) => (
-  <span
-    className={cn(
-      'inline-flex h-9 w-9 items-center justify-center rounded-xl',
-      'bg-[radial-gradient(120%_120%_at_30%_20%,hsl(var(--accent)/.16),hsl(var(--accent)/.06)_45%,transparent_70%)]',
-      'ring-1 ring-[hsl(var(--accent)/.22)] shadow-[inset_0_1px_0_rgba(255,255,255,.18)]',
-      className
-    )}
-  >
-    {children}
-  </span>
-)
+function ActionBadge({
+  children,
+  className,
+}: {
+  children: ReactNode
+  className?: string
+}) {
+  return (
+    <span
+      className={cn(
+        'inline-flex h-9 w-9 items-center justify-center rounded-xl',
+        'bg-[radial-gradient(120%_120%_at_30%_20%,hsl(var(--accent)/.16),hsl(var(--accent)/.06)_45%,transparent_70%)]',
+        'ring-1 ring-[hsl(var(--accent)/.22)] shadow-[inset_0_1px_0_rgba(255,255,255,.18)]',
+        className
+      )}
+    >
+      {children}
+    </span>
+  )
+}
 
-function LocaleSwitch({pathname}: {pathname: string}) {
+function getCartCount(cart: CartCollection): number {
+  if (Array.isArray(cart)) {
+    return cart.reduce((total, item) => {
+      const quantity = Number(item?.quantity ?? 1)
+      return total + (Number.isFinite(quantity) && quantity > 0 ? quantity : 1)
+    }, 0)
+  }
+
+  if (cart && Array.isArray(cart.items)) {
+    return cart.items.reduce((total, item) => {
+      const quantity = Number(item?.quantity ?? 1)
+      return total + (Number.isFinite(quantity) && quantity > 0 ? quantity : 1)
+    }, 0)
+  }
+
+  const count = Number(cart?.count ?? cart?.size ?? 0)
+  return Number.isFinite(count) ? count : 0
+}
+
+function getWishlistCount(wishlist: WishlistCollection): number {
+  if (Array.isArray(wishlist)) return wishlist.length
+  if (wishlist && Array.isArray(wishlist.items)) return wishlist.items.length
+
+  const count = Number(wishlist?.count ?? wishlist?.size ?? 0)
+  return Number.isFinite(count) ? count : 0
+}
+
+function LocaleSwitch({ pathname }: { pathname: string }) {
   const router = useRouter()
-  const locale = getCurrentLocale(pathname)
+  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr'
   const t = STR[locale]
 
-  const setLang = (newLocale: 'fr' | 'en') => {
-    if (newLocale === locale) return
+  const setLang = (nextLocale: 'fr' | 'en') => {
+    if (nextLocale === locale) return
 
     try {
       const secure =
         typeof location !== 'undefined' && location.protocol === 'https:' ? '; Secure' : ''
-      document.cookie = `${LOCALE_COOKIE}=${encodeURIComponent(newLocale)}; Max-Age=31536000; Path=/; SameSite=Lax${secure}`
-      setLocaleCookie(newLocale)
-    } catch {}
+      document.cookie = `${LOCALE_COOKIE}=${encodeURIComponent(nextLocale)}; Max-Age=31536000; Path=/; SameSite=Lax${secure}`
+      setLocaleCookie(nextLocale)
+    } catch {
+      // no-op
+    }
 
-    const next = localizePath(pathname, newLocale)
-    router.replace(next)
+    router.replace(localizePath(pathname, nextLocale))
   }
 
   return (
@@ -169,26 +220,26 @@ function LocaleSwitch({pathname}: {pathname: string}) {
       aria-label={t.localeSwitcherAria}
       className="inline-flex items-center rounded-full border border-token-border bg-token-surface/60 p-0.5"
     >
-      {(['fr', 'en'] as const).map((l) => {
-        const active = locale === l
+      {(['fr', 'en'] as const).map((lang) => {
+        const active = locale === lang
 
         return (
           <button
-            key={l}
+            key={lang}
             type="button"
-            onClick={() => setLang(l)}
+            onClick={() => setLang(lang)}
             onMouseDown={(e) => e.preventDefault()}
             disabled={active}
             aria-pressed={active}
             className={cn(
               'rounded-full px-2.5 py-1.5 text-xs font-semibold transition outline-none focus:ring-2',
               active
-                ? 'cursor-default bg-blue-600 text-white focus:ring-blue-400'
-                : 'bg-transparent text-token-text hover:opacity-90 focus:ring-blue-400'
+                ? 'cursor-default bg-[hsl(var(--accent))] text-white focus:ring-[hsl(var(--accent)/.4)]'
+                : 'bg-transparent text-token-text hover:opacity-90 focus:ring-[hsl(var(--accent)/.4)]'
             )}
-            title={l === 'fr' ? 'Français' : 'English'}
+            title={lang === 'fr' ? 'Français' : 'English'}
           >
-            {l.toUpperCase()}
+            {lang.toUpperCase()}
           </button>
         )
       })}
@@ -199,104 +250,94 @@ function LocaleSwitch({pathname}: {pathname: string}) {
 export default function Header() {
   const pathname = usePathname() || '/'
   const router = useRouter()
-  const locale = getCurrentLocale(pathname) as 'fr' | 'en'
+  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr'
   const t = STR[locale]
-  const L = (p: string) => localizePath(p, locale)
-  const SEARCH_ACTION = L('/products')
+  const L = (path: string) => localizePath(path, locale)
 
+  const searchAction = L('/products')
   const categories = useMemo(() => getCategories(locale), [locale])
 
   const cartStore = useCart() as CartStoreLike
   const wishlistStore = useWishlist() as WishlistStoreLike
 
-  const cart = cartStore?.cart
-  const wishlist = wishlistStore?.wishlist
-
-  const cartCount = useMemo(() => {
-    if (Array.isArray(cart)) {
-      return cart.reduce((tot, it) => tot + Math.max(1, Number(it.quantity ?? 1)), 0)
-    }
-
-    if (Array.isArray(cart?.items)) {
-      return cart.items.reduce((tot, it) => tot + Math.max(1, Number(it.quantity ?? 1)), 0)
-    }
-
-    const n = Number(cart?.count ?? cart?.size ?? 0)
-    return Number.isFinite(n) ? n : 0
-  }, [cart])
-
-  const wishlistCount = useMemo(() => {
-    if (Array.isArray(wishlist)) return wishlist.length
-    if (Array.isArray(wishlist?.items)) return wishlist.items.length
-
-    const n = Number(wishlist?.count ?? wishlist?.size ?? 0)
-    return Number.isFinite(n) ? n : 0
-  }, [wishlist])
+  const cartCount = useMemo(() => getCartCount(cartStore?.cart), [cartStore?.cart])
+  const wishlistCount = useMemo(
+    () => getWishlistCount(wishlistStore?.wishlist),
+    [wishlistStore?.wishlist]
+  )
 
   const [hidden, setHidden] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [catOpen, setCatOpen] = useState(false)
+  const [placeholder, setPlaceholder] = useState<string>(() => t.trends[0] ?? '')
 
   const lastY = useRef(0)
   const ticking = useRef(false)
   const reducedMotion = useRef(false)
   const prefetchTimers = useRef<Map<string, number>>(new Map())
   const searchRef = useRef<HTMLInputElement | null>(null)
-
-  const trends: string[] = useMemo(() => [...STR[locale].trends], [locale])
-  const [placeholder, setPlaceholder] = useState<string>(() => trends[0] ?? '')
-  const saveData = useRef<boolean>(false)
-
-  const [catOpen, setCatOpen] = useState(false)
   const catBtnRef = useRef<HTMLButtonElement | null>(null)
   const catPanelRef = useRef<HTMLDivElement | null>(null)
-  const catTimer = useRef<number | null>(null)
+  const catTimerRef = useRef<number | null>(null)
+
   const catBtnId = useId()
   const catPanelId = useId()
 
-  const openCats = () => {
-    if (catTimer.current) {
-      clearTimeout(catTimer.current)
-      catTimer.current = null
+  const clearCatTimer = () => {
+    if (catTimerRef.current) {
+      window.clearTimeout(catTimerRef.current)
+      catTimerRef.current = null
     }
+  }
+
+  const openCats = () => {
+    clearCatTimer()
     setCatOpen(true)
   }
 
   const closeCats = (delay = 80) => {
-    if (catTimer.current) {
-      clearTimeout(catTimer.current)
-      catTimer.current = null
-    }
-    catTimer.current = window.setTimeout(() => setCatOpen(false), delay)
+    clearCatTimer()
+    catTimerRef.current = window.setTimeout(() => setCatOpen(false), delay)
   }
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (!catOpen) return
+  const isActive = (href: string) => {
+    const localized = L(href)
+    return localized === pathname || pathname.startsWith(`${localized}/`)
+  }
 
-      if (e.key === 'Escape') {
-        e.preventDefault()
-        setCatOpen(false)
-        catBtnRef.current?.focus()
-      }
+  const prefetchPath = (href: string) => {
+    const target = L(href)
+    if (!target || isActive(href)) return
+
+    try {
+      router.prefetch(target)
+    } catch {
+      // no-op
     }
+  }
 
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [catOpen])
+  const smartPrefetchStart = (href: string) => {
+    const target = L(href)
+    if (!target || isActive(href)) return
+    if (prefetchTimers.current.has(target)) return
 
-  useEffect(() => {
-    const onClick = (e: MouseEvent) => {
-      if (!catOpen) return
+    const timer = window.setTimeout(() => {
+      prefetchPath(href)
+      prefetchTimers.current.delete(target)
+    }, HOVER_PREFETCH_DELAY)
 
-      const target = e.target as Node
-      if (catPanelRef.current?.contains(target) || catBtnRef.current?.contains(target)) return
+    prefetchTimers.current.set(target, timer)
+  }
 
-      setCatOpen(false)
+  const smartPrefetchCancel = (href: string) => {
+    const target = L(href)
+    const timer = prefetchTimers.current.get(target)
+
+    if (timer) {
+      window.clearTimeout(timer)
+      prefetchTimers.current.delete(target)
     }
-
-    window.addEventListener('mousedown', onClick)
-    return () => window.removeEventListener('mousedown', onClick)
-  }, [catOpen])
+  }
 
   useEffect(() => {
     const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)')
@@ -312,12 +353,6 @@ export default function Header() {
   }, [])
 
   useEffect(() => {
-    try {
-      saveData.current = !!navigator.connection?.saveData
-    } catch {}
-  }, [])
-
-  useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY
       if (ticking.current) return
@@ -325,7 +360,7 @@ export default function Header() {
       ticking.current = true
 
       window.requestAnimationFrame(() => {
-        setScrolled(y > 2)
+        setScrolled(y > 4)
 
         if (!reducedMotion.current) {
           setHidden(y > lastY.current && y > SCROLL_HIDE_OFFSET)
@@ -338,101 +373,75 @@ export default function Header() {
       })
     }
 
-    window.addEventListener('scroll', onScroll, {passive: true})
+    window.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
 
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
   useEffect(() => {
+    const trends: string[] = [...t.trends]
+    setPlaceholder(trends[0] ?? '')
+
+    const interval = window.setInterval(() => {
+      setPlaceholder((current) => {
+        const currentIndex = trends.indexOf(current)
+        const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % trends.length : 0
+        return trends[nextIndex] ?? ''
+      })
+    }, PLACEHOLDER_MS)
+
+    return () => window.clearInterval(interval)
+  }, [t.trends])
+
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null
       const tag = target?.tagName
-      const editable = tag === 'INPUT' || tag === 'TEXTAREA' || target?.isContentEditable
-      const cmdK = e.key.toLowerCase() === 'k' && (e.metaKey || e.ctrlKey)
-      const slash = e.key === '/'
+      const editable =
+        tag === 'INPUT' || tag === 'TEXTAREA' || Boolean(target?.isContentEditable)
 
-      if (!editable && (cmdK || slash)) {
+      const isCmdK = e.key.toLowerCase() === 'k' && (e.metaKey || e.ctrlKey)
+      const isSlash = e.key === '/'
+
+      if (!editable && (isCmdK || isSlash)) {
         e.preventDefault()
         searchRef.current?.focus()
         searchRef.current?.select()
       }
 
-      if (e.key === 'Escape' && searchRef.current === document.activeElement) {
-        const inputTarget = e.target as HTMLInputElement | null
-        inputTarget?.blur?.()
+      if (e.key === 'Escape' && catOpen) {
+        e.preventDefault()
+        setCatOpen(false)
+        catBtnRef.current?.focus()
       }
     }
 
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [])
+  }, [catOpen])
 
   useEffect(() => {
-    setPlaceholder(trends[0] ?? '')
-    let i = 0
+    const onPointerDown = (e: globalThis.MouseEvent) => {
+      if (!catOpen) return
 
-    const id = window.setInterval(() => {
-      i = (i + 1) % trends.length
-      setPlaceholder(trends[i] ?? '')
-    }, PLACEHOLDER_MS)
+      const target = e.target as Node
+      if (catPanelRef.current?.contains(target) || catBtnRef.current?.contains(target)) return
 
-    return () => clearInterval(id)
-  }, [trends])
+      setCatOpen(false)
+    }
+
+    window.addEventListener('mousedown', onPointerDown)
+    return () => window.removeEventListener('mousedown', onPointerDown)
+  }, [catOpen])
 
   useEffect(() => {
-    const timers = prefetchTimers.current
-
     return () => {
-      timers.forEach((timer) => clearTimeout(timer))
-      timers.clear()
+      clearCatTimer()
+      prefetchTimers.current.forEach((timer) => window.clearTimeout(timer))
+      prefetchTimers.current.clear()
     }
   }, [])
-
-  const isActive = (href: string) => {
-    const localized = L(href)
-    return localized === pathname || pathname.startsWith(`${localized}/`)
-  }
-
-  const prefetchViaLink = (href: string) => {
-    if (saveData.current) return
-
-    try {
-      router.prefetch(href)
-
-      const el = document.createElement('link')
-      el.rel = 'prefetch'
-      el.href = href
-      document.head.appendChild(el)
-
-      setTimeout(() => el.remove(), 5000)
-    } catch {}
-  }
-
-  const smartPrefetchStart = (href: string) => {
-    if (saveData.current) return
-
-    const target = L(href)
-    if (!target || isActive(href)) return
-    if (prefetchTimers.current.has(target)) return
-
-    const timer = window.setTimeout(() => {
-      prefetchViaLink(target)
-      prefetchTimers.current.delete(target)
-    }, HOVER_PREFETCH_DELAY)
-
-    prefetchTimers.current.set(target, timer)
-  }
-
-  const smartPrefetchCancel = (href: string) => {
-    const target = L(href)
-    const timer = prefetchTimers.current.get(target)
-
-    if (timer) {
-      clearTimeout(timer)
-      prefetchTimers.current.delete(target)
-    }
-  }
 
   const onSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     const form = e.currentTarget
@@ -442,30 +451,20 @@ export default function Header() {
     if (!q) {
       e.preventDefault()
       searchRef.current?.focus()
-      return
     }
-
-    try {
-      localStorage.setItem('last:q', q)
-    } catch {}
   }
 
   const onLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (e.metaKey || e.ctrlKey || e.button === 1) return
 
     e.preventDefault()
-
     const url = L('/')
 
     try {
       router.push(url)
-    } catch {}
-
-    setTimeout(() => {
-      try {
-        if (window.location.pathname !== url) window.location.assign(url)
-      } catch {}
-    }, 80)
+    } catch {
+      window.location.assign(url)
+    }
   }
 
   return (
@@ -475,13 +474,11 @@ export default function Header() {
       data-hidden={hidden ? 'true' : 'false'}
       data-scrolled={scrolled ? 'true' : 'false'}
       className={cn(
-        'fixed left-0 right-0 top-0 z-[80] w-full',
-        'backdrop-blur',
-        'border-b transition-all motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-out',
+        'fixed left-0 right-0 top-0 z-[80] w-full border-b backdrop-blur transition-all motion-safe:duration-300 motion-safe:ease-out',
+        hidden ? '-translate-y-full' : 'translate-y-0',
         scrolled
           ? 'border-token-border bg-token-surface/85 shadow-soft'
-          : 'border-transparent bg-token-surface/65',
-        hidden ? '-translate-y-full' : 'translate-y-0'
+          : 'border-transparent bg-token-surface/65'
       )}
     >
       <div className="container-app flex h-16 items-center justify-between gap-2 sm:gap-3 md:h-20">
@@ -504,7 +501,7 @@ export default function Header() {
         </NextLink>
 
         <form
-          action={SEARCH_ACTION}
+          action={searchAction}
           method="get"
           role="search"
           aria-label={t.searchAria}
@@ -533,21 +530,18 @@ export default function Header() {
             spellCheck={false}
             enterKeyHint="search"
             aria-keyshortcuts="/ Control+K Meta+K"
-            aria-controls="search-status"
-            aria-describedby="search-hint"
+            aria-describedby="header-search-hint"
           />
 
           <datalist id="header-search-suggestions">
-            {trends.map((s) => (
-              <option value={s} key={s} />
+            {t.trends.map((item) => (
+              <option key={item} value={item} />
             ))}
           </datalist>
 
-          <div id="search-hint" className="sr-only">
+          <div id="header-search-hint" className="sr-only">
             {t.searchHint}
           </div>
-
-          <div id="search-status" aria-live="polite" aria-atomic="true" className="sr-only" />
 
           <div className="absolute inset-y-0 right-1.5 flex items-center">
             <button
@@ -566,14 +560,14 @@ export default function Header() {
           className="hidden whitespace-nowrap text-[15px] font-medium tracking-tight text-token-text lg:flex lg:gap-5 xl:gap-7 xl:text-base"
           aria-label={t.headerNavAria}
         >
-          {LINKS.map(({href, labelKey}) => {
+          {LINKS.map(({ href, labelKey }) => {
             const label = t.nav[labelKey]
             const active = isActive(href)
 
             if (labelKey === 'categories') {
               return (
                 <div
-                  key="mega-cats"
+                  key="mega-categories"
                   className="relative"
                   onMouseEnter={openCats}
                   onMouseLeave={() => closeCats()}
@@ -585,9 +579,9 @@ export default function Header() {
                     aria-haspopup="true"
                     aria-expanded={catOpen}
                     aria-controls={catPanelId}
-                    onClick={() => setCatOpen((v) => !v)}
+                    onClick={() => setCatOpen((value) => !value)}
                     onFocus={openCats}
-                    onBlur={() => closeCats(80)}
+                    onBlur={() => closeCats(100)}
                     onMouseDown={(e) => e.preventDefault()}
                     className={cn(
                       'group relative rounded-sm px-0.5 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]',
@@ -598,12 +592,13 @@ export default function Header() {
                     data-gtm="header_mega_btn"
                   >
                     {label}
-                    {!active && (
+
+                    {!active ? (
                       <span
-                        className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-[hsl(var(--accent))] transition-all duration-300 group-hover:w-full"
                         aria-hidden="true"
+                        className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-[hsl(var(--accent))] transition-all duration-300 group-hover:w-full"
                       />
-                    )}
+                    ) : null}
                   </button>
 
                   <div
@@ -611,6 +606,10 @@ export default function Header() {
                     id={catPanelId}
                     role="menu"
                     aria-labelledby={catBtnId}
+                    aria-hidden={catOpen ? 'false' : 'true'}
+                    tabIndex={catOpen ? 0 : -1}
+                    onFocus={openCats}
+                    onBlur={() => closeCats(100)}
                     className={cn(
                       'absolute left-1/2 top-[calc(100%+10px)] z-50 w-[min(860px,92vw)] -translate-x-1/2 rounded-2xl border',
                       'border-token-border bg-token-surface/90 shadow-2xl backdrop-blur',
@@ -619,36 +618,35 @@ export default function Header() {
                         ? 'pointer-events-auto translate-y-0 opacity-100'
                         : 'pointer-events-none -translate-y-1 opacity-0'
                     )}
-                    onFocus={openCats}
-                    onBlur={() => closeCats(80)}
-                    aria-hidden={catOpen ? 'false' : 'true'}
-                    tabIndex={catOpen ? 0 : -1}
                   >
                     <div className="grid grid-cols-1 gap-2 p-3 md:grid-cols-3 md:p-4">
                       <ul
-                        className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:col-span-2 md:gap-3"
                         role="none"
+                        className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:col-span-2 md:gap-3"
                       >
-                        {categories.map((c) => (
-                          <li key={c.href} role="none">
+                        {categories.map((category) => (
+                          <li key={category.href} role="none">
                             <Link
                               role="menuitem"
-                              href={c.href}
+                              href={category.href}
                               prefetch={false}
-                              onPointerEnter={() => smartPrefetchStart(c.href)}
-                              onPointerLeave={() => smartPrefetchCancel(c.href)}
-                              onFocus={() => smartPrefetchStart(c.href)}
-                              onBlur={() => smartPrefetchCancel(c.href)}
+                              onPointerEnter={() => smartPrefetchStart(category.href)}
+                              onPointerLeave={() => smartPrefetchCancel(category.href)}
+                              onFocus={() => smartPrefetchStart(category.href)}
+                              onBlur={() => smartPrefetchCancel(category.href)}
                               className={cn(
-                                'group flex transform-gpu items-center gap-3 rounded-xl border p-3 transition',
-                                'border-transparent bg-token-surface/80 shadow-sm hover:-translate-y-0.5 hover:border-[hsl(var(--accent)/.30)] hover:bg-token-surface hover:shadow-md'
+                                'group flex items-center gap-3 rounded-xl border p-3 transition',
+                                'border-transparent bg-token-surface/80 shadow-sm',
+                                'hover:-translate-y-0.5 hover:border-[hsl(var(--accent)/.30)] hover:bg-token-surface hover:shadow-md'
                               )}
                               data-gtm="header_mega_cat"
                             >
-                              <c.Icon className="opacity-80" />
+                              <category.Icon className="opacity-80" />
                               <span className="flex-1">
-                                <span className="block text-sm font-semibold">{c.label}</span>
-                                <span className="block text-xs text-token-text/60">{c.desc}</span>
+                                <span className="block text-sm font-semibold">{category.label}</span>
+                                <span className="block text-xs text-token-text/60">
+                                  {category.desc}
+                                </span>
                               </span>
                               <svg
                                 width="18"
@@ -666,10 +664,12 @@ export default function Header() {
 
                       <div className="md:col-span-1">
                         <div className="h-full rounded-xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.10)] via-transparent to-token-surface p-4 shadow-md md:p-5">
-                          <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent)/.90)]">
+                          <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent))]/90">
                             {t.selection}
                           </p>
+
                           <h3 className="mt-1 text-lg font-extrabold">{t.packsTitle}</h3>
+
                           <p className="mt-2 text-sm text-token-text/70">{t.packsDesc}</p>
 
                           <div className="mt-3 flex flex-wrap gap-2">
@@ -726,12 +726,13 @@ export default function Header() {
                 data-gtm={`header_nav_${labelKey}`}
               >
                 {label}
-                {!active && (
+
+                {!active ? (
                   <span
-                    className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-[hsl(var(--accent))] transition-all duration-300 group-hover:w-full"
                     aria-hidden="true"
+                    className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-[hsl(var(--accent))] transition-all duration-300 group-hover:w-full"
                   />
-                )}
+                ) : null}
               </Link>
             )
           })}
@@ -794,14 +795,14 @@ export default function Header() {
               </ActionBadge>
             </Link>
 
-            {wishlistCount > 0 && (
+            {wishlistCount > 0 ? (
               <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
                 <span className="rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm">
                   <span className="sr-only">Wishlist count: </span>
                   {wishlistCount}
                 </span>
               </div>
-            )}
+            ) : null}
           </div>
 
           <div className="relative">
@@ -822,14 +823,14 @@ export default function Header() {
               </ActionBadge>
             </Link>
 
-            {cartCount > 0 && (
+            {cartCount > 0 ? (
               <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
                 <span className="animate-[pulse_2s_ease-in-out_infinite] rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm">
                   <span className="sr-only">Cart count: </span>
                   {cartCount}
                 </span>
               </div>
-            )}
+            ) : null}
           </div>
 
           <Link
@@ -854,7 +855,7 @@ export default function Header() {
       </div>
 
       <div
-        aria-hidden
+        aria-hidden="true"
         className="pointer-events-none h-[2px] w-full bg-gradient-to-r from-transparent via-[hsl(var(--accent)/.40)] to-transparent"
       />
     </header>

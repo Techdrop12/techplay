@@ -93,6 +93,16 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
 
+function isCurrency(value: unknown): value is Currency {
+  return value === 'EUR' || value === 'GBP' || value === 'USD'
+}
+
+function isExpired(expiresAt?: string): boolean {
+  if (!expiresAt) return false
+  const ts = Date.parse(expiresAt)
+  return Number.isFinite(ts) ? Date.now() > ts : false
+}
+
 function ensureItemShape(input: Partial<CartItem> | unknown): CartItem {
   const source = isRecord(input) ? input : {}
 
@@ -111,11 +121,11 @@ function detectCurrency(): Currency {
   try {
     const htmlLang = typeof document !== 'undefined' ? document.documentElement.lang || '' : ''
     const nav = typeof navigator !== 'undefined' ? navigator.language || '' : ''
-    const src = (htmlLang || nav).toLowerCase()
+    const source = (htmlLang || nav).toLowerCase()
 
-    if (src.includes('gb') || src.endsWith('-uk') || src.includes('en-gb')) return 'GBP'
-    if (src.includes('us') || src.includes('en-us')) return 'USD'
-    if (src.startsWith('en')) return 'USD'
+    if (source.includes('gb') || source.endsWith('-uk') || source.includes('en-gb')) return 'GBP'
+    if (source.includes('us') || source.includes('en-us')) return 'USD'
+    if (source.startsWith('en')) return 'USD'
     return 'EUR'
   } catch {
     return 'EUR'
@@ -130,9 +140,9 @@ function readCart(): CartItem[] {
     if (!raw) return []
 
     const parsed = JSON.parse(raw)
-    const arr = Array.isArray(parsed) ? parsed : Array.isArray(parsed?.items) ? parsed.items : []
+    const items = Array.isArray(parsed) ? parsed : Array.isArray(parsed?.items) ? parsed.items : []
 
-    return arr
+    return items
       .filter(Boolean)
       .map((item: unknown) => ensureItemShape(item))
       .filter((item: CartItem) => Boolean(item._id && item.slug))
@@ -143,20 +153,25 @@ function readCart(): CartItem[] {
 
 function writeCart(cart: CartItem[]) {
   if (typeof window === 'undefined') return
+
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ v: 2, items: cart }))
     window.dispatchEvent(new CustomEvent('cart-updated', { detail: cart }))
-  } catch {}
+  } catch {
+    // no-op
+  }
 }
 
 function readCoupon(): Coupon | null {
   if (typeof window === 'undefined') return null
+
   try {
     const raw = localStorage.getItem(COUPON_KEY)
     if (!raw) return null
+
     const coupon = JSON.parse(raw) as Coupon
-    if (!coupon?.code) return null
-    if (coupon.expiresAt && Date.now() > Date.parse(coupon.expiresAt)) return null
+    if (!coupon?.code || isExpired(coupon.expiresAt)) return null
+
     return coupon
   } catch {
     return null
@@ -165,17 +180,21 @@ function readCoupon(): Coupon | null {
 
 function writeCoupon(coupon: Coupon | null) {
   if (typeof window === 'undefined') return
+
   try {
     if (coupon) localStorage.setItem(COUPON_KEY, JSON.stringify(coupon))
     else localStorage.removeItem(COUPON_KEY)
-  } catch {}
+  } catch {
+    // no-op
+  }
 }
 
 function readCurrency(): Currency {
   if (typeof window === 'undefined') return 'EUR'
+
   try {
-    const saved = localStorage.getItem(CURRENCY_KEY) as Currency | null
-    return saved || detectCurrency()
+    const saved = localStorage.getItem(CURRENCY_KEY)
+    return isCurrency(saved) ? saved : detectCurrency()
   } catch {
     return detectCurrency()
   }
@@ -183,9 +202,12 @@ function readCurrency(): Currency {
 
 function writeCurrency(currency: Currency) {
   if (typeof window === 'undefined') return
+
   try {
     localStorage.setItem(CURRENCY_KEY, currency)
-  } catch {}
+  } catch {
+    // no-op
+  }
 }
 
 function getOrCreateCartId(): string {
@@ -224,6 +246,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const writeTimer = useRef<number | null>(null)
 
   useEffect(() => {
+    setCart(readCart())
+    setCoupon(readCoupon())
+    setCurrencyState(readCurrency())
     setCartId(getOrCreateCartId())
     hydrated.current = true
   }, [])
@@ -263,31 +288,34 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [currency])
 
   useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY) setCart(readCart())
-      if (e.key === COUPON_KEY) setCoupon(readCoupon())
-      if (e.key === CART_ID_KEY && e.newValue) setCartId(e.newValue)
-
-      if (e.key === CURRENCY_KEY && e.newValue) {
-        if (e.newValue === 'EUR' || e.newValue === 'GBP' || e.newValue === 'USD') {
-          setCurrencyState(e.newValue)
-        }
-      }
+    if (coupon && isExpired(coupon.expiresAt)) {
+      setCoupon(null)
     }
+  }, [coupon])
 
-    const onCustom = (e: Event) => {
-      const detail = (e as CustomEvent<CartItem[]>).detail
-      if (Array.isArray(detail)) {
-        setCart(detail.map((item) => ensureItemShape(item)))
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY) {
+        setCart(readCart())
+      }
+
+      if (e.key === COUPON_KEY) {
+        setCoupon(readCoupon())
+      }
+
+      if (e.key === CART_ID_KEY && e.newValue) {
+        setCartId(e.newValue)
+      }
+
+      if (e.key === CURRENCY_KEY && isCurrency(e.newValue)) {
+        setCurrencyState(e.newValue)
       }
     }
 
     window.addEventListener('storage', onStorage)
-    window.addEventListener('cart-updated', onCustom as EventListener)
 
     return () => {
       window.removeEventListener('storage', onStorage)
-      window.removeEventListener('cart-updated', onCustom as EventListener)
     }
   }, [])
 
@@ -297,12 +325,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   )
 
   const subtotal = useMemo(
-    () => round2(cart.reduce((sum, item) => sum + (Number(item.price) || 0) * (item.quantity || 0), 0)),
+    () =>
+      round2(
+        cart.reduce((sum, item) => sum + (Number(item.price) || 0) * (item.quantity || 0), 0)
+      ),
     [cart]
   )
 
   const discount = useMemo(() => {
-    if (!coupon) return 0
+    if (!coupon || isExpired(coupon.expiresAt)) return 0
 
     if (coupon.type === 'percent') {
       const rawRate = Number(coupon.value)
@@ -314,15 +345,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [coupon, subtotal])
 
   const shipping = useMemo(() => {
+    if (coupon?.freeShipping && !isExpired(coupon.expiresAt)) return 0
     if (FREE_SHIPPING_THRESHOLD > 0 && subtotal - discount >= FREE_SHIPPING_THRESHOLD) return 0
-    if (coupon?.freeShipping) return 0
     return FLAT_SHIPPING_FEE
-  }, [subtotal, discount, coupon])
+  }, [coupon, discount, subtotal])
 
   const taxableBase = useMemo(() => Math.max(0, subtotal - discount), [subtotal, discount])
   const tax = useMemo(() => round2(taxableBase * Math.max(0, TAX_RATE)), [taxableBase])
   const grandTotal = useMemo(() => round2(taxableBase + tax + shipping), [taxableBase, tax, shipping])
-
   const total = useMemo(() => round2(subtotal), [subtotal])
 
   const amountToFreeShipping = useMemo(() => {
@@ -360,15 +390,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const item = ensureItemShape({ ...input, quantity: input.quantity ?? 1 })
 
       setCart((current) => {
-        const idx = current.findIndex((it) => it._id === item._id)
-        if (idx >= 0) {
+        const existingIndex = current.findIndex((it) => it._id === item._id)
+
+        if (existingIndex >= 0) {
           const next = [...current]
-          next[idx] = {
-            ...next[idx],
-            quantity: clamp(next[idx].quantity + item.quantity, MIN_QTY, MAX_QTY),
+          next[existingIndex] = {
+            ...next[existingIndex],
+            quantity: clamp(next[existingIndex].quantity + item.quantity, MIN_QTY, MAX_QTY),
           }
           return next
         }
+
         return [...current, item]
       })
 
@@ -379,7 +411,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           label: item.title,
           value: round2(item.price * item.quantity),
         })
-      } catch {}
+      } catch {
+        // no-op
+      }
 
       try {
         trackAddToCart({
@@ -394,20 +428,31 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             },
           ],
         })
-      } catch {}
+      } catch {
+        // no-op
+      }
     },
     [currency]
   )
 
   const removeFromCart = useCallback((id: string) => {
     setCart((current) => current.filter((item) => item._id !== id))
+
     try {
-      gaEvent?.({ action: 'remove_from_cart', category: 'ecommerce', label: id, value: 0 })
-    } catch {}
+      gaEvent?.({
+        action: 'remove_from_cart',
+        category: 'ecommerce',
+        label: id,
+        value: 0,
+      })
+    } catch {
+      // no-op
+    }
   }, [])
 
   const updateQuantity = useCallback((id: string, quantity: number) => {
     if (!Number.isFinite(quantity)) return
+
     const q = clamp(Math.trunc(quantity), MIN_QTY, MAX_QTY)
 
     setCart((current) =>
@@ -415,8 +460,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     )
 
     try {
-      gaEvent?.({ action: 'update_cart_quantity', category: 'ecommerce', label: id, value: q })
-    } catch {}
+      gaEvent?.({
+        action: 'update_cart_quantity',
+        category: 'ecommerce',
+        label: id,
+        value: q,
+      })
+    } catch {
+      // no-op
+    }
   }, [])
 
   const increment = useCallback((id: string, step = 1) => {
@@ -441,16 +493,35 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = useCallback(() => {
     setCart([])
+
     try {
-      gaEvent?.({ action: 'clear_cart', category: 'ecommerce', label: 'all', value: 0 })
-    } catch {}
+      gaEvent?.({
+        action: 'clear_cart',
+        category: 'ecommerce',
+        label: 'all',
+        value: 0,
+      })
+    } catch {
+      // no-op
+    }
   }, [])
 
   const replaceCart = useCallback((items: CartItem[]) => {
-    setCart(items.map((item) => ensureItemShape(item)))
+    setCart(
+      items
+        .map((item) => ensureItemShape(item))
+        .filter((item) => Boolean(item._id && item.slug))
+    )
   }, [])
 
-  const applyCoupon = useCallback((value: Coupon) => setCoupon(value), [])
+  const applyCoupon = useCallback((value: Coupon) => {
+    if (!value?.code || isExpired(value.expiresAt)) {
+      setCoupon(null)
+      return
+    }
+    setCoupon(value)
+  }, [])
+
   const removeCoupon = useCallback(() => setCoupon(null), [])
 
   const setCurrency = useCallback((value: Currency) => {
@@ -459,6 +530,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const beginCheckout: CartContextValue['beginCheckout'] = useCallback(
     async ({ email, address, locale }) => {
+      if (!cart.length) {
+        throw new Error('Le panier est vide.')
+      }
+
+      if (!isOnline) {
+        throw new Error('Connexion internet indisponible.')
+      }
+
       return createCheckoutSessionFromCart({
         email,
         address,
@@ -468,7 +547,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         metadata: { cart_id: cartId },
       })
     },
-    [cart, currency, cartId]
+    [cart, currency, cartId, isOnline]
   )
 
   const value: CartContextValue = useMemo(
@@ -547,7 +626,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useCart(): CartContextValue {
-  const ctx = useContext(CartContext)
-  if (!ctx) throw new Error('useCart must be used inside <CartProvider />')
-  return ctx
+  const context = useContext(CartContext)
+  if (!context) {
+    throw new Error('useCart must be used inside <CartProvider />')
+  }
+  return context
 }

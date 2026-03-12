@@ -1,15 +1,12 @@
-// src/lib/data.ts
 import { connectToDatabase } from './db'
 
 import type { BlogPost } from '@/types/blog'
-import type { Product as ProductType, Pack as PackType } from '@/types/product'
+import type { Pack as PackType, Product as ProductType } from '@/types/product'
 import type { PipelineStage } from 'mongoose'
 
 import Blog from '@/models/Blog'
 import Pack from '@/models/Pack'
 import Product from '@/models/Product'
-
-/* ==================== Helpers ==================== */
 
 function toPlain<T>(value: unknown): T {
   return JSON.parse(JSON.stringify(value)) as T
@@ -17,14 +14,59 @@ function toPlain<T>(value: unknown): T {
 
 const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
-/* ==================== Accès simples ==================== */
+const PRODUCT_LIST_FIELDS = [
+  '_id',
+  'slug',
+  'title',
+  'description',
+  'price',
+  'oldPrice',
+  'image',
+  'images',
+  'gallery',
+  'rating',
+  'aggregateRating',
+  'reviewsCount',
+  'reviews',
+  'stock',
+  'category',
+  'brand',
+  'sku',
+  'isNew',
+  'isBestSeller',
+  'featured',
+  'tags',
+  'createdAt',
+].join(' ')
+
+const PACK_LIST_FIELDS = [
+  '_id',
+  'slug',
+  'title',
+  'description',
+  'price',
+  'oldPrice',
+  'image',
+  'images',
+  'rating',
+  'reviewsCount',
+  'stock',
+  'brand',
+  'sku',
+  'isNew',
+  'isBestSeller',
+  'recommended',
+  'items',
+  'createdAt',
+].join(' ')
 
 export async function getBestProducts(): Promise<ProductType[]> {
   await connectToDatabase()
 
   const docs = await Product.find({ featured: true })
+    .sort({ createdAt: -1 })
     .limit(8)
-    .select('_id slug title price image gallery rating reviewsCount stock category brand sku')
+    .select(PRODUCT_LIST_FIELDS)
     .lean()
     .exec()
 
@@ -35,7 +77,8 @@ export async function getAllProducts(): Promise<ProductType[]> {
   await connectToDatabase()
 
   const docs = await Product.find({})
-    .select('_id slug title price image gallery rating reviewsCount stock category brand sku')
+    .sort({ createdAt: -1 })
+    .select(PRODUCT_LIST_FIELDS)
     .lean()
     .exec()
 
@@ -53,7 +96,9 @@ export async function getRecommendedPacks(): Promise<PackType[]> {
   await connectToDatabase()
 
   const docs = await Pack.find({ recommended: true })
+    .sort({ createdAt: -1 })
     .limit(6)
+    .select(PACK_LIST_FIELDS)
     .lean()
     .exec()
 
@@ -86,8 +131,6 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
   return post ? toPlain<BlogPost>(post) : null
 }
 
-/* ==================== /products : pagination + tri DB ==================== */
-
 type SortKey = 'price_asc' | 'price_desc' | 'rating' | 'new' | 'promo'
 
 type GetProductsPageInput = {
@@ -97,7 +140,6 @@ type GetProductsPageInput = {
   sort?: SortKey
   page?: number
   pageSize?: number
-  /** filtre catégorie (insensible à la casse + alias FR/EN) */
   category?: string | null
 }
 
@@ -108,7 +150,6 @@ type ProductPageFacet = {
   stats: Array<{ _id: null; min: number; max: number }>
 }
 
-/** Alias FR/EN robustes pour les catégories dataset */
 const CATEGORY_ALIASES: Record<string, string[]> = {
   casques: ['casques', 'casque', 'headphones', 'headset', 'écouteurs', 'earbuds', 'audio headset'],
   claviers: ['claviers', 'clavier', 'keyboards', 'keyboard', 'mechanical keyboard', 'mech'],
@@ -120,7 +161,6 @@ const CATEGORY_ALIASES: Record<string, string[]> = {
   ecrans: ['ecrans', 'écrans', 'monitor', 'monitors', 'screen', 'display'],
 }
 
-/** Construit un RegExp “^alias1|alias2|…$” insensible à la casse */
 function buildCategoryRegex(input?: string | null): RegExp | null {
   if (!input) return null
 
@@ -131,13 +171,6 @@ function buildCategoryRegex(input?: string | null): RegExp | null {
   return alts.length ? new RegExp(`^(${alts.map(escapeRegex).join('|')})$`, 'i') : null
 }
 
-/**
- * Normalise le prix:
- * - `currentPrice` = promo si active sinon `price`
- * - `oldPriceOut` = ancien prix si promo active
- * Tous les filtres min/max et les stats se basent sur `currentPrice`
- * Le tri "promo" utilise le pourcentage de remise calculé côté DB.
- */
 export async function getProductsPage({
   q,
   min,
@@ -182,7 +215,7 @@ export async function getProductsPage({
     {
       $addFields: {
         currentPrice: { $cond: ['$isPromoActive', '$promo.price', '$price'] },
-        oldPriceOut: { $cond: ['$isPromoActive', '$price', null] },
+        oldPriceOut: { $cond: ['$isPromoActive', '$price', '$oldPrice'] },
       },
     },
     {
@@ -225,13 +258,13 @@ export async function getProductsPage({
 
   const itemsSort: PipelineStage.Sort[] =
     sort === 'promo'
-      ? [{ $sort: { discountPct: -1, currentPrice: 1 } }]
+      ? [{ $sort: { discountPct: -1, currentPrice: 1, createdAt: -1 } }]
       : sort === 'price_asc'
-        ? [{ $sort: { currentPrice: 1 } }]
+        ? [{ $sort: { currentPrice: 1, createdAt: -1 } }]
         : sort === 'price_desc'
-          ? [{ $sort: { currentPrice: -1 } }]
+          ? [{ $sort: { currentPrice: -1, createdAt: -1 } }]
           : sort === 'rating'
-            ? [{ $sort: { rating: -1 } }]
+            ? [{ $sort: { 'aggregateRating.average': -1, rating: -1, createdAt: -1 } }]
             : [{ $sort: { createdAt: -1 } }]
 
   const itemsPipeline = [
@@ -246,16 +279,22 @@ export async function getProductsPage({
         _id: 1,
         slug: 1,
         title: 1,
+        description: 1,
         price: '$currentPrice',
         oldPrice: '$oldPriceOut',
         image: 1,
-        images: '$gallery',
+        images: 1,
+        gallery: 1,
         rating: 1,
+        aggregateRating: 1,
         reviewsCount: 1,
         stock: 1,
         category: 1,
         brand: 1,
         sku: 1,
+        isNew: 1,
+        isBestSeller: 1,
+        tags: 1,
         discountPct: 1,
         createdAt: 1,
       },
@@ -324,14 +363,12 @@ export async function getProductsPage({
 
   const firstStat = safeFacet.stats?.[0]
   const priceRange =
-    firstStat &&
-    Number.isFinite(firstStat.min) &&
-    Number.isFinite(firstStat.max)
+    firstStat && Number.isFinite(firstStat.min) && Number.isFinite(firstStat.max)
       ? { min: Number(firstStat.min), max: Number(firstStat.max) }
       : undefined
 
   return {
-    items,
+    items: toPlain<ProductType[]>(items),
     total,
     page: safePage,
     pageSize: safeSize,

@@ -1,5 +1,3 @@
-// src/app/products/[slug]/page.tsx — SEO/Perf+ version typée proprement
-import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
 
@@ -9,7 +7,7 @@ import type { Metadata } from 'next'
 import ProductJsonLd from '@/components/JsonLd/ProductJsonLd'
 import ProductDetail from '@/components/ProductDetail'
 import { getProductBySlug } from '@/lib/data'
-import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale, type Locale } from '@/lib/language'
+import { DEFAULT_LOCALE } from '@/lib/language'
 import { getFallbackDescription } from '@/lib/meta'
 import { generateProductMeta, jsonLdBreadcrumbs } from '@/lib/seo'
 
@@ -78,7 +76,6 @@ function readImage(record: Record<string, unknown>): string {
   return '/og-image.jpg'
 }
 
-/* ---------------------- Metadata dynamique ---------------------- */
 export async function generateMetadata({
   params,
 }: {
@@ -135,7 +132,6 @@ export async function generateMetadata({
   }
 }
 
-/* ------------------------------ Page ----------------------------- */
 export default async function ProductPage({
   params,
 }: {
@@ -146,10 +142,6 @@ export default async function ProductPage({
   if (!product) {
     notFound()
   }
-
-  const cookieStore = await cookies()
-  const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value ?? ''
-  const locale: Locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE
 
   const crumbs = jsonLdBreadcrumbs([
     { name: 'Accueil', url: '/' },
@@ -163,7 +155,7 @@ export default async function ProductPage({
         className="max-w-6xl mx-auto px-4 py-10"
         aria-label={`Page produit : ${product.title?.trim() || 'Produit'}`}
       >
-        <ProductDetail product={product} locale={locale} />
+        <ProductDetail product={product} locale={DEFAULT_LOCALE} />
       </main>
 
       <ProductJsonLd product={product} maxReviews={3} />

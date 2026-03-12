@@ -1,13 +1,20 @@
-// src/components/ProductDetail.tsx — OPTI MAX (SEO/a11y/UX/Perf) — CENTRAL JSON-LD GÉRÉ EN PAGE — FINAL
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
 import Image from 'next/image'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEventHandler,
+  type PointerEventHandler,
+} from 'react'
 import { toast } from 'react-hot-toast'
-import { FaCcVisa, FaCcMastercard, FaCcPaypal } from 'react-icons/fa'
+import { FaCcMastercard, FaCcPaypal, FaCcVisa } from 'react-icons/fa'
 
-import type { Product, Review, AggregateRating } from '@/types/product'
+import type { AggregateRating, Product, Review } from '@/types/product'
 
 import AddToCartButtonAB from '@/components/AddToCartButtonAB'
 import FreeShippingBadge from '@/components/FreeShippingBadge'
@@ -19,24 +26,22 @@ import RatingStars from '@/components/RatingStars'
 import RatingSummary from '@/components/RatingSummary'
 import ReviewForm from '@/components/ReviewForm'
 import ShippingSimulator from '@/components/ShippingSimulator'
-import StickyCartSummary from '@/components/StickyCartSummary'
 import DeliveryEstimate from '@/components/ui/DeliveryEstimate'
 import WishlistButton from '@/components/WishlistButton'
 import {
-  trackViewItem,
+  mapProductToGaItem,
   trackAddToCart,
   trackAddToWishlist,
   trackSelectItem,
-  mapProductToGaItem,
+  trackViewItem,
 } from '@/lib/ga'
 import { DEFAULT_LOCALE, isLocale, type AppLocale } from '@/lib/language'
 import { logEvent } from '@/lib/logEvent'
 import { pixelViewContent } from '@/lib/meta-pixel'
-import { formatPrice, cn } from '@/lib/utils'
+import { cn, formatPrice } from '@/lib/utils'
 
 interface Props {
   product: Product
-  /** string tolérée ici, on normalise juste avant usage */
   locale?: string
 }
 
@@ -48,19 +53,107 @@ type RecentProduct = {
   image: string
 }
 
-type GaSource = Record<string, unknown>
+type ProductLike = Product & Record<string, unknown>
 
-const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n))
-
-function toGaSource(p: Product): GaSource {
-  return p as unknown as GaSource
-}
-
-// très petit blur inline (évite un asset supplémentaire)
 const BLUR_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+'
 
-/** Icône “share” (inline, pas d’emoji) */
+const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n))
+
+function toNum(value: unknown): number | undefined {
+  const parsed =
+    typeof value === 'number'
+      ? value
+      : typeof value === 'string' && value.trim()
+        ? Number(value)
+        : NaN
+
+  return Number.isFinite(parsed) ? parsed : undefined
+}
+
+function readString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined
+}
+
+function detectCurrency(localeHint: AppLocale): 'EUR' | 'GBP' | 'USD' {
+  try {
+    const htmlLang = typeof document !== 'undefined' ? document.documentElement.lang || '' : ''
+    const nav = typeof navigator !== 'undefined' ? navigator.language || '' : ''
+    const src = (htmlLang || nav).toLowerCase()
+
+    if (src.includes('gb') || src.endsWith('-uk') || src.includes('en-gb')) return 'GBP'
+    if (src.includes('us') || src.includes('en-us')) return 'USD'
+    return localeHint === 'en' ? 'EUR' : 'EUR'
+  } catch {
+    return 'EUR'
+  }
+}
+
+function buildGallery(product: ProductLike): string[] {
+  const pool = [
+    product.image,
+    ...(Array.isArray(product.images) ? product.images : []),
+    ...(Array.isArray(product.gallery) ? product.gallery : []),
+  ]
+
+  return Array.from(
+    new Set(pool.filter((item): item is string => typeof item === 'string' && item.trim().length > 0))
+  ).slice(0, 8)
+}
+
+function computeAggregate(
+  ratingFromProduct: number | undefined,
+  reviews: Review[] | undefined,
+  aggregate?: AggregateRating
+): AggregateRating {
+  if (aggregate?.total && typeof aggregate.average === 'number') {
+    return aggregate
+  }
+
+  const list = Array.isArray(reviews) ? reviews : []
+  const total = list.length
+
+  if (total > 0) {
+    const breakdown: Partial<Record<1 | 2 | 3 | 4 | 5, number>> = {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+    }
+
+    let sum = 0
+    let counted = 0
+
+    for (const review of list) {
+      const value = toNum(review?.rating)
+      if (value && value >= 1 && value <= 5) {
+        const safeRating = value as 1 | 2 | 3 | 4 | 5
+        breakdown[safeRating] = (breakdown[safeRating] || 0) + 1
+        sum += safeRating
+        counted += 1
+      }
+    }
+
+    return {
+      average: counted ? Math.max(0, Math.min(5, sum / counted)) : ratingFromProduct ?? 0,
+      total,
+      breakdownCount: breakdown,
+    }
+  }
+
+  return {
+    average:
+      typeof ratingFromProduct === 'number' ? Math.max(0, Math.min(5, ratingFromProduct)) : 0,
+    total: aggregate?.total ?? 0,
+    breakdownCount: aggregate?.breakdownCount,
+  }
+}
+
+function toGaSource(product: Product): Record<string, unknown> {
+  return product as Record<string, unknown>
+}
+
 function IconShare({ size = 18, className = '' }: { size?: number; className?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className={className}>
@@ -72,123 +165,131 @@ function IconShare({ size = 18, className = '' }: { size?: number; className?: s
   )
 }
 
-/** Cast “safe number” (accepte string/number) */
-const toNum = (v: unknown): number | undefined => {
-  const n = typeof v === 'number' ? v : Number(v)
-  return Number.isFinite(n) ? n : undefined
-}
-
-/** Détection devise simple (EUR/GBP/USD) */
-function detectCurrency(): 'EUR' | 'GBP' | 'USD' {
-  try {
-    const htmlLang = typeof document !== 'undefined' ? document.documentElement.lang || '' : ''
-    const nav = typeof navigator !== 'undefined' ? navigator.language || '' : ''
-    const src = (htmlLang || nav).toLowerCase()
-    if (src.includes('gb') || src.endsWith('-uk') || src.includes('en-gb')) return 'GBP'
-    if (src.includes('us') || src.includes('en-us')) return 'USD'
-    if (src.startsWith('en')) return 'USD'
-    return 'EUR'
-  } catch {
-    return 'EUR'
-  }
-}
-
-/** Agrégat reviews robuste (fallback si l’API ne fournit pas aggregateRating) */
-function computeAggregate(
-  ratingFromProduct: number | undefined,
-  reviews: Review[] | undefined,
-  aggregate?: AggregateRating,
-): AggregateRating {
-  if (aggregate?.total && aggregate.average) return aggregate
-
-  const list = Array.isArray(reviews) ? reviews : []
-  const total = list.length
-
-  if (total > 0) {
-    const counts: Record<1 | 2 | 3 | 4 | 5, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
-    let sum = 0
-
-    for (const r of list) {
-      const v = (r?.rating as 1 | 2 | 3 | 4 | 5) ?? 0
-      if (v >= 1 && v <= 5) {
-        counts[v]++
-        sum += v
-      }
-    }
-
-    return {
-      average: total ? Math.max(0, Math.min(5, sum / total)) : ratingFromProduct ?? 0,
-      total,
-      breakdownCount: counts,
-    }
-  }
-
-  return {
-    average:
-      typeof ratingFromProduct === 'number'
-        ? Math.max(0, Math.min(5, ratingFromProduct))
-        : 0,
-    total: aggregate?.total ?? 0,
-    breakdownCount: aggregate?.breakdownCount,
-  }
-}
-
 export default function ProductDetail({ product, locale = 'fr' }: Props) {
   const prefersReducedMotion = useReducedMotion()
+  const sectionRef = useRef<HTMLElement | null>(null)
+  const mediaRef = useRef<HTMLDivElement | null>(null)
+  const viewedRef = useRef(false)
 
-  const [quantity, setQuantity] = useState<number>(1)
+  const safeLocale: AppLocale = isLocale(locale) ? locale : DEFAULT_LOCALE
+  const currency = detectCurrency(safeLocale)
+
+  const t =
+    safeLocale === 'en'
+      ? {
+          newLabel: 'New',
+          bestSeller: 'Best seller',
+          reviews: 'reviews',
+          stock: 'In stock',
+          lowStock: 'Only',
+          lowStockSuffix: 'left in stock',
+          outOfStock: 'Out of stock',
+          hurry: 'Hurry up, almost sold out',
+          quantity: 'Quantity',
+          quantityHelp: 'Choose the quantity to add to cart',
+          unavailable: 'Currently unavailable',
+          notifyMe: 'Notify me',
+          share: 'Share',
+          copied: 'Link copied to clipboard',
+          imageLabel: 'Image',
+          of: 'of',
+          imageHelp: 'Click or press Enter/Space to zoom the image.',
+          imageHelpOut: 'Click or press Enter/Space to zoom out the image.',
+          payments: 'Payments:',
+          returns: '2-year warranty & 30-day returns',
+          secured: '100% secure payment',
+          shipping: 'Ships within 24 business hours',
+          deliveryReturns: 'Delivery & returns',
+          specs: 'Specifications',
+          detailedSpecs: 'Detailed specifications available on the product sheet.',
+          brand: 'Brand',
+          acceptedPayments: 'Accepted payments: Visa, Mastercard, PayPal',
+          addToCart: 'Add to cart',
+          notifyToast: 'We can notify you when it comes back.',
+          galleryLabel: 'Product gallery thumbnails',
+          save: 'Save',
+        }
+      : {
+          newLabel: 'Nouveau',
+          bestSeller: 'Best Seller',
+          reviews: 'avis',
+          stock: 'En stock',
+          lowStock: 'Plus que',
+          lowStockSuffix: 'en stock',
+          outOfStock: 'Rupture',
+          hurry: 'Dépêchez-vous, bientôt épuisé',
+          quantity: 'Quantité',
+          quantityHelp: 'Sélectionnez la quantité à ajouter au panier',
+          unavailable: 'Indisponible actuellement',
+          notifyMe: 'Me prévenir',
+          share: 'Partager',
+          copied: 'Lien copié dans le presse-papier',
+          imageLabel: 'Image',
+          of: 'sur',
+          imageHelp: 'Cliquer ou appuyer sur Entrée/Espace pour zoomer l’image.',
+          imageHelpOut: 'Cliquer ou appuyer sur Entrée/Espace pour dézoomer l’image.',
+          payments: 'Paiements :',
+          returns: 'Garantie 2 ans & retours sous 30 jours',
+          secured: 'Paiement 100% sécurisé',
+          shipping: 'Expédition en 24h ouvrées',
+          deliveryReturns: 'Livraison & retours',
+          specs: 'Spécifications',
+          detailedSpecs: 'Caractéristiques détaillées disponibles sur la fiche.',
+          brand: 'Marque',
+          acceptedPayments: 'Paiements acceptés : Visa, Mastercard, PayPal',
+          addToCart: 'Ajouter au panier',
+          notifyToast: '🔔 Nous pouvons vous prévenir quand il revient.',
+          galleryLabel: 'Miniatures du produit',
+          save: 'Économisez',
+        }
+
+  const source = product as ProductLike
+
+  const _id = String(product._id || '')
+  const slug = readString(product.slug) || ''
+  const title = readString(product.title) || 'Produit'
+  const description = readString(product.description) || ''
+  const brand = readString(product.brand)
+  const category = readString(product.category)
+  const sku = readString(source.sku)
+  const image = readString(product.image) || '/og-image.jpg'
+  const price = Math.max(0, toNum(product.price) ?? 0)
+  const oldPrice = toNum(product.oldPrice)
+  const rating = toNum(product.rating)
+  const reviews = Array.isArray(product.reviews) ? product.reviews : []
+  const reviewsCount = toNum(product.reviewsCount)
+  const isNew = Boolean(product.isNew)
+  const isBestSeller = Boolean(product.isBestSeller)
+  const stock = toNum(product.stock)
+  const tags = Array.isArray(source.tags)
+    ? source.tags.filter((tag): tag is string => typeof tag === 'string' && tag.trim().length > 0)
+    : []
+
+  const gallery = useMemo(() => buildGallery(source), [source])
+  const safeGallery = gallery.length > 0 ? gallery : [image]
+
+  const [quantity, setQuantity] = useState(1)
   const [imgLoaded, setImgLoaded] = useState(false)
   const [activeIdx, setActiveIdx] = useState(0)
-  const viewedRef = useRef(false)
-  const sectionRef = useRef<HTMLElement | null>(null)
-
-  // zoom/tilt image
-  const mediaRef = useRef<HTMLDivElement | null>(null)
   const [zoomed, setZoomed] = useState(false)
-  const [origin, setOrigin] = useState<{ x: number; y: number }>({ x: 50, y: 50 })
+  const [origin, setOrigin] = useState({ x: 50, y: 50 })
 
-  // Unpack produit
-  const {
-    _id,
-    slug = '',
-    title = 'Produit',
-    price: priceRaw = 0,
-    oldPrice: oldPriceRaw,
-    image = '/og-image.jpg',
-    images,
-    description = '',
-    rating,
-    isNew,
-    isBestSeller,
-    stock,
-    brand,
-    category,
-    reviews,
-    aggregateRating,
-    reviewsCount,
-  } = product ?? {}
+  const activeImage = safeGallery[activeIdx] || image
+  const total = useMemo(() => price * quantity, [price, quantity])
 
-  // ✅ Normalisation des prix (tolère string)
-  const price = Math.max(0, toNum(priceRaw) ?? 0)
-  const oldPrice = toNum(oldPriceRaw)
-  const currency = detectCurrency()
+  const aggregate = useMemo(
+    () => computeAggregate(rating, reviews, product.aggregateRating),
+    [rating, reviews, product.aggregateRating]
+  )
 
-  // ✅ Extraction tolérante de `tags`
-  const tags: string[] | undefined = (product as Partial<Product> & { tags?: string[] }).tags
-
-  // Galerie (images[] -> max 8)
-  const gallery: string[] = useMemo(() => {
-    const arr = Array.isArray(images) && images.length ? images : [image].filter(Boolean)
-    return Array.from(new Set(arr)).slice(0, 8)
-  }, [images, image])
-
-  const hasRating = typeof rating === 'number' && !Number.isNaN(rating)
+  const totalReviews = aggregate.total || reviewsCount || 0
   const discount =
     typeof oldPrice === 'number' && oldPrice > price
       ? Math.round(((oldPrice - price) / oldPrice) * 100)
       : null
 
-  const priceStr = useMemo(() => price.toFixed(2), [price])
+  const amountSaved =
+    typeof oldPrice === 'number' && oldPrice > price ? oldPrice - price : null
 
   const availability =
     typeof stock === 'number'
@@ -198,116 +299,121 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
       : 'https://schema.org/InStock'
 
   const lowStock = typeof stock === 'number' && stock > 0 && stock <= 5
-  const total = useMemo(() => price * quantity, [price, quantity])
+  const outOfStock = typeof stock === 'number' && stock <= 0
+  const priceStr = price.toFixed(2)
 
-  // Agrégat reviews sécurisé
-  const agg = useMemo(
-    () => computeAggregate(rating, reviews, aggregateRating),
-    [rating, reviews, aggregateRating],
-  )
-
-  const totalReviews = agg.total || reviewsCount || 0
-
-  /* ------------------------------------------------------------------------ */
-  /*                           Tracking / Recently viewed                     */
-  /* ------------------------------------------------------------------------ */
-
-  // GA4 + Pixel “ViewContent” quand la section devient visible (une seule fois)
   useEffect(() => {
     if (!sectionRef.current || viewedRef.current) return
 
     const el = sectionRef.current
-    const io = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       (entries) => {
-        if (entries.some((e) => e.isIntersecting) && !viewedRef.current) {
-          viewedRef.current = true
+        const visible = entries.some((entry) => entry.isIntersecting)
+        if (!visible || viewedRef.current) return
 
-          try {
-            logEvent({
-              action: 'product_detail_view',
-              category: 'engagement',
-              label: title,
-              value: price,
-            })
-          } catch {}
+        viewedRef.current = true
 
-          try {
-            const item = { ...mapProductToGaItem(toGaSource(product)), quantity: 1 }
-            trackViewItem({
-              currency,
-              value: price,
-              items: [item],
-            })
-          } catch {}
+        try {
+          logEvent({
+            action: 'product_detail_view',
+            category: 'engagement',
+            label: title,
+            value: price,
+          })
+        } catch {
+          // no-op
+        }
 
-          try {
-            pixelViewContent({
-              value: price,
-              currency,
-              content_name: title,
-              content_type: 'product',
-              content_ids: [String(product?._id ?? product?.slug ?? '')].filter(Boolean),
-              contents: [
-                {
-                  id: String(product?._id ?? product?.slug ?? ''),
-                  quantity: 1,
-                  item_price: price,
-                },
-              ],
-            })
-          } catch {}
+        try {
+          trackViewItem({
+            currency,
+            value: price,
+            items: [{ ...mapProductToGaItem(toGaSource(product)), quantity: 1 }],
+          })
+        } catch {
+          // no-op
+        }
 
-          // Ajout "vu récemment"
-          try {
-            const key = 'recent:products'
-            const prev = JSON.parse(localStorage.getItem(key) || '[]') as RecentProduct[]
-            const next = [
-              { _id, slug, title, price, image: gallery[0] ?? image },
-              ...prev.filter((p) => p._id !== _id),
-            ].slice(0, 16)
-            localStorage.setItem(key, JSON.stringify(next))
-          } catch {}
+        try {
+          pixelViewContent({
+            value: price,
+            currency,
+            content_name: title,
+            content_type: 'product',
+            content_ids: [String(product._id ?? product.slug ?? '')].filter(Boolean),
+            contents: [
+              {
+                id: String(product._id ?? product.slug ?? ''),
+                quantity: 1,
+                item_price: price,
+              },
+            ],
+          })
+        } catch {
+          // no-op
+        }
+
+        try {
+          const key = 'recent:products'
+          const prev = JSON.parse(localStorage.getItem(key) || '[]') as RecentProduct[]
+          const next = [
+            { _id, slug, title, price, image: safeGallery[0] ?? image },
+            ...prev.filter((item) => item._id !== _id),
+          ].slice(0, 16)
+          localStorage.setItem(key, JSON.stringify(next))
+        } catch {
+          // no-op
         }
       },
-      { threshold: 0.35 },
+      { threshold: 0.35 }
     )
 
-    io.observe(el)
-    return () => io.disconnect()
-  }, [product, title, price, _id, slug, image, gallery, currency])
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [_id, currency, image, price, product, safeGallery, slug, title])
 
-  // Raccourcis clavier
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement)?.tagName
-      const editable =
-        tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null
+      const tag = target?.tagName
+      const editable = tag === 'INPUT' || tag === 'TEXTAREA' || target?.isContentEditable
 
       if (editable) return
 
-      if (e.key === '+') setQuantity((q) => clamp(q + 1, 1, 99))
-      if (e.key === '-') setQuantity((q) => clamp(q - 1, 1, 99))
-      if (e.key.toLowerCase() === 'a') {
-        e.preventDefault()
-        onAddToCart()
-      }
-      if (e.key.toLowerCase() === 'w') {
-        e.preventDefault()
-        onAddWishlist()
-      }
-      if (e.key === 'ArrowLeft') setActiveIdx((i) => (i > 0 ? i - 1 : i))
-      if (e.key === 'ArrowRight') setActiveIdx((i) => (i < gallery.length - 1 ? i + 1 : i))
+      if (event.key === '+') setQuantity((q) => clamp(q + 1, 1, 99))
+      if (event.key === '-') setQuantity((q) => clamp(q - 1, 1, 99))
+      if (event.key === 'ArrowLeft') setActiveIdx((i) => Math.max(0, i - 1))
+      if (event.key === 'ArrowRight') setActiveIdx((i) => Math.min(safeGallery.length - 1, i + 1))
     }
 
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [gallery.length])
+  }, [safeGallery.length])
 
-  // Handlers e-commerce
+  useEffect(() => {
+    if (typeof window === 'undefined' || safeGallery.length <= 1) return
+
+    const nextIndex = (activeIdx + 1) % safeGallery.length
+    const prevIndex = (activeIdx - 1 + safeGallery.length) % safeGallery.length
+
+    for (const src of [safeGallery[nextIndex], safeGallery[prevIndex]]) {
+      if (!src) continue
+      const img = new window.Image()
+      img.src = src
+    }
+  }, [activeIdx, safeGallery])
+
   const onAddToCart = useCallback(() => {
     try {
-      logEvent({ action: 'add_to_cart', category: 'ecommerce', label: title, value: total })
-    } catch {}
+      logEvent({
+        action: 'add_to_cart',
+        category: 'ecommerce',
+        label: title,
+        value: total,
+      })
+    } catch {
+      // no-op
+    }
 
     try {
       trackAddToCart({
@@ -315,13 +421,22 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         value: total,
         items: [{ ...mapProductToGaItem(toGaSource(product)), quantity }],
       })
-    } catch {}
-  }, [title, total, product, quantity, currency])
+    } catch {
+      // no-op
+    }
+  }, [currency, product, quantity, title, total])
 
   const onAddWishlist = useCallback(() => {
     try {
-      logEvent({ action: 'add_to_wishlist', category: 'ecommerce', label: title, value: price })
-    } catch {}
+      logEvent({
+        action: 'add_to_wishlist',
+        category: 'ecommerce',
+        label: title,
+        value: price,
+      })
+    } catch {
+      // no-op
+    }
 
     try {
       trackAddToWishlist({
@@ -329,11 +444,14 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         value: price,
         items: [{ ...mapProductToGaItem(toGaSource(product)), quantity: 1 }],
       })
-    } catch {}
-  }, [title, price, product, currency])
+    } catch {
+      // no-op
+    }
+  }, [currency, price, product, title])
 
   const onThumbSelect = (idx: number) => {
     setActiveIdx(idx)
+
     try {
       trackSelectItem({
         currency,
@@ -341,114 +459,111 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         items: [{ ...mapProductToGaItem(toGaSource(product)), quantity: 1 }],
         item_list_name: 'product_gallery',
       })
-    } catch {}
+    } catch {
+      // no-op
+    }
   }
 
-  // Partage & copie
   const share = async () => {
     try {
       const url = typeof window !== 'undefined' ? window.location.href : ''
-      if (typeof navigator !== 'undefined' && 'share' in navigator && typeof navigator.share === 'function') {
+
+      if (
+        typeof navigator !== 'undefined' &&
+        'share' in navigator &&
+        typeof navigator.share === 'function'
+      ) {
         await navigator.share({ title, text: title, url })
-      } else if (navigator.clipboard) {
-        await navigator.clipboard.writeText(url)
-        toast.success('Lien copié dans le presse-papier')
+        return
       }
-    } catch {}
+
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(url)
+        toast.success(t.copied)
+      }
+    } catch {
+      // no-op
+    }
   }
 
-  /* ------------------------------------------------------------------------ */
-  /*                              Image interactions                           */
-  /* ------------------------------------------------------------------------ */
-
-  const onPointerMove: React.PointerEventHandler<HTMLDivElement> = (e) => {
-    if (!mediaRef.current) return
-    if (!zoomed) return
+  const onPointerMove: PointerEventHandler<HTMLDivElement> = (event) => {
+    if (!mediaRef.current || !zoomed) return
 
     const rect = mediaRef.current.getBoundingClientRect()
-    const x = ((e.clientX - rect.left) / rect.width) * 100
-    const y = ((e.clientY - rect.top) / rect.height) * 100
-    setOrigin({ x: clamp(x, 0, 100), y: clamp(y, 0, 100) })
+    const x = ((event.clientX - rect.left) / rect.width) * 100
+    const y = ((event.clientY - rect.top) / rect.height) * 100
+
+    setOrigin({
+      x: clamp(x, 0, 100),
+      y: clamp(y, 0, 100),
+    })
   }
 
   const toggleZoom = () => {
     if (prefersReducedMotion) return
-    setZoomed((z) => !z)
+    setZoomed((value) => !value)
   }
 
-  const onMediaKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
+  const onMediaKeyDown: KeyboardEventHandler<HTMLDivElement> = (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
       toggleZoom()
-    } else if (e.key === 'ArrowLeft') {
-      setActiveIdx((i) => (i > 0 ? i - 1 : i))
-    } else if (e.key === 'ArrowRight') {
-      setActiveIdx((i) => (i < gallery.length - 1 ? i + 1 : i))
+    }
+
+    if (event.key === 'ArrowLeft') {
+      setActiveIdx((i) => Math.max(0, i - 1))
+    }
+
+    if (event.key === 'ArrowRight') {
+      setActiveIdx((i) => Math.min(safeGallery.length - 1, i + 1))
     }
   }
-
-  // Prefetch next/prev images
-  useEffect(() => {
-    if (typeof window === 'undefined' || gallery.length <= 1) return
-    const n = (activeIdx + 1) % gallery.length
-    const p = (activeIdx - 1 + gallery.length) % gallery.length
-
-    ;[gallery[n], gallery[p]].filter(Boolean).forEach((src) => {
-      const img = new window.Image()
-      img.src = src
-    })
-  }, [activeIdx, gallery])
-
-  // ✅ Normalisation de la locale → AppLocale
-  const safeLocale: AppLocale = isLocale(locale) ? locale : DEFAULT_LOCALE
-  const skuValue = (product as Partial<Product> & { sku?: string }).sku
 
   return (
     <motion.section
       ref={sectionRef}
-      className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-7xl mx-auto px-4 py-12"
-      initial={prefersReducedMotion ? false : { opacity: 0, y: 30 }}
+      className="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-4 py-12 lg:grid-cols-2"
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}
       animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
       aria-labelledby="product-title"
-      data-product-id={_id}
+      data-product-id={_id || slug}
       data-product-slug={slug}
       role="region"
       aria-live="polite"
       itemScope
       itemType="https://schema.org/Product"
     >
-      {/* Galerie */}
       <div className="grid gap-4">
         <div
           ref={mediaRef}
           className={cn(
-            'relative w-full aspect-square rounded-3xl overflow-hidden border',
-            'border-gray-200 dark:border-gray-700 shadow-xl bg-gray-50 dark:bg-zinc-900',
+            'relative aspect-square w-full overflow-hidden rounded-3xl border shadow-xl',
+            'border-token-border bg-token-surface'
           )}
           onPointerMove={onPointerMove}
           onPointerLeave={() => setZoomed(false)}
           onClick={toggleZoom}
           onKeyDown={onMediaKeyDown}
-          role="img"
-          aria-label={`Image ${activeIdx + 1} sur ${gallery.length} : ${title}`}
+          role="button"
+          aria-label={`${t.imageLabel} ${activeIdx + 1} ${t.of} ${safeGallery.length} : ${title}`}
           aria-busy={!imgLoaded}
           tabIndex={0}
         >
           <Image
-            key={gallery[activeIdx] ?? image}
-            src={gallery[activeIdx] ?? image}
-            alt={`Image ${activeIdx + 1} de ${title}`}
+            key={activeImage}
+            src={activeImage}
+            alt={`${t.imageLabel} ${activeIdx + 1} ${t.of} ${safeGallery.length} - ${title}`}
             fill
-            className={cn(
-              'object-cover transition-transform duration-700 will-change-transform',
-              zoomed ? 'scale-125 cursor-zoom-out' : 'hover:scale-[1.03] cursor-zoom-in',
-            )}
-            style={{ transformOrigin: `${origin.x}% ${origin.y}%` }}
             sizes="(min-width: 1024px) 50vw, 100vw"
             priority
             placeholder="blur"
             blurDataURL={BLUR_DATA_URL}
+            className={cn(
+              'object-cover transition-transform duration-700 will-change-transform',
+              zoomed ? 'scale-125 cursor-zoom-out' : 'cursor-zoom-in hover:scale-[1.03]'
+            )}
+            style={{ transformOrigin: `${origin.x}% ${origin.y}%` }}
             onLoad={() => setImgLoaded(true)}
             itemProp="image"
             draggable={false}
@@ -461,65 +576,65 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             />
           )}
 
-          {/* Badges & pricing overlays */}
+          <div className="pointer-events-none absolute left-4 top-4 z-10 flex flex-col gap-2">
+            {isNew ? (
+              <span className="rounded-full bg-green-600 px-3 py-1 text-sm font-semibold text-white shadow-md">
+                {t.newLabel}
+              </span>
+            ) : null}
+
+            {isBestSeller ? (
+              <span className="rounded-full bg-yellow-400 px-3 py-1 text-sm font-semibold text-black shadow-md">
+                {t.bestSeller}
+              </span>
+            ) : null}
+
+            {discount ? (
+              <span className="rounded-full bg-red-600 px-3 py-1 text-sm font-semibold text-white shadow-md">
+                -{discount}%
+              </span>
+            ) : null}
+          </div>
+
           <div className="absolute bottom-4 right-4 z-10">
             <PricingBadge price={price} oldPrice={oldPrice} showDiscountLabel showOldPrice />
           </div>
 
-          <div className="absolute top-4 left-4 flex flex-col gap-2 pointer-events-none select-none z-10">
-            {isNew && (
-              <span className="bg-green-600 text-white px-3 py-1 rounded-full font-semibold text-sm shadow-md">
-                Nouveau
-              </span>
-            )}
-            {isBestSeller && (
-              <span className="bg-yellow-400 text-black px-3 py-1 rounded-full font-semibold text-sm shadow-md">
-                Best Seller
-              </span>
-            )}
-            {discount && (
-              <span className="bg-red-600 text-white px-3 py-1 rounded-full font-semibold text-sm shadow-md">
-                -{discount}%
-              </span>
-            )}
-          </div>
-
-          {/* Actions coin droit */}
-          <div className="absolute top-4 right-4 flex gap-2 z-10">
+          <div className="absolute right-4 top-4 z-10 flex gap-2">
             <button
+              type="button"
               onClick={share}
-              className="rounded-full bg-white/90 dark:bg-black/60 border border-gray-200 dark:border-gray-700 px-3 py-1 text-sm shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-              aria-label="Partager ce produit"
-              title="Partager"
+              className="rounded-full border border-token-border bg-white/90 px-3 py-2 text-sm shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] dark:bg-black/60"
+              aria-label={t.share}
+              title={t.share}
             >
               <IconShare />
             </button>
           </div>
 
-          <p className="sr-only">
-            Cliquer ou appuyer sur Entrée/Espace pour {zoomed ? 'dézoomer' : 'zoomer'} l’image.
-          </p>
+          <p className="sr-only">{zoomed ? t.imageHelpOut : t.imageHelp}</p>
         </div>
 
-        {gallery.length > 1 && (
-          <nav aria-label="Miniatures du produit">
-            <ul role="list" className="grid grid-cols-5 sm:grid-cols-6 gap-3">
-              {gallery.map((src, i) => {
-                const active = i === activeIdx
+        {safeGallery.length > 1 ? (
+          <nav aria-label={t.galleryLabel}>
+            <ul role="list" className="grid grid-cols-5 gap-3 sm:grid-cols-6">
+              {safeGallery.map((src, idx) => {
+                const active = idx === activeIdx
 
                 return (
-                  <li key={`${src}-${i}`}>
+                  <li key={`${src}-${idx}`}>
                     <button
-                      onClick={() => onThumbSelect(i)}
-                      onMouseEnter={() => !prefersReducedMotion && setActiveIdx(i)}
+                      type="button"
+                      onClick={() => onThumbSelect(idx)}
+                      onMouseEnter={() => !prefersReducedMotion && setActiveIdx(idx)}
                       className={cn(
-                        'relative block aspect-square rounded-xl overflow-hidden border transition',
+                        'relative block aspect-square overflow-hidden rounded-xl border transition',
                         active
-                          ? 'border-accent ring-2 ring-accent'
-                          : 'border-gray-200 dark:border-gray-700 hover:border-accent/60',
+                          ? 'border-[hsl(var(--accent))] ring-2 ring-[hsl(var(--accent))]'
+                          : 'border-token-border hover:border-[hsl(var(--accent)/.6)]'
                       )}
-                      aria-label={`Voir l’image ${i + 1}`}
-                      aria-current={active ? 'true' : 'false'}
+                      aria-label={`${t.imageLabel} ${idx + 1}`}
+                      aria-current={active ? 'true' : undefined}
                     >
                       <Image
                         src={src}
@@ -537,10 +652,9 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
               })}
             </ul>
           </nav>
-        )}
+        ) : null}
       </div>
 
-      {/* Infos + actions */}
       <div className="flex flex-col justify-between space-y-8">
         <div>
           <h1
@@ -552,67 +666,74 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             {title}
           </h1>
 
-          {/* Microdata extras */}
-          {(_id || skuValue) && <meta itemProp="sku" content={String(_id || skuValue)} />}
-          {brand && <meta itemProp="brand" content={String(brand)} />}
+          {_id || sku ? <meta itemProp="sku" content={String(_id || sku)} /> : null}
+          {brand ? <meta itemProp="brand" content={brand} /> : null}
 
           <div className="mt-3 flex flex-wrap items-center gap-3">
-            <RatingStars value={agg.average || (hasRating ? rating! : 4)} editable={false} />
+            <RatingStars value={aggregate.average || 0} editable={false} />
 
-            {totalReviews > 0 && (
+            {totalReviews > 0 ? (
               <a
                 href="#reviews"
-                className="text-sm text-accent underline underline-offset-2"
+                className="text-sm text-[hsl(var(--accent))] underline underline-offset-2"
                 onClick={() => {
                   try {
-                    logEvent({ action: 'jump_to_reviews', category: 'engagement', label: slug })
-                  } catch {}
+                    logEvent({
+                      action: 'jump_to_reviews',
+                      category: 'engagement',
+                      label: slug || title,
+                    })
+                  } catch {
+                    // no-op
+                  }
                 }}
               >
-                {totalReviews} avis
+                {totalReviews} {t.reviews}
               </a>
-            )}
+            ) : null}
 
             <FreeShippingBadge price={price} minimal />
 
-            {typeof stock === 'number' && (
+            {typeof stock === 'number' ? (
               <span
                 className={cn(
-                  'text-xs px-2 py-1 rounded-full border',
+                  'rounded-full border px-2 py-1 text-xs',
                   stock > 0
                     ? lowStock
                       ? 'border-amber-300 text-amber-700 dark:text-amber-300'
                       : 'border-emerald-300 text-emerald-700 dark:text-emerald-300'
-                    : 'border-red-300 text-red-600 dark:text-red-400',
+                    : 'border-red-300 text-red-600 dark:text-red-400'
                 )}
                 aria-live="polite"
               >
-                {stock > 0 ? (lowStock ? `Plus que ${stock} en stock` : 'En stock') : 'Rupture'}
+                {stock > 0
+                  ? lowStock
+                    ? `${t.lowStock} ${stock} ${t.lowStockSuffix}`
+                    : t.stock
+                  : t.outOfStock}
               </span>
-            )}
+            ) : null}
           </div>
 
-          {lowStock && (
+          {lowStock ? (
             <div className="mt-2">
               <div
-                className="h-2 w-full rounded-full bg-amber-100 dark:bg-amber-900/30 overflow-hidden"
-                aria-hidden
+                className="h-2 w-full overflow-hidden rounded-full bg-amber-100 dark:bg-amber-900/30"
+                aria-hidden="true"
               >
                 <div
                   className="h-full bg-amber-500 transition-all"
-                  style={{ width: `${Math.min(100, (stock / 5) * 100)}%` }}
+                  style={{ width: `${Math.min(100, ((stock || 0) / 5) * 100)}%` }}
                 />
               </div>
-              <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
-                Dépêchez-vous, bientôt épuisé
-              </p>
+              <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">{t.hurry}</p>
             </div>
-          )}
+          ) : null}
 
           <div className="mt-4 flex flex-wrap items-end gap-3" aria-live="polite">
             <span
               className="text-3xl font-extrabold text-brand"
-              aria-label={`Prix : ${formatPrice(price)}`}
+              aria-label={`Prix : ${formatPrice(price, { currency })}`}
               itemProp="offers"
               itemScope
               itemType="https://schema.org/Offer"
@@ -623,65 +744,64 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
               {formatPrice(price, { currency })}
             </span>
 
-            {typeof oldPrice === 'number' && oldPrice > price && (
+            {typeof oldPrice === 'number' && oldPrice > price ? (
               <span className="line-through text-gray-400 dark:text-gray-500">
                 {formatPrice(oldPrice, { currency })}
               </span>
-            )}
+            ) : null}
 
-            {discount && typeof oldPrice === 'number' && (
-              <span className="text-sm text-emerald-600 dark:text-emerald-400 font-semibold">
-                Économisez {formatPrice(oldPrice - price, { currency })} ({discount}%)
+            {discount && amountSaved ? (
+              <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                {t.save} {formatPrice(amountSaved, { currency })} ({discount}%)
               </span>
-            )}
+            ) : null}
 
-            {quantity > 1 && (
+            {quantity > 1 ? (
               <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
                 Total ({quantity}×)&nbsp;:{' '}
                 <span className="font-semibold">{formatPrice(total, { currency })}</span>
               </span>
-            )}
+            ) : null}
           </div>
 
           <div className="mt-3">
             <DeliveryEstimate />
           </div>
 
-          {description && (
+          {description ? (
             <p
-              className="mt-6 text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed text-lg"
+              className="mt-6 whitespace-pre-line text-lg leading-relaxed text-gray-700 dark:text-gray-300"
               itemProp="description"
             >
               {description}
             </p>
-          )}
+          ) : null}
 
-          {Array.isArray(tags) && tags.length > 0 && (
+          {tags.length > 0 ? (
             <div className="mt-4">
               <ProductTags tags={tags} />
             </div>
-          )}
+          ) : null}
 
-          {/* Garanties & infos */}
           <div className="mt-6 grid gap-3 text-sm text-gray-600 dark:text-gray-400">
             <div className="flex items-center gap-2">
-              <span aria-hidden>✅</span> Garantie 2 ans & retours sous 30 jours
+              <span aria-hidden="true">✅</span> {t.returns}
             </div>
             <div className="flex items-center gap-2">
-              <span aria-hidden>🔒</span> Paiement 100% sécurisé (CB/PayPal)
+              <span aria-hidden="true">🔒</span> {t.secured}
             </div>
             <div className="flex items-center gap-2">
-              <span aria-hidden>⚡</span> Expédition en 24h ouvrées
+              <span aria-hidden="true">⚡</span> {t.shipping}
             </div>
           </div>
         </div>
 
-        {/* Actions */}
         <div className="space-y-6">
           <div className="flex items-center gap-4">
             <label htmlFor="quantity" className="text-lg font-semibold text-gray-900 dark:text-white">
-              Quantité :
+              {t.quantity} :
             </label>
+
             <QuantitySelector
               value={quantity}
               onChange={(q) => setQuantity(clamp(q, 1, 99))}
@@ -691,12 +811,19 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           </div>
 
           <p id="quantity-desc" className="sr-only">
-            Sélectionnez la quantité à ajouter au panier
+            {t.quantityHelp}
           </p>
 
-          {!(typeof stock === 'number' && stock <= 0) ? (
+          {!outOfStock ? (
             <AddToCartButtonAB
-              product={{ _id, slug, title, price, image: gallery[0] ?? image, quantity }}
+              product={{
+                _id,
+                slug,
+                title,
+                price,
+                image: safeGallery[0] ?? image,
+                quantity,
+              }}
               locale={safeLocale}
               onAdd={onAddToCart}
               gtmExtra={{
@@ -708,20 +835,20 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
                 product_category: category ?? undefined,
               }}
               size="lg"
-              aria-label={`Ajouter ${title} au panier`}
+              aria-label={`${t.addToCart} ${title}`}
             />
           ) : (
             <div
               className="inline-flex items-center justify-center rounded-lg border border-red-300 px-4 py-3 text-red-700 dark:text-red-300"
               role="alert"
             >
-              Indisponible actuellement
+              {t.unavailable}
               <button
                 type="button"
-                onClick={() => toast('🔔 Nous pouvons vous prévenir quand il revient !')}
+                onClick={() => toast(t.notifyToast)}
                 className="ml-3 underline underline-offset-2"
               >
-                Me prévenir
+                {t.notifyMe}
               </button>
             </div>
           )}
@@ -729,34 +856,35 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           <div className="flex flex-wrap items-center gap-3">
             <div className="inline-block" onClick={onAddWishlist}>
               <WishlistButton
-                product={{ _id, slug, title, price, image: gallery[0] ?? image }}
+                product={{
+                  _id,
+                  slug,
+                  title,
+                  price,
+                  image: safeGallery[0] ?? image,
+                }}
                 floating={false}
                 className="mt-2"
               />
             </div>
 
             <button
+              type="button"
               onClick={share}
-              className="mt-2 inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-              aria-label="Partager"
-              title="Partager"
+              className="mt-2 inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] dark:border-gray-700 dark:hover:bg-zinc-800"
+              aria-label={t.share}
+              title={t.share}
             >
               <IconShare />
-              <span>Partager</span>
+              <span>{t.share}</span>
             </button>
 
-            <div className="mt-2 ml-auto flex items-center gap-3 text-2xl text-token-text/60">
-              <span className="text-xs font-medium mr-1">Paiements :</span>
+            <div className="ml-auto mt-2 flex items-center gap-3 text-2xl text-token-text/60">
+              <span className="mr-1 text-xs font-medium">{t.payments}</span>
               <FaCcVisa aria-hidden="true" title="Visa" className="transition-opacity hover:opacity-90" />
-              <FaCcMastercard
-                aria-hidden="true"
-                title="Mastercard"
-                className="transition-opacity hover:opacity-90"
-              />
+              <FaCcMastercard aria-hidden="true" title="Mastercard" className="transition-opacity hover:opacity-90" />
               <FaCcPaypal aria-hidden="true" title="PayPal" className="transition-opacity hover:opacity-90" />
-              <span className="sr-only" id="pay-methods">
-                Paiements acceptés : Visa, Mastercard, PayPal
-              </span>
+              <span className="sr-only">{t.acceptedPayments}</span>
             </div>
           </div>
 
@@ -765,24 +893,34 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           </div>
 
           <div className="mt-2 grid gap-2">
-            <details className="rounded-xl border border-gray-200 dark:border-gray-700 p-3">
-              <summary className="cursor-pointer font-semibold">Livraison & retours</summary>
+            <details className="rounded-xl border border-gray-200 p-3 dark:border-gray-700">
+              <summary className="cursor-pointer font-semibold">{t.deliveryReturns}</summary>
               <ul className="mt-2 list-disc pl-5 text-sm text-gray-600 dark:text-gray-400">
-                <li>Livraison 48–72h en France métropolitaine</li>
-                <li>Retour gratuit sous 30 jours</li>
-                <li>Suivi colis temps réel</li>
+                <li>
+                  {safeLocale === 'en'
+                    ? 'Delivery within 48–72h in mainland France'
+                    : 'Livraison 48–72h en France métropolitaine'}
+                </li>
+                <li>
+                  {safeLocale === 'en'
+                    ? 'Free return within 30 days'
+                    : 'Retour gratuit sous 30 jours'}
+                </li>
+                <li>
+                  {safeLocale === 'en' ? 'Real-time order tracking' : 'Suivi colis temps réel'}
+                </li>
               </ul>
             </details>
 
-            <details className="rounded-xl border border-gray-200 dark:border-gray-700 p-3">
-              <summary className="cursor-pointer font-semibold">Spécifications</summary>
+            <details className="rounded-xl border border-gray-200 p-3 dark:border-gray-700">
+              <summary className="cursor-pointer font-semibold">{t.specs}</summary>
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
                 {brand ? (
                   <>
-                    Marque&nbsp;: <strong>{String(brand)}</strong>
+                    {t.brand}&nbsp;: <strong>{brand}</strong>
                   </>
                 ) : (
-                  'Caractéristiques détaillées disponibles sur la fiche.'
+                  t.detailedSpecs
                 )}
               </p>
             </details>
@@ -790,30 +928,24 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         </div>
       </div>
 
-      {/* Résumé sticky (mobile) */}
-      <StickyCartSummary locale={safeLocale} />
-
-      {/* Avis */}
-      <div className="lg:col-span-2 mt-12" id="reviews" aria-label="Avis clients">
+      <div className="mt-12 lg:col-span-2" id="reviews" aria-label="Avis clients">
         <div className="mb-6">
           <RatingSummary
-            average={agg.average}
+            average={aggregate.average}
             total={totalReviews}
-            breakdownCount={agg.breakdownCount}
+            breakdownCount={aggregate.breakdownCount}
             jsonLd={{ productSku: _id, productName: title }}
           />
         </div>
 
-        {Array.isArray(reviews) && reviews.length > 0 && (
+        {reviews.length > 0 ? (
           <div className="mb-10">
             <ProductReviews reviews={reviews} />
           </div>
-        )}
+        ) : null}
 
         <ReviewForm productId={_id} />
       </div>
-
-      {/* NOTE: Le JSON-LD est injecté au niveau de la page (/products/[slug]) via <ProductJsonLd /> */}
     </motion.section>
   )
 }
