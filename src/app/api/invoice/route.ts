@@ -14,6 +14,7 @@ import {
   formatInvoiceData,
   renderInvoicePDFStream,
 } from '@/lib/pdf'
+import { serverEnv } from '@/env.server'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -300,14 +301,14 @@ export async function POST(req: Request) {
 
   const { stream, filename } = await renderInvoicePDFStream(data, {
     brand: {
-      name: process.env.BRAND_NAME || 'TechPlay',
+      name: serverEnv.BRAND_NAME || 'TechPlay',
       address:
-        process.env.BRAND_ADDRESS || '42 rue de la Liberté\n75000 Paris\nFrance',
-      website: process.env.BRAND_URL || '',
-      email: process.env.BRAND_EMAIL || '',
-      vatNumber: process.env.BRAND_VAT || '',
-      siret: process.env.BRAND_SIRET || '',
-      logoPath: process.env.BRAND_LOGO_PATH || '',
+        serverEnv.BRAND_ADDRESS || '42 rue de la Liberté\n75000 Paris\nFrance',
+      website: serverEnv.BRAND_URL || '',
+      email: serverEnv.BRAND_EMAIL || '',
+      vatNumber: serverEnv.BRAND_VAT || '',
+      siret: serverEnv.BRAND_SIRET || '',
+      logoPath: serverEnv.BRAND_LOGO_PATH || '',
     },
     locale: 'fr-FR',
     title: `Facture ${data.invoiceNumber}`,
@@ -325,10 +326,12 @@ export async function POST(req: Request) {
 }
 
 export async function OPTIONS() {
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com'
+
   return new NextResponse(null, {
     status: 204,
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': origin,
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     },

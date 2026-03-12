@@ -12,7 +12,8 @@
     "analyze": "cross-env ANALYZE=true next build",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "echo \"Tests a venir\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "clean": "rimraf .next",
     "audit": "npm audit --audit-level=moderate",
     "prepare": "husky",
@@ -81,7 +82,8 @@
     "tailwind-scrollbar": "^4.0.2",
     "tailwindcss": "^4.2.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^3.0.0"
   },
   "engines": {
     "node": ">=20 <23",

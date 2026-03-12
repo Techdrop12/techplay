@@ -4,8 +4,11 @@ import crypto from 'crypto'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
+import { serverEnv } from '@/env.server'
+import { ipFromRequest } from '@/lib/rateLimit'
+
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-const STRIPE_KEY = process.env.STRIPE_SECRET_KEY || ''
+const STRIPE_KEY = serverEnv.STRIPE_SECRET_KEY || ''
 const ALLOWED_ORIGINS = [SITE_URL]
 const RATE_LIMIT_WINDOW_MS = 60_000
 const RATE_LIMIT_MAX = 20
@@ -75,12 +78,6 @@ function toAllowedCountries(input: unknown): AllowedCountry[] {
   return fallback
 }
 
-function ipFromHeaders(req: Request): string {
-  const xf = req.headers.get('x-forwarded-for')
-  if (xf) return xf.split(',')[0]?.trim() || '0.0.0.0'
-  return req.headers.get('x-real-ip') || '0.0.0.0'
-}
-
 function rateLimitCheck(ip: string): boolean {
   const now = Date.now()
   const rec = bucket.get(ip)
@@ -128,7 +125,7 @@ export async function POST(request: Request) {
       return json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const ip = ipFromHeaders(request)
+    const ip = ipFromRequest(request)
     if (!rateLimitCheck(ip)) {
       return json({ error: 'Too many requests' }, { status: 429 })
     }

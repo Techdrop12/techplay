@@ -36,6 +36,17 @@ export async function getOrderById (id) {
 }
 
 /**
+ * Recherche une commande à partir de l'id d'événement Stripe stocké en meta.
+ * @param {string} eventId
+ */
+export async function getOrderByStripeEventId (eventId) {
+  await dbConnect()
+  const id = String(eventId || '').trim()
+  if (!id) return null
+  return Order.findOne({ 'meta.stripeEventId': id }).lean().exec()
+}
+
+/**
  * @param {string} id
  * @param {string} status
  */
@@ -59,6 +70,7 @@ export async function createOrder (payload) {
 export default {
   getUserOrders,
   getOrderById,
+  getOrderByStripeEventId,
   updateOrderStatus,
   createOrder,
 }
