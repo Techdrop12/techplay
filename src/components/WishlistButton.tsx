@@ -2,12 +2,13 @@
 
 import { motion, useReducedMotion } from 'framer-motion'
 import { AlertTriangle, Heart, HeartCrack } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { usePathname } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
 import { useWishlist, type WishlistItemBase } from '@/hooks/useWishlist'
 import { trackAddToWishlist } from '@/lib/ga'
+import { getCurrentLocale } from '@/lib/i18n-routing'
 import { logEvent } from '@/lib/logEvent'
 import { cn } from '@/lib/utils'
 
@@ -33,8 +34,35 @@ interface WishlistButtonProps {
 
 const WISHLIST_LIMIT = Number.parseInt(process.env.NEXT_PUBLIC_WISHLIST_LIMIT ?? '50', 10)
 
-function toCanonicalWishlistProduct(product: WishlistProduct): (WishlistItemBase & WishlistProduct) | null {
-  const id = String(product?._id ?? product?.id ?? '').trim()
+const TEXT = {
+  fr: {
+    addToWishlist: 'Ajouter à la wishlist',
+    removeFromWishlist: 'Retirer de la wishlist',
+    addedToWishlist: 'Ajouté à la wishlist',
+    removedFromWishlist: 'Retiré de la wishlist',
+    wishlistTitle: 'Wishlist',
+    added: 'Produit ajouté à la wishlist',
+    removed: 'Produit retiré de la wishlist',
+    limitReached: 'Limite de wishlist atteinte',
+    fallbackProduct: 'Produit',
+  },
+  en: {
+    addToWishlist: 'Add to wishlist',
+    removeFromWishlist: 'Remove from wishlist',
+    addedToWishlist: 'Added to wishlist',
+    removedFromWishlist: 'Removed from wishlist',
+    wishlistTitle: 'Wishlist',
+    added: 'Product added to wishlist',
+    removed: 'Product removed from wishlist',
+    limitReached: 'Wishlist limit reached',
+    fallbackProduct: 'Product',
+  },
+} as const
+
+function toCanonicalWishlistProduct(
+  product: WishlistProduct
+): (WishlistItemBase & WishlistProduct) | null {
+  const id = String(product?._id ?? product?.id ?? product?.slug ?? '').trim()
   if (!id) return null
   return { ...product, id }
 }
@@ -48,9 +76,9 @@ export default function WishlistButton({
   size = 'md',
   withLabel = false,
 }: WishlistButtonProps) {
-  const tBtn = useTranslations('buttons')
-  const tToast = useTranslations('toasts')
-  const tWL = useTranslations('wishlist')
+  const pathname = usePathname() || '/'
+  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr'
+  const t = TEXT[locale]
 
   const prefersReduced = useReducedMotion()
   const btnRef = useRef<HTMLButtonElement | null>(null)
@@ -88,45 +116,68 @@ export default function WishlistButton({
 
     try {
       navigator.vibrate?.(8)
-    } catch {}
+    } catch {
+      // no-op
+    }
 
-    const title = String(canonical.title ?? 'Product')
+    const title = String(canonical.title ?? t.fallbackProduct)
     const price = Number(canonical.price) || 0
 
     if (isWishlisted) {
       remove(pid)
-      setSr(tWL('removed'))
-      toast(tToast('removed_from_wishlist'), {
+      setSr(t.removed)
+
+      toast(t.removedFromWishlist, {
         icon: <HeartCrack size={18} className="text-gray-600" />,
         style: { borderRadius: '10px', background: '#111827', color: '#fff' },
       })
+
       try {
-        logEvent({ action: 'wishlist_remove', category: 'wishlist', label: `product_${pid}`, value: 1 })
-      } catch {}
+        logEvent({
+          action: 'wishlist_remove',
+          category: 'wishlist',
+          label: `product_${pid}`,
+          value: 1,
+        })
+      } catch {
+        // no-op
+      }
+
       return
     }
 
     if (count >= WISHLIST_LIMIT) {
       setShake(true)
-      setTimeout(() => setShake(false), 420)
-      setSr(tWL('limit_reached'))
-      toast.error(tWL('limit_reached'), {
+      window.setTimeout(() => setShake(false), 420)
+      setSr(t.limitReached)
+
+      toast.error(t.limitReached, {
         icon: <AlertTriangle size={18} className="text-amber-500" />,
       })
+
       return
     }
 
     add(canonical)
-    setSr(tWL('added'))
-    toast.success(tToast('added_to_wishlist'), {
+    setSr(t.added)
+
+    toast.success(t.addedToWishlist, {
       icon: <Heart size={18} className="text-red-500" />,
       style: { borderRadius: '10px', background: '#111827', color: '#fff' },
     })
+
     setRippler((k) => k + 1)
 
     try {
-      logEvent({ action: 'wishlist_add', category: 'wishlist', label: `product_${pid}`, value: 1 })
-    } catch {}
+      logEvent({
+        action: 'wishlist_add',
+        category: 'wishlist',
+        label: `product_${pid}`,
+        value: 1,
+      })
+    } catch {
+      // no-op
+    }
 
     try {
       trackAddToWishlist({
@@ -134,10 +185,12 @@ export default function WishlistButton({
         value: price,
         items: [{ item_id: pid, item_name: title, price, quantity: 1 }],
       })
-    } catch {}
+    } catch {
+      // no-op
+    }
   }
 
-  const ariaLabel = isWishlisted ? tBtn('remove_from_wishlist') : tBtn('add_to_wishlist')
+  const ariaLabel = isWishlisted ? t.removeFromWishlist : t.addToWishlist
 
   return (
     <>
@@ -166,7 +219,7 @@ export default function WishlistButton({
         title={ariaLabel}
         data-wishlisted={isWishlisted ? 'true' : 'false'}
       >
-        {!prefersReduced && isWishlisted && (
+        {!prefersReduced && isWishlisted ? (
           <motion.span
             key={rippler}
             className="pointer-events-none absolute inset-0 rounded-full"
@@ -176,14 +229,14 @@ export default function WishlistButton({
             style={{ boxShadow: '0 0 0 6px rgba(239,68,68,0.15)' }}
             aria-hidden
           />
-        )}
+        ) : null}
 
-        {isWishlisted && (
+        {isWishlisted ? (
           <span
             aria-hidden
             className="pointer-events-none absolute inset-0 rounded-full shadow-glow-accent"
           />
-        )}
+        ) : null}
 
         <Heart
           size={iconSize}
@@ -193,11 +246,9 @@ export default function WishlistButton({
           aria-hidden="true"
         />
 
-        {!floating && withLabel && (
-          <span className="ml-2 text-sm font-medium">
-            {isWishlisted ? tWL('title') : 'Wishlist'}
-          </span>
-        )}
+        {!floating && withLabel ? (
+          <span className="ml-2 text-sm font-medium">{t.wishlistTitle}</span>
+        ) : null}
       </motion.button>
     </>
   )

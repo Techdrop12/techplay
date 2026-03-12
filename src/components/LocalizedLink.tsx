@@ -1,6 +1,7 @@
 'use client'
 
 import NextLink, { type LinkProps } from 'next/link'
+import { usePathname } from 'next/navigation'
 import { forwardRef, type AnchorHTMLAttributes } from 'react'
 
 import type { UrlObject } from 'url'
@@ -23,11 +24,12 @@ function isAbsolute(href: string): boolean {
 
 function normalizeHref(
   href: string | UrlObject,
+  currentPathname: string,
   locale?: Locale,
   keepQuery = false,
   keepHash = false
 ): NextHref {
-  const resolvedLocale = locale ?? getCurrentLocale()
+  const resolvedLocale = locale ?? getCurrentLocale(currentPathname)
 
   if (typeof href === 'string') {
     if (isAbsolute(href) || href.startsWith('#')) return href
@@ -37,23 +39,7 @@ function normalizeHref(
   const nextHref: UrlObject = { ...href }
 
   if (typeof href.pathname === 'string' && href.pathname.trim() && !isAbsolute(href.pathname)) {
-    const queryString =
-      typeof href.search === 'string'
-        ? href.search
-        : href.query && Object.keys(href.query).length > 0
-          ? ''
-          : ''
-
-    const hash =
-      typeof href.hash === 'string' && href.hash.startsWith('#')
-        ? href.hash
-        : typeof href.hash === 'string' && href.hash
-          ? `#${href.hash}`
-          : ''
-
     nextHref.pathname = localizePath(href.pathname, resolvedLocale)
-    if (queryString) nextHref.search = queryString
-    if (hash) nextHref.hash = hash
   }
 
   return nextHref
@@ -63,7 +49,8 @@ const LocalizedLink = forwardRef<HTMLAnchorElement, Props>(function LocalizedLin
   { href, locale, keepQuery = false, keepHash = false, ...rest },
   ref
 ) {
-  const finalHref = normalizeHref(href, locale, keepQuery, keepHash)
+  const pathname = usePathname() || '/'
+  const finalHref = normalizeHref(href, pathname, locale, keepQuery, keepHash)
 
   return <NextLink ref={ref} href={finalHref} {...rest} />
 })

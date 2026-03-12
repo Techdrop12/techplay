@@ -8,13 +8,13 @@
 
 import { NextResponse } from 'next/server'
 
+import { serverEnv } from '@/env.server'
 import {
   type Order,
   type OrderItem,
   formatInvoiceData,
   renderInvoicePDFStream,
 } from '@/lib/pdf'
-import { serverEnv } from '@/env.server'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -141,11 +141,7 @@ function readCustomerField(
 }
 
 function readEmail(root: Record<string, unknown>, fallback = ''): string {
-  return (
-    getNonEmptyString(root.email) ||
-    getNonEmptyString(readCustomer(root).email) ||
-    fallback
-  )
+  return getNonEmptyString(root.email) || getNonEmptyString(readCustomer(root).email) || fallback
 }
 
 function readShipping(root: Record<string, unknown>): Record<string, unknown> {
@@ -199,11 +195,7 @@ function readItems(root: Record<string, unknown>): OrderItem[] {
     .map((item): OrderItem | null => {
       const it = getRecord(item)
 
-      const name =
-        getNonEmptyString(it.name) ||
-        getNonEmptyString(it.title) ||
-        'Article'
-
+      const name = getNonEmptyString(it.name) || getNonEmptyString(it.title) || 'Article'
       const price = Math.max(0, getNumber(it.price, 0))
       const quantity = Math.max(1, Math.floor(getNumber(it.quantity ?? it.qty, 1)))
       const taxRate =
@@ -283,10 +275,7 @@ export async function POST(req: Request) {
   const order = buildOrderFromBody(body)
 
   if (!Array.isArray(order.items) || order.items.length === 0) {
-    return NextResponse.json(
-      { error: 'Aucun article dans la commande.' },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: 'Aucun article dans la commande.' }, { status: 400 })
   }
 
   const data = formatInvoiceData(order, {
@@ -302,8 +291,7 @@ export async function POST(req: Request) {
   const { stream, filename } = await renderInvoicePDFStream(data, {
     brand: {
       name: serverEnv.BRAND_NAME || 'TechPlay',
-      address:
-        serverEnv.BRAND_ADDRESS || '42 rue de la Liberté\n75000 Paris\nFrance',
+      address: serverEnv.BRAND_ADDRESS || '42 rue de la Liberté\n75000 Paris\nFrance',
       website: serverEnv.BRAND_URL || '',
       email: serverEnv.BRAND_EMAIL || '',
       vatNumber: serverEnv.BRAND_VAT || '',

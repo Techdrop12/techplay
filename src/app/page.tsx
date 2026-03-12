@@ -1,4 +1,3 @@
-// src/app/page.tsx
 import dynamic from 'next/dynamic'
 import { Suspense, type CSSProperties } from 'react'
 

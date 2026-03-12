@@ -1,10 +1,12 @@
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+
+import { createOrder, getOrderByStripeEventId } from '../../../lib/db/orders.js'
+
 import type Stripe from 'stripe'
 
 import { serverEnv } from '@/env.server'
 import stripe from '@/lib/stripe'
-import { createOrder, getOrderByStripeEventId } from '../../../lib/db/orders.js'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -46,14 +48,10 @@ export async function POST(req: Request) {
         }
 
         const email =
-          session.customer_details?.email ||
-          (session.customer_email as string | null) ||
-          ''
+          session.customer_details?.email || (session.customer_email as string | null) || ''
 
         const total =
-          typeof session.amount_total === 'number'
-            ? session.amount_total / 100
-            : undefined
+          typeof session.amount_total === 'number' ? session.amount_total / 100 : undefined
 
         if (email) {
           await createOrder({
@@ -75,12 +73,10 @@ export async function POST(req: Request) {
 
       case 'payment_intent.payment_failed':
       case 'payment_intent.canceled': {
-        // Ici, on pourrait éventuellement marquer une commande comme échouée.
         break
       }
 
       default: {
-        // Pour les autres événements, on se contente d'accuser réception.
         break
       }
     }
