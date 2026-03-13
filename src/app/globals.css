@@ -241,7 +241,7 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    padding: 0.5rem 1rem;
+    padding: 0.6rem 1.1rem;
     border-radius: 0.75rem;
     font-weight: 600;
     transition:
@@ -363,8 +363,8 @@
   }
 
   .btn-lg {
-    padding: 0.75rem 1.5rem;
-    font-size: 1.0625rem;
+    padding: 0.9rem 1.6rem;
+    font-size: 1.08rem;
     border-radius: var(--radius-lg);
   }
 
@@ -393,6 +393,21 @@
 
   .section-spacing-sm {
     padding-block: var(--section-gap-sm);
+  }
+
+  @media (max-width: 640px) {
+    .btn,
+    .btn-primary,
+    .btn-premium {
+      min-height: 3.1rem;
+      padding-inline: 1.25rem;
+      font-size: 0.98rem;
+    }
+
+    .btn-primary,
+    .btn-premium {
+      width: 100%;
+    }
   }
 
   .skeleton {

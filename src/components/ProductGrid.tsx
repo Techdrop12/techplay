@@ -69,8 +69,8 @@ const GRID_COLS = {
 
 function getGridClasses(cols?: Cols): string {
   const safe = {
-    base: cols?.base ?? 2,
-    sm: cols?.sm ?? 3,
+    base: cols?.base ?? 1,
+    sm: cols?.sm ?? 2,
     md: cols?.md,
     lg: cols?.lg ?? 4,
     xl: cols?.xl,

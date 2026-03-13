@@ -131,9 +131,9 @@
     radial-gradient(ellipse 70% 50% at -5% 0%, hsl(var(--accent) / 0.04), transparent 50%);
   --glow-accent: 0 0 0 1px hsl(var(--accent) / 0.2), 0 0 36px hsl(var(--accent) / 0.1);
   --glow-accent-strong: 0 0 0 1px hsl(var(--accent) / 0.35), 0 0 28px hsl(var(--accent) / 0.2);
-  --gradient-hero: radial-gradient(ellipse 100% 80% at 50% -10%, hsl(var(--accent) / 0.18), transparent 55%),
-    radial-gradient(ellipse 80% 50% at 80% 50%, hsl(var(--accent) / 0.07), transparent 50%),
-    radial-gradient(ellipse 60% 40% at 10% 80%, hsl(var(--accent) / 0.05), transparent 45%);
+  --gradient-hero: radial-gradient(ellipse 120% 90% at 30% -5%, hsl(var(--accent) / 0.28), transparent 50%),
+    radial-gradient(ellipse 90% 60% at 85% 40%, hsl(var(--accent) / 0.12), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 5% 90%, hsl(var(--accent) / 0.08), transparent 45%);
 
   /* ==================== Elevation ================== */
   --elev-c: 0 0% 0%;

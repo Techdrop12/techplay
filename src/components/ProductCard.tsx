@@ -1,15 +1,16 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
-import { Star } from 'lucide-react'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { memo, useMemo, useState } from 'react'
 
 import type { Product } from '@/types/product'
 
+import AddToCartButton from '@/components/AddToCartButton'
 import FreeShippingBadge from '@/components/FreeShippingBadge'
 import Link from '@/components/LocalizedLink'
+import RatingStars from '@/components/RatingStars'
 import WishlistButton from '@/components/WishlistButton'
 import { pushDataLayer } from '@/lib/ga'
 import { getCurrentLocale } from '@/lib/i18n-routing'
@@ -42,6 +43,16 @@ function getImage(product: Product): string {
   }
 
   return '/og-image.jpg'
+}
+
+function getSecondImage(product: Product): string | null {
+  const pool: string[] = []
+  if (typeof product.image === 'string' && product.image.trim()) pool.push(product.image.trim())
+  if (Array.isArray(product.images)) pool.push(...product.images.filter((img): img is string => typeof img === 'string' && img.trim().length > 0))
+  if (Array.isArray(product.gallery)) pool.push(...product.gallery.filter((img): img is string => typeof img === 'string' && img.trim().length > 0))
+  const uniq = Array.from(new Set(pool)).map((url) => safeProductImageUrl(url))
+  if (uniq.length < 2) return null
+  return uniq[1]
 }
 
 function getTitle(product: Product): string {
@@ -103,6 +114,7 @@ function ProductCard({
   const title = useMemo(() => getTitle(product), [product])
   const description = useMemo(() => getDescription(product), [product])
   const image = useMemo(() => (imgError ? '/og-image.jpg' : getImage(product)), [product, imgError])
+  const secondImage = useMemo(() => getSecondImage(product), [product])
   const oldPrice = useMemo(() => getOldPrice(product), [product])
   const ratingValue = useMemo(() => getRatingValue(product), [product])
   const reviewsCount = useMemo(() => getReviewsCount(product), [product])
@@ -120,10 +132,12 @@ function ProductCard({
       ? {
           new: 'New',
           best: 'Best seller',
+          sale: 'Sale',
           lowStock: 'Low stock',
           outOfStock: 'Out of stock',
           inStock: 'In stock',
           seeProduct: 'View product',
+          addToCart: 'Add to cart',
           reviews: 'reviews',
           productAria: `Product: ${title}`,
           save: 'Save',
@@ -131,10 +145,12 @@ function ProductCard({
       : {
           new: 'Nouveau',
           best: 'Best seller',
+          sale: 'Promo',
           lowStock: 'Stock faible',
           outOfStock: 'Rupture',
           inStock: 'En stock',
           seeProduct: 'Voir le produit',
+          addToCart: 'Ajouter au panier',
           reviews: 'avis',
           productAria: `Produit : ${title}`,
           save: 'Économie',
@@ -217,14 +233,17 @@ function ProductCard({
           className="block rounded-[inherit] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/80"
           onClick={handleClick}
         >
-          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[1.45rem] bg-[hsl(var(--surface-2))]">
+          <div className="relative aspect-[4/3] sm:aspect-[4/3] w-full overflow-hidden rounded-[1.45rem] bg-[hsl(var(--surface-2))]">
             <div className="absolute inset-0">
               <Image
                 src={image}
                 alt={title}
                 fill
                 sizes="(min-width:1280px) 22vw, (min-width:1024px) 25vw, (min-width:640px) 33vw, 50vw"
-                className="object-cover transition-transform duration-500 ease-[var(--ease-smooth)] will-change-transform group-hover:scale-[1.06]"
+                className={cn(
+                  'object-cover transition-transform duration-500 ease-[var(--ease-smooth)] will-change-transform group-hover:scale-[1.06]',
+                  secondImage && 'group-hover:opacity-0 transition-opacity duration-300'
+                )}
                 priority={priority}
                 placeholder="blur"
                 blurDataURL={BLUR_DATA_URL}
@@ -233,10 +252,21 @@ function ProductCard({
                 onError={() => setImgError(true)}
                 draggable={false}
               />
+              {secondImage ? (
+                <Image
+                  src={secondImage}
+                  alt=""
+                  fill
+                  sizes="(min-width:1280px) 22vw, (min-width:1024px) 25vw, (min-width:640px) 33vw, 50vw"
+                  className="absolute inset-0 object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-hover:scale-[1.06] will-change-transform ease-[var(--ease-smooth)]"
+                  aria-hidden
+                  draggable={false}
+                />
+              ) : null}
 
               {!imgLoaded && (
                 <div
-                  className="absolute inset-0 animate-pulse bg-gradient-to-br from-slate-200/75 via-slate-100/40 to-white/10 dark:from-slate-800/65 dark:via-slate-900/40 dark:to-slate-950/80"
+                  className="absolute inset-0 animate-pulse bg-gradient-to-br from-[hsl(var(--surface-2))] to-[hsl(var(--surface))]"
                   aria-hidden="true"
                 />
               )}
@@ -272,12 +302,11 @@ function ProductCard({
               ) : null}
             </div>
 
-            {ratingValue > 0 ? (
-              <div className="absolute right-3 top-3 rounded-full border border-white/20 bg-black/50 px-2.5 py-1.5 text-[11px] shadow-[0_14px_40px_rgba(15,23,42,0.8)] backdrop-blur-xl sm:right-4 sm:top-4">
-                <span className="inline-flex items-center gap-1.5 text-amber-50">
-                  <Star size={12} className="fill-amber-400 text-amber-400 drop-shadow-[0_0_12px_rgba(251,191,36,0.8)]" />
-                  <span className="font-semibold tabular-nums">{ratingValue.toFixed(1)}</span>
-                </span>
+            {(ratingValue > 0 || reviewsCount > 0) ? (
+              <div className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full border border-white/20 bg-black/50 px-2.5 py-1.5 text-[11px] shadow-[0_14px_40px_rgba(15,23,42,0.8)] backdrop-blur-xl sm:right-4 sm:top-4">
+                <RatingStars value={ratingValue} size="xs" editable={false} filledClassName="text-amber-400" emptyClassName="text-white/40" />
+                <span className="font-semibold tabular-nums text-white">{ratingValue > 0 ? ratingValue.toFixed(1) : '—'}</span>
+                {reviewsCount > 0 ? <span className="text-white/80">({reviewsCount})</span> : null}
               </div>
             ) : null}
 
@@ -294,39 +323,34 @@ function ProductCard({
           </div>
 
           <div className="p-4 sm:p-5">
-            <div className="min-h-[3.25rem]">
-              {product.brand || product.category ? (
-                <p className="mb-1 text-[11px] uppercase tracking-[0.18em] text-token-text/60">
-                  {[product.brand, product.category].filter(Boolean).join(' · ')}
-                </p>
-              ) : null}
+            {/* Preuve sociale : rating + reviews en premier */}
+            {(ratingValue > 0 || reviewsCount > 0) ? (
+              <div className="mb-2 flex flex-wrap items-center gap-2">
+                <RatingStars value={ratingValue} size="sm" editable={false} filledClassName="text-amber-500" emptyClassName="text-[hsl(var(--border))]" />
+                <span className="text-sm font-semibold tabular-nums text-[hsl(var(--text))]">
+                  {ratingValue > 0 ? ratingValue.toFixed(1) : '—'}
+                </span>
+                {reviewsCount > 0 ? (
+                  <span className="text-[13px] text-token-text/70">({reviewsCount} {t.reviews})</span>
+                ) : null}
+              </div>
+            ) : null}
 
-              <h3
-                className="line-clamp-2 text-[15px] font-semibold text-gray-900 dark:text-white sm:text-[17px]"
-                title={title}
-              >
-                {title}
-              </h3>
-            </div>
-
-            {description ? (
-              <p className="mt-2 line-clamp-2 text-[13px] text-gray-600 dark:text-gray-400">
-                {description}
+            {product.brand || product.category ? (
+              <p className="mb-1 text-[11px] font-medium uppercase tracking-[0.18em] text-token-text/55">
+                {[product.brand, product.category].filter(Boolean).join(' · ')}
               </p>
             ) : null}
 
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              {reviewsCount > 0 ? (
-                <p className="text-[11px] text-token-text/70">
-                  {ratingValue.toFixed(1)} · {reviewsCount} {t.reviews}
-                </p>
-              ) : null}
-
-              <FreeShippingBadge price={product.price} minimal />
-            </div>
+            <h3
+              className="line-clamp-2 text-[15px] font-bold leading-snug text-[hsl(var(--text))] sm:text-[17px]"
+              title={title}
+            >
+              {title}
+            </h3>
 
             <div
-              className="mt-4 flex flex-wrap items-end gap-3"
+              className="mt-3 flex flex-wrap items-baseline gap-2"
               itemProp="offers"
               itemScope
               itemType="https://schema.org/Offer"
@@ -337,42 +361,22 @@ function ProductCard({
                 itemProp="availability"
                 href={outOfStock ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock'}
               />
-
-              <span className="text-lg font-extrabold tracking-tight text-[hsl(var(--accent))] sm:text-xl">
+              <span className="text-xl font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-2xl">
                 {formatPrice(product.price)}
               </span>
-
-              {hasDiscount ? (
+              {hasDiscount && typeof oldPrice === 'number' ? (
                 <>
-                  <span className="text-xs text-gray-400 line-through dark:text-gray-500">
+                  <span className="text-sm font-medium text-token-text/50 line-through">
                     {formatPrice(oldPrice)}
                   </span>
-
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100/80 px-2 py-[3px] text-[11px] font-semibold text-emerald-800 shadow-[0_8px_24px_rgba(16,185,129,0.45)] dark:bg-emerald-900/40 dark:text-emerald-200">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(34,197,94,0.5)]" />
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--accent)/0.15)] px-2 py-[2px] text-[11px] font-semibold text-[hsl(var(--accent))]">
                     {t.save} {formatPrice(oldPrice - product.price)}
                   </span>
                 </>
               ) : null}
             </div>
 
-            <div className="mt-4 flex items-center justify-between gap-3">
-              <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[hsl(var(--accent))]">
-                {t.seeProduct}
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                  className="transition-transform duration-200 group-hover:translate-x-0.5"
-                >
-                  <path
-                    fill="currentColor"
-                    d="M13.172 12L8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"
-                  />
-                </svg>
-              </span>
-
+            <div className="mt-3 flex flex-wrap items-center gap-2">
               <span
                 className={cn(
                   'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium',
@@ -383,9 +387,23 @@ function ProductCard({
                       : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
                 )}
               >
-                <span className="h-1.5 w-1.5 rounded-full bg-current/80" />
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-current/80" />
                 {outOfStock ? t.outOfStock : lowStock ? t.lowStock : t.inStock}
               </span>
+              <FreeShippingBadge price={product.price} minimal />
+            </div>
+
+            <div className="mt-4">
+              <AddToCartButton
+                product={{ _id: product._id, slug: product.slug, title, image, price: product.price }}
+                stopPropagation
+                size="sm"
+                variant="solid"
+                fullWidth
+                idleText={t.addToCart}
+                className="rounded-xl font-semibold"
+                ariaLabel={`${t.addToCart} — ${title}`}
+              />
             </div>
           </div>
         </Link>

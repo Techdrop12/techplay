@@ -88,22 +88,50 @@ const T = {
         ],
       },
       {
-        title: 'Support',
+        title: 'À propos',
         links: [
-          { label: 'Contact', href: '/contact' },
-          { label: 'FAQ', href: '/#faq' },
-          { label: 'Suivi de commande', href: '/commande' },
-          { label: 'Blog', href: '/blog' },
-          { label: 'Promo du jour', href: '/products?promo=1' },
+          { label: 'Qui sommes-nous', href: '/#about' },
+          { label: 'Notre histoire', href: '/#about' },
         ],
       },
       {
-        title: 'Légal',
+        title: 'Support',
+        links: [
+          { label: 'FAQ', href: '/#faq' },
+          { label: 'Suivi de commande', href: '/commande' },
+          { label: 'Blog', href: '/blog' },
+        ],
+      },
+      {
+        title: 'Contact',
+        links: [
+          { label: 'Nous contacter', href: '/contact' },
+        ],
+      },
+      {
+        title: 'Retours',
+        links: [
+          { label: 'Retours & échanges', href: '/cgv' },
+        ],
+      },
+      {
+        title: 'Livraison',
+        links: [
+          { label: 'Infos livraison', href: '/cgv' },
+        ],
+      },
+      {
+        title: 'Confidentialité',
+        links: [
+          { label: 'Politique de confidentialité', href: '/confidentialite' },
+          { label: 'Préférences cookies', href: '#cookies' },
+        ],
+      },
+      {
+        title: 'Mentions & CGV',
         links: [
           { label: 'Mentions légales', href: '/mentions-legales' },
-          { label: 'Confidentialité', href: '/confidentialite' },
-          { label: 'CGV', href: '/cgv' },
-          { label: 'Préférences cookies', href: '#cookies' },
+          { label: 'Conditions générales', href: '/cgv' },
         ],
       },
     ] as NavGroup[],
@@ -145,7 +173,7 @@ const T = {
     legalTitle: 'Legal',
     defaultGroups: [
       {
-        title: 'Store',
+        title: 'Shop',
         links: [
           { label: 'Home', href: '/' },
           { label: 'Categories', href: '/categorie' },
@@ -155,22 +183,50 @@ const T = {
         ],
       },
       {
-        title: 'Support',
+        title: 'About',
         links: [
-          { label: 'Contact', href: '/contact' },
-          { label: 'FAQ', href: '/#faq' },
-          { label: 'Order tracking', href: '/commande' },
-          { label: 'Blog', href: '/blog' },
-          { label: 'Daily deal', href: '/products?promo=1' },
+          { label: 'About us', href: '/#about' },
+          { label: 'Our story', href: '/#about' },
         ],
       },
       {
-        title: 'Legal',
+        title: 'Support',
+        links: [
+          { label: 'FAQ', href: '/#faq' },
+          { label: 'Order tracking', href: '/commande' },
+          { label: 'Blog', href: '/blog' },
+        ],
+      },
+      {
+        title: 'Contact',
+        links: [
+          { label: 'Contact us', href: '/contact' },
+        ],
+      },
+      {
+        title: 'Returns',
+        links: [
+          { label: 'Returns & refunds', href: '/cgv' },
+        ],
+      },
+      {
+        title: 'Shipping',
+        links: [
+          { label: 'Shipping info', href: '/cgv' },
+        ],
+      },
+      {
+        title: 'Privacy',
+        links: [
+          { label: 'Privacy policy', href: '/confidentialite' },
+          { label: 'Cookie preferences', href: '#cookies' },
+        ],
+      },
+      {
+        title: 'Terms',
         links: [
           { label: 'Legal notice', href: '/mentions-legales' },
-          { label: 'Privacy', href: '/confidentialite' },
           { label: 'Terms & conditions', href: '/cgv' },
-          { label: 'Cookie preferences', href: '#cookies' },
         ],
       },
     ] as NavGroup[],
@@ -543,7 +599,7 @@ export default function Footer({
             </ul>
           </div>
 
-          <div className="grid grid-cols-2 gap-8 md:col-span-7 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-6 md:col-span-7 sm:grid-cols-3 lg:grid-cols-4">
             {navGroups.map((group) => (
               <nav key={group.title} aria-label={group.title} className="space-y-3">
                 <h3 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-token-text/60">
@@ -616,16 +672,16 @@ export default function Footer({
             ))}
 
             {!compact ? (
-              <div className="col-span-2 space-y-5 sm:col-span-1">
+              <div className="col-span-2 space-y-5 sm:col-span-3 lg:col-span-4 lg:mt-4 lg:border-t lg:border-[hsl(var(--border))] lg:pt-8">
                 <form
                   onSubmit={onSubscribe}
                   noValidate
-                  className="space-y-3"
+                  className="space-y-3 max-w-md"
                   aria-label={t.newsletterFormAria}
                   aria-busy={status === 'loading'}
                   aria-describedby={message ? messageId : undefined}
                 >
-                  <h3 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-token-text/60">
+                  <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-[hsl(var(--text))]">
                     {t.newsletterTitle}
                   </h3>
 

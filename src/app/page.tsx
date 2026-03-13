@@ -8,10 +8,12 @@ import ClientTrackingScript from '@/components/ClientTrackingScript'
 import Link from '@/components/LocalizedLink'
 import TrustBadges from '@/components/TrustBadges'
 import { getCategories } from '@/lib/categories'
+import { getPosts } from '@/lib/blog'
 import { BRAND } from '@/lib/constants'
 import { getBestProducts, getRecommendedPacks } from '@/lib/data'
 
 const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'))
+const BlogCard = dynamic(() => import('@/components/blog/BlogCard'))
 const BestProducts = dynamic(() => import('@/components/BestProducts'), {
   loading: () => <SectionSkeleton title="…" />,
 })
@@ -46,13 +48,13 @@ const STR = {
     metaDescription:
       'Découvrez les meilleures offres TechPlay : accessoires high-tech, gaming, audio et packs exclusifs sélectionnés pour la performance, le style et la fiabilité.',
     heroAria: 'Carrousel des produits en vedette',
-    heroBadge: 'Nouvelle collection',
-    heroTitle: 'Un setup haut de gamme, sans compromis.',
+    heroBadge: 'TechPlay',
+    heroTitle: 'Gaming Gear pour les vrais joueurs.',
     heroSubtitle:
-      'Des accessoires et packs pensés pour la performance, la fiabilité et une esthétique premium — de la sélection au déballage.',
-    heroPrimaryCta: 'Découvrir les packs',
-    heroSecondaryCta: 'Voir tous les produits',
-    heroMeta: 'Livraison 48–72 h · Paiement sécurisé · Retours 30 j',
+      'Équipement gaming haute performance pour les joueurs compétitifs — casques, souris, claviers et packs au meilleur rapport qualité/prix.',
+    heroPrimaryCta: 'Acheter',
+    heroSecondaryCta: 'Explorer les packs',
+    heroMeta: 'Livraison rapide · Garantie 2 ans · Paiement sécurisé',
     catsKicker: 'Explorer',
     catsTitle: 'Catégories incontournables',
     catsSub: 'Des sélections ciblées pour trouver vite le bon setup.',
@@ -78,19 +80,24 @@ const STR = {
     noscriptProducts: 'Voir les produits',
     productsSectionLabel: 'Sélection de produits populaires',
     packsSectionLabel: 'Sélection de packs recommandés',
+    blogKicker: 'Guides & SEO',
+    blogTitle: 'Blog gaming & setup',
+    blogSub: 'Meilleurs claviers 2026, guides setup, astuces FPS — pour ramener du trafic et convertir.',
+    blogCta: 'Voir tout le blog',
+    blogSectionLabel: 'Derniers articles du blog',
   },
   en: {
     metaTitle: 'TechPlay – High-tech store & exclusive bundles',
     metaDescription:
       'Discover the best TechPlay offers: high-tech accessories, gaming, audio gear and exclusive bundles selected for performance, style and reliability.',
     heroAria: 'Featured products carousel',
-    heroBadge: 'New collection',
-    heroTitle: 'A high-end setup, no compromises.',
+    heroBadge: 'TechPlay',
+    heroTitle: 'Gaming Gear For Real Players.',
     heroSubtitle:
-      'Accessories and bundles curated for performance, reliability and a premium feel — from selection to unboxing.',
-    heroPrimaryCta: 'Discover bundles',
-    heroSecondaryCta: 'View all products',
-    heroMeta: '48–72 h delivery · Secure payment · 30-day returns',
+      'High-performance gaming equipment for competitive players — headsets, mice, keyboards and value packs, best price/performance.',
+    heroPrimaryCta: 'Shop Now',
+    heroSecondaryCta: 'Explore Packs',
+    heroMeta: 'Fast delivery · 2-year warranty · Secure payment',
     catsKicker: 'Explore',
     catsTitle: 'Must-have categories',
     catsSub: 'Curated selections to find the right setup faster.',
@@ -116,6 +123,11 @@ const STR = {
     noscriptProducts: 'View products',
     productsSectionLabel: 'Popular products selection',
     packsSectionLabel: 'Recommended bundles selection',
+    blogKicker: 'Guides & SEO',
+    blogTitle: 'Gaming blog & guides',
+    blogSub: 'Best gaming keyboards 2026, setup guides, how to improve aim in FPS — drive Google traffic and convert.',
+    blogCta: 'View all articles',
+    blogSectionLabel: 'Latest blog posts',
   },
 } as const
 
@@ -374,9 +386,10 @@ function SectionSkeleton({ title }: { title: string }) {
 export async function HomePageView({ locale }: { locale: HomeLocale }) {
   const t = STR[locale]
 
-  const [bestProductsResult, recommendedPacksResult] = await Promise.allSettled([
+  const [bestProductsResult, recommendedPacksResult, blogResult] = await Promise.allSettled([
     getBestProducts(),
     getRecommendedPacks(),
+    getPosts({ limit: 3, sort: 'newest', publishedOnly: true }),
   ])
 
   const bestProducts: Product[] =
@@ -384,6 +397,29 @@ export async function HomePageView({ locale }: { locale: HomeLocale }) {
 
   const recommendedPacks: Pack[] =
     recommendedPacksResult.status === 'fulfilled' ? recommendedPacksResult.value : []
+
+  const blogData = blogResult.status === 'fulfilled' ? blogResult.value : null
+  const rawBlogPosts = Array.isArray(blogData?.items) ? blogData.items : []
+  const blogPosts = rawBlogPosts.slice(0, 3).map((post: unknown, idx: number) => {
+    const p = post && typeof post === 'object' ? (post as Record<string, unknown>) : {}
+    const slug = String(p?.slug ?? '')
+    const title = String(p?.title ?? 'Article')
+    const description = String(p?.description ?? p?.excerpt ?? '')
+    const image = String(p?.image ?? p?.coverImage ?? '/og-image.jpg')
+    const createdAt = p?.publishedAt ?? p?.createdAt ?? new Date().toISOString()
+    const tags = Array.isArray(p?.tags) ? p.tags : []
+    return {
+      _id: String(p?._id ?? p?.id ?? `post-${idx}`),
+      slug: slug || `post-${idx}`,
+      title,
+      content: '',
+      description,
+      createdAt: typeof createdAt === 'string' ? createdAt : new Date(createdAt as Date).toISOString(),
+      image,
+      author: String(p?.author ?? 'TechPlay'),
+      tags,
+    }
+  })
 
   const itemListJsonLd =
     bestProducts.length > 0
@@ -429,51 +465,57 @@ export async function HomePageView({ locale }: { locale: HomeLocale }) {
           className="motion-section relative overflow-hidden rounded-[var(--radius-3xl)] bg-[length:100%_100%]"
           style={{ backgroundImage: 'var(--gradient-hero)' }}
         >
-          <div className="container-app relative z-10 grid gap-12 px-6 py-14 sm:py-16 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1.1fr)] lg:items-center lg:gap-16">
-            <div className="space-y-7 sm:space-y-8">
-              <span className="text-[var(--step-subtitle)] font-semibold uppercase tracking-[0.2em] text-[hsl(var(--accent))]">
+          <div className="container-app relative z-10 grid gap-10 px-6 py-12 sm:py-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] lg:items-center lg:gap-14 lg:py-16">
+            <div className="space-y-6 sm:space-y-7">
+              <span className="inline-block text-[var(--step-subtitle)] font-bold uppercase tracking-[0.22em] text-[hsl(var(--accent))]">
                 {t.heroBadge}
               </span>
 
-              <h2 className="text-balance text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl md:text-[2.75rem] [line-height:var(--heading-leading)]">
+              <h2 className="text-balance text-3xl font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-4xl md:text-5xl lg:text-[2.75rem] [line-height:var(--heading-leading)] [letter-spacing:var(--heading-tracking)]">
                 {t.heroTitle}
               </h2>
 
-              <p className="max-w-xl text-[var(--step-0)] leading-relaxed text-token-text/75">
+              <p className="max-w-lg text-[var(--step-0)] font-medium leading-snug text-token-text/85">
                 {t.heroSubtitle}
               </p>
 
-              <div className="flex flex-wrap items-center gap-4 pt-2">
+              <div className="flex flex-wrap items-center gap-3 pt-1">
                 <Link
-                  href="/products/packs"
+                  href="/products"
                   prefetch={false}
-                  className="btn btn-premium btn-lg inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-[var(--step-0)] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)]"
+                  className="btn btn-premium btn-lg inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-[var(--step-0)] font-bold focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)]"
                   data-gtm="home_hero_primary"
                 >
                   {t.heroPrimaryCta}
                 </Link>
-
                 <Link
-                  href="/products"
+                  href="/products/packs"
                   prefetch={false}
-                  className="btn btn-outline btn-lg inline-flex items-center gap-2 rounded-full border-[hsl(var(--border))] px-8 py-3.5 text-[var(--step-0)] hover:bg-[hsl(var(--surface-2))] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.3)]"
+                  className="btn btn-outline btn-lg inline-flex items-center gap-2 rounded-full border-[hsl(var(--border))] px-8 py-3.5 text-[var(--step-0)] font-semibold hover:bg-[hsl(var(--surface-2))] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.3)]"
                   data-gtm="home_hero_secondary"
                 >
                   {t.heroSecondaryCta}
                 </Link>
               </div>
 
-              <p className="pt-2 text-[var(--step-subtitle)] font-medium uppercase tracking-[0.2em] text-token-text/55">
-                {t.heroMeta}
-              </p>
+              <TrustBadges
+                variant="pill"
+                compact
+                className="!mt-4 !border-0 !bg-transparent !py-0 [&_ul]:!max-w-none [&_ul]:!px-0 [&_ul]:grid-cols-3"
+                badges={[
+                  { icon: 'truck', label: locale === 'en' ? 'Fast delivery' : 'Livraison rapide' },
+                  { icon: 'shield', label: locale === 'en' ? '2-year warranty' : 'Garantie 2 ans' },
+                  { icon: 'lock', label: locale === 'en' ? 'Secure payment' : 'Paiement sécurisé' },
+                ]}
+              />
             </div>
 
-            <div className="relative">
-              <div className="pointer-events-none absolute -inset-4 rounded-[var(--radius-3xl)] bg-[radial-gradient(ellipse_80%_80%_at_50%_0%,hsl(var(--accent)/.08),transparent_60%)]" />
+            <div className="relative min-h-[280px] sm:min-h-[320px] lg:min-h-[380px]">
+              <div className="pointer-events-none absolute -inset-4 rounded-[var(--radius-3xl)] bg-[radial-gradient(ellipse_80%_80%_at_50%_0%,hsl(var(--accent)/.12),transparent_55%)]" />
 
-              <div className="relative overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-black/80 shadow-[0_32px_80px_rgba(0,0,0,0.4)]">
-                <Suspense fallback={<div className="skeleton h-48 rounded-[var(--radius-2xl)] sm:h-60 lg:h-80" />}>
-                  <HeroCarousel overlayOpacity={0.4} textSize="lg" />
+              <div className="relative h-full min-h-[280px] overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/95 shadow-[var(--shadow-xl)] sm:min-h-[320px] lg:min-h-[380px]">
+                <Suspense fallback={<div className="skeleton h-full min-h-[280px] rounded-[var(--radius-2xl)] sm:min-h-[320px] lg:min-h-[380px]" />}>
+                  <HeroCarousel overlayOpacity={0.25} textSize="xl" />
                   <noscript>
                     <p className="px-4 py-3 text-sm text-token-text/80">
                       <a href="/products" className="underline underline-offset-4">
@@ -514,6 +556,50 @@ export async function HomePageView({ locale }: { locale: HomeLocale }) {
             <Suspense fallback={<SectionSkeleton title={t.packsTitle} />}>
               <PacksSection packs={recommendedPacks} />
             </Suspense>
+          </div>
+        </section>
+
+        <section
+          id="blog"
+          aria-label={t.blogSectionLabel}
+          className="motion-section section-spacing-sm"
+          style={lazySectionStyle600}
+        >
+          <SectionHeader kicker={t.blogKicker} title={t.blogTitle} sub={t.blogSub} />
+          <div className="mt-8">
+            {blogPosts.length > 0 ? (
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {blogPosts.map((post) => (
+                  <BlogCard key={post._id} article={post} />
+                ))}
+              </div>
+            ) : (
+              <div className="card rounded-[var(--radius-2xl)] border-[hsl(var(--border))] p-8 text-center">
+                <p className="text-token-text/70 mb-4">
+                  {locale === 'en'
+                    ? 'Best gaming keyboards 2026, setup guides, FPS tips — articles coming soon.'
+                    : 'Meilleurs claviers gaming 2026, guides setup, astuces FPS — articles à venir.'}
+                </p>
+                <Link
+                  href="/blog"
+                  prefetch={false}
+                  className="btn-premium inline-flex rounded-full px-6 py-2.5 text-sm font-semibold"
+                >
+                  {t.blogCta}
+                </Link>
+              </div>
+            )}
+            {blogPosts.length > 0 && (
+              <div className="mt-8 text-center">
+                <Link
+                  href="/blog"
+                  prefetch={false}
+                  className="btn-outline inline-flex rounded-full px-6 py-2.5 text-sm font-semibold"
+                >
+                  {t.blogCta}
+                </Link>
+              </div>
+            )}
           </div>
         </section>
 

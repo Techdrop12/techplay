@@ -200,7 +200,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   const q = opts.q
   const page = opts.page
 
-  const baseTitle = 'Blog TechPlay – Conseils et nouveautés'
+  const baseTitle = 'Blog Gaming & Setup – Best Keyboards 2026, Guides, FPS Tips | TechPlay'
   const title = q
     ? `Résultats pour “${q}” – Page ${page}`
     : page > 1
@@ -209,7 +209,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
 
   const description = q
     ? `Articles correspondant à « ${q} » sur le blog TechPlay.`
-    : "Guide d'achat, tests et actualités high-tech. Conseils produits, bons plans et nouveautés pour bien choisir sur TechPlay."
+    : 'Meilleurs claviers gaming 2026, guides setup, comment améliorer son aim en FPS. Articles éditoriaux pour ramener du trafic Google et convertir sur TechPlay.'
 
   const sp = new URLSearchParams()
   if (q) sp.set('q', q)
@@ -282,13 +282,21 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
   ])
 
   return (
-    <main className="mx-auto max-w-7xl px-4 pt-28 pb-16 sm:px-6 sm:pt-32 sm:pb-20 lg:px-8" aria-labelledby="blog-title">
-      <h1
-        id="blog-title"
-        className="mb-6 text-center text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:mb-8 sm:text-4xl lg:text-5xl"
-      >
-        {q ? `Résultats pour “${q}”` : 'Nos articles'}
-      </h1>
+    <main className="mx-auto max-w-7xl px-4 pt-20 pb-16 sm:px-6 sm:pt-24 sm:pb-20 lg:px-8" aria-labelledby="blog-title">
+      <header className="mb-12 text-center sm:mb-14">
+        <p className="text-[var(--step-subtitle)] font-semibold uppercase tracking-[0.2em] text-[hsl(var(--accent))]">
+          Guides & actualités
+        </p>
+        <h1
+          id="blog-title"
+          className="mt-2 text-3xl font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-4xl lg:text-5xl [letter-spacing:var(--heading-tracking)]"
+        >
+          {q ? `Résultats pour « ${q} »` : 'Blog gaming & setup'}
+        </h1>
+        <p className="mx-auto mt-4 max-w-2xl text-[var(--step-0)] leading-relaxed text-token-text/75">
+          {q ? 'Articles correspondant à votre recherche.' : 'Meilleurs claviers 2026, guides setup, astuces FPS — contenu éditorial pour ramener du trafic et convertir.'}
+        </p>
+      </header>
 
       <form
         role="search"
@@ -343,11 +351,16 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
       </form>
 
       {posts.length === 0 ? (
-        <p className="rounded-[1.25rem] border border-white/10 bg-[hsl(var(--surface))]/50 py-12 text-center text-[15px] text-gray-500 dark:text-gray-400" role="status" aria-live="polite">
-          Aucun article {q ? `pour “${q}”` : 'disponible'}.
-        </p>
+        <div className="card rounded-[var(--radius-2xl)] py-16 text-center" role="status" aria-live="polite">
+          <p className="text-[var(--step-0)] text-token-text/70">
+            Aucun article {q ? `pour « ${q} »` : 'disponible'}.
+          </p>
+          <p className="mt-2 text-[13px] text-token-text/60">
+            Best gaming keyboard 2026, gaming setup guide, how to improve aim in FPS — bientôt en ligne.
+          </p>
+        </div>
       ) : (
-        <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8" aria-label="Liste des articles">
+        <section className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10" aria-label="Liste des articles">
           {posts.map((post, idx) => (
             <BlogCard
               key={post._id || post.slug || `post-${idx}`}
