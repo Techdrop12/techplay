@@ -39,6 +39,7 @@ import {
 import { DEFAULT_LOCALE, isLocale, type AppLocale } from '@/lib/language'
 import { logEvent } from '@/lib/logEvent'
 import { pixelViewContent } from '@/lib/meta-pixel'
+import { safeProductImageUrl } from '@/lib/safeProductImage'
 import { cn, formatPrice } from '@/lib/utils'
 
 interface Props {
@@ -83,9 +84,10 @@ function buildGallery(product: ProductLike): string[] {
     ...(Array.isArray(product.gallery) ? product.gallery : []),
   ]
 
-  return Array.from(
+  const urls = Array.from(
     new Set(pool.filter((item): item is string => typeof item === 'string' && item.trim().length > 0))
   ).slice(0, 8)
+  return urls.map((url) => safeProductImageUrl(url))
 }
 
 function computeAggregate(
@@ -239,7 +241,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
   const brand = readString(product.brand)
   const category = readString(product.category)
   const sku = readString(source.sku)
-  const image = readString(product.image) || '/og-image.jpg'
+  const image = safeProductImageUrl(readString(product.image)) || '/og-image.jpg'
   const price = Math.max(0, toNum(product.price) ?? 0)
   const oldPrice = toNum(product.oldPrice)
   const rating = toNum(product.rating)

@@ -45,12 +45,13 @@ function readPostString(post: unknown, key: 'slug' | 'title' | '_id'): string {
 }
 
 type PageProps = {
-  searchParams?: SearchParams
+  searchParams?: Promise<SearchParams>
 }
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
-  const q = readQueryValue(searchParams, 'q').trim()
-  const page = readPositiveInt(searchParams, 'page', 1)
+  const resolved = searchParams ? await searchParams : undefined
+  const q = readQueryValue(resolved, 'q').trim()
+  const page = readPositiveInt(resolved, 'page', 1)
 
   const baseTitle = 'Blog TechPlay – Conseils et nouveautés'
   const title = q
@@ -82,13 +83,14 @@ export default async function BlogPage({ searchParams }: PageProps) {
   const acceptLang = (await headers()).get('accept-language') || ''
   const locale: Locale = cookieLocale && isLocale(cookieLocale) ? cookieLocale : pickBestLocale(acceptLang)
 
-  const page = readPositiveInt(searchParams, 'page', 1)
-  const limit = readPositiveInt(searchParams, 'limit', 12, 24)
+  const resolved = searchParams ? await searchParams : undefined
+  const page = readPositiveInt(resolved, 'page', 1)
+  const limit = readPositiveInt(resolved, 'limit', 12, 24)
 
-  const q = readQueryValue(searchParams, 'q').trim()
-  const tag = readQueryValue(searchParams, 'tag').trim()
-  const category = readQueryValue(searchParams, 'category').trim()
-  const sort = readQueryValue(searchParams, 'sort').trim() || 'newest'
+  const q = readQueryValue(resolved, 'q').trim()
+  const tag = readQueryValue(resolved, 'tag').trim()
+  const category = readQueryValue(resolved, 'category').trim()
+  const sort = readQueryValue(resolved, 'sort').trim() || 'newest'
 
   const requestParams = {
     page,

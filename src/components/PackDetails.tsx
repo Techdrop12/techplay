@@ -5,9 +5,11 @@ import Image from 'next/image'
 
 import type { Pack } from '@/types/product'
 
+import AddToCartButton from '@/components/AddToCartButton'
 import ProductTags from '@/components/ProductTags'
 import StarsRating from '@/components/StarsRating'
 import WishlistButton from '@/components/WishlistButton'
+import { safeProductImageUrl } from '@/lib/safeProductImage'
 import { formatPrice } from '@/lib/utils'
 
 
@@ -40,7 +42,7 @@ export default function PackDetails({ pack }: Props) {
       {/* Image */}
       <div className="relative w-full aspect-square rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-md">
         <Image
-          src={image}
+          src={safeProductImageUrl(image)}
           alt={`Image du pack ${title}`}
           fill
           className="object-cover"
@@ -87,6 +89,20 @@ export default function PackDetails({ pack }: Props) {
             image,
           }}
           floating={false}
+        />
+
+        {/* Ajouter au panier */}
+        <AddToCartButton
+          product={{
+            _id,
+            slug: slug ?? _id,
+            title,
+            price,
+            image: safeProductImageUrl(image),
+            quantity: 1,
+          }}
+          fullWidth
+          idleText="Ajouter le pack au panier"
         />
 
         {/* Description */}

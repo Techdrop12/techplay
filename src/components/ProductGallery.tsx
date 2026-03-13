@@ -5,6 +5,8 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { safeProductImageUrl } from '@/lib/safeProductImage';
+
 const BLUR = 'data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=';
 const PLACEHOLDER = '/default.jpg';
 
@@ -33,17 +35,19 @@ export default function ProductGallery({
 }: ProductGalleryProps) {
   const prefersReducedMotion = useReducedMotion();
 
-  /** Normalisation des médias (string -> {src, kind:'image'}) */
+  /** Normalisation des médias (string -> {src, kind:'image'}) + fallback pour URLs cassées (ex. fakestoreapi) */
   const media = useMemo(() => {
     const arr = Array.isArray(images) ? images : [];
     return arr
       .filter(Boolean)
-      .map((it) =>
-        typeof it === 'string'
-          ? { src: it, kind: 'image' }
-          : { src: it?.src, kind: it?.kind === 'video' ? 'video' : 'image', poster: it?.poster }
-      )
-      .filter((m) => typeof m.src === 'string' && m.src.length > 0);
+      .map((it) => {
+        const src = typeof it === 'string' ? it : it?.src
+        const safeSrc = typeof src === 'string' && src.length > 0 ? safeProductImageUrl(src) : ''
+        return typeof it === 'string'
+          ? { src: safeSrc, kind: 'image' as const }
+          : { src: safeSrc, kind: it?.kind === 'video' ? 'video' : 'image', poster: it?.poster }
+      })
+      .filter((m) => m.src.length > 0);
   }, [images]);
 
   const [index, setIndex] = useState(

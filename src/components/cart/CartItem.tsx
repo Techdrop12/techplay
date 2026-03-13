@@ -8,6 +8,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import Link from '@/components/LocalizedLink'
 import { useCart } from '@/hooks/useCart'
+import { safeProductImageUrl } from '@/lib/safeProductImage'
 import { formatPrice } from '@/lib/utils'
 
 interface CartItemProps {
@@ -88,7 +89,7 @@ export default function CartItem({ item }: CartItemProps) {
         aria-label={`Voir la fiche produit de ${item.title}`}
       >
         <Image
-          src={item.image || '/placeholder.png'}
+          src={safeProductImageUrl(item.image)}
           alt={item.title || 'Image produit'}
           fill
           sizes="80px"

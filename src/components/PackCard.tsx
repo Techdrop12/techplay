@@ -22,6 +22,7 @@ import { BRAND } from '@/lib/constants'
 import { pushDataLayer } from '@/lib/ga'
 import { getCurrentLocale } from '@/lib/i18n-routing'
 import { logEvent } from '@/lib/logEvent'
+import { safeProductImageUrl } from '@/lib/safeProductImage'
 import { cn, formatPrice } from '@/lib/utils'
 
 interface PackCardProps {
@@ -202,7 +203,8 @@ export default function PackCard({ pack, priority = false, className }: PackCard
 
   const mainImage = useMemo(() => {
     const first = images?.[0] ?? normalizeImageSrc(image)
-    return imageError ? '/placeholder.png' : first || '/placeholder.png'
+    const raw = imageError ? '/placeholder.png' : first || '/placeholder.png'
+    return safeProductImageUrl(raw)
   }, [image, imageError, images])
 
   const itemsValue = useMemo(() => {

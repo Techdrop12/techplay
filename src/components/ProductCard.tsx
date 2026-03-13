@@ -14,6 +14,7 @@ import WishlistButton from '@/components/WishlistButton'
 import { pushDataLayer } from '@/lib/ga'
 import { getCurrentLocale } from '@/lib/i18n-routing'
 import { logEvent } from '@/lib/logEvent'
+import { safeProductImageUrl } from '@/lib/safeProductImage'
 import { cn, formatPrice } from '@/lib/utils'
 
 interface ProductCardProps {
@@ -26,16 +27,18 @@ const BLUR_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+'
 
 function getImage(product: Product): string {
-  if (typeof product.image === 'string' && product.image.trim()) return product.image.trim()
+  if (typeof product.image === 'string' && product.image.trim()) {
+    return safeProductImageUrl(product.image.trim())
+  }
 
   if (Array.isArray(product.images)) {
     const first = product.images.find((img) => typeof img === 'string' && img.trim())
-    if (first) return first
+    if (first) return safeProductImageUrl(first)
   }
 
   if (Array.isArray(product.gallery)) {
     const first = product.gallery.find((img) => typeof img === 'string' && img.trim())
-    if (first) return first
+    if (first) return safeProductImageUrl(first)
   }
 
   return '/og-image.jpg'

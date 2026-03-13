@@ -8,6 +8,7 @@ import type { Product } from '@/types/product';
 
 import Link from '@/components/LocalizedLink';
 import { getRecentlyViewed } from '@/lib/recentProducts';
+import { safeProductImageUrl } from '@/lib/safeProductImage';
 
 export default function RecentProducts() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -36,7 +37,7 @@ export default function RecentProducts() {
             >
               <div className="relative w-full h-32 mb-2">
                 <Image
-                  src={typeof p.image === 'string' ? p.image : '/default.jpg'}
+                  src={safeProductImageUrl(typeof p.image === 'string' ? p.image : undefined)}
                   alt={typeof p.title === 'string' ? p.title : ''}
                   fill
                   sizes="(max-width: 768px) 100vw, 33vw"

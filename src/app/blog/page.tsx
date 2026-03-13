@@ -24,8 +24,8 @@ const SITE = BRAND.URL
 type SearchParams = Record<string, string | string[] | undefined>
 
 type PageProps = {
-  params?: Record<string, string | string[] | undefined>
-  searchParams?: SearchParams
+  params?: Promise<Record<string, string | string[] | undefined>>
+  searchParams?: Promise<SearchParams>
 }
 
 type BlogListOpts = {
@@ -195,7 +195,8 @@ function normalizeBlogItem(item: unknown, idx: number): BlogCardArticle {
 }
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
-  const opts = toBlogOptions(searchParams)
+  const resolved = await searchParams
+  const opts = toBlogOptions(resolved)
   const q = opts.q
   const page = opts.page
 
@@ -225,7 +226,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   })
 }
 
-export default async function BlogPage({ searchParams }: { searchParams?: SearchParams }) {
+export default async function BlogPage({ searchParams }: { searchParams?: Promise<SearchParams> }) {
   const cookieStore = await cookies()
   const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value ?? ''
   const acceptLang = (await headers()).get('accept-language') || ''
@@ -237,7 +238,8 @@ export default async function BlogPage({ searchParams }: { searchParams?: Search
       ? pickedLocale
       : DEFAULT_LOCALE
 
-  const opts = toBlogOptions(searchParams)
+  const resolved = searchParams ? await searchParams : undefined
+  const opts = toBlogOptions(resolved)
 
   const q = opts.q
   const tagStr = opts.tag
