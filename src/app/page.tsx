@@ -15,13 +15,13 @@ import { getBestProducts, getRecommendedPacks } from '@/lib/data'
 const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'))
 const BlogCard = dynamic(() => import('@/components/blog/BlogCard'))
 const BestProducts = dynamic(() => import('@/components/BestProducts'), {
-  loading: () => <SectionSkeleton title="…" />,
+  loading: () => <SectionSkeleton title="Chargement" />,
 })
 const PacksSection = dynamic(() => import('@/components/PacksSection'), {
-  loading: () => <SectionSkeleton title="…" />,
+  loading: () => <SectionSkeleton title="Chargement" />,
 })
 const FAQ = dynamic(() => import('@/components/FAQ'), {
-  loading: () => <SectionSkeleton title="…" />,
+  loading: () => <SectionSkeleton title="Chargement" />,
 })
 
 
@@ -178,12 +178,14 @@ function getProductName(product: Product): string {
 }
 
 function SectionHeader({
+  id,
   kicker,
   title,
   sub,
   center = true,
   as = 'h2',
 }: {
+  id?: string
   kicker?: string
   title: string
   sub?: string
@@ -200,7 +202,10 @@ function SectionHeader({
         </p>
       ) : null}
 
-      <Tag className="mt-4 text-balance font-bold tracking-tight text-gray-900 dark:text-white [font-size:var(--step-4)] sm:[font-size:var(--step-5)] [letter-spacing:var(--heading-tracking)]">
+      <Tag
+        id={id}
+        className="mt-4 text-balance font-bold tracking-tight text-gray-900 dark:text-white [font-size:var(--step-4)] sm:[font-size:var(--step-5)] [letter-spacing:var(--heading-tracking)]"
+      >
         {title}
       </Tag>
 
@@ -219,11 +224,7 @@ function FeaturedCategories({ locale }: { locale: HomeLocale }) {
 
   return (
     <section id="categories" aria-labelledby="cats-title" className="motion-section section-spacing-sm">
-      <SectionHeader kicker={t.catsKicker} title={t.catsTitle} sub={t.catsSub} />
-
-      <h2 id="cats-title" className="sr-only">
-        {t.catsTitle}
-      </h2>
+      <SectionHeader id="cats-title" kicker={t.catsKicker} title={t.catsTitle} sub={t.catsSub} />
 
       <ul role="list" className="mt-14 grid grid-cols-2 gap-5 sm:grid-cols-3 sm:gap-6 lg:grid-cols-6 stagger-children">
         {items.map((category) => (
@@ -559,37 +560,20 @@ export async function HomePageView({ locale }: { locale: HomeLocale }) {
           </div>
         </section>
 
-        <section
-          id="blog"
-          aria-label={t.blogSectionLabel}
-          className="motion-section section-spacing-sm"
-          style={lazySectionStyle600}
-        >
-          <SectionHeader kicker={t.blogKicker} title={t.blogTitle} sub={t.blogSub} />
-          <div className="mt-8">
-            {blogPosts.length > 0 ? (
+        {blogPosts.length > 0 && (
+          <section
+            id="blog"
+            aria-label={t.blogSectionLabel}
+            className="motion-section section-spacing-sm"
+            style={lazySectionStyle600}
+          >
+            <SectionHeader kicker={t.blogKicker} title={t.blogTitle} sub={t.blogSub} />
+            <div className="mt-8">
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {blogPosts.map((post) => (
                   <BlogCard key={post._id} article={post} />
                 ))}
               </div>
-            ) : (
-              <div className="card rounded-[var(--radius-2xl)] border-[hsl(var(--border))] p-8 text-center">
-                <p className="text-token-text/70 mb-4">
-                  {locale === 'en'
-                    ? 'Best gaming keyboards 2026, setup guides, FPS tips — articles coming soon.'
-                    : 'Meilleurs claviers gaming 2026, guides setup, astuces FPS — articles à venir.'}
-                </p>
-                <Link
-                  href="/blog"
-                  prefetch={false}
-                  className="btn-premium inline-flex rounded-full px-6 py-2.5 text-sm font-semibold"
-                >
-                  {t.blogCta}
-                </Link>
-              </div>
-            )}
-            {blogPosts.length > 0 && (
               <div className="mt-8 text-center">
                 <Link
                   href="/blog"
@@ -599,9 +583,9 @@ export async function HomePageView({ locale }: { locale: HomeLocale }) {
                   {t.blogCta}
                 </Link>
               </div>
-            )}
-          </div>
-        </section>
+            </div>
+          </section>
+        )}
 
         <Testimonials locale={locale} />
         <SplitCTA locale={locale} />
