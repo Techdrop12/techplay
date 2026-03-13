@@ -250,7 +250,10 @@
 
   "packs": {
     "title": "Packs",
-    "empty": "Aucun pack disponible pour le moment."
+    "empty": "Aucun pack disponible pour le moment.",
+    "emptyTitle": "Packs bientôt disponibles",
+    "emptyDescription": "Nous préparons des bundles soignés pour vous. En attendant, découvrez notre sélection de produits.",
+    "emptyCtaLabel": "Découvrir les produits"
   },
 
   "pack": {

@@ -21,7 +21,7 @@ export default function StickyHeader({ children }: StickyHeaderProps) {
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full bg-white dark:bg-gray-900 shadow-md z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 w-full bg-[hsl(var(--surface))] border-b border-[hsl(var(--border))] shadow-[var(--shadow-sm)] z-50 transition-all duration-300 ${
         sticky ? 'py-2' : 'py-4'
       }`}
     >

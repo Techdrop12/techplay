@@ -24,7 +24,7 @@ export default function DropdownMenu({ label, items = [] }: DropdownMenuProps) {
 
   return (
     <div className="relative" ref={ref}>
-      <button onClick={() => setOpen(!open)} className="px-3 py-2 bg-gray-100 rounded hover:bg-gray-200">
+      <button onClick={() => setOpen(!open)} className="px-3 py-2 bg-[hsl(var(--surface-2))] rounded hover:opacity-90">
         {label}
       </button>
       {open && (
@@ -34,7 +34,7 @@ export default function DropdownMenu({ label, items = [] }: DropdownMenuProps) {
               <button
                 type="button"
                 onClick={item.onClick}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+                className="w-full text-left px-4 py-2 hover:bg-[hsl(var(--surface-2))]"
               >
                 {item.label}
               </button>

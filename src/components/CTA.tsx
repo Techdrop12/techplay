@@ -10,7 +10,7 @@ interface CTAProps {
 export default function CTA({ title, description, href, buttonLabel }: CTAProps) {
   return (
     <div className="rounded-2xl border bg-gradient-to-br from-zinc-100 to-white p-10 dark:from-zinc-900 dark:to-black">
-      <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
+      <h2 className="heading-section">{title}</h2>
       <p className="mt-2 text-muted-foreground">{description}</p>
       <Link
         href={href}

@@ -61,12 +61,12 @@ export default async function OrderDetailPage({ params }: Props) {
 
       <h1
         id="order-title"
-        className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-3xl"
+        className="heading-page sm:text-3xl"
       >
         Commande #{orderId}
       </h1>
 
-      <p className="mt-3 text-[15px] text-gray-600 dark:text-gray-400">
+      <p className="mt-3 text-[15px] text-token-text/75">
         {order.createdAt ? formatDateTime(order.createdAt, 'fr-FR') : '—'}
       </p>
 
@@ -75,7 +75,7 @@ export default async function OrderDetailPage({ params }: Props) {
         aria-label="Résumé de la commande"
       >
         <div>
-          <h2 className="text-[12px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+          <h2 className="text-[12px] font-semibold uppercase tracking-wide text-token-text/60">
             Statut
           </h2>
           <p className="mt-1 text-[15px] font-medium">{status}</p>
@@ -89,7 +89,7 @@ export default async function OrderDetailPage({ params }: Props) {
             <ul className="divide-y divide-[hsl(var(--border))]" role="list">
               {items.map((line: { title?: string | null; quantity?: number | null; price?: number | null }, idx: number) => (
                 <li key={idx} className="py-3 first:pt-0 flex justify-between items-start gap-4">
-                  <span className="text-[15px] text-gray-900 dark:text-gray-100">
+                  <span className="text-[15px] text-[hsl(var(--text))]">
                     {line.title ?? 'Article'} × {Number(line.quantity) || 1}
                   </span>
                   <span className="font-medium tabular-nums text-[15px]">
@@ -102,15 +102,15 @@ export default async function OrderDetailPage({ params }: Props) {
         )}
 
         <div>
-          <h2 className="text-[12px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-            Adresse de livraison
-          </h2>
-          <p className="mt-1 whitespace-pre-line text-[15px] text-gray-700 dark:text-gray-300">{address}</p>
+<h2 className="text-[12px] font-semibold uppercase tracking-wide text-token-text/60">
+          Adresse de livraison
+        </h2>
+          <p className="mt-1 whitespace-pre-line text-[15px] text-token-text/85">{address}</p>
         </div>
 
         {(trackingNumber || shippingProvider) && (
           <div>
-            <h2 className="text-[12px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            <h2 className="text-[12px] font-semibold uppercase tracking-wide text-token-text/60">
               Suivi
             </h2>
             <p className="mt-1">

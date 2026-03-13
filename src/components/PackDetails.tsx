@@ -57,7 +57,7 @@ export default function PackDetails({ pack }: Props) {
       <div className="flex flex-col justify-center space-y-6">
         <h1
           id="pack-title"
-          className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight"
+          className="text-4xl font-bold text-[hsl(var(--text))] tracking-tight"
         >
           {title}
         </h1>
@@ -107,7 +107,7 @@ export default function PackDetails({ pack }: Props) {
 
         {/* Description */}
         {description && (
-          <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed whitespace-pre-line">
+          <p className="text-token-text/85 text-lg leading-relaxed whitespace-pre-line">
             {description}
           </p>
         )}

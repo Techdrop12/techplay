@@ -284,16 +284,16 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
   return (
     <main className="mx-auto max-w-7xl px-4 pt-20 pb-16 sm:px-6 sm:pt-24 sm:pb-20 lg:px-8" aria-labelledby="blog-title">
       <header className="mb-12 text-center sm:mb-14">
-        <p className="text-[var(--step-subtitle)] font-semibold uppercase tracking-[0.2em] text-[hsl(var(--accent))]">
+        <p className="heading-kicker">
           Guides & actualités
         </p>
         <h1
           id="blog-title"
-          className="mt-2 text-3xl font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-4xl lg:text-5xl [letter-spacing:var(--heading-tracking)]"
+          className="heading-section mt-2 sm:[font-size:var(--step-5)] lg:text-5xl"
         >
           {q ? `Résultats pour « ${q} »` : 'Blog gaming & setup'}
         </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-[var(--step-0)] leading-relaxed text-token-text/75">
+        <p className="mx-auto mt-4 max-w-2xl heading-section-sub">
           {q ? 'Articles correspondant à votre recherche.' : 'Meilleurs claviers 2026, guides setup, astuces FPS — contenu éditorial pour ramener du trafic et convertir.'}
         </p>
       </header>
@@ -351,16 +351,87 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
       </form>
 
       {posts.length === 0 ? (
-        <div className="card rounded-[var(--radius-2xl)] py-16 text-center" role="status" aria-live="polite">
-          <p className="text-[var(--step-0)] text-token-text/70">
-            Aucun article {q ? `pour « ${q} »` : 'disponible'}.
-          </p>
-          <p className="mt-2 text-[13px] text-token-text/60">
-            Best gaming keyboard 2026, gaming setup guide, how to improve aim in FPS — bientôt en ligne.
-          </p>
+        <div
+          className="mx-auto max-w-xl rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding text-center shadow-sm"
+          role="status"
+          aria-live="polite"
+        >
+          {q ? (
+            <>
+              <div className="flex justify-center">
+                <span
+                  className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[hsl(var(--surface-2))] text-token-text/50"
+                  aria-hidden="true"
+                >
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.35-4.35" />
+                  </svg>
+                </span>
+              </div>
+              <h2 className="mt-6 heading-subsection">
+                {locale === 'en' ? 'No articles match your search' : 'Aucun article pour cette recherche'}
+              </h2>
+              <p className="mt-3 text-[15px] leading-relaxed text-token-text/70">
+                {locale === 'en'
+                  ? `We didn't find anything for « ${q} ». Try different keywords or browse our guides when they're live.`
+                  : `Aucun résultat pour « ${q} ». Essayez d'autres mots-clés ou consultez nos guides dès leur publication.`}
+              </p>
+              <Link
+                href={localizePath('/blog', locale)}
+                prefetch={false}
+                className="mt-6 inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-5 py-2.5 text-[13px] font-semibold transition hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+              >
+                {locale === 'en' ? 'View all articles' : 'Voir tout le blog'}
+              </Link>
+            </>
+          ) : (
+            <>
+              <div className="flex justify-center">
+                <span
+                  className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[hsl(var(--accent)/0.1)] text-[hsl(var(--accent))]"
+                  aria-hidden="true"
+                >
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                    <path d="M8 7h8" />
+                    <path d="M8 11h8" />
+                  </svg>
+                </span>
+              </div>
+              <h2 className="mt-6 heading-subsection">
+                {locale === 'en' ? 'Editorial coming soon' : 'Éditorial à venir'}
+              </h2>
+              <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-token-text/70">
+                {locale === 'en'
+                  ? "We're preparing guides on gaming setups, keyboard picks, and FPS tips. Check back soon — or explore our products in the meantime."
+                  : 'Nous préparons des guides setup gaming, sélections claviers et astuces FPS. Revenez bientôt, ou découvrez nos produits en attendant.'}
+              </p>
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                <Link
+                  href={localizePath('/products', locale)}
+                  prefetch={false}
+                  className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] px-5 py-2.5 text-[13px] font-semibold text-white shadow-md transition hover:bg-[hsl(var(--accent)/0.9)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+                >
+                  {locale === 'en' ? 'Explore products' : 'Découvrir les produits'}
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </Link>
+                <Link
+                  href={localizePath('/', locale)}
+                  prefetch={false}
+                  className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-5 py-2.5 text-[13px] font-semibold transition hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+                >
+                  {locale === 'en' ? 'Back to home' : "Retour à l'accueil"}
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       ) : (
-        <section className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10" aria-label="Liste des articles">
+        <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3" aria-label="Liste des articles">
           {posts.map((post, idx) => (
             <BlogCard
               key={post._id || post.slug || `post-${idx}`}

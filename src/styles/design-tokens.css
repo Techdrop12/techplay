@@ -98,6 +98,11 @@
   --section-gap-sm: clamp(3rem, 6vw, 5rem);
   --space-card: clamp(1.25rem, 2.5vw, 1.75rem);
   --space-section-inline: clamp(1.25rem, 5vw, 2.5rem);
+  /* Content rhythm: space after section heading, between stacked blocks */
+  --space-content: 2rem;
+  --space-stack: 1.5rem;
+  --space-grid: 1.5rem;
+  --space-grid-lg: 2rem;
 
   /* ==================== Selection ================== */
   --selection-bg: hsl(var(--accent) / 0.18);

@@ -295,7 +295,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           />
           <button
             type="submit"
-            className="shrink-0 rounded-full bg-[hsl(var(--accent))] px-5 py-2.5 text-[15px] font-semibold text-slate-950 shadow-[0_10px_30px_rgba(20,184,166,0.3)] transition hover:shadow-[0_14px_40px_rgba(20,184,166,0.4)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)]"
+            className="shrink-0 rounded-full bg-[hsl(var(--accent))] px-5 py-2.5 text-[15px] font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-md)] transition hover:opacity-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)]"
           >
             Filtrer
           </button>
@@ -305,7 +305,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           <div className="lg:col-span-4">
             <Link
               href={`/categorie/${category}`}
-              className="inline-block text-[13px] text-gray-600 transition hover:text-[hsl(var(--accent))] dark:text-gray-400"
+              className="inline-block text-[13px] text-token-text/70 transition hover:text-[hsl(var(--accent))]"
               aria-label="Réinitialiser les filtres"
             >
               Réinitialiser les filtres

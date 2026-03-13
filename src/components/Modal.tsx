@@ -180,7 +180,7 @@ function ModalRoot({
         className={cn(
           'relative w-full',
           SIZES[size],
-          'rounded-[1.5rem] border border-white/10 bg-[hsl(var(--surface))] text-gray-900 dark:text-white shadow-2xl',
+          'rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-[hsl(var(--text))] shadow-[var(--shadow-lg)]',
           'motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-out',
           'motion-safe:opacity-100 motion-safe:scale-100',
           'outline-none',
@@ -193,7 +193,7 @@ function ModalRoot({
             onClick={onClose}
             aria-label="Fermer la fenêtre modale"
             className="absolute right-3.5 top-3.5 inline-grid h-9 w-9 place-items-center rounded-full
-                       text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white
+                       text-token-text/70 hover:text-[hsl(var(--text))]
                        hover:bg-black/5 dark:hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
           >
             <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">

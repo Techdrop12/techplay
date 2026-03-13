@@ -8,11 +8,11 @@ interface HighlightBoxProps {
 
 export default function HighlightBox({ icon, title, subtitle }: HighlightBoxProps) {
   return (
-    <div className="flex items-start gap-3 p-4 bg-white dark:bg-gray-900 shadow rounded">
-      {icon && <div className="text-blue-600">{icon}</div>}
+    <div className="flex items-start gap-3 p-4 bg-[hsl(var(--surface))] border border-[hsl(var(--border))] shadow-[var(--shadow-sm)] rounded-xl">
+      {icon && <div className="text-[hsl(var(--accent))]">{icon}</div>}
       <div>
-        <p className="font-bold">{title}</p>
-        <p className="text-sm text-gray-500">{subtitle}</p>
+        <p className="font-bold text-[hsl(var(--text))]">{title}</p>
+        {subtitle != null && <p className="text-sm text-token-text/65">{subtitle}</p>}
       </div>
     </div>
   );

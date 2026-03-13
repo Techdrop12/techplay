@@ -77,9 +77,9 @@ export default function ConfidentialitePage() {
   }
 
   return (
-    <main className="container-app mx-auto max-w-3xl py-10" role="main" aria-labelledby="confidentialite-title">
-      <div className="card p-6 shadow-[var(--shadow-lg)] sm:p-8">
-        <h1 id="confidentialite-title" className="mb-6 text-2xl font-extrabold tracking-tight text-[hsl(var(--text))] [letter-spacing:var(--heading-tracking)]">
+    <main className="container-app mx-auto max-w-3xl py-10 sm:py-12" role="main" aria-labelledby="confidentialite-title">
+      <div className="card card-padding shadow-[var(--shadow-md)]">
+        <h1 id="confidentialite-title" className="heading-page mb-6">
           Politique de confidentialité
         </h1>
 

@@ -37,44 +37,65 @@ export default function OrderSummary({
   const fmt = (v: number) => formatPrice(v, { currency, locale })
 
   return (
-    <div className={cn('border-t pt-4 mt-4', className)} role="region" aria-label="Récapitulatif commande">
-      <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Récapitulatif</h3>
+    <section
+      className={cn(
+        'rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[var(--shadow-md)] md:sticky md:top-6 md:self-start',
+        className
+      )}
+      role="region"
+      aria-labelledby="order-summary-title"
+      aria-label="Récapitulatif commande"
+    >
+      <h2
+        id="order-summary-title"
+        className="text-base font-semibold tracking-tight text-[hsl(var(--text))] border-b border-[hsl(var(--border))] pb-3 mb-4"
+      >
+        Récapitulatif
+      </h2>
 
       {showBreakdown && (
-        <dl className="space-y-1 text-sm">
+        <dl className="space-y-2 text-[13px] text-token-text/80 mb-4">
           {typeof subtotal === 'number' && (
-            <div className="flex justify-between">
-              <dt className="text-gray-600 dark:text-gray-400">Sous-total</dt>
-              <dd className="font-medium">{fmt(subtotal)}</dd>
+            <div className="flex justify-between items-center">
+              <dt className="text-token-text/80">Sous-total</dt>
+              <dd className="font-medium tabular-nums text-[hsl(var(--text))]">{fmt(subtotal)}</dd>
             </div>
           )}
           {typeof shipping === 'number' && (
-            <div className="flex justify-between">
-              <dt className="text-gray-600 dark:text-gray-400">Livraison</dt>
-              <dd className="font-medium">{fmt(shipping)}</dd>
+            <div className="flex justify-between items-center">
+              <dt className="text-token-text/80">Livraison</dt>
+              <dd className="font-medium tabular-nums text-[hsl(var(--text))]">{shipping === 0 ? 'Offerte' : fmt(shipping)}</dd>
             </div>
           )}
           {typeof tax === 'number' && (
-            <div className="flex justify-between">
-              <dt className="text-gray-600 dark:text-gray-400">TVA</dt>
-              <dd className="font-medium">{fmt(tax)}</dd>
+            <div className="flex justify-between items-center">
+              <dt className="text-token-text/80">TVA</dt>
+              <dd className="font-medium tabular-nums text-[hsl(var(--text))]">{fmt(tax)}</dd>
             </div>
           )}
           {typeof discount === 'number' && discount > 0 && (
-            <div className="flex justify-between">
-              <dt className="text-gray-600 dark:text-gray-400">Remise</dt>
-              <dd className="font-medium">- {fmt(discount)}</dd>
+            <div className="flex justify-between items-center">
+              <dt className="text-token-text/80">Remise</dt>
+              <dd className="font-medium tabular-nums text-emerald-600 dark:text-emerald-400">- {fmt(discount)}</dd>
             </div>
           )}
         </dl>
       )}
 
-      <div className="flex items-baseline justify-between mt-2">
-        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Total</h4>
-        <p className="text-xl font-bold text-brand" aria-live="polite" aria-label={`Total ${fmt(computed)}`}>
+      <div className="flex items-baseline justify-between gap-4 rounded-lg bg-[hsl(var(--surface))]/80 border border-[hsl(var(--border))] px-4 py-3">
+        <span className="text-sm font-semibold text-[hsl(var(--text))]">Total à payer</span>
+        <p
+          className="text-xl font-bold tabular-nums text-[hsl(var(--text))]"
+          aria-live="polite"
+          aria-label={`Total ${fmt(computed)}`}
+        >
           {fmt(computed)}
         </p>
       </div>
-    </div>
+
+      <p className="mt-4 text-[11px] text-token-text/60">
+        Paiement sécurisé
+      </p>
+    </section>
   )
 }

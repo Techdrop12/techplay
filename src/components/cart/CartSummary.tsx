@@ -140,7 +140,7 @@ export default function CartSummary({
   return (
     <section
       className={cn(
-        'card space-y-5 p-6 shadow-[var(--shadow-lg)]',
+        'card space-y-5 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[var(--shadow-md)]',
         className
       )}
       role="region"
@@ -149,8 +149,8 @@ export default function CartSummary({
       {/* Live region pour lecteurs d’écran */}
       <p ref={srRef} className="sr-only" role="status" aria-live="polite" />
 
-      <h2 id="cart-summary-title" className="text-lg font-bold tracking-tight text-[hsl(var(--text))] sm:text-xl [letter-spacing:var(--heading-tracking)]">
-        Résumé de la commande
+      <h2 id="cart-summary-title" className="text-base font-semibold tracking-tight text-[hsl(var(--text))] border-b border-[hsl(var(--border))] pb-3">
+        Récapitulatif
       </h2>
 
       {/* Progression livraison gratuite */}
@@ -158,7 +158,7 @@ export default function CartSummary({
         <FreeShippingBadge price={taxableBase} withProgress />
       </div>
 
-      <div className="space-y-2 text-[13px] text-token-text/80">
+      <div className="space-y-1.5 text-[13px] text-token-text/80">
         <Row
           label={`Sous-total (${itemsCount} article${itemsCount > 1 ? 's' : ''})`}
           value={formatPrice(subtotal)}
@@ -172,27 +172,44 @@ export default function CartSummary({
         )}
         <Row label="TVA (est.)" value={taxRate > 0 ? formatPrice(tax) : '—'} />
         <Row label="Livraison" value={shipping === 0 ? 'Offerte' : formatPrice(shipping)} />
-        <hr className="my-3 border-[hsl(var(--border))]" />
-        <Row label="Total" value={formatPrice(total)} bold big />
+      </div>
+      <hr className="border-[hsl(var(--border))]" />
+      <div className="flex items-baseline justify-between gap-4">
+        <span className="text-sm font-semibold text-[hsl(var(--text))]">Total</span>
+        <span className="text-lg font-bold tabular-nums text-[hsl(var(--text))]" aria-label="Total">
+          {formatPrice(total)}
+        </span>
       </div>
 
       {/* Économies totales */}
       {savings > 0 && (
-        <p className="text-xs text-emerald-600 dark:text-emerald-400">
-          Vous économisez {formatPrice(savings)} {applied ? `avec le code ${applied}` : ''}.
+        <p className="text-[12px] text-emerald-600 dark:text-emerald-400">
+          Vous économisez {formatPrice(savings)}{applied ? ` (${applied})` : ''}.
         </p>
       )}
 
-      {/* Zone code promo */}
-      <div className="mt-4">
+      <Link
+        href="/commande"
+        className="btn-premium flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-[15px] font-bold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2"
+        aria-label="Passer commande et payer"
+        prefetch={false}
+      >
+        Passer commande
+        <span aria-hidden="true">→</span>
+      </Link>
+
+      <p className="text-[11px] text-token-text/60">
+        Paiement sécurisé · Livraison offerte dès {formatPrice(shippingThreshold)} · Retours 30 jours. Montants estimatifs.
+      </p>
+
+      <div className="space-y-2 border-t border-[hsl(var(--border))] pt-4">
         {applied ? (
-          <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50/80 px-3.5 py-2.5 text-[13px] dark:border-emerald-800/50 dark:bg-emerald-900/20">
-            <span className="font-semibold text-emerald-700 dark:text-emerald-300">
-              Code appliqué : {applied}
-            </span>
+          <div className="flex items-center justify-between rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-3 py-2 text-[12px]">
+            <span className="text-token-text/80">Code : {applied}</span>
             <button
+              type="button"
               onClick={removeCoupon}
-              className="rounded-lg px-2 py-1 font-medium text-emerald-700 transition hover:bg-emerald-100 dark:text-emerald-300 dark:hover:bg-emerald-800/40"
+              className="text-[12px] text-token-text/70 underline underline-offset-1 transition hover:text-[hsl(var(--accent))]"
               aria-label="Retirer le code promo"
             >
               Retirer
@@ -201,11 +218,8 @@ export default function CartSummary({
         ) : (
           <form
             className="flex gap-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              applyCoupon(code);
-            }}
-            aria-label="Appliquer un code promo"
+            onSubmit={(e) => { e.preventDefault(); applyCoupon(code); }}
+            aria-label="Code promo"
           >
             <input
               type="text"
@@ -213,47 +227,22 @@ export default function CartSummary({
               placeholder="Code promo"
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
-              className="flex-1 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-3.5 py-2.5 text-[13px] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
+              className="min-w-0 flex-1 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-3 py-2 text-[12px] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
               aria-describedby="coupon-help"
             />
             <button
               type="submit"
               disabled={!code.trim()}
-              className={cn(
-                'btn-primary shrink-0 rounded-xl px-4 py-2.5 text-[13px] font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)]',
-                !code.trim() && 'cursor-not-allowed opacity-50'
-              )}
-              aria-label="Appliquer le code promo"
+              className={cn('shrink-0 rounded-lg border border-[hsl(var(--border))] px-3 py-2 text-[12px] font-medium transition hover:bg-[hsl(var(--surface))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]', !code.trim() && 'cursor-not-allowed opacity-50')}
+              aria-label="Appliquer le code"
             >
-              Appliquer
+              OK
             </button>
           </form>
         )}
-        <p id="coupon-help" className="mt-1 text-xs text-token-text/70" role="status">
-          {msg}
-        </p>
+        <p id="coupon-help" className="text-[11px] text-token-text/60" role="status">{msg}</p>
       </div>
 
-      {/* CTA principal : passer commande */}
-      <Link
-        href="/commande"
-        className="btn-premium mt-4 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-[15px] font-bold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2"
-        aria-label="Passer commande et payer"
-        prefetch={false}
-      >
-        Passer commande
-        <span aria-hidden="true">→</span>
-      </Link>
-
-      <p className="text-center text-[12px] text-token-text/70">
-        Paiement sécurisé · Livraison offerte dès {formatPrice(shippingThreshold)}
-      </p>
-
-      {/* Note légale */}
-      <p className="text-[11px] text-token-text/70 leading-relaxed">
-        Montants estimatifs. Le calcul final des taxes et frais s’effectue au paiement.
-        Livraison offerte dès {formatPrice(shippingThreshold)} après remise.
-      </p>
     </section>
   );
 }

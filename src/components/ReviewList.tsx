@@ -16,7 +16,7 @@ function Skeleton() {
   return (
     <ul role="list" aria-label="Chargement des avis" className="space-y-4 animate-pulse">
       {[...Array(3)].map((_, i) => (
-        <li key={i} className="p-4 bg-gray-200 rounded h-24" />
+        <li key={i} className="p-4 bg-[hsl(var(--surface-2))] rounded-xl h-24" />
       ))}
     </ul>
   );
@@ -82,7 +82,7 @@ export default function ReviewList({ productId }: ReviewListProps) {
 
   if (reviews.length === 0) {
     return (
-      <p className="text-sm text-gray-500 mt-4 text-center" aria-live="polite">
+      <p className="text-sm text-token-text/60 mt-4 text-center" aria-live="polite">
         {t('no_reviews')}
       </p>
     );
@@ -99,7 +99,7 @@ export default function ReviewList({ productId }: ReviewListProps) {
               key={s}
               onClick={() => setFilter(s === filter ? null : s)}
               className={`text-xs px-2 py-1 rounded border transition focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-black ${
-                s === filter ? 'bg-black text-white' : 'text-gray-700 hover:bg-gray-200'
+                s === filter ? 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))]' : 'text-token-text/80 hover:bg-[hsl(var(--surface-2))]'
               }`}
               aria-pressed={s === filter}
               aria-label={t('filter_stars', { count: s })}
@@ -110,7 +110,7 @@ export default function ReviewList({ productId }: ReviewListProps) {
           {filter !== null && (
             <button
               onClick={() => setFilter(null)}
-              className="text-xs px-2 py-1 rounded border text-gray-600 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-black"
+              className="text-xs px-2 py-1 rounded border border-[hsl(var(--border))] text-token-text/70 hover:bg-[hsl(var(--surface-2))] focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[hsl(var(--accent))]"
               aria-label={t('clear_filter')}
             >
               {t('clear')}
@@ -143,7 +143,7 @@ export default function ReviewList({ productId }: ReviewListProps) {
                 <Star
                   key={j}
                   size={16}
-                  className={j <= r.rating ? 'text-yellow-400' : 'text-gray-300'}
+                  className={j <= r.rating ? 'text-yellow-400' : 'text-token-text/30'}
                   fill={j <= r.rating ? 'currentColor' : 'none'}
                   aria-hidden="true"
                 />
@@ -153,7 +153,7 @@ export default function ReviewList({ productId }: ReviewListProps) {
               </span>
             </div>
 
-            <p className="text-sm text-gray-800">{r.comment}</p>
+            <p className="text-sm text-token-text/90">{r.comment}</p>
 
             {Boolean(r.verified) && (
               <p className="text-xs text-green-600 mt-1 font-medium" aria-label={t('verified')}>

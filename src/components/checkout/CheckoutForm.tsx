@@ -10,7 +10,7 @@ import { getErrorMessageWithFallback } from '@/lib/errors'
 import { event as gaEvent, pushDataLayer, trackAddShippingInfo } from '@/lib/ga'
 import { error as logError } from '@/lib/logger'
 import { pixelInitiateCheckout } from '@/lib/meta-pixel'
-import { cn } from '@/lib/utils'
+import { cn, formatPrice } from '@/lib/utils'
 
 type FormErrors = {
   email?: string
@@ -385,18 +385,18 @@ export default function CheckoutForm() {
         {status}
       </p>
 
-      <div className="space-y-1.5">
-        <h3 id="checkout-form-title" className="text-base font-bold tracking-tight text-gray-900 dark:text-white sm:text-lg">
+      <div className="space-y-1">
+        <h2 id="checkout-form-title" className="text-base font-semibold tracking-tight text-[hsl(var(--text))]">
           Coordonnées
-        </h3>
+        </h2>
         <p className="text-[13px] text-token-text/70">
-          Renseignez vos informations pour finaliser la commande en toute sécurité.
+          Indiquez votre email et adresse de livraison. Vous serez redirigé vers le paiement sécurisé (Stripe).
         </p>
       </div>
 
       <fieldset disabled={loading} className="space-y-6">
         <div>
-          <label htmlFor="checkout-email" className="mb-1 block text-sm font-medium">
+          <label htmlFor="checkout-email" className="mb-1 block text-[13px] font-medium text-[hsl(var(--text))]">
             Email
           </label>
           <input
@@ -426,7 +426,7 @@ export default function CheckoutForm() {
             aria-describedby={emailDescribedBy || undefined}
             data-gtm="checkout_email_input"
             className={cn(
-              'w-full rounded-xl border px-3.5 py-3 text-[13px] transition',
+              'w-full min-h-[3rem] rounded-xl border px-3.5 py-3 text-[13px] transition sm:min-h-0',
               'bg-[hsl(var(--surface))]/80 dark:bg-[hsl(var(--surface))]/60',
               'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]',
               errors.email
@@ -435,7 +435,7 @@ export default function CheckoutForm() {
             )}
           />
           <p id={emailHintId} className="mt-1 text-[11px] text-token-text/60">
-            Nous vous enverrons la confirmation et la facture à cette adresse.
+            Confirmation et facture envoyées à cette adresse.
           </p>
           {errors.email ? (
             <p id="email-error" className="mt-1 text-xs text-red-600" role="alert">
@@ -445,7 +445,7 @@ export default function CheckoutForm() {
         </div>
 
         <div>
-          <label htmlFor="checkout-address" className="mb-1 block text-sm font-medium">
+          <label htmlFor="checkout-address" className="mb-1 block text-[13px] font-medium text-[hsl(var(--text))]">
             Adresse de livraison
           </label>
           <textarea
@@ -469,7 +469,7 @@ export default function CheckoutForm() {
             aria-describedby={addressDescribedBy || undefined}
             data-gtm="checkout_address_input"
             className={cn(
-              'min-h-[96px] w-full resize-y rounded-xl border px-3.5 py-3 text-[13px] transition',
+              'min-h-[4.5rem] w-full resize-y rounded-xl border px-3.5 py-3 text-[13px] transition sm:min-h-[96px]',
               'bg-[hsl(var(--surface))]/80 dark:bg-[hsl(var(--surface))]/60',
               'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]',
               errors.address
@@ -499,27 +499,15 @@ export default function CheckoutForm() {
           />
         </div>
 
-        <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 p-4 text-[13px]">
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-token-text/70">Total estimé</span>
-            <span className="font-bold tabular-nums text-[hsl(var(--accent))]">
-              {subtotal.toFixed(2)} {currency}
-            </span>
-          </div>
-          <div className="mt-1 text-[12px] text-token-text/60">
-            {itemsCount} article{itemsCount > 1 ? 's' : ''} dans le panier
-          </div>
-        </div>
-
         <button
           type="submit"
           disabled={loading}
           aria-busy={loading ? 'true' : 'false'}
           data-gtm="checkout_submit_btn"
-          className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-4 py-3.5 text-[15px] font-bold text-slate-950 shadow-[0_14px_40px_rgba(20,184,166,0.5)] transition hover:shadow-[0_18px_50px_rgba(20,184,166,0.6)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+          className="touch-target inline-flex min-h-[2.75rem] w-full items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-4 py-3.5 text-[15px] font-bold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-sm)] transition hover:opacity-95 active:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
         >
           <IconCard />
-          <span>{loading ? 'Redirection…' : 'Payer maintenant'}</span>
+          <span>{loading ? 'Redirection…' : 'Payer ' + formatPrice(subtotal, { currency })}</span>
         </button>
 
         {lastError && (
@@ -538,20 +526,10 @@ export default function CheckoutForm() {
           </div>
         )}
 
-        <p className="text-center text-xs text-token-text/60" role="status">
-          Paiement sécurisé Stripe · Données cryptées · CB, Apple Pay, Google Pay
-        </p>
-
-        <p className="text-[11px] leading-relaxed text-token-text/60">
-          En continuant, vous acceptez nos{' '}
-          <a className="underline underline-offset-2" href="/cgv">
-            CGV
-          </a>{' '}
-          et notre{' '}
-          <a className="underline underline-offset-2" href="/confidentialite">
-            politique de confidentialité
-          </a>
-          .
+        <p className="text-center text-[11px] text-token-text/60" role="status">
+          Paiement sécurisé (Stripe) · CB, Apple Pay, Google Pay · En continuant vous acceptez nos{' '}
+          <a className="underline underline-offset-1" href="/cgv">CGV</a> et notre{' '}
+          <a className="underline underline-offset-1" href="/confidentialite">politique de confidentialité</a>.
         </p>
       </fieldset>
     </form>

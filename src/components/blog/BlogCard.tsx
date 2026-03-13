@@ -29,66 +29,53 @@ export default function BlogCard({ article }: BlogCardProps) {
 
   return (
     <motion.article
-      whileHover={{ y: -4, scale: 1.01 }}
-      transition={{ duration: 0.25, ease: [0.33, 1, 0.68, 1] }}
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.22, ease: [0.33, 1, 0.68, 1] }}
       className={cn(
-        'group relative flex flex-col overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))]',
-        'card shadow-[var(--shadow-md)] transition-all duration-300 ease-[var(--ease-smooth)] hover:shadow-[var(--shadow-card-hover)]'
+        'group relative flex flex-col overflow-hidden rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]',
+        'shadow-[var(--shadow-sm)] transition-shadow duration-300 hover:shadow-[var(--shadow-md)]'
       )}
       aria-label={`Lire l'article : ${article.title}`}
     >
-      <Link href={`/blog/${article.slug}`} prefetch={false} className="block flex-1 flex flex-col">
-        <div className="relative aspect-[16/10] w-full overflow-hidden bg-[hsl(var(--surface-2))] sm:aspect-[2/1]">
-        <Image
-          src={imageSrc}
-          alt={article.title}
-          fill
-          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-          className="object-cover transition-transform duration-500 ease-[var(--ease-smooth)] group-hover:scale-[1.05]"
-          priority
-        />
-
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
-
-        <div className="absolute left-4 top-4 flex flex-wrap gap-2">
+      <Link href={`/blog/${article.slug}`} prefetch={false} className="flex flex-1 flex-col">
+        {/* Editorial feature image — no overlay, clean frame */}
+        <div className="relative aspect-[16/10] w-full overflow-hidden bg-[hsl(var(--surface-2))]">
+          <Image
+            src={imageSrc}
+            alt=""
+            fill
+            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+            className="object-cover transition-transform duration-500 ease-[var(--ease-smooth)] group-hover:scale-[1.02]"
+            priority
+          />
           {category ? (
-            <span className="inline-flex items-center rounded-full bg-black/75 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white backdrop-blur-sm">
+            <span className="absolute left-4 top-4 rounded-md bg-white/95 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--text))] shadow-sm dark:bg-black/60 dark:text-white">
               {category}
             </span>
           ) : null}
-          {(category?.toLowerCase().includes('guide') || article.title?.toLowerCase().includes('guide') || article.title?.toLowerCase().includes('how to')) ? (
-            <span className="inline-flex items-center rounded-full bg-[hsl(var(--accent))]/90 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-white backdrop-blur-sm">
-              Guide
-            </span>
-          ) : null}
-          {(article.title?.toLowerCase().includes('best') || article.title?.toLowerCase().includes('meilleur')) ? (
-            <span className="inline-flex items-center rounded-full bg-amber-500/90 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-black backdrop-blur-sm">
-              Best 2026
-            </span>
-          ) : null}
         </div>
-      </div>
 
-        <div className="flex flex-1 flex-col px-5 pb-5 pt-4 sm:px-6 sm:pb-6 sm:pt-5">
+        {/* Editorial content block — hierarchy: meta → headline → excerpt → read */}
+        <div className="flex flex-1 flex-col px-5 py-6 sm:px-6 sm:py-7">
           {dateLabel ? (
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-token-text/55">
+            <p className="text-[12px] font-medium uppercase tracking-[0.12em] text-token-text/55">
               {dateLabel}
             </p>
           ) : null}
 
-          <h2 className="mt-2 line-clamp-2 text-lg font-bold leading-snug tracking-tight text-[hsl(var(--text))] sm:text-xl [letter-spacing:var(--heading-tracking)]">
+          <h2 className="mt-2.5 line-clamp-2 text-[1.125rem] font-bold leading-snug tracking-tight text-[hsl(var(--text))] sm:text-[1.25rem] sm:leading-snug">
             {article.title}
           </h2>
 
           {article.description ? (
-            <p className="mt-3 line-clamp-3 text-[13px] leading-relaxed text-token-text/75">
+            <p className="mt-4 line-clamp-3 text-[14px] leading-[1.6] text-token-text/75">
               {article.description}
             </p>
           ) : null}
 
-          <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[hsl(var(--accent))] group-hover:underline">
+          <span className="mt-6 inline-flex items-center gap-1.5 text-[13px] font-medium text-[hsl(var(--accent))] decoration-[hsl(var(--accent))] underline-offset-2 group-hover:underline">
             Lire l'article
-            <span aria-hidden>→</span>
+            <span aria-hidden className="text-[10px] opacity-80">→</span>
           </span>
         </div>
       </Link>

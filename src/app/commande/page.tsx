@@ -140,55 +140,50 @@ export default function CheckoutPage() {
 
   return (
     <main
-      className="mx-auto max-w-7xl px-4 pt-28 pb-24 sm:px-6 lg:px-8"
+      className="container-app mx-auto max-w-6xl pt-24 pb-24 sm:pt-28 sm:pb-24"
       aria-labelledby="checkout-title"
       role="main"
     >
-      <nav aria-label="Fil d’Ariane" className="mb-6 text-[13px] text-token-text/60">
-        <ol className="flex items-center gap-2">
+      <nav aria-label="Fil d’Ariane" className="mb-6 text-[12px] text-token-text/60">
+        <ol className="flex items-center gap-1.5">
           <li>
-            <Link href="/" className="transition hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded">
+            <Link href="/" className="transition hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded" prefetch={false}>
               Accueil
             </Link>
           </li>
           <li aria-hidden="true">/</li>
-          <li>
-            <Link href="/commande" aria-current="page" className="font-medium text-gray-700 dark:text-gray-200">
-              Commande
-            </Link>
-          </li>
+          <li aria-current="page" className="text-token-text/90">Commande</li>
         </ol>
       </nav>
 
       <h1
         id="checkout-title"
-        className="mb-2 text-center text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl"
+        className="heading-page"
       >
         Finaliser ma commande
       </h1>
-
-      <p className="text-center text-[13px] text-gray-600 dark:text-gray-400">
-        {itemsCount} article{itemsCount > 1 ? 's' : ''} dans votre panier
+      <p className="mt-1 text-[13px] text-token-text/70">
+        {itemsCount} article{itemsCount > 1 ? 's' : ''} · Paiement sécurisé en 2 étapes
       </p>
 
       {!isEmpty && (
-        <div className="mt-6 flex justify-center">
+        <div className="mt-4">
           <FreeShippingBadge price={subtotal} withProgress />
         </div>
       )}
 
       {isEmpty ? (
         <section
-          className="mt-12 rounded-[1.5rem] border border-white/10 bg-[hsl(var(--surface))]/60 py-12 text-center dark:bg-[hsl(var(--surface))]/40"
+          className="mt-12 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/50 py-12 text-center"
           role="alert"
           aria-live="polite"
         >
-          <p className="mb-6 text-lg text-gray-600 dark:text-gray-400">Votre panier est vide.</p>
+          <p className="mb-6 text-lg text-token-text/70">Votre panier est vide.</p>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/products"
-              className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] px-6 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_10px_30px_rgba(20,184,166,0.4)] transition hover:shadow-[0_14px_40px_rgba(20,184,166,0.5)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)]"
+              className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] px-6 py-2.5 text-sm font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-lg)] transition hover:opacity-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)]"
             >
               Parcourir les produits
             </Link>
@@ -203,44 +198,42 @@ export default function CheckoutPage() {
         </section>
       ) : (
         <>
-          <div className="mt-10 grid items-start gap-10 lg:grid-cols-3" aria-live="polite">
-            <section className="space-y-8 lg:col-span-2" aria-label="Articles du panier">
+          <div className="mt-8 grid items-start gap-8 lg:grid-cols-[1fr,minmax(360px,420px)] lg:gap-10" aria-live="polite">
+            <section className="min-w-0 space-y-6 lg:col-span-1" aria-label="Articles du panier">
               <CartList items={items} />
             </section>
 
             <aside
               id="paiement"
-              className="sticky top-24 h-fit space-y-8 rounded-[1.5rem] border border-white/10 bg-[hsl(var(--surface))]/95 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.25)] dark:bg-[hsl(var(--surface))]/90 scroll-mt-28"
+              className="sticky top-24 h-fit space-y-6 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-5 shadow-[var(--shadow-md)] sm:p-6 scroll-mt-28"
               aria-label="Résumé et paiement"
             >
               <CartSummary items={items} />
               <CheckoutForm />
-              <p className="text-center text-[12px] text-gray-500 dark:text-gray-400">
-                Paiement sécurisé · Livraison 48–72 h · Retours gratuits 30 j
+              <p className="text-center text-[11px] text-token-text/60">
+                Paiement sécurisé Stripe · Livraison 48–72 h · Retours 30 jours
               </p>
             </aside>
           </div>
 
-          <div className="fixed inset-x-0 bottom-0 z-40 lg:hidden">
-            <div className="mx-4 mb-4 rounded-2xl border border-white/10 bg-[hsl(var(--surface))]/95 shadow-[0_20px_60px_rgba(15,23,42,0.35)] backdrop-blur-xl">
-              <div className="flex items-center justify-between p-4">
-                <div className="text-[13px]">
-                  <p className="font-semibold text-gray-900 dark:text-white">Sous-total</p>
-                  <p className="text-[15px] font-bold tabular-nums text-[hsl(var(--accent))]">
+          <div className="fixed inset-x-0 bottom-0 z-40 lg:hidden pb-[env(safe-area-inset-bottom)]">
+            <div className="mx-4 mb-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-4 shadow-[var(--shadow-lg)]">
+              <div className="flex items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-[12px] text-token-text/70">Total</p>
+                  <p className="text-base font-bold tabular-nums text-[hsl(var(--text))] truncate">
                     {new Intl.NumberFormat('fr-FR', { style: 'currency', currency }).format(subtotal)}
                   </p>
                 </div>
-
                 <a
                   href="#paiement"
-                  className="rounded-xl bg-[hsl(var(--accent))] px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_10px_30px_rgba(20,184,166,0.45)] transition hover:shadow-[0_14px_40px_rgba(20,184,166,0.55)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)]"
-                  aria-label="Aller au paiement"
+                  className="touch-target shrink-0 inline-flex min-h-[2.75rem] items-center justify-center rounded-xl bg-[hsl(var(--accent))] px-6 py-3 text-[15px] font-bold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-sm)] transition hover:opacity-95 active:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+                  aria-label="Aller au formulaire de paiement"
                 >
-                  Payer
+                  Continuer
                 </a>
               </div>
             </div>
-
             <div className="h-20" aria-hidden="true" />
           </div>
         </>

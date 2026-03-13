@@ -93,11 +93,11 @@ export default function OrderList({ orders = [], className }: Props) {
   if (!Array.isArray(orders) || orders.length === 0) {
     return (
       <div
-        className="rounded-xl border border-dashed border-gray-300 p-8 text-center dark:border-gray-700"
+        className="rounded-xl border border-dashed border-[hsl(var(--border))] p-8 text-center"
         role="status"
         aria-live="polite"
       >
-        <p className="text-gray-600 dark:text-gray-300">Vous n’avez pas encore de commande.</p>
+        <p className="text-token-text/75">Vous n’avez pas encore de commande.</p>
         <Link
           href="/produit"
           className="mt-4 inline-block rounded-lg bg-accent px-4 py-2 font-semibold text-white hover:bg-accent/90 focus:outline-none focus:ring-4 focus:ring-accent/40"
@@ -122,7 +122,7 @@ export default function OrderList({ orders = [], className }: Props) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Rechercher par n° de commande…"
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-zinc-900 sm:w-64"
+              className="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-2 text-sm sm:w-64"
               aria-label="Rechercher par numéro de commande"
             />
           </label>
@@ -135,7 +135,7 @@ export default function OrderList({ orders = [], className }: Props) {
                 const value = e.target.value
                 if (isSortOption(value)) setSort(value)
               }}
-              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-zinc-900"
+              className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-2 text-sm"
               aria-label="Trier les commandes"
             >
               <option value="recent">Plus récentes</option>
@@ -152,21 +152,21 @@ export default function OrderList({ orders = [], className }: Props) {
           const statusKey = normalizeStatus(order.status)
           const badgeClass =
             STATUS_STYLE[statusKey] ||
-            'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
+            'bg-[hsl(var(--surface-2))] text-[hsl(var(--text))]'
           const statusLabel = STATUS_LABEL[statusKey] || order.status || '—'
           const itemsCount = typeof order.itemsCount === 'number' ? order.itemsCount : 0
 
           return (
             <li
               key={order.id}
-              className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md dark:border-gray-800 dark:bg-zinc-900"
+              className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-4 shadow-[var(--shadow-sm)] transition hover:shadow-[var(--shadow-md)]"
               aria-label={`Commande ${order.id}`}
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="font-semibold">
-                      Commande <span className="text-gray-500">#{order.id}</span>
+                      Commande <span className="text-token-text/60">#{order.id}</span>
                     </p>
 
                     <span
@@ -188,7 +188,7 @@ export default function OrderList({ orders = [], className }: Props) {
                 <div className="flex flex-col items-start gap-2 sm:items-end">
                   <div className="text-sm">
                     Total :{' '}
-                    <strong className="text-gray-900 dark:text-gray-100">
+                    <strong className="text-[hsl(var(--text))]">
                       {typeof order.total === 'number' ? formatPrice(order.total) : '—'}
                     </strong>
                   </div>
@@ -196,7 +196,7 @@ export default function OrderList({ orders = [], className }: Props) {
                   <div className="flex gap-2">
                     <Link
                       href={`/account/mes-commandes/${order.id}`}
-                      className="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-accent dark:border-gray-700 dark:hover:bg-zinc-800"
+                      className="inline-flex items-center rounded-lg border border-[hsl(var(--border))] px-3 py-1.5 text-sm font-medium hover:bg-[hsl(var(--surface-2))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
                       aria-label={`Voir le détail de la commande ${order.id}`}
                     >
                       Détail

@@ -72,11 +72,11 @@ export default function CartItem({ item }: CartItemProps) {
 
   return (
     <motion.li
-      initial={prefersReduced ? false : { opacity: 0, y: 10 }}
+      initial={prefersReduced ? false : { opacity: 0, y: 8 }}
       animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
-      exit={prefersReduced ? undefined : { opacity: 0, y: -10 }}
-      transition={{ duration: 0.25 }}
-      className="card group flex items-center gap-4 rounded-[var(--radius-2xl)] p-4 shadow-[var(--shadow-sm)] transition-all hover:shadow-[var(--shadow-card-hover)]"
+      exit={prefersReduced ? undefined : { opacity: 0, y: -8 }}
+      transition={{ duration: 0.22 }}
+      className="group flex items-center gap-4 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/50 p-4 transition-colors hover:bg-[hsl(var(--surface))]/80"
       role="listitem"
       aria-label={`Produit dans le panier : ${item.title}`}
       data-id={item._id}
@@ -85,7 +85,7 @@ export default function CartItem({ item }: CartItemProps) {
 
       <Link
         href={`/products/${item.slug}`}
-        className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+        className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
         aria-label={`Voir la fiche produit de ${item.title}`}
       >
         <Image
@@ -97,29 +97,24 @@ export default function CartItem({ item }: CartItemProps) {
         />
       </Link>
 
-      <div className="min-w-0 flex-1 space-y-1">
+      <div className="min-w-0 flex-1 space-y-0.5">
         <Link
           href={`/products/${item.slug}`}
-          className="block line-clamp-1 text-[14px] font-semibold text-[hsl(var(--text))] transition hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded"
+          className="block line-clamp-2 break-words text-[14px] font-semibold text-[hsl(var(--text))] transition hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded"
         >
           {item.title}
         </Link>
-
-        <p className="text-[12px] text-token-text/70">
-          {formatPrice(item.price)} / unité
-        </p>
-
-        <div className="mt-1.5 inline-flex items-center gap-0 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-1.5 py-0.5">
+        <p className="text-[12px] text-token-text/60">{formatPrice(item.price)}/unité</p>
+        <div className="inline-flex items-center gap-0 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-0.5 py-1 sm:px-1 sm:py-0.5">
           <button
             type="button"
             onClick={dec}
             disabled={item.quantity <= MIN_QTY}
-            className="rounded-lg p-1.5 transition hover:bg-white/50 disabled:opacity-40 dark:hover:bg-white/10"
+            className="touch-target rounded p-2 transition hover:bg-white/50 disabled:opacity-40 dark:hover:bg-white/10 sm:p-1"
             aria-label={`Diminuer la quantité de ${item.title}`}
           >
-            <Minus className="h-4 w-4" aria-hidden="true" />
+            <Minus className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
-
           <input
             inputMode="numeric"
             pattern="[0-9]*"
@@ -127,45 +122,38 @@ export default function CartItem({ item }: CartItemProps) {
             onChange={(e) => setQty(clamp(Number(e.target.value)))}
             onBlur={() => commitQty(qty)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.currentTarget.blur()
-              }
+              if (e.key === 'Enter') e.currentTarget.blur()
             }}
             aria-label={`Quantité pour ${item.title}`}
-            className="w-10 bg-transparent text-center text-sm font-medium outline-none tabular-nums"
+            className="w-8 bg-transparent text-center text-[13px] font-medium outline-none tabular-nums"
           />
-
           <button
             type="button"
             onClick={inc}
             disabled={item.quantity >= MAX_QTY}
-            className="rounded-lg p-1.5 transition hover:bg-white/50 disabled:opacity-40 dark:hover:bg-white/10"
+            className="rounded p-1 transition hover:bg-white/50 disabled:opacity-40 dark:hover:bg-white/10"
             aria-label={`Augmenter la quantité de ${item.title}`}
           >
-            <Plus className="h-4 w-4" aria-hidden="true" />
+            <Plus className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
         </div>
       </div>
 
-      <div className="flex flex-col items-end gap-2">
+      <div className="flex shrink-0 flex-col items-end gap-1.5">
         <p
-          className="text-base font-extrabold tabular-nums tracking-tight text-[hsl(var(--accent))]"
+          className="text-base font-bold tabular-nums text-[hsl(var(--accent))]"
           aria-label={`Total pour ${item.title} : ${formatPrice(lineTotal)}`}
         >
           {formatPrice(lineTotal)}
         </p>
-
         <button
           type="button"
           onClick={handleRemove}
-          className="rounded-xl p-2.5 transition hover:bg-red-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:hover:bg-red-900/25 dark:focus:ring-offset-[hsl(var(--surface))]"
+          className="touch-target rounded-lg p-2.5 text-token-text/60 transition hover:bg-red-100 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:hover:bg-red-900/25 dark:hover:text-red-400 sm:p-2"
           aria-label={`Supprimer ${item.title} du panier`}
           title={`Supprimer ${item.title}`}
         >
-          <Trash2
-            className="h-5 w-5 text-red-600 transition-transform group-hover:scale-110 dark:text-red-400"
-            aria-hidden="true"
-          />
+          <Trash2 className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
     </motion.li>

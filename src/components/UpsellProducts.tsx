@@ -36,8 +36,8 @@ export default function UpsellProducts() {
   if (!recommendations.length) return null;
 
   return (
-    <section className="card mt-10 p-4 rounded-[var(--radius-2xl)]">
-      <h2 className="text-xl font-bold mb-4 text-[hsl(var(--text))] [letter-spacing:var(--heading-tracking)]">
+    <section className="card rhythm-content card-padding rounded-2xl">
+      <h2 className="heading-subsection mb-4">
         🎯 Vous pourriez aussi aimer
       </h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">

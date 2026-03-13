@@ -28,10 +28,11 @@ const STR = {
   fr: {
     nav: {
       categories: 'Catégories',
-      products: 'Produits',
+      products: 'Tous les produits',
+      packs: 'Packs recommandés',
       wishlist: 'Wishlist',
       blog: 'Blog',
-      contact: 'Contact',
+      contact: 'Support & contact',
     },
     headerNavAria: 'Navigation principale',
     searchAria: 'Recherche produits',
@@ -57,6 +58,7 @@ const STR = {
     allProducts: 'Tous les produits',
     wishlistAria: (n: number) => (n > 0 ? `Voir la wishlist (${n})` : 'Voir la wishlist'),
     cartAria: (n: number) => (n > 0 ? `Voir le panier (${n})` : 'Voir le panier'),
+    cartShort: 'Panier',
     account: {
       aria: 'Espace client',
       title: 'Espace client',
@@ -68,10 +70,11 @@ const STR = {
   en: {
     nav: {
       categories: 'Categories',
-      products: 'Products',
+      products: 'All products',
+      packs: 'Packs',
       wishlist: 'Wishlist',
       blog: 'Blog',
-      contact: 'Contact',
+      contact: 'Support & contact',
     },
     headerNavAria: 'Primary navigation',
     searchAria: 'Product search',
@@ -97,6 +100,7 @@ const STR = {
     allProducts: 'All products',
     wishlistAria: (n: number) => (n > 0 ? `View wishlist (${n})` : 'View wishlist'),
     cartAria: (n: number) => (n > 0 ? `View cart (${n})` : 'View cart'),
+    cartShort: 'Cart',
     account: {
       aria: 'Account',
       title: 'Account',
@@ -135,9 +139,9 @@ type WishlistStoreLike = {
 }
 
 const LINKS: NavLink[] = [
-  { href: '/categorie', labelKey: 'categories' },
   { href: '/products', labelKey: 'products' },
-  { href: '/wishlist', labelKey: 'wishlist' },
+  { href: '/products/packs', labelKey: 'packs' },
+  { href: '/categorie', labelKey: 'categories' },
   { href: '/blog', labelKey: 'blog' },
   { href: '/contact', labelKey: 'contact' },
 ]
@@ -476,22 +480,22 @@ export default function Header() {
       className={cn(
         'fixed left-0 right-0 top-0 z-[80] w-full border-b border-transparent backdrop-blur-xl supports-[backdrop-filter]:backdrop-blur-xl',
         'bg-[hsl(var(--surface))]/80 transition-[background-color,border-color,box-shadow,transform] motion-safe:duration-300 motion-safe:ease-[var(--ease-smooth)]',
-        'data-[scrolled=true]:bg-[hsl(var(--surface))]/90 data-[scrolled=true]:border-[hsl(var(--border))]/60 data-[scrolled=true]:shadow-[0_4px_24px_rgba(0,0,0,0.06)] dark:data-[scrolled=true]:shadow-[0_8px_32px_rgba(0,0,0,0.35)]',
+        'data-[scrolled=true]:bg-[hsl(var(--surface))]/92 data-[scrolled=true]:border-[hsl(var(--border))]/70 data-[scrolled=true]:shadow-[0_14px_40px_rgba(15,23,42,0.24)] dark:data-[scrolled=true]:shadow-[0_18px_60px_rgba(0,0,0,0.75)]',
         hidden ? '-translate-y-full' : 'translate-y-0'
       )}
     >
-      <div className="container-app flex h-16 items-center justify-between gap-2 sm:gap-3 md:h-[4.5rem]">
+      <div className="container-app flex h-16 items-center justify-between gap-4 md:h-[4.5rem] md:gap-3 lg:h-[4.75rem]">
         <NextLink
           href={L('/')}
           prefetch={false}
           aria-label={t.logoAria}
           rel="home"
           onClick={onLogoClick}
-          className="group inline-flex items-center rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+          className="touch-target group inline-flex items-center justify-center rounded-xl p-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] md:min-h-0 md:min-w-0 md:p-1.5"
           data-gtm="header_logo_home"
         >
           <Logo
-            className="h-8 w-auto md:h-10"
+            className="h-7 w-auto md:h-9 lg:h-10"
             withText={false}
             srcLight="/logo.svg"
             srcDark="/logo-dark.svg"
@@ -505,7 +509,7 @@ export default function Header() {
           role="search"
           aria-label={t.searchAria}
           onSubmit={onSearchSubmit}
-          className="relative hidden min-w-0 flex-1 items-center md:flex lg:max-w-md xl:max-w-lg"
+          className="relative hidden min-w-0 flex-1 items-center md:flex lg:max-w-md xl:max-w-xl"
         >
           <label htmlFor="header-search" className="sr-only">
             {t.searchAria}
@@ -520,7 +524,7 @@ export default function Header() {
             list="header-search-suggestions"
             className={cn(
               'w-full rounded-full border px-4 py-2.5 pr-12 text-sm',
-              'border-[hsl(var(--border))] bg-[hsl(var(--surface))]/70 placeholder:text-token-text/40',
+              'border-[hsl(var(--border))] bg-[hsl(var(--surface))]/75 placeholder:text-token-text/40',
               'focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/.30)]'
             )}
             autoComplete="off"
@@ -545,7 +549,7 @@ export default function Header() {
           <div className="absolute inset-y-0 right-1.5 flex items-center">
             <button
               type="submit"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--accent))] text-white shadow-[0_10px_30px_rgba(20,184,166,0.55)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
               aria-label={t.searchAria}
               title={t.searchAria}
               data-gtm="header_search_submit"
@@ -556,7 +560,7 @@ export default function Header() {
         </form>
 
         <nav
-          className="hidden whitespace-nowrap text-[15px] font-medium tracking-tight text-token-text lg:flex lg:gap-5 xl:gap-7 xl:text-base"
+          className="hidden items-center whitespace-nowrap text-[15px] font-medium tracking-tight text-token-text lg:flex lg:gap-5 xl:gap-7 xl:text-base"
           aria-label={t.headerNavAria}
         >
           {LINKS.map(({ href, labelKey }) => {
@@ -583,7 +587,7 @@ export default function Header() {
                     onBlur={() => closeCats(100)}
                     onMouseDown={(e) => e.preventDefault()}
                     className={cn(
-                      'group relative rounded-sm px-0.5 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]',
+                      'group relative rounded-full px-1.5 py-1 text-sm transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]',
                       active
                         ? 'font-semibold text-[hsl(var(--accent))] after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-[hsl(var(--accent))]'
                         : 'hover:text-[hsl(var(--accent))] focus-visible:text-[hsl(var(--accent))]'
@@ -610,8 +614,8 @@ export default function Header() {
                     onFocus={openCats}
                     onBlur={() => closeCats(100)}
                     className={cn(
-                      'absolute left-1/2 top-[calc(100%+10px)] z-50 w-[min(860px,92vw)] -translate-x-1/2 rounded-2xl border',
-                      'border-[hsl(var(--border))] bg-[hsl(var(--surface))]/90 shadow-2xl backdrop-blur',
+                      'absolute left-1/2 top-[calc(100%+12px)] z-50 w-[min(880px,94vw)] -translate-x-1/2 rounded-3xl border',
+                      'border-[hsl(var(--border))] bg-[hsl(var(--surface))]/92 shadow-[0_26px_80px_rgba(15,23,42,0.45)] backdrop-blur-xl',
                       'transition-all duration-200',
                       catOpen
                         ? 'pointer-events-auto translate-y-0 opacity-100'
@@ -662,7 +666,7 @@ export default function Header() {
                       </ul>
 
                       <div className="md:col-span-1">
-                        <div className="h-full rounded-xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.10)] via-transparent to-[hsl(var(--surface))] p-4 shadow-md md:p-5">
+                        <div className="h-full rounded-2xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.12)] via-[hsl(var(--surface))] to-[hsl(var(--surface-2))] p-4 shadow-md md:p-5">
                           <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent))]/90">
                             {t.selection}
                           </p>
@@ -717,7 +721,7 @@ export default function Header() {
                 onBlur={() => smartPrefetchCancel(href)}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'group relative rounded-sm transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]',
+                  'group relative rounded-full px-1.5 py-1 text-sm transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]',
                   active
                     ? 'font-semibold text-[hsl(var(--accent))] after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-[hsl(var(--accent))]'
                     : 'hover:text-[hsl(var(--accent))] focus-visible:text-[hsl(var(--accent))]'
@@ -737,74 +741,118 @@ export default function Header() {
           })}
         </nav>
 
+        <div className="flex min-h-[2.75rem] items-center gap-3 md:hidden" style={{ touchAction: 'manipulation' }}>
+          <Link
+            href={L('/commande')}
+            prefetch={false}
+            onPointerEnter={() => smartPrefetchStart('/commande')}
+            onPointerLeave={() => smartPrefetchCancel('/commande')}
+            className="touch-target relative flex items-center justify-center rounded-xl p-2.5 hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 md:p-1.5"
+            aria-label={t.cartAria(cartCount)}
+            data-gtm="header_cart_mobile"
+            data-cart-icon
+          >
+            <Cart />
+            {cartCount > 0 ? (
+              <span className="absolute -right-1 -top-1 flex min-w-[1.15rem] items-center justify-center rounded-full bg-[hsl(var(--accent))] px-1 py-0.5 text-[10px] font-bold tabular-nums text-white">
+                <span className="sr-only">Cart count: </span>
+                {cartCount > 99 ? '99+' : cartCount}
+              </span>
+            ) : null}
+          </Link>
+          <MobileNav />
+        </div>
+
         <div className="hidden items-center gap-2 sm:gap-3 md:flex">
-          <ThemeToggle size="sm" />
-          <LocaleSwitch pathname={pathname} />
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            <ThemeToggle size="sm" />
+            <LocaleSwitch pathname={pathname} />
 
-          <Link
-            href="/products?promo=1"
-            prefetch={false}
-            onPointerEnter={() => smartPrefetchStart('/products?promo=1')}
-            onPointerLeave={() => smartPrefetchCancel('/products?promo=1')}
-            onFocus={() => smartPrefetchStart('/products?promo=1')}
-            onBlur={() => smartPrefetchCancel('/products?promo=1')}
-            className="inline-flex items-center justify-center rounded-lg p-0.5 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)] xl:hidden"
-            aria-label={t.deals.aria}
-            title={t.deals.title}
-            data-gtm="header_deals_icon"
-          >
-            <ActionBadge>
-              <Flame />
-            </ActionBadge>
-          </Link>
-
-          <Link
-            href="/products?promo=1"
-            prefetch={false}
-            onPointerEnter={() => smartPrefetchStart('/products?promo=1')}
-            onPointerLeave={() => smartPrefetchCancel('/products?promo=1')}
-            onFocus={() => smartPrefetchStart('/products?promo=1')}
-            onBlur={() => smartPrefetchCancel('/products?promo=1')}
-            className="group hidden items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 px-3 py-1.5 text-[13px] font-medium text-token-text hover:bg-[hsl(var(--surface))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)] xl:inline-flex"
-            aria-label={t.deals.aria}
-            title={t.deals.title}
-            data-gtm="header_deals"
-          >
-            <span className="relative inline-flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gradient-to-r from-pink-500 to-yellow-500 opacity-60" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-gradient-to-r from-pink-500 to-yellow-500" />
-            </span>
-            <span>{t.deals.text}</span>
-          </Link>
-
-          <div className="relative">
             <Link
-              href="/wishlist"
+              href="/products?promo=1"
               prefetch={false}
-              onPointerEnter={() => smartPrefetchStart('/wishlist')}
-              onPointerLeave={() => smartPrefetchCancel('/wishlist')}
-              onFocus={() => smartPrefetchStart('/wishlist')}
-              onBlur={() => smartPrefetchCancel('/wishlist')}
-              className="relative rounded-lg p-0.5 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-              aria-label={t.wishlistAria(wishlistCount)}
-              data-gtm="header_wishlist"
+              onPointerEnter={() => smartPrefetchStart('/products?promo=1')}
+              onPointerLeave={() => smartPrefetchCancel('/products?promo=1')}
+              onFocus={() => smartPrefetchStart('/products?promo=1')}
+              onBlur={() => smartPrefetchCancel('/products?promo=1')}
+              className="inline-flex items-center justify-center rounded-lg p-0.5 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)] xl:hidden"
+              aria-label={t.deals.aria}
+              title={t.deals.title}
+              data-gtm="header_deals_icon"
             >
               <ActionBadge>
-                <Heart />
+                <Flame />
               </ActionBadge>
             </Link>
 
-            {wishlistCount > 0 ? (
-              <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
-                <span className="rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm">
-                  <span className="sr-only">Wishlist count: </span>
-                  {wishlistCount}
-                </span>
-              </div>
-            ) : null}
+            <Link
+              href="/products?promo=1"
+              prefetch={false}
+              onPointerEnter={() => smartPrefetchStart('/products?promo=1')}
+              onPointerLeave={() => smartPrefetchCancel('/products?promo=1')}
+              onFocus={() => smartPrefetchStart('/products?promo=1')}
+              onBlur={() => smartPrefetchCancel('/products?promo=1')}
+              className="group hidden items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 px-3 py-1.5 text-[13px] font-medium text-token-text hover:bg-[hsl(var(--surface))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)] xl:inline-flex"
+              aria-label={t.deals.aria}
+              title={t.deals.title}
+              data-gtm="header_deals"
+            >
+              <span className="relative inline-flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gradient-to-r from-pink-500 to-yellow-500 opacity-60" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-gradient-to-r from-pink-500 to-yellow-500" />
+              </span>
+              <span>{t.deals.text}</span>
+            </Link>
+
+            <div className="relative">
+              <Link
+                href="/wishlist"
+                prefetch={false}
+                onPointerEnter={() => smartPrefetchStart('/wishlist')}
+                onPointerLeave={() => smartPrefetchCancel('/wishlist')}
+                onFocus={() => smartPrefetchStart('/wishlist')}
+                onBlur={() => smartPrefetchCancel('/wishlist')}
+                className="relative rounded-lg p-0.5 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+                aria-label={t.wishlistAria(wishlistCount)}
+                data-gtm="header_wishlist"
+              >
+                <ActionBadge>
+                  <Heart />
+                </ActionBadge>
+              </Link>
+
+              {wishlistCount > 0 ? (
+                <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
+                  <span className="rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm">
+                    <span className="sr-only">Wishlist count: </span>
+                    {wishlistCount}
+                  </span>
+                </div>
+              ) : null}
+            </div>
+
+            <Link
+              href="/login"
+              prefetch={false}
+              onPointerEnter={() => smartPrefetchStart('/login')}
+              onPointerLeave={() => smartPrefetchCancel('/login')}
+              onFocus={() => smartPrefetchStart('/login')}
+              onBlur={() => smartPrefetchCancel('/login')}
+              className="hidden items-center justify-center rounded-lg p-0.5 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] xl:inline-flex"
+              aria-label={t.account.aria}
+              title={t.account.title}
+              data-gtm="header_account"
+            >
+              <ActionBadge>
+                <User />
+              </ActionBadge>
+            </Link>
           </div>
 
-          <div className="relative">
+          <div
+            className="ml-3 flex items-center border-l border-[hsl(var(--border))] pl-3"
+            aria-hidden="true"
+          >
             <Link
               href="/commande"
               prefetch={false}
@@ -812,42 +860,33 @@ export default function Header() {
               onPointerLeave={() => smartPrefetchCancel('/commande')}
               onFocus={() => smartPrefetchStart('/commande')}
               onBlur={() => smartPrefetchCancel('/commande')}
-              className="relative rounded-lg p-0.5 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+              className={cn(
+                'relative inline-flex min-h-[2.75rem] items-center gap-2 rounded-full border-2 px-4 py-2 transition-colors',
+                'border-[hsl(var(--accent)/.35)] bg-[hsl(var(--accent)/.14)] hover:border-[hsl(var(--accent)/.5)] hover:bg-[hsl(var(--accent)/.2)]',
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]'
+              )}
               aria-label={t.cartAria(cartCount)}
               data-gtm="header_cart"
               data-cart-icon
             >
-              <ActionBadge>
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--accent))]/20 text-[hsl(var(--accent))]">
                 <Cart />
-              </ActionBadge>
-            </Link>
-
-            {cartCount > 0 ? (
-              <div aria-live="polite" aria-atomic="true" className="absolute -right-2 -top-2">
-                <span className="animate-[pulse_2s_ease-in-out_infinite] rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm">
+              </span>
+              <span className="hidden font-semibold text-[hsl(var(--text))] xl:inline">
+                {t.cartShort}
+              </span>
+              {cartCount > 0 ? (
+                <span
+                  aria-live="polite"
+                  aria-atomic="true"
+                  className="flex min-w-[1.4rem] items-center justify-center rounded-full bg-[hsl(var(--accent))] px-2 py-0.5 text-[13px] font-bold tabular-nums text-white"
+                >
                   <span className="sr-only">Cart count: </span>
-                  {cartCount}
+                  {cartCount > 99 ? '99+' : cartCount}
                 </span>
-              </div>
-            ) : null}
+              ) : null}
+            </Link>
           </div>
-
-          <Link
-            href="/login"
-            prefetch={false}
-            onPointerEnter={() => smartPrefetchStart('/login')}
-            onPointerLeave={() => smartPrefetchCancel('/login')}
-            onFocus={() => smartPrefetchStart('/login')}
-            onBlur={() => smartPrefetchCancel('/login')}
-            className="hidden items-center justify-center rounded-lg p-0.5 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] xl:inline-flex"
-            aria-label={t.account.aria}
-            title={t.account.title}
-            data-gtm="header_account"
-          >
-            <ActionBadge>
-              <User />
-            </ActionBadge>
-          </Link>
         </div>
 
         <MobileNav />

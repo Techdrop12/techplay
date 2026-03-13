@@ -37,19 +37,19 @@ async function OrdersContent() {
         aria-labelledby="orders-title"
         role="main"
       >
-        <h1 id="orders-title" className="mb-6 text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+        <h1 id="orders-title" className="heading-page mb-6">
           Mes commandes
         </h1>
         <div
-          className="rounded-[1.5rem] border border-dashed border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 p-8 text-center dark:bg-[hsl(var(--surface))]/40"
+          className="rounded-2xl border border-dashed border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-8 text-center"
           role="status"
         >
-          <p className="text-gray-600 dark:text-gray-300">
+          <p className="text-token-text/75">
             Connectez-vous pour voir l&apos;historique de vos commandes.
           </p>
           <Link
             href="/login"
-            className="mt-4 inline-flex items-center justify-center rounded-full bg-[hsl(var(--accent))] px-5 py-2.5 text-[15px] font-semibold text-slate-950 shadow-[0_10px_30px_rgba(20,184,166,0.3)] transition hover:shadow-[0_14px_40px_rgba(20,184,166,0.4)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)]"
+            className="mt-4 inline-flex items-center justify-center rounded-full bg-[hsl(var(--accent))] px-5 py-2.5 text-[15px] font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-md)] transition hover:opacity-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)]"
           >
             Se connecter
           </Link>
@@ -90,7 +90,7 @@ function OrdersSkeleton() {
         {[...Array(2)].map((_, i) => (
           <div
             key={i}
-            className="animate-pulse rounded-[1.5rem] border border-white/10 bg-[hsl(var(--surface))]/80 p-5"
+            className="animate-pulse rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-5"
           >
             <div className="mb-3 h-4 w-48 rounded-lg bg-[hsl(var(--surface-2))]" />
             <div className="h-8 w-40 rounded-lg bg-[hsl(var(--surface-2))]" />

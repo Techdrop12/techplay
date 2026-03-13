@@ -395,7 +395,7 @@ export default function BestProducts({
         <>
           <h2
             id={headingId}
-            className="mb-2 text-center text-3xl font-extrabold text-brand dark:text-white sm:text-4xl"
+            className="mb-2 text-center heading-section"
           >
             {title || t.titleFallback}
           </h2>

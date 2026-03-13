@@ -15,11 +15,12 @@ import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 const STR = {
   fr: {
     nav: [
-      { href: '/products', label: 'Produits' },
+      { href: '/products', label: 'Tous les produits' },
+      { href: '/products/packs', label: 'Packs recommandés' },
       { href: '/categorie', label: 'Catégories' },
       { href: '/wishlist', label: 'Wishlist' },
       { href: '/blog', label: 'Blog' },
-      { href: '/contact', label: 'Contact' },
+      { href: '/contact', label: 'Support & contact' },
       { href: '/products?promo=1', label: 'Offres', promo: true },
     ],
     ui: {
@@ -40,6 +41,8 @@ const STR = {
       dealsAria: 'Voir les offres du jour',
       dealsTitle: 'Offres du jour',
       mobileNavAria: 'Navigation mobile',
+      shopLabel: 'Par où commencer',
+      quickAccessLabel: 'Compte & accès',
     },
     trends: [
       'écouteurs bluetooth',
@@ -52,11 +55,12 @@ const STR = {
   },
   en: {
     nav: [
-      { href: '/products', label: 'Products' },
+      { href: '/products', label: 'All products' },
+      { href: '/products/packs', label: 'Packs' },
       { href: '/categorie', label: 'Categories' },
       { href: '/wishlist', label: 'Wishlist' },
       { href: '/blog', label: 'Blog' },
-      { href: '/contact', label: 'Contact' },
+      { href: '/contact', label: 'Support & contact' },
       { href: '/products?promo=1', label: 'Deals', promo: true },
     ],
     ui: {
@@ -77,6 +81,8 @@ const STR = {
       dealsAria: "See today's deals",
       dealsTitle: "Today's deals",
       mobileNavAria: 'Mobile navigation',
+      shopLabel: 'Where to go',
+      quickAccessLabel: 'Account & access',
     },
     trends: [
       'bluetooth earbuds',
@@ -581,7 +587,7 @@ export default function MobileNav() {
         aria-controls={dialogId}
         aria-label={t.ui.openMenu}
         aria-keyshortcuts="Alt+M"
-        className="grid h-10 w-10 place-items-center rounded-xl hover:bg-[hsl(var(--surface))]/80 md:hidden"
+        className="grid min-h-[2.75rem] min-w-[2.75rem] place-items-center rounded-xl hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 md:hidden"
       >
         <Icon.Menu />
       </button>
@@ -621,17 +627,17 @@ export default function MobileNav() {
               }}
             >
               <div className="pt-[env(safe-area-inset-top)]" />
-              <div className="mx-auto mt-3 h-1.5 w-14 rounded-full bg-token-text/20" aria-hidden="true" />
+              <div className="mx-auto mt-4 h-1 w-12 rounded-full bg-token-text/15" aria-hidden="true" />
 
-              <div className="flex items-center justify-between px-4 py-3">
-                <h2 id={titleId} className="text-lg font-semibold">
+              <div className="flex items-center justify-between gap-3 px-5 py-4">
+                <h2 id={titleId} className="text-lg font-semibold text-[hsl(var(--text))]">
                   {t.ui.menu}
                 </h2>
 
                 <button
                   onClick={() => closeMenu('close_btn')}
                   type="button"
-                  className="rounded px-3 py-2 text-sm hover:bg-[hsl(var(--surface))]/80"
+                  className="flex min-h-[2.75rem] min-w-[2.75rem] items-center justify-center rounded-xl hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
                   aria-label={t.ui.closeMenu}
                 >
                   <Icon.Close />
@@ -644,7 +650,7 @@ export default function MobileNav() {
                 role="search"
                 aria-label={t.ui.searchAria}
                 onSubmit={onSearchSubmit}
-                className="px-4 pb-2"
+                className="px-5 pb-4"
               >
                 <div className="relative">
                   <input
@@ -653,7 +659,7 @@ export default function MobileNav() {
                     name="q"
                     placeholder={`${t.ui.placeholderPrefix} ${placeholder}`}
                     list="mobile-search-suggestions"
-                    className="w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-3 pr-12 text-base placeholder:text-token-text/50 focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/.30)]"
+                    className="min-h-[3rem] w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-3 pr-12 text-base placeholder:text-token-text/50 focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/.30)]"
                     autoComplete="off"
                     enterKeyHint="search"
                     inputMode="search"
@@ -680,8 +686,8 @@ export default function MobileNav() {
               </form>
 
               {recentQs.length > 0 ? (
-                <div className="px-4 pb-3">
-                  <div className="mb-2 text-xs font-semibold text-token-text/60">{t.ui.recent}</div>
+                <div className="px-5 pb-4">
+                  <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-token-text/55">{t.ui.recent}</div>
 
                   <div className="flex flex-wrap gap-2">
                     {recentQs.map((q) => (
@@ -689,7 +695,7 @@ export default function MobileNav() {
                         key={q}
                         type="button"
                         onClick={() => goSearch(q)}
-                        className="focus-ring rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-[13px] hover:bg-[hsl(var(--surface))]/80"
+                        className="focus-ring min-h-[2.75rem] rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 text-[13px] hover:bg-[hsl(var(--surface))]/80"
                         aria-label={`${t.ui.searchBtn}: ${q}`}
                       >
                         {q.length > 26 ? `${q.slice(0, 24)}…` : q}
@@ -706,7 +712,7 @@ export default function MobileNav() {
                         }
                         setRecentQs([])
                       }}
-                      className="focus-ring ml-1 rounded-full bg-[hsl(var(--surface))]/80 px-3 py-1.5 text-[12px] text-token-text/70 hover:bg-[hsl(var(--surface))]"
+                      className="focus-ring min-h-[2.75rem] rounded-full bg-[hsl(var(--surface))]/80 px-4 py-2 text-[12px] text-token-text/70 hover:bg-[hsl(var(--surface))]"
                       aria-label={t.ui.clear}
                     >
                       {t.ui.clear}
@@ -715,64 +721,69 @@ export default function MobileNav() {
                 </div>
               ) : null}
 
-              <div className="flex items-center gap-2 px-4 pb-3">
-                <ThemeToggle size="md" />
+              <section className="border-t border-[hsl(var(--border))]/60 px-5 py-4" aria-label={t.ui.quickAccessLabel}>
+                <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-token-text/55">
+                  {t.ui.quickAccessLabel}
+                </p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <ThemeToggle size="md" />
 
-                <Link
-                  href="/wishlist"
-                  prefetch={false}
-                  onPointerDown={() => prefetchOnPointer('/wishlist')}
-                  onFocus={() => prefetchOnPointer('/wishlist')}
-                  onClick={() => {
-                    track({ action: 'mobile_nav_quick_wishlist' })
-                    closeMenu('quick_wishlist')
-                  }}
-                  className="focus-ring relative inline-flex items-center gap-2 rounded-lg border border-[hsl(var(--border))] px-3 py-2 text-[13px] font-medium hover:bg-[hsl(var(--surface))]/80"
-                  aria-label={t.ui.wishlist(wishlistCount)}
-                >
-                  <Icon.Heart />
-                  {wishlistCount > 0 ? (
-                    <span className="rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-[11px] font-bold text-white">
-                      {wishlistCount}
-                    </span>
-                  ) : null}
-                </Link>
-
-                <Link
-                  href="/login"
-                  prefetch={false}
-                  onPointerDown={() => prefetchOnPointer('/login')}
-                  onFocus={() => prefetchOnPointer('/login')}
-                  onClick={() => {
-                    track({ action: 'mobile_nav_quick_account' })
-                    closeMenu('quick_account')
-                  }}
-                  className="focus-ring inline-flex items-center gap-2 rounded-lg border border-[hsl(var(--border))] px-3 py-2 text-[13px] font-medium hover:bg-[hsl(var(--surface))]/80"
-                  aria-label={t.ui.account}
-                >
-                  <Icon.User />
-                </Link>
-
-                {canInstall ? (
-                  <button
-                    onClick={handleInstall}
-                    type="button"
-                    className="ml-auto inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-lime-500 to-emerald-500 px-3 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
-                    aria-label={t.ui.installAppTitle}
-                    title={t.ui.installAppTitle}
+                  <Link
+                    href="/wishlist"
+                    prefetch={false}
+                    onPointerDown={() => prefetchOnPointer('/wishlist')}
+                    onFocus={() => prefetchOnPointer('/wishlist')}
+                    onClick={() => {
+                      track({ action: 'mobile_nav_quick_wishlist' })
+                      closeMenu('quick_wishlist')
+                    }}
+                    className="focus-ring inline-flex min-h-[2.75rem] items-center gap-2 rounded-xl border border-[hsl(var(--border))] px-4 py-2.5 text-[13px] font-medium hover:bg-[hsl(var(--surface))]/80"
+                    aria-label={t.ui.wishlist(wishlistCount)}
                   >
-                    <Icon.Download /> {t.ui.installApp}
-                  </button>
-                ) : null}
-              </div>
+                    <Icon.Heart />
+                    {wishlistCount > 0 ? (
+                      <span className="rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-[11px] font-bold text-white">
+                        {wishlistCount}
+                      </span>
+                    ) : null}
+                  </Link>
 
-              <div className="px-4 pb-3">
+                  <Link
+                    href="/login"
+                    prefetch={false}
+                    onPointerDown={() => prefetchOnPointer('/login')}
+                    onFocus={() => prefetchOnPointer('/login')}
+                    onClick={() => {
+                      track({ action: 'mobile_nav_quick_account' })
+                      closeMenu('quick_account')
+                    }}
+                    className="focus-ring inline-flex min-h-[2.75rem] items-center gap-2 rounded-xl border border-[hsl(var(--border))] px-4 py-2.5 text-[13px] font-medium hover:bg-[hsl(var(--surface))]/80"
+                    aria-label={t.ui.account}
+                  >
+                    <Icon.User />
+                  </Link>
+
+                  {canInstall ? (
+                    <button
+                      onClick={handleInstall}
+                      type="button"
+                      className="ml-auto inline-flex min-h-[2.75rem] items-center gap-2 rounded-xl bg-gradient-to-r from-lime-500 to-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+                      aria-label={t.ui.installAppTitle}
+                      title={t.ui.installAppTitle}
+                    >
+                      <Icon.Download /> {t.ui.installApp}
+                    </button>
+                  ) : null}
+                </div>
+              </section>
+
+              <div className="px-5 pb-4">
                 <button
                   type="button"
                   onClick={() => setCatsOpen((value) => !value)}
                   aria-expanded={catsOpen}
                   aria-controls={catsPanelId}
-                  className="focus-ring flex w-full items-center justify-between rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-3 text-base font-semibold hover:bg-[hsl(var(--surface))]/80"
+                  className="focus-ring flex min-h-[2.75rem] w-full items-center justify-between rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-3 text-base font-semibold hover:bg-[hsl(var(--surface))]/80"
                 >
                   {t.ui.categories}
                   <Icon.Chevron open={catsOpen} />
@@ -790,7 +801,7 @@ export default function MobileNav() {
                       transition={{ duration: reducedMotion ? 0 : 0.22, ease: 'easeOut' }}
                       className="overflow-hidden"
                     >
-                      <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                      <ul className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
                         {categories.map((category) => (
                           <li key={category.href}>
                             <Link
@@ -802,7 +813,7 @@ export default function MobileNav() {
                                 track({ action: 'mobile_nav_cat', label: category.href })
                                 closeMenu('cat_click')
                               }}
-                              className="focus-ring group flex items-center gap-3 rounded-xl border border-transparent bg-[hsl(var(--surface))]/80 p-3 shadow-sm transition hover:-translate-y-0.5 hover:border-[hsl(var(--accent)/.30)] hover:bg-[hsl(var(--surface))] hover:shadow-md"
+                              className="focus-ring group flex min-h-[3rem] items-center gap-3 rounded-xl border border-transparent bg-[hsl(var(--surface))]/80 p-3 shadow-sm transition hover:-translate-y-0.5 hover:border-[hsl(var(--accent)/.30)] hover:bg-[hsl(var(--surface))] hover:shadow-md"
                             >
                               <category.Icon className="opacity-80" />
                               <span className="flex-1">
@@ -829,8 +840,11 @@ export default function MobileNav() {
                 </AnimatePresence>
               </div>
 
-              <nav aria-label={t.ui.mobileNavAria} className="px-5 pb-4">
-                <ul className="grid grid-cols-1 gap-2 text-lg">
+              <section className="border-t border-[hsl(var(--border))]/60 px-5 pt-5 pb-5" aria-label={t.ui.mobileNavAria}>
+                <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-token-text/55">
+                  {t.ui.shopLabel}
+                </p>
+                <ul className="grid grid-cols-1 gap-1.5 text-lg">
                   {t.nav.map((item) => {
                     const { href, label } = item
                     const promo = ('promo' in item && item.promo === true) || href.includes('promo=1')
@@ -843,7 +857,7 @@ export default function MobileNav() {
                             onClick={openCatsFromNav}
                             aria-expanded={catsOpen}
                             aria-controls={catsPanelId}
-                            className="focus-ring w-full rounded-xl border border-transparent px-4 py-3 text-left transition hover:bg-[hsl(var(--surface))]/80"
+                            className="focus-ring flex min-h-[3rem] w-full items-center rounded-xl border border-transparent px-4 py-3.5 text-left transition hover:bg-[hsl(var(--surface))]/80 active:bg-[hsl(var(--surface))]/60"
                           >
                             {label}
                           </button>
@@ -866,7 +880,7 @@ export default function MobileNav() {
                           }}
                           aria-current={active ? 'page' : undefined}
                           className={[
-                            'focus-ring block rounded-xl px-4 py-3 transition',
+                            'focus-ring flex min-h-[3rem] items-center rounded-xl px-4 py-3.5 transition active:bg-[hsl(var(--surface))]/60',
                             promo
                               ? 'bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-center font-semibold text-white shadow-md hover:shadow-lg'
                               : active
@@ -885,9 +899,9 @@ export default function MobileNav() {
                     )
                   })}
                 </ul>
-              </nav>
+              </section>
 
-              <div className="flex items-center gap-3 border-t border-[hsl(var(--border))] px-4 py-3">
+              <div className="flex items-center gap-3 border-t border-[hsl(var(--border))] px-5 py-4">
                 <Link
                   href="/commande"
                   prefetch={false}
@@ -897,12 +911,12 @@ export default function MobileNav() {
                     track({ action: 'mobile_nav_cart_click', label: 'cart', value: cartCount || 1 })
                     closeMenu('cart_btn')
                   }}
-                  className="focus-ring relative inline-flex items-center justify-center rounded-lg border border-[hsl(var(--border))] px-4 py-2 text-base font-semibold hover:bg-[hsl(var(--surface))]/80"
+                  className="focus-ring flex min-h-[3rem] flex-1 items-center justify-center gap-2 rounded-xl border-2 border-[hsl(var(--accent)/.35)] bg-[hsl(var(--accent)/.12)] px-4 py-3 text-base font-semibold hover:bg-[hsl(var(--accent)/.2)] focus-visible:ring-[hsl(var(--accent)/.5)]"
                   aria-label={t.ui.cart(cartCount)}
                 >
                   <Icon.Cart />
                   {cartCount > 0 ? (
-                    <span className="ml-2 rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white">
+                    <span className="rounded-full bg-[hsl(var(--accent))] px-2 py-0.5 text-[13px] font-bold tabular-nums text-white">
                       {cartCount}
                     </span>
                   ) : null}
@@ -911,7 +925,7 @@ export default function MobileNav() {
                 <button
                   onClick={() => closeMenu('footer_close')}
                   type="button"
-                  className="ml-auto text-sm text-token-text/70 hover:underline focus:outline-none"
+                  className="min-h-[3rem] px-4 text-sm font-medium text-token-text/70 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
                   aria-label={t.ui.closeMenu}
                 >
                   {t.ui.closeMenu}

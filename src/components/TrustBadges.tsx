@@ -40,7 +40,7 @@ interface TrustBadgesProps {
 
 /* ----------------------------- Icônes vectorielles ----------------------------- */
 function Icon({ name, className }: { name: IconName; className?: string }) {
-  const common = 'w-5 h-5 sm:w-6 sm:h-6'
+  const common = 'w-5 h-5 shrink-0'
   switch (name) {
     case 'lock':
       return (
@@ -99,12 +99,12 @@ function Icon({ name, className }: { name: IconName; className?: string }) {
   }
 }
 
-/* -------------------------- Badges par défaut (premium) -------------------------- */
+/* -------------------------- Badges par défaut -------------------------- */
 const DEFAULT_BADGES: Badge[] = [
-  { icon: 'lock', label: 'Paiement sécurisé', sr: 'Paiement sécurisé (Stripe, PayPal, SSL 256 bits)' },
-  { icon: 'truck', label: 'Livraison 48–72h', sr: 'Livraison sous 48 à 72 heures' },
-  { icon: 'chat', label: 'Support 7j/7', sr: 'Support client réactif, 7 jours sur 7' },
-  { icon: 'shield', label: 'Satisfait ou remboursé', sr: 'Garantie satisfait ou remboursé' },
+  { icon: 'lock', label: 'Paiement sécurisé', sr: 'Paiement sécurisé par Stripe, chiffrement SSL' },
+  { icon: 'truck', label: 'Livraison 48–72 h', sr: 'Livraison en 48 à 72 h ouvrées' },
+  { icon: 'chat', label: 'Support réactif', sr: 'Équipe support joignable pour toute question' },
+  { icon: 'shield', label: 'Retours 30 jours', sr: 'Retours et remboursement sous 30 jours' },
 ]
 
 function TrustBadges({
@@ -116,23 +116,24 @@ function TrustBadges({
   const prefersReduced = useReducedMotion()
 
   const base =
-    'flex items-center gap-2 sm:gap-3 px-4 py-2 sm:px-5 sm:py-3 text-sm sm:text-base font-medium select-none'
-  const spacing = compact ? 'py-6' : 'py-12'
+    'flex items-center gap-3 px-4 py-3 sm:px-5 sm:py-3.5 text-[13px] sm:text-sm font-medium text-[hsl(var(--text))] select-none min-h-[52px] sm:min-h-[56px]'
+  const spacing = compact ? 'py-6' : 'py-8 sm:py-10'
 
   const variants: Record<NonNullable<TrustBadgesProps['variant']>, string> = {
-    card:
-      'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-lg shadow-md hover:shadow-lg border border-gray-200/70 dark:border-gray-700/70 transition-all',
-    pill:
-      'bg-white/70 dark:bg-gray-800/60 backdrop-blur text-gray-900 dark:text-gray-100 rounded-full shadow-sm ring-1 ring-gray-200/70 dark:ring-gray-700/60 transition-all',
-    subtle: 'bg-transparent text-gray-800 dark:text-gray-200',
+    card: [
+      'rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]',
+      'shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-shadow duration-200',
+    ].join(' '),
+    pill: [
+      'rounded-full border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface))]/90 backdrop-blur-sm',
+      'shadow-[var(--shadow-sm)] hover:border-[hsl(var(--border))] transition-colors duration-200',
+    ].join(' '),
+    subtle:
+      'bg-transparent text-[hsl(var(--text))]/90',
     premium: [
-      'relative rounded-xl',
-      'bg-[hsl(var(--surface))]/90 backdrop-blur',
-      'text-[hsl(var(--text))]',
-      'shadow-md hover:shadow-lg',
-      'ring-1 ring-[hsl(var(--border))]',
-      'border border-[hsl(var(--border))]',
-      'transition-all duration-300 ease-[var(--ease-smooth)]',
+      'relative rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]',
+      'shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:border-[hsl(var(--border))]',
+      'transition-all duration-200 ease-[var(--ease-smooth)]',
     ].join(' '),
   }
 
@@ -140,30 +141,20 @@ function TrustBadges({
 
   return (
     <section
-      className={cn('border-t border-[hsl(var(--border))] bg-[hsl(var(--surface-2))]/60', spacing, className)}
+      className={cn('border-t border-[hsl(var(--border))] bg-[hsl(var(--surface-2))]/50', spacing, className)}
       aria-labelledby="trust-heading"
     >
       <h2 id="trust-heading" className="sr-only">
         Nos garanties de confiance
       </h2>
 
-      <ul className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 px-4" role="list">
+      <ul className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 px-4 sm:px-6" role="list">
         {items.map(({ icon, label, href, sr }, i) => {
           const content = (
             <div className={cn(base, variants[variant])} aria-label={label}>
-              {/* Anneau conique subtil pour le variant premium */}
-              {variant === 'premium' && (
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute -inset-[1px] rounded-[18px] bg-[conic-gradient(from_140deg,rgba(59,130,246,.45),transparent_40%,rgba(14,165,233,.35),transparent_70%)] opacity-30 blur"
-                />
-              )}
+              <Icon name={icon ?? 'shield'} className="text-[hsl(var(--accent))]" />
 
-              {/* Icône (bouclier par défaut si non spécifiée) */}
-              <Icon name={icon ?? 'shield'} className="shrink-0 text-[hsl(var(--accent))] opacity-95" />
-
-              {/* Libellé + SR */}
-              <span className="relative z-10">{label}</span>
+              <span className="relative z-10 truncate">{label}</span>
               {sr ? <span className="sr-only"> — {sr}</span> : null}
             </div>
           )
@@ -171,15 +162,18 @@ function TrustBadges({
           return (
             <motion.li
               key={`${label}-${i}`}
-              initial={prefersReduced ? false : { opacity: 0, y: 8 }}
+              initial={prefersReduced ? false : { opacity: 0, y: 6 }}
               whileInView={prefersReduced ? undefined : { opacity: 1, y: 0 }}
-              whileHover={prefersReduced ? undefined : { scale: 1.015 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.28, ease: 'easeOut', delay: i * 0.05 }}
-              className="relative"
+              whileHover={prefersReduced ? undefined : { y: -1 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.25, ease: 'easeOut', delay: i * 0.04 }}
+              className="relative list-none"
             >
               {href ? (
-                <Link href={href} className="block focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40 rounded-xl">
+                <Link
+                  href={href}
+                  className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 rounded-xl"
+                >
                   {content}
                 </Link>
               ) : (

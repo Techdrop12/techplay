@@ -277,12 +277,12 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
           aria-invalid={tooShort ? 'true' : 'false'}
           aria-describedby={`review-help review-counter${tooShort ? ' review-error' : ''}`}
         />
-        <div id="review-help" className="mt-1 text-[12px] text-gray-500">
+        <div id="review-help" className="mt-1 text-[12px] text-token-text/60">
           {tr('helper_text', `Soyez précis et respectueux. Au moins ${MIN_LEN} caractères.`)}
         </div>
         <div
           id="review-counter"
-          className={`mt-1 text-[12px] ${tooShort ? 'text-orange-600' : 'text-gray-400'}`}
+          className={`mt-1 text-[12px] ${tooShort ? 'text-orange-600' : 'text-token-text/50'}`}
           aria-live="polite"
         >
           {remaining} / {MAX_LEN}
@@ -301,8 +301,8 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
         aria-busy={sending}
         whileHover={prefersReducedMotion || disabled ? undefined : { scale: 1.03 }}
         whileTap={prefersReducedMotion || disabled ? undefined : { scale: 0.97 }}
-        className={`w-full rounded-full bg-[hsl(var(--accent))] px-4 py-3 text-[15px] font-extrabold text-slate-950 shadow-[0_10px_30px_rgba(20,184,166,0.3)] transition focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2 ${
-          disabled ? 'opacity-60 cursor-not-allowed' : 'hover:shadow-[0_14px_40px_rgba(20,184,166,0.4)]'
+        className={`w-full rounded-full bg-[hsl(var(--accent))] px-4 py-3 text-[15px] font-extrabold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-md)] transition focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2 ${
+          disabled ? 'opacity-60 cursor-not-allowed' : 'hover:opacity-95'
         }`}
         data-gtm="review_submit"
       >

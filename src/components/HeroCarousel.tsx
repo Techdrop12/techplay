@@ -672,8 +672,8 @@ export default function HeroCarousel({
             type="button"
             aria-label={t.prev}
             className={cn(
-              'group absolute left-3 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-black/30 text-white shadow-[0_10px_35px_rgba(15,23,42,0.65)] backdrop-blur-xl',
-              'hover:-translate-y-1 hover:bg-white/10 hover:border-white/40 sm:left-4 sm:h-11 sm:w-11',
+              'group absolute left-2 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-black/35 text-white shadow-[0_10px_32px_rgba(15,23,42,0.6)] backdrop-blur-xl',
+              'hover:-translate-y-0.5 hover:bg-white/10 hover:border-white/50 sm:left-4 sm:h-11 sm:w-11',
               'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60'
             )}
             data-gtm="hero_prev"
@@ -694,8 +694,8 @@ export default function HeroCarousel({
             type="button"
             aria-label={t.next}
             className={cn(
-              'group absolute right-3 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-black/30 text-white shadow-[0_10px_35px_rgba(15,23,42,0.65)] backdrop-blur-xl',
-              'hover:-translate-y-1 hover:bg-white/10 hover:border-white/40 sm:right-4 sm:h-11 sm:w-11',
+              'group absolute right-2 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-black/35 text-white shadow-[0_10px_32px_rgba(15,23,42,0.6)] backdrop-blur-xl',
+              'hover:-translate-y-0.5 hover:bg-white/10 hover:border-white/50 sm:right-4 sm:h-11 sm:w-11',
               'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60'
             )}
             data-gtm="hero_next"
@@ -738,7 +738,7 @@ export default function HeroCarousel({
 
       {effectiveAutoplay ? (
         <div
-          className="absolute bottom-6 left-1/2 z-20 h-[7px] w-[70%] max-w-3xl -translate-x-1/2 overflow-hidden rounded-full border border-white/15 bg-black/50 backdrop-blur-xl"
+          className="absolute bottom-6 left-1/2 z-20 hidden h-[5px] w-[70%] max-w-3xl -translate-x-1/2 overflow-hidden rounded-full border border-white/15 bg-black/50 backdrop-blur-xl sm:block"
           role="presentation"
           aria-hidden="true"
           onClick={(e) => {
@@ -763,7 +763,7 @@ export default function HeroCarousel({
 
       {showBullets && canNavigate ? (
         <nav className="absolute bottom-3 left-1/2 z-20 -translate-x-1/2 sm:hidden" aria-label={t.nav}>
-          <ul className="flex items-center gap-3 rounded-full bg-black/45 px-3 py-1.5 shadow-[0_12px_40px_rgba(15,23,42,0.7)] backdrop-blur-xl">
+          <ul className="flex items-center gap-2.5 rounded-full bg-black/40 px-3 py-1.5 shadow-[0_12px_36px_rgba(15,23,42,0.75)] backdrop-blur-xl">
             {slides.map((slide, i) => {
               const active = i === index
               const bulletLabel = t.goTo + (i + 1) + (slide.alt ? ` : ${slide.alt}` : '')
@@ -775,8 +775,8 @@ export default function HeroCarousel({
                     className={cn(
                       'h-2.5 w-2.5 rounded-full transition',
                       active
-                        ? 'scale-110 bg-white shadow-[0_0_0_4px_rgba(20,184,166,0.55)]'
-                        : 'bg-white/40 hover:bg-white/80'
+                        ? 'scale-110 bg-[hsl(var(--accent))] shadow-[0_0_0_2px_rgba(15,23,42,0.8)]'
+                        : 'bg-white/40 hover:bg-white/85'
                     )}
                     aria-label={bulletLabel}
                     aria-current={active ? 'true' : undefined}

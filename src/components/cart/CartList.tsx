@@ -108,25 +108,25 @@ export default function CartList({
     <section aria-label="Articles du panier" className={className}>
       <span ref={srRef} className="sr-only" role="status" aria-live="polite" />
 
-      {showControls && (
-        <div className="mb-4 flex items-center justify-between">
-          <p className="text-[13px] font-medium text-token-text/70">
-            {itemsCount} article{itemsCount > 1 ? 's' : ''}
-          </p>
+      <div className="mb-4 flex items-center justify-between border-b border-[hsl(var(--border))] pb-3">
+        <h2 className="text-base font-semibold tracking-tight text-[hsl(var(--text))]">
+          Articles
+        </h2>
+        {showControls && (
           <button
             type="button"
             onClick={handleClear}
             disabled={itemsCount === 0}
             aria-disabled={itemsCount === 0}
-            className="rounded-lg px-3 py-1.5 text-[12px] font-semibold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-red-900/20 dark:text-red-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+            className="text-[13px] text-token-text/70 underline decoration-token-text/40 underline-offset-2 transition hover:text-red-600 hover:decoration-red-600 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:text-red-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded"
             aria-label="Vider le panier"
           >
             Vider le panier
           </button>
-        </div>
-      )}
+        )}
+      </div>
 
-      <ul role="list" className="space-y-4">
+      <ul role="list" className="space-y-3">
         <AnimatePresence initial={false}>
           {safeItems.map((item) => (
             <motion.li

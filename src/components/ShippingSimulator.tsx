@@ -215,7 +215,7 @@ export default function ShippingSimulator({
 
   return (
     <motion.p
-      className={`text-sm text-gray-600 dark:text-gray-400 mt-2 ${className}`}
+      className={`text-sm text-token-text/70 mt-2 ${className}`}
       role="status"
       aria-live="polite"
       initial={{ opacity: 0, y: 6 }}

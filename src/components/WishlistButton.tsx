@@ -129,7 +129,7 @@ export default function WishlistButton({
       setSr(t.removed)
 
       toast(t.removedFromWishlist, {
-        icon: <HeartCrack size={18} className="text-gray-600" />,
+        icon: <HeartCrack size={18} className="text-token-text/60" />,
         style: { borderRadius: '10px', background: '#111827', color: '#fff' },
       })
 
@@ -241,7 +241,7 @@ export default function WishlistButton({
 
         <Heart
           size={iconSize}
-          className={isWishlisted ? 'text-red-500' : 'text-gray-600 dark:text-gray-300'}
+          className={isWishlisted ? 'text-red-500' : 'text-token-text/60'}
           fill={isWishlisted ? 'currentColor' : 'none'}
           stroke="currentColor"
           aria-hidden="true"

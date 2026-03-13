@@ -125,7 +125,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
     <main className="mx-auto max-w-7xl px-4 pt-28 pb-16 sm:px-6 sm:pt-32 sm:pb-20 lg:px-8" aria-labelledby="blog-title">
       <h1
         id="blog-title"
-        className="mb-6 text-center text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:mb-8 sm:text-4xl lg:text-5xl"
+        className="heading-page mb-6 text-center sm:mb-8 sm:text-4xl lg:text-5xl"
       >
         {q ? `Résultats pour “${q}”` : 'Nos articles'}
       </h1>
@@ -167,7 +167,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
           </button>
 
           {(q || tag || category) && (
-            <Link href="/blog" className="text-sm text-gray-600 hover:underline dark:text-gray-400" prefetch={false}>
+            <Link href="/blog" className="text-sm text-token-text/70 hover:underline" prefetch={false}>
               Réinitialiser
             </Link>
           )}
@@ -219,7 +219,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
                   aria-current={n === page ? 'page' : undefined}
                   className={`rounded-xl border px-3.5 py-2 text-[13px] font-medium transition ${
                     n === page
-                      ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent))] text-slate-950 shadow-[0_8px_24px_rgba(20,184,166,0.35)]'
+                      ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] shadow-[var(--shadow-sm)]'
                       : 'border-[hsl(var(--border))] hover:bg-[hsl(var(--surface))]/80'
                   }`}
                 >
@@ -230,7 +230,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
 
             if (n === 2 && page > 3) return <span key="dots-left" className="px-2 text-gray-400">…</span>
             if (n === pagination.pages - 1 && page < pagination.pages - 2) {
-              return <span key="dots-right" className="px-2 text-gray-400">…</span>
+              return <span key="dots-right" className="px-2 text-token-text/50">…</span>
             }
 
             return null

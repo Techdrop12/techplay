@@ -23,7 +23,7 @@ export default function ProductReviews({ reviews }: Props) {
       </h3>
 
       {list.length === 0 ? (
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-token-text/70">
           Aucun avis pour ce produit.
         </p>
       ) : (
@@ -66,7 +66,7 @@ export default function ProductReviews({ reviews }: Props) {
 
                 {title && <h4 className="font-medium">{title}</h4>}
 
-                <p className="whitespace-pre-line text-sm text-gray-700 dark:text-gray-300">
+                <p className="whitespace-pre-line text-sm text-token-text/85">
                   {comment}
                 </p>
               </article>

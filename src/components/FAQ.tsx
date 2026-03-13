@@ -34,17 +34,17 @@ export default function FAQ() {
         {
           _id: '1',
           question: 'Quels sont les délais de livraison ?',
-          answer: 'La majorité des commandes sont livrées en 48 à 72h ouvrées.',
+          answer: 'Livraison en 48 à 72 h ouvrées. Livraison offerte dès 49 € d’achat.',
         },
         {
           _id: '2',
           question: 'Puis-je retourner un article ?',
-          answer: 'Oui, vous avez 14 jours pour changer d’avis et demander un remboursement.',
+          answer: 'Oui. Retours gratuits sous 30 jours : contactez-nous pour obtenir l’étiquette de retour.',
         },
         {
           _id: '3',
-          question: 'Les paiements sont-ils sécurisés ?',
-          answer: 'Oui, les paiements sont 100% sécurisés via Stripe ou PayPal.',
+          question: 'Le paiement est-il sécurisé ?',
+          answer: 'Oui. Paiement par Stripe (CB, Apple Pay, Google Pay). Données cryptées.',
         },
       ])
     } finally {
@@ -119,34 +119,37 @@ export default function FAQ() {
   }, [filteredFaqs])
 
   return (
-    <section className="max-w-3xl mx-auto px-4 py-16" aria-labelledby="faq-heading">
-      <h2 id="faq-heading" className="text-3xl font-extrabold mb-6 text-center">
-        FAQ
+    <section className="container-app mx-auto max-w-3xl py-10 sm:py-12" aria-labelledby="faq-heading">
+      <h2 id="faq-heading" className="heading-section text-center">
+        Questions fréquentes
       </h2>
+      <p className="mt-3 text-center text-[15px] text-token-text/75 max-w-xl mx-auto">
+        Réponses rapides sur les commandes, livraisons et retours. Une question ? <a href="/contact" className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline">Nous contacter</a>.
+      </p>
 
       {/* Barre outils */}
-      <div className="mb-6 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+      <div className="mt-6 mb-6 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
         <input
           type="search"
           inputMode="search"
           placeholder="Rechercher une question…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full sm:w-2/3 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+          className="w-full sm:w-2/3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] focus:ring-offset-2"
           aria-label="Rechercher dans la FAQ"
         />
         <div className="flex gap-2">
           <button
             type="button"
             onClick={expandAll}
-            className="rounded-md bg-accent text-white px-3 py-2 text-sm font-semibold hover:bg-accent/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent"
+            className="rounded-xl bg-[hsl(var(--accent))] text-white px-3.5 py-2.5 text-sm font-semibold hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))]"
           >
             Tout ouvrir
           </button>
           <button
             type="button"
             onClick={collapseAll}
-            className="rounded-md bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-100 px-3 py-2 text-sm hover:bg-gray-300 dark:hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent"
+            className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3.5 py-2.5 text-sm text-token-text hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))]"
           >
             Tout fermer
           </button>
@@ -155,21 +158,21 @@ export default function FAQ() {
 
       {/* État chargement / vide */}
       {loading && (
-        <div className="space-y-4" role="status" aria-live="polite" aria-busy="true">
+        <div className="space-y-3" role="status" aria-live="polite" aria-busy="true">
           {[1, 2, 3].map((k) => (
-            <div key={k} className="h-16 rounded-md bg-gray-100 dark:bg-gray-800 animate-pulse" />
+            <div key={k} className="h-14 rounded-xl bg-[hsl(var(--surface-2))] animate-pulse" />
           ))}
         </div>
       )}
 
       {!loading && filteredFaqs.length === 0 && (
-        <p className="text-center text-gray-500 dark:text-gray-400" role="status">
-          Aucun résultat pour “{search}”.
+        <p className="text-center text-token-text/60 text-[15px]" role="status">
+          Aucun résultat pour « “{search} ». <a href="/contact" className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline">Nous contacter</a>.
         </p>
       )}
 
       {/* Liste FAQ */}
-      <div role="list" aria-live="polite" className="divide-y divide-gray-200 dark:divide-gray-800">
+      <div role="list" aria-live="polite" className="divide-y divide-[hsl(var(--border))]">
         {filteredFaqs.map((faq, i) => {
           const isOpen = openSet.has(i)
           const headerId = `faq-header-${faq._id}-${i}`
@@ -184,13 +187,13 @@ export default function FAQ() {
                 id={headerId}
                 aria-controls={panelId}
                 aria-expanded={isOpen}
-                className="w-full text-left flex items-start justify-between gap-4 text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent"
+                className="w-full text-left flex items-start justify-between gap-4 text-[15px] sm:text-base font-semibold text-[hsl(var(--text))] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))] rounded-md py-1"
                 onClick={() => toggleIndex(i)}
                 onKeyDown={(e) => onKeyNav(e, i)}
               >
                 <span>{faq.question}</span>
                 <span
-                  className="shrink-0 rounded-full bg-gray-100 dark:bg-gray-800 px-2 py-1 text-xs text-gray-600 dark:text-gray-300"
+                  className="shrink-0 rounded-md bg-[hsl(var(--surface-2))] px-2 py-0.5 text-xs text-token-text/70"
                   aria-hidden="true"
                 >
                   {isOpen ? '−' : '+'}
@@ -210,7 +213,7 @@ export default function FAQ() {
                     transition={{ duration: 0.25, ease: 'easeInOut' }}
                     className="overflow-hidden"
                   >
-                    <div className="pt-3 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                    <div className="pt-3 text-[14px] leading-relaxed text-token-text/80">
                       {faq.answer}
                     </div>
                   </motion.div>

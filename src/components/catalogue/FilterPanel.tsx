@@ -192,85 +192,85 @@ export default function FilterPanel({
   return (
     <div
       className={cn(
-        'relative z-10',
-        sticky &&
-          `sticky ${stickyTopClass} backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-black/40 bg-white/70 dark:bg-black/30 border-b border-gray-200/70 dark:border-gray-800/70`,
+        'relative z-10 rounded-[var(--radius-xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/95 p-4',
+        sticky && `sticky ${stickyTopClass} backdrop-blur-xl`,
         className
       )}
     >
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 py-3">
-        <div
-          ref={containerRef}
-          id={groupId}
-          role="radiogroup"
-          aria-label="Filtrer par catégorie"
-          aria-describedby={liveId}
-          onKeyDown={onKeyDown}
-          className="relative flex gap-2 overflow-x-auto snap-x snap-mandatory no-scrollbar py-1"
-        >
-          {items.map((label, i) => {
-            const isAll = i === 0
-            const active = isAll ? selected === null : selected?.toLowerCase() === label.toLowerCase()
-            const count = !isAll && counts ? counts[label] : undefined
-            const key = toKey(label)
-            const CIcon = !isAll ? CAT_ICONS[key] : undefined
+      <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-token-text/60">
+        Catégorie
+      </p>
+      <div
+        ref={containerRef}
+        id={groupId}
+        role="radiogroup"
+        aria-label="Filtrer par catégorie"
+        aria-describedby={liveId}
+        onKeyDown={onKeyDown}
+        className="relative flex gap-2.5 overflow-x-auto snap-x snap-mandatory no-scrollbar"
+      >
+        {items.map((label, i) => {
+          const isAll = i === 0
+          const active = isAll ? selected === null : selected?.toLowerCase() === label.toLowerCase()
+          const count = !isAll && counts ? counts[label] : undefined
+          const key = toKey(label)
+          const CIcon = !isAll ? CAT_ICONS[key] : undefined
 
-            return (
-              <motion.button
-                key={label}
-                ref={(el) => {
-                  btnRefs.current[i] = el
-                }}
-                role="radio"
-                aria-checked={active}
-                aria-label={`Filtrer par catégorie : ${label}${typeof count === 'number' ? ` (${count})` : ''}`}
-                tabIndex={active ? 0 : -1}
-                onClick={() => setSelected(isAll ? null : label)}
-                whileTap={reduced ? undefined : { scale: 0.97 }}
-                className={cn(
-                  'snap-start shrink-0 px-3.5 py-2 text-sm rounded-full border transition focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40',
-                  active
-                    ? 'bg-accent text-white border-accent shadow'
-                    : 'bg-white/80 dark:bg-zinc-900/70 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-accent/50'
-                )}
-              >
-                <span className="inline-flex items-center gap-2 font-medium">
-                  {CIcon ? <CIcon className="opacity-80" /> : null}
-                  {label}
-                </span>
-
-                {typeof count === 'number' && (
-                  <span
-                    className={cn(
-                      'ml-2 inline-flex items-center justify-center rounded-full px-1.5 text-[11px]',
-                      active ? 'bg-white/20' : 'bg-gray-200 dark:bg-zinc-800'
-                    )}
-                  >
-                    {count}
-                  </span>
-                )}
-              </motion.button>
-            )
-          })}
-
-          {selected && (
+          return (
             <motion.button
-              key="reset"
-              type="button"
-              aria-label="Réinitialiser le filtre"
-              onClick={() => setSelected(null)}
+              key={label}
+              ref={(el) => {
+                btnRefs.current[i] = el
+              }}
+              role="radio"
+              aria-checked={active}
+              aria-label={`Filtrer par catégorie : ${label}${typeof count === 'number' ? ` (${count})` : ''}`}
+              tabIndex={active ? 0 : -1}
+              onClick={() => setSelected(isAll ? null : label)}
               whileTap={reduced ? undefined : { scale: 0.97 }}
-              className="ml-1 shrink-0 px-3 py-2 text-sm rounded-full border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 bg-white/80 dark:bg-zinc-900/70 hover:border-accent/50 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40"
+              className={cn(
+                'snap-start shrink-0 rounded-full border px-4 py-2.5 text-[13px] font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]',
+                active
+                  ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent))] text-white shadow-[0_4px_14px_hsl(var(--accent)/.35)]'
+                  : 'border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-token-text hover:border-[hsl(var(--accent)/.5)] hover:bg-[hsl(var(--surface-2))]'
+              )}
             >
-              Réinitialiser
-            </motion.button>
-          )}
-        </div>
+              <span className="inline-flex items-center gap-2">
+                {CIcon ? <CIcon className="opacity-90" aria-hidden /> : null}
+                {label}
+              </span>
 
-        <p id={liveId} className="sr-only" role="status" aria-live="polite">
-          {announcement}
-        </p>
+              {typeof count === 'number' && (
+                <span
+                  className={cn(
+                    'ml-1.5 inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1.5 py-0.5 text-[11px] font-semibold tabular-nums',
+                    active ? 'bg-white/25' : 'bg-[hsl(var(--surface-2))] text-token-text/80'
+                  )}
+                >
+                  {count}
+                </span>
+              )}
+            </motion.button>
+          )
+        })}
+
+        {selected && (
+          <motion.button
+            key="reset"
+            type="button"
+            aria-label="Réinitialiser le filtre"
+            onClick={() => setSelected(null)}
+            whileTap={reduced ? undefined : { scale: 0.97 }}
+            className="shrink-0 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3.5 py-2.5 text-[12px] font-medium text-token-text/80 hover:border-[hsl(var(--accent)/.4)] hover:bg-[hsl(var(--surface-2))] hover:text-token-text focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+          >
+            Réinitialiser
+          </motion.button>
+        )}
       </div>
+
+      <p id={liveId} className="sr-only" role="status" aria-live="polite">
+        {announcement}
+      </p>
     </div>
   )
 }

@@ -381,7 +381,7 @@ export default function FreeShippingBadge({
 
       {withProgress && (
         <div
-          className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-gray-200/80 dark:bg-zinc-800/80"
+          className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-[hsl(var(--surface-2))]"
           role="progressbar"
           aria-label={T.progressLabel}
           aria-valuemin={0}

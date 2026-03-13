@@ -275,7 +275,7 @@ export default function ProductFilter({
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-[12px] text-gray-500 dark:text-gray-400">
+          <span className="text-[12px] text-token-text/60">
             {filtered.length} résultat{filtered.length > 1 ? 's' : ''}
           </span>
           <button

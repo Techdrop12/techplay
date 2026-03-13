@@ -14,7 +14,6 @@ import SortDropdown from '@/components/catalogue/SortDropdown'
 import MetaPixel from '@/components/MetaPixel'
 import ProductGrid from '@/components/ProductGrid'
 import ScrollToTop from '@/components/ScrollToTop'
-import SectionTitle from '@/components/SectionTitle'
 import SectionWrapper from '@/components/SectionWrapper'
 import { LIST_NAMES } from '@/lib/analytics-events'
 import { getCurrentLocale } from '@/lib/i18n-routing'
@@ -90,20 +89,30 @@ export default function ProductCatalogue({
   const t =
     locale === 'en'
       ? {
-          title: 'TechPlay Catalogue',
-          subtitle: 'Find the right product faster with smart search, filters and sorting.',
+          kicker: 'Shop',
+          title: 'Our tech & gaming selection',
+          subtitle:
+            'Keyboards, mice, headsets and accessories chosen to perform. Refine below to find your next upgrade.',
+          refineLabel: 'Refine your selection',
+          selectionHeading: 'Our selection',
+          selectionSub: 'Hand-picked for performance.',
           results: 'results',
           searchResults: 'Search results',
           noResults: 'No products found.',
-          noResultsHint: 'Try another keyword, category, or sorting option.',
+          noResultsHint: 'Try another keyword, category, or sort option.',
           clearFilters: 'Clear filters',
           allCategories: 'All categories',
           activeCategory: 'Selected category',
           activePrice: 'Active price filter',
         }
       : {
-          title: 'Catalogue TechPlay',
-          subtitle: 'Trouvez plus vite le bon produit grâce à la recherche, aux filtres et au tri.',
+          kicker: 'Catalogue',
+          title: 'Notre sélection tech & gaming',
+          subtitle:
+            'Claviers, souris, casques et accessoires choisis pour performer. Affinez ci-dessous pour trouver votre prochain upgrade.',
+          refineLabel: 'Affiner votre sélection',
+          selectionHeading: 'Notre sélection',
+          selectionSub: 'Sélectionnés pour performer.',
           results: 'résultat(s)',
           searchResults: 'Résultats de recherche',
           noResults: 'Aucun produit trouvé.',
@@ -214,34 +223,68 @@ export default function ProductCatalogue({
       <ScrollToTop />
       <BackToTopButton />
 
-      <section className="min-h-screen bg-white text-gray-900 transition-colors dark:bg-gray-900 dark:text-white">
+      <section className="min-h-screen bg-[hsl(var(--surface))] text-[hsl(var(--text))] transition-colors">
         <SectionWrapper>
-          <div className="mb-8">
-            <SectionTitle title={t.title} />
-            <p className="mt-2 text-center text-sm text-token-text/70 sm:text-base">
+          <header className="mx-auto max-w-3xl border-b border-[hsl(var(--border))]/60 pb-10 text-center sm:pb-12">
+            {t.kicker ? (
+              <p className="heading-kicker">
+                {t.kicker}
+              </p>
+            ) : null}
+            <h1 className="heading-page mt-3 sm:[font-size:var(--step-4)] md:text-[2.25rem]">
+              {t.title}
+            </h1>
+            <p className="mt-4 heading-section-sub font-medium">
               {t.subtitle}
             </p>
-          </div>
+          </header>
 
-          <div className="mb-6 grid gap-4 xl:grid-cols-[minmax(0,1.3fr)_auto_auto] xl:items-end">
-            <SearchBar query={query} setQuery={setQuery} products={safeProducts} />
+          <section
+            className="mt-10 rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 px-5 py-5 sm:px-6 sm:py-6"
+            aria-labelledby="catalogue-refine-heading"
+          >
+            <h2 id="catalogue-refine-heading" className="sr-only">
+              {t.refineLabel}
+            </h2>
+            <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-token-text/60">
+              {t.refineLabel}
+            </p>
+            <div className="grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_auto_auto] xl:items-end xl:gap-6">
+              <SearchBar query={query} setQuery={setQuery} products={safeProducts} />
 
-            <FilterPanel
-              categories={categories}
-              selected={selectedCategory}
-              setSelected={setCategory}
-            />
+              <FilterPanel
+                categories={categories}
+                selected={selectedCategory}
+                setSelected={setCategory}
+              />
 
-            <SortDropdown sort={sortOption} setSort={setSortOption} />
-          </div>
+              <SortDropdown sort={sortOption} setSort={setSortOption} locale={locale} />
+            </div>
+          </section>
 
-          <div className="mb-6 flex flex-col gap-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 p-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-[13px] font-semibold text-token-text">
+          <section
+            className="mt-8 rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/40"
+            aria-labelledby="catalogue-selection-heading"
+          >
+            <div className="border-b border-[hsl(var(--border))]/60 px-5 py-4 sm:px-6">
+              <h2
+                id="catalogue-selection-heading"
+                className="heading-subsection text-lg sm:text-xl"
+              >
+                {t.selectionHeading}
+              </h2>
+              <p className="mt-1 text-[13px] font-medium leading-relaxed text-token-text/75">
+                {t.selectionSub}
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-4 border-b border-[hsl(var(--border))]/50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-5 sm:px-6">
+            <div className="min-w-0">
+              <p className="text-[13px] font-semibold tabular-nums text-[hsl(var(--text))]">
                 {filteredProducts.length} {t.results}
               </p>
 
-              <p className="mt-1 text-[12px] text-token-text/70">
+              <p className="mt-1.5 text-[12px] leading-relaxed text-token-text/65">
                 {query.trim() ? `${t.searchResults} : “${query.trim()}”` : t.allCategories}
                 {selectedCategory ? ` · ${t.activeCategory} : ${selectedCategory}` : ''}
                 {typeof initialMin === 'number' || typeof initialMax === 'number'
@@ -260,29 +303,32 @@ export default function ProductCatalogue({
                   setCategory(null)
                 }}
                 className={cn(
-                  'inline-flex items-center justify-center rounded-xl border border-[hsl(var(--border))]',
-                  'bg-[hsl(var(--surface))] px-4 py-2 text-[13px] font-semibold transition',
-                  'hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)] focus-visible:ring-offset-2'
+                  'shrink-0 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]',
+                  'px-4 py-2.5 text-[13px] font-semibold transition',
+                  'hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2'
                 )}
               >
                 {t.clearFilters}
               </button>
             ) : null}
-          </div>
-
-          {filteredProducts.length === 0 ? (
-            <div className="rounded-[1.5rem] border border-white/10 bg-[hsl(var(--surface))]/60 px-6 py-14 text-center dark:bg-[hsl(var(--surface))]/40">
-              <p className="text-lg font-semibold text-token-text">{t.noResults}</p>
-              <p className="mt-2 text-[13px] text-token-text/70">{t.noResultsHint}</p>
             </div>
-          ) : (
-            <ProductGrid
-              products={filteredProducts}
-              className="mt-2"
-              listName={LIST_NAMES.CATALOGUE}
-              id="catalogue-products-grid"
-            />
-          )}
+
+            {filteredProducts.length === 0 ? (
+              <div className="px-5 py-16 text-center sm:px-6 sm:py-20">
+                <p className="text-lg font-semibold text-[hsl(var(--text))]">{t.noResults}</p>
+                <p className="mt-2 text-[13px] leading-relaxed text-token-text/70">{t.noResultsHint}</p>
+              </div>
+            ) : (
+              <div className="px-5 pb-8 pt-6 sm:px-6 sm:pb-10 sm:pt-8">
+                <ProductGrid
+                  products={filteredProducts}
+                  className="mt-0"
+                  listName={LIST_NAMES.CATALOGUE}
+                  id="catalogue-products-grid"
+                />
+              </div>
+            )}
+          </section>
         </SectionWrapper>
       </section>
     </>

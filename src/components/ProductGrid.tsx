@@ -71,17 +71,17 @@ function getGridClasses(cols?: Cols): string {
   const safe = {
     base: cols?.base ?? 1,
     sm: cols?.sm ?? 2,
-    md: cols?.md,
-    lg: cols?.lg ?? 4,
-    xl: cols?.xl,
+    md: cols?.md ?? 2,
+    lg: cols?.lg ?? 3,
+    xl: cols?.xl ?? 4,
   }
 
   return [
     GRID_COLS.base[safe.base],
     GRID_COLS.sm[safe.sm],
-    safe.md ? GRID_COLS.md[safe.md] : '',
+    GRID_COLS.md[safe.md],
     GRID_COLS.lg[safe.lg],
-    safe.xl ? GRID_COLS.xl[safe.xl] : '',
+    GRID_COLS.xl[safe.xl],
   ]
     .filter(Boolean)
     .join(' ')
@@ -278,7 +278,7 @@ export default function ProductGrid({
 
   if (isEmpty && !isLoading) {
     return (
-      <div className="rounded-[1.5rem] border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/70 px-6 py-12 text-center" role="status">
+      <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/70 card-padding text-center" role="status">
         <p className="text-base font-semibold text-token-text">
           {emptyMessage || 'Aucun produit trouvé.'}
         </p>
@@ -298,7 +298,7 @@ export default function ProductGrid({
           ref={gridRef}
           layout={!prefersReducedMotion}
           className={cn(
-            'grid gap-6',
+            'grid gap-5 sm:gap-6 lg:gap-8',
             getGridClasses(columns),
             className
           )}

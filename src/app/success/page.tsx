@@ -4,7 +4,7 @@ export default function SuccessPage() {
   return (
     <main className="container-app flex min-h-screen flex-col items-center justify-center py-16" role="main" aria-labelledby="success-title">
       <div className="card w-full max-w-md p-8 text-center shadow-[var(--shadow-xl)] sm:p-10">
-        <h1 id="success-title" className="text-2xl font-extrabold tracking-tight text-[hsl(var(--accent))] sm:text-3xl [letter-spacing:var(--heading-tracking)]">
+        <h1 id="success-title" className="heading-page text-[hsl(var(--accent))]">
           Commande validée
         </h1>
         <p className="mt-3 text-[var(--step-0)] text-token-text/75">

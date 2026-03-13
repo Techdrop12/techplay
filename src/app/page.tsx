@@ -6,6 +6,7 @@ import type { Metadata } from 'next'
 
 import ClientTrackingScript from '@/components/ClientTrackingScript'
 import Link from '@/components/LocalizedLink'
+import SectionHeader from '@/components/SectionHeader'
 import TrustBadges from '@/components/TrustBadges'
 import { getCategories } from '@/lib/categories'
 import { getPosts } from '@/lib/blog'
@@ -48,10 +49,10 @@ const STR = {
     metaDescription:
       'Découvrez les meilleures offres TechPlay : accessoires high-tech, gaming, audio et packs exclusifs sélectionnés pour la performance, le style et la fiabilité.',
     heroAria: 'Carrousel des produits en vedette',
-    heroBadge: 'TechPlay',
-    heroTitle: 'Gaming Gear pour les vrais joueurs.',
+    heroBadge: 'TechPlay Premium',
+    heroTitle: 'Le setup gaming des joueurs exigeants.',
     heroSubtitle:
-      'Équipement gaming haute performance pour les joueurs compétitifs — casques, souris, claviers et packs au meilleur rapport qualité/prix.',
+      'Sélection pointue de périphériques et packs gaming haut de gamme : performances stables, design soigné et expérience clé en main pour élever votre niveau de jeu.',
     heroPrimaryCta: 'Acheter',
     heroSecondaryCta: 'Explorer les packs',
     heroMeta: 'Livraison rapide · Garantie 2 ans · Paiement sécurisé',
@@ -63,7 +64,7 @@ const STR = {
     bestSub: 'Les favoris de la communauté, choisis pour leur fiabilité et leur impact.',
     packsKicker: 'Bundles',
     packsTitle: 'Packs recommandés',
-    packsSub: 'Des combinaisons pensées pour le meilleur rapport performance / budget.',
+    packsSub: 'Sélections expertes : plusieurs produits ensemble à prix pack. Économisez plus, livraison offerte.',
     faqTitle: 'Questions fréquentes',
     faqKicker: 'FAQ',
     ctaTitle: 'Appel à l’action',
@@ -91,10 +92,10 @@ const STR = {
     metaDescription:
       'Discover the best TechPlay offers: high-tech accessories, gaming, audio gear and exclusive bundles selected for performance, style and reliability.',
     heroAria: 'Featured products carousel',
-    heroBadge: 'TechPlay',
-    heroTitle: 'Gaming Gear For Real Players.',
+    heroBadge: 'TechPlay Premium',
+    heroTitle: 'Premium gaming gear for serious players.',
     heroSubtitle:
-      'High-performance gaming equipment for competitive players — headsets, mice, keyboards and value packs, best price/performance.',
+      'Curated high-end gaming tech — headsets, mice, keyboards and complete bundles — engineered for consistent performance, refined aesthetics and tournament-ready setups.',
     heroPrimaryCta: 'Shop Now',
     heroSecondaryCta: 'Explore Packs',
     heroMeta: 'Fast delivery · 2-year warranty · Secure payment',
@@ -106,7 +107,7 @@ const STR = {
     bestSub: 'Community favorites selected for reliability and real value.',
     packsKicker: 'Bundles',
     packsTitle: 'Recommended bundles',
-    packsSub: 'Smart combinations designed for performance and savings.',
+    packsSub: 'Expert picks: multiple products together at bundle price. Save more, free delivery.',
     faqTitle: 'Frequently asked questions',
     faqKicker: 'FAQ',
     ctaTitle: 'Call to action',
@@ -177,47 +178,6 @@ function getProductName(product: Product): string {
   return product.title?.trim() || 'Produit'
 }
 
-function SectionHeader({
-  id,
-  kicker,
-  title,
-  sub,
-  center = true,
-  as = 'h2',
-}: {
-  id?: string
-  kicker?: string
-  title: string
-  sub?: string
-  center?: boolean
-  as?: 'h2' | 'h3'
-}) {
-  const Tag = as
-
-  return (
-    <header className={center ? 'mx-auto max-w-3xl text-center' : ''}>
-      {kicker ? (
-        <p className="text-[var(--step-subtitle)] font-semibold uppercase tracking-[0.2em] text-[hsl(var(--accent))]">
-          {kicker}
-        </p>
-      ) : null}
-
-      <Tag
-        id={id}
-        className="mt-4 text-balance font-bold tracking-tight text-gray-900 dark:text-white [font-size:var(--step-4)] sm:[font-size:var(--step-5)] [letter-spacing:var(--heading-tracking)]"
-      >
-        {title}
-      </Tag>
-
-      {sub ? (
-        <p className="mt-5 max-w-2xl text-[var(--step-0)] leading-relaxed text-token-text/75 [margin-inline:auto]">
-          {sub}
-        </p>
-      ) : null}
-    </header>
-  )
-}
-
 function FeaturedCategories({ locale }: { locale: HomeLocale }) {
   const items = getCategories(locale).slice(0, 8)
   const t = STR[locale]
@@ -226,7 +186,7 @@ function FeaturedCategories({ locale }: { locale: HomeLocale }) {
     <section id="categories" aria-labelledby="cats-title" className="motion-section section-spacing-sm">
       <SectionHeader id="cats-title" kicker={t.catsKicker} title={t.catsTitle} sub={t.catsSub} />
 
-      <ul role="list" className="mt-14 grid grid-cols-2 gap-5 sm:grid-cols-3 sm:gap-6 lg:grid-cols-6 stagger-children">
+      <ul role="list" className="rhythm-content grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-6 stagger-children">
         {items.map((category) => (
           <li key={category.href}>
             <Link
@@ -257,7 +217,7 @@ function SplitCTA({ locale }: { locale: HomeLocale }) {
   return (
     <section
       aria-label={t.ctaTitle}
-      className="motion-section section-spacing-sm relative overflow-hidden rounded-[var(--radius-3xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-10 shadow-sm sm:p-16 md:p-20"
+      className="motion-section section-spacing-sm relative overflow-hidden rounded-[var(--radius-3xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-sm sm:px-12 sm:py-14 md:px-16 md:py-20"
       style={lazySectionStyle300}
     >
       <div
@@ -267,11 +227,11 @@ function SplitCTA({ locale }: { locale: HomeLocale }) {
 
       <div className="relative grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
         <div>
-          <p className="text-[var(--step-subtitle)] font-semibold uppercase tracking-[0.2em] text-[hsl(var(--accent))]">
+          <p className="heading-kicker">
             {t.ctaOffer}
           </p>
 
-          <h3 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl md:text-[2.5rem]">
+          <h3 className="mt-4 heading-section sm:[font-size:var(--step-4)] md:text-[2.5rem]">
             {t.ctaHeadline}
             <span className="text-[hsl(var(--accent))]">{t.ctaSpan}</span>
           </h3>
@@ -280,7 +240,7 @@ function SplitCTA({ locale }: { locale: HomeLocale }) {
             {t.ctaText}
           </p>
 
-          <div className="mt-10 flex flex-wrap gap-4">
+          <div className="mt-8 flex flex-wrap gap-4">
             <Link
               href="/products/packs"
               prefetch={false}
@@ -352,7 +312,7 @@ function Testimonials({ locale }: { locale: HomeLocale }) {
         sub={t.testimonialsSub}
       />
 
-      <ul role="list" className="mt-14 grid gap-6 sm:grid-cols-3 stagger-children">
+      <ul role="list" className="rhythm-content grid gap-6 sm:grid-cols-3 stagger-children">
         {items.map((item, index) => (
           <li
             key={`${item.name}-${index}`}
@@ -375,7 +335,7 @@ function SectionSkeleton({ title }: { title: string }) {
   return (
     <section className="motion-section">
       <SectionHeader title={title} />
-      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+      <div className="rhythm-content grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {Array.from({ length: 8 }).map((_, index) => (
           <div key={index} className="skeleton h-40 rounded-2xl" />
         ))}
@@ -458,33 +418,33 @@ export async function HomePageView({ locale }: { locale: HomeLocale }) {
         id="main"
         role="main"
         tabIndex={-1}
-        className="container-app mx-auto max-w-screen-xl scroll-smooth space-y-[var(--section-gap)] py-4 sm:py-6"
+        className="container-app mx-auto max-w-screen-xl scroll-smooth rhythm-sections py-6 sm:py-10"
       >
         <section
           id="hero"
           aria-label={t.heroAria}
-          className="motion-section relative overflow-hidden rounded-[var(--radius-3xl)] bg-[length:100%_100%]"
+          className="motion-section relative overflow-hidden rounded-[var(--radius-3xl)] border border-[hsl(var(--border))] bg-[length:120%_120%] shadow-[var(--shadow-xl)]"
           style={{ backgroundImage: 'var(--gradient-hero)' }}
         >
-          <div className="container-app relative z-10 grid gap-10 px-6 py-12 sm:py-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] lg:items-center lg:gap-14 lg:py-16">
+          <div className="container-app relative z-10 grid gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1.2fr)] lg:items-center lg:gap-12 lg:py-12">
             <div className="space-y-6 sm:space-y-7">
               <span className="inline-block text-[var(--step-subtitle)] font-bold uppercase tracking-[0.22em] text-[hsl(var(--accent))]">
                 {t.heroBadge}
               </span>
 
-              <h2 className="text-balance text-3xl font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-4xl md:text-5xl lg:text-[2.75rem] [line-height:var(--heading-leading)] [letter-spacing:var(--heading-tracking)]">
+              <h2 className="heading-section text-balance max-w-xl font-extrabold sm:[font-size:var(--step-5)] md:text-5xl lg:text-[2.75rem]">
                 {t.heroTitle}
               </h2>
 
-              <p className="max-w-lg text-[var(--step-0)] font-medium leading-snug text-token-text/85">
+              <p className="max-w-lg heading-section-sub font-medium leading-snug">
                 {t.heroSubtitle}
               </p>
 
-              <div className="flex flex-wrap items-center gap-3 pt-1">
+              <div className="flex flex-col items-stretch gap-3 pt-3 sm:flex-row sm:flex-wrap sm:items-center">
                 <Link
                   href="/products"
                   prefetch={false}
-                  className="btn btn-premium btn-lg inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-[var(--step-0)] font-bold focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)]"
+                  className="btn btn-premium btn-lg inline-flex w-full items-center justify-center gap-2 rounded-full px-8 py-3.5 text-[var(--step-0)] font-bold focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)] sm:w-auto"
                   data-gtm="home_hero_primary"
                 >
                   {t.heroPrimaryCta}
@@ -492,7 +452,7 @@ export async function HomePageView({ locale }: { locale: HomeLocale }) {
                 <Link
                   href="/products/packs"
                   prefetch={false}
-                  className="btn btn-outline btn-lg inline-flex items-center gap-2 rounded-full border-[hsl(var(--border))] px-8 py-3.5 text-[var(--step-0)] font-semibold hover:bg-[hsl(var(--surface-2))] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.3)]"
+                  className="btn btn-ghost inline-flex w-full items-center justify-center gap-2 rounded-full border-[hsl(var(--border))] px-6 py-2.5 text-[13px] font-medium text-token-text/80 hover:bg-[hsl(var(--surface-2))] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.25)] sm:w-auto"
                   data-gtm="home_hero_secondary"
                 >
                   {t.heroSecondaryCta}
@@ -530,8 +490,6 @@ export async function HomePageView({ locale }: { locale: HomeLocale }) {
           </div>
         </section>
 
-        <FeaturedCategories locale={locale} />
-
         <section
           id="best-products"
           aria-label={t.productsSectionLabel}
@@ -539,7 +497,7 @@ export async function HomePageView({ locale }: { locale: HomeLocale }) {
           style={lazySectionStyle600}
         >
           <SectionHeader kicker={t.bestKicker} title={t.bestTitle} sub={t.bestSub} />
-          <div className="mt-8">
+          <div className="rhythm-content">
             <Suspense fallback={<SectionSkeleton title={t.bestTitle} />}>
               <BestProducts products={bestProducts} showTitle={false} />
             </Suspense>
@@ -553,42 +511,15 @@ export async function HomePageView({ locale }: { locale: HomeLocale }) {
           style={lazySectionStyle600}
         >
           <SectionHeader kicker={t.packsKicker} title={t.packsTitle} sub={t.packsSub} />
-          <div className="mt-8">
+          <div className="rhythm-content overflow-hidden rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/50 shadow-sm">
             <Suspense fallback={<SectionSkeleton title={t.packsTitle} />}>
               <PacksSection packs={recommendedPacks} />
             </Suspense>
           </div>
         </section>
 
-        {blogPosts.length > 0 && (
-          <section
-            id="blog"
-            aria-label={t.blogSectionLabel}
-            className="motion-section section-spacing-sm"
-            style={lazySectionStyle600}
-          >
-            <SectionHeader kicker={t.blogKicker} title={t.blogTitle} sub={t.blogSub} />
-            <div className="mt-8">
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {blogPosts.map((post) => (
-                  <BlogCard key={post._id} article={post} />
-                ))}
-              </div>
-              <div className="mt-8 text-center">
-                <Link
-                  href="/blog"
-                  prefetch={false}
-                  className="btn-outline inline-flex rounded-full px-6 py-2.5 text-sm font-semibold"
-                >
-                  {t.blogCta}
-                </Link>
-              </div>
-            </div>
-          </section>
-        )}
-
-        <Testimonials locale={locale} />
-        <SplitCTA locale={locale} />
+        {/* Trust / rassurance avant FAQ et CTA final */}
+        <TrustBadges variant="premium" />
 
         <section
           id="faq"
@@ -597,14 +528,15 @@ export async function HomePageView({ locale }: { locale: HomeLocale }) {
           style={lazySectionStyle500}
         >
           <SectionHeader kicker={t.faqKicker} title={t.faqTitle} />
-          <div className="mt-8">
+          <div className="rhythm-content">
             <Suspense fallback={<SectionSkeleton title={t.faqTitle} />}>
               <FAQ />
             </Suspense>
           </div>
         </section>
 
-        <TrustBadges variant="premium" className="mt-10" />
+        {/* CTA final concentré sur packs / produits */}
+        <SplitCTA locale={locale} />
       </main>
 
       <script

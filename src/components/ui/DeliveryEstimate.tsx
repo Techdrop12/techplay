@@ -89,7 +89,7 @@ export default function DeliveryEstimate({
   return (
     <p
       className={[
-        'flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300',
+        'flex items-center gap-2 text-sm text-token-text/70',
         className,
       ].join(' ')}
       role="status"

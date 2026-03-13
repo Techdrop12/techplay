@@ -182,7 +182,7 @@ export default function PopupEmailCapture({
           <button
             onClick={close}
             aria-label={isFr ? 'Fermer' : 'Close'}
-            className="rounded p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))]"
+            className="rounded p-1 text-token-text/60 hover:text-[hsl(var(--text))] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))]"
           >
             ✕
           </button>
@@ -202,11 +202,10 @@ export default function PopupEmailCapture({
             autoComplete="email"
             required
             className={[
-              'w-full rounded-lg border px-3 py-2 text-sm',
-              'bg-white dark:bg-zinc-800',
+              'w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-2 text-sm',
               error
                 ? 'border-red-500 focus:ring-red-500'
-                : 'border-gray-300 dark:border-zinc-700 focus:ring-2 focus:ring-accent focus:outline-none',
+                : 'border-[hsl(var(--border))] focus:ring-2 focus:ring-[hsl(var(--accent))] focus:outline-none',
             ].join(' ')}
             placeholder={isFr ? 'Votre email' : 'Your email'}
             value={email}
@@ -228,7 +227,7 @@ export default function PopupEmailCapture({
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-[hsl(var(--accent))] py-2 font-semibold text-white shadow transition hover:opacity-90 disabled:opacity-60"
+            className="w-full rounded-lg bg-[hsl(var(--accent))] py-2 font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-sm)] transition hover:opacity-90 disabled:opacity-60"
             aria-busy={loading ? 'true' : 'false'}
           >
             {loading ? (isFr ? 'Envoi…' : 'Sending…') : isFr ? "S'inscrire" : 'Subscribe'}
@@ -237,12 +236,12 @@ export default function PopupEmailCapture({
           <button
             type="button"
             onClick={close}
-            className="w-full rounded-lg border border-gray-300 dark:border-zinc-700 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800"
+            className="w-full rounded-lg border border-[hsl(var(--border))] py-2 text-sm text-token-text/70 hover:bg-[hsl(var(--surface-2))]"
           >
             {isFr ? 'Non merci' : 'No thanks'}
           </button>
 
-          <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-[11px] text-token-text/60">
             {isFr ? 'En vous inscrivant, vous acceptez notre ' : 'By subscribing you agree to our '}
             <a className="underline" href="/confidentialite">
               {isFr ? 'politique de confidentialité' : 'privacy policy'}

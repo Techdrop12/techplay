@@ -17,6 +17,11 @@ interface Props {
   showControls?: boolean
   initialSort?: 'savings' | 'priceAsc' | 'priceDesc' | 'items'
   autoLoadOnIntersect?: boolean
+  /** Optional copy for empty state (defaults to French) */
+  emptyTitle?: string
+  emptyDescription?: string
+  emptyCtaLabel?: string
+  emptyCtaHref?: string
 }
 
 type PackRecord = Record<string, unknown>
@@ -152,6 +157,13 @@ function isPromo(pack: Pack): boolean {
   return getSavingsPercent(pack) > 0
 }
 
+const EMPTY_DEFAULTS = {
+  title: 'Packs bientôt disponibles',
+  description: 'Nous préparons des bundles soignés pour vous. En attendant, découvrez notre sélection de produits.',
+  ctaLabel: 'Découvrir les produits',
+  ctaHref: '/products',
+} as const
+
 export default function PacksSection({
   packs,
   className,
@@ -160,6 +172,10 @@ export default function PacksSection({
   showControls = true,
   initialSort = 'savings',
   autoLoadOnIntersect = true,
+  emptyTitle,
+  emptyDescription,
+  emptyCtaLabel,
+  emptyCtaHref,
 }: Props) {
   const headingId = useId()
   const subId = `${headingId}-sub`
@@ -179,16 +195,62 @@ export default function PacksSection({
   const isEmpty = !Array.isArray(packs) || packs.length === 0
 
   if (isEmpty) {
+    const title = emptyTitle ?? EMPTY_DEFAULTS.title
+    const description = emptyDescription ?? EMPTY_DEFAULTS.description
+    const ctaLabel = emptyCtaLabel ?? EMPTY_DEFAULTS.ctaLabel
+    const ctaHref = emptyCtaHref ?? EMPTY_DEFAULTS.ctaHref
+
     return (
-      <section className={cn('max-w-6xl mx-auto px-6 py-16', className)}>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-48 animate-pulse rounded-[1.5rem] bg-[hsl(var(--surface))]/80" aria-hidden="true" />
-          ))}
+      <section
+        className={cn('container-app mx-auto py-10 sm:py-12', className)}
+        aria-labelledby={showHeader ? headingId : undefined}
+        role="region"
+      >
+        {showHeader && (
+          <div className="mb-10 flex flex-col items-center text-center sm:mb-12">
+            <h2
+              id={headingId}
+              className="flex items-center justify-center gap-2 heading-subsection font-bold sm:text-2xl"
+            >
+              <DuotoneGift size={24} className="text-[hsl(var(--accent))]" />
+              <span>Nos Packs Recommandés</span>
+            </h2>
+            <p id={subId} className="mt-2 text-sm text-token-text/70">
+              Équipez-vous malin : bundles optimisés pour la perf’ et le budget.
+            </p>
+          </div>
+        )}
+
+        <div
+          className="mx-auto max-w-xl rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding text-center shadow-sm"
+          role="status"
+          aria-live="polite"
+        >
+          <div className="flex justify-center">
+            <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[hsl(var(--accent)/0.08)] text-[hsl(var(--accent))]">
+              <DuotoneGift size={32} />
+            </span>
+          </div>
+          <h3 className="mt-6 text-xl font-bold tracking-tight text-[hsl(var(--text))] sm:text-2xl">
+            {title}
+          </h3>
+          <p className="mt-3 text-[15px] leading-relaxed text-token-text/70">
+            {description}
+          </p>
+          <div className="rhythm-content">
+            <Link
+              href={ctaHref}
+              prefetch={false}
+              className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-[hsl(var(--accent)/0.9)] hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+              onClick={() => pushDL('packs_empty_cta')}
+            >
+              {ctaLabel}
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" className="opacity-90">
+                <path fill="currentColor" d="M13.172 12L8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z" />
+              </svg>
+            </Link>
+          </div>
         </div>
-        <p className="mt-6 text-center text-[13px] text-token-text/70" role="status" aria-live="polite">
-          Chargement des packs recommandés…
-        </p>
       </section>
     )
   }
@@ -257,45 +319,67 @@ export default function PacksSection({
 
   const totalCount = filteredSorted.length
   const visibleCount = list.length
+  const hasPacks = totalCount > 0
+  const filterActive = filterPromo || filterStock
+  const noResultsAfterFilter = hasPacks && filterActive && visibleCount === 0
 
   return (
     <section
-      className={cn('max-w-6xl mx-auto px-6 py-16', className)}
+      className={cn('container-app mx-auto py-10 sm:py-12', className)}
       aria-labelledby={showHeader ? headingId : undefined}
       role="region"
     >
       {showHeader && (
-        <div className="mb-10 flex flex-col items-center justify-between gap-4 sm:flex-row">
-          <div className="text-center sm:text-left">
-            <h2
-              id={headingId}
-              className="flex items-center justify-center gap-2 text-3xl font-extrabold text-brand dark:text-white sm:justify-start"
+        <>
+          <div className="mb-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
+            <div className="text-center sm:text-left">
+              <h2
+                id={headingId}
+                className="flex items-center justify-center gap-2 heading-subsection font-bold sm:justify-start"
+              >
+                <DuotoneGift size={22} className="text-[hsl(var(--accent))]" />
+                <span>Nos Packs Recommandés</span>
+              </h2>
+              <p id={subId} className="mt-2 text-sm text-token-text/70">
+                Équipez-vous malin : bundles optimisés pour la perf’ et le budget.
+                {hasPacks && <span className="sr-only"> {totalCount} packs disponibles.</span>}
+              </p>
+            </div>
+
+            <Link
+              href="/products/packs"
+              prefetch={false}
+              className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-[hsl(var(--accent)/.90)] hover:shadow-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
+              aria-label="Voir tous les packs TechPlay"
+              onClick={() => pushDL('packs_see_all')}
             >
-              <DuotoneGift />
-              <span>Nos Packs Recommandés</span>
-            </h2>
-            <p id={subId} className="mt-2 text-sm text-token-text/70">
-              Équipez-vous malin : bundles optimisés pour la perf’ et le budget.
-              <span className="sr-only"> {totalCount} packs disponibles.</span>
-            </p>
+              Voir tous les packs
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" className="opacity-90">
+                <path fill="currentColor" d="M13.172 12L8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z" />
+              </svg>
+            </Link>
           </div>
 
-          <Link
-            href="/products/packs"
-            prefetch={false}
-            className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] px-5 py-2 text-sm font-semibold text-white shadow-md transition hover:bg-[hsl(var(--accent)/.90)] hover:shadow-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
-            aria-label="Voir tous les packs TechPlay"
-            onClick={() => pushDL('packs_see_all')}
-          >
-            Voir tous les packs
-            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" className="opacity-90">
-              <path fill="currentColor" d="M13.172 12L8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z" />
-            </svg>
-          </Link>
-        </div>
+          {hasPacks && (
+            <div className="mb-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-[12px] text-token-text/65 sm:justify-start">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))]" aria-hidden="true" />
+                Sélectionnés par nos experts
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
+                Économies sur les bundles
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden="true" />
+                Livraison offerte
+              </span>
+            </div>
+          )}
+        </>
       )}
 
-      {showControls && (
+      {hasPacks && showControls && (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div className="text-xs text-token-text/70">
             Affichage <span className="font-semibold">{visibleCount}</span> / <span>{totalCount}</span>
@@ -364,49 +448,70 @@ export default function PacksSection({
         </div>
       )}
 
-      <motion.ul
-        {...(!reduceMotion ? { variants: containerVariants, initial: 'hidden', whileInView: 'show' } : {})}
-        viewport={{ once: true, amount: 0.2 }}
-        className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3"
-        role="list"
-        aria-describedby={showHeader ? subId : undefined}
-        id={gridId}
-      >
-        {list.map((pack, i) => {
-          const record = toRecord(pack)
-          const key = readString(record, ['slug', '_id', 'id']) ?? `pk-${i}`
-
-          return (
-            <motion.li
-              key={key}
-              {...(!reduceMotion ? { variants: itemVariants } : {})}
-              {...(!reduceMotion ? { whileHover: { y: -4 } } : {})}
-              transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-              data-gtm="packs_item"
-              data-idx={i}
-            >
-              <PackCard pack={pack} />
-            </motion.li>
-          )
-        })}
-      </motion.ul>
-
-      <div className="mt-8 flex items-center justify-between gap-4">
-        <Link
-          href="/products/packs"
-          prefetch={false}
-          className="inline-flex items-center gap-2 text-sm font-semibold text-[hsl(var(--accent))] hover:text-[hsl(var(--accent-600))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
+      {noResultsAfterFilter ? (
+        <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 card-padding text-center">
+          <p className="text-sm font-medium text-token-text/80">
+            Aucun pack ne correspond aux filtres sélectionnés.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              setFilterPromo(false)
+              setFilterStock(false)
+              pushDL('packs_filter_clear')
+            }}
+            className="mt-4 inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 text-[13px] font-semibold transition hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+          >
+            Réinitialiser les filtres
+          </button>
+        </div>
+      ) : (
+        <motion.ul
+          {...(!reduceMotion ? { variants: containerVariants, initial: 'hidden', whileInView: 'show' } : {})}
+          viewport={{ once: true, amount: 0.2 }}
+          className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 sm:gap-8"
+          role="list"
+          aria-describedby={showHeader ? subId : undefined}
+          id={gridId}
         >
-          <span>Voir tous les packs</span>
-          <span aria-hidden>↗</span>
-        </Link>
+          {list.map((pack, i) => {
+            const record = toRecord(pack)
+            const key = readString(record, ['slug', '_id', 'id']) ?? `pk-${i}`
 
-        <p className="text-xs text-token-text/60">
-          {visibleCount} / {totalCount} packs affichés
-        </p>
-      </div>
+            return (
+              <motion.li
+                key={key}
+                {...(!reduceMotion ? { variants: itemVariants } : {})}
+                {...(!reduceMotion ? { whileHover: { y: -4 } } : {})}
+                transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+                data-gtm="packs_item"
+                data-idx={i}
+              >
+                <PackCard pack={pack} />
+              </motion.li>
+            )
+          })}
+        </motion.ul>
+      )}
 
-      {!expanded && limit > 0 && totalCount > limit && (
+      {hasPacks && !noResultsAfterFilter && (
+        <div className="mt-8 flex items-center justify-between gap-4">
+          <Link
+            href="/products/packs"
+            prefetch={false}
+            className="inline-flex items-center gap-2 text-sm font-semibold text-[hsl(var(--accent))] hover:text-[hsl(var(--accent-600))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
+          >
+            <span>Voir tous les packs</span>
+            <span aria-hidden>↗</span>
+          </Link>
+
+          <p className="text-xs text-token-text/60">
+            {visibleCount} / {totalCount} packs affichés
+          </p>
+        </div>
+      )}
+
+      {hasPacks && !noResultsAfterFilter && !expanded && limit > 0 && totalCount > limit && (
         <div className="mt-10 flex flex-col items-center gap-3">
           <button
             type="button"

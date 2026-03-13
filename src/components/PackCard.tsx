@@ -38,6 +38,7 @@ const BLUR_DATA_URL =
 
 const STR = {
   fr: {
+    packLabel: 'Pack',
     new: 'Nouveau',
     bestSeller: 'Best Seller',
     lowStock: 'Stock faible',
@@ -51,6 +52,7 @@ const STR = {
     previewItems: 'Aperçu des articles inclus',
   },
   en: {
+    packLabel: 'Bundle',
     new: 'New',
     bestSeller: 'Best Seller',
     lowStock: 'Low stock',
@@ -360,7 +362,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
     return {
       perspective: 1000,
       background:
-        'linear-gradient(165deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.08) 40%, transparent 70%)',
+        'linear-gradient(145deg, hsl(var(--accent) / 0.12) 0%, rgba(255,255,255,0.06) 35%, transparent 60%)',
     }
   }, [])
 
@@ -370,9 +372,10 @@ export default function PackCard({ pack, priority = false, className }: PackCard
       itemScope
       itemType="https://schema.org/Product"
       className={cn(
-        'group relative rounded-[1.75rem] p-[1px]',
-        'shadow-[0_22px_70px_rgba(15,23,42,0.5)]',
-        'transition-all duration-300 ease-[var(--ease-smooth)] hover:shadow-[0_26px_90px_rgba(15,23,42,0.75)] hover:-translate-y-1',
+        'group relative rounded-[1.75rem] border border-[hsl(var(--accent)/0.2)] p-[2px]',
+        'shadow-[0_20px_50px_rgba(15,23,42,0.4),0_0_0_1px_hsl(var(--accent)/0.06)]',
+        'transition-all duration-300 ease-[var(--ease-smooth)]',
+        'hover:shadow-[0_24px_60px_rgba(15,23,42,0.5),0_0_24px_hsl(var(--accent)/0.12)] hover:-translate-y-1 hover:border-[hsl(var(--accent)/0.35)]',
         className
       )}
       style={articleStyle}
@@ -405,8 +408,8 @@ export default function PackCard({ pack, priority = false, className }: PackCard
 
       <motion.div
         className={cn(
-          'relative overflow-hidden rounded-[1.55rem]',
-          'border border-white/50 dark:border-white/10',
+          'relative overflow-hidden rounded-[1.5rem]',
+          'border border-white/40 dark:border-white/10',
           'bg-[hsl(var(--surface))]/98 dark:bg-[hsl(var(--surface))]/92 supports-[backdrop-filter]:backdrop-blur-2xl'
         )}
         style={
@@ -415,12 +418,18 @@ export default function PackCard({ pack, priority = false, className }: PackCard
             : undefined
         }
       >
+        {/* Pack identity: accent stripe + bundle label */}
+        <div
+          aria-hidden="true"
+          className="absolute left-0 right-0 top-0 z-20 h-1 rounded-t-[1.5rem] bg-gradient-to-r from-[hsl(var(--accent))] via-[hsl(var(--accent)/0.8)] to-[hsl(var(--accent)/0.5)]"
+        />
+
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
           style={{
             background:
-              'radial-gradient(800px 280px at 20% -5%, rgba(255,255,255,0.25), transparent 55%)',
+              'radial-gradient(800px 280px at 20% -5%, hsl(var(--accent)/0.04), transparent 55%)',
           }}
         />
 
@@ -458,7 +467,13 @@ export default function PackCard({ pack, priority = false, className }: PackCard
               />
             ) : null}
 
-            <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-col gap-1.5 sm:left-4 sm:top-4">
+            <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-wrap gap-1.5 sm:left-4 sm:top-4">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--accent)/0.35)] bg-[hsl(var(--surface))]/95 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--accent))] shadow-sm backdrop-blur-sm dark:bg-[hsl(var(--surface))]/90">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M20 7h-3.17a3 3 0 1 0-5.66-2 3 3 0 1 0-5.66 2H2v4h2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9h2V7h-2Z" />
+                </svg>
+                {t.packLabel}
+              </span>
               {isNew ? (
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/95 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-950 shadow-[0_12px_35px_rgba(4,120,87,0.7)] ring-1 ring-emerald-900/40">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-900/90" />
@@ -515,26 +530,29 @@ export default function PackCard({ pack, priority = false, className }: PackCard
             />
           </div>
 
-          <div className="p-5 sm:p-6">
+          <div className="border-t border-[hsl(var(--border))]/60 bg-[hsl(var(--surface))]/30 p-5 sm:p-6">
             <h3
-              className="line-clamp-2 text-[15px] font-semibold text-gray-900 sm:text-[17px] dark:text-white"
+              className="line-clamp-2 text-[15px] font-bold tracking-tight text-[hsl(var(--text))] sm:text-[17px]"
               title={title}
             >
               {title}
             </h3>
 
             {items.length > 0 ? (
-              <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-token-text/60">
-                {t.included(items.length)}
-              </p>
+              <div className="mt-2 flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--accent)/0.1)] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--accent))]">
+                  <span className="h-1 w-1 rounded-full bg-[hsl(var(--accent))]" aria-hidden="true" />
+                  {t.included(items.length)}
+                </span>
+              </div>
             ) : null}
 
             {itemChips.length > 0 ? (
-              <ul className="mt-2 flex flex-wrap gap-1.5" aria-label={t.previewItems}>
+              <ul className="mt-3 flex flex-wrap gap-1.5" aria-label={t.previewItems}>
                 {itemChips.map((label, index) => (
                   <li
                     key={`${label}-${index}`}
-                    className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-2.5 py-1 text-[11px] text-token-text/85"
+                    className="rounded-lg border border-[hsl(var(--accent)/0.2)] bg-[hsl(var(--accent)/0.06)] px-2.5 py-1 text-[11px] font-medium text-token-text/90"
                   >
                     {label}
                   </li>
@@ -543,13 +561,13 @@ export default function PackCard({ pack, priority = false, className }: PackCard
             ) : null}
 
             {description ? (
-              <p className="mt-2 line-clamp-3 text-[13px] text-gray-600 dark:text-gray-400">
+              <p className="mt-2 line-clamp-3 text-[13px] text-token-text/70">
                 {description}
               </p>
             ) : null}
 
             <div
-              className="mt-3 flex flex-wrap items-end gap-3 sm:mt-4"
+              className="mt-4 flex flex-wrap items-end gap-3 rounded-xl border border-[hsl(var(--accent)/0.15)] bg-[hsl(var(--accent)/0.04)] p-3 sm:p-3.5"
               itemProp="offers"
               itemScope
               itemType="https://schema.org/Offer"
@@ -563,7 +581,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
               <meta itemProp="price" content={Math.max(0, Number(price || 0)).toFixed(2)} />
 
               <span
-                className="text-lg font-extrabold tracking-tight text-[hsl(var(--accent))] sm:text-xl"
+                className="text-xl font-extrabold tracking-tight text-[hsl(var(--accent))] sm:text-2xl"
                 aria-label={`Prix : ${formatPrice(price)}`}
               >
                 {formatPrice(price)}
@@ -571,11 +589,11 @@ export default function PackCard({ pack, priority = false, className }: PackCard
 
               {typeof referencePrice === 'number' && referencePrice > price ? (
                 <>
-                  <span className="text-xs text-gray-400 line-through dark:text-gray-500">
+                  <span className="text-sm text-token-text/50 line-through">
                     {formatPrice(referencePrice)}
                   </span>
                   {typeof discountPercent === 'number' ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100/80 px-2 py-[3px] text-[11px] font-semibold text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
                       -{discountPercent}%
                     </span>
                   ) : null}
@@ -584,28 +602,28 @@ export default function PackCard({ pack, priority = false, className }: PackCard
             </div>
 
             {typeof savingsEuro === 'number' && savingsEuro > 0 ? (
-              <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px]">
-                <p className="font-medium text-emerald-700 dark:text-emerald-300">
+              <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg bg-emerald-500/10 px-3 py-2 text-[12px]">
+                <span className="font-semibold text-emerald-700 dark:text-emerald-300">
                   {t.save} {formatPrice(savingsEuro)}
-                </p>
+                </span>
                 {typeof itemsValue === 'number' ? (
-                  <span className="text-token-text/60">
-                    {t.itemValue} : {formatPrice(itemsValue)}
-                  </span>
+                  <>
+                    <span className="text-token-text/50" aria-hidden="true">·</span>
+                    <span className="text-token-text/60">{t.itemValue} {formatPrice(itemsValue)}</span>
+                  </>
                 ) : null}
               </div>
             ) : null}
 
-            <div className="mt-4 flex items-center justify-between gap-3">
-              <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[hsl(var(--accent))]">
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+              <span className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent)/0.1)] px-3 py-2 text-[13px] font-semibold text-[hsl(var(--accent))] transition-colors group-hover:bg-[hsl(var(--accent)/0.15)]">
                 {t.readPack}
-                <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-0.5">
+                <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" className="shrink-0 transition-transform duration-200 group-hover:translate-x-0.5">
                   <path fill="currentColor" d="M13.172 12L8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z" />
                 </svg>
               </span>
+              <FreeShippingBadge price={price} minimal className="mt-0" />
             </div>
-
-            <FreeShippingBadge price={price} minimal className="mt-2" />
           </div>
         </Link>
       </motion.div>

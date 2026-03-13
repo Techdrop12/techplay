@@ -26,7 +26,7 @@ export default function EmptyCart({ locale = 'fr' }: EmptyCartProps) {
       aria-label={message}
       className="card py-16 text-center shadow-[var(--shadow-lg)]"
     >
-      <h2 className="text-2xl font-semibold text-[hsl(var(--text))] sm:text-3xl [letter-spacing:var(--heading-tracking)]">{message}</h2>
+      <h2 className="heading-section">{message}</h2>
       <p className="mx-auto mt-2 max-w-sm text-[14px] text-token-text/75">{sub}</p>
 
       <div className="mt-8 flex flex-wrap items-center justify-center gap-3">

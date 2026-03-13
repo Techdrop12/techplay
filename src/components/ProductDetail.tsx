@@ -185,9 +185,9 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           imageHelp: 'Click or press Enter/Space to zoom the image.',
           imageHelpOut: 'Click or press Enter/Space to zoom out the image.',
           payments: 'Payments:',
-          returns: '2-year warranty & 30-day returns',
-          secured: '100% secure payment',
-          shipping: 'Ships within 24 business hours',
+          returns: 'Free 30-day returns',
+          secured: 'Secure payment',
+          shipping: 'Ships in 24h',
           deliveryReturns: 'Delivery & returns',
           specs: 'Specifications',
           detailedSpecs: 'Detailed specifications available on the product sheet.',
@@ -218,9 +218,9 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           imageHelp: 'Cliquer ou appuyer sur Entrée/Espace pour zoomer l’image.',
           imageHelpOut: 'Cliquer ou appuyer sur Entrée/Espace pour dézoomer l’image.',
           payments: 'Paiements :',
-          returns: 'Garantie 2 ans & retours sous 30 jours',
-          secured: 'Paiement 100% sécurisé',
-          shipping: 'Expédition en 24h ouvrées',
+          returns: 'Retours gratuits 30 jours',
+          secured: 'Paiement sécurisé',
+          shipping: 'Expédition sous 24h',
           deliveryReturns: 'Livraison & retours',
           specs: 'Spécifications',
           detailedSpecs: 'Caractéristiques détaillées disponibles sur la fiche.',
@@ -511,7 +511,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
   return (
     <motion.section
       ref={sectionRef}
-      className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-10 sm:gap-12 sm:px-6 sm:py-12 lg:grid-cols-2"
+      className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-8 pb-[max(2rem,env(safe-area-inset-bottom))] sm:gap-10 sm:px-6 sm:py-12 sm:pb-12 lg:gap-12 lg:grid-cols-2"
       initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}
       animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
@@ -523,23 +523,25 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
       itemScope
       itemType="https://schema.org/Product"
     >
-      <div className="grid gap-4">
-        <div
-          ref={mediaRef}
-          className={cn(
-            'relative aspect-square w-full overflow-hidden rounded-[var(--radius-3xl)]',
-            'border border-[hsl(var(--border))]',
-            'bg-[hsl(var(--surface))] shadow-[var(--shadow-xl)]'
-          )}
-          onPointerMove={onPointerMove}
-          onPointerLeave={() => setZoomed(false)}
-          onClick={toggleZoom}
-          onKeyDown={onMediaKeyDown}
-          role="button"
-          aria-label={`${t.imageLabel} ${activeIdx + 1} ${t.of} ${safeGallery.length} : ${title}`}
-          aria-busy={!imgLoaded}
-          tabIndex={0}
-        >
+      <div className="flex flex-col gap-5 sm:gap-8 min-w-0">
+        {/* Main image: framed for emphasis; less frame padding on mobile */}
+        <div className="rounded-2xl bg-[hsl(var(--surface-2))] p-2 shadow-[var(--shadow-lg)] sm:p-3">
+          <div
+            ref={mediaRef}
+            className={cn(
+              'relative aspect-square w-full overflow-hidden rounded-xl',
+              'border border-[hsl(var(--border))]',
+              'bg-[hsl(var(--surface))] shadow-[var(--shadow-md)]'
+            )}
+            onPointerMove={onPointerMove}
+            onPointerLeave={() => setZoomed(false)}
+            onClick={toggleZoom}
+            onKeyDown={onMediaKeyDown}
+            role="button"
+            aria-label={`${t.imageLabel} ${activeIdx + 1} ${t.of} ${safeGallery.length} : ${title}`}
+            aria-busy={!imgLoaded}
+            tabIndex={0}
+          >
           <Image
             key={activeImage}
             src={activeImage}
@@ -606,25 +608,29 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           </div>
 
           <p className="sr-only">{zoomed ? t.imageHelpOut : t.imageHelp}</p>
+          </div>
         </div>
 
         {safeGallery.length > 1 ? (
-          <nav aria-label={t.galleryLabel}>
-            <ul role="list" className="grid grid-cols-5 gap-2.5 sm:grid-cols-6 sm:gap-3">
+          <nav aria-label={t.galleryLabel} className="flex flex-col gap-3">
+            <ul
+              role="list"
+              className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 sm:gap-4 sm:flex-wrap sm:overflow-visible sm:pb-0"
+            >
               {safeGallery.map((src, idx) => {
                 const active = idx === activeIdx
 
                 return (
-                  <li key={`${src}-${idx}`}>
+                  <li key={`${src}-${idx}`} className="shrink-0 snap-start sm:shrink-0">
                     <button
                       type="button"
                       onClick={() => onThumbSelect(idx)}
                       onMouseEnter={() => !prefersReducedMotion && setActiveIdx(idx)}
                       className={cn(
-                        'relative block aspect-square overflow-hidden rounded-xl border transition-all duration-200',
+                        'relative flex h-20 w-20 overflow-hidden rounded-xl border transition-all duration-200 sm:h-24 sm:w-24',
                         active
-                          ? 'border-[hsl(var(--accent))] ring-2 ring-[hsl(var(--accent))] shadow-[var(--shadow-md)]'
-                          : 'border-[hsl(var(--border))] hover:border-[hsl(var(--accent)/.5)]'
+                          ? 'border-[hsl(var(--accent))] ring-2 ring-[hsl(var(--accent))] ring-offset-2 ring-offset-[hsl(var(--surface))] shadow-[var(--shadow-md)]'
+                          : 'border-[hsl(var(--border))] hover:border-[hsl(var(--accent)/.5)] hover:shadow-[var(--shadow-sm)]'
                       )}
                       aria-label={`${t.imageLabel} ${idx + 1}`}
                       aria-current={active ? 'true' : undefined}
@@ -648,23 +654,146 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         ) : null}
       </div>
 
-      <div className="flex flex-col justify-between space-y-8">
-        <div>
+      <div className="flex flex-col gap-6 sm:gap-8 lg:gap-10">
+        {/* 1. Title — mobile-first hierarchy */}
+        <div className="min-w-0">
           <h1
             id="product-title"
-            className="text-3xl font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-4xl [letter-spacing:var(--heading-tracking)]"
+            className="text-[1.75rem] font-extrabold leading-snug tracking-tight text-[hsl(var(--text))] sm:text-3xl lg:text-[1.75rem] [letter-spacing:var(--heading-tracking)]"
             tabIndex={-1}
             itemProp="name"
           >
             {title}
           </h1>
-
           {_id || sku ? <meta itemProp="sku" content={String(_id || sku)} /> : null}
           {brand ? <meta itemProp="brand" content={brand} /> : null}
+          {(brand || category) ? (
+            <p className="mt-2 text-[13px] font-medium uppercase tracking-[0.12em] text-token-text/55">
+              {[brand, category].filter(Boolean).join(' · ')}
+            </p>
+          ) : null}
+        </div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-3">
+        {/* Purchase section: price + CTA + trust — touch-friendly on mobile */}
+        <div
+          className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-5 py-5 shadow-sm sm:p-6"
+          aria-label={safeLocale === 'en' ? 'Purchase options' : 'Options d’achat'}
+        >
+          {/* 2. Price — prominent, scannable on mobile */}
+          <div className="flex flex-wrap items-baseline gap-3 pb-5 sm:pb-6" aria-live="polite">
+            <span
+              className="text-[1.875rem] font-extrabold tabular-nums tracking-tight text-[hsl(var(--accent))] sm:text-3xl"
+              aria-label={safeLocale === 'en' ? `Price: ${formatPrice(price, { currency })}` : `Prix : ${formatPrice(price, { currency })}`}
+              itemProp="offers"
+              itemScope
+              itemType="https://schema.org/Offer"
+            >
+              <meta itemProp="priceCurrency" content={currency} />
+              <meta itemProp="price" content={priceStr} />
+              <meta itemProp="availability" content={availability} />
+              {formatPrice(price, { currency })}
+            </span>
+            {typeof oldPrice === 'number' && oldPrice > price ? (
+              <span className="text-base font-medium text-token-text/50 line-through">
+                {formatPrice(oldPrice, { currency })}
+              </span>
+            ) : null}
+            {discount && amountSaved ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--accent)/0.12)] px-2.5 py-1 text-[12px] font-semibold text-[hsl(var(--accent))]">
+                {t.save} {formatPrice(amountSaved, { currency })} ({discount}%)
+              </span>
+            ) : null}
+            {quantity > 1 ? (
+              <span className="text-[13px] text-token-text/70">
+                Total ({quantity}×)&nbsp;: <span className="font-semibold text-[hsl(var(--text))]">{formatPrice(total, { currency })}</span>
+              </span>
+            ) : null}
+          </div>
+
+          {/* 3. Buy action — quantity + CTA (44px+ touch targets on mobile) */}
+          <div className="space-y-4 sm:space-y-4">
+            <div className="flex min-h-[44px] flex-col justify-center gap-3 xs:flex-row xs:items-center xs:gap-4">
+              <label htmlFor="quantity" className="text-sm font-semibold text-[hsl(var(--text))] sm:text-sm">
+                {t.quantity}
+              </label>
+              <QuantitySelector
+                value={quantity}
+                onChange={(q) => setQuantity(clamp(q, 1, 99))}
+                id="quantity"
+                aria-describedby="quantity-desc"
+              />
+            </div>
+            <p id="quantity-desc" className="sr-only">
+              {t.quantityHelp}
+            </p>
+            {!outOfStock ? (
+              <div className="space-y-2">
+                <AddToCartButtonAB
+                  product={{
+                    _id,
+                    slug,
+                    title,
+                    price,
+                    image: safeGallery[0] ?? image,
+                    quantity,
+                  }}
+                  locale={safeLocale}
+                  onAdd={onAddToCart}
+                  gtmExtra={{
+                    from: 'pdp',
+                    product_id: _id,
+                    product_slug: slug,
+                    product_title: title,
+                    product_price: price,
+                    product_category: category ?? undefined,
+                  }}
+                  size="lg"
+                  fullWidth
+                  className="min-h-[56px] py-4 text-base font-semibold shadow-md transition hover:shadow-lg focus-visible:ring-2 focus-visible:ring-offset-2 sm:min-h-[52px] sm:py-3.5"
+                  aria-label={`${t.addToCart} ${title}`}
+                />
+                <p className="text-center text-[12px] text-token-text/60" role="status">
+                  {safeLocale === 'en' ? 'Secure checkout · Free returns' : 'Paiement sécurisé · Retours gratuits'}
+                </p>
+              </div>
+            ) : (
+              <div
+                className="inline-flex min-h-[48px] flex-wrap items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300 sm:min-h-0"
+                role="alert"
+              >
+                {t.unavailable}
+                <button
+                  type="button"
+                  onClick={() => toast(t.notifyToast)}
+                  className="min-h-[44px] min-w-[44px] font-medium underline underline-offset-2 hover:no-underline sm:min-h-0 sm:min-w-0"
+                >
+                  {t.notifyMe}
+                </button>
+              </div>
+            )}
+
+            {/* Reassurance: shipping, returns, secure payment */}
+            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-[hsl(var(--border))] pt-4">
+              <span className="inline-flex items-center gap-1.5 text-[12px] text-token-text/70">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400" aria-hidden="true">✓</span>
+                {t.shipping}
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[12px] text-token-text/70">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-600 dark:bg-sky-900/50 dark:text-sky-400" aria-hidden="true">🔒</span>
+                {t.returns}
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[12px] text-token-text/70">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400" aria-hidden="true">⚡</span>
+                {t.secured}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Supporting: rating, stock, delivery, description, tags */}
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center gap-3">
             <RatingStars value={aggregate.average || 0} editable={false} />
-
             {totalReviews > 0 ? (
               <a
                 href="#reviews"
@@ -684,9 +813,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
                 {totalReviews} {t.reviews}
               </a>
             ) : null}
-
             <FreeShippingBadge price={price} minimal />
-
             {typeof stock === 'number' ? (
               <span
                 className={cn(
@@ -708,9 +835,8 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
               </span>
             ) : null}
           </div>
-
           {lowStock ? (
-            <div className="mt-2">
+            <div>
               <div
                 className="h-2 w-full overflow-hidden rounded-full bg-amber-100 dark:bg-amber-900/30"
                 aria-hidden="true"
@@ -723,135 +849,24 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
               <p className="mt-1 text-[11px] font-medium text-amber-700 dark:text-amber-300">{t.hurry}</p>
             </div>
           ) : null}
-
-          <div className="mt-4 flex flex-wrap items-end gap-3" aria-live="polite">
-            <span
-              className="text-2xl font-extrabold tracking-tight text-[hsl(var(--accent))] sm:text-3xl"
-              aria-label={`Prix : ${formatPrice(price, { currency })}`}
-              itemProp="offers"
-              itemScope
-              itemType="https://schema.org/Offer"
-            >
-              <meta itemProp="priceCurrency" content={currency} />
-              <meta itemProp="price" content={priceStr} />
-              <meta itemProp="availability" content={availability} />
-              {formatPrice(price, { currency })}
-            </span>
-
-            {typeof oldPrice === 'number' && oldPrice > price ? (
-              <span className="text-sm line-through text-gray-400 dark:text-gray-500">
-                {formatPrice(oldPrice, { currency })}
-              </span>
-            ) : null}
-
-            {discount && amountSaved ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100/80 px-2.5 py-1 text-[12px] font-semibold text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                {t.save} {formatPrice(amountSaved, { currency })} ({discount}%)
-              </span>
-            ) : null}
-
-            {quantity > 1 ? (
-              <span className="ml-2 text-[13px] text-gray-600 dark:text-gray-400">
-                Total ({quantity}×)&nbsp;: <span className="font-semibold">{formatPrice(total, { currency })}</span>
-              </span>
-            ) : null}
-          </div>
-
-          <div className="mt-3">
-            <DeliveryEstimate />
-          </div>
-
+          <DeliveryEstimate />
           {description ? (
             <p
-              className="mt-6 whitespace-pre-line text-[15px] leading-relaxed text-gray-700 dark:text-gray-300 sm:text-base"
+              className="whitespace-pre-line text-[15px] leading-relaxed text-token-text/85 sm:text-base"
               itemProp="description"
             >
               {description}
             </p>
           ) : null}
-
           {tags.length > 0 ? (
-            <div className="mt-4">
+            <div>
               <ProductTags tags={tags} />
             </div>
           ) : null}
-
-          <div className="mt-6 grid gap-2.5 rounded-xl border border-white/10 bg-white/5 p-4 text-[13px] text-gray-600 dark:text-gray-400 dark:bg-black/20">
-            <div className="flex items-center gap-2.5">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400" aria-hidden="true">✓</span>
-              {t.returns}
-            </div>
-            <div className="flex items-center gap-2.5">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-600 dark:bg-sky-900/50 dark:text-sky-400" aria-hidden="true">🔒</span>
-              {t.secured}
-            </div>
-            <div className="flex items-center gap-2.5">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400" aria-hidden="true">⚡</span>
-              {t.shipping}
-            </div>
-          </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="flex items-center gap-4">
-            <label htmlFor="quantity" className="text-lg font-semibold text-gray-900 dark:text-white">
-              {t.quantity} :
-            </label>
-
-            <QuantitySelector
-              value={quantity}
-              onChange={(q) => setQuantity(clamp(q, 1, 99))}
-              id="quantity"
-              aria-describedby="quantity-desc"
-            />
-          </div>
-
-          <p id="quantity-desc" className="sr-only">
-            {t.quantityHelp}
-          </p>
-
-          {!outOfStock ? (
-            <AddToCartButtonAB
-              product={{
-                _id,
-                slug,
-                title,
-                price,
-                image: safeGallery[0] ?? image,
-                quantity,
-              }}
-              locale={safeLocale}
-              onAdd={onAddToCart}
-              gtmExtra={{
-                from: 'pdp',
-                product_id: _id,
-                product_slug: slug,
-                product_title: title,
-                product_price: price,
-                product_category: category ?? undefined,
-              }}
-              size="lg"
-              aria-label={`${t.addToCart} ${title}`}
-            />
-          ) : (
-            <div
-              className="inline-flex flex-wrap items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300"
-              role="alert"
-            >
-              {t.unavailable}
-              <button
-                type="button"
-                onClick={() => toast(t.notifyToast)}
-                className="font-medium underline underline-offset-2 hover:no-underline"
-              >
-                {t.notifyMe}
-              </button>
-            </div>
-          )}
-
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="inline-block" onClick={onAddWishlist}>
+        <div className="flex flex-wrap items-center gap-3">
+            <div className="inline-flex min-h-[44px] items-center sm:min-h-0" onClick={onAddWishlist}>
               <WishlistButton
                 product={{
                   _id,
@@ -861,18 +876,18 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
                   image: safeGallery[0] ?? image,
                 }}
                 floating={false}
-                className="mt-2"
+                className="mt-0 sm:mt-2"
               />
             </div>
 
             <button
               type="button"
               onClick={share}
-              className="mt-2 inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-[13px] font-medium transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 dark:bg-black/20 dark:hover:bg-black/30"
+              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-[13px] font-medium transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 dark:bg-black/20 dark:hover:bg-black/30 sm:min-h-0 sm:min-w-0 sm:py-2.5"
               aria-label={t.share}
               title={t.share}
             >
-              <IconShare size={16} />
+              <IconShare size={18} />
               <span>{t.share}</span>
             </button>
 
@@ -891,8 +906,8 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
 
           <div className="mt-2 grid gap-2">
             <details className="rounded-xl border border-white/10 bg-white/5 p-3.5 dark:bg-black/20">
-              <summary className="cursor-pointer text-[13px] font-semibold text-token-text">{t.deliveryReturns}</summary>
-              <ul className="mt-2 list-disc space-y-1 pl-5 text-[13px] text-gray-600 dark:text-gray-400">
+              <summary className="flex min-h-[44px] cursor-pointer list-none items-center text-[13px] font-semibold text-token-text [&::-webkit-details-marker]:hidden">{t.deliveryReturns}</summary>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-[13px] text-token-text/70">
                 <li>
                   {safeLocale === 'en'
                     ? 'Delivery within 48–72h in mainland France'
@@ -910,8 +925,8 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             </details>
 
             <details className="rounded-xl border border-white/10 bg-white/5 p-3.5 dark:bg-black/20">
-              <summary className="cursor-pointer text-[13px] font-semibold text-token-text">{t.specs}</summary>
-              <p className="mt-2 text-[13px] text-gray-600 dark:text-gray-400">
+              <summary className="flex min-h-[44px] cursor-pointer list-none items-center text-[13px] font-semibold text-token-text [&::-webkit-details-marker]:hidden">{t.specs}</summary>
+              <p className="mt-2 text-[13px] text-token-text/70">
                 {brand ? (
                   <>
                     {t.brand}&nbsp;: <strong>{brand}</strong>
@@ -922,7 +937,6 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
               </p>
             </details>
           </div>
-        </div>
       </div>
 
       <div className="mt-12 lg:col-span-2" id="reviews" aria-label="Avis clients">

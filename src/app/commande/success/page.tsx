@@ -20,13 +20,13 @@ export default function OrderSuccessPage({
   return (
     <main className="mx-auto max-w-2xl px-4 py-20 sm:py-28" role="main" aria-labelledby="success-title">
       <div className="rounded-[1.75rem] border border-white/10 bg-[hsl(var(--surface))]/95 p-8 text-center shadow-[0_24px_80px_rgba(15,23,42,0.2)] dark:bg-[hsl(var(--surface))]/90 sm:p-10">
-        <h1 id="success-title" className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+        <h1 id="success-title" className="heading-page">
           Merci pour votre commande
         </h1>
-        <p className="mt-3 text-[15px] text-gray-600 dark:text-gray-300">
+        <p className="mt-3 text-[15px] text-token-text/75">
           Un email de confirmation a été envoyé à l&apos;adresse indiquée.
         </p>
-        <p className="mt-1 text-[13px] text-gray-500 dark:text-gray-400">
+        <p className="mt-1 text-[13px] text-token-text/60">
           Livraison sous 48–72 h · Suivi colis par email
         </p>
 
@@ -47,7 +47,7 @@ export default function OrderSuccessPage({
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/"
-            className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-[hsl(var(--accent))] px-6 py-3 text-[15px] font-semibold text-slate-950 shadow-[0_14px_40px_rgba(20,184,166,0.5)] transition hover:shadow-[0_18px_50px_rgba(20,184,166,0.6)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2"
+            className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-[hsl(var(--accent))] px-6 py-3 text-[15px] font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-lg)] transition hover:opacity-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2"
           >
             Continuer mes achats
           </Link>

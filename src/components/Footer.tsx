@@ -88,57 +88,35 @@ const T = {
         ],
       },
       {
-        title: 'À propos',
-        links: [
-          { label: 'Qui sommes-nous', href: '/#about' },
-          { label: 'Notre histoire', href: '/#about' },
-        ],
-      },
-      {
-        title: 'Support',
+        title: 'Aide & contact',
         links: [
           { label: 'FAQ', href: '/#faq' },
+          { label: 'Nous contacter', href: '/contact' },
           { label: 'Suivi de commande', href: '/commande' },
           { label: 'Blog', href: '/blog' },
         ],
       },
       {
-        title: 'Contact',
+        title: 'Votre commande',
         links: [
-          { label: 'Nous contacter', href: '/contact' },
-        ],
-      },
-      {
-        title: 'Retours',
-        links: [
+          { label: 'Livraison', href: '/cgv' },
           { label: 'Retours & échanges', href: '/cgv' },
         ],
       },
       {
-        title: 'Livraison',
-        links: [
-          { label: 'Infos livraison', href: '/cgv' },
-        ],
-      },
-      {
-        title: 'Confidentialité',
-        links: [
-          { label: 'Politique de confidentialité', href: '/confidentialite' },
-          { label: 'Préférences cookies', href: '#cookies' },
-        ],
-      },
-      {
-        title: 'Mentions & CGV',
+        title: 'Légal',
         links: [
           { label: 'Mentions légales', href: '/mentions-legales' },
           { label: 'Conditions générales', href: '/cgv' },
+          { label: 'Politique de confidentialité', href: '/confidentialite' },
+          { label: 'Préférences cookies', href: '#cookies' },
         ],
       },
     ] as NavGroup[],
     badges: {
       secure: 'Paiement sécurisé',
-      shipping: 'Liv. 48–72h',
-      support: 'Support 7j/7',
+      shipping: 'Livraison 48–72 h',
+      support: 'Support réactif',
     },
     newsletterTitle: 'Newsletter',
     newsletterPlaceholder: 'votre@email.com',
@@ -183,57 +161,35 @@ const T = {
         ],
       },
       {
-        title: 'About',
-        links: [
-          { label: 'About us', href: '/#about' },
-          { label: 'Our story', href: '/#about' },
-        ],
-      },
-      {
-        title: 'Support',
+        title: 'Help & contact',
         links: [
           { label: 'FAQ', href: '/#faq' },
+          { label: 'Contact us', href: '/contact' },
           { label: 'Order tracking', href: '/commande' },
           { label: 'Blog', href: '/blog' },
         ],
       },
       {
-        title: 'Contact',
+        title: 'Your order',
         links: [
-          { label: 'Contact us', href: '/contact' },
-        ],
-      },
-      {
-        title: 'Returns',
-        links: [
+          { label: 'Shipping', href: '/cgv' },
           { label: 'Returns & refunds', href: '/cgv' },
         ],
       },
       {
-        title: 'Shipping',
-        links: [
-          { label: 'Shipping info', href: '/cgv' },
-        ],
-      },
-      {
-        title: 'Privacy',
-        links: [
-          { label: 'Privacy policy', href: '/confidentialite' },
-          { label: 'Cookie preferences', href: '#cookies' },
-        ],
-      },
-      {
-        title: 'Terms',
+        title: 'Legal',
         links: [
           { label: 'Legal notice', href: '/mentions-legales' },
           { label: 'Terms & conditions', href: '/cgv' },
+          { label: 'Privacy policy', href: '/confidentialite' },
+          { label: 'Cookie preferences', href: '#cookies' },
         ],
       },
     ] as NavGroup[],
     badges: {
       secure: 'Secure payment',
       shipping: '48–72h delivery',
-      support: 'Support 7/7',
+      support: 'Quick support',
     },
     newsletterTitle: 'Newsletter',
     newsletterPlaceholder: 'your@email.com',
@@ -516,97 +472,111 @@ export default function Footer({
 
   return (
     <footer
-      className="relative overflow-hidden border-t border-white/10 bg-gradient-to-b from-[hsl(var(--surface))] to-[hsl(var(--surface))]/95 text-token-text"
+      className="relative overflow-hidden border-t border-[hsl(var(--border))] bg-[hsl(var(--surface-2))] text-[hsl(var(--text))]"
       role="contentinfo"
       aria-label={t.ariaFooter}
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(1400px_700px_at_85%_-15%,rgba(20,184,166,0.06),transparent_50%),radial-gradient(900px_450px_at_5%_110%,rgba(16,185,129,0.05),transparent_45%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_600px_at_90%_0%,hsl(var(--accent)/0.04),transparent_50%)]"
       />
-      <div className="absolute inset-0 backdrop-blur-[1px]" aria-hidden="true" />
 
-      <div className="relative mx-auto max-w-screen-xl px-6 pb-8 pt-14 sm:px-8">
+      <div className="relative mx-auto max-w-screen-xl px-6 pb-10 pt-16 sm:px-8 sm:pt-20">
         <h2 className="sr-only" id="footer-heading">
           {t.footerHeading}
         </h2>
 
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-12">
-          <div className="space-y-5 md:col-span-5">
-            <p className="text-xl font-extrabold tracking-tight sm:text-2xl">
-              <span className="text-token-text dark:text-white">{companyName}</span>
-              <span className="text-[hsl(var(--accent))]">.</span>
-            </p>
-
-            <p className="max-w-sm text-sm leading-relaxed text-token-text/70">{t.brandText}</p>
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-12 lg:gap-16">
+          <div className="space-y-8 md:col-span-5">
+            <div>
+              <p className="text-xl font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-2xl">
+                <span>{companyName}</span>
+                <span className="text-[hsl(var(--accent))]">.</span>
+              </p>
+              <p className="mt-3 max-w-sm text-[14px] leading-relaxed text-token-text/75">{t.brandText}</p>
+            </div>
 
             {!compact ? (
               <>
-                <ul className="mt-4 grid grid-cols-1 gap-2.5 text-sm sm:grid-cols-3">
-                  <li className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-token-text/90 shadow-[0_8px_24px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:bg-black/20">
-                    <FaShieldAlt className="text-emerald-500 shrink-0" aria-hidden="true" />
-                    <span className="text-[13px] font-medium">{t.badges.secure}</span>
-                  </li>
-                  <li className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-token-text/90 shadow-[0_8px_24px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:bg-black/20">
-                    <FaTruck className="text-[hsl(var(--accent))] shrink-0" aria-hidden="true" />
-                    <span className="text-[13px] font-medium">{t.badges.shipping}</span>
-                  </li>
-                  <li className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-token-text/90 shadow-[0_8px_24px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:bg-black/20">
-                    <FaHeadset className="text-amber-400 shrink-0" aria-hidden="true" />
-                    <span className="text-[13px] font-medium">{t.badges.support}</span>
-                  </li>
-                </ul>
+                <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 p-4 dark:bg-[hsl(var(--surface))]/50" aria-label="Garanties">
+                  <ul className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3" role="list">
+                    <li className="flex items-center gap-3">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                        <FaShieldAlt className="text-[15px]" aria-hidden="true" />
+                      </span>
+                      <span className="text-[13px] font-medium text-[hsl(var(--text))]">{t.badges.secure}</span>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))]">
+                        <FaTruck className="text-[15px]" aria-hidden="true" />
+                      </span>
+                      <span className="text-[13px] font-medium text-[hsl(var(--text))]">{t.badges.shipping}</span>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                        <FaHeadset className="text-[15px]" aria-hidden="true" />
+                      </span>
+                      <span className="text-[13px] font-medium text-[hsl(var(--text))]">{t.badges.support}</span>
+                    </li>
+                  </ul>
+                </div>
 
-                <div className="flex items-center gap-4 pt-2 text-2xl text-token-text/50">
-                  <FaCcVisa aria-label="Visa" className="transition-opacity hover:opacity-80" />
-                  <FaCcMastercard aria-label="Mastercard" className="transition-opacity hover:opacity-80" />
-                  <FaCcPaypal aria-label="PayPal" className="transition-opacity hover:opacity-80" />
+                <p className="sr-only">Paiements acceptés</p>
+                <div className="flex items-center gap-5 text-2xl text-token-text/60" aria-hidden="true">
+                  <FaCcVisa className="transition-opacity hover:opacity-80" />
+                  <FaCcMastercard className="transition-opacity hover:opacity-80" />
+                  <FaCcPaypal className="transition-opacity hover:opacity-80" />
                 </div>
               </>
             ) : null}
 
-            <ul className="space-y-1.5 pt-2 text-[13px] text-token-text/80">
-              {contact?.email ? (
-                <li>
-                  <a
-                    href={`mailto:${contact.email}`}
-                    className="rounded-md transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
-                  >
-                    {contact.email}
-                  </a>
-                </li>
-              ) : null}
-
-              {contact?.phone ? (
-                <li>
-                  <a
-                    href={`tel:${contact.phone.replace(/\s+/g, '')}`}
-                    className="rounded-md transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
-                  >
-                    {contact.phone}
-                  </a>
-                </li>
-              ) : null}
-
-              {contact?.address?.streetAddress ? (
-                <li className="text-token-text/60">
-                  {contact.address.streetAddress}
-                  {contact.address.postalCode ? `, ${contact.address.postalCode}` : ''}
-                  {contact.address.addressLocality ? ` ${contact.address.addressLocality}` : ''}
-                  {contact.address.addressCountry ? ` · ${contact.address.addressCountry}` : ''}
-                </li>
-              ) : null}
-            </ul>
+            {(contact?.email || contact?.phone || contact?.address?.streetAddress) ? (
+              <>
+                <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--text))]">
+                  {locale === 'en' ? 'Get in touch' : 'Nous joindre'}
+                </h3>
+                <ul className="mt-3 space-y-2 text-[14px] text-token-text/85">
+                  {contact?.email ? (
+                    <li>
+                      <a
+                        href={`mailto:${contact.email}`}
+                        className="rounded-md transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
+                      >
+                        {contact.email}
+                      </a>
+                    </li>
+                  ) : null}
+                  {contact?.phone ? (
+                    <li>
+                      <a
+                        href={`tel:${contact.phone.replace(/\s+/g, '')}`}
+                        className="rounded-md transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
+                      >
+                        {contact.phone}
+                      </a>
+                    </li>
+                  ) : null}
+                  {contact?.address?.streetAddress ? (
+                    <li className="text-token-text/70">
+                      {contact.address.streetAddress}
+                      {contact.address.postalCode ? `, ${contact.address.postalCode}` : ''}
+                      {contact.address.addressLocality ? ` ${contact.address.addressLocality}` : ''}
+                      {contact.address.addressCountry ? ` · ${contact.address.addressCountry}` : ''}
+                    </li>
+                  ) : null}
+                </ul>
+              </>
+            ) : null}
           </div>
 
-          <div className="grid grid-cols-2 gap-6 md:col-span-7 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-8 py-6 sm:gap-10 sm:py-0 md:col-span-7 lg:grid-cols-4 lg:border-l lg:border-[hsl(var(--border))] lg:pl-12">
             {navGroups.map((group) => (
-              <nav key={group.title} aria-label={group.title} className="space-y-3">
-                <h3 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-token-text/60">
+              <nav key={group.title} aria-label={group.title} className="space-y-4">
+                <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--text))]">
                   {group.title}
                 </h3>
 
-                <ul className="space-y-2">
+                <ul className="space-y-3">
                   {group.links.map(({ href, label, external }) => {
                     const finalHref = localizePath(href, locale)
                     const active =
@@ -617,7 +587,7 @@ export default function Footer({
                     const isCookie = label.toLowerCase().includes('cookie')
 
                     const linkClass =
-                      'inline-flex items-center gap-2 rounded-md py-0.5 text-[13px] text-token-text/80 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]'
+                      'inline-flex min-h-[2.25rem] items-center gap-2 rounded-md py-2 text-[14px] text-token-text/85 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] sm:min-h-0 sm:py-0.5'
                     const content = (
                       <>
                         {group.title.toLowerCase().includes('légal') ||
@@ -672,27 +642,27 @@ export default function Footer({
             ))}
 
             {!compact ? (
-              <div className="col-span-2 space-y-5 sm:col-span-3 lg:col-span-4 lg:mt-4 lg:border-t lg:border-[hsl(var(--border))] lg:pt-8">
+              <div className="col-span-2 space-y-6 sm:col-span-3 lg:col-span-4 lg:mt-0 lg:rounded-xl lg:border lg:border-[hsl(var(--border))] lg:bg-[hsl(var(--surface))]/60 lg:px-6 lg:py-6 lg:dark:bg-[hsl(var(--surface))]/30">
                 <form
                   onSubmit={onSubscribe}
                   noValidate
-                  className="space-y-3 max-w-md"
+                  className="space-y-4 max-w-md"
                   aria-label={t.newsletterFormAria}
                   aria-busy={status === 'loading'}
                   aria-describedby={message ? messageId : undefined}
                 >
-                  <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-[hsl(var(--text))]">
+                  <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--text))]">
                     {t.newsletterTitle}
                   </h3>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-3">
                     <input
                       id={emailId}
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder={t.newsletterPlaceholder}
-                      className="w-full rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 text-[13px] text-token-text placeholder:text-token-text/50 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]"
+                      className="w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-3 text-[14px] text-[hsl(var(--text))] placeholder:text-token-text/50 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]"
                       aria-required="true"
                       aria-invalid={status === 'error' && !isValidEmail(email) ? 'true' : 'false'}
                       autoComplete="email"
@@ -704,7 +674,7 @@ export default function Footer({
                     <button
                       type="submit"
                       disabled={status === 'loading'}
-                      className="shrink-0 rounded-xl bg-[hsl(var(--accent))] px-4 py-2.5 text-[13px] font-semibold text-slate-950 shadow-[0_10px_30px_rgba(20,184,166,0.4)] transition hover:shadow-[0_14px_40px_rgba(20,184,166,0.5)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2 disabled:opacity-60"
+                      className="shrink-0 rounded-xl bg-[hsl(var(--accent))] px-5 py-3 text-[14px] font-semibold text-white shadow-md transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 disabled:opacity-60"
                       aria-label={t.newsletterButtonIdle}
                       data-gtm="footer_newsletter_submit"
                     >
@@ -716,7 +686,7 @@ export default function Footer({
 
                   <label
                     htmlFor={consentId}
-                    className="flex items-start gap-2 text-[12px] text-token-text/70"
+                    className="flex items-start gap-2.5 text-[13px] text-token-text/80"
                   >
                     <input
                       id={consentId}
@@ -762,7 +732,8 @@ export default function Footer({
                   ) : null}
                 </form>
 
-                <div className="flex items-center gap-5 text-xl text-token-text/50">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-token-text/70">{locale === 'en' ? 'Follow us' : 'Suivez-nous'}</p>
+                <div className="flex items-center gap-4 text-xl text-token-text/60">
                   <a
                     href="https://facebook.com/techplay"
                     target="_blank"
@@ -806,19 +777,20 @@ export default function Footer({
 
         {children ? <div className="mt-10 text-center">{children}</div> : null}
 
-        <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-[13px] md:flex-row">
-          <p className="text-token-text/60">
+        <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-[hsl(var(--border))] pt-8 text-[14px] md:flex-row">
+          <p className="text-token-text/75">
             © {currentYear}{' '}
-            <span className="font-semibold text-token-text/90">{companyName}</span>. {t.rightsReserved}
+            <span className="font-semibold text-[hsl(var(--text))]">{companyName}</span>
+            <span className="text-token-text/60">. {t.rightsReserved}</span>
           </p>
 
-          <ul className="flex flex-wrap items-center justify-center gap-3 text-[12px] text-token-text/55">
-            <li className="inline-flex items-center gap-1.5">
-              <FaLock className="opacity-70" aria-hidden="true" /> Stripe · Visa · Mastercard · PayPal
+          <ul className="flex flex-wrap items-center justify-center gap-4 text-[13px] text-token-text/70">
+            <li className="inline-flex items-center gap-2">
+              <FaLock className="text-token-text/60" aria-hidden="true" /> Stripe · Visa · Mastercard · PayPal
             </li>
-            <li className="hidden text-token-text/40 sm:inline">·</li>
+            <li className="hidden sm:inline text-token-text/50">·</li>
             <li>{t.recentLocale}</li>
-            <li className="hidden text-token-text/40 sm:inline">·</li>
+            <li className="hidden sm:inline text-token-text/50">·</li>
             <li>
               <a
                 href="#cookies"

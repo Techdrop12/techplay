@@ -8,7 +8,7 @@ interface SectionTitleProps {
 
 export default function SectionTitle({ children }: SectionTitleProps) {
   return (
-    <h2 className="text-xl font-semibold mb-4 text-[hsl(var(--text))] [letter-spacing:var(--heading-tracking)]">
+    <h2 className="heading-subsection mb-4">
       {children}
     </h2>
   );
