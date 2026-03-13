@@ -235,13 +235,13 @@ export default function ProductCatalogue({
             <SortDropdown sort={sortOption} setSort={setSortOption} />
           </div>
 
-          <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-token-border bg-token-surface/70 p-4 shadow-soft sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-6 flex flex-col gap-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm font-semibold text-token-text">
+              <p className="text-[13px] font-semibold text-token-text">
                 {filteredProducts.length} {t.results}
               </p>
 
-              <p className="mt-1 text-xs text-token-text/70">
+              <p className="mt-1 text-[12px] text-token-text/70">
                 {query.trim() ? `${t.searchResults} : “${query.trim()}”` : t.allCategories}
                 {selectedCategory ? ` · ${t.activeCategory} : ${selectedCategory}` : ''}
                 {typeof initialMin === 'number' || typeof initialMax === 'number'
@@ -260,9 +260,9 @@ export default function ProductCatalogue({
                   setCategory(null)
                 }}
                 className={cn(
-                  'inline-flex items-center justify-center rounded-xl border border-token-border',
-                  'bg-token-surface px-4 py-2 text-sm font-semibold transition',
-                  'hover:shadow focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]'
+                  'inline-flex items-center justify-center rounded-xl border border-[hsl(var(--border))]',
+                  'bg-[hsl(var(--surface))] px-4 py-2 text-[13px] font-semibold transition',
+                  'hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)] focus-visible:ring-offset-2'
                 )}
               >
                 {t.clearFilters}
@@ -271,9 +271,9 @@ export default function ProductCatalogue({
           </div>
 
           {filteredProducts.length === 0 ? (
-            <div className="rounded-3xl border border-token-border bg-token-surface/70 px-6 py-14 text-center shadow-soft">
+            <div className="rounded-[1.5rem] border border-white/10 bg-[hsl(var(--surface))]/60 px-6 py-14 text-center dark:bg-[hsl(var(--surface))]/40">
               <p className="text-lg font-semibold text-token-text">{t.noResults}</p>
-              <p className="mt-2 text-sm text-token-text/70">{t.noResultsHint}</p>
+              <p className="mt-2 text-[13px] text-token-text/70">{t.noResultsHint}</p>
             </div>
           ) : (
             <ProductGrid

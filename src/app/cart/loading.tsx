@@ -1,14 +1,17 @@
 export default function CartLoading() {
   return (
-    <div className="container-app mx-auto px-4 py-8">
-      <div className="skeleton mb-6 h-8 w-48 rounded-xl" />
-      <div className="flex flex-col gap-4 sm:flex-row sm:gap-8">
-        <div className="flex-1 space-y-4">
+    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+      <div className="mb-6 h-9 w-52 animate-pulse rounded-xl bg-[hsl(var(--surface-2))]" />
+      <div className="mt-10 grid gap-8 lg:grid-cols-3 lg:gap-12">
+        <div className="space-y-4 lg:col-span-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="skeleton h-28 rounded-2xl" />
+            <div
+              key={i}
+              className="h-28 animate-pulse rounded-[1.25rem] bg-[hsl(var(--surface))]/80 dark:bg-[hsl(var(--surface))]/60"
+            />
           ))}
         </div>
-        <div className="skeleton h-48 w-full rounded-2xl sm:w-80" />
+        <div className="h-64 animate-pulse rounded-[1.5rem] bg-[hsl(var(--surface))]/80 dark:bg-[hsl(var(--surface))]/60" />
       </div>
     </div>
   )

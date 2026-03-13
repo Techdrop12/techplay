@@ -117,7 +117,7 @@ export default function RatingSummary({
   return (
     <div className={cn('space-y-2', className)}>
       {/* En-tête moyenne */}
-      <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+      <div className="flex items-center gap-2 text-sm text-token-text/80">
         <strong className="text-base tabular-nums">{rounded.toFixed(1)} ★</strong>
         <RatingStars value={avg} editable={false} size={18} ariaLabel={`Note moyenne ${rounded}/5`} />
         <span className="tabular-nums">
@@ -137,7 +137,7 @@ export default function RatingSummary({
                   {n}
                 </span>
                 <div
-                  className="relative h-2 flex-1 rounded bg-gray-200 dark:bg-zinc-800 overflow-hidden"
+                  className="relative h-2 flex-1 rounded bg-[hsl(var(--surface-2))] overflow-hidden"
                   role="progressbar"
                   aria-valuemin={0}
                   aria-valuemax={100}

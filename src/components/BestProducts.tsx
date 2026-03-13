@@ -407,7 +407,7 @@ export default function BestProducts({
         </>
       )}
 
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-token-border bg-token-surface/70 p-3 shadow-soft">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/70 p-3">
         <div className="text-xs text-token-text/70" aria-live="polite">
           {t.display} <span className="font-semibold">{visibleCount}</span> / <span>{totalCount}</span>
         </div>
@@ -466,7 +466,7 @@ export default function BestProducts({
 
             <select
               id={`${headingId}-sort`}
-              className="rounded-xl border border-token-border bg-token-surface px-3 py-1.5 text-xs font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
+              className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-[12px] font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
               value={sortBy}
               onChange={(e) => {
                 const next = (e.currentTarget.value as SortKey) || 'popular'
@@ -492,7 +492,7 @@ export default function BestProducts({
                   setAnnounce(t.resetAnnounce)
                   pushDL('best_products_reset_filters')
                 }}
-                className="rounded-full border border-token-border bg-token-surface px-3 py-1.5 text-xs font-semibold transition hover:shadow"
+                className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-xs font-semibold transition hover:shadow"
               >
                 {t.reset}
               </button>
@@ -542,7 +542,7 @@ export default function BestProducts({
               setAnnounce(t.allShown)
               pushDL('best_products_see_more_click')
             }}
-            className="inline-flex items-center gap-2 rounded-full border border-token-border bg-token-surface px-5 py-2.5 text-sm font-semibold shadow-sm transition hover:shadow focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
+            className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-5 py-2.5 text-[13px] font-semibold shadow-sm transition hover:shadow focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
             aria-controls={gridId}
             aria-expanded={expanded ? 'true' : 'false'}
           >

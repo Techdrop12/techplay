@@ -77,20 +77,28 @@ export default function ConfidentialitePage() {
   }
 
   return (
-    <main className="max-w-3xl mx-auto px-4 py-10">
-      <h1 className="mb-6 text-2xl font-bold">Politique de confidentialité</h1>
+    <main className="container-app mx-auto max-w-3xl py-10" role="main" aria-labelledby="confidentialite-title">
+      <div className="card p-6 shadow-[var(--shadow-lg)] sm:p-8">
+        <h1 id="confidentialite-title" className="mb-6 text-2xl font-extrabold tracking-tight text-[hsl(var(--text))] [letter-spacing:var(--heading-tracking)]">
+          Politique de confidentialité
+        </h1>
 
-      <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+        <p className="text-[var(--step-0)] leading-relaxed text-token-text/80">
         Nous respectons votre vie privée. Les données collectées sur ce site sont utilisées pour le bon
-        fonctionnement du service, la mesure d’audience si vous l’acceptez, et éventuellement la publicité.
+        fonctionnement du service, la mesure d&apos;audience si vous l&apos;acceptez, et éventuellement la publicité.
       </p>
 
-      <section className="mt-8 rounded-xl border border-token-border p-4">
-        <h2 className="mb-3 font-semibold">Préférences de confidentialité</h2>
+      <section
+          className="mt-8 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/50 p-5"
+          aria-labelledby="prefs-heading"
+        >
+          <h2 id="prefs-heading" className="mb-3 text-[15px] font-semibold">
+            Préférences de confidentialité
+          </h2>
 
         <div className="space-y-3">
           <label className="flex items-center justify-between gap-4">
-            <span>Mesure d’audience (Analytics)</span>
+            <span className="text-[13px]">Mesure d&apos;audience (Analytics)</span>
             <input
               type="checkbox"
               className="h-5 w-5 accent-[hsl(var(--accent))]"
@@ -105,7 +113,7 @@ export default function ConfidentialitePage() {
           </label>
 
           <label className="flex items-center justify-between gap-4">
-            <span>Publicité</span>
+            <span className="text-[13px]">Publicité</span>
             <input
               type="checkbox"
               className="h-5 w-5 accent-[hsl(var(--accent))]"
@@ -120,38 +128,39 @@ export default function ConfidentialitePage() {
           </label>
 
           <div className="mt-4 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={save}
-              className="rounded-lg bg-[hsl(var(--accent))] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
-            >
-              Enregistrer
-            </button>
+              <button
+                type="button"
+                onClick={save}
+                className="btn-premium rounded-full px-5 py-2.5 text-[13px] font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+              >
+                Enregistrer
+              </button>
 
-            <button
-              type="button"
-              onClick={revoke}
-              className="rounded-lg border border-token-border px-4 py-2 text-sm hover:bg-token-surface/60"
-            >
-              Tout refuser
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={revoke}
+                className="btn-outline rounded-full px-5 py-2.5 text-[13px] font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+              >
+                Tout refuser
+              </button>
+            </div>
 
-          <p className="sr-only" aria-live="polite">
-            {message}
-          </p>
-
-          {message && (
-            <p className="text-sm text-emerald-600 dark:text-emerald-400">
+            <p id="prefs-message" className="sr-only" aria-live="polite">
               {message}
             </p>
-          )}
-        </div>
-      </section>
 
-      <p className="mt-6 text-xs text-gray-500 dark:text-gray-400">
-        Vous pouvez aussi gérer vos préférences via la bannière en bas de page lors de votre première visite.
-      </p>
+            {message && (
+              <p className="text-[13px] text-[hsl(var(--accent))]" aria-hidden>
+                {message}
+              </p>
+            )}
+          </div>
+        </section>
+
+        <p className="mt-6 text-[12px] text-token-text/70">
+          Vous pouvez aussi gérer vos préférences via la bannière en bas de page lors de votre première visite.
+        </p>
+      </div>
     </main>
   )
 }

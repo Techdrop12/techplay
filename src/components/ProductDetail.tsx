@@ -511,7 +511,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
   return (
     <motion.section
       ref={sectionRef}
-      className="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-4 py-12 lg:grid-cols-2"
+      className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-10 sm:gap-12 sm:px-6 sm:py-12 lg:grid-cols-2"
       initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}
       animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
@@ -527,8 +527,9 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         <div
           ref={mediaRef}
           className={cn(
-            'relative aspect-square w-full overflow-hidden rounded-3xl border shadow-xl',
-            'border-token-border bg-token-surface'
+            'relative aspect-square w-full overflow-hidden rounded-[var(--radius-3xl)]',
+            'border border-[hsl(var(--border))]',
+            'bg-[hsl(var(--surface))] shadow-[var(--shadow-xl)]'
           )}
           onPointerMove={onPointerMove}
           onPointerLeave={() => setZoomed(false)}
@@ -560,26 +561,29 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
 
           {!imgLoaded && (
             <div
-              className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-200/70 to-gray-100/40 dark:from-zinc-800/60 dark:to-zinc-900/40"
+              className="absolute inset-0 animate-pulse bg-gradient-to-br from-[hsl(var(--surface-2))] via-[hsl(var(--surface))] to-[hsl(var(--surface-2))]"
               aria-hidden="true"
             />
           )}
 
-          <div className="pointer-events-none absolute left-4 top-4 z-10 flex flex-col gap-2">
+          <div className="pointer-events-none absolute left-4 top-4 z-10 flex flex-col gap-1.5 sm:left-5 sm:top-5">
             {isNew ? (
-              <span className="rounded-full bg-green-600 px-3 py-1 text-sm font-semibold text-white shadow-md">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/95 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-950 shadow-[0_12px_35px_rgba(4,120,87,0.7)] ring-1 ring-emerald-900/40">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-900/90" />
                 {t.newLabel}
               </span>
             ) : null}
 
             {isBestSeller ? (
-              <span className="rounded-full bg-yellow-400 px-3 py-1 text-sm font-semibold text-black shadow-md">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-300/95 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-950 shadow-[0_12px_35px_rgba(120,53,15,0.55)] ring-1 ring-amber-900/35">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-700" />
                 {t.bestSeller}
               </span>
             ) : null}
 
             {discount ? (
-              <span className="rounded-full bg-red-600 px-3 py-1 text-sm font-semibold text-white shadow-md">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/95 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-red-50 shadow-[0_12px_35px_rgba(127,29,29,0.7)] ring-1 ring-red-900/40">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-200" />
                 -{discount}%
               </span>
             ) : null}
@@ -589,15 +593,15 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             <PricingBadge price={price} oldPrice={oldPrice} showDiscountLabel showOldPrice />
           </div>
 
-          <div className="absolute right-4 top-4 z-10 flex gap-2">
+          <div className="absolute right-4 top-4 z-10 flex gap-2 sm:right-5 sm:top-5">
             <button
               type="button"
               onClick={share}
-              className="rounded-full border border-token-border bg-white/90 px-3 py-2 text-sm shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] dark:bg-black/60"
+              className="rounded-full border border-white/20 bg-black/40 px-3.5 py-2.5 text-white shadow-[0_12px_35px_rgba(15,23,42,0.7)] backdrop-blur-xl transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
               aria-label={t.share}
               title={t.share}
             >
-              <IconShare />
+              <IconShare size={18} />
             </button>
           </div>
 
@@ -606,7 +610,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
 
         {safeGallery.length > 1 ? (
           <nav aria-label={t.galleryLabel}>
-            <ul role="list" className="grid grid-cols-5 gap-3 sm:grid-cols-6">
+            <ul role="list" className="grid grid-cols-5 gap-2.5 sm:grid-cols-6 sm:gap-3">
               {safeGallery.map((src, idx) => {
                 const active = idx === activeIdx
 
@@ -617,10 +621,10 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
                       onClick={() => onThumbSelect(idx)}
                       onMouseEnter={() => !prefersReducedMotion && setActiveIdx(idx)}
                       className={cn(
-                        'relative block aspect-square overflow-hidden rounded-xl border transition',
+                        'relative block aspect-square overflow-hidden rounded-xl border transition-all duration-200',
                         active
-                          ? 'border-[hsl(var(--accent))] ring-2 ring-[hsl(var(--accent))]'
-                          : 'border-token-border hover:border-[hsl(var(--accent)/.6)]'
+                          ? 'border-[hsl(var(--accent))] ring-2 ring-[hsl(var(--accent))] shadow-[var(--shadow-md)]'
+                          : 'border-[hsl(var(--border))] hover:border-[hsl(var(--accent)/.5)]'
                       )}
                       aria-label={`${t.imageLabel} ${idx + 1}`}
                       aria-current={active ? 'true' : undefined}
@@ -648,7 +652,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         <div>
           <h1
             id="product-title"
-            className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white"
+            className="text-3xl font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-4xl [letter-spacing:var(--heading-tracking)]"
             tabIndex={-1}
             itemProp="name"
           >
@@ -664,7 +668,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             {totalReviews > 0 ? (
               <a
                 href="#reviews"
-                className="text-sm text-[hsl(var(--accent))] underline underline-offset-2"
+                className="text-[13px] font-medium text-[hsl(var(--accent))] underline underline-offset-2 transition hover:opacity-90"
                 onClick={() => {
                   try {
                     logEvent({
@@ -686,15 +690,16 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             {typeof stock === 'number' ? (
               <span
                 className={cn(
-                  'rounded-full border px-2 py-1 text-xs',
+                  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium',
                   stock > 0
                     ? lowStock
-                      ? 'border-amber-300 text-amber-700 dark:text-amber-300'
-                      : 'border-emerald-300 text-emerald-700 dark:text-emerald-300'
-                    : 'border-red-300 text-red-600 dark:text-red-400'
+                      ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200'
+                      : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200'
+                    : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
                 )}
                 aria-live="polite"
               >
+                <span className="h-1.5 w-1.5 rounded-full bg-current opacity-80" />
                 {stock > 0
                   ? lowStock
                     ? `${t.lowStock} ${stock} ${t.lowStockSuffix}`
@@ -711,17 +716,17 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
                 aria-hidden="true"
               >
                 <div
-                  className="h-full bg-amber-500 transition-all"
+                  className="h-full rounded-full bg-amber-500 transition-all duration-300"
                   style={{ width: `${Math.min(100, ((stock || 0) / 5) * 100)}%` }}
                 />
               </div>
-              <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">{t.hurry}</p>
+              <p className="mt-1 text-[11px] font-medium text-amber-700 dark:text-amber-300">{t.hurry}</p>
             </div>
           ) : null}
 
           <div className="mt-4 flex flex-wrap items-end gap-3" aria-live="polite">
             <span
-              className="text-3xl font-extrabold text-brand"
+              className="text-2xl font-extrabold tracking-tight text-[hsl(var(--accent))] sm:text-3xl"
               aria-label={`Prix : ${formatPrice(price, { currency })}`}
               itemProp="offers"
               itemScope
@@ -734,21 +739,21 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             </span>
 
             {typeof oldPrice === 'number' && oldPrice > price ? (
-              <span className="line-through text-gray-400 dark:text-gray-500">
+              <span className="text-sm line-through text-gray-400 dark:text-gray-500">
                 {formatPrice(oldPrice, { currency })}
               </span>
             ) : null}
 
             {discount && amountSaved ? (
-              <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100/80 px-2.5 py-1 text-[12px] font-semibold text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 {t.save} {formatPrice(amountSaved, { currency })} ({discount}%)
               </span>
             ) : null}
 
             {quantity > 1 ? (
-              <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
-                Total ({quantity}×)&nbsp;:{' '}
-                <span className="font-semibold">{formatPrice(total, { currency })}</span>
+              <span className="ml-2 text-[13px] text-gray-600 dark:text-gray-400">
+                Total ({quantity}×)&nbsp;: <span className="font-semibold">{formatPrice(total, { currency })}</span>
               </span>
             ) : null}
           </div>
@@ -759,7 +764,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
 
           {description ? (
             <p
-              className="mt-6 whitespace-pre-line text-lg leading-relaxed text-gray-700 dark:text-gray-300"
+              className="mt-6 whitespace-pre-line text-[15px] leading-relaxed text-gray-700 dark:text-gray-300 sm:text-base"
               itemProp="description"
             >
               {description}
@@ -772,15 +777,18 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             </div>
           ) : null}
 
-          <div className="mt-6 grid gap-3 text-sm text-gray-600 dark:text-gray-400">
-            <div className="flex items-center gap-2">
-              <span aria-hidden="true">✅</span> {t.returns}
+          <div className="mt-6 grid gap-2.5 rounded-xl border border-white/10 bg-white/5 p-4 text-[13px] text-gray-600 dark:text-gray-400 dark:bg-black/20">
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400" aria-hidden="true">✓</span>
+              {t.returns}
             </div>
-            <div className="flex items-center gap-2">
-              <span aria-hidden="true">🔒</span> {t.secured}
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-600 dark:bg-sky-900/50 dark:text-sky-400" aria-hidden="true">🔒</span>
+              {t.secured}
             </div>
-            <div className="flex items-center gap-2">
-              <span aria-hidden="true">⚡</span> {t.shipping}
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400" aria-hidden="true">⚡</span>
+              {t.shipping}
             </div>
           </div>
         </div>
@@ -828,14 +836,14 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             />
           ) : (
             <div
-              className="inline-flex items-center justify-center rounded-lg border border-red-300 px-4 py-3 text-red-700 dark:text-red-300"
+              className="inline-flex flex-wrap items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300"
               role="alert"
             >
               {t.unavailable}
               <button
                 type="button"
                 onClick={() => toast(t.notifyToast)}
-                className="ml-3 underline underline-offset-2"
+                className="font-medium underline underline-offset-2 hover:no-underline"
               >
                 {t.notifyMe}
               </button>
@@ -860,19 +868,19 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             <button
               type="button"
               onClick={share}
-              className="mt-2 inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] dark:border-gray-700 dark:hover:bg-zinc-800"
+              className="mt-2 inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-[13px] font-medium transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 dark:bg-black/20 dark:hover:bg-black/30"
               aria-label={t.share}
               title={t.share}
             >
-              <IconShare />
+              <IconShare size={16} />
               <span>{t.share}</span>
             </button>
 
-            <div className="ml-auto mt-2 flex items-center gap-3 text-2xl text-token-text/60">
-              <span className="mr-1 text-xs font-medium">{t.payments}</span>
-              <FaCcVisa aria-hidden="true" title="Visa" className="transition-opacity hover:opacity-90" />
-              <FaCcMastercard aria-hidden="true" title="Mastercard" className="transition-opacity hover:opacity-90" />
-              <FaCcPaypal aria-hidden="true" title="PayPal" className="transition-opacity hover:opacity-90" />
+            <div className="ml-auto mt-2 flex items-center gap-3 text-xl text-token-text/50">
+              <span className="mr-1 text-[11px] font-medium uppercase tracking-wider text-token-text/60">{t.payments}</span>
+              <FaCcVisa aria-hidden="true" title="Visa" className="transition-opacity hover:opacity-80" />
+              <FaCcMastercard aria-hidden="true" title="Mastercard" className="transition-opacity hover:opacity-80" />
+              <FaCcPaypal aria-hidden="true" title="PayPal" className="transition-opacity hover:opacity-80" />
               <span className="sr-only">{t.acceptedPayments}</span>
             </div>
           </div>
@@ -882,9 +890,9 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           </div>
 
           <div className="mt-2 grid gap-2">
-            <details className="rounded-xl border border-gray-200 p-3 dark:border-gray-700">
-              <summary className="cursor-pointer font-semibold">{t.deliveryReturns}</summary>
-              <ul className="mt-2 list-disc pl-5 text-sm text-gray-600 dark:text-gray-400">
+            <details className="rounded-xl border border-white/10 bg-white/5 p-3.5 dark:bg-black/20">
+              <summary className="cursor-pointer text-[13px] font-semibold text-token-text">{t.deliveryReturns}</summary>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-[13px] text-gray-600 dark:text-gray-400">
                 <li>
                   {safeLocale === 'en'
                     ? 'Delivery within 48–72h in mainland France'
@@ -901,9 +909,9 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
               </ul>
             </details>
 
-            <details className="rounded-xl border border-gray-200 p-3 dark:border-gray-700">
-              <summary className="cursor-pointer font-semibold">{t.specs}</summary>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            <details className="rounded-xl border border-white/10 bg-white/5 p-3.5 dark:bg-black/20">
+              <summary className="cursor-pointer text-[13px] font-semibold text-token-text">{t.specs}</summary>
+              <p className="mt-2 text-[13px] text-gray-600 dark:text-gray-400">
                 {brand ? (
                   <>
                     {t.brand}&nbsp;: <strong>{brand}</strong>

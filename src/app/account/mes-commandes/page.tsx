@@ -33,23 +33,23 @@ async function OrdersContent() {
   if (!email) {
     return (
       <main
-        className="max-w-4xl mx-auto px-4 py-10"
+        className="mx-auto max-w-4xl px-4 py-10"
         aria-labelledby="orders-title"
         role="main"
       >
-        <h1 id="orders-title" className="text-2xl font-bold mb-6">
+        <h1 id="orders-title" className="mb-6 text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white">
           Mes commandes
         </h1>
         <div
-          className="rounded-xl border border-dashed border-gray-300 p-8 text-center dark:border-gray-700"
+          className="rounded-[1.5rem] border border-dashed border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 p-8 text-center dark:bg-[hsl(var(--surface))]/40"
           role="status"
         >
           <p className="text-gray-600 dark:text-gray-300">
-            Connectez-vous pour voir l’historique de vos commandes.
+            Connectez-vous pour voir l&apos;historique de vos commandes.
           </p>
           <Link
             href="/login"
-            className="mt-4 inline-block rounded-lg bg-accent px-4 py-2 font-semibold text-white hover:bg-accent/90 focus:outline-none focus:ring-4 focus:ring-accent/40"
+            className="mt-4 inline-flex items-center justify-center rounded-full bg-[hsl(var(--accent))] px-5 py-2.5 text-[15px] font-semibold text-slate-950 shadow-[0_10px_30px_rgba(20,184,166,0.3)] transition hover:shadow-[0_14px_40px_rgba(20,184,166,0.4)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)]"
           >
             Se connecter
           </Link>
@@ -70,11 +70,11 @@ async function OrdersContent() {
 
   return (
     <main
-      className="max-w-4xl mx-auto px-4 py-10"
+      className="mx-auto max-w-4xl px-4 py-10"
       aria-labelledby="orders-title"
       role="main"
     >
-      <h1 id="orders-title" className="text-2xl font-bold mb-6">
+      <h1 id="orders-title" className="mb-6 text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white">
         Mes commandes
       </h1>
       <OrderList orders={orders} />
@@ -84,16 +84,19 @@ async function OrdersContent() {
 
 function OrdersSkeleton() {
   return (
-    <div className="space-y-4" role="status" aria-live="polite">
-      {[...Array(2)].map((_, i) => (
-        <div
-          key={i}
-          className="animate-pulse rounded border border-gray-200 dark:border-zinc-800 p-4"
-        >
-          <div className="h-4 w-48 bg-gray-200 dark:bg-zinc-800 rounded mb-3" />
-          <div className="h-8 w-40 bg-gray-200 dark:bg-zinc-800 rounded" />
-        </div>
-      ))}
-    </div>
+    <main className="mx-auto max-w-4xl px-4 py-10" role="main" aria-busy="true">
+      <div className="mb-6 h-8 w-48 animate-pulse rounded-lg bg-[hsl(var(--surface-2))]" />
+      <div className="space-y-4" role="status" aria-live="polite">
+        {[...Array(2)].map((_, i) => (
+          <div
+            key={i}
+            className="animate-pulse rounded-[1.5rem] border border-white/10 bg-[hsl(var(--surface))]/80 p-5"
+          >
+            <div className="mb-3 h-4 w-48 rounded-lg bg-[hsl(var(--surface-2))]" />
+            <div className="h-8 w-40 rounded-lg bg-[hsl(var(--surface-2))]" />
+          </div>
+        ))}
+      </div>
+    </main>
   )
 }

@@ -317,7 +317,7 @@ export default function StickyCartSummary({
         className={cn(
           'md:hidden fixed bottom-0 left-0 right-0 z-[60] pointer-events-none',
           'backdrop-blur supports-[backdrop-filter]:bg-white/85 dark:supports-[backdrop-filter]:bg-zinc-900/85',
-          'border-t border-gray-200 dark:border-zinc-800 shadow-[0_-6px_20px_rgba(0,0,0,0.08)]',
+          'border-t border-[hsl(var(--border))] shadow-[var(--shadow-md)]',
           'pb-[env(safe-area-inset-bottom)]',
           className
         )}
@@ -330,14 +330,14 @@ export default function StickyCartSummary({
             <button
               type="button"
               onClick={() => setCollapsedPersist(!collapsed)}
-              className="rounded-md px-1 -mx-1 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] dark:text-gray-100"
+              className="rounded-md px-1 -mx-1 text-sm font-semibold text-[hsl(var(--text))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
               aria-expanded={!collapsed}
               aria-controls="sticky-cart-panel"
             >
               {collapsed ? tx('show') : tx('hide')} · {count} {count > 1 ? tx('items') : tx('item')}
             </button>
 
-            <div className="text-sm text-gray-800 dark:text-gray-100" aria-live="polite">
+            <div className="text-sm text-[hsl(var(--text))]" aria-live="polite">
               {tx('total')} : <strong className="ml-1">{formatPrice(payable)}</strong>
             </div>
           </div>
@@ -354,13 +354,13 @@ export default function StickyCartSummary({
                 className="overflow-hidden"
               >
                 <div className="px-4 pt-1">
-                  <div className="mb-1 flex items-center justify-between text-[11px] text-gray-600 dark:text-gray-300">
+                  <div className="mb-1 flex items-center justify-between text-[11px] text-token-text/70">
                     <span>{tx('free_shipping')}</span>
                     <span aria-hidden="true">{progress}%</span>
                   </div>
 
                   <div
-                    className="h-2 w-full overflow-hidden rounded-full bg-gray-200/70 dark:bg-zinc-800"
+                    className="h-2 w-full overflow-hidden rounded-full bg-[hsl(var(--surface-2))]"
                     aria-label={tx('free_shipping_progress')}
                     role="progressbar"
                     aria-valuemin={0}
@@ -382,8 +382,8 @@ export default function StickyCartSummary({
                     className={cn(
                       'mt-2 text-xs',
                       remaining > 0
-                        ? 'text-gray-600 dark:text-gray-300'
-                        : 'font-semibold text-green-600 dark:text-green-400'
+                        ? 'text-token-text/70'
+                        : 'font-semibold text-[hsl(var(--accent))]'
                     )}
                     aria-live="polite"
                   >
@@ -393,7 +393,7 @@ export default function StickyCartSummary({
                   </p>
                 </div>
 
-                <div className="space-y-1 px-4 pt-2 text-[13px] text-gray-700 dark:text-gray-300">
+                <div className="space-y-1 px-4 pt-2 text-[13px] text-token-text/80">
                   <Line label={tx('subtotal')} value={formatPrice(subtotal)} />
                   {discount > 0 && <Line label={tx('discount')} value={`- ${formatPrice(discount)}`} accent />}
                   <Line
@@ -401,7 +401,7 @@ export default function StickyCartSummary({
                     value={Number.isFinite(tax) && tax > 0 ? formatPrice(tax) : '—'}
                   />
                   <Line label={tx('shipping')} value={shippingDisplay} />
-                  <div className="my-2 border-t border-gray-300 dark:border-zinc-700" />
+                  <div className="my-2 border-t border-[hsl(var(--border))]" />
                   <Line label={tx('total')} value={formatPrice(payable)} bold />
                 </div>
 
@@ -409,7 +409,7 @@ export default function StickyCartSummary({
                   <Link
                     href={cartHref}
                     onClick={() => onCta('voir_panier')}
-                    className="inline-flex items-center justify-center rounded-lg border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] dark:border-zinc-700 dark:text-gray-100 dark:hover:bg-zinc-800"
+                    className="btn-outline inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
                     aria-label={tx('view_cart')}
                   >
                     {tx('view_cart')}
@@ -426,17 +426,17 @@ export default function StickyCartSummary({
                 </div>
 
                 <div className="px-4 pb-3 -mt-1">
-                  <ul className="flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
+                  <ul className="flex items-center justify-between text-[11px] text-token-text/70">
                     <li className="flex items-center gap-1.5">
-                      <IconLock className="text-gray-600 dark:text-gray-300" />
+                      <IconLock className="text-token-text/70" />
                       <span>{tx('secure_payment')}</span>
                     </li>
                     <li className="flex items-center gap-1.5">
-                      <IconRocket className="text-gray-600 dark:text-gray-300" />
+                      <IconRocket className="text-token-text/70" />
                       <span>{tx('fast_shipping')}</span>
                     </li>
                     <li className="flex items-center gap-1.5">
-                      <IconHeadset className="text-gray-600 dark:text-gray-300" />
+                      <IconHeadset className="text-token-text/70" />
                       <span>{tx('support')}</span>
                     </li>
                   </ul>
@@ -463,10 +463,10 @@ function Line({
 }) {
   return (
     <div className="flex items-center justify-between">
-      <span className={cn('text-gray-700 dark:text-gray-300', bold && 'font-semibold')}>{label}</span>
+      <span className={cn('text-token-text/80', bold && 'font-semibold')}>{label}</span>
       <span
         className={cn(
-          'tabular-nums text-gray-900 dark:text-white',
+          'tabular-nums text-[hsl(var(--text))]',
           bold && 'font-semibold',
           accent && 'font-semibold text-emerald-600 dark:text-emerald-400'
         )}

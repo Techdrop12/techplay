@@ -218,7 +218,7 @@ function LocaleSwitch({ pathname }: { pathname: string }) {
     <div
       role="group"
       aria-label={t.localeSwitcherAria}
-      className="inline-flex items-center rounded-full border border-token-border bg-token-surface/60 p-0.5"
+      className="inline-flex items-center rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 p-0.5"
     >
       {(['fr', 'en'] as const).map((lang) => {
         const active = locale === lang
@@ -474,11 +474,10 @@ export default function Header() {
       data-hidden={hidden ? 'true' : 'false'}
       data-scrolled={scrolled ? 'true' : 'false'}
       className={cn(
-        'fixed left-0 right-0 top-0 z-[80] w-full border-b backdrop-blur-md transition-[background-color,border-color,box-shadow,transform] motion-safe:duration-300 motion-safe:ease-out',
-        hidden ? '-translate-y-full' : 'translate-y-0',
-        scrolled
-          ? 'border-token-border bg-token-surface/95 shadow-lg shadow-token-text/5'
-          : 'border-transparent bg-token-surface/80'
+        'fixed left-0 right-0 top-0 z-[80] w-full border-b border-transparent backdrop-blur-xl supports-[backdrop-filter]:backdrop-blur-xl',
+        'bg-[hsl(var(--surface))]/80 transition-[background-color,border-color,box-shadow,transform] motion-safe:duration-300 motion-safe:ease-[var(--ease-smooth)]',
+        'data-[scrolled=true]:bg-[hsl(var(--surface))]/90 data-[scrolled=true]:border-[hsl(var(--border))]/60 data-[scrolled=true]:shadow-[0_4px_24px_rgba(0,0,0,0.06)] dark:data-[scrolled=true]:shadow-[0_8px_32px_rgba(0,0,0,0.35)]',
+        hidden ? '-translate-y-full' : 'translate-y-0'
       )}
     >
       <div className="container-app flex h-16 items-center justify-between gap-2 sm:gap-3 md:h-[4.5rem]">
@@ -521,7 +520,7 @@ export default function Header() {
             list="header-search-suggestions"
             className={cn(
               'w-full rounded-full border px-4 py-2.5 pr-12 text-sm',
-              'border-token-border bg-token-surface/70 placeholder:text-token-text/40',
+              'border-[hsl(var(--border))] bg-[hsl(var(--surface))]/70 placeholder:text-token-text/40',
               'focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/.30)]'
             )}
             autoComplete="off"
@@ -612,7 +611,7 @@ export default function Header() {
                     onBlur={() => closeCats(100)}
                     className={cn(
                       'absolute left-1/2 top-[calc(100%+10px)] z-50 w-[min(860px,92vw)] -translate-x-1/2 rounded-2xl border',
-                      'border-token-border bg-token-surface/90 shadow-2xl backdrop-blur',
+                      'border-[hsl(var(--border))] bg-[hsl(var(--surface))]/90 shadow-2xl backdrop-blur',
                       'transition-all duration-200',
                       catOpen
                         ? 'pointer-events-auto translate-y-0 opacity-100'
@@ -636,8 +635,8 @@ export default function Header() {
                               onBlur={() => smartPrefetchCancel(category.href)}
                               className={cn(
                                 'group flex items-center gap-3 rounded-xl border p-3 transition',
-                                'border-transparent bg-token-surface/80 shadow-sm',
-                                'hover:-translate-y-0.5 hover:border-[hsl(var(--accent)/.30)] hover:bg-token-surface hover:shadow-md'
+                                'border-transparent bg-[hsl(var(--surface))]/80 shadow-sm',
+                                'hover:-translate-y-0.5 hover:border-[hsl(var(--accent)/.30)] hover:bg-[hsl(var(--surface))] hover:shadow-md'
                               )}
                               data-gtm="header_mega_cat"
                             >
@@ -663,7 +662,7 @@ export default function Header() {
                       </ul>
 
                       <div className="md:col-span-1">
-                        <div className="h-full rounded-xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.10)] via-transparent to-token-surface p-4 shadow-md md:p-5">
+                        <div className="h-full rounded-xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.10)] via-transparent to-[hsl(var(--surface))] p-4 shadow-md md:p-5">
                           <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent))]/90">
                             {t.selection}
                           </p>
@@ -694,7 +693,7 @@ export default function Header() {
                               onFocus={() => smartPrefetchStart('/products')}
                               onBlur={() => smartPrefetchCancel('/products')}
                               role="menuitem"
-                              className="inline-flex items-center rounded-lg border border-token-border bg-token-surface px-3 py-1.5 text-sm font-semibold hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.30)]"
+                              className="inline-flex items-center rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-[13px] font-semibold hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.30)]"
                             >
                               {t.allProducts}
                             </Link>
@@ -766,7 +765,7 @@ export default function Header() {
             onPointerLeave={() => smartPrefetchCancel('/products?promo=1')}
             onFocus={() => smartPrefetchStart('/products?promo=1')}
             onBlur={() => smartPrefetchCancel('/products?promo=1')}
-            className="group hidden items-center gap-2 rounded-full border border-token-border bg-token-surface/60 px-3 py-1.5 text-sm font-medium text-token-text hover:bg-token-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)] xl:inline-flex"
+            className="group hidden items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 px-3 py-1.5 text-[13px] font-medium text-token-text hover:bg-[hsl(var(--surface))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)] xl:inline-flex"
             aria-label={t.deals.aria}
             title={t.deals.title}
             data-gtm="header_deals"

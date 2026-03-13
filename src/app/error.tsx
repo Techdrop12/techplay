@@ -23,29 +23,27 @@ export default function RootError({
   return (
     <main
       id="main"
-      className="container-app mx-auto max-w-2xl px-4 py-16 text-center"
+      className="container-app mx-auto max-w-xl px-4 py-20 text-center"
       role="main"
       aria-labelledby="error-title"
     >
-      <h1 id="error-title" className="text-2xl font-bold text-token-text">
-        Une erreur est survenue
-      </h1>
-      <p className="mt-2 text-sm text-token-text/70">{message}</p>
-      <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-        <button
-          type="button"
-          onClick={() => reset()}
-          className="btn btn-primary inline-flex min-h-[48px] items-center justify-center rounded-xl px-5 py-2.5"
-        >
-          Réessayer
-        </button>
-        <Link
-          href="/"
-          className="btn btn-outline inline-flex min-h-[48px] items-center justify-center rounded-xl px-5 py-2.5"
-          prefetch={false}
-        >
-          Retour à l&apos;accueil
-        </Link>
+      <div className="card p-8 shadow-[var(--shadow-lg)]">
+        <h1 id="error-title" className="text-xl font-bold text-token-text sm:text-2xl [letter-spacing:var(--heading-tracking)]">
+          Une erreur est survenue
+        </h1>
+        <p className="mt-2 text-[13px] text-token-text/70">{message}</p>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => reset()}
+            className="btn-premium inline-flex min-h-[48px] items-center justify-center rounded-full px-6 py-2.5 text-[15px] font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2"
+          >
+            Réessayer
+          </button>
+          <Link href="/" className="btn-outline inline-flex min-h-[48px] items-center justify-center rounded-full px-6 py-2.5 text-[15px] font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2" prefetch={false}>
+            Retour à l&apos;accueil
+          </Link>
+        </div>
       </div>
     </main>
   )

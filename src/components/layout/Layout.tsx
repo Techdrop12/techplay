@@ -190,7 +190,7 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
     <>
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-[max(0.5rem,env(safe-area-inset-top))] focus:z-[100] rounded-md bg-token-surface px-3 py-2 text-token-text shadow-soft focus-ring"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-[max(0.5rem,env(safe-area-inset-top))] focus:z-[100] rounded-xl bg-[hsl(var(--surface))] px-3 py-2 text-token-text focus-ring"
       >
         {localeStrings[locale].skipToContent}
       </a>
@@ -225,7 +225,7 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
         data-theme={theme}
         data-pathname={pathname}
         aria-label={localeStrings[locale].mainLabel}
-        className="relative min-h-[calc(var(--vh,1vh)*100)] bg-token-surface px-[max(0px,env(safe-area-inset-left))] pb-[max(0px,env(safe-area-inset-bottom))] pr-[max(0px,env(safe-area-inset-right))] pt-[var(--header-offset,4.5rem)] text-token-text transition-colors"
+        className="relative min-h-[calc(var(--vh,1vh)*100)] bg-token-surface px-[max(0px,env(safe-area-inset-left))] pb-[max(0px,env(safe-area-inset-bottom))] pr-[max(0px,env(safe-area-inset-right))] pt-[var(--header-offset,4.5rem)] text-token-text transition-colors page-entrance"
         style={{ opacity: 1, visibility: 'visible' }}
       >
         <Suspense

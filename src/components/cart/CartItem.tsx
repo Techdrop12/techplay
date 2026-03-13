@@ -76,7 +76,7 @@ export default function CartItem({ item }: CartItemProps) {
       animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
       exit={prefersReduced ? undefined : { opacity: 0, y: -10 }}
       transition={{ duration: 0.25 }}
-      className="group flex items-center gap-4 rounded-lg border bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-zinc-700 dark:bg-zinc-900"
+      className="card group flex items-center gap-4 rounded-[var(--radius-2xl)] p-4 shadow-[var(--shadow-sm)] transition-all hover:shadow-[var(--shadow-card-hover)]"
       role="listitem"
       aria-label={`Produit dans le panier : ${item.title}`}
       data-id={item._id}
@@ -85,7 +85,7 @@ export default function CartItem({ item }: CartItemProps) {
 
       <Link
         href={`/products/${item.slug}`}
-        className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+        className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
         aria-label={`Voir la fiche produit de ${item.title}`}
       >
         <Image
@@ -100,21 +100,21 @@ export default function CartItem({ item }: CartItemProps) {
       <div className="min-w-0 flex-1 space-y-1">
         <Link
           href={`/products/${item.slug}`}
-          className="block line-clamp-1 text-sm font-semibold text-gray-900 hover:underline focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 dark:text-white"
+          className="block line-clamp-1 text-[14px] font-semibold text-[hsl(var(--text))] transition hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded"
         >
           {item.title}
         </Link>
 
-        <p className="text-xs text-gray-500 dark:text-gray-400">
+        <p className="text-[12px] text-token-text/70">
           {formatPrice(item.price)} / unité
         </p>
 
-        <div className="mt-1 inline-flex items-center gap-2 rounded-md border border-gray-300 px-2 py-1 dark:border-zinc-700">
+        <div className="mt-1.5 inline-flex items-center gap-0 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-1.5 py-0.5">
           <button
             type="button"
             onClick={dec}
             disabled={item.quantity <= MIN_QTY}
-            className="rounded p-1 hover:bg-gray-100 disabled:opacity-40 dark:hover:bg-zinc-800"
+            className="rounded-lg p-1.5 transition hover:bg-white/50 disabled:opacity-40 dark:hover:bg-white/10"
             aria-label={`Diminuer la quantité de ${item.title}`}
           >
             <Minus className="h-4 w-4" aria-hidden="true" />
@@ -132,14 +132,14 @@ export default function CartItem({ item }: CartItemProps) {
               }
             }}
             aria-label={`Quantité pour ${item.title}`}
-            className="w-10 bg-transparent text-center text-sm outline-none"
+            className="w-10 bg-transparent text-center text-sm font-medium outline-none tabular-nums"
           />
 
           <button
             type="button"
             onClick={inc}
             disabled={item.quantity >= MAX_QTY}
-            className="rounded p-1 hover:bg-gray-100 disabled:opacity-40 dark:hover:bg-zinc-800"
+            className="rounded-lg p-1.5 transition hover:bg-white/50 disabled:opacity-40 dark:hover:bg-white/10"
             aria-label={`Augmenter la quantité de ${item.title}`}
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
@@ -149,7 +149,7 @@ export default function CartItem({ item }: CartItemProps) {
 
       <div className="flex flex-col items-end gap-2">
         <p
-          className="tabular-nums text-sm font-semibold text-gray-900 dark:text-white"
+          className="text-base font-extrabold tabular-nums tracking-tight text-[hsl(var(--accent))]"
           aria-label={`Total pour ${item.title} : ${formatPrice(lineTotal)}`}
         >
           {formatPrice(lineTotal)}
@@ -158,12 +158,12 @@ export default function CartItem({ item }: CartItemProps) {
         <button
           type="button"
           onClick={handleRemove}
-          className="rounded-lg p-2 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 dark:hover:bg-red-900/20 dark:focus:ring-offset-zinc-900"
+          className="rounded-xl p-2.5 transition hover:bg-red-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:hover:bg-red-900/25 dark:focus:ring-offset-[hsl(var(--surface))]"
           aria-label={`Supprimer ${item.title} du panier`}
           title={`Supprimer ${item.title}`}
         >
           <Trash2
-            className="h-5 w-5 text-red-600 transition-transform group-hover:scale-110"
+            className="h-5 w-5 text-red-600 transition-transform group-hover:scale-110 dark:text-red-400"
             aria-hidden="true"
           />
         </button>

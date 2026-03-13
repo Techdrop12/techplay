@@ -361,7 +361,7 @@ export default function ProductGallery({
           type="button"
           onClick={() => setLightboxOpen(true)}
           onKeyDown={onMainKeyDown}
-          className="relative w-full aspect-[4/3] md:aspect-square cursor-zoom-in rounded-2xl overflow-hidden shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="relative w-full aspect-[4/3] md:aspect-square cursor-zoom-in rounded-[1.5rem] overflow-hidden shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
           aria-label="Agrandir le média"
         >
           {/* Edge fade pour le relief visuel */}

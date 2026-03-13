@@ -254,14 +254,14 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           name="q"
           defaultValue={q}
           placeholder="Rechercher dans cette catégorie…"
-          className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent dark:border-gray-700 dark:bg-gray-900"
+          className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
           aria-label="Rechercher"
         />
 
         <select
           name="sort"
           defaultValue={sort}
-          className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent dark:border-gray-700 dark:bg-gray-900"
+          className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
           aria-label="Trier"
         >
           <option value="new">Nouveautés</option>
@@ -277,7 +277,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           inputMode="numeric"
           defaultValue={min ?? ''}
           placeholder="Prix min (€)"
-          className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent dark:border-gray-700 dark:bg-gray-900"
+          className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
           aria-label="Prix minimum"
           min={0}
         />
@@ -289,13 +289,13 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             inputMode="numeric"
             defaultValue={max ?? ''}
             placeholder="Prix max (€)"
-            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent dark:border-gray-700 dark:bg-gray-900"
+            className="w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
             aria-label="Prix maximum"
             min={0}
           />
           <button
             type="submit"
-            className="shrink-0 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent/90 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40"
+            className="shrink-0 rounded-full bg-[hsl(var(--accent))] px-5 py-2.5 text-[15px] font-semibold text-slate-950 shadow-[0_10px_30px_rgba(20,184,166,0.3)] transition hover:shadow-[0_14px_40px_rgba(20,184,166,0.4)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)]"
           >
             Filtrer
           </button>
@@ -305,7 +305,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           <div className="lg:col-span-4">
             <Link
               href={`/categorie/${category}`}
-              className="inline-block text-sm text-gray-600 hover:text-accent dark:text-gray-400"
+              className="inline-block text-[13px] text-gray-600 transition hover:text-[hsl(var(--accent))] dark:text-gray-400"
               aria-label="Réinitialiser les filtres"
             >
               Réinitialiser les filtres
@@ -320,13 +320,13 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         emptyMessage={`Aucun produit trouvé dans la catégorie "${displayCategory}".`}
       />
 
-      <nav aria-label="Pagination" className="mt-10 flex items-center justify-center gap-3 text-sm">
+      <nav aria-label="Pagination" className="mt-10 flex flex-wrap items-center justify-center gap-3 text-[13px]">
         {hasPrev ? (
-          <Link className="rounded-md border px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-800" href={buildUrl(page - 1)}>
+          <Link className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 transition hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2" href={buildUrl(page - 1)}>
             ← Précédent
           </Link>
         ) : (
-          <span className="rounded-md border px-3 py-1.5 opacity-40">← Précédent</span>
+          <span className="rounded-xl border border-[hsl(var(--border))] px-4 py-2 opacity-40">← Précédent</span>
         )}
 
         <span className="px-2">
@@ -334,11 +334,11 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         </span>
 
         {hasNext ? (
-          <Link className="rounded-md border px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-800" href={buildUrl(page + 1)}>
+          <Link className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 transition hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2" href={buildUrl(page + 1)}>
             Suivant →
           </Link>
         ) : (
-          <span className="rounded-md border px-3 py-1.5 opacity-40">Suivant →</span>
+          <span className="rounded-xl border border-[hsl(var(--border))] px-4 py-2 opacity-40">Suivant →</span>
         )}
       </nav>
 

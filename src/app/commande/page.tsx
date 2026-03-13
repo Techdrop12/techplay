@@ -140,14 +140,14 @@ export default function CheckoutPage() {
 
   return (
     <main
-      className="max-w-7xl mx-auto px-4 pt-28 pb-24 sm:px-6 lg:px-8"
+      className="mx-auto max-w-7xl px-4 pt-28 pb-24 sm:px-6 lg:px-8"
       aria-labelledby="checkout-title"
       role="main"
     >
-      <nav aria-label="Fil d’Ariane" className="mb-6 text-sm text-gray-500 dark:text-gray-400">
+      <nav aria-label="Fil d’Ariane" className="mb-6 text-[13px] text-token-text/60">
         <ol className="flex items-center gap-2">
           <li>
-            <Link href="/" className="hover:underline">
+            <Link href="/" className="transition hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded">
               Accueil
             </Link>
           </li>
@@ -162,12 +162,12 @@ export default function CheckoutPage() {
 
       <h1
         id="checkout-title"
-        className="mb-3 text-center text-4xl font-extrabold tracking-tight text-brand dark:text-white"
+        className="mb-2 text-center text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl"
       >
         Finaliser ma commande
       </h1>
 
-      <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+      <p className="text-center text-[13px] text-gray-600 dark:text-gray-400">
         {itemsCount} article{itemsCount > 1 ? 's' : ''} dans votre panier
       </p>
 
@@ -179,23 +179,23 @@ export default function CheckoutPage() {
 
       {isEmpty ? (
         <section
-          className="mt-12 text-center text-lg text-gray-600 dark:text-gray-400"
+          className="mt-12 rounded-[1.5rem] border border-white/10 bg-[hsl(var(--surface))]/60 py-12 text-center dark:bg-[hsl(var(--surface))]/40"
           role="alert"
           aria-live="polite"
         >
-          <p className="mb-6">Votre panier est vide.</p>
+          <p className="mb-6 text-lg text-gray-600 dark:text-gray-400">Votre panier est vide.</p>
 
-          <div className="flex items-center justify-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/products"
-              className="rounded-lg bg-accent px-5 py-2 font-semibold text-white shadow hover:bg-accent/90 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40"
+              className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] px-6 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_10px_30px_rgba(20,184,166,0.4)] transition hover:shadow-[0_14px_40px_rgba(20,184,166,0.5)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)]"
             >
               Parcourir les produits
             </Link>
 
             <Link
               href="/products/packs"
-              className="rounded-lg border border-gray-300 px-5 py-2 font-semibold hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent dark:border-zinc-700 dark:hover:bg-zinc-800"
+              className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-6 py-2.5 text-sm font-medium text-token-text transition hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
             >
               Voir les packs
             </Link>
@@ -210,30 +210,30 @@ export default function CheckoutPage() {
 
             <aside
               id="paiement"
-              className="sticky top-24 h-fit space-y-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-xl dark:border-zinc-700 dark:bg-zinc-900 scroll-mt-28"
+              className="sticky top-24 h-fit space-y-8 rounded-[1.5rem] border border-white/10 bg-[hsl(var(--surface))]/95 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.25)] dark:bg-[hsl(var(--surface))]/90 scroll-mt-28"
               aria-label="Résumé et paiement"
             >
               <CartSummary items={items} />
               <CheckoutForm />
-              <p className="text-center text-xs text-gray-500 dark:text-gray-400">
-                🔒 Paiement sécurisé · ⚡ Livraison 48–72 h · ↩ Retours gratuits 30 j
+              <p className="text-center text-[12px] text-gray-500 dark:text-gray-400">
+                Paiement sécurisé · Livraison 48–72 h · Retours gratuits 30 j
               </p>
             </aside>
           </div>
 
           <div className="fixed inset-x-0 bottom-0 z-40 lg:hidden">
-            <div className="mx-4 mb-4 rounded-xl border border-gray-200 bg-white/95 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:border-zinc-700 dark:bg-zinc-900/95">
-              <div className="flex items-center justify-between p-3">
-                <div className="text-sm">
+            <div className="mx-4 mb-4 rounded-2xl border border-white/10 bg-[hsl(var(--surface))]/95 shadow-[0_20px_60px_rgba(15,23,42,0.35)] backdrop-blur-xl">
+              <div className="flex items-center justify-between p-4">
+                <div className="text-[13px]">
                   <p className="font-semibold text-gray-900 dark:text-white">Sous-total</p>
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <p className="text-[15px] font-bold tabular-nums text-[hsl(var(--accent))]">
                     {new Intl.NumberFormat('fr-FR', { style: 'currency', currency }).format(subtotal)}
                   </p>
                 </div>
 
                 <a
                   href="#paiement"
-                  className="rounded-lg bg-accent px-4 py-2 font-semibold text-white shadow hover:bg-accent/90 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40"
+                  className="rounded-xl bg-[hsl(var(--accent))] px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_10px_30px_rgba(20,184,166,0.45)] transition hover:shadow-[0_14px_40px_rgba(20,184,166,0.55)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)]"
                   aria-label="Aller au paiement"
                 >
                   Payer

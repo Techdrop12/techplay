@@ -178,9 +178,10 @@ function ProductCard({
       aria-label={t.productAria}
       data-product-id={productId || product.slug}
       className={cn(
-        'group card card-hover relative rounded-3xl p-[1px] shadow-sm',
-        'transition-[box-shadow] duration-300 ease-[var(--ease-smooth)]',
-        'hover:shadow-[var(--glow-accent)]',
+        'group relative rounded-[1.75rem] p-[1px]',
+        'bg-gradient-to-b from-white/65 via-white/10 to-white/0 dark:from-white/15 dark:via-white/5 dark:to-transparent',
+        'shadow-[0_22px_70px_rgba(15,23,42,0.55)]',
+        'transition-all duration-300 ease-[var(--ease-smooth)] hover:shadow-[0_26px_90px_rgba(15,23,42,0.85)] hover:-translate-y-1',
         className
       )}
       whileHover={!prefersReducedMotion ? { y: -4 } : undefined}
@@ -193,9 +194,9 @@ function ProductCard({
 
       <div
         className={cn(
-          'relative overflow-hidden rounded-[inherit]',
-          'bg-[hsl(var(--surface))]/95 dark:bg-[hsl(var(--surface))]/95 supports-[backdrop-filter]:backdrop-blur',
-          'border border-[hsl(var(--border))]'
+          'relative overflow-hidden rounded-[1.55rem]',
+          'bg-[hsl(var(--surface))]/98 dark:bg-[hsl(var(--surface))]/92 supports-[backdrop-filter]:backdrop-blur-2xl',
+          'border border-white/60/60 dark:border-white/5'
         )}
       >
         <WishlistButton
@@ -213,75 +214,81 @@ function ProductCard({
         <Link
           href={href}
           prefetch={false}
-          className="block rounded-[inherit] focus:outline-none focus-glow rounded-3xl"
+          className="block rounded-[inherit] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/80"
           onClick={handleClick}
         >
-          <div className="relative aspect-[4/3] w-full bg-[hsl(var(--surface-2))]">
-            <Image
-              src={image}
-              alt={title}
-              fill
-              sizes="(min-width:1024px) 25vw, (min-width:640px) 33vw, 50vw"
-              className="object-cover transition-transform duration-500 ease-[var(--ease-smooth)] will-change-transform group-hover:scale-[1.06]"
-              priority={priority}
-              placeholder="blur"
-              blurDataURL={BLUR_DATA_URL}
-              quality={85}
-              onLoad={() => setImgLoaded(true)}
-              onError={() => setImgError(true)}
-              draggable={false}
-            />
-
-            {!imgLoaded && (
-              <div
-                className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-200/70 to-gray-100/40 dark:from-zinc-800/60 dark:to-zinc-900/40"
-                aria-hidden="true"
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[1.45rem] bg-[hsl(var(--surface-2))]">
+            <div className="absolute inset-0">
+              <Image
+                src={image}
+                alt={title}
+                fill
+                sizes="(min-width:1280px) 22vw, (min-width:1024px) 25vw, (min-width:640px) 33vw, 50vw"
+                className="object-cover transition-transform duration-500 ease-[var(--ease-smooth)] will-change-transform group-hover:scale-[1.06]"
+                priority={priority}
+                placeholder="blur"
+                blurDataURL={BLUR_DATA_URL}
+                quality={88}
+                onLoad={() => setImgLoaded(true)}
+                onError={() => setImgError(true)}
+                draggable={false}
               />
-            )}
 
-            <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-col gap-2">
+              {!imgLoaded && (
+                <div
+                  className="absolute inset-0 animate-pulse bg-gradient-to-br from-slate-200/75 via-slate-100/40 to-white/10 dark:from-slate-800/65 dark:via-slate-900/40 dark:to-slate-950/80"
+                  aria-hidden="true"
+                />
+              )}
+            </div>
+
+            <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-col gap-1.5 sm:left-4 sm:top-4">
               {product.isNew ? (
-                <span className="rounded-full bg-emerald-600 px-3 py-1 text-[11px] font-semibold text-white shadow-md shadow-black/10 ring-1 ring-black/10">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/95 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-950 shadow-[0_12px_35px_rgba(4,120,87,0.75)] ring-1 ring-emerald-900/40">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-900/90 shadow-[0_0_0_4px_rgba(187,247,208,0.75)]" />
                   {t.new}
                 </span>
               ) : null}
 
               {product.isBestSeller ? (
-                <span className="rounded-full bg-amber-400 px-3 py-1 text-[11px] font-semibold text-amber-950 shadow-md shadow-amber-900/20 ring-1 ring-amber-900/20">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-300/95 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-950 shadow-[0_12px_35px_rgba(120,53,15,0.6)] ring-1 ring-amber-900/35">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-700 shadow-[0_0_0_4px_rgba(253,230,138,0.75)]" />
                   {t.best}
                 </span>
               ) : null}
 
               {discountPct ? (
-                <span className="rounded-full bg-red-600 px-3 py-1 text-[11px] font-semibold text-white shadow-md shadow-red-900/25 ring-1 ring-red-900/30">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/95 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-red-50 shadow-[0_12px_35px_rgba(127,29,29,0.7)] ring-1 ring-red-900/40">
+                  <span className="h-1.5 w-1.5 rounded-full bg-red-200 shadow-[0_0_0_4px_rgba(248,113,113,0.75)]" />
                   -{discountPct}%
                 </span>
               ) : null}
 
               {lowStock ? (
-                <span className="rounded-full bg-amber-300/95 px-3 py-1 text-[11px] font-semibold text-amber-900 shadow-md shadow-amber-900/15 ring-1 ring-amber-800/20 dark:bg-amber-500/90 dark:text-amber-950">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-200/95 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-950 shadow-[0_10px_28px_rgba(180,83,9,0.35)] ring-1 ring-amber-800/35 dark:bg-amber-400/90 dark:text-amber-950">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-700 shadow-[0_0_0_4px_rgba(253,230,138,0.7)]" />
                   {t.lowStock}
                 </span>
               ) : null}
             </div>
 
             {ratingValue > 0 ? (
-              <div className="absolute right-3 top-3 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/95 px-2.5 py-1.5 text-xs shadow-md backdrop-blur-sm">
-                <span className="inline-flex items-center gap-1.5">
-                  <Star size={12} className="fill-amber-400 text-amber-400" />
+              <div className="absolute right-3 top-3 rounded-full border border-white/20 bg-black/50 px-2.5 py-1.5 text-[11px] shadow-[0_14px_40px_rgba(15,23,42,0.8)] backdrop-blur-xl sm:right-4 sm:top-4">
+                <span className="inline-flex items-center gap-1.5 text-amber-50">
+                  <Star size={12} className="fill-amber-400 text-amber-400 drop-shadow-[0_0_12px_rgba(251,191,36,0.8)]" />
                   <span className="font-semibold tabular-nums">{ratingValue.toFixed(1)}</span>
                 </span>
               </div>
             ) : null}
 
             {outOfStock ? (
-              <div className="absolute inset-0 grid place-items-center bg-black/45 text-sm font-semibold text-white">
+              <div className="absolute inset-0 grid place-items-center bg-black/55 text-xs font-semibold uppercase tracking-[0.18em] text-white/90">
                 {t.outOfStock}
               </div>
             ) : null}
 
             <div
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/30 to-transparent"
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/35 via-black/10 to-transparent"
               aria-hidden="true"
             />
           </div>
@@ -289,13 +296,13 @@ function ProductCard({
           <div className="p-4 sm:p-5">
             <div className="min-h-[3.25rem]">
               {product.brand || product.category ? (
-                <p className="mb-1 text-[11px] uppercase tracking-wide text-token-text/60">
+                <p className="mb-1 text-[11px] uppercase tracking-[0.18em] text-token-text/60">
                   {[product.brand, product.category].filter(Boolean).join(' · ')}
                 </p>
               ) : null}
 
               <h3
-                className="line-clamp-2 text-base font-semibold text-gray-900 dark:text-white sm:text-lg"
+                className="line-clamp-2 text-[15px] font-semibold text-gray-900 dark:text-white sm:text-[17px]"
                 title={title}
               >
                 {title}
@@ -303,14 +310,14 @@ function ProductCard({
             </div>
 
             {description ? (
-              <p className="mt-2 line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
+              <p className="mt-2 line-clamp-2 text-[13px] text-gray-600 dark:text-gray-400">
                 {description}
               </p>
             ) : null}
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
               {reviewsCount > 0 ? (
-                <p className="text-xs text-token-text/70">
+                <p className="text-[11px] text-token-text/70">
                   {ratingValue.toFixed(1)} · {reviewsCount} {t.reviews}
                 </p>
               ) : null}
@@ -337,11 +344,12 @@ function ProductCard({
 
               {hasDiscount ? (
                 <>
-                  <span className="text-sm text-gray-400 line-through dark:text-gray-500">
+                  <span className="text-xs text-gray-400 line-through dark:text-gray-500">
                     {formatPrice(oldPrice)}
                   </span>
 
-                  <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100/80 px-2 py-[3px] text-[11px] font-semibold text-emerald-800 shadow-[0_8px_24px_rgba(16,185,129,0.45)] dark:bg-emerald-900/40 dark:text-emerald-200">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(34,197,94,0.5)]" />
                     {t.save} {formatPrice(oldPrice - product.price)}
                   </span>
                 </>
@@ -349,13 +357,25 @@ function ProductCard({
             </div>
 
             <div className="mt-4 flex items-center justify-between gap-3">
-              <span className="text-sm font-semibold text-[hsl(var(--accent))]">
+              <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[hsl(var(--accent))]">
                 {t.seeProduct}
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  className="transition-transform duration-200 group-hover:translate-x-0.5"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M13.172 12L8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"
+                  />
+                </svg>
               </span>
 
               <span
                 className={cn(
-                  'rounded-full px-2.5 py-1 text-[11px] font-medium',
+                  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium',
                   outOfStock
                     ? 'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300'
                     : lowStock
@@ -363,6 +383,7 @@ function ProductCard({
                       : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
                 )}
               >
+                <span className="h-1.5 w-1.5 rounded-full bg-current/80" />
                 {outOfStock ? t.outOfStock : lowStock ? t.lowStock : t.inStock}
               </span>
             </div>

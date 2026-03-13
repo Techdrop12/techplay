@@ -46,6 +46,13 @@ const STR = {
     metaDescription:
       'Découvrez les meilleures offres TechPlay : accessoires high-tech, gaming, audio et packs exclusifs sélectionnés pour la performance, le style et la fiabilité.',
     heroAria: 'Carrousel des produits en vedette',
+    heroBadge: 'Nouvelle collection',
+    heroTitle: 'Un setup haut de gamme, sans compromis.',
+    heroSubtitle:
+      'Des accessoires et packs pensés pour la performance, la fiabilité et une esthétique premium — de la sélection au déballage.',
+    heroPrimaryCta: 'Découvrir les packs',
+    heroSecondaryCta: 'Voir tous les produits',
+    heroMeta: 'Livraison 48–72 h · Paiement sécurisé · Retours 30 j',
     catsKicker: 'Explorer',
     catsTitle: 'Catégories incontournables',
     catsSub: 'Des sélections ciblées pour trouver vite le bon setup.',
@@ -77,6 +84,13 @@ const STR = {
     metaDescription:
       'Discover the best TechPlay offers: high-tech accessories, gaming, audio gear and exclusive bundles selected for performance, style and reliability.',
     heroAria: 'Featured products carousel',
+    heroBadge: 'New collection',
+    heroTitle: 'A high-end setup, no compromises.',
+    heroSubtitle:
+      'Accessories and bundles curated for performance, reliability and a premium feel — from selection to unboxing.',
+    heroPrimaryCta: 'Discover bundles',
+    heroSecondaryCta: 'View all products',
+    heroMeta: '48–72 h delivery · Secure payment · 30-day returns',
     catsKicker: 'Explore',
     catsTitle: 'Must-have categories',
     catsSub: 'Curated selections to find the right setup faster.',
@@ -169,19 +183,17 @@ function SectionHeader({
   return (
     <header className={center ? 'mx-auto max-w-3xl text-center' : ''}>
       {kicker ? (
-        <p className="inline-block text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent))]">
-          <span className="relative inline-block pb-1 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:bg-[hsl(var(--accent))]/50 after:content-['']">
-            {kicker}
-          </span>
+        <p className="text-[var(--step-subtitle)] font-semibold uppercase tracking-[0.2em] text-[hsl(var(--accent))]">
+          {kicker}
         </p>
       ) : null}
 
-      <Tag className="mt-3 heading-display text-balance">
-        <span className="text-gradient">{title}</span>
+      <Tag className="mt-4 text-balance font-bold tracking-tight text-gray-900 dark:text-white [font-size:var(--step-4)] sm:[font-size:var(--step-5)] [letter-spacing:var(--heading-tracking)]">
+        {title}
       </Tag>
 
       {sub ? (
-        <p className="mt-4 max-w-2xl text-sm leading-relaxed text-token-text/70 sm:text-base [margin-inline:auto]">
+        <p className="mt-5 max-w-2xl text-[var(--step-0)] leading-relaxed text-token-text/75 [margin-inline:auto]">
           {sub}
         </p>
       ) : null}
@@ -201,13 +213,13 @@ function FeaturedCategories({ locale }: { locale: HomeLocale }) {
         {t.catsTitle}
       </h2>
 
-      <ul role="list" className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-6 stagger-children">
+      <ul role="list" className="mt-14 grid grid-cols-2 gap-5 sm:grid-cols-3 sm:gap-6 lg:grid-cols-6 stagger-children">
         {items.map((category) => (
           <li key={category.href}>
             <Link
               href={category.href}
               prefetch={false}
-              className="group card card-interactive block rounded-2xl border border-token-border bg-token-surface/90 p-5 shadow-sm backdrop-blur focus-ring sm:p-6"
+              className="group card card-interactive block rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6 shadow-sm backdrop-blur focus-ring sm:p-7"
               data-gtm="home_cat_card"
               data-cat={category.label}
               aria-label={`${category.label} — ${category.desc}`}
@@ -232,38 +244,34 @@ function SplitCTA({ locale }: { locale: HomeLocale }) {
   return (
     <section
       aria-label={t.ctaTitle}
-      className="motion-section section-spacing-sm relative overflow-hidden rounded-3xl border border-[hsl(var(--accent)/.25)] bg-gradient-to-br from-[hsl(var(--accent)/.14)] via-[hsl(var(--surface))] to-[hsl(var(--surface-2))] p-8 shadow-elevated sm:p-14 md:p-16"
+      className="motion-section section-spacing-sm relative overflow-hidden rounded-[var(--radius-3xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-10 shadow-sm sm:p-16 md:p-20"
       style={lazySectionStyle300}
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-[hsl(var(--accent)/.22)] blur-3xl"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-token-text/8 blur-3xl"
+        className="pointer-events-none absolute -right-40 -top-40 h-[28rem] w-[28rem] rounded-full bg-[hsl(var(--accent)/.06)] blur-3xl"
       />
 
-      <div className="relative grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
+      <div className="relative grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent))]">
+          <p className="text-[var(--step-subtitle)] font-semibold uppercase tracking-[0.2em] text-[hsl(var(--accent))]">
             {t.ctaOffer}
           </p>
 
-          <h3 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl md:text-[2.5rem]">
+          <h3 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl md:text-[2.5rem]">
             {t.ctaHeadline}
-            <span className="text-gradient">{t.ctaSpan}</span>
+            <span className="text-[hsl(var(--accent))]">{t.ctaSpan}</span>
           </h3>
 
-          <p className="mt-4 max-w-lg text-base leading-relaxed text-token-text/75 sm:text-lg">
+          <p className="mt-5 max-w-lg text-[var(--step-0)] leading-relaxed text-token-text/75">
             {t.ctaText}
           </p>
 
-          <div className="mt-8 flex flex-wrap gap-4">
+          <div className="mt-10 flex flex-wrap gap-4">
             <Link
               href="/products/packs"
               prefetch={false}
-              className="btn btn-premium btn-lg inline-flex items-center gap-2 rounded-xl focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
+              className="btn btn-premium btn-lg inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-[var(--step-0)] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)]"
               data-gtm="home_cta_packs"
             >
               {t.ctaPacks}
@@ -272,7 +280,7 @@ function SplitCTA({ locale }: { locale: HomeLocale }) {
             <Link
               href="/products"
               prefetch={false}
-              className="btn btn-outline btn-lg inline-flex items-center gap-2 rounded-xl focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
+              className="btn btn-outline btn-lg inline-flex items-center gap-2 rounded-full border-[hsl(var(--border))] px-8 py-3.5 text-[var(--step-0)] hover:bg-[hsl(var(--surface-2))] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.3)]"
               data-gtm="home_cta_products"
             >
               {t.ctaProducts}
@@ -282,7 +290,7 @@ function SplitCTA({ locale }: { locale: HomeLocale }) {
 
         <div
           aria-hidden
-          className="min-h-[200px] rounded-2xl border border-token-border bg-token-surface/70 shadow-elevated sm:min-h-[240px]"
+          className="min-h-[220px] rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface-2))]/50 sm:min-h-[280px]"
         />
       </div>
     </section>
@@ -331,11 +339,11 @@ function Testimonials({ locale }: { locale: HomeLocale }) {
         sub={t.testimonialsSub}
       />
 
-      <ul role="list" className="mt-12 grid gap-6 sm:grid-cols-3 stagger-children">
+      <ul role="list" className="mt-14 grid gap-6 sm:grid-cols-3 stagger-children">
         {items.map((item, index) => (
           <li
             key={`${item.name}-${index}`}
-            className="card card-hover relative overflow-hidden rounded-2xl border border-token-border bg-token-surface/90 p-6 shadow-sm sm:p-8"
+            className="card card-hover relative overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-8 shadow-sm sm:p-10"
           >
             <span aria-hidden className="absolute right-4 top-4 text-4xl font-serif leading-none text-[hsl(var(--accent)/.15)] select-none sm:right-6 sm:top-6">&ldquo;</span>
             <p className="relative text-pretty text-sm leading-relaxed text-token-text/90 sm:text-base">{item.text}</p>
@@ -407,7 +415,7 @@ export async function HomePageView({ locale }: { locale: HomeLocale }) {
       <ClientTrackingScript event="homepage_view" />
 
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-gradient-mesh" />
-      <div aria-hidden className="pointer-events-none fixed left-1/2 top-0 h-[480px] w-[720px] -translate-x-1/2 -translate-y-1/4 rounded-full bg-[hsl(var(--accent)/.18)] blur-3xl" />
+      <div aria-hidden className="pointer-events-none fixed left-1/2 top-0 h-[520px] w-[760px] -translate-x-1/2 -translate-y-1/3 rounded-[999px] bg-[hsl(var(--accent)/.22)] blur-3xl" />
 
       <main
         id="main"
@@ -416,19 +424,67 @@ export async function HomePageView({ locale }: { locale: HomeLocale }) {
         className="container-app mx-auto max-w-screen-xl scroll-smooth space-y-[var(--section-gap)] py-4 sm:py-6"
       >
         <section
-          aria-label={t.heroAria}
-          className="motion-section relative overflow-hidden rounded-3xl bg-[length:100%_100%] pt-2 sm:rounded-[2rem]"
           id="hero"
+          aria-label={t.heroAria}
+          className="motion-section relative overflow-hidden rounded-[var(--radius-3xl)] bg-[length:100%_100%]"
           style={{ backgroundImage: 'var(--gradient-hero)' }}
         >
-          <Suspense fallback={<div className="skeleton h-40 rounded-2xl sm:h-56 lg:h-72" />}>
-            <HeroCarousel />
-            <noscript>
-              <p>
-                <a href="/products">{t.noscriptProducts}</a>
+          <div className="container-app relative z-10 grid gap-12 px-6 py-14 sm:py-16 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1.1fr)] lg:items-center lg:gap-16">
+            <div className="space-y-7 sm:space-y-8">
+              <span className="text-[var(--step-subtitle)] font-semibold uppercase tracking-[0.2em] text-[hsl(var(--accent))]">
+                {t.heroBadge}
+              </span>
+
+              <h2 className="text-balance text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl md:text-[2.75rem] [line-height:var(--heading-leading)]">
+                {t.heroTitle}
+              </h2>
+
+              <p className="max-w-xl text-[var(--step-0)] leading-relaxed text-token-text/75">
+                {t.heroSubtitle}
               </p>
-            </noscript>
-          </Suspense>
+
+              <div className="flex flex-wrap items-center gap-4 pt-2">
+                <Link
+                  href="/products/packs"
+                  prefetch={false}
+                  className="btn btn-premium btn-lg inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-[var(--step-0)] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)]"
+                  data-gtm="home_hero_primary"
+                >
+                  {t.heroPrimaryCta}
+                </Link>
+
+                <Link
+                  href="/products"
+                  prefetch={false}
+                  className="btn btn-outline btn-lg inline-flex items-center gap-2 rounded-full border-[hsl(var(--border))] px-8 py-3.5 text-[var(--step-0)] hover:bg-[hsl(var(--surface-2))] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.3)]"
+                  data-gtm="home_hero_secondary"
+                >
+                  {t.heroSecondaryCta}
+                </Link>
+              </div>
+
+              <p className="pt-2 text-[var(--step-subtitle)] font-medium uppercase tracking-[0.2em] text-token-text/55">
+                {t.heroMeta}
+              </p>
+            </div>
+
+            <div className="relative">
+              <div className="pointer-events-none absolute -inset-4 rounded-[var(--radius-3xl)] bg-[radial-gradient(ellipse_80%_80%_at_50%_0%,hsl(var(--accent)/.08),transparent_60%)]" />
+
+              <div className="relative overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-black/80 shadow-[0_32px_80px_rgba(0,0,0,0.4)]">
+                <Suspense fallback={<div className="skeleton h-48 rounded-[var(--radius-2xl)] sm:h-60 lg:h-80" />}>
+                  <HeroCarousel overlayOpacity={0.4} textSize="lg" />
+                  <noscript>
+                    <p className="px-4 py-3 text-sm text-token-text/80">
+                      <a href="/products" className="underline underline-offset-4">
+                        {t.noscriptProducts}
+                      </a>
+                    </p>
+                  </noscript>
+                </Suspense>
+              </div>
+            </div>
+          </div>
         </section>
 
         <FeaturedCategories locale={locale} />

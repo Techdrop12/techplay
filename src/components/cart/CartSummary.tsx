@@ -140,7 +140,7 @@ export default function CartSummary({
   return (
     <section
       className={cn(
-        'space-y-5 bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-md border border-gray-200 dark:border-zinc-700',
+        'card space-y-5 p-6 shadow-[var(--shadow-lg)]',
         className
       )}
       role="region"
@@ -149,8 +149,8 @@ export default function CartSummary({
       {/* Live region pour lecteurs d’écran */}
       <p ref={srRef} className="sr-only" role="status" aria-live="polite" />
 
-      <h2 id="cart-summary-title" className="text-xl font-bold text-gray-900 dark:text-white">
-        🧾 Résumé de la commande
+      <h2 id="cart-summary-title" className="text-lg font-bold tracking-tight text-[hsl(var(--text))] sm:text-xl [letter-spacing:var(--heading-tracking)]">
+        Résumé de la commande
       </h2>
 
       {/* Progression livraison gratuite */}
@@ -158,8 +158,7 @@ export default function CartSummary({
         <FreeShippingBadge price={taxableBase} withProgress />
       </div>
 
-      {/* Lignes montants */}
-      <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+      <div className="space-y-2 text-[13px] text-token-text/80">
         <Row
           label={`Sous-total (${itemsCount} article${itemsCount > 1 ? 's' : ''})`}
           value={formatPrice(subtotal)}
@@ -173,7 +172,7 @@ export default function CartSummary({
         )}
         <Row label="TVA (est.)" value={taxRate > 0 ? formatPrice(tax) : '—'} />
         <Row label="Livraison" value={shipping === 0 ? 'Offerte' : formatPrice(shipping)} />
-        <hr className="border-gray-300 dark:border-zinc-700 my-3" />
+        <hr className="my-3 border-[hsl(var(--border))]" />
         <Row label="Total" value={formatPrice(total)} bold big />
       </div>
 
@@ -187,13 +186,13 @@ export default function CartSummary({
       {/* Zone code promo */}
       <div className="mt-4">
         {applied ? (
-          <div className="flex items-center justify-between rounded-lg border border-emerald-300/70 dark:border-emerald-700/40 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2 text-sm">
+          <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50/80 px-3.5 py-2.5 text-[13px] dark:border-emerald-800/50 dark:bg-emerald-900/20">
             <span className="font-semibold text-emerald-700 dark:text-emerald-300">
-              Code appliqué&nbsp;: {applied}
+              Code appliqué : {applied}
             </span>
             <button
               onClick={removeCoupon}
-              className="text-emerald-700/90 hover:underline dark:text-emerald-300"
+              className="rounded-lg px-2 py-1 font-medium text-emerald-700 transition hover:bg-emerald-100 dark:text-emerald-300 dark:hover:bg-emerald-800/40"
               aria-label="Retirer le code promo"
             >
               Retirer
@@ -214,15 +213,15 @@ export default function CartSummary({
               placeholder="Code promo"
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
-              className="flex-1 rounded-md border border-gray-300 dark:border-zinc-700 bg-white/90 dark:bg-zinc-900/80 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+              className="flex-1 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-3.5 py-2.5 text-[13px] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
               aria-describedby="coupon-help"
             />
             <button
               type="submit"
               disabled={!code.trim()}
               className={cn(
-                'rounded-md bg-accent text-white px-4 py-2 text-sm font-semibold shadow focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40',
-                !code.trim() ? 'opacity-50 cursor-not-allowed' : 'hover:bg-accent/90'
+                'btn-primary shrink-0 rounded-xl px-4 py-2.5 text-[13px] font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)]',
+                !code.trim() && 'cursor-not-allowed opacity-50'
               )}
               aria-label="Appliquer le code promo"
             >
@@ -230,7 +229,7 @@ export default function CartSummary({
             </button>
           </form>
         )}
-        <p id="coupon-help" className="mt-1 text-xs text-gray-500 dark:text-gray-400" role="status">
+        <p id="coupon-help" className="mt-1 text-xs text-token-text/70" role="status">
           {msg}
         </p>
       </div>
@@ -238,19 +237,20 @@ export default function CartSummary({
       {/* CTA principal : passer commande */}
       <Link
         href="/commande"
-        className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-4 py-3.5 font-bold text-white shadow-lg transition hover:opacity-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)]"
+        className="btn-premium mt-4 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-[15px] font-bold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2"
         aria-label="Passer commande et payer"
+        prefetch={false}
       >
         Passer commande
         <span aria-hidden="true">→</span>
       </Link>
 
-      <p className="text-center text-xs text-gray-500 dark:text-gray-400">
+      <p className="text-center text-[12px] text-token-text/70">
         Paiement sécurisé · Livraison offerte dès {formatPrice(shippingThreshold)}
       </p>
 
       {/* Note légale */}
-      <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
+      <p className="text-[11px] text-token-text/70 leading-relaxed">
         Montants estimatifs. Le calcul final des taxes et frais s’effectue au paiement.
         Livraison offerte dès {formatPrice(shippingThreshold)} après remise.
       </p>
@@ -273,12 +273,12 @@ function Row({
 }) {
   return (
     <div className="flex justify-between items-center">
-      <span className={cn('text-gray-700 dark:text-gray-300', bold && 'font-semibold', big && 'text-base')}>
+      <span className={cn('text-token-text/80', bold && 'font-semibold', big && 'text-base')}>
         {label}
       </span>
       <span
         className={cn(
-          'tabular-nums text-gray-900 dark:text-white',
+          'tabular-nums text-[hsl(var(--text))]',
           bold && 'font-semibold',
           big && 'text-lg',
           valueClass

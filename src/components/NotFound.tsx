@@ -21,9 +21,9 @@ export default function NotFound() {
 
   const popularLinks = [
     { href: '/', label: 'Accueil' },
-    { href: '/produit', label: 'Nos produits' },
+    { href: '/products', label: 'Nos produits' },
     { href: '/categorie/accessoires', label: 'Catégories' },
-    { href: '/pack', label: 'Packs' },
+    { href: '/products/packs', label: 'Packs' },
     { href: '/wishlist', label: 'Wishlist' },
     { href: '/contact', label: 'Contact' },
     { href: '/blog', label: 'Blog' },
@@ -35,25 +35,25 @@ export default function NotFound() {
         Détails de la page introuvable
       </h2>
 
-      <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
+      <p className="mt-3 text-[13px] text-gray-500 dark:text-gray-400">
         Chemin demandé :
-        <code className="ml-2 rounded bg-gray-100 dark:bg-zinc-900 px-2 py-1 text-[12px]">
+        <code className="ml-2 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-2 py-1 text-[12px]">
           {attempted}
         </code>
       </p>
 
-      <div className="mt-8 flex items-center justify-center gap-3">
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-3 text-white font-semibold shadow hover:bg-accent/90 focus:outline-none focus:ring-4 focus:ring-accent/50"
+          className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] px-5 py-3 text-[15px] font-semibold text-slate-950 shadow-[0_10px_30px_rgba(20,184,166,0.3)] transition hover:shadow-[0_14px_40px_rgba(20,184,166,0.4)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2"
         >
-          ← Retour à l’accueil
+          ← Retour à l&apos;accueil
         </Link>
 
         <button
           type="button"
           onClick={() => router.back()}
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-zinc-700 px-5 py-3 font-semibold hover:bg-gray-50 dark:hover:bg-zinc-800 focus:outline-none focus:ring-4 focus:ring-accent/30"
+          className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-5 py-3 text-[15px] font-semibold transition hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)] focus-visible:ring-offset-2"
           aria-label="Revenir à la page précédente"
         >
           ⟲ Page précédente
@@ -61,14 +61,14 @@ export default function NotFound() {
       </div>
 
       <nav
-        className="mt-10 grid grid-cols-2 sm:grid-cols-3 gap-3"
+        className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3"
         aria-label="Liens rapides"
       >
         {popularLinks.map((l) => (
           <Link
             key={l.href}
             href={l.href}
-            className="rounded-lg border border-gray-200 dark:border-zinc-800 px-4 py-3 text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-accent"
+            className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-3 text-[13px] font-medium transition hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
           >
             {l.label}
           </Link>
@@ -78,7 +78,7 @@ export default function NotFound() {
       <div className="mt-8">
         <a
           href={`mailto:support@techplay.example.com?subject=Lien brisé&body=URL introuvable : ${encodeURIComponent(attempted)}`}
-          className="text-xs text-gray-500 underline hover:text-gray-700 dark:hover:text-gray-300"
+          className="text-[12px] text-gray-500 underline transition hover:text-gray-700 dark:hover:text-gray-300"
         >
           Signaler ce lien brisé
         </a>

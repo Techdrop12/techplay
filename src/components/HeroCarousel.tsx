@@ -462,8 +462,8 @@ export default function HeroCarousel({
     <section
       ref={containerRef}
       className={cn(
-        'relative h-[60vh] w-full select-none overflow-hidden rounded-2xl bg-token-surface/60 shadow-2xl sm:h-[72vh] sm:rounded-3xl lg:h-[88vh]',
-        'will-change-transform touch-pan-y',
+        'relative w-full select-none overflow-hidden rounded-[1.75rem] bg-gradient-to-b from-black/85 via-black/75 to-black/90 shadow-[0_28px_80px_rgba(0,0,0,0.65)]',
+        'h-[58vh] sm:h-[70vh] lg:h-[82vh] will-change-transform touch-pan-y',
         className
       )}
       role="region"
@@ -489,11 +489,11 @@ export default function HeroCarousel({
       {edgeFade ? (
         <>
           <div
-            className="pointer-events-none absolute inset-y-0 left-0 z-[2] w-24 bg-gradient-to-r from-black/40 to-transparent dark:from-black/60"
+            className="pointer-events-none absolute inset-y-0 left-0 z-[2] w-24 bg-gradient-to-r from-black/55 via-black/10 to-transparent"
             aria-hidden="true"
           />
           <div
-            className="pointer-events-none absolute inset-y-0 right-0 z-[2] w-24 bg-gradient-to-l from-black/40 to-transparent dark:from-black/60"
+            className="pointer-events-none absolute inset-y-0 right-0 z-[2] w-24 bg-gradient-to-l from-black/55 via-black/10 to-transparent"
             aria-hidden="true"
           />
         </>
@@ -583,38 +583,41 @@ export default function HeroCarousel({
         <div className="overlay-hero absolute inset-0" />
         {showOverlay ? (
           <div
-            className="absolute inset-0"
-            style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity})` }}
+            className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/55 to-black/80"
+            style={overlayOpacity ? { opacity: overlayOpacity } : undefined}
           />
         ) : null}
         <div
-          className="absolute inset-0 opacity-60 mix-blend-overlay dark:mix-blend-screen"
+          className="absolute inset-0 opacity-70 mix-blend-overlay"
           style={{ background: 'var(--ring-conic)' }}
         />
       </div>
 
       {current?.badge ? (
-        <div className="absolute left-5 top-5 z-20">
-          <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-black shadow dark:bg-black/60 dark:text-white">
+        <div className="absolute left-5 top-5 z-20 sm:left-8 sm:top-7">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3.5 py-1.5 text-[11px] font-semibold tracking-[0.16em] text-black shadow-[0_12px_35px_rgba(15,23,42,0.42)] dark:bg-black/70 dark:text-white">
+            <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))] shadow-[0_0_0_4px_rgba(20,184,166,0.25)]" />
             {current.badge}
           </span>
         </div>
       ) : null}
 
       {showCounter && canNavigate ? (
-        <div className="glass absolute left-1/2 top-4 z-20 -translate-x-1/2 rounded-full px-3 py-1 text-xs font-semibold text-white">
-          {index + 1} / {total}
+        <div className="glass absolute left-1/2 top-4 z-20 -translate-x-1/2 rounded-full border border-white/20 bg-white/5 px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-white/80 backdrop-blur-xl">
+          {index + 1}{' '}
+          <span className="mx-1.5 h-[1px] w-6 align-middle bg-gradient-to-r from-white/0 via-white/60 to-white/0" />{' '}
+          {total}
         </div>
       ) : null}
 
       {current?.text || current?.ctaLabel ? (
-        <div className="absolute inset-0 z-10 grid place-items-center px-6 text-center sm:px-12">
-          <div className="mx-auto max-w-5xl">
+        <div className="absolute inset-0 z-10 grid place-items-center px-5 text-left sm:px-10">
+          <div className="mx-auto flex w-full max-w-5xl flex-col items-start gap-6 sm:gap-7 md:gap-8">
             {current?.text ? (
               <h2
                 className={cn(
-                  'font-extrabold tracking-tight text-white drop-shadow-xl',
-                  'bg-gradient-to-b from-white to-white/80 bg-clip-text text-transparent',
+                  'max-w-xl font-semibold tracking-tight text-white drop-shadow-[0_22px_55px_rgba(0,0,0,0.9)] sm:max-w-3xl',
+                  'bg-gradient-to-b from-white via-white to-white/85 bg-clip-text text-transparent',
                   TEXT_SIZES[textSize]
                 )}
               >
@@ -623,15 +626,15 @@ export default function HeroCarousel({
             ) : null}
 
             {current?.ctaLabel ? (
-              <div className="mt-6">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                 <Link
                   href={localizedHref(current.ctaLink)}
                   prefetch={false}
                   className={cn(
-                    'inline-flex items-center gap-2 rounded-2xl px-6 py-3 text-base font-semibold text-white sm:px-8 sm:text-lg',
-                    'bg-[hsl(var(--accent))] shadow-lg transition-all duration-200',
-                    'hover:scale-[1.03] hover:bg-[hsl(var(--accent)/.92)] active:scale-95',
-                    'focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.50)]'
+                    'inline-flex items-center gap-2.5 rounded-full px-6 py-2.5 text-sm font-semibold text-slate-950 sm:px-8 sm:py-3 sm:text-[15px]',
+                    'bg-[hsl(var(--accent))] shadow-[0_18px_45px_rgba(20,184,166,0.55)] transition-all duration-200',
+                    'hover:-translate-y-0.5 hover:shadow-[0_22px_65px_rgba(20,184,166,0.75)] active:translate-y-0 active:shadow-[0_10px_30px_rgba(20,184,166,0.55)]',
+                    'focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.55)] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900'
                   )}
                   aria-label={`${current.ctaLabel}${current.alt ? ` — ${current.alt}` : ''}`}
                   data-gtm="home_hero_cta"
@@ -640,8 +643,8 @@ export default function HeroCarousel({
                 >
                   {current.ctaLabel || t.ctaFallback}
                   <svg
-                    width="18"
-                    height="18"
+                    width="17"
+                    height="17"
                     viewBox="0 0 24 24"
                     aria-hidden="true"
                     className="opacity-90"
@@ -652,6 +655,11 @@ export default function HeroCarousel({
                     />
                   </svg>
                 </Link>
+                {current.alt ? (
+                  <p className="max-w-xs text-xs font-medium text-white/70 sm:max-w-sm sm:text-[13px]">
+                    {current.alt}
+                  </p>
+                ) : null}
               </div>
             ) : null}
           </div>
@@ -664,13 +672,20 @@ export default function HeroCarousel({
             type="button"
             aria-label={t.prev}
             className={cn(
-              'glass absolute left-2 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full text-white shadow-soft hover:bg-token-surface/80',
-              'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60 sm:left-4 sm:h-12 sm:w-12'
+              'group absolute left-3 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-black/30 text-white shadow-[0_10px_35px_rgba(15,23,42,0.65)] backdrop-blur-xl',
+              'hover:-translate-y-1 hover:bg-white/10 hover:border-white/40 sm:left-4 sm:h-11 sm:w-11',
+              'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60'
             )}
             data-gtm="hero_prev"
             onClick={() => runManualAction(prev)}
           >
-            <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              className="transition-transform duration-200 group-hover:-translate-x-0.5"
+            >
               <path fill="currentColor" d="M15.78 19.78L8 12l7.78-7.78l1.44 1.44L10.88 12l6.34 6.34z" />
             </svg>
           </button>
@@ -679,13 +694,20 @@ export default function HeroCarousel({
             type="button"
             aria-label={t.next}
             className={cn(
-              'glass absolute right-2 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full text-white shadow-soft hover:bg-token-surface/80',
-              'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60 sm:right-4 sm:h-12 sm:w-12'
+              'group absolute right-3 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-black/30 text-white shadow-[0_10px_35px_rgba(15,23,42,0.65)] backdrop-blur-xl',
+              'hover:-translate-y-1 hover:bg-white/10 hover:border-white/40 sm:right-4 sm:h-11 sm:w-11',
+              'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60'
             )}
             data-gtm="hero_next"
             onClick={() => runManualAction(next)}
           >
-            <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              className="transition-transform duration-200 group-hover:translate-x-0.5"
+            >
               <path fill="currentColor" d="M8.22 4.22L16 12l-7.78 7.78l-1.44-1.44L13.12 12L6.78 5.66z" />
             </svg>
           </button>
@@ -702,8 +724,8 @@ export default function HeroCarousel({
           aria-label={isPaused ? t.play : t.pause}
           aria-pressed={isPaused}
           className={cn(
-            'glass absolute right-3 top-3 z-20 rounded-full px-3 py-2 text-xs font-semibold text-white',
-            'hover:bg-token-surface/80 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60'
+            'absolute right-3 top-3 z-20 rounded-full border border-white/15 bg-black/40 px-3.5 py-2 text-[11px] font-medium text-white backdrop-blur-xl',
+            'hover:bg-white/10 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60'
           )}
           data-gtm="hero_toggle"
         >
@@ -716,7 +738,7 @@ export default function HeroCarousel({
 
       {effectiveAutoplay ? (
         <div
-          className="absolute bottom-6 left-1/2 z-20 h-1.5 w-[68%] max-w-3xl -translate-x-1/2 overflow-hidden rounded-full bg-white/25"
+          className="absolute bottom-6 left-1/2 z-20 h-[7px] w-[70%] max-w-3xl -translate-x-1/2 overflow-hidden rounded-full border border-white/15 bg-black/50 backdrop-blur-xl"
           role="presentation"
           aria-hidden="true"
           onClick={(e) => {
@@ -732,7 +754,7 @@ export default function HeroCarousel({
           style={progressClickable ? { cursor: 'pointer' } : undefined}
         >
           <motion.div
-            className="h-full rounded-full bg-[hsl(var(--accent))]"
+            className="h-full rounded-full bg-gradient-to-r from-[hsl(var(--accent))] via-sky-300 to-white"
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.1, ease: 'linear' }}
           />
@@ -741,7 +763,7 @@ export default function HeroCarousel({
 
       {showBullets && canNavigate ? (
         <nav className="absolute bottom-3 left-1/2 z-20 -translate-x-1/2 sm:hidden" aria-label={t.nav}>
-          <ul className="flex gap-3">
+          <ul className="flex items-center gap-3 rounded-full bg-black/45 px-3 py-1.5 shadow-[0_12px_40px_rgba(15,23,42,0.7)] backdrop-blur-xl">
             {slides.map((slide, i) => {
               const active = i === index
               const bulletLabel = t.goTo + (i + 1) + (slide.alt ? ` : ${slide.alt}` : '')
@@ -751,10 +773,10 @@ export default function HeroCarousel({
                   <button
                     type="button"
                     className={cn(
-                      'h-3.5 w-3.5 rounded-full transition',
+                      'h-2.5 w-2.5 rounded-full transition',
                       active
-                        ? 'scale-110 bg-white ring-2 ring-[hsl(var(--accent)/.70)] shadow'
-                        : 'bg-white/60 hover:bg-white'
+                        ? 'scale-110 bg-white shadow-[0_0_0_4px_rgba(20,184,166,0.55)]'
+                        : 'bg-white/40 hover:bg-white/80'
                     )}
                     aria-label={bulletLabel}
                     aria-current={active ? 'true' : undefined}
@@ -771,7 +793,7 @@ export default function HeroCarousel({
 
       {showThumbnails && canNavigate ? (
         <div className="absolute bottom-4 left-1/2 z-20 hidden -translate-x-1/2 sm:block">
-          <ul className="flex gap-3" aria-label={t.thumbs}>
+          <ul className="flex gap-3 rounded-full bg-black/40 px-3 py-2 shadow-[0_18px_60px_rgba(15,23,42,0.9)] backdrop-blur-2xl" aria-label={t.thumbs}>
             {slides.map((slide, i) => {
               const active = i === index
               const thumb = getImageSrc(slide).desktop
@@ -781,10 +803,10 @@ export default function HeroCarousel({
                   <button
                     type="button"
                     className={cn(
-                      'relative h-10 w-16 overflow-hidden rounded-lg border shadow sm:h-12 sm:w-20',
+                      'group relative h-10 w-16 overflow-hidden rounded-xl border border-white/15 shadow-[0_10px_35px_rgba(15,23,42,0.85)] sm:h-12 sm:w-20',
                       active
                         ? 'border-[hsl(var(--accent))] ring-2 ring-[hsl(var(--accent))]'
-                        : 'border-white/60 hover:border-white'
+                        : 'hover:border-white/70'
                     )}
                     aria-label={`${t.goTo}${i + 1}`}
                     aria-current={active ? 'true' : undefined}
@@ -797,7 +819,7 @@ export default function HeroCarousel({
                       alt=""
                       fill
                       sizes="80px"
-                      className="object-cover"
+                      className="object-cover brightness-[1.08] contrast-[1.05] transition-transform duration-300 group-hover:scale-105"
                       placeholder="blur"
                       blurDataURL={BLUR_DATA_URL}
                       draggable={false}

@@ -40,7 +40,7 @@ export default function PackDetails({ pack }: Props) {
       transition={{ duration: 0.4, ease: 'easeOut' }}
     >
       {/* Image */}
-      <div className="relative w-full aspect-square rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-md">
+      <div className="relative w-full aspect-square rounded-[1.5rem] overflow-hidden border border-[hsl(var(--border))] shadow-md">
         <Image
           src={safeProductImageUrl(image)}
           alt={`Image du pack ${title}`}
@@ -64,7 +64,7 @@ export default function PackDetails({ pack }: Props) {
 
         {/* Prix */}
         <div className="flex items-center gap-4">
-          <span className="text-brand text-2xl font-semibold">
+          <span className="text-2xl font-semibold text-[hsl(var(--accent))]">
             {formatPrice(price)}
           </span>
           {oldPrice && (

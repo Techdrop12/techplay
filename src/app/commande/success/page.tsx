@@ -18,44 +18,46 @@ export default function OrderSuccessPage({
   const mock = searchParams?.mock === '1'
 
   return (
-    <main className="container max-w-3xl mx-auto px-4 py-24 text-center" role="main" aria-labelledby="success-title">
-      <h1 id="success-title" className="text-3xl font-extrabold text-gray-900 dark:text-white">
-        Merci pour votre commande 🎉
-      </h1>
-      <p className="mt-3 text-lg text-gray-600 dark:text-gray-300">
-        Un email de confirmation a été envoyé à l&apos;adresse indiquée.
-      </p>
-      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Livraison sous 48–72 h · Suivi colis par email
-      </p>
+    <main className="mx-auto max-w-2xl px-4 py-20 sm:py-28" role="main" aria-labelledby="success-title">
+      <div className="rounded-[1.75rem] border border-white/10 bg-[hsl(var(--surface))]/95 p-8 text-center shadow-[0_24px_80px_rgba(15,23,42,0.2)] dark:bg-[hsl(var(--surface))]/90 sm:p-10">
+        <h1 id="success-title" className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+          Merci pour votre commande
+        </h1>
+        <p className="mt-3 text-[15px] text-gray-600 dark:text-gray-300">
+          Un email de confirmation a été envoyé à l&apos;adresse indiquée.
+        </p>
+        <p className="mt-1 text-[13px] text-gray-500 dark:text-gray-400">
+          Livraison sous 48–72 h · Suivi colis par email
+        </p>
 
-      <div className="mt-6 inline-block text-left rounded-xl border border-gray-200 dark:border-zinc-700 p-4 bg-white/60 dark:bg-zinc-900/40">
-        {mock ? (
-          <p className="text-sm">Mode démo : aucune transaction réelle.</p>
-        ) : sess ? (
-          <p className="text-sm">
-            Référence : <code className="font-mono text-xs" title={sess}>{sess.length > 12 ? `…${sess.slice(-12)}` : sess}</code>
-          </p>
-        ) : (
-          <p className="text-sm">Session non spécifiée.</p>
-        )}
-      </div>
+        <div className="mt-6 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 p-4 text-left">
+          {mock ? (
+            <p className="text-[13px] text-token-text/80">Mode démo : aucune transaction réelle.</p>
+          ) : sess ? (
+            <p className="text-[13px] text-token-text/80">
+              Référence : <code className="font-mono text-xs" title={sess}>{sess.length > 12 ? `…${sess.slice(-12)}` : sess}</code>
+            </p>
+          ) : (
+            <p className="text-[13px] text-token-text/80">Session non spécifiée.</p>
+          )}
+        </div>
 
-      <PurchaseTrackerClient sessionId={sess} mock={mock} />
+        <PurchaseTrackerClient sessionId={sess} mock={mock} />
 
-      <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-        <Link
-          href="/"
-          className="inline-flex min-h-[48px] items-center justify-center rounded-xl bg-[hsl(var(--accent))] px-5 py-3 font-semibold text-white shadow-lg hover:opacity-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)]"
-        >
-          Continuer mes achats
-        </Link>
-        <Link
-          href="/account/mes-commandes"
-          className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-gray-300 px-5 py-3 font-semibold text-gray-800 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] dark:border-zinc-600 dark:text-gray-200 dark:hover:bg-zinc-800"
-        >
-          Voir mes commandes
-        </Link>
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+          <Link
+            href="/"
+            className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-[hsl(var(--accent))] px-6 py-3 text-[15px] font-semibold text-slate-950 shadow-[0_14px_40px_rgba(20,184,166,0.5)] transition hover:shadow-[0_18px_50px_rgba(20,184,166,0.6)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2"
+          >
+            Continuer mes achats
+          </Link>
+          <Link
+            href="/account/mes-commandes"
+            className="inline-flex min-h-[48px] items-center justify-center rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-6 py-3 text-[15px] font-semibold text-token-text transition hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+          >
+            Voir mes commandes
+          </Link>
+        </div>
       </div>
     </main>
   )

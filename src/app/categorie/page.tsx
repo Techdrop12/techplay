@@ -40,14 +40,14 @@ export default function CategoryIndexPage() {
   })
 
   return (
-    <main className="max-w-4xl mx-auto px-4 py-16" aria-labelledby="categories-title" id="main">
+    <main className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8" aria-labelledby="categories-title" id="main">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }} />
 
-      <h1 id="categories-title" className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-2">
+      <h1 id="categories-title" className="mb-2 text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
         Catégories produits
       </h1>
-      <p className="text-lg text-gray-600 dark:text-gray-400 mb-10">
+      <p className="mb-10 text-[15px] text-gray-600 dark:text-gray-400">
         Choisissez une catégorie pour découvrir nos produits high-tech : audio, gaming, bureautique et plus.
       </p>
 
@@ -56,18 +56,18 @@ export default function CategoryIndexPage() {
           <Link
             key={cat.slug}
             href={`/categorie/${cat.slug}`}
-            className="group flex flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition hover:border-[hsl(var(--accent))] hover:shadow-md dark:border-zinc-700 dark:bg-zinc-900"
+            className="group flex flex-col rounded-[1.5rem] border border-white/10 bg-[hsl(var(--surface))]/95 p-6 shadow-[0_12px_40px_rgba(15,23,42,0.1)] transition hover:border-[hsl(var(--accent)/.4)] hover:shadow-[0_20px_60px_rgba(15,23,42,0.18)] dark:bg-[hsl(var(--surface))]/90"
           >
-            <span className="font-semibold text-gray-900 dark:text-white group-hover:text-[hsl(var(--accent))]">
+            <span className="font-semibold text-gray-900 transition group-hover:text-[hsl(var(--accent))] dark:text-white">
               {cat.label}
             </span>
-            <span className="mt-1 text-sm text-gray-500 dark:text-gray-400">{cat.description}</span>
+            <span className="mt-1 text-[13px] text-gray-500 dark:text-gray-400">{cat.description}</span>
           </Link>
         ))}
       </nav>
 
-      <p className="mt-10 text-center text-sm text-gray-500 dark:text-gray-400">
-        <Link href="/products" className="underline underline-offset-2 hover:text-[hsl(var(--accent))]">
+      <p className="mt-10 text-center text-[13px] text-gray-500 dark:text-gray-400">
+        <Link href="/products" className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline" prefetch={false}>
           Voir tout le catalogue
         </Link>
       </p>

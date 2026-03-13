@@ -29,14 +29,14 @@ const sizeClasses: Record<Size, string> = {
   sm: 'h-9 px-3 text-sm rounded-lg',
   md: 'h-10 px-3.5 text-base rounded-xl',
   lg: 'h-11 px-4 text-lg rounded-xl',
-  xl: 'h-12 px-4 text-[1.05rem] rounded-2xl',
+  xl: 'h-12 px-4 text-[1.05rem] rounded-[1.5rem]',
 }
 
 const variantClasses: Record<Variant, string> = {
   solid:
-    'bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 focus:bg-white dark:focus:bg-zinc-900',
+    'bg-[hsl(var(--surface))] border border-[hsl(var(--border))] focus:bg-[hsl(var(--surface))] focus:border-[hsl(var(--accent))] focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2',
   outline:
-    'bg-transparent border border-gray-300 dark:border-zinc-700',
+    'bg-transparent border border-[hsl(var(--border))] focus:border-[hsl(var(--accent))] focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2',
   ghost:
     'bg-transparent border border-transparent',
 }

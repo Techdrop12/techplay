@@ -109,8 +109,8 @@ export default function CartList({
       <span ref={srRef} className="sr-only" role="status" aria-live="polite" />
 
       {showControls && (
-        <div className="mb-2 flex items-center justify-between">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="mb-4 flex items-center justify-between">
+          <p className="text-[13px] font-medium text-token-text/70">
             {itemsCount} article{itemsCount > 1 ? 's' : ''}
           </p>
           <button
@@ -118,7 +118,7 @@ export default function CartList({
             onClick={handleClear}
             disabled={itemsCount === 0}
             aria-disabled={itemsCount === 0}
-            className="text-sm font-semibold text-red-600 disabled:text-red-400 disabled:cursor-not-allowed hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 rounded"
+            className="rounded-lg px-3 py-1.5 text-[12px] font-semibold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-red-900/20 dark:text-red-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
             aria-label="Vider le panier"
           >
             Vider le panier

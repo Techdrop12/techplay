@@ -82,19 +82,19 @@ export default function CartPageClient() {
 
   return (
     <main
-      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10"
+      className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8"
       role="main"
       aria-labelledby="cart-title"
     >
-      <nav aria-label="Fil d’Ariane" className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+      <nav aria-label="Fil d’Ariane" className="mb-6 text-[13px] text-token-text/60">
         <ol className="flex items-center gap-2">
           <li>
-            <Link href="/" className="hover:underline">
+            <Link href="/" className="transition hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded">
               Accueil
             </Link>
           </li>
-          <li aria-hidden="true">/</li>
-          <li aria-current="page" className="font-medium text-gray-700 dark:text-gray-200">
+          <li aria-hidden="true" className="text-token-text/40">/</li>
+          <li aria-current="page" className="font-medium text-token-text">
             Panier
           </li>
         </ol>
@@ -104,7 +104,7 @@ export default function CartPageClient() {
 
       <motion.h1
         id="cart-title"
-        className="text-3xl font-extrabold text-gray-900 dark:text-white text-center"
+        className="text-center text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl"
         initial={prefersReduced ? false : { opacity: 0, y: 6 }}
         animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
         transition={{ duration: 0.25 }}
@@ -112,30 +112,37 @@ export default function CartPageClient() {
         Mon panier{count > 0 ? ` (${count})` : ''}
       </motion.h1>
       {!isEmpty && (
-        <p className="mt-1 text-center text-sm text-gray-600 dark:text-gray-400">
+        <p className="mt-2 text-center text-[13px] text-gray-600 dark:text-gray-400">
           Livraison offerte dès {formatPrice(UI.FREE_SHIPPING_THRESHOLD)} · Paiement sécurisé · Retours gratuits sous 30 jours
         </p>
       )}
 
       {isEmpty ? (
         <motion.div
+          className="mt-8"
           initial={prefersReduced ? false : { opacity: 0, y: 10 }}
           animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
           <EmptyCart locale="fr" />
-          <div className="mt-6 text-center">
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/products"
-              className="inline-block text-sm text-white bg-black hover:bg-gray-800 transition px-4 py-2 rounded font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black dark:focus:ring-offset-zinc-900"
+              className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] px-6 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_10px_30px_rgba(20,184,166,0.4)] transition hover:shadow-[0_14px_40px_rgba(20,184,166,0.5)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)]"
             >
               Explorer les produits
+            </Link>
+            <Link
+              href="/products/packs"
+              className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-6 py-2.5 text-sm font-medium text-token-text transition hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+            >
+              Voir les packs
             </Link>
           </div>
         </motion.div>
       ) : (
         <motion.section
-          className="grid lg:grid-cols-3 gap-10"
+          className="mt-10 grid gap-8 lg:grid-cols-3 lg:gap-12"
           aria-label="Contenu du panier"
           initial={prefersReduced ? false : { opacity: 0 }}
           animate={prefersReduced ? undefined : { opacity: 1 }}

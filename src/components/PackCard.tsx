@@ -203,7 +203,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
 
   const mainImage = useMemo(() => {
     const first = images?.[0] ?? normalizeImageSrc(image)
-    const raw = imageError ? '/placeholder.png' : first || '/placeholder.png'
+    const raw = imageError ? '/og-image.jpg' : first || '/og-image.jpg'
     return safeProductImageUrl(raw)
   }, [image, imageError, images])
 
@@ -360,7 +360,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
     return {
       perspective: 1000,
       background:
-        'conic-gradient(from 140deg, hsl(var(--accent) / .38), transparent 35%, hsl(199 89% 48% / .22), transparent 70%, hsl(var(--accent) / .28))',
+        'linear-gradient(165deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.08) 40%, transparent 70%)',
     }
   }, [])
 
@@ -370,12 +370,14 @@ export default function PackCard({ pack, priority = false, className }: PackCard
       itemScope
       itemType="https://schema.org/Product"
       className={cn(
-        'group relative rounded-3xl p-[1px] shadow-sm transition-shadow hover:shadow-2xl',
+        'group relative rounded-[1.75rem] p-[1px]',
+        'shadow-[0_22px_70px_rgba(15,23,42,0.5)]',
+        'transition-all duration-300 ease-[var(--ease-smooth)] hover:shadow-[0_26px_90px_rgba(15,23,42,0.75)] hover:-translate-y-1',
         className
       )}
       style={articleStyle}
-      whileHover={!prefersReducedMotion ? { scale: 1.015 } : undefined}
-      transition={{ duration: prefersReducedMotion ? 0 : 0.22, ease: 'easeOut' }}
+      whileHover={!prefersReducedMotion ? { y: -4 } : undefined}
+      transition={{ duration: prefersReducedMotion ? 0 : 0.28, ease: [0.33, 1, 0.68, 1] }}
       onMouseMove={handleMouseMove}
       onMouseLeave={resetTilt}
       aria-describedby={ariaDescribedBy}
@@ -403,7 +405,9 @@ export default function PackCard({ pack, priority = false, className }: PackCard
 
       <motion.div
         className={cn(
-          'relative overflow-hidden rounded-[inherit] border border-white/40 bg-white/80 ring-1 ring-gray-200/60 backdrop-blur dark:border-white/10 dark:bg-zinc-900/80 dark:ring-gray-800/60'
+          'relative overflow-hidden rounded-[1.55rem]',
+          'border border-white/50 dark:border-white/10',
+          'bg-[hsl(var(--surface))]/98 dark:bg-[hsl(var(--surface))]/92 supports-[backdrop-filter]:backdrop-blur-2xl'
         )}
         style={
           !prefersReducedMotion
@@ -413,71 +417,75 @@ export default function PackCard({ pack, priority = false, className }: PackCard
       >
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
+          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
           style={{
             background:
-              'radial-gradient(700px 220px at 12% -10%, rgba(255,255,255,0.35), transparent 60%)',
+              'radial-gradient(800px 280px at 20% -5%, rgba(255,255,255,0.25), transparent 55%)',
           }}
         />
 
         <Link
           href={urlPath}
           prefetch={false}
-          className="block rounded-[inherit] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.6)]"
+          className="block rounded-[inherit] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.55)] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/80"
           onClick={handleClick}
           aria-label={t.readPack}
         >
           <div
-            className="relative aspect-[4/3] w-full bg-gray-100 sm:aspect-[16/9] dark:bg-zinc-800"
+            className="relative aspect-[4/3] w-full overflow-hidden rounded-[1.45rem] bg-[hsl(var(--surface-2))] sm:aspect-[16/9]"
             aria-busy={!imageLoaded}
           >
             <Image
               src={mainImage}
               alt={title}
               fill
-              sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
+              sizes="(min-width:1280px) 28vw, (min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
               priority={priority}
               placeholder="blur"
               blurDataURL={BLUR_DATA_URL}
-              quality={85}
+              quality={88}
               decoding="async"
               draggable={false}
               onLoad={() => setImageLoaded(true)}
               onError={() => setImageError(true)}
-              className="object-cover transition-transform duration-700 will-change-transform group-hover:scale-105"
+              className="object-cover transition-transform duration-500 ease-[var(--ease-smooth)] will-change-transform group-hover:scale-[1.06]"
             />
 
             {!imageLoaded ? (
               <div
-                className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-200/70 to-gray-100/40 dark:from-zinc-800/60 dark:to-zinc-900/40"
+                className="absolute inset-0 animate-pulse bg-gradient-to-br from-slate-200/75 via-slate-100/40 to-white/10 dark:from-slate-800/65 dark:via-slate-900/40 dark:to-slate-950/80"
                 aria-hidden="true"
               />
             ) : null}
 
-            <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-col gap-2">
+            <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-col gap-1.5 sm:left-4 sm:top-4">
               {isNew ? (
-                <span className="rounded-full bg-green-600 px-2.5 py-0.5 text-[11px] font-semibold text-white shadow">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/95 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-950 shadow-[0_12px_35px_rgba(4,120,87,0.7)] ring-1 ring-emerald-900/40">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-900/90" />
                   {t.new}
                 </span>
               ) : null}
 
               {isBestSeller ? (
-                <span className="rounded-full bg-yellow-400 px-2.5 py-0.5 text-[11px] font-semibold text-black shadow">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-300/95 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-950 shadow-[0_12px_35px_rgba(120,53,15,0.55)] ring-1 ring-amber-900/35">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-700" />
                   {t.bestSeller}
                 </span>
               ) : null}
 
               {typeof discountPercent === 'number' ? (
                 <span
-                  className="rounded-full bg-red-600 px-2.5 py-0.5 text-[11px] font-semibold text-white shadow"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-red-500/95 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-red-50 shadow-[0_12px_35px_rgba(127,29,29,0.7)] ring-1 ring-red-900/40"
                   aria-label={t.savings(discountPercent)}
                 >
+                  <span className="h-1.5 w-1.5 rounded-full bg-red-200" />
                   -{discountPercent}%
                 </span>
               ) : null}
 
               {lowStock ? (
-                <span className="rounded-full bg-amber-300/90 px-2.5 py-0.5 text-[11px] font-semibold text-amber-900 shadow">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-200/95 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-950 ring-1 ring-amber-800/35 dark:bg-amber-400/90 dark:text-amber-950">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-700" />
                   {t.lowStock}
                 </span>
               ) : null}
@@ -485,16 +493,16 @@ export default function PackCard({ pack, priority = false, className }: PackCard
 
             {hasRating && formattedRating ? (
               <div
-                className="absolute right-3 top-3 rounded-full border border-gray-200/60 bg-white/90 px-2.5 py-1 text-xs shadow backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/90"
+                className="absolute right-3 top-3 rounded-full border border-white/20 bg-black/50 px-2.5 py-1.5 text-[11px] shadow-[0_14px_40px_rgba(15,23,42,0.8)] backdrop-blur-xl text-amber-50 sm:right-4 sm:top-4"
                 aria-label={t.avgRating(formattedRating)}
               >
-                <span className="text-yellow-500">★</span> {formattedRating}
+                <span className="drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]">★</span> {formattedRating}
               </div>
             ) : null}
 
             {outOfStock ? (
               <div
-                className="absolute inset-0 grid place-items-center bg-black/45 text-sm font-semibold text-white"
+                className="absolute inset-0 grid place-items-center bg-black/55 text-xs font-semibold uppercase tracking-[0.18em] text-white/90"
                 aria-hidden="true"
               >
                 {t.outOfStock}
@@ -502,21 +510,21 @@ export default function PackCard({ pack, priority = false, className }: PackCard
             ) : null}
 
             <div
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/35 to-transparent"
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/35 via-black/10 to-transparent"
               aria-hidden="true"
             />
           </div>
 
           <div className="p-5 sm:p-6">
             <h3
-              className="line-clamp-2 text-lg font-semibold text-gray-900 sm:text-xl dark:text-white"
+              className="line-clamp-2 text-[15px] font-semibold text-gray-900 sm:text-[17px] dark:text-white"
               title={title}
             >
               {title}
             </h3>
 
             {items.length > 0 ? (
-              <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+              <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-token-text/60">
                 {t.included(items.length)}
               </p>
             ) : null}
@@ -526,7 +534,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
                 {itemChips.map((label, index) => (
                   <li
                     key={`${label}-${index}`}
-                    className="rounded-md border border-token-border bg-token-surface px-2 py-1 text-[11px] text-token-text/80"
+                    className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-2.5 py-1 text-[11px] text-token-text/85"
                   >
                     {label}
                   </li>
@@ -535,13 +543,13 @@ export default function PackCard({ pack, priority = false, className }: PackCard
             ) : null}
 
             {description ? (
-              <p className="mt-2 line-clamp-3 text-sm text-gray-600 dark:text-gray-400">
+              <p className="mt-2 line-clamp-3 text-[13px] text-gray-600 dark:text-gray-400">
                 {description}
               </p>
             ) : null}
 
             <div
-              className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 sm:mt-4"
+              className="mt-3 flex flex-wrap items-end gap-3 sm:mt-4"
               itemProp="offers"
               itemScope
               itemType="https://schema.org/Offer"
@@ -555,7 +563,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
               <meta itemProp="price" content={Math.max(0, Number(price || 0)).toFixed(2)} />
 
               <span
-                className="text-lg font-extrabold text-brand sm:text-xl"
+                className="text-lg font-extrabold tracking-tight text-[hsl(var(--accent))] sm:text-xl"
                 aria-label={`Prix : ${formatPrice(price)}`}
               >
                 {formatPrice(price)}
@@ -563,12 +571,11 @@ export default function PackCard({ pack, priority = false, className }: PackCard
 
               {typeof referencePrice === 'number' && referencePrice > price ? (
                 <>
-                  <span className="text-sm text-gray-400 line-through dark:text-gray-500">
+                  <span className="text-xs text-gray-400 line-through dark:text-gray-500">
                     {formatPrice(referencePrice)}
                   </span>
-
                   {typeof discountPercent === 'number' ? (
-                    <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100/80 px-2 py-[3px] text-[11px] font-semibold text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200">
                       -{discountPercent}%
                     </span>
                   ) : null}
@@ -577,11 +584,10 @@ export default function PackCard({ pack, priority = false, className }: PackCard
             </div>
 
             {typeof savingsEuro === 'number' && savingsEuro > 0 ? (
-              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px]">
                 <p className="font-medium text-emerald-700 dark:text-emerald-300">
                   {t.save} {formatPrice(savingsEuro)}
                 </p>
-
                 {typeof itemsValue === 'number' ? (
                   <span className="text-token-text/60">
                     {t.itemValue} : {formatPrice(itemsValue)}
@@ -589,6 +595,15 @@ export default function PackCard({ pack, priority = false, className }: PackCard
                 ) : null}
               </div>
             ) : null}
+
+            <div className="mt-4 flex items-center justify-between gap-3">
+              <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[hsl(var(--accent))]">
+                {t.readPack}
+                <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-0.5">
+                  <path fill="currentColor" d="M13.172 12L8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z" />
+                </svg>
+              </span>
+            </div>
 
             <FreeShippingBadge price={price} minimal className="mt-2" />
           </div>

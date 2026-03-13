@@ -45,19 +45,19 @@ export default async function PacksPage() {
             </Link>
             <Link
               href="/products?cat=casques"
-              className="rounded-xl border border-token-border bg-token-surface px-4 py-2 font-semibold hover:shadow focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
+              className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 text-[13px] font-semibold transition hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)] focus-visible:ring-offset-2"
             >
               Casques 🎧
             </Link>
             <Link
               href="/products?cat=claviers"
-              className="rounded-xl border border-token-border bg-token-surface px-4 py-2 font-semibold hover:shadow focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
+              className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 text-[13px] font-semibold transition hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)] focus-visible:ring-offset-2"
             >
               Claviers ⌨️
             </Link>
             <Link
               href="/products?cat=souris"
-              className="rounded-xl border border-token-border bg-token-surface px-4 py-2 font-semibold hover:shadow focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
+              className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 text-[13px] font-semibold transition hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)] focus-visible:ring-offset-2"
             >
               Souris 🖱️
             </Link>
@@ -68,7 +68,7 @@ export default async function PacksPage() {
           fallback={
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="skeleton h-64 rounded-2xl" aria-hidden />
+                <div key={i} className="h-64 animate-pulse rounded-[1.5rem] bg-[hsl(var(--surface))]/80" aria-hidden />
               ))}
             </div>
           }

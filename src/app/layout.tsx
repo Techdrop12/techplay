@@ -241,7 +241,7 @@ export default async function RootLayout({
         ) : null}
       </head>
 
-      <body className="min-h-screen bg-token-surface text-token-text antialiased dark:[color-scheme:dark]">
+      <body className="min-h-screen bg-[hsl(var(--bg))] text-token-text antialiased dark:[color-scheme:dark]">
         <SkipLink />
         {GTM_ID ? (
           <noscript

@@ -149,31 +149,31 @@ export default function ProductFilter({
   // --------- UI
   return (
     <section
-      className="mb-6 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 sm:p-5"
+      className="mb-6 rounded-[1.5rem] border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/95 p-4 sm:p-5"
       aria-label="Filtres produits"
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
         {/* Recherche */}
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">Recherche</span>
+          <span className="text-[13px] font-medium">Recherche</span>
           <input
             type="search"
             inputMode="search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Nom, mot-clé…"
-            className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
             aria-label="Rechercher un produit"
           />
         </label>
 
         {/* Catégorie */}
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">Catégorie</span>
+          <span className="text-[13px] font-medium">Catégorie</span>
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
             aria-label="Filtrer par catégorie"
           >
             <option value="">Toutes catégories</option>
@@ -187,7 +187,7 @@ export default function ProductFilter({
 
         {/* Prix min */}
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">Prix min (€)</span>
+          <span className="text-[13px] font-medium">Prix min (€)</span>
           <input
             type="number"
             min={0}
@@ -195,14 +195,14 @@ export default function ProductFilter({
             value={minPrice}
             onChange={(e) => setMinPrice(e.target.value)}
             placeholder="0"
-            className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
             aria-label="Prix minimum"
           />
         </label>
 
         {/* Prix max */}
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">Prix max (€)</span>
+          <span className="text-[13px] font-medium">Prix max (€)</span>
           <input
             type="number"
             min={0}
@@ -210,18 +210,18 @@ export default function ProductFilter({
             value={maxPrice}
             onChange={(e) => setMaxPrice(e.target.value)}
             placeholder="999"
-            className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
             aria-label="Prix maximum"
           />
         </label>
 
         {/* Note min */}
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">Note minimale</span>
+          <span className="text-[13px] font-medium">Note minimale</span>
           <select
             value={ratingMin}
             onChange={(e) => setRatingMin(e.target.value)}
-            className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
             aria-label="Filtrer par note minimale"
           >
             <option value="">Toutes</option>
@@ -233,11 +233,11 @@ export default function ProductFilter({
 
         {/* Tri */}
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">Trier par</span>
+          <span className="text-[13px] font-medium">Trier par</span>
           <select
             value={sort}
             onChange={(e) => setSort((e.target.value || 'new') as ProductFilterSort)}
-            className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
             aria-label="Trier les produits"
           >
             <option value="new">Nouveautés</option>
@@ -252,22 +252,22 @@ export default function ProductFilter({
       {/* Toggles + actions */}
       <div className="mt-3 flex flex-wrap items-center gap-3 justify-between">
         <div className="flex flex-wrap gap-4">
-          <label className="inline-flex items-center gap-2 text-sm">
+          <label className="inline-flex items-center gap-2 text-[13px]">
             <input
               type="checkbox"
               checked={onlyNew}
               onChange={(e) => setOnlyNew(e.target.checked)}
-              className="h-4 w-4 accent-accent"
+              className="h-4 w-4 accent-[hsl(var(--accent))]"
               aria-label="Afficher uniquement les nouveautés"
             />
             Nouveautés
           </label>
-          <label className="inline-flex items-center gap-2 text-sm">
+          <label className="inline-flex items-center gap-2 text-[13px]">
             <input
               type="checkbox"
               checked={onlyPromo}
               onChange={(e) => setOnlyPromo(e.target.checked)}
-              className="h-4 w-4 accent-accent"
+              className="h-4 w-4 accent-[hsl(var(--accent))]"
               aria-label="Afficher uniquement les articles en promotion"
             />
             En promo
@@ -275,13 +275,13 @@ export default function ProductFilter({
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span className="text-[12px] text-gray-500 dark:text-gray-400">
             {filtered.length} résultat{filtered.length > 1 ? 's' : ''}
           </span>
           <button
             type="button"
             onClick={reset}
-            className="rounded-md border border-gray-300 dark:border-gray-700 px-3 py-1.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
+            className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 text-[13px] font-medium transition hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
             aria-label="Réinitialiser tous les filtres"
           >
             Réinitialiser

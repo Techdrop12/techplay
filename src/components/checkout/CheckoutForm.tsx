@@ -385,11 +385,11 @@ export default function CheckoutForm() {
         {status}
       </p>
 
-      <div className="space-y-2">
-        <h3 id="checkout-form-title" className="text-lg font-semibold text-gray-900 dark:text-white">
+      <div className="space-y-1.5">
+        <h3 id="checkout-form-title" className="text-base font-bold tracking-tight text-gray-900 dark:text-white sm:text-lg">
           Coordonnées
         </h3>
-        <p className="text-sm text-token-text/70">
+        <p className="text-[13px] text-token-text/70">
           Renseignez vos informations pour finaliser la commande en toute sécurité.
         </p>
       </div>
@@ -426,12 +426,12 @@ export default function CheckoutForm() {
             aria-describedby={emailDescribedBy || undefined}
             data-gtm="checkout_email_input"
             className={cn(
-              'w-full rounded-xl border px-3 py-3 text-sm transition',
-              'bg-white dark:bg-zinc-800',
-              'focus:outline-none focus:ring-2',
+              'w-full rounded-xl border px-3.5 py-3 text-[13px] transition',
+              'bg-[hsl(var(--surface))]/80 dark:bg-[hsl(var(--surface))]/60',
+              'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]',
               errors.email
                 ? 'border-red-500 focus:ring-red-500'
-                : 'border-gray-300 dark:border-zinc-700 focus:ring-[hsl(var(--accent))]'
+                : 'border-[hsl(var(--border))] focus:ring-[hsl(var(--accent))]'
             )}
           />
           <p id={emailHintId} className="mt-1 text-[11px] text-token-text/60">
@@ -469,12 +469,12 @@ export default function CheckoutForm() {
             aria-describedby={addressDescribedBy || undefined}
             data-gtm="checkout_address_input"
             className={cn(
-              'w-full rounded-xl border px-3 py-3 text-sm transition resize-y min-h-[96px]',
-              'bg-white dark:bg-zinc-800',
-              'focus:outline-none focus:ring-2',
+              'min-h-[96px] w-full resize-y rounded-xl border px-3.5 py-3 text-[13px] transition',
+              'bg-[hsl(var(--surface))]/80 dark:bg-[hsl(var(--surface))]/60',
+              'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]',
               errors.address
                 ? 'border-red-500 focus:ring-red-500'
-                : 'border-gray-300 dark:border-zinc-700 focus:ring-[hsl(var(--accent))]'
+                : 'border-[hsl(var(--border))] focus:ring-[hsl(var(--accent))]'
             )}
           />
           <p id={addressHintId} className="mt-1 text-[11px] text-token-text/60">
@@ -499,14 +499,14 @@ export default function CheckoutForm() {
           />
         </div>
 
-        <div className="rounded-2xl border border-token-border bg-token-surface/70 p-4 text-sm">
+        <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 p-4 text-[13px]">
           <div className="flex items-center justify-between gap-3">
             <span className="text-token-text/70">Total estimé</span>
-            <span className="font-semibold text-token-text">
+            <span className="font-bold tabular-nums text-[hsl(var(--accent))]">
               {subtotal.toFixed(2)} {currency}
             </span>
           </div>
-          <div className="mt-1 text-xs text-token-text/60">
+          <div className="mt-1 text-[12px] text-token-text/60">
             {itemsCount} article{itemsCount > 1 ? 's' : ''} dans le panier
           </div>
         </div>
@@ -516,14 +516,14 @@ export default function CheckoutForm() {
           disabled={loading}
           aria-busy={loading ? 'true' : 'false'}
           data-gtm="checkout_submit_btn"
-          className="inline-flex w-full min-h-[48px] items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-4 py-3 font-semibold text-white shadow transition hover:bg-[hsl(var(--accent)/.92)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.35)] disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-4 py-3.5 text-[15px] font-bold text-slate-950 shadow-[0_14px_40px_rgba(20,184,166,0.5)] transition hover:shadow-[0_18px_50px_rgba(20,184,166,0.6)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
         >
           <IconCard />
           <span>{loading ? 'Redirection…' : 'Payer maintenant'}</span>
         </button>
 
         {lastError && (
-          <div className="rounded-xl border border-red-200 bg-red-50/80 p-3 dark:border-red-900/50 dark:bg-red-950/30" role="alert">
+          <div className="rounded-xl border border-red-200 bg-red-50/80 p-3.5 dark:border-red-900/50 dark:bg-red-950/30" role="alert">
             <p className="text-sm text-red-700 dark:text-red-300">{lastError}</p>
             <button
               type="button"

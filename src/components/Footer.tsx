@@ -460,15 +460,15 @@ export default function Footer({
 
   return (
     <footer
-      className="relative overflow-hidden border-t-2 border-token-border bg-token-surface text-token-text"
+      className="relative overflow-hidden border-t border-white/10 bg-gradient-to-b from-[hsl(var(--surface))] to-[hsl(var(--surface))]/95 text-token-text"
       role="contentinfo"
       aria-label={t.ariaFooter}
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_600px_at_80%_-20%,rgba(37,99,235,0.08),transparent),radial-gradient(800px_400px_at_10%_120%,rgba(16,185,129,0.06),transparent)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(1400px_700px_at_85%_-15%,rgba(20,184,166,0.06),transparent_50%),radial-gradient(900px_450px_at_5%_110%,rgba(16,185,129,0.05),transparent_45%)]"
       />
-      <div className="absolute inset-0 backdrop-blur-[2px]" aria-hidden="true" />
+      <div className="absolute inset-0 backdrop-blur-[1px]" aria-hidden="true" />
 
       <div className="relative mx-auto max-w-screen-xl px-6 pb-8 pt-14 sm:px-8">
         <h2 className="sr-only" id="footer-heading">
@@ -477,44 +477,44 @@ export default function Footer({
 
         <div className="grid grid-cols-1 gap-10 md:grid-cols-12">
           <div className="space-y-5 md:col-span-5">
-            <p className="text-xl font-extrabold tracking-tight">
-              <span className="text-brand dark:text-white">{companyName}</span>
+            <p className="text-xl font-extrabold tracking-tight sm:text-2xl">
+              <span className="text-token-text dark:text-white">{companyName}</span>
               <span className="text-[hsl(var(--accent))]">.</span>
             </p>
 
-            <p className="text-sm leading-relaxed text-token-text/70">{t.brandText}</p>
+            <p className="max-w-sm text-sm leading-relaxed text-token-text/70">{t.brandText}</p>
 
             {!compact ? (
               <>
-                <ul className="mt-3 grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
-                  <li className="flex items-center gap-2 rounded-lg border border-token-border bg-token-surface/80 px-3 py-2 backdrop-blur">
-                    <FaShieldAlt className="text-emerald-500" aria-hidden="true" />
-                    {t.badges.secure}
+                <ul className="mt-4 grid grid-cols-1 gap-2.5 text-sm sm:grid-cols-3">
+                  <li className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-token-text/90 shadow-[0_8px_24px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:bg-black/20">
+                    <FaShieldAlt className="text-emerald-500 shrink-0" aria-hidden="true" />
+                    <span className="text-[13px] font-medium">{t.badges.secure}</span>
                   </li>
-                  <li className="flex items-center gap-2 rounded-lg border border-token-border bg-token-surface/80 px-3 py-2 backdrop-blur">
-                    <FaTruck className="text-[hsl(var(--accent))]" aria-hidden="true" />
-                    {t.badges.shipping}
+                  <li className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-token-text/90 shadow-[0_8px_24px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:bg-black/20">
+                    <FaTruck className="text-[hsl(var(--accent))] shrink-0" aria-hidden="true" />
+                    <span className="text-[13px] font-medium">{t.badges.shipping}</span>
                   </li>
-                  <li className="flex items-center gap-2 rounded-lg border border-token-border bg-token-surface/80 px-3 py-2 backdrop-blur">
-                    <FaHeadset className="text-amber-400" aria-hidden="true" />
-                    {t.badges.support}
+                  <li className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-token-text/90 shadow-[0_8px_24px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:bg-black/20">
+                    <FaHeadset className="text-amber-400 shrink-0" aria-hidden="true" />
+                    <span className="text-[13px] font-medium">{t.badges.support}</span>
                   </li>
                 </ul>
 
-                <div className="flex items-center gap-3 pt-1 text-2xl text-token-text/60">
-                  <FaCcVisa aria-label="Visa" />
-                  <FaCcMastercard aria-label="Mastercard" />
-                  <FaCcPaypal aria-label="PayPal" />
+                <div className="flex items-center gap-4 pt-2 text-2xl text-token-text/50">
+                  <FaCcVisa aria-label="Visa" className="transition-opacity hover:opacity-80" />
+                  <FaCcMastercard aria-label="Mastercard" className="transition-opacity hover:opacity-80" />
+                  <FaCcPaypal aria-label="PayPal" className="transition-opacity hover:opacity-80" />
                 </div>
               </>
             ) : null}
 
-            <ul className="space-y-1 pt-2 text-sm">
+            <ul className="space-y-1.5 pt-2 text-[13px] text-token-text/80">
               {contact?.email ? (
                 <li>
                   <a
                     href={`mailto:${contact.email}`}
-                    className="rounded-sm transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+                    className="rounded-md transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
                   >
                     {contact.email}
                   </a>
@@ -525,7 +525,7 @@ export default function Footer({
                 <li>
                   <a
                     href={`tel:${contact.phone.replace(/\s+/g, '')}`}
-                    className="rounded-sm transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+                    className="rounded-md transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
                   >
                     {contact.phone}
                   </a>
@@ -545,8 +545,8 @@ export default function Footer({
 
           <div className="grid grid-cols-2 gap-8 md:col-span-7 sm:grid-cols-3">
             {navGroups.map((group) => (
-              <nav key={group.title} aria-label={group.title} className="space-y-2">
-                <h3 className="text-sm font-semibold uppercase tracking-wide text-token-text/60">
+              <nav key={group.title} aria-label={group.title} className="space-y-3">
+                <h3 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-token-text/60">
                   {group.title}
                 </h3>
 
@@ -560,6 +560,8 @@ export default function Footer({
 
                     const isCookie = label.toLowerCase().includes('cookie')
 
+                    const linkClass =
+                      'inline-flex items-center gap-2 rounded-md py-0.5 text-[13px] text-token-text/80 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]'
                     const content = (
                       <>
                         {group.title.toLowerCase().includes('légal') ||
@@ -577,7 +579,7 @@ export default function Footer({
                             href={href}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 rounded-sm text-token-text/80 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+                            className={linkClass}
                             onClick={(e) => onNavClick(group.title, label, href, e)}
                             data-gtm="footer_link_external"
                           >
@@ -588,7 +590,7 @@ export default function Footer({
                             href="#cookies"
                             role="button"
                             aria-controls="tp-consent-panel"
-                            className="inline-flex items-center gap-2 rounded-sm text-token-text/80 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+                            className={linkClass}
                             onClick={(e) => onNavClick(group.title, label, '#cookies', e)}
                             data-gtm="footer_link_cookies"
                           >
@@ -599,7 +601,7 @@ export default function Footer({
                             href={href}
                             prefetch={false}
                             aria-current={active ? 'page' : undefined}
-                            className="inline-flex items-center gap-2 rounded-sm text-token-text/80 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+                            className={linkClass}
                             onClick={(e) => onNavClick(group.title, label, href, e)}
                             data-gtm="footer_link_internal"
                           >
@@ -623,7 +625,7 @@ export default function Footer({
                   aria-busy={status === 'loading'}
                   aria-describedby={message ? messageId : undefined}
                 >
-                  <h3 className="text-sm font-semibold uppercase tracking-wide text-token-text/60">
+                  <h3 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-token-text/60">
                     {t.newsletterTitle}
                   </h3>
 
@@ -634,7 +636,7 @@ export default function Footer({
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder={t.newsletterPlaceholder}
-                      className="w-full rounded-md border border-token-border bg-token-surface/90 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
+                      className="w-full rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 text-[13px] text-token-text placeholder:text-token-text/50 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]"
                       aria-required="true"
                       aria-invalid={status === 'error' && !isValidEmail(email) ? 'true' : 'false'}
                       autoComplete="email"
@@ -646,7 +648,7 @@ export default function Footer({
                     <button
                       type="submit"
                       disabled={status === 'loading'}
-                      className="rounded-md bg-[hsl(var(--accent))] px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-[hsl(var(--accent)/.92)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)] disabled:opacity-60"
+                      className="shrink-0 rounded-xl bg-[hsl(var(--accent))] px-4 py-2.5 text-[13px] font-semibold text-slate-950 shadow-[0_10px_30px_rgba(20,184,166,0.4)] transition hover:shadow-[0_14px_40px_rgba(20,184,166,0.5)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2 disabled:opacity-60"
                       aria-label={t.newsletterButtonIdle}
                       data-gtm="footer_newsletter_submit"
                     >
@@ -704,13 +706,13 @@ export default function Footer({
                   ) : null}
                 </form>
 
-                <div className="flex items-center gap-6 text-xl text-token-text/60">
+                <div className="flex items-center gap-5 text-xl text-token-text/50">
                   <a
                     href="https://facebook.com/techplay"
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={t.social.facebook}
-                    className="rounded-sm transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+                    className="rounded-lg p-1.5 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
                     onClick={() => onSocialClick('facebook')}
                     data-gtm="footer_social_facebook"
                   >
@@ -722,7 +724,7 @@ export default function Footer({
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={t.social.twitter}
-                    className="rounded-sm transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+                    className="rounded-lg p-1.5 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
                     onClick={() => onSocialClick('twitter')}
                     data-gtm="footer_social_twitter"
                   >
@@ -734,7 +736,7 @@ export default function Footer({
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={t.social.instagram}
-                    className="rounded-sm transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+                    className="rounded-lg p-1.5 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
                     onClick={() => onSocialClick('instagram')}
                     data-gtm="footer_social_instagram"
                   >
@@ -748,26 +750,26 @@ export default function Footer({
 
         {children ? <div className="mt-10 text-center">{children}</div> : null}
 
-        <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-token-border pt-5 text-sm md:flex-row">
-          <p className="text-token-text/70">
+        <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-[13px] md:flex-row">
+          <p className="text-token-text/60">
             © {currentYear}{' '}
-            <span className="font-semibold text-token-text">{companyName}</span>. {t.rightsReserved}
+            <span className="font-semibold text-token-text/90">{companyName}</span>. {t.rightsReserved}
           </p>
 
-          <ul className="flex flex-wrap items-center gap-3 text-[12px] text-token-text/60">
-            <li className="inline-flex items-center gap-1">
-              <FaLock aria-hidden="true" /> Stripe · Visa · Mastercard · PayPal
+          <ul className="flex flex-wrap items-center justify-center gap-3 text-[12px] text-token-text/55">
+            <li className="inline-flex items-center gap-1.5">
+              <FaLock className="opacity-70" aria-hidden="true" /> Stripe · Visa · Mastercard · PayPal
             </li>
-            <li className="hidden text-token-text/40 sm:inline">•</li>
+            <li className="hidden text-token-text/40 sm:inline">·</li>
             <li>{t.recentLocale}</li>
-            <li className="hidden text-token-text/40 sm:inline">•</li>
+            <li className="hidden text-token-text/40 sm:inline">·</li>
             <li>
               <a
                 href="#cookies"
                 role="button"
                 aria-controls="tp-consent-panel"
                 onClick={(e) => openConsentManager(e)}
-                className="underline decoration-dotted underline-offset-2 hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+                className="underline decoration-dotted underline-offset-2 hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
               >
                 {t.cookiePrefs}
               </a>

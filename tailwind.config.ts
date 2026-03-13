@@ -35,16 +35,16 @@ const config: Config = {
         // ✅ DEFAULT piloté par --accent (réagit au thème). Steps 50..900 conservés.
         accent: {
           DEFAULT: 'hsl(var(--accent) / <alpha-value>)',
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
+          50: '#ecfdf8',
+          100: '#d1faf0',
+          200: '#a7f3e1',
+          300: '#6ee7cf',
+          400: '#34d3b4',
+          500: '#14b89a',
+          600: '#0d9488',
+          700: '#0f766e',
+          800: '#115e59',
+          900: '#134e4a',
         },
         success: '#16a34a',
         warning: '#eab308',
@@ -71,7 +71,7 @@ const config: Config = {
         soft: '0 6px 20px rgba(0,0,0,0.06)',
         elevated: '0 10px 30px rgba(0,0,0,0.10)',
         card: '0 1px 2px rgba(0,0,0,0.04), 0 6px 16px rgba(0,0,0,0.06)',
-        'glow-accent': '0 0 0 6px rgba(37,99,235,0.10)',
+        'glow-accent': '0 0 0 6px hsl(var(--accent) / 0.12), 0 0 24px hsl(var(--accent) / 0.08)',
       },
 
       transitionTimingFunction: {
@@ -85,7 +85,7 @@ const config: Config = {
       backgroundImage: {
         'radial-faded': 'radial-gradient(80% 60% at 50% 40%, transparent, rgba(0,0,0,.55))',
         'conic-accent':
-          'conic-gradient(from 140deg, rgba(59,130,246,.35), transparent 35%, rgba(14,165,233,.35), transparent 75%)',
+          'conic-gradient(from 140deg, hsl(var(--accent) / .35), transparent 35%, hsl(175 60% 45% / .3), transparent 75%)',
         'gloss-top': 'linear-gradient(to bottom, rgba(255,255,255,.45), transparent)',
         'grid-surface':
           'linear-gradient(var(--grid-color,rgba(0,0,0,.06)) 1px,transparent 1px),linear-gradient(90deg,var(--grid-color,rgba(0,0,0,.06)) 1px,transparent 1px)',

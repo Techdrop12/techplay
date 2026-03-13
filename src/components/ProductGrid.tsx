@@ -278,7 +278,7 @@ export default function ProductGrid({
 
   if (isEmpty && !isLoading) {
     return (
-      <div className="rounded-3xl border border-token-border bg-token-surface/70 px-6 py-12 text-center shadow-soft" role="status">
+      <div className="rounded-[1.5rem] border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/70 px-6 py-12 text-center" role="status">
         <p className="text-base font-semibold text-token-text">
           {emptyMessage || 'Aucun produit trouvé.'}
         </p>

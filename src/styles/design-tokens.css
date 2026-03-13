@@ -4,12 +4,12 @@
 :root {
   color-scheme: light dark;
 
-  /* ===================== Brand ===================== */
-  --brand: 222 47% 11%;
-  --accent: 221 83% 55%;
-  --accent-500: 221 83% 58%;
-  --accent-600: 223 77% 48%;
-  --accent-700: 224 71% 40%;
+  /* ===================== Brand — Teal / Émeraude premium ===================== */
+  --brand: 200 25% 12%;
+  --accent: 168 72% 42%;
+  --accent-500: 168 70% 45%;
+  --accent-600: 168 68% 36%;
+  --accent-700: 168 65% 30%;
   --accent-fg: 0 0% 100%;
 
   /* ==================== Semantic =================== */
@@ -17,31 +17,32 @@
   --warning: 38 92% 50%;
   --danger: 0 72% 51%;
 
-  /* ==================== Surfaces =================== */
-  --bg: 210 40% 98%;
+  /* ==================== Surfaces — Neutres légèrement chauds =================== */
+  --bg: 40 20% 98%;
   --surface: 0 0% 100%;
-  --surface-2: 210 40% 96%;
-  --border: 214 32% 91%;
-  --text: 222 47% 11%;
-  --text-muted: 215 20% 35%;
+  --surface-2: 40 18% 96%;
+  --border: 30 8% 90%;
+  --text: 200 26% 8%;
+  --text-muted: 210 14% 34%;
 
-  /* ===================== Radii ===================== */
-  --radius-sm: 0.375rem;
-  --radius: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-2xl: 1.25rem;
-  --radius-3xl: 1.75rem;
+  /* ===================== Radii — Apple-style soft ===================== */
+  --radius-sm: 0.5rem;
+  --radius: 0.875rem;
+  --radius-lg: 1.125rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
 
-  /* ===================== Shadows =================== */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 48px rgba(0, 0, 0, 0.12), 0 8px 20px rgba(0, 0, 0, 0.06);
-  --shadow-card-hover: 0 20px 40px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.04);
+  /* ===================== Shadows — Douces mais lisibles (équilibre premium) =================== */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px hsl(168 72% 42% / 0.02);
+  --shadow-md: 0 6px 24px rgba(0, 0, 0, 0.06), 0 2px 10px hsl(168 72% 42% / 0.04);
+  --shadow-lg: 0 14px 44px rgba(0, 0, 0, 0.07), 0 4px 18px hsl(168 72% 42% / 0.05);
+  --shadow-xl: 0 24px 56px rgba(0, 0, 0, 0.08), 0 8px 28px hsl(168 72% 42% / 0.05);
+  --shadow-card-hover: 0 28px 56px rgba(0, 0, 0, 0.07), 0 10px 28px hsl(168 72% 42% / 0.06);
 
   /* ===================== Focus ===================== */
   --ring-color: hsl(var(--accent));
-  --ring-offset: 2px;
+  --ring-offset: 3px;
+  --ring-width: 2px;
 
   /* ===================== Motion ==================== */
   --ease-out: cubic-bezier(0.19, 1, 0.22, 1);
@@ -75,61 +76,64 @@
     ui-sans-serif,
     system-ui;
 
-  --step--1: clamp(0.86rem, 0.83rem + 0.15vw, 0.95rem);
-  --step-0: clamp(1rem, 0.98rem + 0.22vw, 1.1rem);
-  --step-1: clamp(1.15rem, 1.1rem + 0.35vw, 1.38rem);
-  --step-2: clamp(1.35rem, 1.25rem + 0.55vw, 1.72rem);
-  --step-3: clamp(1.62rem, 1.45rem + 0.85vw, 2.15rem);
-  --step-4: clamp(1.94rem, 1.7rem + 1.25vw, 2.69rem);
-  --step-5: clamp(2.33rem, 2rem + 1.85vw, 3.36rem);
-  --step-display: clamp(2.5rem, 4vw + 1.5rem, 4rem);
-  --heading-tracking: -0.03em;
-  --display-tracking: -0.04em;
+  --step--1: clamp(0.875rem, 0.84rem + 0.15vw, 0.975rem);
+  --step-0: clamp(1.0625rem, 1rem + 0.25vw, 1.15rem);
+  --step-1: clamp(1.2rem, 1.12rem + 0.4vw, 1.45rem);
+  --step-2: clamp(1.45rem, 1.3rem + 0.6vw, 1.85rem);
+  --step-3: clamp(1.75rem, 1.5rem + 1vw, 2.25rem);
+  --step-4: clamp(2.1rem, 1.8rem + 1.4vw, 2.85rem);
+  --step-5: clamp(2.5rem, 2.2rem + 1.8vw, 3.5rem);
+  --step-display: clamp(2.75rem, 4.5vw + 1.5rem, 4.25rem);
+  --heading-tracking: -0.04em;
+  --display-tracking: -0.05em;
+  --step-subtitle: clamp(0.925rem, 0.88rem + 0.2vw, 1.05rem);
+  --body-leading: 1.65;
+  --heading-leading: 1.15;
 
-  /* ===================== Layout ==================== */
-  --container-max: 1280px;
-  --container-narrow: 720px;
+  /* ===================== Layout — Generous whitespace (Apple) ==================== */
+  --container-max: 1320px;
+  --container-narrow: 760px;
   --header-offset: 4.5rem;
-  --section-gap: clamp(3.5rem, 7vw, 6rem);
-  --section-gap-sm: clamp(2.5rem, 5vw, 4rem);
-  --space-card: clamp(1rem, 2vw, 1.5rem);
-  --space-section-inline: clamp(1rem, 4vw, 2rem);
+  --section-gap: clamp(4.5rem, 10vw, 8rem);
+  --section-gap-sm: clamp(3rem, 6vw, 5rem);
+  --space-card: clamp(1.25rem, 2.5vw, 1.75rem);
+  --space-section-inline: clamp(1.25rem, 5vw, 2.5rem);
 
   /* ==================== Selection ================== */
   --selection-bg: hsl(var(--accent) / 0.18);
   --selection-fg: hsl(var(--text));
 
-  /* ==================== Gradients ================== */
+  /* ==================== Gradients — Teal / émeraude ================== */
   --ring-conic: conic-gradient(
     from 140deg,
-    hsl(var(--accent) / 0.45),
+    hsl(var(--accent) / 0.4),
     transparent 40%,
-    hsl(199 89% 48% / 0.35),
+    hsl(175 60% 45% / 0.3),
     transparent 70%
   );
   --overlay-hero: radial-gradient(
     80% 60% at 50% 40%,
     transparent,
-    rgba(0, 0, 0, 0.55)
+    rgba(0, 0, 0, 0.5)
   );
   --gradient-accent: linear-gradient(
     135deg,
     hsl(var(--accent)) 0%,
-    hsl(var(--accent-700)) 100%
+    hsl(168 65% 32%) 100%
   );
   --gradient-accent-soft: linear-gradient(
     135deg,
-    hsl(var(--accent) / 0.12) 0%,
+    hsl(var(--accent) / 0.14) 0%,
     hsl(var(--accent-700) / 0.06) 100%
   );
-  --gradient-mesh: radial-gradient(ellipse 80% 50% at 50% -20%, hsl(var(--accent) / 0.15), transparent),
-    radial-gradient(ellipse 60% 40% at 100% 0%, hsl(var(--accent) / 0.08), transparent),
-    radial-gradient(ellipse 60% 40% at 0% 0%, hsl(var(--accent) / 0.06), transparent);
-  --glow-accent: 0 0 0 1px hsl(var(--accent) / 0.2), 0 0 32px hsl(var(--accent) / 0.12);
-  --glow-accent-strong: 0 0 0 1px hsl(var(--accent) / 0.35), 0 0 24px hsl(var(--accent) / 0.25);
-  --gradient-hero: radial-gradient(ellipse 100% 80% at 50% -10%, hsl(var(--accent) / 0.2), transparent 55%),
-    radial-gradient(ellipse 80% 50% at 80% 50%, hsl(var(--accent) / 0.08), transparent 50%),
-    radial-gradient(ellipse 60% 40% at 10% 80%, hsl(var(--accent) / 0.06), transparent 45%);
+  --gradient-mesh: radial-gradient(ellipse 90% 60% at 50% -20%, hsl(var(--accent) / 0.08), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 105% 0%, hsl(var(--accent) / 0.04), transparent 50%),
+    radial-gradient(ellipse 70% 50% at -5% 0%, hsl(var(--accent) / 0.04), transparent 50%);
+  --glow-accent: 0 0 0 1px hsl(var(--accent) / 0.2), 0 0 36px hsl(var(--accent) / 0.1);
+  --glow-accent-strong: 0 0 0 1px hsl(var(--accent) / 0.35), 0 0 28px hsl(var(--accent) / 0.2);
+  --gradient-hero: radial-gradient(ellipse 100% 80% at 50% -10%, hsl(var(--accent) / 0.18), transparent 55%),
+    radial-gradient(ellipse 80% 50% at 80% 50%, hsl(var(--accent) / 0.07), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 10% 80%, hsl(var(--accent) / 0.05), transparent 45%);
 
   /* ==================== Elevation ================== */
   --elev-c: 0 0% 0%;
@@ -138,34 +142,34 @@
   --elev-a3: 0.1;
 
   /* ============= Advanced color opt-ins ============ */
-  --accent-p3: 0.25 0.54 1;
-  --accent-oklch: 0.7 0.15 258;
+  --accent-p3: 0.45 0.55 0.65;
+  --accent-oklch: 0.65 0.12 180;
 }
 
 .dark {
-  --bg: 222 47% 5%;
-  --surface: 222 47% 7%;
-  --surface-2: 222 47% 10%;
-  --border: 222 16% 18%;
-  --text: 210 40% 96%;
-  --text-muted: 215 16% 65%;
+  --bg: 215 28% 6%;
+  --surface: 215 22% 9%;
+  --surface-2: 215 20% 13%;
+  --border: 215 14% 24%;
+  --text: 210 30% 96%;
+  --text-muted: 215 16% 68%;
 
-  --accent: 221 83% 65%;
-  --accent-500: 221 83% 62%;
-  --accent-600: 221 83% 58%;
-  --accent-700: 221 83% 52%;
+  --accent: 168 58% 52%;
+  --accent-500: 168 55% 55%;
+  --accent-600: 168 52% 48%;
+  --accent-700: 168 50% 42%;
   --accent-fg: 0 0% 100%;
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.45), 0 8px 20px rgba(0, 0, 0, 0.25);
-  --shadow-xl: 0 28px 64px rgba(0, 0, 0, 0.52), 0 12px 28px rgba(0, 0, 0, 0.3);
-  --shadow-card-hover: 0 24px 48px rgba(0, 0, 0, 0.45), 0 12px 24px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 12px hsl(168 58% 52% / 0.05);
+  --shadow-lg: 0 20px 56px rgba(0, 0, 0, 0.45), 0 6px 28px hsl(168 58% 52% / 0.06);
+  --shadow-xl: 0 28px 72px rgba(0, 0, 0, 0.5), 0 10px 40px hsl(168 58% 52% / 0.06);
+  --shadow-card-hover: 0 32px 64px rgba(0, 0, 0, 0.48), 0 12px 36px hsl(168 58% 52% / 0.08);
 
-  --selection-bg: hsl(var(--accent) / 0.25);
-  --elev-a1: 0.3;
-  --elev-a2: 0.38;
-  --elev-a3: 0.45;
+  --selection-bg: hsl(var(--accent) / 0.28);
+  --elev-a1: 0.32;
+  --elev-a2: 0.4;
+  --elev-a3: 0.48;
 }
 
 @supports (color: color(display-p3 1 1 1)) {
@@ -203,7 +207,8 @@ body {
   background-color: hsl(var(--bg));
   color: hsl(var(--text));
   font-family: var(--font-sans);
-  line-height: 1.6;
+  line-height: var(--body-leading, 1.65);
+  letter-spacing: 0.01em;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -214,24 +219,27 @@ h2,
 h3,
 h4 {
   font-family: var(--font-heading);
-  letter-spacing: -0.01em;
+  letter-spacing: var(--heading-tracking);
 }
 
 h1 {
   font-size: var(--step-5);
-  line-height: 1.05;
+  line-height: var(--heading-leading, 1.1);
+  font-weight: 700;
   text-wrap: balance;
 }
 
 h2 {
   font-size: var(--step-4);
-  line-height: 1.1;
+  line-height: var(--heading-leading, 1.12);
+  font-weight: 700;
   text-wrap: balance;
 }
 
 h3 {
   font-size: var(--step-3);
-  line-height: 1.15;
+  line-height: var(--heading-leading, 1.15);
+  font-weight: 600;
 }
 
 a {
@@ -268,7 +276,7 @@ button {
   outline: none;
   box-shadow:
     0 0 0 var(--ring-offset) hsl(var(--surface)),
-    0 0 0 calc(var(--ring-offset) + 2px) var(--ring-color);
+    0 0 0 calc(var(--ring-offset) + var(--ring-width, 2px)) var(--ring-color);
   border-radius: max(var(--radius-sm), 0.375rem);
 }
 
@@ -426,6 +434,17 @@ button {
   from {
     opacity: 0;
     transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUpPage {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
   to {
     opacity: 1;

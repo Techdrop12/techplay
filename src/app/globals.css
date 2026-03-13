@@ -26,9 +26,13 @@
   body {
     min-height: 100dvh;
     background-color: hsl(var(--bg));
+    background-image: var(--gradient-mesh);
+    background-attachment: fixed;
+    background-size: 100% 100%;
     color: hsl(var(--text));
     font-family: var(--font-sans);
-    line-height: 1.6;
+    line-height: var(--body-leading, 1.65);
+    letter-spacing: 0.01em;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -74,19 +78,22 @@
 
   h1 {
     font-size: var(--step-5);
-    line-height: 1.05;
+    line-height: var(--heading-leading, 1.1);
     letter-spacing: var(--heading-tracking);
+    font-weight: 700;
   }
 
   h2 {
     font-size: var(--step-4);
-    line-height: 1.1;
+    line-height: var(--heading-leading, 1.12);
     letter-spacing: var(--heading-tracking);
+    font-weight: 700;
   }
 
   h3 {
     font-size: var(--step-3);
-    line-height: 1.15;
+    line-height: var(--heading-leading, 1.15);
+    font-weight: 600;
   }
 
   h1[id],
@@ -133,7 +140,7 @@
     outline: none;
     box-shadow:
       0 0 0 var(--ring-offset) hsl(var(--surface)),
-      0 0 0 calc(var(--ring-offset) + 2px) hsl(var(--accent));
+      0 0 0 calc(var(--ring-offset) + var(--ring-width, 2px)) hsl(var(--accent));
     border-radius: 0.5rem;
   }
 
@@ -184,30 +191,24 @@
     width: 100%;
     margin-inline: auto;
     max-width: var(--container-max);
-    padding-inline: 0.75rem;
+    padding-inline: clamp(1rem, 4vw, 1.5rem);
   }
 
   @media (min-width: 640px) {
     .container-app {
-      padding-inline: 1.25rem;
+      padding-inline: clamp(1.25rem, 5vw, 2rem);
     }
   }
 
-  @media (min-width: 768px) {
+  @media (min-width: 1024px) {
     .container-app {
-      padding-inline: 1.5rem;
+      padding-inline: clamp(1.5rem, 5vw, 2.5rem);
     }
   }
 
   @media (min-width: 1280px) {
     .container-app {
-      padding-inline: 2rem;
-    }
-  }
-
-  @media (min-width: 1536px) {
-    .container-app {
-      padding-inline: 2.5rem;
+      padding-inline: clamp(2rem, 6vw, 3rem);
     }
   }
 
@@ -216,12 +217,13 @@
     border: 1px solid hsl(var(--border));
     border-radius: var(--radius-2xl);
     box-shadow: var(--shadow-sm);
+    transition: border-color var(--dur-fast) ease, box-shadow var(--dur) var(--ease-out);
   }
 
   .card-hover {
     transition:
       box-shadow var(--dur) var(--ease-out),
-      transform var(--dur) var(--ease-out),
+      transform var(--dur) var(--ease-spring),
       border-color var(--dur-fast) ease;
   }
 
@@ -243,12 +245,13 @@
     border-radius: 0.75rem;
     font-weight: 600;
     transition:
-      transform 150ms ease,
-      box-shadow 150ms ease,
-      background-color 150ms ease,
-      color 150ms ease,
-      border-color 150ms ease,
-      opacity 150ms ease;
+      transform var(--dur-fast) var(--ease-out),
+      box-shadow var(--dur) var(--ease-smooth),
+      background-color var(--dur-fast) ease,
+      color var(--dur-fast) ease,
+      border-color var(--dur-fast) ease,
+      opacity var(--dur-fast) ease,
+      filter var(--dur) var(--ease-smooth);
     outline: none;
   }
 
@@ -267,7 +270,7 @@
   .btn-outline:focus-visible {
     box-shadow:
       0 0 0 var(--ring-offset) hsl(var(--surface)),
-      0 0 0 calc(var(--ring-offset) + 2px) hsl(var(--accent));
+      0 0 0 calc(var(--ring-offset) + var(--ring-width, 2px)) hsl(var(--accent));
     outline: none;
   }
 
@@ -278,17 +281,27 @@
 
   .btn-primary:hover {
     background: hsl(var(--accent-600));
+    transform: scale(1.02);
+  }
+
+  .btn-primary:active:hover {
+    transform: scale(0.98);
   }
 
   .btn-premium {
     color: white;
     background: var(--gradient-accent);
-    box-shadow: 0 4px 14px hsl(var(--accent) / 0.35);
+    box-shadow: 0 4px 16px hsl(var(--accent) / 0.3), 0 2px 8px rgba(0, 0, 0, 0.06);
   }
 
   .btn-premium:hover {
-    box-shadow: 0 6px 20px hsl(var(--accent) / 0.45);
+    box-shadow: 0 8px 28px hsl(var(--accent) / 0.4), 0 4px 12px rgba(0, 0, 0, 0.08);
     filter: brightness(1.05);
+    transform: scale(1.02);
+  }
+
+  .btn-premium:active:hover {
+    transform: scale(0.98);
   }
 
   .btn-premium,
@@ -296,7 +309,7 @@
     transition:
       box-shadow var(--dur) var(--ease-smooth),
       filter var(--dur) var(--ease-smooth),
-      transform 150ms var(--ease-out);
+      transform var(--dur-fast) var(--ease-out);
   }
 
   .heading-display {
@@ -309,13 +322,23 @@
 
   .hover-lift {
     transition:
-      transform var(--dur) var(--ease-out),
+      transform var(--dur) var(--ease-spring),
       box-shadow var(--dur) var(--ease-out);
   }
 
   .hover-lift:hover {
-    transform: translateY(-4px);
+    transform: translateY(-5px);
     box-shadow: var(--shadow-card-hover);
+  }
+
+  .page-entrance {
+    animation: fadeInUpPage var(--dur-slow) var(--ease-out) forwards;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .page-entrance {
+      animation: none;
+    }
   }
 
   .btn-ghost {
@@ -385,6 +408,13 @@
     animation: shimmer 1.8s var(--ease-smooth) infinite;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton {
+      animation: none;
+      background: hsl(var(--surface-2));
+    }
+  }
+
   .focus-glow:focus-visible {
     outline: none;
     box-shadow: var(--glow-accent-strong);
@@ -413,13 +443,18 @@
   }
 
   .card-interactive:hover {
-    transform: translateY(-4px) scale(1.01);
+    transform: translateY(-5px) scale(1.008);
     box-shadow: var(--shadow-card-hover);
   }
 
   .card-interactive:active {
     transform: translateY(-2px) scale(1);
   }
+
+  .stagger-children > *:nth-child(9) { animation-delay: 0.45s; }
+  .stagger-children > *:nth-child(10) { animation-delay: 0.5s; }
+  .stagger-children > *:nth-child(11) { animation-delay: 0.55s; }
+  .stagger-children > *:nth-child(12) { animation-delay: 0.6s; }
 }
 
 /* ================== Utilities =================== */
@@ -568,12 +603,15 @@
   @media (prefers-reduced-motion: reduce) {
     .stagger-children > * { animation-delay: 0s !important; }
     .card-interactive:hover { transform: none; }
+    .btn-primary:hover { transform: none; }
+    .btn-premium:hover { transform: none; }
+    .hover-lift:hover { transform: none; }
   }
 
   .focus-ring {
     box-shadow:
       0 0 0 var(--ring-offset) hsl(var(--surface)),
-      0 0 0 calc(var(--ring-offset) + 2px) hsl(var(--accent)) !important;
+      0 0 0 calc(var(--ring-offset) + var(--ring-width, 2px)) hsl(var(--accent)) !important;
     outline: none !important;
   }
 

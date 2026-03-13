@@ -45,14 +45,14 @@ export default async function OrderDetailPage({ params }: Props) {
 
   return (
     <main
-      className="max-w-2xl mx-auto px-4 pt-28 pb-20"
+      className="mx-auto max-w-2xl px-4 pt-28 pb-20"
       aria-labelledby="order-title"
       role="main"
     >
       <div className="mb-6">
         <Link
           href="/account/mes-commandes"
-          className="text-sm text-accent hover:underline"
+          className="text-[13px] font-medium text-[hsl(var(--accent))] transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
           aria-label="Retour à la liste de mes commandes"
         >
           ← Retour à mes commandes
@@ -61,38 +61,38 @@ export default async function OrderDetailPage({ params }: Props) {
 
       <h1
         id="order-title"
-        className="text-2xl sm:text-3xl font-extrabold tracking-tight text-brand dark:text-brand-light"
+        className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-3xl"
       >
         Commande #{orderId}
       </h1>
 
-      <p className="mt-3 text-muted-foreground">
+      <p className="mt-3 text-[15px] text-gray-600 dark:text-gray-400">
         {order.createdAt ? formatDateTime(order.createdAt, 'fr-FR') : '—'}
       </p>
 
       <section
-        className="mt-8 rounded-xl border border-gray-200 dark:border-gray-800 p-6 space-y-6"
+        className="mt-8 rounded-[1.5rem] border border-white/10 bg-[hsl(var(--surface))]/95 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] dark:bg-[hsl(var(--surface))]/90 sm:p-8"
         aria-label="Résumé de la commande"
       >
         <div>
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+          <h2 className="text-[12px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
             Statut
           </h2>
-          <p className="mt-1 font-medium">{status}</p>
+          <p className="mt-1 text-[15px] font-medium">{status}</p>
         </div>
 
         {items.length > 0 && (
           <div>
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+            <h2 className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
               Articles
             </h2>
-            <ul className="divide-y divide-gray-200 dark:divide-gray-700" role="list">
+            <ul className="divide-y divide-[hsl(var(--border))]" role="list">
               {items.map((line: { title?: string | null; quantity?: number | null; price?: number | null }, idx: number) => (
                 <li key={idx} className="py-3 first:pt-0 flex justify-between items-start gap-4">
-                  <span className="text-gray-900 dark:text-gray-100">
+                  <span className="text-[15px] text-gray-900 dark:text-gray-100">
                     {line.title ?? 'Article'} × {Number(line.quantity) || 1}
                   </span>
-                  <span className="font-medium tabular-nums">
+                  <span className="font-medium tabular-nums text-[15px]">
                     {formatPrice((Number(line.price) || 0) * (Number(line.quantity) || 1))}
                   </span>
                 </li>
@@ -102,15 +102,15 @@ export default async function OrderDetailPage({ params }: Props) {
         )}
 
         <div>
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+          <h2 className="text-[12px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
             Adresse de livraison
           </h2>
-          <p className="mt-1 text-gray-700 dark:text-gray-300 whitespace-pre-line">{address}</p>
+          <p className="mt-1 whitespace-pre-line text-[15px] text-gray-700 dark:text-gray-300">{address}</p>
         </div>
 
         {(trackingNumber || shippingProvider) && (
           <div>
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            <h2 className="text-[12px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
               Suivi
             </h2>
             <p className="mt-1">
@@ -124,7 +124,7 @@ export default async function OrderDetailPage({ params }: Props) {
         )}
 
         <div className="flex flex-wrap gap-3 pt-2">
-          <span className="text-lg font-bold">
+          <span className="text-[15px] font-bold">
             Total : {typeof order.total === 'number' ? formatPrice(order.total) : '—'}
           </span>
           <InvoiceButton

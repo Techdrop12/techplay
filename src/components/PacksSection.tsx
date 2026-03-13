@@ -183,10 +183,10 @@ export default function PacksSection({
       <section className={cn('max-w-6xl mx-auto px-6 py-16', className)}>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="skeleton h-48 rounded-2xl" aria-hidden="true" />
+            <div key={i} className="h-48 animate-pulse rounded-[1.5rem] bg-[hsl(var(--surface))]/80" aria-hidden="true" />
           ))}
         </div>
-        <p className="mt-6 text-center text-sm text-token-text/70" role="status" aria-live="polite">
+        <p className="mt-6 text-center text-[13px] text-token-text/70" role="status" aria-live="polite">
           Chargement des packs recommandés…
         </p>
       </section>
@@ -313,7 +313,7 @@ export default function PacksSection({
                 'rounded-full border px-3 py-1.5 text-xs font-semibold transition',
                 filterPromo
                   ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent)/.12)] text-[hsl(var(--accent))]'
-                  : 'border-token-border bg-token-surface hover:shadow'
+                  : 'border-[hsl(var(--border))] bg-[hsl(var(--surface))] hover:shadow'
               )}
               aria-pressed={filterPromo}
               aria-label="Filtrer : en promotion"
@@ -332,7 +332,7 @@ export default function PacksSection({
                 'rounded-full border px-3 py-1.5 text-xs font-semibold transition',
                 filterStock
                   ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent)/.12)] text-[hsl(var(--accent))]'
-                  : 'border-token-border bg-token-surface hover:shadow'
+                  : 'border-[hsl(var(--border))] bg-[hsl(var(--surface))] hover:shadow'
               )}
               aria-pressed={filterStock}
               aria-label="Filtrer : en stock"
@@ -346,7 +346,7 @@ export default function PacksSection({
 
             <select
               id={sortId}
-              className="rounded-xl border border-token-border bg-token-surface px-3 py-1.5 text-xs font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
+              className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-[12px] font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
               value={sortBy}
               onChange={(e) => {
                 const next = (e.target.value as Props['initialSort']) || 'savings'
@@ -391,6 +391,21 @@ export default function PacksSection({
         })}
       </motion.ul>
 
+      <div className="mt-8 flex items-center justify-between gap-4">
+        <Link
+          href="/products/packs"
+          prefetch={false}
+          className="inline-flex items-center gap-2 text-sm font-semibold text-[hsl(var(--accent))] hover:text-[hsl(var(--accent-600))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
+        >
+          <span>Voir tous les packs</span>
+          <span aria-hidden>↗</span>
+        </Link>
+
+        <p className="text-xs text-token-text/60">
+          {visibleCount} / {totalCount} packs affichés
+        </p>
+      </div>
+
       {!expanded && limit > 0 && totalCount > limit && (
         <div className="mt-10 flex flex-col items-center gap-3">
           <button
@@ -399,7 +414,7 @@ export default function PacksSection({
               setExpanded(true)
               pushDL('packs_see_more_click')
             }}
-            className="inline-flex items-center gap-2 rounded-full border border-token-border bg-token-surface px-5 py-2.5 text-sm font-semibold shadow-sm transition hover:shadow focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
+            className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-5 py-2.5 text-[13px] font-semibold shadow-sm transition hover:shadow focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
             aria-controls={gridId}
             aria-expanded={expanded ? 'true' : 'false'}
           >

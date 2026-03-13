@@ -152,14 +152,14 @@ export default function ExitIntentPopup({
         aria-modal="true"
         aria-labelledby="exit-intent-title"
         aria-describedby="exit-intent-desc"
-        className="mx-3 w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 text-center shadow-xl outline-none dark:border-zinc-800 dark:bg-zinc-900 dark:text-white"
+        className="mx-3 w-full max-w-md rounded-[1.5rem] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6 text-center shadow-xl outline-none"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <h3 id="exit-intent-title" className="mb-2 text-xl font-bold">
           {isFr ? 'Avant de partir…' : 'Before you go…'}
         </h3>
 
-        <p id="exit-intent-desc" className="mb-4 text-sm text-gray-600 dark:text-gray-300">
+        <p id="exit-intent-desc" className="mb-4 text-[15px] text-gray-600 dark:text-gray-300">
           {isFr
             ? `Profitez de -10 % avec le code ${promoCode}`
             : `Enjoy -10% with code ${promoCode}`}
@@ -168,7 +168,7 @@ export default function ExitIntentPopup({
         <div className="flex flex-col gap-2">
           <Link
             href={ctaHref}
-            className="inline-flex items-center justify-center rounded-lg bg-[hsl(var(--accent))] px-4 py-2 font-semibold text-white shadow hover:opacity-90"
+            className="inline-flex items-center justify-center rounded-full bg-[hsl(var(--accent))] px-5 py-2.5 text-[15px] font-semibold text-slate-950 shadow-[0_10px_30px_rgba(20,184,166,0.3)] transition hover:shadow-[0_14px_40px_rgba(20,184,166,0.4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
             onClick={() => {
               persistDismiss()
               pushDL('exit_intent_cta_click')
@@ -180,7 +180,7 @@ export default function ExitIntentPopup({
           <button
             type="button"
             onClick={close}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:border-zinc-700 dark:text-gray-200 dark:hover:bg-zinc-800"
+            className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-5 py-2.5 text-[13px] font-medium transition hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
           >
             {isFr ? 'Continuer mes achats' : 'Keep browsing'}
           </button>

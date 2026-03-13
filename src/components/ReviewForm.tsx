@@ -208,7 +208,7 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="mt-10 border-t border-gray-200 dark:border-gray-800 pt-6 space-y-5"
+      className="mt-10 border-t border-[hsl(var(--border))] pt-6 space-y-5"
       aria-label={tr('form_label', 'Formulaire d’avis')}
       noValidate
     >
@@ -219,7 +219,7 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
       {/* Nom (optionnel) + honeypot */}
       <div className="grid sm:grid-cols-2 gap-4">
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">{tr('name_label', 'Nom (optionnel)')}</span>
+          <span className="text-[13px] font-medium">{tr('name_label', 'Nom (optionnel)')}</span>
           <input
             type="text"
             value={name}
@@ -227,7 +227,7 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
             autoComplete="name"
             maxLength={60}
             placeholder={tr('name_ph', 'Votre prénom')}
-            className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
           />
         </label>
 
@@ -269,7 +269,7 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
           onChange={(e) => setComment(e.target.value.slice(0, MAX_LEN))}
           onKeyDown={onTextareaKeyDown}
           placeholder={tr('placeholder', 'Partagez votre expérience…')}
-          className="w-full border border-gray-300 dark:border-gray-700 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent dark:bg-zinc-900 dark:text-white"
+          className="w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-4 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
           rows={5}
           required
           maxLength={MAX_LEN}
@@ -277,18 +277,18 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
           aria-invalid={tooShort ? 'true' : 'false'}
           aria-describedby={`review-help review-counter${tooShort ? ' review-error' : ''}`}
         />
-        <div id="review-help" className="mt-1 text-xs text-gray-500">
+        <div id="review-help" className="mt-1 text-[12px] text-gray-500">
           {tr('helper_text', `Soyez précis et respectueux. Au moins ${MIN_LEN} caractères.`)}
         </div>
         <div
           id="review-counter"
-          className={`mt-1 text-xs ${tooShort ? 'text-orange-600' : 'text-gray-400'}`}
+          className={`mt-1 text-[12px] ${tooShort ? 'text-orange-600' : 'text-gray-400'}`}
           aria-live="polite"
         >
           {remaining} / {MAX_LEN}
         </div>
         {tooShort && (
-          <p id="review-error" className="mt-1 text-xs text-orange-600" role="alert">
+          <p id="review-error" className="mt-1 text-[12px] text-orange-600" role="alert">
             {tr('minlen_error', `Votre message doit contenir au moins ${MIN_LEN} caractères.`)}
           </p>
         )}
@@ -301,8 +301,8 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
         aria-busy={sending}
         whileHover={prefersReducedMotion || disabled ? undefined : { scale: 1.03 }}
         whileTap={prefersReducedMotion || disabled ? undefined : { scale: 0.97 }}
-        className={`w-full rounded-xl bg-accent text-white px-4 py-3 text-base font-extrabold shadow-lg transition-colors focus:outline-none focus:ring-4 focus:ring-accent/50 ${
-          disabled ? 'opacity-60 cursor-not-allowed' : 'hover:bg-accent/90'
+        className={`w-full rounded-full bg-[hsl(var(--accent))] px-4 py-3 text-[15px] font-extrabold text-slate-950 shadow-[0_10px_30px_rgba(20,184,166,0.3)] transition focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2 ${
+          disabled ? 'opacity-60 cursor-not-allowed' : 'hover:shadow-[0_14px_40px_rgba(20,184,166,0.4)]'
         }`}
         data-gtm="review_submit"
       >

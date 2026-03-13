@@ -122,17 +122,17 @@ export default async function BlogPage({ searchParams }: PageProps) {
   ])
 
   return (
-    <main className="max-w-7xl mx-auto px-4 pt-32 pb-20" aria-labelledby="blog-title">
+    <main className="mx-auto max-w-7xl px-4 pt-28 pb-16 sm:px-6 sm:pt-32 sm:pb-20 lg:px-8" aria-labelledby="blog-title">
       <h1
         id="blog-title"
-        className="mb-8 text-center text-4xl font-extrabold tracking-tight text-brand dark:text-brand-light sm:text-5xl"
+        className="mb-6 text-center text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:mb-8 sm:text-4xl lg:text-5xl"
       >
-        {q ? `Résultats pour “${q}”` : 'Nos articles de blog'}
+        {q ? `Résultats pour “${q}”` : 'Nos articles'}
       </h1>
 
       <form
         role="search"
-        className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-3"
+        className="mb-10 grid grid-cols-1 gap-3 sm:grid-cols-3"
         action={localizePath('/blog', locale)}
         method="GET"
       >
@@ -141,14 +141,14 @@ export default async function BlogPage({ searchParams }: PageProps) {
           name="q"
           defaultValue={q}
           placeholder="Rechercher un article…"
-          className="rounded-lg border border-gray-300 bg-white/90 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent dark:border-zinc-700 dark:bg-zinc-900/80"
+          className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-3.5 py-2.5 text-[13px] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]"
           aria-label="Rechercher dans le blog"
         />
 
         <select
           name="sort"
           defaultValue={sort}
-          className="rounded-lg border border-gray-300 bg-white/90 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent dark:border-zinc-700 dark:bg-zinc-900/80"
+          className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-3.5 py-2.5 text-[13px] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]"
           aria-label="Trier"
         >
           <option value="newest">Plus récents</option>
@@ -161,7 +161,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
         <div className="flex items-center gap-2">
           <button
             type="submit"
-            className="w-full rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow hover:bg-accent/90 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40 sm:w-auto"
+            className="w-full rounded-xl bg-[hsl(var(--accent))] px-4 py-2.5 text-[13px] font-semibold text-slate-950 shadow-[0_8px_24px_rgba(20,184,166,0.35)] transition hover:shadow-[0_12px_32px_rgba(20,184,166,0.45)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] sm:w-auto"
           >
             Filtrer
           </button>
@@ -179,11 +179,11 @@ export default async function BlogPage({ searchParams }: PageProps) {
       </form>
 
       {posts.length === 0 ? (
-        <p className="text-center text-lg text-gray-500 dark:text-gray-400" role="status" aria-live="polite">
+        <p className="rounded-[1.25rem] border border-white/10 bg-[hsl(var(--surface))]/50 py-12 text-center text-[15px] text-gray-500 dark:text-gray-400" role="status" aria-live="polite">
           Aucun article {q ? `pour “${q}”` : 'disponible'}.
         </p>
       ) : (
-        <section className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3" aria-label="Liste des articles">
+        <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8" aria-label="Liste des articles">
           {posts.map((post, idx) => {
             const postId = readPostString(post, '_id')
             const postSlug = readPostString(post, 'slug')
@@ -198,10 +198,10 @@ export default async function BlogPage({ searchParams }: PageProps) {
             href={persist(Math.max(1, page - 1))}
             prefetch={false}
             aria-disabled={page <= 1}
-            className={`rounded-md border px-3 py-2 text-sm ${
+            className={`rounded-xl border px-3.5 py-2 text-[13px] font-medium transition ${
               page <= 1
-                ? 'pointer-events-none opacity-40 border-gray-300 dark:border-zinc-700'
-                : 'border-gray-300 hover:bg-gray-50 dark:border-zinc-700 dark:hover:bg-zinc-800'
+                ? 'pointer-events-none border-[hsl(var(--border))] opacity-40'
+                : 'border-[hsl(var(--border))] hover:bg-[hsl(var(--surface))]/80'
             }`}
           >
             ← Précédent
@@ -217,10 +217,10 @@ export default async function BlogPage({ searchParams }: PageProps) {
                   href={persist(n)}
                   prefetch={false}
                   aria-current={n === page ? 'page' : undefined}
-                  className={`rounded-md border px-3 py-2 text-sm ${
+                  className={`rounded-xl border px-3.5 py-2 text-[13px] font-medium transition ${
                     n === page
-                      ? 'border-accent bg-accent text-white'
-                      : 'border-gray-300 hover:bg-gray-50 dark:border-zinc-700 dark:hover:bg-zinc-800'
+                      ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent))] text-slate-950 shadow-[0_8px_24px_rgba(20,184,166,0.35)]'
+                      : 'border-[hsl(var(--border))] hover:bg-[hsl(var(--surface))]/80'
                   }`}
                 >
                   {n}
@@ -240,10 +240,10 @@ export default async function BlogPage({ searchParams }: PageProps) {
             href={persist(Math.min(pagination.pages, page + 1))}
             prefetch={false}
             aria-disabled={page >= pagination.pages}
-            className={`rounded-md border px-3 py-2 text-sm ${
+            className={`rounded-xl border px-3.5 py-2 text-[13px] font-medium transition ${
               page >= pagination.pages
-                ? 'pointer-events-none opacity-40 border-gray-300 dark:border-zinc-700'
-                : 'border-gray-300 hover:bg-gray-50 dark:border-zinc-700 dark:hover:bg-zinc-800'
+                ? 'pointer-events-none border-[hsl(var(--border))] opacity-40'
+                : 'border-[hsl(var(--border))] hover:bg-[hsl(var(--surface))]/80'
             }`}
           >
             Suivant →

@@ -155,7 +155,7 @@ function flyTo(source: HTMLElement, target: HTMLElement, prefersReduced: boolean
   dot.style.height = '10px'
   dot.style.borderRadius = '9999px'
   dot.style.background = 'hsl(var(--accent))'
-  dot.style.boxShadow = '0 0 0 6px rgba(37,99,235,0.15)'
+  dot.style.boxShadow = '0 0 0 6px rgba(20,184,166,0.15)'
   dot.style.zIndex = '999999'
   dot.style.pointerEvents = 'none'
 

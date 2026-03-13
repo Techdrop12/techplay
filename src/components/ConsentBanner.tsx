@@ -185,7 +185,7 @@ export default function ConsentBanner() {
       aria-describedby="tp-consent-desc"
       aria-live="polite"
       data-nosnippet
-      className="fixed inset-x-0 bottom-0 z-[60] mx-auto max-w-4xl rounded-t-2xl border border-token-border bg-token-surface/95 px-4 py-4 shadow-2xl backdrop-blur sm:bottom-6 sm:rounded-2xl sm:px-6 sm:py-5 pointer-events-none"
+      className="fixed inset-x-0 bottom-0 z-[60] mx-auto max-w-4xl rounded-t-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/95 px-4 py-4 shadow-2xl backdrop-blur sm:bottom-6 sm:rounded-2xl sm:px-6 sm:py-5 pointer-events-none"
     >
       <div className="flex flex-col gap-3 pointer-events-auto sm:flex-row sm:items-start sm:gap-5">
         <div className="flex-1">
@@ -259,7 +259,7 @@ export default function ConsentBanner() {
                   setOpen(true)
                   window.setTimeout(() => firstToggleRef.current?.focus(), 0)
                 }}
-                className="w-full rounded-xl border border-token-border bg-token-surface px-4 py-2 text-sm font-semibold hover:shadow focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
+                className="w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 text-[13px] font-semibold hover:shadow focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
               >
                 Paramètres
               </button>
@@ -267,7 +267,7 @@ export default function ConsentBanner() {
               <button
                 type="button"
                 onClick={refuseAll}
-                className="w-full rounded-xl border border-token-border bg-token-surface px-4 py-2 text-sm font-semibold hover:shadow focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
+                className="w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 text-[13px] font-semibold hover:shadow focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
               >
                 Tout refuser
               </button>
@@ -285,7 +285,7 @@ export default function ConsentBanner() {
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="w-full rounded-xl border border-token-border bg-token-surface px-4 py-2 text-sm font-semibold hover:shadow focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
+                className="w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 text-[13px] font-semibold hover:shadow focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
               >
                 Retour
               </button>

@@ -27,25 +27,25 @@ export default function OrderTable() {
       .catch(() => toast.error('Erreur chargement commandes'));
   }, []);
 
-  if (!orders.length) return <p className="text-gray-500 p-4">Aucune commande pour le moment.</p>;
+  if (!orders.length) return <p className="text-token-text/70 p-4">Aucune commande pour le moment.</p>;
 
   return (
     <div className="overflow-x-auto p-4">
-      <h2 className="text-2xl font-bold mb-4">Commandes</h2>
-      <table className="min-w-full table-auto border border-gray-300 bg-white text-sm">
+      <h2 className="text-2xl font-bold mb-4 text-[hsl(var(--text))]">Commandes</h2>
+      <table className="min-w-full table-auto border border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-sm">
         <thead>
-          <tr className="bg-gray-100">
-            <th className="p-2 border">Client</th>
-            <th className="p-2 border">Email</th>
-            <th className="p-2 border">Produits</th>
-            <th className="p-2 border">Montant</th>
-            <th className="p-2 border">Statut</th>
-            <th className="p-2 border">Date</th>
+          <tr className="bg-[hsl(var(--surface-2))]">
+            <th className="p-2 border border-[hsl(var(--border))]">Client</th>
+            <th className="p-2 border border-[hsl(var(--border))]">Email</th>
+            <th className="p-2 border border-[hsl(var(--border))]">Produits</th>
+            <th className="p-2 border border-[hsl(var(--border))]">Montant</th>
+            <th className="p-2 border border-[hsl(var(--border))]">Statut</th>
+            <th className="p-2 border border-[hsl(var(--border))]">Date</th>
           </tr>
         </thead>
         <tbody>
           {orders.map((o) => (
-            <tr key={o._id} className="border-t">
+            <tr key={o._id} className="border-t border-[hsl(var(--border))]">
               <td className="p-2">{o.name}</td>
               <td className="p-2">{o.email}</td>
               <td className="p-2">{o.items?.map((i: OrderItem) => i.title).join(', ')}</td>

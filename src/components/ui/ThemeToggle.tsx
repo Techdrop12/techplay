@@ -92,8 +92,8 @@ export default function ThemeToggle({ className, iconOnly = true, size = 'md' }:
       title={label}
       aria-pressed={isDark}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-full border border-token-border',
-        'bg-token-surface/80 text-token-text shadow-soft backdrop-blur transition',
+        'inline-flex items-center justify-center gap-2 rounded-full border border-[hsl(var(--border))]',
+        'bg-[hsl(var(--surface))]/80 text-token-text backdrop-blur transition',
         'hover:-translate-y-[1px] hover:shadow-md active:translate-y-0 active:scale-[0.98]',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2',
         currentSize.button,

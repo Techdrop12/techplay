@@ -24,22 +24,16 @@ export default function EmptyCart({ locale = 'fr' }: EmptyCartProps) {
       role="status"
       aria-live="polite"
       aria-label={message}
-      className="text-center py-20 text-gray-600 dark:text-gray-300"
+      className="card py-16 text-center shadow-[var(--shadow-lg)]"
     >
-      <h2 className="text-2xl font-semibold mb-2">{message}</h2>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-sm mx-auto">{sub}</p>
+      <h2 className="text-2xl font-semibold text-[hsl(var(--text))] sm:text-3xl [letter-spacing:var(--heading-tracking)]">{message}</h2>
+      <p className="mx-auto mt-2 max-w-sm text-[14px] text-token-text/75">{sub}</p>
 
-      <div className="flex flex-wrap items-center justify-center gap-3">
-        <Link
-          href="/products"
-          className="inline-block bg-black text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black dark:focus:ring-offset-zinc-900 transition"
-        >
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <Link href="/products" className="btn-premium inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)]">
           {cta}
         </Link>
-        <Link
-          href="/products/packs"
-          className="inline-block border border-gray-300 dark:border-zinc-600 text-gray-800 dark:text-gray-200 px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition"
-        >
+        <Link href="/products/packs" className="btn-outline inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]" prefetch={false}>
           {ctaPacks}
         </Link>
       </div>
