@@ -112,7 +112,7 @@ function ProductCard({
   const [imgError, setImgError] = useState(false)
 
   const title = useMemo(() => getTitle(product), [product])
-  const description = useMemo(() => getDescription(product), [product])
+  const _description = useMemo(() => getDescription(product), [product])
   const image = useMemo(() => (imgError ? '/og-image.jpg' : getImage(product)), [product, imgError])
   const secondImage = useMemo(() => getSecondImage(product), [product])
   const oldPrice = useMemo(() => getOldPrice(product), [product])

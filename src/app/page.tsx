@@ -8,13 +8,13 @@ import ClientTrackingScript from '@/components/ClientTrackingScript'
 import Link from '@/components/LocalizedLink'
 import SectionHeader from '@/components/SectionHeader'
 import TrustBadges from '@/components/TrustBadges'
-import { getCategories } from '@/lib/categories'
 import { getPosts } from '@/lib/blog'
+import { getCategories } from '@/lib/categories'
 import { BRAND } from '@/lib/constants'
 import { getBestProducts, getRecommendedPacks } from '@/lib/data'
 
 const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'))
-const BlogCard = dynamic(() => import('@/components/blog/BlogCard'))
+const _BlogCard = dynamic(() => import('@/components/blog/BlogCard'))
 const BestProducts = dynamic(() => import('@/components/BestProducts'), {
   loading: () => <SectionSkeleton title="Chargement" />,
 })
@@ -178,7 +178,7 @@ function getProductName(product: Product): string {
   return product.title?.trim() || 'Produit'
 }
 
-function FeaturedCategories({ locale }: { locale: HomeLocale }) {
+function _FeaturedCategories({ locale }: { locale: HomeLocale }) {
   const items = getCategories(locale).slice(0, 8)
   const t = STR[locale]
 
@@ -270,7 +270,7 @@ function SplitCTA({ locale }: { locale: HomeLocale }) {
   )
 }
 
-function Testimonials({ locale }: { locale: HomeLocale }) {
+function _Testimonials({ locale }: { locale: HomeLocale }) {
   const t = STR[locale]
 
   const items =
@@ -361,7 +361,7 @@ export async function HomePageView({ locale }: { locale: HomeLocale }) {
 
   const blogData = blogResult.status === 'fulfilled' ? blogResult.value : null
   const rawBlogPosts = Array.isArray(blogData?.items) ? blogData.items : []
-  const blogPosts = rawBlogPosts.slice(0, 3).map((post: unknown, idx: number) => {
+  const _blogPosts = rawBlogPosts.slice(0, 3).map((post: unknown, idx: number) => {
     const p = post && typeof post === 'object' ? (post as Record<string, unknown>) : {}
     const slug = String(p?.slug ?? '')
     const title = String(p?.title ?? 'Article')
