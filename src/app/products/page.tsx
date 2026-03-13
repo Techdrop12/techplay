@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 import ProductCatalogue, { type CatalogueSort } from '@/components/ProductCatalogue'
 import { getAllProducts } from '@/lib/data'
-import { generateMeta } from '@/lib/seo'
+import { generateMeta, absoluteUrl } from '@/lib/seo'
 
 
 type SortKey = 'new' | 'price_asc' | 'price_desc'
@@ -146,7 +146,7 @@ export default async function ProductsPage({
             '@type': 'CollectionPage',
             name: 'Catalogue produits TechPlay',
             description: 'Catalogue complet des produits high-tech TechPlay.',
-            url: '/products',
+            url: absoluteUrl('/products'),
           }),
         }}
       />

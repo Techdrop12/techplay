@@ -314,7 +314,8 @@ export async function POST(req: Request) {
 }
 
 export async function OPTIONS() {
-  const origin = process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com'
+  const { BRAND } = await import('@/lib/constants')
+  const origin = BRAND.URL
 
   return new NextResponse(null, {
     status: 204,

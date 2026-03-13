@@ -2,6 +2,8 @@
 // Système d’e-mails HTML + texte : layout responsive, préheader, dark mode,
 // escape variables, pixel de tracking optionnel, et version texte automatique.
 
+import { BRAND } from './constants'
+
 type TemplateVars = Record<string, string | number | undefined>
 
 export type RenderedEmail = {
@@ -12,13 +14,11 @@ export type RenderedEmail = {
 
 export type TemplateFn = (vars: TemplateVars) => RenderedEmail
 
-const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME ?? 'TechPlay'
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://techplay.example.com'
-const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'support@techplay.example.com'
+const SITE_NAME = BRAND.NAME
+const SITE_URL = BRAND.URL
+const SUPPORT_EMAIL = BRAND.SUPPORT_EMAIL
 const LOGO_URL = process.env.NEXT_PUBLIC_EMAIL_LOGO_URL ?? `${SITE_URL}/logo-email.png`
-const ADDRESS =
-  process.env.NEXT_PUBLIC_COMPANY_ADDRESS ??
-  'TechPlay, 10 rue de l’Innovation, 75000 Paris, France'
+const ADDRESS = BRAND.ADDRESS
 const TRACKING_PIXEL_URL = process.env.NEXT_PUBLIC_EMAIL_PIXEL_URL
 
 function escapeHtml(input: unknown): string {

@@ -1,4 +1,7 @@
 // src/lib/performance.ts — router des Web Vitals vers analytics ou API
+// @deprecated Non importé. Métriques perf optionnelles.
+
+import { log } from '@/lib/logger'
 
 export type WebVitalMetric = {
   name: string
@@ -44,14 +47,12 @@ export function reportWebVitals(metric: WebVitalMetric): void {
     sendToGoogleAnalytics(metric)
     sendToVitalsApi(metric)
 
-    if (process.env.NODE_ENV === 'development') {
-      console.debug('[Perf]', {
-        name: metric.name,
-        value: metric.value,
-        id: metric.id,
-        label: metric.label,
-      })
-    }
+    log('[Perf]', {
+      name: metric.name,
+      value: metric.value,
+      id: metric.id,
+      label: metric.label,
+    })
   } catch {
     // no-op
   }

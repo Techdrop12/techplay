@@ -10,10 +10,14 @@ import React, {
   useState,
 } from 'react'
 
+import type { CartItem as ProductCartItem } from '@/types/product'
+
 import {
   createCheckoutSessionFromCart,
   type CheckoutResponse,
 } from '@/lib/checkout'
+import { UI } from '@/lib/constants'
+import { detectCurrency } from '@/lib/currency'
 import { event as gaEvent, trackAddToCart } from '@/lib/ga'
 
 const STORAGE_KEY = 'cart'
@@ -24,21 +28,15 @@ const CURRENCY_KEY = 'cart_currency_v1'
 const MIN_QTY = 1
 const MAX_QTY = 99
 
-const FREE_SHIPPING_THRESHOLD = Number(process.env.NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD ?? 60)
-const FLAT_SHIPPING_FEE = Number(process.env.NEXT_PUBLIC_FLAT_SHIPPING_FEE ?? 0)
-const TAX_RATE = Number(process.env.NEXT_PUBLIC_TAX_RATE ?? 0)
+const FREE_SHIPPING_THRESHOLD = UI.FREE_SHIPPING_THRESHOLD
+const FLAT_SHIPPING_FEE = UI.FLAT_SHIPPING_FEE
+const TAX_RATE = UI.TAX_RATE
+
 
 export type Currency = 'EUR' | 'GBP' | 'USD'
 
-export type CartItem = {
-  _id: string
-  slug: string
-  title: string
-  image: string
-  price: number
-  quantity: number
-  sku?: string
-}
+/** Item du panier (source: @/types/product) */
+export type CartItem = ProductCartItem
 
 export type CartInput = Omit<CartItem, 'quantity'> & { quantity?: number }
 
@@ -117,20 +115,6 @@ function ensureItemShape(input: Partial<CartItem> | unknown): CartItem {
   }
 }
 
-function detectCurrency(): Currency {
-  try {
-    const htmlLang = typeof document !== 'undefined' ? document.documentElement.lang || '' : ''
-    const nav = typeof navigator !== 'undefined' ? navigator.language || '' : ''
-    const source = (htmlLang || nav).toLowerCase()
-
-    if (source.includes('gb') || source.endsWith('-uk') || source.includes('en-gb')) return 'GBP'
-    if (source.includes('us') || source.includes('en-us')) return 'USD'
-    if (source.startsWith('en')) return 'USD'
-    return 'EUR'
-  } catch {
-    return 'EUR'
-  }
-}
 
 function readCart(): CartItem[] {
   if (typeof window === 'undefined') return []
@@ -422,7 +406,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           items: [
             {
               item_id: item._id,
-              item_name: item.title,
+              item_name: item.title ?? '',
               price: item.price,
               quantity: item.quantity,
             },

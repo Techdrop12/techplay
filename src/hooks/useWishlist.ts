@@ -3,10 +3,12 @@
 
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 
+import { UI } from '@/lib/constants'
+
 export type WishlistItemBase = { id: string } & Record<string, unknown>
 
 const STORAGE_KEY = 'wishlist'
-const MAX_ITEMS = Number.parseInt(process.env.NEXT_PUBLIC_WISHLIST_LIMIT ?? '50', 10)
+const MAX_ITEMS = UI.WISHLIST_LIMIT
 
 function safeParse<T>(json: string | null, fallback: T): T {
   try {

@@ -1,22 +1,16 @@
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { NextResponse } from 'next/server'
 
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message
-  if (typeof error === 'string') return error
-
-  try {
-    return JSON.stringify(error)
-  } catch {
-    return String(error)
-  }
-}
+import { serverEnv } from '@/env.server'
+import { getErrorMessage } from '@/lib/errors'
+import { verifySecret } from '@/lib/secureCompare'
 
 export async function POST(req: Request) {
   const url = new URL(req.url)
   const token = url.searchParams.get('token')
+  const expected = serverEnv.ADMIN_REVALIDATE_TOKEN ?? process.env.ADMIN_REVALIDATE_TOKEN
 
-  if (!token || token !== process.env.ADMIN_REVALIDATE_TOKEN) {
+  if (!verifySecret(token, expected)) {
     return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 })
   }
 

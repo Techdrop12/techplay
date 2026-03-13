@@ -1,10 +1,12 @@
 import { cookies, headers } from 'next/headers'
 
+import type { BlogPost } from '@/types/blog'
 import type { Metadata } from 'next'
 
 import BlogCard from '@/components/blog/BlogCard'
 import Link from '@/components/LocalizedLink'
 import { getPosts } from '@/lib/blog'
+import { BRAND } from '@/lib/constants'
 import { localizePath } from '@/lib/i18n-routing'
 import { LOCALE_COOKIE, isLocale, pickBestLocale, type Locale } from '@/lib/language'
 import { generateMeta, jsonLdBreadcrumbs } from '@/lib/seo'
@@ -18,7 +20,7 @@ type BlogPostLike = Record<string, unknown> & {
   title?: string
 }
 
-const SITE = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
+const SITE = BRAND.URL
 
 function readQueryValue(params: SearchParams | undefined, key: string): string {
   const value = params?.[key]
@@ -183,7 +185,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
           {posts.map((post, idx) => {
             const postId = readPostString(post, '_id')
             const postSlug = readPostString(post, 'slug')
-            return <BlogCard key={postId || postSlug || `post-${idx}`} article={post} />
+            return <BlogCard key={postId || postSlug || `post-${idx}`} article={post as BlogPost} />
           })}
         </section>
       )}

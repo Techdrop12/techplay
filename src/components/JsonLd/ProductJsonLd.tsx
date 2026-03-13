@@ -1,5 +1,7 @@
 import type { Product } from '@/types/product'
 
+import { BRAND } from '@/lib/constants'
+
 type ProductReview = {
   rating?: number
   title?: string
@@ -41,10 +43,9 @@ type Props = {
   maxReviews?: number
 }
 
-const RAW_ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com'
-const ORIGIN = RAW_ORIGIN.replace(/\/+$/, '')
+const ORIGIN = BRAND.URL
 const DEF_AVAIL = 'https://schema.org/InStock'
-const SELLER_NAME = process.env.NEXT_PUBLIC_SITE_NAME || 'TechPlay'
+const SELLER_NAME = BRAND.NAME
 
 function absUrl(u?: string): string | undefined {
   if (!u) return undefined

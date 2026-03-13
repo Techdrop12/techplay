@@ -28,6 +28,7 @@ import ReviewForm from '@/components/ReviewForm'
 import ShippingSimulator from '@/components/ShippingSimulator'
 import DeliveryEstimate from '@/components/ui/DeliveryEstimate'
 import WishlistButton from '@/components/WishlistButton'
+import { detectCurrency } from '@/lib/currency'
 import {
   mapProductToGaItem,
   trackAddToCart,
@@ -73,20 +74,6 @@ function toNum(value: unknown): number | undefined {
 
 function readString(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim() : undefined
-}
-
-function detectCurrency(localeHint: AppLocale): 'EUR' | 'GBP' | 'USD' {
-  try {
-    const htmlLang = typeof document !== 'undefined' ? document.documentElement.lang || '' : ''
-    const nav = typeof navigator !== 'undefined' ? navigator.language || '' : ''
-    const src = (htmlLang || nav).toLowerCase()
-
-    if (src.includes('gb') || src.endsWith('-uk') || src.includes('en-gb')) return 'GBP'
-    if (src.includes('us') || src.includes('en-us')) return 'USD'
-    return localeHint === 'en' ? 'EUR' : 'EUR'
-  } catch {
-    return 'EUR'
-  }
 }
 
 function buildGallery(product: ProductLike): string[] {
@@ -172,7 +159,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
   const viewedRef = useRef(false)
 
   const safeLocale: AppLocale = isLocale(locale) ? locale : DEFAULT_LOCALE
-  const currency = detectCurrency(safeLocale)
+  const currency = detectCurrency(safeLocale === 'en' ? 'en' : undefined)
 
   const t =
     safeLocale === 'en'

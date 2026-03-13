@@ -11,7 +11,9 @@ export type MetaDefaults = {
   twitterCard?: 'summary' | 'summary_large_image'
 }
 
-const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || 'TechPlay'
+import { BRAND } from './constants'
+
+const SITE_NAME = BRAND.NAME
 
 export const defaultMeta: MetaDefaults = {
   title: `${SITE_NAME} — Boutique high-tech`,

@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 
+import { UI } from '@/lib/constants'
 import { cn, formatPrice } from '@/lib/utils'
 
 interface FreeShippingBadgeProps {
@@ -85,7 +86,7 @@ function ConfettiSVG() {
 
 export default function FreeShippingBadge({
   price,
-  threshold = Number(process.env.NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD ?? 49),
+  threshold = UI.FREE_SHIPPING_THRESHOLD,
   className,
   minimal = false,
   withProgress = !minimal,

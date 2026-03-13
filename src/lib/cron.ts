@@ -1,62 +1,61 @@
 // src/lib/cron.ts
-// ✅ Orchestrateur simple avec verrou (anti double exécution), logs horodatés,
-// tâches prêtes : publication programmée, relance panier abandonné, nettoyage.
+// Orchestrateur cron avec verrou (anti double exécution). Tâches à brancher
+// sur la logique métier (voir docs/RUNBOOK.md#cron).
 
-let running = false;
+import { log as devLog } from '@/lib/logger'
+
+let running = false
 
 type CronTask = {
-  name: string;
-  run: () => Promise<void> | void;
-};
+  name: string
+  run: () => Promise<void> | void
+}
 
 function log(msg: string) {
-   
-  console.log(`[CRON] ${new Date().toISOString()} — ${msg}`);
+  devLog(`[CRON] ${new Date().toISOString()} — ${msg}`)
 }
 
 const tasks: CronTask[] = [
   {
-    name: "publishScheduledArticles",
+    name: 'publishScheduledArticles',
     async run() {
-      // TODO : branche ta logique réelle
-      // await publishScheduledArticles()
-      log("✓ Articles programmés : OK");
+      // Stub : brancher sur API publication blog / CMS (ex. GET /api/cron/publish-blog)
+      log('✓ Articles programmés : OK')
     },
   },
   {
-    name: "sendAbandonedCartReminders",
+    name: 'sendAbandonedCartReminders',
     async run() {
-      // TODO : branche ta logique (par ex. via sendAbandonedCart(to, product))
-      // await sendAbandonedCart(to, product)
-      log("✓ Relances panier abandonné : OK");
+      // Stub : relances gérées côté client (AbandonCartTracker) + API /api/brevo/abandon-panier
+      log('✓ Relances panier abandonné : OK')
     },
   },
   {
-    name: "cleanupOldSessions",
+    name: 'cleanupOldSessions',
     async run() {
-      // TODO : supprime anciennes sessions/notifications si nécessaire
-      log("✓ Nettoyage : OK");
+      // Stub : nettoyage DB / cache / notifications si nécessaire
+      log('✓ Nettoyage : OK')
     },
   },
-];
+]
 
 export async function runCronTasks() {
   if (running) {
-    log("Déjà en cours, on skip pour éviter les doublons.");
-    return;
+    log('Déjà en cours, skip (évite doublons).')
+    return
   }
-  running = true;
-  log("Démarrage des tâches planifiées…");
+  running = true
+  log('Démarrage des tâches planifiées…')
 
   try {
     for (const t of tasks) {
-      log(`→ ${t.name}`);
-      await t.run();
+      log(`→ ${t.name}`)
+      await t.run()
     }
-    log("Toutes les tâches sont terminées.");
+    log('Toutes les tâches sont terminées.')
   } catch (e) {
-    log(`Erreur : ${(e as Error).message}`);
+    log(`Erreur : ${(e as Error).message}`)
   } finally {
-    running = false;
+    running = false
   }
 }

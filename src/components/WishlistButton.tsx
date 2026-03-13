@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
 import { useWishlist, type WishlistItemBase } from '@/hooks/useWishlist'
+import { UI } from '@/lib/constants'
 import { trackAddToWishlist } from '@/lib/ga'
 import { getCurrentLocale } from '@/lib/i18n-routing'
 import { logEvent } from '@/lib/logEvent'
@@ -32,7 +33,7 @@ interface WishlistButtonProps {
   withLabel?: boolean
 }
 
-const WISHLIST_LIMIT = Number.parseInt(process.env.NEXT_PUBLIC_WISHLIST_LIMIT ?? '50', 10)
+const WISHLIST_LIMIT = UI.WISHLIST_LIMIT
 
 const TEXT = {
   fr: {

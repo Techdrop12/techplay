@@ -18,6 +18,7 @@ import type { Pack } from '@/types/product'
 
 import FreeShippingBadge from '@/components/FreeShippingBadge'
 import Link from '@/components/LocalizedLink'
+import { BRAND } from '@/lib/constants'
 import { pushDataLayer } from '@/lib/ga'
 import { getCurrentLocale } from '@/lib/i18n-routing'
 import { logEvent } from '@/lib/logEvent'
@@ -147,7 +148,7 @@ const readItemLabel = (item: unknown): string | undefined => {
   return readString(item, ['title', 'name', 'label'])
 }
 
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/+$/, '')
+const SITE_URL = BRAND.URL
 
 const toAbs = (value?: string) => {
   if (!value) return ''

@@ -5,7 +5,10 @@ import { toast } from 'react-hot-toast'
 
 import { useCart } from '@/hooks/useCart'
 import { createCheckoutSession } from '@/lib/checkout'
+import { detectCurrency } from '@/lib/currency'
+import { getErrorMessageWithFallback } from '@/lib/errors'
 import { event as gaEvent, pushDataLayer, trackAddShippingInfo } from '@/lib/ga'
+import { error as logError } from '@/lib/logger'
 import { pixelInitiateCheckout } from '@/lib/meta-pixel'
 import { cn } from '@/lib/utils'
 
@@ -76,29 +79,6 @@ function getCartItems(input: unknown): CartItemLike[] {
   })
 }
 
-function getErrorMessage(error: unknown) {
-  if (error instanceof Error && error.message) return error.message
-  if (isRecord(error) && typeof error.message === 'string' && error.message.trim()) {
-    return error.message
-  }
-  return 'Une erreur est survenue. Réessayez.'
-}
-
-function detectCurrency(): 'EUR' | 'GBP' | 'USD' {
-  try {
-    const htmlLang = typeof document !== 'undefined' ? document.documentElement.lang || '' : ''
-    const nav = typeof navigator !== 'undefined' ? navigator.language || '' : ''
-    const source = (htmlLang || nav).toLowerCase()
-
-    if (source.includes('gb') || source.endsWith('-uk') || source.includes('en-gb')) return 'GBP'
-    if (source.includes('us') || source.includes('en-us')) return 'USD'
-    if (source.startsWith('en')) return 'USD'
-    return 'EUR'
-  } catch {
-    return 'EUR'
-  }
-}
-
 function IconCard({ size = 18, className = '' }: { size?: number; className?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className={className}>
@@ -124,6 +104,7 @@ export default function CheckoutForm() {
   const [status, setStatus] = useState('')
   const [honeypot, setHoneypot] = useState('')
   const [currency, setCurrency] = useState<'EUR' | 'GBP' | 'USD'>(() => detectCurrency())
+  const [lastError, setLastError] = useState<string | null>(null)
 
   const formRef = useRef<HTMLFormElement | null>(null)
   const emailRef = useRef<HTMLInputElement | null>(null)
@@ -234,6 +215,7 @@ export default function CheckoutForm() {
 
       if (loading) return
       if (honeypot) return
+      setLastError(null)
       if (!gaItems.length) {
         toast.error('Votre panier est vide.')
         return
@@ -336,9 +318,10 @@ export default function CheckoutForm() {
 
         throw new Error('Session de paiement invalide')
       } catch (error: unknown) {
-        const message = getErrorMessage(error)
+        const message = getErrorMessageWithFallback(error, 'Une erreur est survenue. Réessayez.')
 
-        console.error('[Checkout] error:', error)
+        logError('[Checkout] error:', error)
+        setLastError(message)
         announce(message)
         toast.error(message)
 
@@ -533,11 +516,31 @@ export default function CheckoutForm() {
           disabled={loading}
           aria-busy={loading ? 'true' : 'false'}
           data-gtm="checkout_submit_btn"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-4 py-3 font-semibold text-white shadow transition hover:bg-[hsl(var(--accent)/.92)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.35)] disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex w-full min-h-[48px] items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-4 py-3 font-semibold text-white shadow transition hover:bg-[hsl(var(--accent)/.92)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.35)] disabled:cursor-not-allowed disabled:opacity-60"
         >
           <IconCard />
           <span>{loading ? 'Redirection…' : 'Payer maintenant'}</span>
         </button>
+
+        {lastError && (
+          <div className="rounded-xl border border-red-200 bg-red-50/80 p-3 dark:border-red-900/50 dark:bg-red-950/30" role="alert">
+            <p className="text-sm text-red-700 dark:text-red-300">{lastError}</p>
+            <button
+              type="button"
+              onClick={() => {
+                setLastError(null)
+                emailRef.current?.focus()
+              }}
+              className="mt-2 text-sm font-medium text-red-700 underline underline-offset-2 hover:no-underline dark:text-red-300"
+            >
+              Réessayer
+            </button>
+          </div>
+        )}
+
+        <p className="text-center text-xs text-token-text/60" role="status">
+          Paiement sécurisé Stripe · Données cryptées · CB, Apple Pay, Google Pay
+        </p>
 
         <p className="text-[11px] leading-relaxed text-token-text/60">
           En continuant, vous acceptez nos{' '}

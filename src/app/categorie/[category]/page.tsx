@@ -5,8 +5,9 @@ import type { SVGProps, JSX } from 'react';
 
 import Link from '@/components/LocalizedLink'
 import ProductGrid from '@/components/ProductGrid'
+import { LIST_NAMES } from '@/lib/analytics-events'
 import { getAllProducts } from '@/lib/data'
-import { generateMeta, jsonLdBreadcrumbs } from '@/lib/seo'
+import { generateMeta, jsonLdBreadcrumbs, jsonLdItemList } from '@/lib/seo'
 
 export const revalidate = 900
 
@@ -18,8 +19,8 @@ const SORT_VALUES: SortKey[] = ['price_asc', 'price_desc', 'rating', 'new', 'pro
 const PAGE_SIZE = 24
 
 interface Props {
-  params: { category: string }
-  searchParams?: { q?: string; sort?: string; min?: string; max?: string; page?: string }
+  params: Promise<{ category: string }>
+  searchParams?: Promise<{ q?: string; sort?: string; min?: string; max?: string; page?: string }>
 }
 
 function isRecord(value: unknown): value is ProductRecord {
@@ -132,32 +133,35 @@ function isNewProduct(product: Product): boolean {
   return readBoolean(toRecord(product), ['isNew']) ?? false
 }
 
-export function generateMetadata({ params, searchParams }: Props): Metadata {
-  const capitalized = params.category.charAt(0).toUpperCase() + params.category.slice(1).replace(/-/g, ' ')
-  const hasFilters = Boolean(searchParams?.q || searchParams?.min || searchParams?.max)
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
+  const { category } = await params
+  const sp = await searchParams
+  const capitalized = category.charAt(0).toUpperCase() + category.slice(1).replace(/-/g, ' ')
+  const hasFilters = Boolean(sp?.q || sp?.min || sp?.max)
 
   return generateMeta({
     title: `${capitalized} – Produits TechPlay`,
-    description: `Explorez tous les produits de la catégorie « ${capitalized} » sur TechPlay.`,
-    url: `/categorie/${params.category}`,
+    description: `Achetez ${capitalized} sur TechPlay. Sélection de produits high-tech, livraison rapide et SAV. Comparez les prix et les avis.`,
+    url: `/categorie/${category}`,
     image: '/og-image.jpg',
     noindex: hasFilters,
   })
 }
 
 export default async function CategoryPage({ params, searchParams }: Props) {
-  const { category } = params
+  const { category } = await params
+  const sp = searchParams ? await searchParams : undefined
   const displayCategory = category.charAt(0).toUpperCase() + category.slice(1).replace(/-/g, ' ')
   const CatIcon = ICON_BY_SLUG[category]
 
-  const q = (searchParams?.q ?? '').trim().toLowerCase()
+  const q = (sp?.q ?? '').trim().toLowerCase()
 
-  const rawSort = searchParams?.sort ?? 'new'
+  const rawSort = sp?.sort ?? 'new'
   const sort: SortKey = SORT_VALUES.includes(rawSort as SortKey) ? (rawSort as SortKey) : 'new'
 
-  const min = Number.isFinite(Number(searchParams?.min)) ? Number(searchParams?.min) : undefined
-  const max = Number.isFinite(Number(searchParams?.max)) ? Number(searchParams?.max) : undefined
-  const page = Math.max(1, Number(searchParams?.page ?? 1))
+  const min = Number.isFinite(Number(sp?.min)) ? Number(sp?.min) : undefined
+  const max = Number.isFinite(Number(sp?.max)) ? Number(sp?.max) : undefined
+  const page = Math.max(1, Number(sp?.page ?? 1))
 
   const all = (await getAllProducts()) as Product[]
   let filtered = all.filter((product) => getProductCategory(product) === category)
@@ -218,8 +222,19 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     { name: displayCategory, url: `/categorie/${category}` },
   ])
 
+  const itemListLd = jsonLdItemList({
+    name: `${displayCategory} – TechPlay`,
+    description: `Produits de la catégorie ${displayCategory}.`,
+    url: `/categorie/${category}`,
+    items: pageItems.map((p) => ({
+      name: (p as Product).title ?? 'Produit',
+      url: `/products/${(p as Product).slug ?? ''}`,
+    })),
+  })
+
   return (
     <main className="max-w-7xl mx-auto px-4 pt-28 pb-20" aria-labelledby="category-title" id="main">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
       <div className="mb-10 text-center">
         <h1
           id="category-title"
@@ -299,7 +314,11 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         )}
       </form>
 
-      <ProductGrid products={pageItems} emptyMessage={`Aucun produit trouvé dans la catégorie "${displayCategory}".`} />
+      <ProductGrid
+        products={pageItems}
+        listName={LIST_NAMES.CATEGORY}
+        emptyMessage={`Aucun produit trouvé dans la catégorie "${displayCategory}".`}
+      />
 
       <nav aria-label="Pagination" className="mt-10 flex items-center justify-center gap-3 text-sm">
         {hasPrev ? (

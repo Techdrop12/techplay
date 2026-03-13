@@ -1,12 +1,12 @@
 // src/lib/openai.ts — client OpenAI minimal + helper génération
 import OpenAI from 'openai'
 
+import { warn } from '@/lib/logger'
 
 const apiKey = process.env.OPENAI_API_KEY
-if (!apiKey) console.warn('[openai] OPENAI_API_KEY manquante')
+if (!apiKey) warn('[openai] OPENAI_API_KEY manquante')
 
-
-export const openai = new OpenAI({ apiKey })
+export const openai = new OpenAI({ apiKey: apiKey ?? '' })
 
 
 export async function generateBlog(prompt: string, opts: { model?: string; temperature?: number; maxTokens?: number; system?: string } = {}) {

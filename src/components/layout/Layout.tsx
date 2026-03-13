@@ -4,9 +4,9 @@ import dynamic from 'next/dynamic'
 import { usePathname, useRouter } from 'next/navigation'
 import { Suspense, type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 
-import LiveChat from '../LiveChat'
-
 import Header from './Header'
+
+const LiveChatLazy = dynamic(() => import('../LiveChat'), { ssr: false })
 
 import { useTheme } from '@/context/themeContext'
 import { pageview } from '@/lib/ga'
@@ -236,7 +236,7 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
       </main>
 
       <ScrollTopButton />
-      {chat ? <LiveChat /> : null}
+      {chat ? <LiveChatLazy /> : null}
       <FooterLazy />
     </>
   )

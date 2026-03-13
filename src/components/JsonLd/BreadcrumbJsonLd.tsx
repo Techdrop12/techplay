@@ -2,6 +2,7 @@
 
 import Head from 'next/head'
 
+import { BRAND } from '@/lib/constants'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
 interface BreadcrumbJsonLdProps {
@@ -9,9 +10,7 @@ interface BreadcrumbJsonLdProps {
   siteUrl?: string
 }
 
-const ORIGIN = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
-
-export default function BreadcrumbJsonLd({ items, siteUrl = ORIGIN }: BreadcrumbJsonLdProps) {
+export default function BreadcrumbJsonLd({ items, siteUrl = BRAND.URL }: BreadcrumbJsonLdProps) {
   if (!items?.length) return null
   const locale = getCurrentLocale()
 

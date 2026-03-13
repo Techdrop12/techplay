@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import Script from 'next/script'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
+import { log } from '@/lib/logger'
 import { isPixelReady, pixelPageView } from '@/lib/meta-pixel'
 
 declare global {
@@ -149,7 +150,7 @@ export default function MetaPixel() {
   const debugLog = useMemo(
     () => (...args: unknown[]) => {
       if (!DEBUG) return
-      console.log('[Pixel]', ...args)
+      log('[Pixel]', ...args)
     },
     []
   )

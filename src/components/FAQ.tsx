@@ -5,6 +5,9 @@ import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 
 import type { KeyboardEvent, RefCallback } from 'react'
 
+import { error as logError } from '@/lib/logger'
+
+
 interface FAQItem {
   _id: string
   question: string
@@ -26,7 +29,7 @@ export default function FAQ() {
       const data = await res.json()
       setFaqs(Array.isArray(data) ? data : [])
     } catch (error) {
-      console.error('Erreur de chargement des FAQs', error)
+      logError('Erreur de chargement des FAQs', error)
       setFaqs([
         {
           _id: '1',

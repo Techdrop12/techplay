@@ -474,14 +474,14 @@ export default function Header() {
       data-hidden={hidden ? 'true' : 'false'}
       data-scrolled={scrolled ? 'true' : 'false'}
       className={cn(
-        'fixed left-0 right-0 top-0 z-[80] w-full border-b backdrop-blur transition-all motion-safe:duration-300 motion-safe:ease-out',
+        'fixed left-0 right-0 top-0 z-[80] w-full border-b backdrop-blur-md transition-[background-color,border-color,box-shadow,transform] motion-safe:duration-300 motion-safe:ease-out',
         hidden ? '-translate-y-full' : 'translate-y-0',
         scrolled
-          ? 'border-token-border bg-token-surface/85 shadow-soft'
-          : 'border-transparent bg-token-surface/65'
+          ? 'border-token-border bg-token-surface/95 shadow-lg shadow-token-text/5'
+          : 'border-transparent bg-token-surface/80'
       )}
     >
-      <div className="container-app flex h-16 items-center justify-between gap-2 sm:gap-3 md:h-20">
+      <div className="container-app flex h-16 items-center justify-between gap-2 sm:gap-3 md:h-[4.5rem]">
         <NextLink
           href={L('/')}
           prefetch={false}

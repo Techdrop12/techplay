@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react'
 import InvoiceButton from './InvoiceButton'
 
 import Link from '@/components/LocalizedLink'
+import { formatDateTime } from '@/lib/formatDate'
 import { cn, formatPrice } from '@/lib/utils'
 
 type OrderStatus = 'pending' | 'paid' | 'shipped' | 'delivered' | 'canceled' | string
@@ -41,25 +42,6 @@ const STATUS_STYLE: Record<string, string> = {
 
 function isSortOption(value: string): value is SortOption {
   return value === 'recent' || value === 'old' || value === 'amountAsc' || value === 'amountDesc'
-}
-
-function formatDateSafe(input?: string | number | Date): string {
-  if (!input) return '—'
-
-  const date = new Date(input)
-  if (Number.isNaN(date.getTime())) return '—'
-
-  try {
-    return new Intl.DateTimeFormat('fr-FR', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(date)
-  } catch {
-    return date.toLocaleString()
-  }
 }
 
 function toTimestamp(input?: string | number | Date): number {
@@ -199,7 +181,7 @@ export default function OrderList({ orders = [], className }: Props) {
                   </div>
 
                   <div className="mt-1 text-sm text-muted-foreground">
-                    {formatDateSafe(order.date)} · {itemsCount || '—'} article{itemsCount > 1 ? 's' : ''}
+                    {order.date ? formatDateTime(order.date, 'fr-FR') : '—'} · {itemsCount || '—'} article{itemsCount > 1 ? 's' : ''}
                   </div>
                 </div>
 

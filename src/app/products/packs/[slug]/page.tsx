@@ -5,14 +5,16 @@ import type { Metadata } from 'next'
 
 import ProductJsonLd from '@/components/JsonLd/ProductJsonLd'
 import PackDetails from '@/components/PackDetails'
+import { BRAND } from '@/lib/constants'
 import { getPackBySlug } from '@/lib/data'
 
 export const revalidate = 1800
 
-const SITE = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
+const SITE = BRAND.URL
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const pack = await getPackBySlug(params.slug)
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  const pack = await getPackBySlug(slug)
   if (!pack) {
     return {
       title: 'Pack introuvable – TechPlay',
@@ -24,12 +26,12 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   return {
     title: `${pack.title} | Pack TechPlay`,
     description: pack.description || 'Découvrez nos packs exclusifs TechPlay.',
-    alternates: { canonical: `${SITE}/products/packs/${params.slug}` },
+    alternates: { canonical: `${SITE}/products/packs/${slug}` },
     openGraph: {
       title: pack.title,
       description: pack.description || '',
       type: 'website',
-      url: `${SITE}/products/packs/${params.slug}`,
+      url: `${SITE}/products/packs/${slug}`,
       images: pack.image
         ? [{ url: pack.image, alt: pack.title }]
         : [{ url: `${SITE}/placeholder.png`, alt: 'Pack TechPlay' }],
@@ -37,8 +39,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-export default async function PackPage({ params }: { params: { slug: string } }) {
-  const pack = await getPackBySlug(params.slug)
+export default async function PackPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const pack = await getPackBySlug(slug)
   if (!pack) return notFound()
 
   const safePack = pack as Pack

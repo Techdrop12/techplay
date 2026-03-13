@@ -5,18 +5,18 @@ import Head from 'next/head'
 
 import type { BlogPost } from '@/types/blog'
 
+import { BRAND } from '@/lib/constants'
+
 interface BlogListJsonLdProps {
   posts: BlogPost[]
   locale?: 'fr' | 'en'
   siteUrl?: string
 }
 
-const ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com'
-
 export default function BlogListJsonLd({
   posts = [],
   locale = 'fr',
-  siteUrl = ORIGIN,
+  siteUrl = BRAND.URL,
 }: BlogListJsonLdProps) {
   if (!Array.isArray(posts) || posts.length === 0) return null
 

@@ -9,6 +9,8 @@ export const revalidate = 0
 
 export const metadata = {
   title: 'Page introuvable – TechPlay',
+  description: 'La page demandée n’existe pas ou a été déplacée.',
+  robots: { index: false, follow: true },
 }
 
 export default function NotFoundPage() {
@@ -33,7 +35,7 @@ export default function NotFoundPage() {
       <div className="mt-8">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-3 text-white font-semibold shadow hover:bg-accent/90 focus:outline-none focus:ring-4 focus:ring-accent/50"
+          className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-lg bg-accent px-5 py-3 text-white font-semibold shadow hover:bg-accent/90 focus:outline-none focus:ring-4 focus:ring-accent/50"
           aria-label="Retour à l’accueil"
         >
           ← Retour à l’accueil

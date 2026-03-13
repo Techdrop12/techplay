@@ -10,25 +10,10 @@ import CheckoutForm from '@/components/checkout/CheckoutForm'
 import FreeShippingBadge from '@/components/FreeShippingBadge'
 import Link from '@/components/LocalizedLink'
 import { useCart } from '@/hooks/useCart'
+import { detectCurrency } from '@/lib/currency'
 import { mapProductToGaItem, pushDataLayer, trackBeginCheckout } from '@/lib/ga'
 
 type CheckoutItem = Product & { quantity: number }
-
-function detectCurrency(): 'EUR' | 'GBP' | 'USD' {
-  try {
-    const htmlLang = typeof document !== 'undefined' ? document.documentElement.lang || '' : ''
-    const nav = typeof navigator !== 'undefined' ? navigator.language || '' : ''
-    const source = (htmlLang || nav).toLowerCase()
-
-    if (source.includes('gb') || source.endsWith('-uk') || source.includes('en-gb')) return 'GBP'
-    if (source.includes('us') || source.includes('en-us')) return 'USD'
-    if (source.startsWith('en')) return 'USD'
-
-    return 'EUR'
-  } catch {
-    return 'EUR'
-  }
-}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
@@ -225,11 +210,14 @@ export default function CheckoutPage() {
 
             <aside
               id="paiement"
-              className="sticky top-24 h-fit space-y-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-xl dark:border-zinc-700 dark:bg-zinc-900"
+              className="sticky top-24 h-fit space-y-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-xl dark:border-zinc-700 dark:bg-zinc-900 scroll-mt-28"
               aria-label="Résumé et paiement"
             >
               <CartSummary items={items} />
               <CheckoutForm />
+              <p className="text-center text-xs text-gray-500 dark:text-gray-400">
+                🔒 Paiement sécurisé · ⚡ Livraison 48–72 h · ↩ Retours gratuits 30 j
+              </p>
             </aside>
           </div>
 

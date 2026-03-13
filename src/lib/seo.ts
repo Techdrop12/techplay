@@ -1,4 +1,6 @@
 // src/lib/seo.ts — Générateur de metadata Next robuste (canonical, hreflang, OG, Twitter, JSON-LD)
+import { BRAND } from './constants'
+
 import type { Metadata } from 'next'
 
 type SiteLocale = 'fr' | 'en'
@@ -29,8 +31,8 @@ interface ProductMetaExtras {
   brand?: string
 }
 
-const RAW_ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com'
-const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || 'TechPlay'
+const RAW_ORIGIN = BRAND.URL
+const SITE_NAME = BRAND.NAME
 const TWITTER_HANDLE = process.env.NEXT_PUBLIC_TWITTER_HANDLE || '@techplay'
 const DEFAULT_OG = '/og-image.jpg'
 const DEFAULT_LOCALE: SiteLocale = 'fr'
@@ -345,6 +347,29 @@ export function jsonLdProduct(params: {
     brand: params.brand ? { '@type': 'Brand', name: params.brand } : undefined,
     image: images,
     offers,
+  }
+}
+
+/** ItemList JSON-LD pour pages liste (catégories, catalogue, blog). */
+export function jsonLdItemList(params: {
+  name: string
+  description?: string
+  url: string
+  items: Array<{ name: string; url: string }>
+}): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: params.name,
+    ...(params.description ? { description: params.description } : {}),
+    url: abs(params.url),
+    numberOfItems: params.items.length,
+    itemListElement: params.items.map((it, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: it.name,
+      url: abs(it.url),
+    })),
   }
 }
 

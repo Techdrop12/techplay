@@ -1,15 +1,12 @@
-// src/lib/cart.ts
+// src/lib/cart.ts — Lecture/écriture panier (localStorage), type depuis @/types/product
+
+import type { CartItem } from '@/types/product'
+
+import { warn } from '@/lib/logger'
 
 export const STORAGE_KEY = 'cart'
 
-export type CartItem = {
-  _id: string
-  slug: string
-  title: string
-  image: string
-  price: number
-  quantity: number
-}
+export type { CartItem }
 
 export type CartInput = Omit<CartItem, 'quantity'> & { quantity?: number }
 
@@ -73,7 +70,7 @@ export function saveCart(cart: CartItem[]): void {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ v: 2, items: cart }))
     window.dispatchEvent(new CustomEvent('cart-updated', { detail: cart }))
   } catch {
-    console.warn('[cart] unable to persist cart')
+    warn('[cart] unable to persist cart')
   }
 }
 

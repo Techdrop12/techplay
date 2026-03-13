@@ -20,6 +20,9 @@ build/
 
 # 🧪 Tests & outils
 bfg.jar
+test-results/
+playwright-report/
+playwright/.cache/
 *.test.ts
 *.test.js
 

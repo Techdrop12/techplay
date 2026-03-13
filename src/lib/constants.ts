@@ -3,7 +3,8 @@
 
 export const BRAND = {
   NAME: process.env.NEXT_PUBLIC_SITE_NAME ?? "TechPlay",
-  URL: process.env.NEXT_PUBLIC_SITE_URL ?? "https://techplay.example.com",
+  /** URL sans slash final (canonical, OG, etc.) */
+  URL: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://techplay.example.com").replace(/\/+$/, ""),
   SUPPORT_EMAIL: process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "support@techplay.example.com",
   PHONE: process.env.NEXT_PUBLIC_SUPPORT_PHONE ?? "+33 1 23 45 67 89",
   ADDRESS:
@@ -27,5 +28,20 @@ export const LEGAL = {
 };
 
 export const UI = {
-  FREE_SHIPPING_THRESHOLD: Number(process.env.NEXT_PUBLIC_FREE_SHIPPING ?? 49),
+  /** Seuil (€) au-delà duquel la livraison est gratuite. Une seule source. */
+  FREE_SHIPPING_THRESHOLD: Number(
+    process.env.NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD ??
+      process.env.NEXT_PUBLIC_FREE_SHIPPING ??
+      49
+  ),
+  /** Nombre max d’articles dans la liste d’envies. */
+  FLAT_SHIPPING_FEE: Number(process.env.NEXT_PUBLIC_FLAT_SHIPPING_FEE ?? 4.9),
+  TAX_RATE: Number(process.env.NEXT_PUBLIC_TAX_RATE ?? 0),
+  WISHLIST_LIMIT: Number.parseInt(
+    process.env.NEXT_PUBLIC_WISHLIST_LIMIT ?? "50",
+    10
+  ),
 };
+
+export const TWITTER_HANDLE =
+  process.env.NEXT_PUBLIC_TWITTER_HANDLE ?? "@techplay";

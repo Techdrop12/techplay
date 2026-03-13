@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 
 import { trackPurchase } from '@/lib/ga'
+import { error as logError } from '@/lib/logger'
 import { pixelPurchase } from '@/lib/meta-pixel'
 
 type Props = { sessionId?: string; mock?: boolean }
@@ -177,7 +178,7 @@ export default function PurchaseTracker({ sessionId, mock }: Props) {
           sessionStorage.setItem(key, '1')
         } catch {}
       } catch (err) {
-        console.error('[PurchaseTracker]', err)
+        logError('[PurchaseTracker]', err)
       }
     })()
   }, [sessionId, mock])

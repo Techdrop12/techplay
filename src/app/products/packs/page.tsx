@@ -8,11 +8,12 @@ import Link from '@/components/LocalizedLink'
 import PackCard from '@/components/PackCard'
 import SectionTitle from '@/components/SectionTitle'
 import SectionWrapper from '@/components/SectionWrapper'
+import { BRAND } from '@/lib/constants'
 import { getRecommendedPacks } from '@/lib/data'
 
 export const revalidate = 900
 
-const SITE = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
+const SITE = BRAND.URL
 
 export const metadata: Metadata = {
   title: 'Nos Packs',
@@ -63,7 +64,15 @@ export default async function PacksPage() {
           </div>
         </div>
       ) : (
-        <Suspense fallback={<div className="text-center text-gray-400 py-6">Chargement des packs…</div>}>
+        <Suspense
+          fallback={
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="skeleton h-64 rounded-2xl" aria-hidden />
+              ))}
+            </div>
+          }
+        >
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {packs.map((pack) => (
               <PackCard key={pack.slug} pack={pack} />

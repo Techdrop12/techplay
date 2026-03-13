@@ -25,6 +25,8 @@ import {
 } from 'react-icons/fa'
 
 import Link from '@/components/LocalizedLink'
+import { BRAND } from '@/lib/constants'
+import { getErrorMessageWithFallback } from '@/lib/errors'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
 type FooterLink = {
@@ -79,7 +81,7 @@ const T = {
         title: 'Boutique',
         links: [
           { label: 'Accueil', href: '/' },
-          { label: 'Catégories', href: '/#categories' },
+          { label: 'Catégories', href: '/categorie' },
           { label: 'Produits', href: '/products' },
           { label: 'Packs', href: '/products/packs' },
           { label: 'Wishlist', href: '/wishlist' },
@@ -146,7 +148,7 @@ const T = {
         title: 'Store',
         links: [
           { label: 'Home', href: '/' },
-          { label: 'Categories', href: '/#categories' },
+          { label: 'Categories', href: '/categorie' },
           { label: 'Products', href: '/products' },
           { label: 'Bundles', href: '/products/packs' },
           { label: 'Wishlist', href: '/wishlist' },
@@ -235,11 +237,6 @@ function pushDataLayer(eventName: string, payload: Record<string, unknown> = {})
   }
 }
 
-function getErrorMessage(error: unknown, fallback: string): string {
-  if (error instanceof Error && error.message.trim()) return error.message
-  if (typeof error === 'string' && error.trim()) return error
-  return fallback
-}
 
 function LegalIcon({ label }: { label: string }) {
   const lower = label.toLowerCase()
@@ -266,7 +263,7 @@ export default function Footer({
   compact = false,
   children,
   subscribeEndpoint = '/api/notifications/subscribe',
-  siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://techplay.example.com',
+  siteUrl = BRAND.URL,
   contact = {
     email: 'support@techplay.fr',
     phone: '+33 1 84 80 12 34',
@@ -406,7 +403,7 @@ export default function Footer({
       }
     } catch (error: unknown) {
       setStatus('error')
-      setMessage(getErrorMessage(error, t.genericError))
+      setMessage(getErrorMessageWithFallback(error, t.genericError))
 
       try {
         toast.error(t.newsletterToastError)
@@ -463,7 +460,7 @@ export default function Footer({
 
   return (
     <footer
-      className="relative overflow-hidden border-t border-token-border bg-token-surface text-token-text"
+      className="relative overflow-hidden border-t-2 border-token-border bg-token-surface text-token-text"
       role="contentinfo"
       aria-label={t.ariaFooter}
     >
@@ -473,7 +470,7 @@ export default function Footer({
       />
       <div className="absolute inset-0 backdrop-blur-[2px]" aria-hidden="true" />
 
-      <div className="relative mx-auto max-w-screen-xl px-6 pb-6 pt-12">
+      <div className="relative mx-auto max-w-screen-xl px-6 pb-8 pt-14 sm:px-8">
         <h2 className="sr-only" id="footer-heading">
           {t.footerHeading}
         </h2>

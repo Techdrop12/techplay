@@ -462,7 +462,7 @@ export default function HeroCarousel({
     <section
       ref={containerRef}
       className={cn(
-        'relative h-[60vh] w-full select-none overflow-hidden rounded-none bg-token-surface/60 shadow-2xl sm:h-[72vh] sm:rounded-3xl lg:h-[88vh]',
+        'relative h-[60vh] w-full select-none overflow-hidden rounded-2xl bg-token-surface/60 shadow-2xl sm:h-[72vh] sm:rounded-3xl lg:h-[88vh]',
         'will-change-transform touch-pan-y',
         className
       )}

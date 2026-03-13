@@ -3,6 +3,8 @@
 
 import { useCallback, useMemo, useState } from 'react'
 
+import { error as logError, warn } from '@/lib/logger'
+
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
@@ -23,7 +25,7 @@ export default function PushSubscribe() {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
       setStatus('unsupported'); return
     }
-    if (!vapidKey) { console.warn('Missing NEXT_PUBLIC_VAPID_PUBLIC_KEY'); return }
+    if (!vapidKey) { warn('Missing NEXT_PUBLIC_VAPID_PUBLIC_KEY'); return }
 
     try {
       setLoading(true)
@@ -58,7 +60,7 @@ export default function PushSubscribe() {
 
       if (res && res.ok) setStatus('enabled')
     } catch (e) {
-      console.error('Push subscribe failed', e)
+      logError('Push subscribe failed', e)
     } finally {
       setLoading(false)
     }

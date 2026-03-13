@@ -116,6 +116,7 @@ declare global {
 
     __prevOverflow?: string
     __pixelUser?: Record<string, unknown> | null
+    tpAskPush?: () => void
 
     doNotTrack?: string
     opera?: string

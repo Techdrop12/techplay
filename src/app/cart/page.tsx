@@ -6,7 +6,8 @@ import CartPageClient from '@/components/cart/CartPageClient'
 
 export const metadata: Metadata = {
   title: 'Mon panier – TechPlay',
-  description: 'Consultez les produits de votre panier avant de passer commande.',
+  description: 'Finalisez votre panier en toute confiance. Livraison offerte dès 49 €, paiement sécurisé, retours gratuits sous 30 jours.',
+  robots: { index: false, follow: true },
 }
 
 export default function CartPage() {

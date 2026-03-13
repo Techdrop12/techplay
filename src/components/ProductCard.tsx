@@ -4,7 +4,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { Star } from 'lucide-react'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { useMemo, useState } from 'react'
+import { memo, useMemo, useState } from 'react'
 
 import type { Product } from '@/types/product'
 
@@ -85,7 +85,7 @@ function getReviewsCount(product: Product): number {
   return 0
 }
 
-export default function ProductCard({
+function ProductCard({
   product,
   className,
   priority = false,
@@ -175,11 +175,13 @@ export default function ProductCard({
       aria-label={t.productAria}
       data-product-id={productId || product.slug}
       className={cn(
-        'group relative rounded-3xl p-[1px] shadow-sm transition-shadow hover:shadow-2xl',
+        'group card card-hover relative rounded-3xl p-[1px] shadow-sm',
+        'transition-[box-shadow] duration-300 ease-[var(--ease-smooth)]',
+        'hover:shadow-[var(--glow-accent)]',
         className
       )}
       whileHover={!prefersReducedMotion ? { y: -4 } : undefined}
-      transition={{ duration: 0.22, ease: 'easeOut' }}
+      transition={{ duration: 0.28, ease: [0.33, 1, 0.68, 1] }}
     >
       <meta itemProp="name" content={title} />
       <meta itemProp="image" content={image} />
@@ -189,8 +191,8 @@ export default function ProductCard({
       <div
         className={cn(
           'relative overflow-hidden rounded-[inherit]',
-          'bg-white/80 dark:bg-zinc-900/80 supports-[backdrop-filter]:backdrop-blur',
-          'border border-white/40 dark:border-white/10 ring-1 ring-gray-200/60 dark:ring-gray-800/60'
+          'bg-[hsl(var(--surface))]/95 dark:bg-[hsl(var(--surface))]/95 supports-[backdrop-filter]:backdrop-blur',
+          'border border-[hsl(var(--border))]'
         )}
       >
         <WishlistButton
@@ -208,16 +210,16 @@ export default function ProductCard({
         <Link
           href={href}
           prefetch={false}
-          className="block rounded-[inherit] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.45)]"
+          className="block rounded-[inherit] focus:outline-none focus-glow rounded-3xl"
           onClick={handleClick}
         >
-          <div className="relative aspect-[4/3] w-full bg-gray-100 dark:bg-zinc-800">
+          <div className="relative aspect-[4/3] w-full bg-[hsl(var(--surface-2))]">
             <Image
               src={image}
               alt={title}
               fill
               sizes="(min-width:1024px) 25vw, (min-width:640px) 33vw, 50vw"
-              className="object-cover transition-transform duration-700 will-change-transform group-hover:scale-105"
+              className="object-cover transition-transform duration-500 ease-[var(--ease-smooth)] will-change-transform group-hover:scale-[1.06]"
               priority={priority}
               placeholder="blur"
               blurDataURL={BLUR_DATA_URL}
@@ -236,35 +238,35 @@ export default function ProductCard({
 
             <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-col gap-2">
               {product.isNew ? (
-                <span className="rounded-full bg-green-600 px-2.5 py-0.5 text-[11px] font-semibold text-white shadow">
+                <span className="rounded-full bg-emerald-600 px-3 py-1 text-[11px] font-semibold text-white shadow-md shadow-black/10 ring-1 ring-black/10">
                   {t.new}
                 </span>
               ) : null}
 
               {product.isBestSeller ? (
-                <span className="rounded-full bg-yellow-400 px-2.5 py-0.5 text-[11px] font-semibold text-black shadow">
+                <span className="rounded-full bg-amber-400 px-3 py-1 text-[11px] font-semibold text-amber-950 shadow-md shadow-amber-900/20 ring-1 ring-amber-900/20">
                   {t.best}
                 </span>
               ) : null}
 
               {discountPct ? (
-                <span className="rounded-full bg-red-600 px-2.5 py-0.5 text-[11px] font-semibold text-white shadow">
+                <span className="rounded-full bg-red-600 px-3 py-1 text-[11px] font-semibold text-white shadow-md shadow-red-900/25 ring-1 ring-red-900/30">
                   -{discountPct}%
                 </span>
               ) : null}
 
               {lowStock ? (
-                <span className="rounded-full bg-amber-300/90 px-2.5 py-0.5 text-[11px] font-semibold text-amber-900 shadow">
+                <span className="rounded-full bg-amber-300/95 px-3 py-1 text-[11px] font-semibold text-amber-900 shadow-md shadow-amber-900/15 ring-1 ring-amber-800/20 dark:bg-amber-500/90 dark:text-amber-950">
                   {t.lowStock}
                 </span>
               ) : null}
             </div>
 
             {ratingValue > 0 ? (
-              <div className="absolute right-3 top-3 rounded-full border border-gray-200/60 bg-white/90 px-2.5 py-1 text-xs shadow backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/90">
-                <span className="inline-flex items-center gap-1">
-                  <Star size={12} className="fill-yellow-400 text-yellow-400" />
-                  <span className="font-medium">{ratingValue.toFixed(1)}</span>
+              <div className="absolute right-3 top-3 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/95 px-2.5 py-1.5 text-xs shadow-md backdrop-blur-sm">
+                <span className="inline-flex items-center gap-1.5">
+                  <Star size={12} className="fill-amber-400 text-amber-400" />
+                  <span className="font-semibold tabular-nums">{ratingValue.toFixed(1)}</span>
                 </span>
               </div>
             ) : null}
@@ -326,7 +328,7 @@ export default function ProductCard({
                 href={outOfStock ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock'}
               />
 
-              <span className="text-lg font-extrabold text-brand sm:text-xl">
+              <span className="text-lg font-extrabold tracking-tight text-[hsl(var(--accent))] sm:text-xl">
                 {formatPrice(product.price)}
               </span>
 
@@ -367,3 +369,5 @@ export default function ProductCard({
     </motion.article>
   )
 }
+
+export default memo(ProductCard)

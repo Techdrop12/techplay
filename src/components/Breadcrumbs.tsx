@@ -3,6 +3,7 @@
 import type { ReactNode, HTMLAttributes } from 'react'
 
 import Link from '@/components/LocalizedLink'
+import { BRAND } from '@/lib/constants'
 import useBreadcrumbSegments from '@/lib/useBreadcrumbSegments'
 
 type Crumb = {
@@ -156,7 +157,7 @@ export function AutoBreadcrumbs(props: Omit<BreadcrumbsProps, 'links'>) {
       {...props}
       links={links}
       home={home as HomeCrumb}
-      baseUrl={props.baseUrl ?? process.env.NEXT_PUBLIC_SITE_URL}
+      baseUrl={props.baseUrl ?? BRAND.URL}
     />
   )
 }

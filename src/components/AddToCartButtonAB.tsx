@@ -7,6 +7,7 @@ import type { Product } from '@/types/product'
 
 import AddToCartButton from '@/components/AddToCartButton'
 import { getABVariant } from '@/lib/ab-test'
+import { detectCurrency } from '@/lib/currency'
 import { logEvent, pushDataLayer } from '@/lib/ga'
 import { pixelInitiateCheckout } from '@/lib/meta-pixel'
 
@@ -36,11 +37,6 @@ const dedupe = (sig: string, ms = 1000) => {
 }
 
 // Mini helper monnaie pour l’event “buy now”
-function detectCurrency(locale?: string): 'EUR' | 'GBP' | 'USD' {
-  if (locale && locale.startsWith('en')) return 'USD'
-  return 'EUR'
-}
-
 export default function AddToCartButtonAB({
   product,
   locale = 'fr',

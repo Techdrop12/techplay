@@ -5,18 +5,26 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
 import { serverEnv } from '@/env.server'
-import { ipFromRequest } from '@/lib/rateLimit'
+import { apiError, apiJson, safeErrorForLog } from '@/lib/apiResponse'
+import { BRAND } from '@/lib/constants'
+import { getErrorMessage } from '@/lib/errors'
+import { error as logError } from '@/lib/logger'
+import { createRateLimiter, ipFromRequest } from '@/lib/rateLimit'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-const STRIPE_KEY = serverEnv.STRIPE_SECRET_KEY || ''
-const ALLOWED_ORIGINS = [SITE_URL]
-const RATE_LIMIT_WINDOW_MS = 60_000
-const RATE_LIMIT_MAX = 20
+const IS_PRODUCTION = process.env.NODE_ENV === 'production'
+const SITE_URL = BRAND.URL || (IS_PRODUCTION ? '' : 'http://localhost:3000')
+const STRIPE_KEY = serverEnv.STRIPE_SECRET_KEY?.trim() ?? ''
+const ALLOWED_ORIGINS = SITE_URL ? [SITE_URL] : []
+
+const checkoutLimiter = createRateLimiter({
+  id: 'checkout',
+  limit: IS_PRODUCTION ? 15 : 30,
+  intervalMs: 60_000,
+  strategy: 'fixed-window',
+})
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
-
-const bucket = new Map<string, { count: number; ts: number }>()
 
 const LineItem = z.object({
   name: z.string().min(1),
@@ -37,16 +45,6 @@ const BodySchema = z.object({
 
 type AllowedCurrency = 'EUR' | 'GBP' | 'USD'
 type AllowedCountry = 'FR' | 'BE' | 'LU' | 'DE' | 'ES' | 'IT' | 'GB' | 'US'
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message
-  if (typeof error === 'string') return error
-  try {
-    return JSON.stringify(error)
-  } catch {
-    return String(error)
-  }
-}
 
 function toAllowedCountries(input: unknown): AllowedCountry[] {
   const fallback: AllowedCountry[] = ['FR']
@@ -78,21 +76,6 @@ function toAllowedCountries(input: unknown): AllowedCountry[] {
   return fallback
 }
 
-function rateLimitCheck(ip: string): boolean {
-  const now = Date.now()
-  const rec = bucket.get(ip)
-
-  if (!rec || now - rec.ts > RATE_LIMIT_WINDOW_MS) {
-    bucket.set(ip, { count: 1, ts: now })
-    return true
-  }
-
-  if (rec.count >= RATE_LIMIT_MAX) return false
-
-  rec.count++
-  return true
-}
-
 function originAllowed(req: Request): boolean {
   const origin = req.headers.get('origin') || ''
   const referer = req.headers.get('referer') || ''
@@ -105,11 +88,6 @@ function originAllowed(req: Request): boolean {
   )
 }
 
-function json(data: unknown, init?: ResponseInit) {
-  const res = NextResponse.json(data, init)
-  res.headers.set('Cache-Control', 'no-store')
-  return res
-}
 
 function hashIdempotency(payload: unknown, ip: string): string {
   const h = crypto.createHash('sha256')
@@ -121,23 +99,29 @@ function hashIdempotency(payload: unknown, ip: string): string {
 
 export async function POST(request: Request) {
   try {
+    if (IS_PRODUCTION && (!SITE_URL || SITE_URL.includes('example.com'))) {
+      return apiError('Configuration invalide', 503)
+    }
     if (!originAllowed(request)) {
-      return json({ error: 'Forbidden' }, { status: 403 })
+      return apiError('Forbidden', 403)
     }
 
     const ip = ipFromRequest(request)
-    if (!rateLimitCheck(ip)) {
-      return json({ error: 'Too many requests' }, { status: 429 })
+    const rl = checkoutLimiter.check(ip)
+    if (!rl.ok) {
+      return NextResponse.json(
+        { error: 'Too many requests' },
+        { status: 429, headers: checkoutLimiter.headers(rl) }
+      )
     }
 
     const raw = await request.json().catch(() => ({}))
     const parsed = BodySchema.safeParse(raw)
 
     if (!parsed.success) {
-      return json(
-        { error: 'Invalid payload', details: parsed.error.flatten() },
-        { status: 400 }
-      )
+      const flat = parsed.error.flatten()
+      const detailsMsg = flat.formErrors?.[0] ?? parsed.error.message
+      return apiError('Invalid payload', 400, { details: detailsMsg })
     }
 
     const body = parsed.data
@@ -150,7 +134,7 @@ export async function POST(request: Request) {
         ip
       )
 
-    const origin = new URL(SITE_URL).origin
+    const origin = (SITE_URL ? new URL(SITE_URL) : new URL('http://localhost:3000')).origin
     const successUrl = `${origin}/commande/success?session_id={CHECKOUT_SESSION_ID}`
     const cancelUrl = `${origin}/commande`
 
@@ -167,7 +151,13 @@ export async function POST(request: Request) {
           ? ['US']
           : ['FR', 'BE', 'LU', 'DE', 'ES', 'IT']
 
-    if (STRIPE_KEY) {
+    if (!STRIPE_KEY) {
+      if (IS_PRODUCTION) return apiError('Service indisponible', 503)
+      const mockUrl = `${new URL(SITE_URL || 'http://localhost:3000').origin}/commande/success?mock=1`
+      return apiJson({ id: `sess_mock_${idem.slice(0, 10)}`, url: mockUrl })
+    }
+
+    {
       const Stripe = (await import('stripe')).default
       const stripe = new Stripe(STRIPE_KEY)
 
@@ -228,24 +218,16 @@ export async function POST(request: Request) {
         { idempotencyKey: idem }
       )
 
-      return json({ id: session.id, url: session.url })
+      return apiJson({ id: session.id, url: session.url })
     }
-
-    const mockUrl = `${origin}/commande/success?mock=1`
-    return json({ id: `sess_mock_${idem.slice(0, 10)}`, url: mockUrl })
   } catch (err: unknown) {
-    console.error('[checkout] error:', err)
-
-    return json(
-      {
-        error: 'Unexpected error',
-        details: process.env.NODE_ENV === 'development' ? getErrorMessage(err) : undefined,
-      },
-      { status: 500 }
-    )
+    logError('[checkout] error:', safeErrorForLog(err))
+    return apiError('Unexpected error', 500, {
+      details: process.env.NODE_ENV === 'development' ? getErrorMessage(err) : undefined,
+    })
   }
 }
 
 export async function GET() {
-  return json({ error: 'Method Not Allowed' }, { status: 405 })
+  return apiError('Method Not Allowed', 405)
 }

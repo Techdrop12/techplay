@@ -6,6 +6,7 @@ import type { Metadata } from 'next'
 import BlogCard from '@/components/blog/BlogCard'
 import Link from '@/components/LocalizedLink'
 import { getPosts } from '@/lib/blog'
+import { BRAND } from '@/lib/constants'
 import { localizePath } from '@/lib/i18n-routing'
 import {
   DEFAULT_LOCALE,
@@ -18,7 +19,7 @@ import { generateMeta, jsonLdBreadcrumbs } from '@/lib/seo'
 
 export const revalidate = 60
 
-const SITE = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
+const SITE = BRAND.URL
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -206,8 +207,8 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
       : baseTitle
 
   const description = q
-    ? `Articles correspondant à “${q}” sur le blog TechPlay.`
-    : 'Explorez nos articles, guides et conseils sur les produits TechPlay.'
+    ? `Articles correspondant à « ${q} » sur le blog TechPlay.`
+    : "Guide d'achat, tests et actualités high-tech. Conseils produits, bons plans et nouveautés pour bien choisir sur TechPlay."
 
   const sp = new URLSearchParams()
   if (q) sp.set('q', q)

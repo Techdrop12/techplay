@@ -1,40 +1,37 @@
 import { headers } from 'next/headers'
-import { NextResponse } from 'next/server'
-
-import { createOrder, getOrderByStripeEventId } from '../../../lib/db/orders.js'
 
 import type Stripe from 'stripe'
 
 import { serverEnv } from '@/env.server'
+import { apiError, apiJson, safeErrorForLog } from '@/lib/apiResponse'
+import { createOrder, getOrderByStripeEventId } from '@/lib/db/orders'
+import { error as logError } from '@/lib/logger'
 import stripe from '@/lib/stripe'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-const WEBHOOK_SECRET = serverEnv.STRIPE_WEBHOOK_SECRET || ''
-
-function json(data: unknown, init?: ResponseInit) {
-  const res = NextResponse.json(data, init)
-  res.headers.set('Cache-Control', 'no-store')
-  return res
-}
+const IS_PRODUCTION = process.env.NODE_ENV === 'production'
 
 export async function POST(req: Request) {
+  const webhookSecret = serverEnv.STRIPE_WEBHOOK_SECRET?.trim()
+  if (!webhookSecret) {
+    if (IS_PRODUCTION) return apiError('Service non configuré', 503)
+    return apiError('Webhook non configuré', 500)
+  }
+
   const hdrs = await headers()
   const sig = hdrs.get('stripe-signature')
-
-  if (!WEBHOOK_SECRET || !sig) {
-    return json({ error: 'Webhook non configuré' }, { status: 500 })
-  }
+  if (!sig) return apiError('Signature manquante', 400)
 
   const body = await req.text()
 
   let event: Stripe.Event
   try {
-    event = stripe.webhooks.constructEvent(body, sig, WEBHOOK_SECRET)
+    event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
   } catch (err) {
-    console.error('[stripe-webhook] signature invalide', err)
-    return json({ error: 'Signature invalide' }, { status: 400 })
+    logError('[stripe-webhook] signature invalide', safeErrorForLog(err))
+    return apiError('Signature invalide', 400)
   }
 
   try {
@@ -44,7 +41,7 @@ export async function POST(req: Request) {
 
         const existing = await getOrderByStripeEventId(event.id)
         if (existing) {
-          return json({ received: true, duplicate: true })
+          return apiJson({ received: true, duplicate: true })
         }
 
         const email =
@@ -81,9 +78,9 @@ export async function POST(req: Request) {
       }
     }
 
-    return json({ received: true })
+    return apiJson({ received: true })
   } catch (err) {
-    console.error('[stripe-webhook] erreur de traitement', err)
-    return json({ error: 'Erreur interne' }, { status: 500 })
+    logError('[stripe-webhook] erreur de traitement', safeErrorForLog(err))
+    return apiError('Erreur interne', 500)
   }
 }

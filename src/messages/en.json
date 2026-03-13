@@ -456,6 +456,17 @@
     "server": "Server error, please try again later"
   },
 
+  "orderSuccess": {
+    "title": "Thank you for your order 🎉",
+    "confirmationSent": "A confirmation email has been sent to the address provided.",
+    "deliveryNote": "Delivery within 48–72 h · Track your order by email",
+    "reference": "Reference",
+    "demoMode": "Demo mode: no real transaction.",
+    "noSession": "Session not specified.",
+    "continueShopping": "Continue shopping",
+    "viewOrders": "View my orders"
+  },
+
   "maintenance": {
     "title": "Maintenance",
     "message": "The site is temporarily unavailable. Please check back later."

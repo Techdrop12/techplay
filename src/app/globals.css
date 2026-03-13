@@ -5,9 +5,7 @@
 
 /* ===================== Base ===================== */
 @layer base {
-  :root {
-    color-scheme: light dark;
-  }
+  /* color-scheme défini dans design-tokens.css */
 
   html {
     scroll-behavior: smooth;
@@ -77,11 +75,13 @@
   h1 {
     font-size: var(--step-5);
     line-height: 1.05;
+    letter-spacing: var(--heading-tracking);
   }
 
   h2 {
     font-size: var(--step-4);
     line-height: 1.1;
+    letter-spacing: var(--heading-tracking);
   }
 
   h3 {
@@ -142,12 +142,34 @@
   select {
     color: hsl(var(--text));
     background-color: hsl(var(--surface));
-    border-color: hsl(var(--border));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius-lg);
+    padding: 0.625rem 1rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    transition:
+      border-color var(--dur-fast) ease,
+      box-shadow var(--dur-fast) ease,
+      background-color var(--dur-fast) ease;
+  }
+
+  input:hover,
+  textarea:hover,
+  select:hover {
+    border-color: hsl(var(--text-muted) / 0.4);
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: none;
+    border-color: hsl(var(--accent));
+    box-shadow: 0 0 0 3px hsl(var(--accent) / 0.15);
   }
 
   input::placeholder,
   textarea::placeholder {
-    color: hsl(var(--text) / 0.5);
+    color: hsl(var(--text) / 0.45);
   }
 
   ::selection {
@@ -199,15 +221,18 @@
   .card-hover {
     transition:
       box-shadow var(--dur) var(--ease-out),
-      transform var(--dur) var(--ease-out);
+      transform var(--dur) var(--ease-out),
+      border-color var(--dur-fast) ease;
   }
 
   .card-hover:hover {
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-card-hover);
+    border-color: hsl(var(--border));
   }
 
   .btn,
   .btn-primary,
+  .btn-premium,
   .btn-ghost,
   .btn-outline {
     display: inline-flex;
@@ -229,6 +254,7 @@
 
   .btn:active,
   .btn-primary:active,
+  .btn-premium:active,
   .btn-ghost:active,
   .btn-outline:active {
     transform: scale(0.98);
@@ -236,6 +262,7 @@
 
   .btn:focus-visible,
   .btn-primary:focus-visible,
+  .btn-premium:focus-visible,
   .btn-ghost:focus-visible,
   .btn-outline:focus-visible {
     box-shadow:
@@ -251,6 +278,44 @@
 
   .btn-primary:hover {
     background: hsl(var(--accent-600));
+  }
+
+  .btn-premium {
+    color: white;
+    background: var(--gradient-accent);
+    box-shadow: 0 4px 14px hsl(var(--accent) / 0.35);
+  }
+
+  .btn-premium:hover {
+    box-shadow: 0 6px 20px hsl(var(--accent) / 0.45);
+    filter: brightness(1.05);
+  }
+
+  .btn-premium,
+  .btn-primary {
+    transition:
+      box-shadow var(--dur) var(--ease-smooth),
+      filter var(--dur) var(--ease-smooth),
+      transform 150ms var(--ease-out);
+  }
+
+  .heading-display {
+    font-size: var(--step-display);
+    line-height: 1.05;
+    letter-spacing: var(--display-tracking);
+    font-weight: 800;
+    text-wrap: balance;
+  }
+
+  .hover-lift {
+    transition:
+      transform var(--dur) var(--ease-out),
+      box-shadow var(--dur) var(--ease-out);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card-hover);
   }
 
   .btn-ghost {
@@ -270,6 +335,14 @@
 
   .btn-outline:hover {
     background: hsl(var(--surface-2));
+    border-color: hsl(var(--accent) / 0.5);
+    color: hsl(var(--accent));
+  }
+
+  .btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.0625rem;
+    border-radius: var(--radius-lg);
   }
 
   .badge {
@@ -285,23 +358,67 @@
   }
 
   .text-gradient {
-    background: linear-gradient(90deg, hsl(var(--accent)), hsl(var(--accent-700)));
+    background: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--accent-700)));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
 
+  .section-spacing {
+    padding-block: var(--section-gap);
+  }
+
+  .section-spacing-sm {
+    padding-block: var(--section-gap-sm);
+  }
+
   .skeleton {
     position: relative;
-    border-radius: 0.75rem;
+    border-radius: var(--radius-2xl);
     background: linear-gradient(
-      90deg,
+      110deg,
       hsl(var(--surface-2)) 25%,
-      hsl(var(--surface)) 37%,
-      hsl(var(--surface-2)) 63%
+      hsl(var(--surface)) 40%,
+      hsl(var(--surface-2)) 65%
     );
-    background-size: 400% 100%;
-    animation: shimmer 1.2s linear infinite;
+    background-size: 200% 100%;
+    animation: shimmer 1.8s var(--ease-smooth) infinite;
+  }
+
+  .focus-glow:focus-visible {
+    outline: none;
+    box-shadow: var(--glow-accent-strong);
+  }
+
+  .stagger-children > * {
+    opacity: 0;
+    animation: slideUpStagger 0.5s var(--ease-out) forwards;
+  }
+
+  .stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+  .stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+  .stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+  .stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+  .stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+  .stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
+  .stagger-children > *:nth-child(7) { animation-delay: 0.35s; }
+  .stagger-children > *:nth-child(8) { animation-delay: 0.4s; }
+
+  .card-interactive {
+    cursor: pointer;
+    transition:
+      transform var(--dur) var(--ease-spring),
+      box-shadow var(--dur) var(--ease-out),
+      border-color var(--dur-fast) ease;
+  }
+
+  .card-interactive:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  .card-interactive:active {
+    transform: translateY(-2px) scale(1);
   }
 }
 
@@ -320,9 +437,15 @@
   }
 
   .shadow-glow-accent {
-    box-shadow:
-      0 0 0 3px hsl(var(--accent) / 0.25),
-      0 0 24px hsl(var(--accent) / 0.45);
+    box-shadow: var(--glow-accent);
+  }
+
+  .shadow-glow-accent-strong {
+    box-shadow: var(--glow-accent-strong);
+  }
+
+  .bg-gradient-mesh {
+    background-image: var(--gradient-mesh);
   }
 
   .bg-token-surface {
@@ -442,6 +565,11 @@
     }
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .stagger-children > * { animation-delay: 0s !important; }
+    .card-interactive:hover { transform: none; }
+  }
+
   .focus-ring {
     box-shadow:
       0 0 0 var(--ring-offset) hsl(var(--surface)),
@@ -469,11 +597,11 @@
 /* =============== Keyframes locales =============== */
 @keyframes shimmer {
   0% {
-    background-position: 200% 0;
+    background-position: 150% 0;
   }
 
   100% {
-    background-position: -200% 0;
+    background-position: -50% 0;
   }
 }
 
@@ -481,10 +609,9 @@
   from {
     transform: translateX(-120%);
   }
-
   to {
     transform: translateX(320%);
   }
 }
 
-/* La keyframe 'fadeInUp' est définie dans styles/design-tokens.css et réutilisée ici. */
+/* fadeInUp et slideUpStagger sont définis dans design-tokens.css */

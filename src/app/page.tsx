@@ -8,6 +8,7 @@ import ClientTrackingScript from '@/components/ClientTrackingScript'
 import Link from '@/components/LocalizedLink'
 import TrustBadges from '@/components/TrustBadges'
 import { getCategories } from '@/lib/categories'
+import { BRAND } from '@/lib/constants'
 import { getBestProducts, getRecommendedPacks } from '@/lib/data'
 
 const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'))
@@ -21,10 +22,8 @@ const FAQ = dynamic(() => import('@/components/FAQ'), {
   loading: () => <SectionSkeleton title="…" />,
 })
 
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(
-  /\/+$/,
-  ''
-)
+
+const SITE_URL = BRAND.URL
 
 const lazySectionStyle600: CSSProperties = {
   contentVisibility: 'auto',
@@ -170,16 +169,22 @@ function SectionHeader({
   return (
     <header className={center ? 'mx-auto max-w-3xl text-center' : ''}>
       {kicker ? (
-        <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent))]/90">
-          {kicker}
+        <p className="inline-block text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent))]">
+          <span className="relative inline-block pb-1 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:bg-[hsl(var(--accent))]/50 after:content-['']">
+            {kicker}
+          </span>
         </p>
       ) : null}
 
-      <Tag className="mt-2 text-balance font-extrabold tracking-tight text-[clamp(1.75rem,3vw+1rem,2.5rem)]">
+      <Tag className="mt-3 heading-display text-balance">
         <span className="text-gradient">{title}</span>
       </Tag>
 
-      {sub ? <p className="mt-3 text-sm text-token-text/70 sm:text-base">{sub}</p> : null}
+      {sub ? (
+        <p className="mt-4 max-w-2xl text-sm leading-relaxed text-token-text/70 sm:text-base [margin-inline:auto]">
+          {sub}
+        </p>
+      ) : null}
     </header>
   )
 }
@@ -189,30 +194,30 @@ function FeaturedCategories({ locale }: { locale: HomeLocale }) {
   const t = STR[locale]
 
   return (
-    <section id="categories" aria-labelledby="cats-title" className="motion-section">
+    <section id="categories" aria-labelledby="cats-title" className="motion-section section-spacing-sm">
       <SectionHeader kicker={t.catsKicker} title={t.catsTitle} sub={t.catsSub} />
 
       <h2 id="cats-title" className="sr-only">
         {t.catsTitle}
       </h2>
 
-      <ul role="list" className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-6">
+      <ul role="list" className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-6 stagger-children">
         {items.map((category) => (
           <li key={category.href}>
             <Link
               href={category.href}
               prefetch={false}
-              className="group block rounded-2xl border border-token-border bg-token-surface/70 p-4 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:shadow-elevated focus-ring sm:p-5"
+              className="group card card-interactive block rounded-2xl border border-token-border bg-token-surface/90 p-5 shadow-sm backdrop-blur focus-ring sm:p-6"
               data-gtm="home_cat_card"
               data-cat={category.label}
               aria-label={`${category.label} — ${category.desc}`}
             >
-              <category.Icon className="opacity-80 transition group-hover:opacity-100" />
-              <div className="mt-3 font-semibold">{category.label}</div>
-              <div className="text-xs text-token-text/60">{category.desc}</div>
-              <div className="mt-3 text-xs font-semibold text-[hsl(var(--accent))] opacity-0 transition group-hover:opacity-100">
+              <category.Icon className="text-[hsl(var(--accent))] opacity-90 transition group-hover:opacity-100 group-hover:scale-105" />
+              <div className="mt-4 font-semibold text-token-text">{category.label}</div>
+              <div className="mt-1 text-xs leading-relaxed text-token-text/60">{category.desc}</div>
+              <span className="mt-4 inline-block text-xs font-semibold text-[hsl(var(--accent))] opacity-0 transition group-hover:opacity-100">
                 {t.seeCat}
-              </div>
+              </span>
             </Link>
           </li>
         ))}
@@ -227,36 +232,38 @@ function SplitCTA({ locale }: { locale: HomeLocale }) {
   return (
     <section
       aria-label={t.ctaTitle}
-      className="motion-section relative overflow-hidden rounded-3xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.10)] via-transparent to-token-surface p-6 shadow-elevated sm:p-10"
+      className="motion-section section-spacing-sm relative overflow-hidden rounded-3xl border border-[hsl(var(--accent)/.25)] bg-gradient-to-br from-[hsl(var(--accent)/.14)] via-[hsl(var(--surface))] to-[hsl(var(--surface-2))] p-8 shadow-elevated sm:p-14 md:p-16"
       style={lazySectionStyle300}
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[hsl(var(--accent)/.20)] blur-3xl"
+        className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-[hsl(var(--accent)/.22)] blur-3xl"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-token-text/10 blur-3xl"
+        className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-token-text/8 blur-3xl"
       />
 
-      <div className="relative grid items-center gap-6 lg:grid-cols-2">
+      <div className="relative grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent))]/90">
+          <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent))]">
             {t.ctaOffer}
           </p>
 
-          <h3 className="mt-2 text-2xl font-extrabold sm:text-3xl">
+          <h3 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl md:text-[2.5rem]">
             {t.ctaHeadline}
             <span className="text-gradient">{t.ctaSpan}</span>
           </h3>
 
-          <p className="mt-3 text-sm text-token-text/70 sm:text-base">{t.ctaText}</p>
+          <p className="mt-4 max-w-lg text-base leading-relaxed text-token-text/75 sm:text-lg">
+            {t.ctaText}
+          </p>
 
-          <div className="mt-5 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-wrap gap-4">
             <Link
               href="/products/packs"
               prefetch={false}
-              className="inline-flex items-center rounded-xl bg-[hsl(var(--accent))] px-5 py-3 font-semibold text-white shadow hover:bg-[hsl(var(--accent)/.92)] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
+              className="btn btn-premium btn-lg inline-flex items-center gap-2 rounded-xl focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
               data-gtm="home_cta_packs"
             >
               {t.ctaPacks}
@@ -265,7 +272,7 @@ function SplitCTA({ locale }: { locale: HomeLocale }) {
             <Link
               href="/products"
               prefetch={false}
-              className="inline-flex items-center rounded-xl border border-token-border bg-token-surface px-5 py-3 font-semibold hover:shadow focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
+              className="btn btn-outline btn-lg inline-flex items-center gap-2 rounded-xl focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
               data-gtm="home_cta_products"
             >
               {t.ctaProducts}
@@ -273,7 +280,10 @@ function SplitCTA({ locale }: { locale: HomeLocale }) {
           </div>
         </div>
 
-        <div className="min-h-[180px] rounded-2xl border border-token-border bg-token-surface/60 shadow-elevated" />
+        <div
+          aria-hidden
+          className="min-h-[200px] rounded-2xl border border-token-border bg-token-surface/70 shadow-elevated sm:min-h-[240px]"
+        />
       </div>
     </section>
   )
@@ -314,21 +324,25 @@ function Testimonials({ locale }: { locale: HomeLocale }) {
         ]
 
   return (
-    <section aria-label={t.testimonialsTitle} className="motion-section">
+    <section aria-label={t.testimonialsTitle} className="motion-section section-spacing-sm">
       <SectionHeader
         kicker={t.testimonialsKicker}
         title={t.testimonialsTitle}
         sub={t.testimonialsSub}
       />
 
-      <ul role="list" className="mt-8 grid gap-4 sm:grid-cols-3">
+      <ul role="list" className="mt-12 grid gap-6 sm:grid-cols-3 stagger-children">
         {items.map((item, index) => (
           <li
             key={`${item.name}-${index}`}
-            className="rounded-2xl border border-token-border bg-token-surface/70 p-5 shadow-soft"
+            className="card card-hover relative overflow-hidden rounded-2xl border border-token-border bg-token-surface/90 p-6 shadow-sm sm:p-8"
           >
-            <p className="text-sm text-token-text/90">“{item.text}”</p>
-            <p className="mt-3 text-sm font-semibold">— {item.name}</p>
+            <span aria-hidden className="absolute right-4 top-4 text-4xl font-serif leading-none text-[hsl(var(--accent)/.15)] select-none sm:right-6 sm:top-6">&ldquo;</span>
+            <p className="relative text-pretty text-sm leading-relaxed text-token-text/90 sm:text-base">{item.text}</p>
+            <div className="mt-6 flex items-center gap-3">
+              <span aria-hidden className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-br from-[hsl(var(--accent)/.25)] to-[hsl(var(--accent)/.1)]" />
+              <p className="text-sm font-semibold text-token-text">{item.name}</p>
+            </div>
           </li>
         ))}
       </ul>
@@ -392,17 +406,21 @@ export async function HomePageView({ locale }: { locale: HomeLocale }) {
       <h1 className="sr-only">{t.metaTitle}</h1>
       <ClientTrackingScript event="homepage_view" />
 
-      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute left-1/2 -top-24 h-[420px] w-[620px] -translate-x-1/2 rounded-full bg-[hsl(var(--accent)/.20)] blur-3xl" />
-      </div>
+      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-gradient-mesh" />
+      <div aria-hidden className="pointer-events-none fixed left-1/2 top-0 h-[480px] w-[720px] -translate-x-1/2 -translate-y-1/4 rounded-full bg-[hsl(var(--accent)/.18)] blur-3xl" />
 
       <main
         id="main"
         role="main"
         tabIndex={-1}
-        className="mx-auto max-w-screen-xl scroll-smooth space-y-24 px-4 sm:px-6 md:space-y-28"
+        className="container-app mx-auto max-w-screen-xl scroll-smooth space-y-[var(--section-gap)] py-4 sm:py-6"
       >
-        <section aria-label={t.heroAria} className="motion-section" id="hero">
+        <section
+          aria-label={t.heroAria}
+          className="motion-section relative overflow-hidden rounded-3xl bg-[length:100%_100%] pt-2 sm:rounded-[2rem]"
+          id="hero"
+          style={{ backgroundImage: 'var(--gradient-hero)' }}
+        >
           <Suspense fallback={<div className="skeleton h-40 rounded-2xl sm:h-56 lg:h-72" />}>
             <HeroCarousel />
             <noscript>
@@ -418,7 +436,7 @@ export async function HomePageView({ locale }: { locale: HomeLocale }) {
         <section
           id="best-products"
           aria-label={t.productsSectionLabel}
-          className="motion-section"
+          className="motion-section section-spacing-sm"
           style={lazySectionStyle600}
         >
           <SectionHeader kicker={t.bestKicker} title={t.bestTitle} sub={t.bestSub} />
@@ -432,7 +450,7 @@ export async function HomePageView({ locale }: { locale: HomeLocale }) {
         <section
           id="packs"
           aria-label={t.packsSectionLabel}
-          className="motion-section"
+          className="motion-section section-spacing-sm"
           style={lazySectionStyle600}
         >
           <SectionHeader kicker={t.packsKicker} title={t.packsTitle} sub={t.packsSub} />
@@ -449,7 +467,7 @@ export async function HomePageView({ locale }: { locale: HomeLocale }) {
         <section
           id="faq"
           aria-label={t.faqTitle}
-          className="motion-section"
+          className="motion-section section-spacing-sm"
           style={lazySectionStyle500}
         >
           <SectionHeader kicker={t.faqKicker} title={t.faqTitle} />

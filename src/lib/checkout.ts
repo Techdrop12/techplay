@@ -270,6 +270,9 @@ export async function createCheckoutSession(
     }
 
     if (!res.ok) {
+      if (res.status === 429) {
+        throw new Error('Trop de tentatives. Réessayez dans une minute.')
+      }
       const msg =
         isRecord(data) && typeof data.error === 'string'
           ? data.error

@@ -2,6 +2,7 @@
 
 import type { BlogPost } from '@/types/blog'
 
+import { BRAND } from '@/lib/constants'
 import { localizePath, type Locale } from '@/lib/i18n-routing'
 
 type BlogJsonLdPost = BlogPost & {
@@ -16,8 +17,6 @@ interface BlogJsonLdProps {
   siteUrl?: string
 }
 
-const ORIGIN = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
-
 function iso(d?: string | number | Date): string | undefined {
   if (!d) return undefined
   const x = d instanceof Date ? d : new Date(d)
@@ -27,7 +26,7 @@ function iso(d?: string | number | Date): string | undefined {
 export default function BlogJsonLd({
   posts = [],
   locale = 'fr',
-  siteUrl = ORIGIN,
+  siteUrl = BRAND.URL,
 }: BlogJsonLdProps) {
   if (!Array.isArray(posts) || posts.length === 0) return null
 

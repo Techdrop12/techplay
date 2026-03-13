@@ -25,20 +25,10 @@ interface Props {
   imageAlt?: string
 }
 
-const RAW_ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com'
-/** ORIGIN normalisée (sans trailing slash) */
-function origin(): string {
-  try {
-    const u = new URL(RAW_ORIGIN)
-    return u.origin
-  } catch {
-    return 'https://techplay.example.com'
-  }
-}
-const ORIGIN = origin()
+import { BRAND, TWITTER_HANDLE } from '@/lib/constants'
 
-const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || 'TechPlay'
-const TWITTER_HANDLE = process.env.NEXT_PUBLIC_TWITTER_HANDLE || '@techplay'
+const ORIGIN = BRAND.URL
+const SITE_NAME = BRAND.NAME
 
 /** Convertit en URL absolue basée sur ORIGIN si relative */
 function absUrl(input?: string): string | undefined {

@@ -5,7 +5,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Product } from '@/types/product'
 
 import FreeShippingBadge from '@/components/FreeShippingBadge'
-import { formatPrice } from '@/lib/formatPrice'   // ✅ ici aussi
+import Link from '@/components/LocalizedLink'
+import { UI } from '@/lib/constants'
+import { formatPrice } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 
 type CouponSpec =
@@ -42,8 +44,8 @@ const DEFAULT_COUPONS: Record<string, CouponSpec> = {
 export default function CartSummary({
   items,
   taxRate = 0.2,
-  shippingThreshold = Number(process.env.NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD ?? 49),
-  shippingFee = Number(process.env.NEXT_PUBLIC_FLAT_SHIPPING_FEE ?? 4.9),
+  shippingThreshold = UI.FREE_SHIPPING_THRESHOLD,
+  shippingFee = UI.FLAT_SHIPPING_FEE,
   couponCodes = DEFAULT_COUPONS,
   onCouponApplied,
   onCouponRemoved,
@@ -232,6 +234,20 @@ export default function CartSummary({
           {msg}
         </p>
       </div>
+
+      {/* CTA principal : passer commande */}
+      <Link
+        href="/commande"
+        className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-4 py-3.5 font-bold text-white shadow-lg transition hover:opacity-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)]"
+        aria-label="Passer commande et payer"
+      >
+        Passer commande
+        <span aria-hidden="true">→</span>
+      </Link>
+
+      <p className="text-center text-xs text-gray-500 dark:text-gray-400">
+        Paiement sécurisé · Livraison offerte dès {formatPrice(shippingThreshold)}
+      </p>
 
       {/* Note légale */}
       <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">

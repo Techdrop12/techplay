@@ -9,6 +9,7 @@ import type { Product } from '@/types/product'
 
 import Button from '@/components/Button'
 import { useCart } from '@/hooks/useCart'
+import { detectCurrency } from '@/lib/currency'
 import { trackAddToCart as rawTrackAddToCart } from '@/lib/ga'
 import { logEvent as rawLogEvent } from '@/lib/logEvent'
 import {
@@ -79,21 +80,6 @@ function isFunction(value: unknown): value is AnyFn {
 
 function clamp(n: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, n))
-}
-
-function detectCurrency(): 'EUR' | 'GBP' | 'USD' {
-  try {
-    const htmlLang = typeof document !== 'undefined' ? document.documentElement.lang || '' : ''
-    const nav = typeof navigator !== 'undefined' ? navigator.language || '' : ''
-    const src = (htmlLang || nav).toLowerCase()
-
-    if (src.includes('gb') || src.endsWith('-uk') || src.includes('en-gb')) return 'GBP'
-    if (src.includes('us') || src.includes('en-us')) return 'USD'
-    if (src.startsWith('en')) return 'USD'
-    return 'EUR'
-  } catch {
-    return 'EUR'
-  }
 }
 
 function getDataLayer(): Array<Record<string, unknown>> | null {
@@ -384,6 +370,9 @@ export default function AddToCartButton({
           currency,
           value: price * quantity,
           items: [{ item_id: id, item_name: title, price, quantity }],
+          ...(gtmExtra?.ab_name && gtmExtra?.ab_variant
+            ? { ab_experiment: String(gtmExtra.ab_name), ab_variant: String(gtmExtra.ab_variant) }
+            : {}),
         })
 
         safeCall(rawPixelAddToCart, {

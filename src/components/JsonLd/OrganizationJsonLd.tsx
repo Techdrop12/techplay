@@ -2,6 +2,8 @@
 
 import Head from 'next/head'
 
+import { BRAND } from '@/lib/constants'
+
 type ContactPoint = {
   telephone: string
   contactType: string
@@ -17,12 +19,9 @@ interface OrgProps {
   contacts?: ContactPoint[]
 }
 
-const ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com'
-const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || 'TechPlay'
-
 export default function OrganizationJsonLd({
-  name = SITE_NAME,
-  siteUrl = ORIGIN,
+  name = BRAND.NAME,
+  siteUrl = BRAND.URL,
   logoPath = '/icons/icon-512x512.png',
   sameAs = [
     'https://www.facebook.com/techplay',

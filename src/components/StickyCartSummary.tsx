@@ -6,10 +6,11 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 
 import Link from '@/components/LocalizedLink'
 import { useCart } from '@/hooks/useCart'
-import { formatPrice } from '@/lib/formatPrice'
+import { UI } from '@/lib/constants'
 import { event } from '@/lib/ga'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 import logEvent from '@/lib/logEvent'
+import { formatPrice } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 
 type AppLocale = 'fr' | 'en'
@@ -166,9 +167,7 @@ export default function StickyCartSummary({
   const FREE_SHIP = useMemo(() => {
     if (typeof freeShippingThreshold === 'number' && freeShippingThreshold > 0) return freeShippingThreshold
     if (typeof ctxThreshold === 'number' && ctxThreshold > 0) return ctxThreshold
-
-    const env = Number(process.env.NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD)
-    return Number.isFinite(env) && env > 0 ? env : 50
+    return UI.FREE_SHIPPING_THRESHOLD
   }, [freeShippingThreshold, ctxThreshold])
 
   const subtotal = useMemo(

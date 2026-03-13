@@ -456,6 +456,17 @@
     "server": "Erreur serveur, réessayez ultérieurement"
   },
 
+  "orderSuccess": {
+    "title": "Merci pour votre commande 🎉",
+    "confirmationSent": "Un email de confirmation a été envoyé à l'adresse indiquée.",
+    "deliveryNote": "Livraison sous 48–72 h · Suivi colis par email",
+    "reference": "Référence",
+    "demoMode": "Mode démo : aucune transaction réelle.",
+    "noSession": "Session non spécifiée.",
+    "continueShopping": "Continuer mes achats",
+    "viewOrders": "Voir mes commandes"
+  },
+
   "maintenance": {
     "title": "Maintenance",
     "message": "Le site est momentanément indisponible. Revenez plus tard."

@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react'
 
+import { getErrorMessage } from '@/lib/errors'
 import { event } from '@/lib/ga'
 import { cn } from '@/lib/utils'
 
@@ -26,26 +27,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
 
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    if (error.name === 'AbortError') {
-      return 'La génération de la facture a expiré. Réessayez.'
-    }
-    return error.message || 'Impossible de générer la facture.'
+function getInvoiceErrorMessage(error: unknown): string {
+  if (error instanceof Error && error.name === 'AbortError') {
+    return 'La génération de la facture a expiré. Réessayez.'
   }
-
-  if (isRecord(error)) {
-    const name = typeof error.name === 'string' ? error.name : ''
-    const message = typeof error.message === 'string' ? error.message : ''
-
-    if (name === 'AbortError') {
-      return 'La génération de la facture a expiré. Réessayez.'
-    }
-
-    if (message) return message
+  if (isRecord(error) && (error as { name?: string }).name === 'AbortError') {
+    return 'La génération de la facture a expiré. Réessayez.'
   }
-
-  return 'Impossible de générer la facture.'
+  return getErrorMessage(error) || 'Impossible de générer la facture.'
 }
 
 function extractFilename(disposition: string | null, fallback: string): string {
@@ -182,7 +171,7 @@ export default function InvoiceButton({
         })
       } catch {}
     } catch (error: unknown) {
-      const message = getErrorMessage(error)
+      const message = getInvoiceErrorMessage(error)
       setErrorMsg(message)
 
       try {

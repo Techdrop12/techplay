@@ -1,5 +1,7 @@
 // src/lib/ga.ts
-// Couche GA / dataLayer SSR-safe, tolérante, rétro-compatible
+// Couche GA / dataLayer SSR-safe, tolérante, rétro-compatible (funnel + dashboards)
+
+import { FUNNEL_STEPS, type ListName } from './analytics-events'
 
 export const GA_TRACKING_ID =
   process.env.NEXT_PUBLIC_GA_ID ||
@@ -174,7 +176,45 @@ export function trackViewItem(params: {
   value?: number
   items: GAItem[]
 }): void {
-  logEvent('view_item', params)
+  const payload = { ...params, funnel_step: FUNNEL_STEPS.VIEW_ITEM }
+  logEvent('view_item', payload)
+  try {
+    ensureDataLayer().push({
+      event: 'view_item',
+      ecommerce: { currency: params.currency, value: params.value, items: params.items },
+      funnel_step: FUNNEL_STEPS.VIEW_ITEM,
+    })
+  } catch {
+    // no-op
+  }
+}
+
+/** Affichage d’une liste de produits (catalogue, catégorie, recommandations). Pour funnel + dashboards. */
+export function trackViewItemList(params: {
+  item_list_name?: ListName | string
+  currency?: string
+  value?: number
+  items: GAItem[]
+}): void {
+  const payload = {
+    ...params,
+    funnel_step: 'view_list' as const,
+  }
+  logEvent('view_item_list', payload)
+  try {
+    ensureDataLayer().push({
+      event: 'view_item_list',
+      ecommerce: {
+        item_list_name: params.item_list_name,
+        currency: params.currency,
+        value: params.value,
+        items: params.items,
+      },
+      funnel_step: 'view_list',
+    })
+  } catch {
+    // no-op
+  }
 }
 
 export function trackSelectItem(params: {
@@ -190,8 +230,41 @@ export function trackAddToCart(params: {
   currency?: string
   value?: number
   items: GAItem[]
+  item_list_name?: ListName | string
+  ab_experiment?: string
+  ab_variant?: string
 }): void {
-  logEvent('add_to_cart', params)
+  const payload = { ...params, funnel_step: FUNNEL_STEPS.ADD_TO_CART }
+  logEvent('add_to_cart', payload)
+  try {
+    ensureDataLayer().push({
+      event: 'add_to_cart',
+      ecommerce: { currency: params.currency, value: params.value, items: params.items },
+      funnel_step: FUNNEL_STEPS.ADD_TO_CART,
+      ...(params.item_list_name ? { item_list_name: params.item_list_name } : {}),
+      ...(params.ab_experiment ? { ab_experiment: params.ab_experiment, ab_variant: params.ab_variant } : {}),
+    })
+  } catch {
+    // no-op
+  }
+}
+
+export function trackViewCart(params: {
+  currency?: string
+  value?: number
+  items: GAItem[]
+}): void {
+  const payload = { ...params, funnel_step: FUNNEL_STEPS.VIEW_CART }
+  logEvent('view_cart', payload)
+  try {
+    ensureDataLayer().push({
+      event: 'view_cart',
+      ecommerce: { currency: params.currency, value: params.value, items: params.items },
+      funnel_step: FUNNEL_STEPS.VIEW_CART,
+    })
+  } catch {
+    // no-op
+  }
 }
 
 export function trackAddToWishlist(params: {
@@ -208,7 +281,17 @@ export function trackBeginCheckout(params: {
   coupon?: string
   items: GAItem[]
 }): void {
-  logEvent('begin_checkout', params)
+  const payload = { ...params, funnel_step: FUNNEL_STEPS.BEGIN_CHECKOUT }
+  logEvent('begin_checkout', payload)
+  try {
+    ensureDataLayer().push({
+      event: 'begin_checkout',
+      ecommerce: { currency: params.currency, value: params.value, coupon: params.coupon, items: params.items },
+      funnel_step: FUNNEL_STEPS.BEGIN_CHECKOUT,
+    })
+  } catch {
+    // no-op
+  }
 }
 
 export function trackAddShippingInfo(params: {
@@ -231,7 +314,25 @@ export function trackPurchase(params: {
   coupon?: string
   items: GAItem[]
 }): void {
-  logEvent('purchase', params)
+  const payload = { ...params, funnel_step: FUNNEL_STEPS.PURCHASE }
+  logEvent('purchase', payload)
+  try {
+    ensureDataLayer().push({
+      event: 'purchase',
+      ecommerce: {
+        transaction_id: params.transaction_id,
+        currency: params.currency,
+        value: params.value,
+        tax: params.tax,
+        shipping: params.shipping,
+        coupon: params.coupon,
+        items: params.items,
+      },
+      funnel_step: FUNNEL_STEPS.PURCHASE,
+    })
+  } catch {
+    // no-op
+  }
 }
 
 export default {
@@ -242,6 +343,8 @@ export default {
   event,
   sendGA,
   pushDataLayer,
+  trackViewItemList,
+  trackViewCart,
   mapProductToGaItem,
   trackViewItem,
   trackSelectItem,

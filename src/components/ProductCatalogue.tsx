@@ -16,6 +16,7 @@ import ProductGrid from '@/components/ProductGrid'
 import ScrollToTop from '@/components/ScrollToTop'
 import SectionTitle from '@/components/SectionTitle'
 import SectionWrapper from '@/components/SectionWrapper'
+import { LIST_NAMES } from '@/lib/analytics-events'
 import { getCurrentLocale } from '@/lib/i18n-routing'
 import { cn } from '@/lib/utils'
 
@@ -278,7 +279,7 @@ export default function ProductCatalogue({
             <ProductGrid
               products={filteredProducts}
               className="mt-2"
-              listName="catalogue_products"
+              listName={LIST_NAMES.CATALOGUE}
               id="catalogue-products-grid"
             />
           )}

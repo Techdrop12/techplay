@@ -5,6 +5,9 @@ import mongoose, { Schema, model, models } from 'mongoose'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
+import { serverEnv } from '@/env.server'
+import { getErrorMessage } from '@/lib/errors'
+import { error as logError } from '@/lib/logger'
 import { createRateLimiter, ipFromRequest, withRateLimit } from '@/lib/rateLimit'
 
 // ------------- Rate limit (5 req / min par IP, fenêtre glissante) -------------
@@ -50,7 +53,7 @@ type MongoLikeError = {
 
 // ------------- ReCAPTCHA (optionnel) -------------
 async function verifyRecaptcha(token: string | undefined, ip: string) {
-  const secret = process.env.RECAPTCHA_SECRET_KEY
+  const secret = serverEnv.RECAPTCHA_SECRET_KEY
 
   if (!secret || !token) {
     return { ok: true, score: 0 }
@@ -75,7 +78,7 @@ async function verifyRecaptcha(token: string | undefined, ip: string) {
 }
 
 // ------------- Mongo (optionnel) -------------
-const MONGO_URI = process.env.MONGODB_URI
+const MONGO_URI = serverEnv.MONGODB_URI
 
 function getReviewModel(): mongoose.Model<ReviewDoc> {
   const existing = models.Review as mongoose.Model<ReviewDoc> | undefined
@@ -121,16 +124,6 @@ function stripTags(value: string) {
   return value.replace(/<[^>]*>/g, '').trim()
 }
 
-function getErrorMessage(error: unknown, fallback = 'Payload invalide'): string {
-  if (error instanceof z.ZodError) {
-    return error.issues[0]?.message || fallback
-  }
-  if (error instanceof Error) {
-    return error.message || fallback
-  }
-  return fallback
-}
-
 function getErrorCode(error: unknown): string | number | undefined {
   if (typeof error !== 'object' || error === null) return undefined
 
@@ -165,7 +158,7 @@ async function handler(request: Request) {
     payload = ReviewSchemaZ.parse(await request.json())
   } catch (error: unknown) {
     return NextResponse.json(
-      { success: false, error: getErrorMessage(error) },
+      { success: false, error: getErrorMessage(error) || 'Payload invalide' },
       { status: 400 }
     )
   }
@@ -231,7 +224,7 @@ async function handler(request: Request) {
       )
     }
 
-    console.error('[review] DB error:', error)
+    logError('[review] DB error:', error)
 
     return NextResponse.json(
       { success: false, error: 'Erreur serveur' },

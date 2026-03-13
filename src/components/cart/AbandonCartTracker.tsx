@@ -5,6 +5,9 @@ import { useEffect, useMemo, useRef } from 'react'
 import type { Product } from '@/types/product'
 
 import { sendAbandonCartReminder } from '@/lib/abandon-cart'
+import { BUSINESS_EVENTS } from '@/lib/analytics-events'
+import { pushDataLayer } from '@/lib/ga'
+import { error as logError } from '@/lib/logger'
 
 type ReminderCart = Parameters<typeof sendAbandonCartReminder>[1]
 type ReminderCartItem = ReminderCart extends ReadonlyArray<infer T> ? T : never
@@ -128,12 +131,29 @@ export default function AbandonCartTracker({
     const sentKey = `${cleanEmail}::${signature}`
     if (lastSentKeyRef.current === sentKey) return
 
+    try {
+      pushDataLayer({
+        event: BUSINESS_EVENTS.CART_ABANDON_ELIGIBLE,
+        value: total,
+        item_count: normalized.length,
+        items: normalized.map((item) => ({
+          item_id: String(item.id),
+          item_name: item.title,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+        currency: 'EUR',
+      })
+    } catch {
+      // no-op
+    }
+
     timerRef.current = setTimeout(async () => {
       try {
         await sendAbandonCartReminder(cleanEmail, normalized)
         lastSentKeyRef.current = sentKey
       } catch (error) {
-        console.error('[AbandonCartTracker] Failed to send reminder:', error)
+        logError('[AbandonCartTracker] Failed to send reminder:', error)
       }
     }, delay)
 

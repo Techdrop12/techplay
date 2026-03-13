@@ -127,12 +127,12 @@ function TrustBadges({
     subtle: 'bg-transparent text-gray-800 dark:text-gray-200',
     premium: [
       'relative rounded-xl',
-      'bg-white/70 dark:bg-zinc-900/60 backdrop-blur',
-      'text-gray-900 dark:text-gray-100',
+      'bg-[hsl(var(--surface))]/90 backdrop-blur',
+      'text-[hsl(var(--text))]',
       'shadow-md hover:shadow-lg',
-      'ring-1 ring-gray-200/70 dark:ring-gray-800/60',
-      'border border-white/30 dark:border-white/10',
-      'transition-all',
+      'ring-1 ring-[hsl(var(--border))]',
+      'border border-[hsl(var(--border))]',
+      'transition-all duration-300 ease-[var(--ease-smooth)]',
     ].join(' '),
   }
 
@@ -140,7 +140,7 @@ function TrustBadges({
 
   return (
     <section
-      className={cn('border-t border-gray-200 dark:border-gray-800 bg-gray-50/60 dark:bg-black', spacing, className)}
+      className={cn('border-t border-[hsl(var(--border))] bg-[hsl(var(--surface-2))]/60', spacing, className)}
       aria-labelledby="trust-heading"
     >
       <h2 id="trust-heading" className="sr-only">
@@ -160,7 +160,7 @@ function TrustBadges({
               )}
 
               {/* Icône (bouclier par défaut si non spécifiée) */}
-              <Icon name={icon ?? 'shield'} className="opacity-90" />
+              <Icon name={icon ?? 'shield'} className="shrink-0 text-[hsl(var(--accent))] opacity-95" />
 
               {/* Libellé + SR */}
               <span className="relative z-10">{label}</span>

@@ -17,6 +17,8 @@ type Payload = {
 
 type AbandonCartResponse = Record<string, unknown>
 
+import { warn } from '@/lib/logger'
+
 const DEDUP_KEY = 'abandon_cart_last_send'
 const DEDUP_MS = 24 * 60 * 60 * 1000
 
@@ -96,5 +98,5 @@ export async function sendAbandonCartReminder(
     }
   }
 
-  console.warn('[abandon-cart] échec envoi :', lastError)
+  warn('[abandon-cart] échec envoi :', lastError)
 }

@@ -7,7 +7,8 @@ import type { Product } from '@/types/product'
 
 import ProductCard from '@/components/ProductCard'
 import ProductSkeleton from '@/components/ProductSkeleton'
-import { pushDataLayer } from '@/lib/ga'
+import { BRAND } from '@/lib/constants'
+import { trackViewItemList } from '@/lib/ga'
 import { cn } from '@/lib/utils'
 
 type Cols = {
@@ -145,8 +146,7 @@ export default function ProductGrid({
     if (!batchRef.current.length) return
 
     try {
-      pushDataLayer({
-        event: 'view_item_list',
+      trackViewItemList({
         item_list_name: listName,
         items: batchRef.current.map((item) => ({
           item_id: item.id,
@@ -262,7 +262,7 @@ export default function ProductGrid({
   const itemListJsonLd = useMemo(() => {
     if (!safeProducts.length) return null
 
-    const base = (process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com').replace(/\/+$/, '')
+    const base = BRAND.URL
 
     return {
       '@context': 'https://schema.org',

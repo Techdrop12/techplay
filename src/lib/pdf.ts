@@ -3,77 +3,26 @@
 
 import PDFDocument from 'pdfkit'
 
+import type {
+  InvoiceOrder,
+  InvoiceOrderItem,
+  InvoiceData,
+  InvoiceLineItem,
+  InvoiceAddress,
+} from '@/types/order'
 import type { ServerResponse } from 'http'
 import type { Readable } from 'node:stream'
 
-/* =============================== Types =============================== */
 
-export type Money = number
+import { formatDate } from '@/lib/formatDate'
 
-export type Address = {
-  name?: string
-  company?: string
-  address1?: string
-  address2?: string
-  postcode?: string
-  city?: string
-  country?: string
-  email?: string
-  phone?: string
-}
+/** @deprecated Use InvoiceOrder from @/types/order */
+export type Order = InvoiceOrder
 
-export type OrderItem = {
-  name: string
-  price: Money
-  quantity: number
-  taxRate?: number
-}
+/** @deprecated Use InvoiceOrderItem from @/types/order */
+export type OrderItem = InvoiceOrderItem
 
-export type ShippingLine = {
-  label?: string
-  price?: Money
-  taxRate?: number
-}
-
-export type Discount = {
-  code?: string
-  amount?: Money
-}
-
-export type Order = {
-  id: string | number
-  createdAt?: Date | string
-  customerName?: string
-  customer?: Address
-  items: OrderItem[]
-  shipping?: ShippingLine
-  discount?: Discount
-  currency?: string
-  taxRateDefault?: number
-}
-
-export type InvoiceItem = {
-  name: string
-  unitPrice: Money
-  quantity: number
-  taxRate: number
-  lineTotal: Money
-}
-
-export type InvoiceData = {
-  invoiceNumber: string
-  orderId: string | number
-  date: Date
-  customerName?: string
-  customer?: Address
-  items: InvoiceItem[]
-  shipping?: { label: string; price: Money; taxRate: number }
-  discount?: { code?: string; amount: Money }
-  subtotal: Money
-  tax: Money
-  total: Money
-  currency: string
-}
+export type { InvoiceData, Money } from '@/types/order'
 
 export type BrandInfo = {
   name: string
@@ -102,13 +51,13 @@ export type PdfRenderOptions = {
 
 type PdfDoc = InstanceType<typeof PDFDocument>
 
-/* ====================== Formatage: Order -> InvoiceData ===================== */
+/* ====================== Formatage: InvoiceOrder -> InvoiceData ===================== */
 
-export function formatInvoiceData(order: Order, opts: FormatOptions = {}): InvoiceData {
+export function formatInvoiceData(order: InvoiceOrder, opts: FormatOptions = {}): InvoiceData {
   const currency = order.currency || 'EUR'
   const defaultTaxRate = normalizeRate(opts.defaultTaxRate ?? order.taxRateDefault ?? 0)
 
-  const items: InvoiceItem[] = (order.items || []).map((item) => {
+  const items: InvoiceLineItem[] = (order.items || []).map((item) => {
     const rate = normalizeRate(item.taxRate ?? defaultTaxRate)
     const unitPrice = toNumber(item.price)
     const quantity = Math.max(1, Math.floor(toNumber(item.quantity)))
@@ -326,7 +275,10 @@ function drawInvoice(doc: PdfDoc, data: InvoiceData, opts: PdfRenderOptions) {
     .fontSize(12)
     .text(`Facture n°: ${data.invoiceNumber}`, rightX - 200, 50, { width: 200, align: 'right' })
     .text(`Commande: ${String(data.orderId)}`, { width: 200, align: 'right' })
-    .text(`Date: ${formatDateLocal(data.date, locale)}`, { width: 200, align: 'right' })
+    .text(`Date: ${formatDate(data.date, locale, { day: '2-digit', month: 'short', year: 'numeric' })}`, {
+      width: 200,
+      align: 'right',
+    })
 
   doc.moveDown(1.2)
   doc.fontSize(12).text('Facturé à :', startX)
@@ -502,7 +454,7 @@ function sanitizeFilename(value: string): string {
   return value.replace(/[^a-z0-9_.-]/gi, '_')
 }
 
-function formatAddress(address?: Address, fallbackName?: string): string {
+function formatAddress(address?: InvoiceAddress, fallbackName?: string): string {
   if (!address && !fallbackName) return ''
 
   const lines = [
@@ -517,12 +469,4 @@ function formatAddress(address?: Address, fallbackName?: string): string {
   ].filter((line): line is string => typeof line === 'string' && line.trim().length > 0)
 
   return lines.join('\n')
-}
-
-function formatDateLocal(date: Date, locale: string): string {
-  try {
-    return new Intl.DateTimeFormat(locale).format(date)
-  } catch {
-    return date.toISOString().slice(0, 10)
-  }
 }

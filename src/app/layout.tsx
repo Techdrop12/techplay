@@ -2,6 +2,7 @@
 
 import './globals.css'
 
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Inter, Sora } from 'next/font/google'
 import Script from 'next/script'
 import { Suspense } from 'react'
@@ -16,10 +17,12 @@ import ConsentBanner from '@/components/ConsentBanner'
 import DarkModeScript from '@/components/DarkModeScript'
 import Layout from '@/components/layout/Layout'
 import RootLayoutClient from '@/components/RootLayoutClient'
+import SkipLink from '@/components/SkipLink'
 import StickyCartSummary from '@/components/StickyCartSummary'
 import Tracking from '@/components/Tracking'
 import StickyFreeShippingBar from '@/components/ui/StickyFreeShippingBar'
 import ThemeProvider from '@/context/themeContext'
+import { BRAND } from '@/lib/constants'
 import { DEFAULT_LOCALE, toLangTag, toOgLocale } from '@/lib/language'
 
 const inter = Inter({
@@ -35,11 +38,8 @@ const sora = Sora({
   variable: '--font-sora',
 })
 
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://techplay.example.com').replace(
-  /\/+$/,
-  ''
-)
-const SITE_NAME = 'TechPlay'
+const SITE_URL = BRAND.URL
+const SITE_NAME = BRAND.NAME
 const DEFAULT_OG = '/og-image.jpg'
 const IS_PREVIEW =
   process.env.VERCEL_ENV === 'preview' || process.env.NEXT_PUBLIC_NOINDEX === '1'
@@ -242,6 +242,7 @@ export default async function RootLayout({
       </head>
 
       <body className="min-h-screen bg-token-surface text-token-text antialiased dark:[color-scheme:dark]">
+        <SkipLink />
         {GTM_ID ? (
           <noscript
             dangerouslySetInnerHTML={{
@@ -295,6 +296,7 @@ export default async function RootLayout({
             </AfterIdleClient>
 
             <Layout>{children}</Layout>
+            <SpeedInsights />
           </RootLayoutClient>
         </ThemeProvider>
 

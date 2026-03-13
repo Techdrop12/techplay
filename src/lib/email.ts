@@ -4,6 +4,7 @@
 
 import nodemailer from 'nodemailer';
 
+import { BRAND } from './constants';
 import { renderTemplate, type RenderedEmail } from './emailTemplates';
 
 const SMTP_URL = process.env.SMTP_URL; // ex: smtp://user:pass@smtp.mailgun.org:587
@@ -151,8 +152,8 @@ export async function sendTemplate<K extends Parameters<typeof renderTemplate>[0
   const rendered: RenderedEmail = renderTemplate(templateKey, { ...vars, to });
 
   // Unsubscribe header (les webmails l’affichent joliment)
-  const unsubscribeUrl = process.env.NEXT_PUBLIC_SITE_URL
-    ? `<${process.env.NEXT_PUBLIC_SITE_URL.replace(/\/+$/, '')}/unsubscribe>`
+  const unsubscribeUrl = BRAND.URL
+    ? `<${BRAND.URL}/unsubscribe>`
     : undefined;
 
   return sendEmailRaw({

@@ -68,7 +68,7 @@ export interface Product {
   attributes?: Record<string, ProductAttributeValue>
 }
 
-/** Utilisé dans le panier */
+/** Utilisé dans le panier (source unique pour context, lib/cart, abandon-cart payloads) */
 export interface CartItem {
   [key: string]: unknown
 
@@ -78,6 +78,8 @@ export interface CartItem {
   price: number
   image?: string
   quantity: number
+  sku?: string
+  category?: string
 }
 
 /** Item contenu dans un pack */

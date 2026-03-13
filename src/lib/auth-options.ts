@@ -5,14 +5,17 @@
 
 import CredentialsProvider from 'next-auth/providers/credentials'
 
+
 import { verifyPassword } from './bcrypt'
 
 import type { NextAuthOptions, Session, User } from 'next-auth'
 import type { JWT } from 'next-auth/jwt'
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@techplay.local'
-const ADMIN_HASH = process.env.ADMIN_PASSWORD_HASH
-const AUTH_SECRET = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || 'change-me'
+import { serverEnv } from '@/env.server'
+
+const ADMIN_EMAIL = serverEnv.ADMIN_EMAIL || 'admin@techplay.local'
+const ADMIN_HASH = serverEnv.ADMIN_PASSWORD_HASH
+const AUTH_SECRET = serverEnv.NEXTAUTH_SECRET || serverEnv.AUTH_SECRET || 'change-me'
 
 type AppRole = 'admin' | 'user'
 

@@ -32,3 +32,24 @@ export function formatRelative(date: Dateish, locale = 'fr') {
 export function toISO(date: Dateish) {
   return toDate(date).toISOString()
 }
+
+/** Format relatif court pour avis/commentaires (« à l'instant », « 5 min », « 2 j ») */
+export function timeAgo(date: Dateish, locale = 'fr'): string {
+  const d = toDate(date).getTime()
+  const diff = Date.now() - d
+  const abs = Math.abs(diff)
+  const minute = 60_000
+  const hour = 3_600_000
+  const day = 86_400_000
+  if (abs < minute) return locale === 'fr' ? 'à l\'instant' : 'just now'
+  if (abs < hour) {
+    const n = Math.round(diff / minute)
+    return locale === 'fr' ? `${n} min` : `${n} min`
+  }
+  if (abs < day) {
+    const n = Math.round(diff / hour)
+    return locale === 'fr' ? `${n} h` : `${n}h`
+  }
+  const n = Math.round(diff / day)
+  return locale === 'fr' ? `${n} j` : `${n}d`
+}

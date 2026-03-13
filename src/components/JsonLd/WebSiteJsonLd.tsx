@@ -2,18 +2,17 @@
 
 import Head from 'next/head'
 
+import { BRAND } from '@/lib/constants'
+
 interface Props {
   siteName?: string
   siteUrl?: string
   searchPath?: string // ex: '/search?q={search_term_string}'
 }
 
-const ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || 'https://techplay.example.com'
-const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || 'TechPlay'
-
 export default function WebSiteJsonLd({
-  siteName = SITE_NAME,
-  siteUrl = ORIGIN,
+  siteName = BRAND.NAME,
+  siteUrl = BRAND.URL,
   searchPath = '/search?q={search_term_string}',
 }: Props) {
   const jsonLd = {

@@ -11,7 +11,9 @@ import CartSummary from '@/components/cart/CartSummary'
 import EmptyCart from '@/components/cart/EmptyCart'
 import Link from '@/components/LocalizedLink'
 import { useCart } from '@/hooks/useCart'
-import { event as gaEvent } from '@/lib/ga'
+import { UI } from '@/lib/constants'
+import { event as gaEvent, mapProductToGaItem, trackViewCart } from '@/lib/ga'
+import { formatPrice } from '@/lib/utils'
 
 type CartProduct = Product & { quantity: number }
 
@@ -28,6 +30,11 @@ export default function CartPageClient() {
 
   const count = useMemo(
     () => safeCart.reduce((s, it) => s + (Number(it.quantity) || 0), 0),
+    [safeCart]
+  )
+
+  const cartTotal = useMemo(
+    () => safeCart.reduce((s, it) => s + (Number(it.price) || 0) * (Number(it.quantity) || 1), 0),
     [safeCart]
   )
 
@@ -56,10 +63,22 @@ export default function CartPageClient() {
   }, [count])
 
   useEffect(() => {
+    if (isEmpty) return
     try {
-      gaEvent?.({ action: 'view_cart', category: 'ecommerce', label: 'cart_page', value: count })
+      const value = Math.round(cartTotal * 100) / 100
+      gaEvent?.({
+        action: 'view_cart',
+        category: 'ecommerce',
+        label: 'cart_page',
+        value,
+      })
+      const items = safeCart.map((p) => ({
+        ...mapProductToGaItem(p),
+        quantity: Number(p.quantity) || 1,
+      }))
+      trackViewCart({ currency: 'EUR', value, items })
     } catch {}
-  }, [count])
+  }, [isEmpty, cartTotal, safeCart])
 
   return (
     <main
@@ -67,6 +86,20 @@ export default function CartPageClient() {
       role="main"
       aria-labelledby="cart-title"
     >
+      <nav aria-label="Fil d’Ariane" className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+        <ol className="flex items-center gap-2">
+          <li>
+            <Link href="/" className="hover:underline">
+              Accueil
+            </Link>
+          </li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page" className="font-medium text-gray-700 dark:text-gray-200">
+            Panier
+          </li>
+        </ol>
+      </nav>
+
       <p ref={srRef} className="sr-only" role="status" aria-live="polite" />
 
       <motion.h1
@@ -78,6 +111,11 @@ export default function CartPageClient() {
       >
         Mon panier{count > 0 ? ` (${count})` : ''}
       </motion.h1>
+      {!isEmpty && (
+        <p className="mt-1 text-center text-sm text-gray-600 dark:text-gray-400">
+          Livraison offerte dès {formatPrice(UI.FREE_SHIPPING_THRESHOLD)} · Paiement sécurisé · Retours gratuits sous 30 jours
+        </p>
+      )}
 
       {isEmpty ? (
         <motion.div

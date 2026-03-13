@@ -1,4 +1,5 @@
 // ✅ src/lib/seo/seoMonitor.ts
+import { warn } from '@/lib/logger'
 
 /**
  * Envoie un événement de page SEO au dataLayer (GTM)
@@ -32,7 +33,7 @@ export function logSeoEvent(event: string, data: Record<string, unknown> = {}) {
  */
 export function reportSEOIssue(message: string, context: Record<string, unknown> = {}) {
   if (typeof window !== 'undefined') {
-    console.warn('[SEO Monitor]', message, context);
+    warn('[SEO Monitor]', message, context);
     // Exemple futur : envoyer vers API /logs
     // fetch('/api/log-seo', { method: 'POST', body: JSON.stringify({ message, ...context }) })
   }

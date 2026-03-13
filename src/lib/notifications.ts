@@ -1,6 +1,8 @@
 // src/lib/notifications.ts — Web Push (VAPID) full options
 import webPush, { type PushSubscription as WebPushSubscription } from 'web-push'
 
+import { warn } from '@/lib/logger'
+
 type PushData = Record<string, unknown> | string
 
 export type PushSubscriptionLike =
@@ -63,7 +65,7 @@ export function configureWebPush() {
   if (configured) return
 
   if (!VAPID_PUBLIC || !VAPID_PRIVATE) {
-    console.warn('[web-push] VAPID keys missing – push disabled')
+    warn('[web-push] VAPID keys missing – push disabled')
     configured = true
     return
   }

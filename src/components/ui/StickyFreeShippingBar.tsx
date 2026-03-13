@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import FreeShippingBadge from '@/components/FreeShippingBadge'
 import Link from '@/components/LocalizedLink'
 import { useCart } from '@/hooks/useCart'
+import { UI } from '@/lib/constants'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 import { cn } from '@/lib/utils'
 
@@ -45,7 +46,7 @@ function pushDL(event: string, extra?: Record<string, unknown>) {
 }
 
 export default function StickyFreeShippingBar({
-  threshold = Number(process.env.NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD ?? 50),
+  threshold = UI.FREE_SHIPPING_THRESHOLD,
   autoShowDelayMs = 4000,
   minScrollY = 120,
   dismissKey = 'freeShippingBarDismissed',
@@ -163,9 +164,9 @@ export default function StickyFreeShippingBar({
       <div
         className={cn(
           'mx-auto max-w-5xl rounded-xl border shadow-lg',
-          'border-gray-200 bg-white/90 dark:border-zinc-800 dark:bg-zinc-900/90',
+          'border-[hsl(var(--border))] bg-[hsl(var(--surface))]/95',
           'supports-[backdrop-filter]:backdrop-blur-lg',
-          'pointer-events-auto'
+          'pointer-events-auto ring-1 ring-[hsl(var(--border))]/80'
         )}
       >
         <div className="flex flex-col items-center justify-between gap-2 px-3 py-2 sm:flex-row sm:gap-4 sm:px-4">

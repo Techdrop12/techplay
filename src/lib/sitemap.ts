@@ -1,5 +1,7 @@
 // src/lib/sitemap.ts — i18n-ready (FR default, EN prefix/domain) — FINAL
 
+import { BRAND } from './constants'
+
 export type ChangeFreq = 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never'
 
 export type SitemapEntry = {
@@ -10,24 +12,32 @@ export type SitemapEntry = {
 }
 
 const ROUTES = [
-  '/',                // home
-  '/products',        // catalogue
-  '/products/packs',  // packs
-  '/wishlist',        // page localisée native
-  '/commande',        // checkout
+  '/',
+  '/products',
+  '/products/packs',
+  '/wishlist',
   '/blog',
   '/contact',
   '/confidentialite',
   '/mentions-legales',
   '/cgv',
+  '/categorie',
+] as const
+
+const CATEGORY_SLUGS = [
+  'casques',
+  'claviers',
+  'souris',
+  'webcams',
+  'batteries',
+  'audio',
+  'stockage',
+  'ecrans',
 ] as const
 export type StaticRoute = (typeof ROUTES)[number]
 
-// Domains
-export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, '') || 'https://techplay.fr'
+export const SITE_URL = BRAND.URL
 
-// Optionnel : domaine EN dédié (avec next-intl "domains")
 export const SITE_URL_EN =
   process.env.NEXT_PUBLIC_SITE_URL_EN?.replace(/\/+$/, '') || ''
 
@@ -56,14 +66,20 @@ export function buildStaticSitemap(): SitemapEntry[] {
 
   for (const locale of LOCALES) {
     for (const p of ROUTES) {
-      // ✅ pas besoin de re-tester dans la 2e branche du OR, ça casse le narrowing
       const isHome = p === '/'
-
       entries.push({
         url: withBaseLocale(p, locale),
         lastmod: now,
         changefreq: isHome ? 'daily' : 'weekly',
         priority: isHome ? 1.0 : 0.7,
+      })
+    }
+    for (const slug of CATEGORY_SLUGS) {
+      entries.push({
+        url: withBaseLocale(`/categorie/${slug}`, locale),
+        lastmod: now,
+        changefreq: 'weekly',
+        priority: 0.8,
       })
     }
   }

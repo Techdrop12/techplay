@@ -5,6 +5,7 @@ import React from 'react'
 
 import type { BlogPost } from '@/types/blog'
 
+import { BRAND } from '@/lib/constants'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
 type BlogPostJsonLd = BlogPost & {
@@ -25,8 +26,7 @@ function iso(d?: string | number | Date): string | undefined {
 }
 
 export default function ArticleJsonLd({ post }: ArticleJsonLdProps) {
-  const RAW = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.techplay.fr'
-  const siteUrl = RAW.replace(/\/+$/, '')
+  const siteUrl = BRAND.URL
   const locale = getCurrentLocale()
   const pagePath = localizePath(`/blog/${post.slug}`, locale)
 

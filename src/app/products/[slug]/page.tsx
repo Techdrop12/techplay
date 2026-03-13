@@ -79,11 +79,12 @@ function readImage(record: Record<string, unknown>): string {
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }): Promise<Metadata> {
-  const product = await getProductCached(params.slug)
+  const { slug } = await params
+  const product = await getProductCached(slug)
   const productRecord = toSeoRecord(product)
-  const path = `/products/${params.slug}`
+  const path = `/products/${slug}`
 
   if (!product || !productRecord) {
     return {
@@ -95,6 +96,15 @@ export async function generateMetadata({
 
   const title = product.title?.trim() || 'Produit'
   const brand = readString(productRecord, ['brand'])
+  const category = readString(productRecord, ['category'])
+  const tags = (productRecord.tags as string[] | undefined) ?? []
+  const keywords = [
+    ...(category ? [category] : []),
+    ...(brand ? [brand] : []),
+    ...tags.filter((t): t is string => typeof t === 'string' && t.length > 0).slice(0, 8),
+    'TechPlay',
+    'achat',
+  ].filter(Boolean)
   const description = getFallbackDescription(
     {
       title: product.title,
@@ -119,6 +129,7 @@ export async function generateMetadata({
 
   return {
     ...base,
+    ...(keywords.length > 0 ? { keywords: [...new Set(keywords)] } : {}),
     robots: noindex ? { index: false, follow: true } : { index: true, follow: true },
     other: {
       ...(typeof price === 'number'
@@ -135,9 +146,10 @@ export async function generateMetadata({
 export default async function ProductPage({
   params,
 }: {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }) {
-  const product = await getProductCached(params.slug)
+  const { slug } = await params
+  const product = await getProductCached(slug)
 
   if (!product) {
     notFound()
