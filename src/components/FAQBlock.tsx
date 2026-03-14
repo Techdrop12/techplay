@@ -32,7 +32,7 @@ export default function FAQBlock({ productId }: FAQBlockProps) {
       </h3>
       <ul>
         {faq.map((item, i) => (
-          <li key={i} className="mb-2">
+          <li key={item.q ?? i} className="mb-2">
             <strong>{item.q}</strong>
             <div>{item.a}</div>
           </li>

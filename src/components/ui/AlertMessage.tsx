@@ -8,15 +8,18 @@ interface AlertMessageProps {
 }
 
 const colors: Record<AlertMessageType, string> = {
-  info: 'bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))]',
-  success: 'bg-green-100 text-green-800',
-  warning: 'bg-yellow-100 text-yellow-800',
-  error: 'bg-red-100 text-red-800',
+  info: 'bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))] dark:bg-[hsl(var(--accent)/0.2)]',
+  success:
+    'bg-[hsl(var(--success)/0.15)] text-[hsl(var(--success))] dark:bg-[hsl(var(--success)/0.25)] dark:text-[hsl(var(--success)/0.95)]',
+  warning:
+    'bg-[hsl(var(--warning)/0.2)] text-[hsl(38_92%_28%)] dark:bg-[hsl(var(--warning)/0.25)] dark:text-[hsl(38_92%_88%)]',
+  error:
+    'bg-[hsl(var(--danger)/0.15)] text-[hsl(var(--danger))] dark:bg-[hsl(var(--danger)/0.25)] dark:text-[hsl(var(--danger)/0.95)]',
 };
 
 export default function AlertMessage({ type = 'info', message }: AlertMessageProps) {
   return (
-    <div className={`p-4 rounded mb-4 ${colors[type]}`}>
+    <div className={`mb-4 rounded-[var(--radius)] p-4 ${colors[type]}`} role="alert">
       {message}
     </div>
   );

@@ -1,6 +1,7 @@
 // src/components/Spinner.tsx
 'use client'
 
+import { useTranslations } from 'next-intl'
 import * as React from 'react'
 
 import type { HTMLAttributes } from 'react'
@@ -26,11 +27,13 @@ const SIZE_STROKE: Record<SizeToken, number> = { xs: 2, sm: 2, md: 3, lg: 4, xl:
 export default function Spinner({
   size = 'md',
   thickness,
-  label = 'Chargement…',
+  label,
   center = false,
   className,
   ...rest
 }: SpinnerProps) {
+  const t = useTranslations('common')
+  const a11yLabel = label ?? t('loading')
   const px = typeof size === 'number' ? Math.max(12, size) : SIZE_PX[size]
   const stroke =
     thickness ??
@@ -72,7 +75,7 @@ export default function Spinner({
           d="M12 2a10 10 0 0 1 10 10h-4a6 6 0 0 0-6-6V2z"
         />
       </svg>
-      <span className="sr-only">{label}</span>
+      <span className="sr-only">{a11yLabel}</span>
     </div>
   )
 }

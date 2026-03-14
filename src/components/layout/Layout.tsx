@@ -1,6 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import { useTranslations } from 'next-intl'
 import { usePathname, useRouter } from 'next/navigation'
 import { Suspense, type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -184,7 +185,8 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
     return () => clearRic(id)
   }, [locale, router])
 
-  const loadingFallback = locale === 'fr' ? 'Chargement…' : 'Loading…'
+  const t = useTranslations('common')
+  const loadingFallback = t('loading')
 
   return (
     <>
@@ -206,7 +208,7 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
 
       <div
         aria-hidden
-        className={`fixed left-0 right-0 top-[env(safe-area-inset-top)] z-[90] h-[2px] overflow-hidden transition-opacity duration-200 ${
+        className={`pointer-events-none fixed left-0 right-0 top-[env(safe-area-inset-top)] z-[90] h-[2px] overflow-hidden transition-opacity duration-200 ${
           isNavigating ? 'opacity-100' : 'opacity-0'
         } motion-reduce:hidden`}
       >

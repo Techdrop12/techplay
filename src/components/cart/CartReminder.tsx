@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-import { useCart } from '@/context/cartContext'
+import { useCart } from '@/hooks/useCart'
 import { pageview } from '@/lib/analytics'
 
 export default function CartReminder() {

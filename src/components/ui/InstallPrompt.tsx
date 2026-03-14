@@ -1,5 +1,6 @@
 'use client';
 
+import { Smartphone } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function InstallPrompt() {
@@ -24,11 +25,13 @@ export default function InstallPrompt() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-[hsl(var(--surface))] border border-[hsl(var(--border))] px-6 py-3 rounded-xl shadow-[var(--shadow-lg)] flex items-center gap-4 z-40">
-      <p className="text-sm">📱 Installer TechPlay en app ?</p>
+    <div className="fixed bottom-4 left-1/2 z-40 flex -translate-x-1/2 items-center gap-4 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-6 py-3 shadow-[var(--shadow-lg)]">
+      <Smartphone aria-hidden className="h-5 w-5 shrink-0 text-[hsl(var(--accent))]" />
+      <p className="text-sm">Installer TechPlay en app ?</p>
       <button
+        type="button"
         onClick={install}
-        className="bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] px-3 py-1 rounded hover:opacity-95 text-sm"
+        className="rounded-lg bg-[hsl(var(--accent))] px-3 py-1.5 text-sm text-[hsl(var(--accent-fg))] outline-none transition hover:opacity-95 focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
       >
         Installer
       </button>

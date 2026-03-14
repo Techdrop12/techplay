@@ -1,5 +1,7 @@
 'use client'
 
+import { CheckCircle2, AlertCircle, Info, AlertTriangle } from 'lucide-react'
+import type { ReactElement } from 'react'
 import { Toaster, toast } from 'react-hot-toast'
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning'
@@ -12,25 +14,25 @@ interface ToastOptions {
 }
 
 const baseStyle = {
-  borderRadius: '6px',
+  borderRadius: 'var(--radius)',
   padding: '12px 16px',
   fontSize: '0.875rem',
   fontWeight: 500,
-  boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+  boxShadow: 'var(--shadow-md)',
 } as const
 
 const styles: Record<ToastType, { background: string; color: string }> = {
-  success: { background: '#10b981', color: '#fff' },
-  error: { background: '#ef4444', color: '#fff' },
-  info: { background: '#3b82f6', color: '#fff' },
-  warning: { background: '#f59e0b', color: '#fff' },
+  success: { background: 'hsl(var(--success))', color: '#fff' },
+  error: { background: 'hsl(var(--danger))', color: '#fff' },
+  info: { background: 'hsl(var(--accent))', color: '#fff' },
+  warning: { background: 'hsl(var(--warning))', color: '#fff' },
 }
 
-const icons: Record<ToastType, string> = {
-  success: '✅',
-  error: '❌',
-  info: 'ℹ️',
-  warning: '⚠️',
+const iconComponents: Record<ToastType, ReactElement> = {
+  success: <CheckCircle2 size={18} aria-hidden className="shrink-0" />,
+  error: <AlertCircle size={18} aria-hidden className="shrink-0" />,
+  info: <Info size={18} aria-hidden className="shrink-0" />,
+  warning: <AlertTriangle size={18} aria-hidden className="shrink-0" />,
 }
 
 export function showToast({
@@ -39,9 +41,10 @@ export function showToast({
   duration = 4000,
   position = 'top-right',
 }: ToastOptions) {
-  toast(`${icons[type]} ${message}`, {
+  toast(message, {
     duration,
     position,
+    icon: iconComponents[type],
     style: { ...baseStyle, ...styles[type] },
     ariaProps: {
       role: 'status',
@@ -58,9 +61,10 @@ export function ToastSystem() {
       toastOptions={{
         duration: 4000,
         style: {
-          borderRadius: '6px',
+          borderRadius: 'var(--radius)',
           fontSize: '0.875rem',
           fontWeight: 500,
+          boxShadow: 'var(--shadow-md)',
         },
       }}
     />

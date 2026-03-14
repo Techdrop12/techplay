@@ -33,16 +33,14 @@ module.exports = [
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
       "no-empty": ["warn", { allowEmptyCatch: true }],
-      "no-extra-semi": "warn",
+      // no-extra-semi désactivé (règle core dépréciée 8.53+, remplacée par @stylistic) ; Prettier gère les point-virgules
+      "no-extra-semi": "off",
       "@typescript-eslint/no-unused-expressions": "warn",
       "jsx-a11y/alt-text": "warn",
       "jsx-a11y/aria-props": "warn",
       "jsx-a11y/aria-proptypes": "warn",
-      "import/order": ["warn", {
-        groups: ["builtin", "external", "internal", "parent", "sibling", "index", "object", "type"],
-        "newlines-between": "always",
-        alphabetize: { order: "asc", caseInsensitive: true }
-      }],
+      // Désactivé: eslint-plugin-import utilise getTokenOrCommentBefore (API ESLint 9+) → crash avec ESLint 10
+      "import/order": "off",
     },
   },
 ];

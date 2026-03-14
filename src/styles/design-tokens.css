@@ -456,3 +456,66 @@ button {
     transform: translateY(0);
   }
 }
+
+/* ==================== Premium animations ==================== */
+@keyframes shine {
+  0% {
+    transform: translateX(-100%) skewX(-12deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateX(200%) skewX(-12deg);
+    opacity: 0;
+  }
+}
+
+@keyframes scaleInSoft {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 hsl(var(--accent) / 0.25);
+  }
+  50% {
+    box-shadow: 0 0 0 8px hsl(var(--accent) / 0);
+  }
+}
+
+/* Staggered section entrance (use with .motion-section) */
+.motion-section-delay-1 { animation-delay: 0.1s; }
+.motion-section-delay-2 { animation-delay: 0.2s; }
+.motion-section-delay-3 { animation-delay: 0.3s; }
+.motion-section-delay-4 { animation-delay: 0.4s; }
+.motion-section-delay-5 { animation-delay: 0.5s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-section-delay-1,
+  .motion-section-delay-2,
+  .motion-section-delay-3,
+  .motion-section-delay-4,
+  .motion-section-delay-5 {
+    animation-delay: 0s;
+  }
+}

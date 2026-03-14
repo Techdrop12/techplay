@@ -14,7 +14,7 @@ export default function LinkButton({ href, children, className = '' }: LinkButto
   return (
     <Link
       href={href}
-      className={`inline-block bg-[hsl(var(--accent))] hover:opacity-95 text-[hsl(var(--accent-fg))] py-2 px-4 rounded transition ${className}`}
+      className={`inline-block rounded-[var(--radius)] bg-[hsl(var(--accent))] px-4 py-2 text-[hsl(var(--accent-fg))] outline-none transition hover:opacity-95 focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 ${className}`}
     >
       {children}
     </Link>

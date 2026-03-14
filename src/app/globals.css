@@ -608,6 +608,73 @@
   .stagger-children > *:nth-child(12) { animation-delay: 0.6s; }
 }
 
+  /* Premium: card shine on hover (subtle gradient sweep) */
+  .card-shine {
+    position: relative;
+    overflow: hidden;
+  }
+  .card-shine::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 0%,
+      transparent 35%,
+      hsl(var(--accent) / 0.06) 45%,
+      hsl(var(--accent) / 0.12) 50%,
+      hsl(var(--accent) / 0.06) 55%,
+      transparent 65%,
+      transparent 100%
+    );
+    transform: translateX(-100%) skewX(-12deg);
+    pointer-events: none;
+    transition: none;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .card-shine:hover::after,
+    .card-shine:focus-within::after {
+      animation: shine 0.7s var(--ease-out) forwards;
+    }
+  }
+
+  /* Modal entrance */
+  .modal-panel-entrance {
+    animation: modalIn 0.28s var(--ease-out) forwards;
+  }
+
+  /* Subtle entrance for inline elements (headings, CTAs) */
+  .animate-in {
+    opacity: 0;
+    transform: translateY(6px);
+    animation: fadeInUp 0.5s var(--ease-out) forwards;
+  }
+  .animate-in-delay-1 { animation-delay: 0.08s; }
+  .animate-in-delay-2 { animation-delay: 0.16s; }
+  .animate-in-delay-3 { animation-delay: 0.24s; }
+  .animate-in-delay-4 { animation-delay: 0.32s; }
+  .animate-in-delay-5 { animation-delay: 0.4s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-in,
+    .animate-in-delay-1,
+    .animate-in-delay-2,
+    .animate-in-delay-3,
+    .animate-in-delay-4,
+    .animate-in-delay-5 {
+      opacity: 1;
+      transform: none;
+      animation: none;
+    }
+    .card-shine:hover::after,
+    .card-shine:focus-within::after {
+      animation: none;
+    }
+    .modal-panel-entrance {
+      animation: none;
+    }
+  }
+
 /* ================== Utilities =================== */
 @layer utilities {
   .shadow-soft {

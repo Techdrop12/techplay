@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 
 import Link from '@/components/LocalizedLink'
 
@@ -8,13 +9,12 @@ interface EmptyCartProps {
   locale?: 'fr' | 'en'
 }
 
-export default function EmptyCart({ locale = 'fr' }: EmptyCartProps) {
-  const isFr = locale === 'fr'
-
-  const message = isFr ? 'Votre panier est vide' : 'Your cart is empty'
-  const sub = isFr ? 'Découvrez nos produits et nos packs à prix avantageux.' : 'Discover our products and value packs.'
-  const cta = isFr ? 'Voir les produits' : 'Browse products'
-  const ctaPacks = isFr ? 'Voir les packs' : 'View packs'
+export default function EmptyCart({ locale: _locale }: EmptyCartProps) {
+  const t = useTranslations('cart')
+  const message = t('empty')
+  const sub = t('empty_sub')
+  const cta = t('view_products')
+  const ctaPacks = t('view_packs')
 
   return (
     <motion.div

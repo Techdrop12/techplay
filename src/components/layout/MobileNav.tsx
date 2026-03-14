@@ -21,7 +21,6 @@ const STR = {
       { href: '/wishlist', label: 'Wishlist' },
       { href: '/blog', label: 'Blog' },
       { href: '/contact', label: 'Support & contact' },
-      { href: '/products?promo=1', label: 'Offres', promo: true },
     ],
     ui: {
       openMenu: 'Ouvrir le menu mobile',
@@ -61,7 +60,6 @@ const STR = {
       { href: '/wishlist', label: 'Wishlist' },
       { href: '/blog', label: 'Blog' },
       { href: '/contact', label: 'Support & contact' },
-      { href: '/products?promo=1', label: 'Deals', promo: true },
     ],
     ui: {
       openMenu: 'Open mobile menu',
@@ -352,7 +350,18 @@ export default function MobileNav() {
     }
   }
 
-  const openMenu = () => {
+  const openedByPointerRef = useRef(false)
+
+  const openMenu = (e?: React.PointerEvent | React.MouseEvent) => {
+    e?.preventDefault()
+    e?.stopPropagation()
+    if (e?.type === 'pointerdown') {
+      openedByPointerRef.current = true
+    }
+    if (!e && openedByPointerRef.current) {
+      openedByPointerRef.current = false
+      return
+    }
     setOpen(true)
     try {
       navigator.vibrate?.(8)
@@ -463,9 +472,12 @@ export default function MobileNav() {
     if (open) {
       lockScroll()
       window.addEventListener('keydown', onKey)
-      window.setTimeout(() => {
-        searchRef.current?.focus()
-      }, 0)
+      const isNarrow = typeof window !== 'undefined' && window.innerWidth < 768
+      if (!isNarrow) {
+        window.setTimeout(() => {
+          searchRef.current?.focus()
+        }, 0)
+      }
     } else {
       unlockScroll()
       window.removeEventListener('keydown', onKey)
@@ -581,13 +593,15 @@ export default function MobileNav() {
       <button
         ref={triggerRef}
         type="button"
-        onClick={openMenu}
+        onClick={() => openMenu()}
+        onPointerDown={openMenu}
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={dialogId}
         aria-label={t.ui.openMenu}
         aria-keyshortcuts="Alt+M"
-        className="grid min-h-[2.75rem] min-w-[2.75rem] place-items-center rounded-xl hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 md:hidden"
+        className="touch-manipulation grid shrink-0 min-h-[2.75rem] min-w-[2.75rem] place-items-center rounded-xl hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 md:hidden"
+        style={{ touchAction: 'manipulation' }}
       >
         <Icon.Menu />
       </button>

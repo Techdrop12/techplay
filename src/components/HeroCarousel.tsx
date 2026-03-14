@@ -612,17 +612,19 @@ export default function HeroCarousel({
 
       {current?.text || current?.ctaLabel ? (
         <div className="absolute inset-0 z-10 grid place-items-center px-5 text-left sm:px-10">
-          <div className="mx-auto flex w-full max-w-5xl flex-col items-start gap-6 sm:gap-7 md:gap-8">
+          <div className="mx-auto flex w-full max-w-2xl flex-col items-start gap-4 sm:gap-5 md:gap-6">
             {current?.text ? (
-              <h2
-                className={cn(
-                  'max-w-xl font-semibold tracking-tight text-white drop-shadow-[0_22px_55px_rgba(0,0,0,0.9)] sm:max-w-3xl',
-                  'bg-gradient-to-b from-white via-white to-white/85 bg-clip-text text-transparent',
-                  TEXT_SIZES[textSize]
-                )}
-              >
-                {current.text}
-              </h2>
+              <div className="rounded-2xl bg-black/40 px-5 py-4 backdrop-blur-sm sm:px-6 sm:py-5">
+                <h2
+                  className={cn(
+                    'max-w-md font-semibold tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] sm:max-w-xl',
+                    'bg-gradient-to-b from-white via-white to-white/90 bg-clip-text text-transparent',
+                    TEXT_SIZES[textSize === 'xl' ? 'lg' : textSize]
+                  )}
+                >
+                  {current.text}
+                </h2>
+              </div>
             ) : null}
 
             {current?.ctaLabel ? (
@@ -656,7 +658,7 @@ export default function HeroCarousel({
                   </svg>
                 </Link>
                 {current.alt ? (
-                  <p className="max-w-xs text-xs font-medium text-white/70 sm:max-w-sm sm:text-[13px]">
+                  <p className="max-w-xs rounded-lg bg-black/30 px-3 py-1.5 text-xs font-medium text-white/85 backdrop-blur-sm sm:max-w-sm sm:text-[13px]">
                     {current.alt}
                   </p>
                 ) : null}

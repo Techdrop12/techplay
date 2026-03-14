@@ -63,11 +63,11 @@ export default function ScrollToTop({
       type="button"
       onClick={scrollTop}
       className={cn(
-        'fixed z-50 inline-grid h-11 w-11 place-items-center rounded-full shadow-lg outline-none transition',
-        'focus-visible:ring-2 focus-visible:ring-accent',
+        'fixed z-50 inline-grid h-11 w-11 place-items-center rounded-full shadow-[var(--shadow-md)] outline-none transition',
+        'focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2',
         highContrast
-          ? 'bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90'
-          : 'bg-accent text-white hover:bg-accent/90',
+          ? 'bg-[hsl(var(--text))] text-[hsl(var(--bg))] hover:opacity-90 dark:bg-[hsl(var(--text))] dark:text-[hsl(var(--bg))]'
+          : 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] hover:opacity-90',
         positionClassName,
         className
       )}

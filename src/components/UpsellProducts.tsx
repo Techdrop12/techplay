@@ -6,7 +6,7 @@ import ProductCard from './ProductCard';
 
 import type { Product } from '@/types/product';
 
-import { useCart } from '@/context/cartContext';
+import { useCart } from '@/hooks/useCart';
 
 export default function UpsellProducts() {
   const { cart } = useCart();

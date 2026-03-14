@@ -28,10 +28,12 @@
     "saving": "Enregistrement…",
     "deleting": "Suppression…",
     "error": "Une erreur est survenue.",
+    "error_label": "Erreur",
     "success": "Opération réussie",
     "retry": "Réessayer",
     "cancel": "Annuler",
     "confirm": "Confirmer",
+    "confirm_default_message": "Voulez-vous continuer ?",
     "close": "Fermer",
     "apply": "Appliquer",
     "edit": "Modifier",
@@ -40,14 +42,20 @@
     "yes": "Oui",
     "no": "Non",
     "back": "Retour",
+    "back_to_home": "Retour à l'accueil",
     "see_more": "Voir plus",
     "see_less": "Voir moins",
     "search": "Rechercher",
     "search_placeholder": "Rechercher un produit ou une marque…",
     "empty_state": "Rien à afficher pour le moment.",
+    "no_result": "Aucun résultat trouvé.",
+    "see_faq": "Voir la FAQ",
     "unit_price": "{value, number, ::currency/EUR}",
     "percent": "{value, number, percent}",
-    "copied": "Copié !"
+    "copied": "Copié !",
+    "quantity_decrease": "Diminuer la quantité",
+    "quantity_increase": "Augmenter la quantité",
+    "quantity_value": "Quantité {value}"
   },
 
   "nav": {
@@ -135,7 +143,15 @@
     "analytics": "Mesure d’audience",
     "ads": "Publicité",
     "functional": "Fonctionnels",
-    "security": "Sécurité"
+    "security": "Sécurité",
+    "banner_title_long": "Votre confidentialité chez TechPlay",
+    "banner_desc_long": "Nous utilisons des cookies pour mesurer l'audience et, si vous l'acceptez, pour la publicité. Vous pourrez changer d'avis à tout moment dans les paramètres.",
+    "settings": "Paramètres",
+    "save": "Sauvegarder",
+    "back": "Retour",
+    "analytics_recommended": "(recommandé)",
+    "functional_always_active": "Fonctionnels & sécurité sont toujours actifs.",
+    "learn_more": "En savoir plus"
   },
 
   "toasts": {
@@ -249,10 +265,20 @@
     "results": "{count, plural, one {# produit} other {# produits}}",
     "best_sellers": "Meilleures ventes",
     "new_arrivals": "Nouveautés",
-    "low_stock": "Plus que {count} en stock"
+    "low_stock": "Plus que {count} en stock",
+    "display_count": "Affichage {current}/{total}",
+    "popularity": "Popularité",
+    "promo": "Promo",
+    "in_stock": "En stock",
+    "loading_products": "Chargement des produits…",
+    "load_more": "Charger plus",
+    "no_products": "Aucun produit trouvé.",
+    "displayed_count": "{count, plural, one {# produit affiché.} other {# produits affichés.}}",
+    "load_more_aria": "Charger plus de produits"
   },
 
   "product": {
+    "default_title": "Produit",
     "added_to_cart": "{title} ajouté au panier",
     "out_of_stock": "Rupture de stock",
     "quantity": "Quantité",
@@ -293,6 +319,7 @@
   },
 
   "cart": {
+    "summary_title": "Récapitulatif",
     "your_cart": "Votre panier",
     "empty": "Votre panier est vide",
     "total": "Total",
@@ -308,7 +335,102 @@
     "add_x_more_fmt": "Ajoutez {missing, number, ::currency/EUR} pour la livraison gratuite",
     "summary_mobile_label": "Résumé du panier",
     "items_count": "{count, plural, one {# article} other {# articles}}",
-    "view_cart": "Voir le panier"
+    "view_cart": "Voir le panier",
+    "checkout_btn": "Passer commande",
+    "checkout_btn_aria": "Passer commande et payer",
+    "shipping_free": "Offerte",
+    "vat_est": "TVA (est.)",
+    "discount_label": "Remise",
+    "remove_code": "Retirer",
+    "remove_code_aria": "Retirer le code promo",
+    "coupon_placeholder": "Code promo",
+    "coupon_aria": "Code promo",
+    "apply_code": "Appliquer le code",
+    "you_save": "Vous économisez {amount}.",
+    "footer_secure": "Paiement sécurisé · Livraison offerte dès {threshold} · Retours 30 jours. Montants estimatifs.",
+    "code_invalid": "Code invalide.",
+    "code_applied": "Code appliqué ✔︎",
+    "code_removed": "Code retiré.",
+    "code_label": "Code :",
+    "announce_invalid": "Code promo invalide",
+    "announce_applied": "Code {code} appliqué",
+    "announce_removed": "Code promo retiré",
+    "no_items": "Aucun article dans le panier.",
+    "empty_sub": "Découvrez nos produits et nos packs à prix avantageux.",
+    "view_products": "Voir les produits",
+    "view_packs": "Voir les packs",
+    "breadcrumb_aria": "Fil d'Ariane",
+    "cart_content_aria": "Contenu du panier",
+    "page_title": "Mon panier",
+    "explore_products": "Explorer les produits",
+    "cart_empty_sr": "Panier vide",
+    "items_in_cart_sr": "{count} article(s) dans le panier",
+    "items_added_sr": "{diff} article(s) ajouté(s). {count} au total.",
+    "items_removed_sr": "{diff} article(s) retiré(s). {count} au total."
+  },
+
+  "hero": {
+    "cta_new": "Voir les nouveautés"
+  },
+
+  "promo_bar": {
+    "text": "Livraison offerte dès 49€ d'achat · Retours gratuits 14j · Support 7j/7"
+  },
+
+  "theme": {
+    "switch_to_light": "Passer en thème clair",
+    "switch_to_dark": "Passer en thème sombre",
+    "light": "Clair",
+    "dark": "Sombre"
+  },
+
+  "reassurance": {
+    "returns_30": "Retours gratuits 30 jours",
+    "shipping_50": "Livraison offerte dès 50 €",
+    "payment_100": "Paiement 100 % sécurisé"
+  },
+
+  "trust_badges": {
+    "payment_secure": "Paiement sécurisé",
+    "payment_secure_sr": "Paiement sécurisé par Stripe, chiffrement SSL",
+    "delivery_48_72": "Livraison 48–72 h",
+    "delivery_48_72_sr": "Livraison en 48 à 72 h ouvrées",
+    "support": "Support réactif",
+    "support_sr": "Équipe support joignable pour toute question",
+    "returns_30": "Retours 30 jours",
+    "returns_30_sr": "Retours et remboursement sous 30 jours",
+    "heading_sr": "Nos garanties de confiance"
+  },
+
+  "not_found": {
+    "title": "404 – Page introuvable",
+    "message": "Désolé, cette page n'existe pas ou a été déplacée.",
+    "details_heading": "Détails",
+    "path_requested": "Chemin demandé :",
+    "back_home": "Retour à l'accueil",
+    "go_back": "Page précédente"
+  },
+
+  "error_page": {
+    "title": "Une erreur est survenue"
+  },
+
+  "success_page": {
+    "title": "Commande validée",
+    "thank_you": "Merci pour votre achat ! Vous recevrez un email de confirmation dans quelques instants.",
+    "continue_shopping": "Continuer mes achats"
+  },
+
+  "login_error": {
+    "title": "Erreur de connexion",
+    "message": "Une erreur est survenue. Vous pouvez réessayer ou retourner à l'accueil."
+  },
+
+  "checkout_steps": {
+    "cart": "Panier",
+    "details": "Coordonnées",
+    "payment": "Paiement",
+    "confirmation": "Confirmation"
   },
 
   "checkout": {
@@ -320,7 +442,15 @@
     "place_order": "Payer maintenant",
     "processing": "Traitement…",
     "pay_secure": "Paiement sécurisé",
-    "error_generic": "Une erreur est survenue lors du paiement."
+    "error_generic": "Une erreur est survenue lors du paiement.",
+    "summary_title": "Récapitulatif",
+    "summary_aria": "Récapitulatif commande",
+    "total_to_pay": "Total à payer"
+  },
+
+  "delivery": {
+    "estimate_label": "Livraison estimée :",
+    "business_days": "(jours ouvrés)"
   },
 
   "commande": {
@@ -436,6 +566,12 @@
   "blog": {
     "title": "Blog TechPlay",
     "no_posts": "Aucun article pour le moment.",
+    "no_articles_search": "Aucun article pour cette recherche",
+    "no_results_for_query": "Aucun résultat pour « {query} ». Essayez d'autres mots-clés ou consultez nos guides dès leur publication.",
+    "view_all_blog": "Voir tout le blog",
+    "view_all_articles": "Voir tous les articles",
+    "search_placeholder": "Rechercher un article…",
+    "search_aria": "Rechercher dans le blog",
     "read_more": "Lire la suite",
     "author": "Auteur : {author}",
     "published_on": "Publié le {date}"
@@ -511,5 +647,38 @@
 
   "sitemap": {
     "title": "Plan du site"
+  },
+
+  "reviews": {
+    "empty_error": "Votre message est vide.",
+    "minlen_error": "Votre message doit contenir au moins 20 caractères.",
+    "rating_error": "Veuillez sélectionner une note valide.",
+    "duplicate_error": "Vous avez déjà envoyé cet avis récemment.",
+    "thank_you": "Merci pour votre avis !",
+    "submit_error": "Une erreur est survenue, merci de réessayer.",
+    "form_label": "Formulaire d'avis",
+    "write_review": "Laisser un avis",
+    "name_label": "Nom (optionnel)",
+    "name_ph": "Votre prénom",
+    "rating_label": "Note globale",
+    "textarea_label": "Votre avis",
+    "placeholder": "Partagez votre expérience…",
+    "helper_text": "Soyez précis et respectueux. Au moins 20 caractères.",
+    "sending": "Envoi en cours…",
+    "cooldown": "Patientez {seconds}s…",
+    "submit": "Envoyer l'avis",
+    "error_loading": "Impossible de charger les avis.",
+    "retry": "Réessayer",
+    "no_reviews": "Aucun avis pour le moment.",
+    "aria_label": "Avis clients",
+    "title": "Avis clients",
+    "filter_label": "Filtrer par note",
+    "filter_stars": "{count} étoile(s)",
+    "clear_filter": "Toutes les notes",
+    "clear": "Tout",
+    "sort_label": "Trier",
+    "sort_recent": "Récents",
+    "sort_helpful": "Utiles",
+    "verified": "Achat vérifié"
   }
 }

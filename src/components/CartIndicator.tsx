@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useContext } from 'react';
 
 import { CartAnimationContext } from '@/context/cartAnimationContext';
-import { useCart } from '@/context/cartContext';
+import { useCart } from '@/hooks/useCart';
 
 export default function CartIndicator() {
   const { cart } = useCart();

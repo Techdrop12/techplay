@@ -2,6 +2,7 @@
 'use client'
 
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useRef } from 'react'
 
 import type { Product } from '@/types/product'
@@ -31,6 +32,7 @@ export default function CartList({
   onClear,
   className = '',
 }: CartListProps) {
+  const t = useTranslations('cart')
   const prefersReducedMotion = useReducedMotion()
   const srRef = useRef<HTMLSpanElement | null>(null)
   const prevCountRef = useRef<number>(0)
@@ -89,7 +91,7 @@ export default function CartList({
         animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
         transition={{ duration: 0.25 }}
       >
-        Aucun article dans le panier.
+        {t('no_items')}
       </motion.p>
     )
   }

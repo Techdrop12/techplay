@@ -1,6 +1,7 @@
 // src/components/ui/DeliveryEstimate.tsx — premium (no emoji + i18n + a11y)
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useMemo } from 'react'
 
 type Props = {
@@ -68,6 +69,7 @@ export default function DeliveryEstimate({
   className = '',
   showIcon = true,
 }: Props) {
+  const t = useTranslations('delivery')
   const locale =
     (typeof document !== 'undefined' && document.documentElement.lang) ||
     (typeof navigator !== 'undefined' && navigator.language) ||
@@ -104,7 +106,7 @@ export default function DeliveryEstimate({
         </span>
       )}
       <span>
-        Livraison estimée :{' '}
+        {t('estimate_label')}{' '}
         <strong>
           {isRange ? (
             <>
@@ -114,7 +116,7 @@ export default function DeliveryEstimate({
             minDateStr
           )}
         </strong>
-        {businessDaysOnly && <span className="ml-1 text-xs opacity-70">(jours ouvrés)</span>}
+        {businessDaysOnly && <span className="ml-1 text-xs opacity-70">{t('business_days')}</span>}
       </span>
     </p>
   )

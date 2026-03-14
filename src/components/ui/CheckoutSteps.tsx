@@ -1,5 +1,10 @@
+'use client'
+
+import { useTranslations } from 'next-intl'
+
 export default function CheckoutSteps({ step = 1 }) {
-  const steps = ['Panier', 'Coordonnées', 'Paiement', 'Confirmation'];
+  const t = useTranslations('checkout_steps')
+  const steps = [t('cart'), t('details'), t('payment'), t('confirmation')]
   return (
     <div className="flex justify-between text-sm text-token-text/70 py-4">
       {steps.map((label, index) => (

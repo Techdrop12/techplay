@@ -23,7 +23,7 @@ export default function Accordion({ items }: AccordionProps) {
   return (
     <div className="border rounded shadow-sm divide-y">
       {items.map(({ title, content }: AccordionItem, idx: number) => (
-        <div key={idx} className="p-4">
+        <div key={title || idx} className="p-4">
           <button
             onClick={() => toggleIndex(idx)}
             aria-expanded={openIndex === idx}

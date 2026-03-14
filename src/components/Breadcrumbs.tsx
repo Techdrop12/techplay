@@ -1,5 +1,8 @@
 // src/components/Breadcrumbs.tsx
 // Fil d'Ariane accessible + SEO (JSON-LD optionnel), TS strict, design propre.
+'use client'
+
+import { useTranslations } from 'next-intl'
 import type { ReactNode, HTMLAttributes } from 'react'
 
 import Link from '@/components/LocalizedLink'
@@ -42,7 +45,7 @@ function joinUrl(base: string | undefined, path?: string) {
 
 export default function Breadcrumbs({
   links,
-  home = { href: '/', label: 'Accueil' },
+  home: homeProp,
   separator = <span aria-hidden="true">/</span>,
   jsonLd = true,
   baseUrl,
@@ -50,6 +53,10 @@ export default function Breadcrumbs({
   className = '',
   ...rest
 }: BreadcrumbsProps) {
+  const t = useTranslations('nav')
+  const defaultHome: HomeCrumb = { href: '/', label: t('home') }
+  const home = homeProp ?? defaultHome
+
   if (!Array.isArray(links) || links.length === 0) return null
 
   const needsHome =
@@ -57,7 +64,7 @@ export default function Breadcrumbs({
     !(
       links[0]?.href === '/' ||
       links[0]?.label.toLowerCase() ===
-        (typeof home === 'object' ? home.label.toLowerCase() : 'accueil')
+        (typeof home === 'object' ? home.label.toLowerCase() : t('home').toLowerCase())
     )
 
   const fullCrumbs: Crumb[] =
@@ -111,7 +118,7 @@ export default function Breadcrumbs({
               ) : (
                 <Link
                   href={crumb.href}
-                  className="hover:underline underline-offset-2 decoration-1 text-foreground/80 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring rounded-sm"
+                  className="rounded-[var(--radius-sm)] text-foreground/80 decoration-1 underline-offset-2 outline-none hover:underline hover:text-foreground focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
                 >
                   {labelEl}
                 </Link>

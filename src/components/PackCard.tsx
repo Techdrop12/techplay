@@ -441,7 +441,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
           aria-label={t.readPack}
         >
           <div
-            className="relative aspect-[4/3] w-full overflow-hidden rounded-[1.45rem] bg-[hsl(var(--surface-2))] sm:aspect-[16/9]"
+            className="card-shine relative aspect-[4/3] w-full overflow-hidden rounded-[1.45rem] bg-[hsl(var(--surface-2))] sm:aspect-[16/9]"
             aria-busy={!imageLoaded}
           >
             <Image

@@ -179,7 +179,7 @@ function SplitCTA({ locale }: { locale: HomeLocale }) {
   return (
     <section
       aria-label={t.ctaTitle}
-      className="motion-section section-spacing-sm relative overflow-hidden rounded-[var(--radius-3xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-sm sm:px-12 sm:py-14 md:px-16 md:py-20"
+      className="motion-section motion-section-delay-4 section-spacing-sm relative overflow-hidden rounded-[var(--radius-3xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-sm sm:px-12 sm:py-14 md:px-16 md:py-20"
       style={lazySectionStyle300}
     >
       <div
@@ -281,14 +281,14 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
         >
           <div className="container-app relative z-10 grid gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1.2fr)] lg:items-center lg:gap-12 lg:py-12">
             <div className="space-y-6 sm:space-y-7">
-              <span className="inline-block text-[var(--step-subtitle)] font-bold uppercase tracking-[0.22em] text-[hsl(var(--accent))]">
+              <span className="animate-in inline-block text-[var(--step-subtitle)] font-bold uppercase tracking-[0.22em] text-[hsl(var(--accent))]">
                 {t.heroBadge}
               </span>
-              <h2 className="heading-section text-balance max-w-xl font-extrabold sm:[font-size:var(--step-5)] md:text-5xl lg:text-[2.75rem]">
+              <h2 className="animate-in animate-in-delay-1 heading-section text-balance max-w-xl font-extrabold sm:[font-size:var(--step-5)] md:text-5xl lg:text-[2.75rem]">
                 {t.heroTitle}
               </h2>
-              <p className="max-w-lg heading-section-sub font-medium leading-snug">{t.heroSubtitle}</p>
-              <div className="flex flex-col items-stretch gap-3 pt-3 sm:flex-row sm:flex-wrap sm:items-center">
+              <p className="animate-in animate-in-delay-2 max-w-lg heading-section-sub font-medium leading-snug">{t.heroSubtitle}</p>
+              <div className="animate-in animate-in-delay-3 flex flex-col items-stretch gap-3 pt-3 sm:flex-row sm:flex-wrap sm:items-center">
                 <Link
                   href="/products"
                   prefetch={false}
@@ -341,7 +341,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
         <section
           id="best-products"
           aria-label={t.productsSectionLabel}
-          className="motion-section section-spacing-sm"
+          className="motion-section motion-section-delay-1 section-spacing-sm"
           style={lazySectionStyle600}
         >
           <SectionHeader kicker={t.bestKicker} title={t.bestTitle} sub={t.bestSub} />
@@ -354,7 +354,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
         <section
           id="packs"
           aria-label={t.packsSectionLabel}
-          className="motion-section section-spacing-sm"
+          className="motion-section motion-section-delay-2 section-spacing-sm"
           style={lazySectionStyle600}
         >
           <SectionHeader kicker={t.packsKicker} title={t.packsTitle} sub={t.packsSub} />
@@ -368,7 +368,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
         <section
           id="faq"
           aria-label={t.faqTitle}
-          className="motion-section section-spacing-sm"
+          className="motion-section motion-section-delay-3 section-spacing-sm"
           style={lazySectionStyle500}
         >
           <SectionHeader kicker={t.faqKicker} title={t.faqTitle} />

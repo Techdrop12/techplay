@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import type { Metadata } from 'next'
 
 import CartPageClient from '@/components/cart/CartPageClient'
+import CartPageFallback from '@/components/cart/CartPageFallback'
 
 export const metadata: Metadata = {
   title: 'Mon panier – TechPlay',
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function CartPage() {
   return (
-    <Suspense fallback={<div className="py-16 text-center">Chargement du panier…</div>}>
+    <Suspense fallback={<CartPageFallback />}>
       <CartPageClient />
     </Suspense>
   )

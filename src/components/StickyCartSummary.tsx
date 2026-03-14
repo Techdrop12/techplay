@@ -9,7 +9,7 @@ import { useCart } from '@/hooks/useCart'
 import { UI } from '@/lib/constants'
 import { event } from '@/lib/ga'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
-import logEvent from '@/lib/logEvent'
+import { logEvent } from '@/lib/logEvent'
 import { formatPrice } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 

@@ -28,10 +28,12 @@
     "saving": "Saving…",
     "deleting": "Deleting…",
     "error": "An error occurred.",
+    "error_label": "Error",
     "success": "Success",
     "retry": "Retry",
     "cancel": "Cancel",
     "confirm": "Confirm",
+    "confirm_default_message": "Do you want to continue?",
     "close": "Close",
     "apply": "Apply",
     "edit": "Edit",
@@ -40,14 +42,20 @@
     "yes": "Yes",
     "no": "No",
     "back": "Back",
+    "back_to_home": "Back to home",
     "see_more": "See more",
     "see_less": "See less",
     "search": "Search",
     "search_placeholder": "Search for a product or brand…",
     "empty_state": "Nothing to display yet.",
+    "no_result": "No results found.",
+    "see_faq": "See FAQ",
     "unit_price": "{value, number, ::currency/EUR}",
     "percent": "{value, number, percent}",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "quantity_decrease": "Decrease quantity",
+    "quantity_increase": "Increase quantity",
+    "quantity_value": "Quantity {value}"
   },
 
   "nav": {
@@ -128,14 +136,22 @@
 
   "consent": {
     "banner_title": "Your privacy",
+    "banner_title_long": "Your privacy at TechPlay",
     "banner_desc": "We use cookies to measure traffic and improve your experience.",
+    "banner_desc_long": "We use cookies to measure traffic and, if you accept, for advertising. You can change your mind at any time in settings.",
     "accept_all": "Accept all",
     "reject_all": "Reject all",
     "customize": "Customize",
+    "settings": "Settings",
+    "save": "Save",
+    "back": "Back",
     "analytics": "Analytics",
+    "analytics_recommended": "(recommended)",
     "ads": "Advertising",
     "functional": "Functional",
-    "security": "Security"
+    "security": "Security",
+    "functional_always_active": "Functional and security cookies are always on.",
+    "learn_more": "Learn more"
   },
 
   "toasts": {
@@ -249,10 +265,20 @@
     "results": "{count, plural, one {# product} other {# products}}",
     "best_sellers": "Best sellers",
     "new_arrivals": "New arrivals",
-    "low_stock": "Only {count} left in stock"
+    "low_stock": "Only {count} left in stock",
+    "display_count": "Showing {current}/{total}",
+    "popularity": "Popularity",
+    "promo": "Sale",
+    "in_stock": "In stock",
+    "loading_products": "Loading products…",
+    "load_more": "Load more",
+    "no_products": "No products found.",
+    "displayed_count": "{count, plural, one {# product displayed.} other {# products displayed.}}",
+    "load_more_aria": "Load more products"
   },
 
   "product": {
+    "default_title": "Product",
     "added_to_cart": "{title} added to cart",
     "out_of_stock": "Out of stock",
     "quantity": "Quantity",
@@ -293,6 +319,7 @@
   },
 
   "cart": {
+    "summary_title": "Summary",
     "your_cart": "Your cart",
     "empty": "Your cart is empty",
     "total": "Total",
@@ -308,7 +335,102 @@
     "add_x_more_fmt": "Add {missing, number, ::currency/EUR} more for free shipping",
     "summary_mobile_label": "Cart summary",
     "items_count": "{count, plural, one {# item} other {# items}}",
-    "view_cart": "View cart"
+    "view_cart": "View cart",
+    "checkout_btn": "Proceed to checkout",
+    "checkout_btn_aria": "Proceed to checkout and pay",
+    "shipping_free": "Free",
+    "vat_est": "VAT (est.)",
+    "discount_label": "Discount",
+    "remove_code": "Remove",
+    "remove_code_aria": "Remove promo code",
+    "coupon_placeholder": "Promo code",
+    "coupon_aria": "Promo code",
+    "apply_code": "Apply code",
+    "you_save": "You save {amount}.",
+    "footer_secure": "Secure payment · Free shipping from {threshold} · 30-day returns. Estimated amounts.",
+    "code_invalid": "Invalid code.",
+    "code_applied": "Code applied ✔",
+    "code_removed": "Code removed.",
+    "code_label": "Code:",
+    "announce_invalid": "Invalid promo code",
+    "announce_applied": "Code {code} applied",
+    "announce_removed": "Promo code removed",
+    "no_items": "No items in cart.",
+    "empty_sub": "Discover our products and value packs.",
+    "view_products": "Browse products",
+    "view_packs": "View packs",
+    "breadcrumb_aria": "Breadcrumb",
+    "cart_content_aria": "Cart contents",
+    "page_title": "My cart",
+    "explore_products": "Explore products",
+    "cart_empty_sr": "Cart empty",
+    "items_in_cart_sr": "{count} item(s) in cart",
+    "items_added_sr": "{diff} item(s) added. {count} total.",
+    "items_removed_sr": "{diff} item(s) removed. {count} total."
+  },
+
+  "hero": {
+    "cta_new": "See what's new"
+  },
+
+  "promo_bar": {
+    "text": "Free delivery from €49 · 14-day free returns · 7-day support"
+  },
+
+  "theme": {
+    "switch_to_light": "Switch to light theme",
+    "switch_to_dark": "Switch to dark theme",
+    "light": "Light",
+    "dark": "Dark"
+  },
+
+  "reassurance": {
+    "returns_30": "30-day free returns",
+    "shipping_50": "Free delivery from €50",
+    "payment_100": "100% secure payment"
+  },
+
+  "trust_badges": {
+    "payment_secure": "Secure payment",
+    "payment_secure_sr": "Secure payment via Stripe, SSL encryption",
+    "delivery_48_72": "Delivery 48–72 h",
+    "delivery_48_72_sr": "Delivery within 48 to 72 business hours",
+    "support": "Responsive support",
+    "support_sr": "Support team available for any questions",
+    "returns_30": "30-day returns",
+    "returns_30_sr": "Returns and refund within 30 days",
+    "heading_sr": "Our trust guarantees"
+  },
+
+  "not_found": {
+    "title": "404 – Page not found",
+    "message": "Sorry, this page doesn't exist or has been moved.",
+    "details_heading": "Details",
+    "path_requested": "Path requested:",
+    "back_home": "Back to home",
+    "go_back": "Previous page"
+  },
+
+  "error_page": {
+    "title": "An error occurred"
+  },
+
+  "success_page": {
+    "title": "Order confirmed",
+    "thank_you": "Thank you for your purchase! You will receive a confirmation email shortly.",
+    "continue_shopping": "Continue shopping"
+  },
+
+  "login_error": {
+    "title": "Login error",
+    "message": "An error occurred. You can try again or return to the home page."
+  },
+
+  "checkout_steps": {
+    "cart": "Cart",
+    "details": "Details",
+    "payment": "Payment",
+    "confirmation": "Confirmation"
   },
 
   "checkout": {
@@ -320,7 +442,15 @@
     "place_order": "Pay now",
     "processing": "Processing…",
     "pay_secure": "Secure payment",
-    "error_generic": "An error occurred during payment."
+    "error_generic": "An error occurred during payment.",
+    "summary_title": "Summary",
+    "summary_aria": "Order summary",
+    "total_to_pay": "Total to pay"
+  },
+
+  "delivery": {
+    "estimate_label": "Estimated delivery:",
+    "business_days": "(business days)"
   },
 
   "commande": {
@@ -436,6 +566,12 @@
   "blog": {
     "title": "TechPlay Blog",
     "no_posts": "No posts available at the moment.",
+    "no_articles_search": "No articles match your search",
+    "no_results_for_query": "No results for « {query} ». Try different keywords or check back when we publish new guides.",
+    "view_all_blog": "View all blog",
+    "view_all_articles": "View all articles",
+    "search_placeholder": "Search for an article…",
+    "search_aria": "Search blog",
     "read_more": "Read more",
     "author": "Author: {author}",
     "published_on": "Published on {date}"
@@ -511,5 +647,38 @@
 
   "sitemap": {
     "title": "Sitemap"
+  },
+
+  "reviews": {
+    "empty_error": "Your message is empty.",
+    "minlen_error": "Your message must be at least 20 characters.",
+    "rating_error": "Please select a valid rating.",
+    "duplicate_error": "You have already submitted this review recently.",
+    "thank_you": "Thank you for your review!",
+    "submit_error": "An error occurred, please try again.",
+    "form_label": "Review form",
+    "write_review": "Leave a review",
+    "name_label": "Name (optional)",
+    "name_ph": "Your name",
+    "rating_label": "Overall rating",
+    "textarea_label": "Your review",
+    "placeholder": "Share your experience…",
+    "helper_text": "Be specific and respectful. At least 20 characters.",
+    "sending": "Sending…",
+    "cooldown": "Wait {seconds}s…",
+    "submit": "Submit review",
+    "error_loading": "Unable to load reviews.",
+    "retry": "Retry",
+    "no_reviews": "No reviews yet.",
+    "aria_label": "Customer reviews",
+    "title": "Customer reviews",
+    "filter_label": "Filter by rating",
+    "filter_stars": "{count} star(s)",
+    "clear_filter": "All ratings",
+    "clear": "Clear",
+    "sort_label": "Sort by",
+    "sort_recent": "Recent",
+    "sort_helpful": "Helpful",
+    "verified": "Verified purchase"
   }
 }

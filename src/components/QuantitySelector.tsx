@@ -1,6 +1,7 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import {
   useCallback,
   useEffect,
@@ -177,7 +178,8 @@ export default function QuantitySelector({
 
   const minusDisabled = disabled || readOnly || qty <= min
   const plusDisabled = disabled || readOnly || qty >= max
-  const srText = useMemo(() => `Quantité ${qty}`, [qty])
+  const t = useTranslations('common')
+  const srText = useMemo(() => t('quantity_value', { value: qty }), [qty, t])
 
   return (
     <div className={cn('inline-flex items-center gap-3 select-none', className)}>
@@ -198,7 +200,7 @@ export default function QuantitySelector({
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-blue-600',
           minusDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-[hsl(var(--surface-2))]'
         )}
-        aria-label="Diminuer la quantité"
+        aria-label={t('quantity_decrease')}
       >
         −
       </motion.button>
@@ -248,7 +250,7 @@ export default function QuantitySelector({
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-blue-600',
           plusDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-[hsl(var(--surface-2))]'
         )}
-        aria-label="Augmenter la quantité"
+        aria-label={t('quantity_increase')}
       >
         +
       </motion.button>

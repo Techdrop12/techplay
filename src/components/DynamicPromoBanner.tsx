@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 
-import { useCart } from '@/context/cartContext';
+import { useCart } from '@/hooks/useCart';
 
 export default function DynamicPromoBanner() {
   const { cart } = useCart();

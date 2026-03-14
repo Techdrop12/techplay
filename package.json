@@ -87,6 +87,9 @@
     "typescript": "^5.9.3",
     "vitest": "^4.1.0"
   },
+  "overrides": {
+    "glob": "^13.0.0"
+  },
   "engines": {
     "node": ">=20.9.0 <23",
     "npm": ">=10"

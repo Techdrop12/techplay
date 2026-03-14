@@ -1,6 +1,7 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import { memo, useMemo } from 'react'
 
 import Link from '@/components/LocalizedLink'
@@ -99,20 +100,28 @@ function Icon({ name, className }: { name: IconName; className?: string }) {
   }
 }
 
-/* -------------------------- Badges par défaut -------------------------- */
-const DEFAULT_BADGES: Badge[] = [
-  { icon: 'lock', label: 'Paiement sécurisé', sr: 'Paiement sécurisé par Stripe, chiffrement SSL' },
-  { icon: 'truck', label: 'Livraison 48–72 h', sr: 'Livraison en 48 à 72 h ouvrées' },
-  { icon: 'chat', label: 'Support réactif', sr: 'Équipe support joignable pour toute question' },
-  { icon: 'shield', label: 'Retours 30 jours', sr: 'Retours et remboursement sous 30 jours' },
-]
+function useDefaultBadges(): Badge[] {
+  const t = useTranslations('trust_badges')
+  return useMemo(
+    () => [
+      { icon: 'lock' as const, label: t('payment_secure'), sr: t('payment_secure_sr') },
+      { icon: 'truck' as const, label: t('delivery_48_72'), sr: t('delivery_48_72_sr') },
+      { icon: 'chat' as const, label: t('support'), sr: t('support_sr') },
+      { icon: 'shield' as const, label: t('returns_30'), sr: t('returns_30_sr') },
+    ],
+    [t]
+  )
+}
 
 function TrustBadges({
-  badges = DEFAULT_BADGES,
+  badges,
   className,
   variant = 'card',
   compact = false,
 }: TrustBadgesProps) {
+  const t = useTranslations('trust_badges')
+  const defaultBadges = useDefaultBadges()
+  const resolvedBadges = badges ?? defaultBadges
   const prefersReduced = useReducedMotion()
 
   const base =
@@ -137,7 +146,7 @@ function TrustBadges({
     ].join(' '),
   }
 
-  const items = useMemo(() => badges.map((b) => ({ ...b })), [badges])
+  const items = useMemo(() => resolvedBadges.map((b) => ({ ...b })), [resolvedBadges])
 
   return (
     <section
@@ -145,7 +154,7 @@ function TrustBadges({
       aria-labelledby="trust-heading"
     >
       <h2 id="trust-heading" className="sr-only">
-        Nos garanties de confiance
+        {t('heading_sr')}
       </h2>
 
       <ul className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 px-4 sm:px-6" role="list">

@@ -1,6 +1,7 @@
 // src/components/ConsentBanner.tsx
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 
 const DISABLED = (process.env.NEXT_PUBLIC_ANALYTICS_DISABLED || '').toLowerCase() === 'true'
@@ -77,6 +78,7 @@ function applyConsent(p: Prefs) {
 }
 
 export default function ConsentBanner() {
+  const t = useTranslations('consent')
   const [open, setOpen] = useState(false)
   const [prefs, setPrefs] = useState<Prefs>({
     analytics: false,
@@ -189,20 +191,19 @@ export default function ConsentBanner() {
       <div className="flex flex-col gap-3 pointer-events-auto sm:flex-row sm:items-start sm:gap-5">
         <div className="flex-1">
           <h2 id="tp-consent-title" className="text-base font-bold">
-            Votre confidentialité chez TechPlay
+            {t('banner_title_long')}
           </h2>
 
           <p id="tp-consent-desc" className="mt-1 text-sm text-token-text/70">
-            Nous utilisons des cookies pour mesurer l’audience et, si vous l’acceptez,
-            pour la publicité. Vous pourrez changer d’avis à tout moment dans les paramètres.
+            {t('banner_desc_long')}
           </p>
 
           {open && (
             <div className="mt-3 grid gap-2 rounded-xl border border-token-border bg-token-surface/70 p-3">
               <label className="flex items-center justify-between gap-3">
                 <span className="text-sm">
-                  Mesure d’audience{' '}
-                  <span className="text-xs text-token-text/60">(recommandé)</span>
+                  {t('analytics')}{' '}
+                  <span className="text-xs text-token-text/60">{t('analytics_recommended')}</span>
                 </span>
                 <input
                   ref={firstToggleRef}
@@ -216,7 +217,7 @@ export default function ConsentBanner() {
               </label>
 
               <label className="flex items-center justify-between gap-3">
-                <span className="text-sm">Publicité</span>
+                <span className="text-sm">{t('ads')}</span>
                 <input
                   type="checkbox"
                   className="h-5 w-5 accent-[hsl(var(--accent))]"
@@ -237,7 +238,7 @@ export default function ConsentBanner() {
             href="/confidentialite"
             className="mt-2 inline-block text-xs text-[hsl(var(--accent))] underline underline-offset-4"
           >
-            En savoir plus
+            {t('learn_more')}
           </a>
         </div>
 
@@ -249,7 +250,7 @@ export default function ConsentBanner() {
                 onClick={acceptAll}
                 className="w-full rounded-xl bg-[hsl(var(--accent))] px-4 py-2 text-sm font-semibold text-white shadow hover:bg-[hsl(var(--accent)/.92)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
               >
-                Tout accepter
+                {t('accept_all')}
               </button>
 
               <button
@@ -260,7 +261,7 @@ export default function ConsentBanner() {
                 }}
                 className="w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 text-[13px] font-semibold hover:shadow focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
               >
-                Paramètres
+                {t('settings')}
               </button>
 
               <button
@@ -268,7 +269,7 @@ export default function ConsentBanner() {
                 onClick={refuseAll}
                 className="w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 text-[13px] font-semibold hover:shadow focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
               >
-                Tout refuser
+                {t('reject_all')}
               </button>
             </>
           ) : (
@@ -278,7 +279,7 @@ export default function ConsentBanner() {
                 onClick={saveSelected}
                 className="w-full rounded-xl bg-[hsl(var(--accent))] px-4 py-2 text-sm font-semibold text-white shadow hover:bg-[hsl(var(--accent)/.92)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
               >
-                Sauvegarder
+                {t('save')}
               </button>
 
               <button
@@ -286,7 +287,7 @@ export default function ConsentBanner() {
                 onClick={() => setOpen(false)}
                 className="w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 text-[13px] font-semibold hover:shadow focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
               >
-                Retour
+                {t('back')}
               </button>
             </>
           )}

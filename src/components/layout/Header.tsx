@@ -11,7 +11,6 @@ import MobileNav from './MobileNav'
 import Link from '@/components/LocalizedLink'
 import {
   CartIcon as Cart,
-  FlameIcon as Flame,
   HeartIcon as Heart,
   SearchIcon as Search,
   UserIcon as User,
@@ -46,11 +45,6 @@ const STR = {
       'power bank',
       'souris sans fil',
     ],
-    deals: {
-      text: 'Offres',
-      title: 'Offres du jour',
-      aria: 'Voir les offres du jour',
-    },
     selection: 'Sélection',
     packsTitle: 'Packs recommandés',
     packsDesc: 'Les meilleures combinaisons pour booster ton setup.',
@@ -88,11 +82,6 @@ const STR = {
       'power bank',
       'wireless mouse',
     ],
-    deals: {
-      text: 'Deals',
-      title: "Today's deals",
-      aria: "See today's deals",
-    },
     selection: 'Featured',
     packsTitle: 'Recommended packs',
     packsDesc: 'Best combos to boost your setup.',
@@ -767,42 +756,6 @@ export default function Header() {
           <div className="flex items-center gap-2 sm:gap-2.5">
             <ThemeToggle size="sm" />
             <LocaleSwitch pathname={pathname} />
-
-            <Link
-              href="/products?promo=1"
-              prefetch={false}
-              onPointerEnter={() => smartPrefetchStart('/products?promo=1')}
-              onPointerLeave={() => smartPrefetchCancel('/products?promo=1')}
-              onFocus={() => smartPrefetchStart('/products?promo=1')}
-              onBlur={() => smartPrefetchCancel('/products?promo=1')}
-              className="inline-flex items-center justify-center rounded-lg p-0.5 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)] xl:hidden"
-              aria-label={t.deals.aria}
-              title={t.deals.title}
-              data-gtm="header_deals_icon"
-            >
-              <ActionBadge>
-                <Flame />
-              </ActionBadge>
-            </Link>
-
-            <Link
-              href="/products?promo=1"
-              prefetch={false}
-              onPointerEnter={() => smartPrefetchStart('/products?promo=1')}
-              onPointerLeave={() => smartPrefetchCancel('/products?promo=1')}
-              onFocus={() => smartPrefetchStart('/products?promo=1')}
-              onBlur={() => smartPrefetchCancel('/products?promo=1')}
-              className="group hidden items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 px-3 py-1.5 text-[13px] font-medium text-token-text hover:bg-[hsl(var(--surface))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)] xl:inline-flex"
-              aria-label={t.deals.aria}
-              title={t.deals.title}
-              data-gtm="header_deals"
-            >
-              <span className="relative inline-flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gradient-to-r from-pink-500 to-yellow-500 opacity-60" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-gradient-to-r from-pink-500 to-yellow-500" />
-              </span>
-              <span>{t.deals.text}</span>
-            </Link>
 
             <div className="relative">
               <Link

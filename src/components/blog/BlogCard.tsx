@@ -42,7 +42,7 @@ export default function BlogCard({ article }: BlogCardProps) {
         <div className="relative aspect-[16/10] w-full overflow-hidden bg-[hsl(var(--surface-2))]">
           <Image
             src={imageSrc}
-            alt=""
+            alt={article.title ? String(article.title) : ''}
             fill
             sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
             className="object-cover transition-transform duration-500 ease-[var(--ease-smooth)] group-hover:scale-[1.02]"

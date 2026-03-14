@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import ContactBottomLinks from '@/components/ContactBottomLinks'
 import Link from '@/components/LocalizedLink'
 
 const SUPPORT_EMAIL = 'support@techplay.fr'
@@ -103,22 +104,7 @@ export default function ContactPage() {
           <p className="mt-2 text-[14px] text-token-text/75">
             Consultez la <Link href="/#faq" className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline" prefetch={false}>FAQ</Link> pour les questions fréquentes, ou retournez à l&apos;accueil pour continuer vos achats.
           </p>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <Link
-              href="/#faq"
-              prefetch={false}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 text-[13px] font-semibold transition hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
-            >
-              Voir la FAQ
-            </Link>
-            <Link
-              href="/"
-              prefetch={false}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 text-[13px] font-semibold transition hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
-            >
-              ← Retour à l&apos;accueil
-            </Link>
-          </div>
+          <ContactBottomLinks />
         </section>
       </div>
     </main>

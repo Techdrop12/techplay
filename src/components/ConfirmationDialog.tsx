@@ -1,6 +1,7 @@
 // src/components/ConfirmationDialog.tsx
 'use client'
 
+import { useTranslations } from 'next-intl'
 import * as React from 'react'
 
 import Button from '@/components/Button'
@@ -21,24 +22,29 @@ export default function ConfirmationDialog({
   open,
   onClose,
   onConfirm,
-  title = 'Confirmer',
-  message = 'Voulez-vous continuer ?',
-  confirmLabel = 'Confirmer',
-  cancelLabel = 'Annuler',
+  title,
+  message,
+  confirmLabel,
+  cancelLabel,
   danger,
 }: ConfirmationDialogProps) {
+  const t = useTranslations('common')
+  const defaultTitle = title ?? t('confirm')
+  const defaultMessage = message ?? t('confirm_default_message')
+  const defaultConfirm = confirmLabel ?? t('confirm')
+  const defaultCancel = cancelLabel ?? t('cancel')
   return (
-    <Modal isOpen={open} onClose={onClose} title={title} size="sm" closeOnOverlay>
+    <Modal isOpen={open} onClose={onClose} title={defaultTitle} size="sm" closeOnOverlay>
       <Modal.Body>
-        <p className="text-sm text-token-text/85">{message}</p>
+        <p className="text-sm text-token-text/85">{defaultMessage}</p>
       </Modal.Body>
       <Modal.Footer>
         <div className="flex justify-end gap-3">
           <Button variant="secondary" onClick={onClose}>
-            {cancelLabel}
+            {defaultCancel}
           </Button>
           <Button variant={danger ? 'danger' : 'accent'} onClick={onConfirm}>
-            {confirmLabel}
+            {defaultConfirm}
           </Button>
         </div>
       </Modal.Footer>

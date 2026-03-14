@@ -51,7 +51,7 @@ const sizes: Record<Size, string> = {
 const variants: Record<Variant, string> = {
   accent: 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] hover:opacity-95',
   secondary:
-    'bg-[hsl(var(--surface-2))] text-[hsl(var(--text))] hover:bg-[hsl(var(--surface-3))]',
+    'bg-[hsl(var(--surface-2))] text-[hsl(var(--text))] hover:brightness-[0.97]',
   outline:
     'border border-[hsl(var(--border))] text-[hsl(var(--text))] hover:bg-[hsl(var(--surface-2))]',
   ghost:

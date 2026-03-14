@@ -4,6 +4,8 @@ import dynamic from 'next/dynamic'
 
 import type { ComponentType } from 'react'
 
+import LoadingLabel from '@/components/LoadingLabel'
+
 interface ClientOnlyProps<T extends Record<string, unknown>> {
   load: () => Promise<{ default: ComponentType<T> }>
   fallback?: React.ReactNode
@@ -17,7 +19,7 @@ export default function ClientOnly<T extends Record<string, unknown>>({
 }: ClientOnlyProps<T>) {
   const LazyComponent = dynamic(load, {
     ssr: false,
-    loading: () => fallback || <p>Chargement…</p>,
+    loading: () => fallback ?? <LoadingLabel />,
   })
 
   return <LazyComponent {...props} />

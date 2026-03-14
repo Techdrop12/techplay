@@ -180,12 +180,10 @@ function ModalRoot({
         aria-describedby={describedById}
         tabIndex={-1}
         className={cn(
-          'relative w-full',
+          'relative w-full outline-none',
           SIZES[size],
           'rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-[hsl(var(--text))] shadow-[var(--shadow-lg)]',
-          'motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-out',
-          'motion-safe:opacity-100 motion-safe:scale-100',
-          'outline-none',
+          'modal-panel-entrance',
           className
         )}
       >

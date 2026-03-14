@@ -251,7 +251,7 @@ export default function MetaPixel() {
       <noscript
         dangerouslySetInnerHTML={{
           __html: `
-            <img height="1" width="1" style="display:none"
+            <img height="1" width="1" style="display:none" alt=""
                  src="https://www.facebook.com/tr?id=${encodeURIComponent(PIXEL_ID)}&ev=PageView&noscript=1"/>
           `,
         }}

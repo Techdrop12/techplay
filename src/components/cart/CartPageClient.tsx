@@ -2,6 +2,7 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useRef } from 'react'
 
 import type { Product } from '@/types/product'
@@ -16,6 +17,8 @@ import { event as gaEvent, mapProductToGaItem, trackViewCart } from '@/lib/ga'
 type CartProduct = Product & { quantity: number }
 
 export default function CartPageClient() {
+  const t = useTranslations('cart')
+  const tNav = useTranslations('nav')
   const { cart } = useCart()
   const prefersReduced = useReducedMotion()
   const srRef = useRef<HTMLParagraphElement | null>(null)
@@ -44,21 +47,21 @@ export default function CartPageClient() {
     const prev = prevCountRef.current
     let text = ''
 
-    if (count === 0) text = 'Panier vide'
-    else if (prev === 0) text = `${count} article${count > 1 ? 's' : ''} dans le panier`
+    if (count === 0) text = t('cart_empty_sr')
+    else if (prev === 0) text = t('items_in_cart_sr', { count })
     else if (count > prev) {
       const diff = count - prev
-      text = `${diff} article${diff > 1 ? 's' : ''} ajouté${diff > 1 ? 's' : ''}. ${count} au total.`
+      text = t('items_added_sr', { diff, count })
     } else if (count < prev) {
       const diff = prev - count
-      text = `${diff} article${diff > 1 ? 's' : ''} retiré${diff > 1 ? 's' : ''}. ${count} au total.`
+      text = t('items_removed_sr', { diff, count })
     } else {
-      text = `${count} article${count > 1 ? 's' : ''} dans le panier`
+      text = t('items_in_cart_sr', { count })
     }
 
     srRef.current.textContent = text
     prevCountRef.current = count
-  }, [count])
+  }, [count, t])
 
   useEffect(() => {
     if (isEmpty) return
@@ -84,15 +87,15 @@ export default function CartPageClient() {
       role="main"
       aria-labelledby="cart-title"
     >
-      <nav aria-label="Fil d’Ariane" className="mb-6 text-[12px] text-token-text/60">
+      <nav aria-label={t('breadcrumb_aria')} className="mb-6 text-[12px] text-token-text/60">
         <ol className="flex items-center gap-1.5">
           <li>
             <Link href="/" className="transition hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded" prefetch={false}>
-              Accueil
+              {tNav('home')}
             </Link>
           </li>
           <li aria-hidden="true" className="text-token-text/40">/</li>
-          <li aria-current="page" className="text-token-text/90">Panier</li>
+          <li aria-current="page" className="text-token-text/90">{tNav('cart')}</li>
         </ol>
       </nav>
 
@@ -105,7 +108,7 @@ export default function CartPageClient() {
         animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
         transition={{ duration: 0.25 }}
       >
-        Mon panier{count > 0 ? ` · ${count} article${count > 1 ? 's' : ''}` : ''}
+        {t('page_title')}{count > 0 ? ` · ${t('items_count', { count })}` : ''}
       </motion.h1>
 
       {isEmpty ? (
@@ -115,26 +118,26 @@ export default function CartPageClient() {
           animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <EmptyCart locale="fr" />
+          <EmptyCart />
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
             <Link
               href="/products"
               className="touch-target inline-flex min-h-[2.75rem] items-center justify-center gap-2 rounded-full bg-[hsl(var(--accent))] px-6 py-3 text-sm font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-md)] transition hover:opacity-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)]"
             >
-              Explorer les produits
+              {t('explore_products')}
             </Link>
             <Link
               href="/products/packs"
               className="touch-target inline-flex min-h-[2.75rem] items-center justify-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-6 py-3 text-sm font-medium text-[hsl(var(--text))] transition hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
             >
-              Voir les packs
+              {t('view_packs')}
             </Link>
           </div>
         </motion.div>
       ) : (
         <motion.section
           className="mt-8 grid gap-6 lg:grid-cols-[1fr,minmax(320px,400px)] lg:gap-10"
-          aria-label="Contenu du panier"
+          aria-label={t('cart_content_aria')}
           initial={prefersReduced ? false : { opacity: 0 }}
           animate={prefersReduced ? undefined : { opacity: 1 }}
           transition={{ duration: 0.25 }}

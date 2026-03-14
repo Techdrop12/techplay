@@ -1,6 +1,7 @@
 'use client'
 
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 import type { Product } from '@/types/product'
@@ -135,12 +136,13 @@ export default function ProductGrid({
   )
 
   const isEmpty = safeProducts.length === 0
+  const t = useTranslations('product_list')
 
   const countMsg = useMemo(() => {
-    if (isLoading && isEmpty) return 'Chargement des produits…'
-    if (isEmpty) return emptyMessage || 'Aucun produit trouvé.'
-    return `${safeProducts.length} produit${safeProducts.length > 1 ? 's' : ''} affiché${safeProducts.length > 1 ? 's' : ''}.`
-  }, [emptyMessage, isEmpty, isLoading, safeProducts.length])
+    if (isLoading && isEmpty) return t('loading_products')
+    if (isEmpty) return emptyMessage || t('no_products')
+    return t('displayed_count', { count: safeProducts.length })
+  }, [emptyMessage, isEmpty, isLoading, safeProducts.length, t])
 
   const flushBatch = useCallback(() => {
     if (!batchRef.current.length) return
@@ -280,7 +282,7 @@ export default function ProductGrid({
     return (
       <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/70 card-padding text-center" role="status">
         <p className="text-base font-semibold text-token-text">
-          {emptyMessage || 'Aucun produit trouvé.'}
+          {emptyMessage || t('no_products')}
         </p>
       </div>
     )
@@ -334,7 +336,7 @@ export default function ProductGrid({
             onClick={onLoadMore}
             disabled={isLoading}
             className="rounded-xl bg-[hsl(var(--accent))] px-5 py-2.5 font-semibold text-white shadow transition hover:shadow-lg hover:opacity-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.35)] disabled:cursor-not-allowed disabled:opacity-60"
-            aria-label="Charger plus de produits"
+            aria-label={t('load_more_aria')}
             data-gtm="grid_load_more"
           >
             {isLoading ? 'Chargement…' : 'Charger plus'}

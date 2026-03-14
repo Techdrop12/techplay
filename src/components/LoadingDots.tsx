@@ -1,6 +1,7 @@
 // src/components/LoadingDots.tsx
 'use client'
 
+import { useTranslations } from 'next-intl'
 import * as React from 'react'
 
 import { cn } from '@/lib/utils'
@@ -18,12 +19,14 @@ export interface LoadingDotsProps extends React.HTMLAttributes<HTMLSpanElement> 
 
 export default function LoadingDots({
   className,
-  label = 'Chargement…',
+  label,
   count = 3,
   delayStepMs = 150,
   dotClassName,
   ...rest
 }: LoadingDotsProps) {
+  const t = useTranslations('common')
+  const a11yLabel = label ?? t('loading')
   const dots = Array.from({ length: Math.max(2, Math.min(5, count)) })
   return (
     <span
@@ -42,7 +45,7 @@ export default function LoadingDots({
           •
         </span>
       ))}
-      <span className="sr-only">{label}</span>
+      <span className="sr-only">{a11yLabel}</span>
     </span>
   )
 }

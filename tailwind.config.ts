@@ -53,6 +53,8 @@ const config: Config = {
         surface: { DEFAULT: '#ffffff', muted: '#f8fafc', dark: '#0b0f14' },
         border: { DEFAULT: '#e5e7eb', dark: '#262b35' },
 
+        foreground: 'hsl(var(--text) / <alpha-value>)',
+        'muted-foreground': 'hsl(var(--text-muted) / <alpha-value>)',
         token: {
           bg: 'hsl(var(--bg) / <alpha-value>)',
           text: 'hsl(var(--text) / <alpha-value>)',

@@ -1,10 +1,9 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useTranslations } from 'next-intl'
+import { useEffect, useState } from 'react'
 
 import { useTheme } from '@/context/themeContext'
-import { getCurrentLocale } from '@/lib/i18n-routing'
 import { cn } from '@/lib/utils'
 
 type Props = {
@@ -36,36 +35,17 @@ function MoonIcon({ className }: { className?: string }) {
 }
 
 export default function ThemeToggle({ className, iconOnly = true, size = 'md' }: Props) {
-  const pathname = usePathname() || '/'
-  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr'
   const { resolvedTheme, toggleTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => setMounted(true), [])
 
   const isDark = resolvedTheme === 'dark'
-
-  const t = useMemo(
-    () =>
-      locale === 'en'
-        ? {
-            switchToLight: 'Switch to light theme',
-            switchToDark: 'Switch to dark theme',
-            light: 'Light',
-            dark: 'Dark',
-          }
-        : {
-            switchToLight: 'Passer en thème clair',
-            switchToDark: 'Passer en thème sombre',
-            light: 'Clair',
-            dark: 'Sombre',
-          },
-    [locale]
-  )
+  const t = useTranslations('theme')
 
   if (!mounted) return null
 
-  const label = isDark ? t.switchToLight : t.switchToDark
+  const label = isDark ? t('switch_to_light') : t('switch_to_dark')
 
   const sizeMap = {
     sm: {
@@ -101,7 +81,7 @@ export default function ThemeToggle({ className, iconOnly = true, size = 'md' }:
       )}
     >
       {isDark ? <SunIcon className={currentSize.icon} /> : <MoonIcon className={currentSize.icon} />}
-      {iconOnly ? null : <span className="font-medium">{isDark ? t.light : t.dark}</span>}
+      {iconOnly ? null : <span className="font-medium">{isDark ? t('light') : t('dark')}</span>}
     </button>
   )
 }

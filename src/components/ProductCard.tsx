@@ -235,7 +235,7 @@ function ProductCard({
           className="block rounded-[inherit] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/80"
           onClick={handleClick}
         >
-          <div className="relative aspect-[4/3] sm:aspect-[4/3] w-full overflow-hidden rounded-[1.45rem] bg-[hsl(var(--surface-2))]">
+          <div className="card-shine relative aspect-[3/2] w-full overflow-hidden rounded-[1.45rem] bg-[hsl(var(--surface-2))] sm:aspect-[4/3]">
             <div className="absolute inset-0">
               <Image
                 src={image}
