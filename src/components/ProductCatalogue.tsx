@@ -7,7 +7,6 @@ import { useDeferredValue, useMemo, useState } from 'react'
 import type { Product } from '@/types/product'
 
 import Analytics from '@/components/Analytics'
-import BackToTopButton from '@/components/BackToTopButton'
 import FilterPanel from '@/components/catalogue/FilterPanel'
 import SearchBar from '@/components/catalogue/SearchBar'
 import SortDropdown from '@/components/catalogue/SortDropdown'
@@ -97,6 +96,7 @@ export default function ProductCatalogue({
           selectionHeading: 'Our selection',
           selectionSub: 'Hand-picked for performance.',
           results: 'results',
+          productsCount: (n: number) => (n === 1 ? '1 product' : `${n} products`),
           searchResults: 'Search results',
           noResults: 'No products found.',
           noResultsHint: 'Try another keyword, category, or sort option.',
@@ -114,6 +114,7 @@ export default function ProductCatalogue({
           selectionHeading: 'Notre sélection',
           selectionSub: 'Sélectionnés pour performer.',
           results: 'résultat(s)',
+          productsCount: (n: number) => (n === 1 ? '1 produit' : `${n} produits`),
           searchResults: 'Résultats de recherche',
           noResults: 'Aucun produit trouvé.',
           noResultsHint: 'Essaie un autre mot-clé, une autre catégorie ou un autre tri.',
@@ -221,7 +222,6 @@ export default function ProductCatalogue({
       <Analytics />
       <MetaPixel />
       <ScrollToTop />
-      <BackToTopButton />
 
       <section className="min-h-screen bg-[hsl(var(--surface))] text-[hsl(var(--text))] transition-colors">
         <SectionWrapper>
@@ -249,7 +249,7 @@ export default function ProductCatalogue({
             <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-token-text/60">
               {t.refineLabel}
             </p>
-            <div className="grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_auto_auto] xl:items-end xl:gap-6">
+            <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end xl:gap-6">
               <SearchBar query={query} setQuery={setQuery} products={safeProducts} />
 
               <FilterPanel
@@ -257,8 +257,6 @@ export default function ProductCatalogue({
                 selected={selectedCategory}
                 setSelected={setCategory}
               />
-
-              <SortDropdown sort={sortOption} setSort={setSortOption} locale={locale} />
             </div>
           </section>
 
@@ -278,39 +276,50 @@ export default function ProductCatalogue({
               </p>
             </div>
 
-            <div className="flex flex-col gap-4 border-b border-[hsl(var(--border))]/50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-5 sm:px-6">
-            <div className="min-w-0">
-              <p className="text-[13px] font-semibold tabular-nums text-[hsl(var(--text))]">
-                {filteredProducts.length} {t.results}
+            <div className="flex flex-col gap-4 border-b border-[hsl(var(--border))]/50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-6 sm:py-5">
+              <p className="min-w-0 shrink-0 text-sm font-semibold tabular-nums text-[hsl(var(--text))] sm:text-[15px]">
+                {typeof t.productsCount === 'function'
+                  ? t.productsCount(filteredProducts.length)
+                  : `${filteredProducts.length} ${t.results}`}
               </p>
 
-              <p className="mt-1.5 text-[12px] leading-relaxed text-token-text/65">
-                {query.trim() ? `${t.searchResults} : “${query.trim()}”` : t.allCategories}
+              <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-3 sm:gap-4">
+                <SortDropdown
+                  sort={sortOption}
+                  setSort={setSortOption}
+                  locale={locale}
+                  className="w-auto shrink-0"
+                />
+                {hasActiveFilters ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuery('')
+                      setCategory(null)
+                    }}
+                    className={cn(
+                      'shrink-0 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]',
+                      'min-h-[2.75rem] px-4 py-2.5 text-[13px] font-semibold transition sm:min-h-0',
+                      'hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2'
+                    )}
+                  >
+                    {t.clearFilters}
+                  </button>
+                ) : null}
+              </div>
+
+              {/* Accessible filter summary for screen readers */}
+              <div className="sr-only" aria-live="polite">
+                <p>
+                  {query.trim() ? `${t.searchResults} : “${query.trim()}”` : t.allCategories}
                 {selectedCategory ? ` · ${t.activeCategory} : ${selectedCategory}` : ''}
                 {typeof initialMin === 'number' || typeof initialMax === 'number'
                   ? ` · ${t.activePrice} : ${typeof initialMin === 'number' ? `${initialMin}€` : '0€'} - ${
                       typeof initialMax === 'number' ? `${initialMax}€` : '∞'
                     }`
                   : ''}
-              </p>
-            </div>
-
-            {hasActiveFilters ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setQuery('')
-                  setCategory(null)
-                }}
-                className={cn(
-                  'shrink-0 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]',
-                  'px-4 py-2.5 text-[13px] font-semibold transition',
-                  'hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2'
-                )}
-              >
-                {t.clearFilters}
-              </button>
-            ) : null}
+                </p>
+              </div>
             </div>
 
             {filteredProducts.length === 0 ? (

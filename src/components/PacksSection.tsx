@@ -159,7 +159,7 @@ function isPromo(pack: Pack): boolean {
 
 const EMPTY_DEFAULTS = {
   title: 'Packs bientôt disponibles',
-  description: 'Nous préparons des bundles soignés pour vous. En attendant, découvrez notre sélection de produits.',
+  description: 'Des bundles soignés arrivent bientôt. Découvrez notre sélection de produits en attendant.',
   ctaLabel: 'Découvrir les produits',
   ctaHref: '/products',
 } as const
@@ -268,10 +268,10 @@ export default function PacksSection({
               className="flex items-center justify-center gap-2 heading-subsection font-bold sm:text-2xl"
             >
               <DuotoneGift size={24} className="text-[hsl(var(--accent))]" />
-              <span>Nos Packs Recommandés</span>
+              <span>Packs recommandés</span>
             </h2>
             <p id={subId} className="mt-2 text-sm text-token-text/70">
-              Équipez-vous malin : bundles optimisés pour la perf’ et le budget.
+              Sélections expertes : plusieurs produits ensemble à prix pack. Économisez plus, livraison offerte.
             </p>
           </div>
         )}
@@ -331,10 +331,10 @@ export default function PacksSection({
                 className="flex items-center justify-center gap-2 heading-subsection font-bold sm:justify-start"
               >
                 <DuotoneGift size={22} className="text-[hsl(var(--accent))]" />
-                <span>Nos Packs Recommandés</span>
+                <span>Packs recommandés</span>
               </h2>
               <p id={subId} className="mt-2 text-sm text-token-text/70">
-                Équipez-vous malin : bundles optimisés pour la perf’ et le budget.
+                Sélections expertes : plusieurs produits ensemble à prix pack. Économisez plus, livraison offerte.
                 {hasPacks && <span className="sr-only"> {totalCount} packs disponibles.</span>}
               </p>
             </div>
@@ -375,7 +375,10 @@ export default function PacksSection({
       {hasPacks && showControls && (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div className="text-xs text-token-text/70">
-            Affichage <span className="font-semibold">{visibleCount}</span> / <span>{totalCount}</span>
+            <span className="font-semibold tabular-nums">{visibleCount}</span>
+            <span className="mx-1">/</span>
+            <span className="tabular-nums">{totalCount}</span>
+            <span className="ml-1">packs</span>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">

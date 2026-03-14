@@ -42,8 +42,8 @@ interface TrustBadgesProps {
 }
 
 /* ----------------------------- Icônes vectorielles ----------------------------- */
-function Icon({ name, className }: { name: IconName; className?: string }) {
-  const common = 'w-5 h-5 shrink-0'
+function Icon({ name, className, size = 'default' }: { name: IconName; className?: string; size?: 'default' | 'large' }) {
+  const common = size === 'large' ? 'w-8 h-8 sm:w-9 sm:h-9 shrink-0' : 'w-5 h-5 shrink-0'
   switch (name) {
     case 'lock':
       return (
@@ -128,26 +128,33 @@ function TrustBadges({
   const prefersReduced = useReducedMotion()
 
   const base =
-    'flex items-center gap-3 px-4 py-3 sm:px-5 sm:py-3.5 text-[13px] sm:text-sm font-medium text-[hsl(var(--text))] select-none min-h-[52px] sm:min-h-[56px]'
+    'flex items-center gap-4 px-4 py-3.5 sm:px-5 sm:py-4 text-[13px] sm:text-sm font-medium text-[hsl(var(--text))] select-none min-h-[56px] sm:min-h-[60px]'
   const spacing = compact ? 'py-6' : 'py-8 sm:py-10'
 
   const variants: Record<NonNullable<TrustBadgesProps['variant']>, string> = {
     card: [
-      'rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]',
-      'shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-shadow duration-200',
+      'rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]',
+      'shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)]',
+      'hover:border-[hsl(var(--border))]',
+      'transition-all duration-300 ease-out',
     ].join(' '),
     pill: [
-      'rounded-full border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface))]/90 backdrop-blur-sm',
-      'shadow-[var(--shadow-sm)] hover:border-[hsl(var(--border))] transition-colors duration-200',
+      'rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/95 backdrop-blur-sm',
+      'shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)]',
+      'hover:border-[hsl(var(--border))]',
+      'transition-all duration-300 ease-out',
     ].join(' '),
     subtle:
       'bg-transparent text-[hsl(var(--text))]/90',
     premium: [
-      'relative rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]',
-      'shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:border-[hsl(var(--border))]',
-      'transition-all duration-200 ease-[var(--ease-smooth)]',
+      'relative rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]',
+      'shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)]',
+      'hover:border-[hsl(var(--border))]',
+      'transition-all duration-300 ease-out',
     ].join(' '),
   }
+
+  const useLargeIcons = variant === 'card' || variant === 'pill' || variant === 'premium'
 
   const items = useMemo(() => resolvedBadges.map((b) => ({ ...b })), [resolvedBadges])
 
@@ -160,11 +167,11 @@ function TrustBadges({
         {t('heading_sr')}
       </h2>
 
-      <ul className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 px-4 sm:px-6" role="list">
+      <ul className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 px-4 sm:px-6" role="list">
         {items.map(({ icon, label, href, sr }, i) => {
           const content = (
             <div className={cn(base, variants[variant])} aria-label={label}>
-              <Icon name={icon ?? 'shield'} className="text-[hsl(var(--accent))]" />
+              <Icon name={icon ?? 'shield'} size={useLargeIcons ? 'large' : 'default'} className="text-[hsl(var(--accent))]" />
 
               <span className={cn('relative z-10', truncateLabels && 'truncate')}>{label}</span>
               {sr ? <span className="sr-only"> — {sr}</span> : null}
@@ -174,11 +181,11 @@ function TrustBadges({
           return (
             <motion.li
               key={`${label}-${i}`}
-              initial={prefersReduced ? false : { opacity: 0, y: 6 }}
+              initial={prefersReduced ? false : { opacity: 0, y: 8 }}
               whileInView={prefersReduced ? undefined : { opacity: 1, y: 0 }}
-              whileHover={prefersReduced ? undefined : { y: -1 }}
+              whileHover={prefersReduced ? undefined : { y: -3, transition: { duration: 0.25, ease: 'easeOut' } }}
               viewport={{ once: true, amount: 0.15 }}
-              transition={{ duration: 0.25, ease: 'easeOut', delay: i * 0.04 }}
+              transition={{ duration: 0.3, ease: 'easeOut', delay: i * 0.04 }}
               className="relative list-none"
             >
               {href ? (

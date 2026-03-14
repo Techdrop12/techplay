@@ -50,7 +50,7 @@ const STR = {
     heroTitle: 'Le setup gaming des joueurs exigeants.',
     heroSubtitle:
       'Sélection pointue de périphériques et packs gaming haut de gamme : performances stables, design soigné et expérience clé en main pour élever votre niveau de jeu.',
-    heroPrimaryCta: 'Acheter',
+    heroPrimaryCta: 'Voir les produits',
     heroSecondaryCta: 'Explorer les packs',
     catsKicker: 'Explorer',
     catsTitle: 'Catégories incontournables',
@@ -88,7 +88,7 @@ const STR = {
     heroTitle: 'Premium gaming gear for serious players.',
     heroSubtitle:
       'Curated high-end gaming tech — headsets, mice, keyboards and complete bundles — engineered for consistent performance, refined aesthetics and tournament-ready setups.',
-    heroPrimaryCta: 'Shop Now',
+    heroPrimaryCta: 'View products',
     heroSecondaryCta: 'Explore Packs',
     catsKicker: 'Explore',
     catsTitle: 'Must-have categories',
@@ -271,7 +271,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
         id="main"
         role="main"
         tabIndex={-1}
-        className="scroll-smooth rhythm-sections py-0 sm:py-0"
+        className="scroll-smooth rhythm-sections py-0"
       >
         <section
           id="hero"
@@ -279,20 +279,22 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
           className="motion-section relative w-full overflow-hidden rounded-b-[var(--radius-3xl)] border-0 border-b border-[hsl(var(--border))] bg-[length:120%_120%] shadow-[var(--shadow-xl)]"
           style={{ backgroundImage: 'var(--gradient-hero)' }}
         >
-          <div className="container-app relative z-10 mx-auto grid max-w-screen-2xl gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1.2fr)] lg:items-center lg:gap-12 lg:py-12">
-            <div className="space-y-6 sm:space-y-7">
-              <span className="animate-in inline-block text-[var(--step-subtitle)] font-bold uppercase tracking-[0.22em] text-[hsl(var(--accent))]">
+          <div className="container-app relative z-10 mx-auto grid max-w-screen-2xl gap-8 px-5 py-10 sm:gap-10 sm:px-6 sm:py-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1.2fr)] lg:items-center lg:gap-14 lg:py-14">
+            <div className="space-y-7 sm:space-y-8">
+              <span className="animate-in inline-block text-[var(--step-subtitle)] font-bold uppercase tracking-[0.22em] text-[hsl(var(--accent))] drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)]">
                 {t.heroBadge}
               </span>
-              <h2 className="animate-in animate-in-delay-1 heading-section text-balance max-w-xl font-extrabold sm:[font-size:var(--step-5)] md:text-5xl lg:text-[2.75rem]">
+              <h2 className="animate-in animate-in-delay-1 heading-section text-balance max-w-xl font-extrabold leading-[1.12] drop-shadow-[0_2px_8px_rgba(0,0,0,0.15)] sm:[font-size:var(--step-5)] md:text-5xl lg:text-[2.75rem] lg:leading-tight">
                 {t.heroTitle}
               </h2>
-              <p className="animate-in animate-in-delay-2 max-w-lg heading-section-sub font-medium leading-snug">{t.heroSubtitle}</p>
-              <div className="animate-in animate-in-delay-3 flex flex-col items-stretch gap-3 pt-3 sm:flex-row sm:flex-wrap sm:items-center">
+              <p className="animate-in animate-in-delay-2 max-w-lg text-base font-medium leading-relaxed text-token-text/90 sm:text-[15px]">
+                {t.heroSubtitle}
+              </p>
+              <div className="animate-in animate-in-delay-3 flex flex-col items-stretch gap-4 pt-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
                 <Link
                   href="/products"
                   prefetch={false}
-                  className="btn btn-premium btn-lg inline-flex w-full items-center justify-center gap-2 rounded-full px-8 py-3.5 text-[var(--step-0)] font-bold focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)] sm:w-auto"
+                  className="hero-cta-primary inline-flex w-full items-center justify-center gap-2.5 rounded-full px-8 py-4 text-[var(--step-0)] font-bold shadow-[var(--shadow-lg),0_0_24px_hsl(var(--accent)/0.25)] transition-all duration-200 hover:shadow-[var(--shadow-lg),0_0_32px_hsl(var(--accent)/0.35)] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] sm:w-auto"
                   data-gtm="home_hero_primary"
                 >
                   {t.heroPrimaryCta}
@@ -300,7 +302,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
                 <Link
                   href="/products/packs"
                   prefetch={false}
-                  className="btn btn-ghost inline-flex w-full items-center justify-center gap-2 rounded-full border-[hsl(var(--border))] px-6 py-2.5 text-[13px] font-medium text-token-text/80 hover:bg-[hsl(var(--surface-2))] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.25)] sm:w-auto"
+                  className="btn btn-ghost inline-flex w-full items-center justify-center gap-2 rounded-full border-2 border-[hsl(var(--border))] px-6 py-3 text-[14px] font-semibold text-token-text/90 hover:border-[hsl(var(--accent)/.3)] hover:bg-[hsl(var(--surface-2))] hover:text-[hsl(var(--text))] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.25)] sm:w-auto"
                   data-gtm="home_hero_secondary"
                 >
                   {t.heroSecondaryCta}
@@ -310,7 +312,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
                 variant="pill"
                 compact
                 truncateLabels={false}
-                className="!mt-4 !border-0 !bg-transparent !py-0 [&_ul]:!max-w-none [&_ul]:!px-0 [&_ul]:grid-cols-3"
+                className="!mt-8 !border-0 !bg-transparent !py-4 [&_ul]:!max-w-none [&_ul]:grid-cols-1 [&_ul]:sm:grid-cols-3 [&_ul]:gap-4"
                 badges={[
                   { icon: 'truck', label: locale === 'en' ? 'Fast delivery' : 'Livraison rapide' },
                   { icon: 'shield', label: locale === 'en' ? '2-year warranty' : 'Garantie 2 ans' },
@@ -363,7 +365,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
           <SectionHeader kicker={t.packsKicker} title={t.packsTitle} sub={t.packsSub} />
           <div className="rhythm-content overflow-hidden rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/50 shadow-sm">
             <Suspense fallback={<SectionSkeleton title={t.packsTitle} />}>
-              <PacksSection packs={recommendedPacks} />
+              <PacksSection packs={recommendedPacks} showHeader={false} />
             </Suspense>
           </div>
         </section>
@@ -377,7 +379,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
           <SectionHeader kicker={t.faqKicker} title={t.faqTitle} />
           <div className="rhythm-content">
             <Suspense fallback={<SectionSkeleton title={t.faqTitle} />}>
-              <FAQ />
+              <FAQ showSectionHeading={false} />
             </Suspense>
           </div>
         </section>

@@ -7,6 +7,7 @@ import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import type { KeyboardEvent, RefCallback } from 'react'
 
 import { error as logError } from '@/lib/logger'
+import { cn } from '@/lib/utils'
 
 interface FAQItem {
   _id: string
@@ -26,7 +27,12 @@ const FALLBACK_FAQ_EN: FAQItem[] = [
   { _id: '3', question: 'Is payment secure?', answer: 'Yes. Payment via Stripe (card, Apple Pay, Google Pay). Data encrypted.' },
 ]
 
-export default function FAQ() {
+interface FAQProps {
+  /** When false, the section heading is not rendered (e.g. when the page already shows it). */
+  showSectionHeading?: boolean
+}
+
+export default function FAQ({ showSectionHeading = true }: FAQProps) {
   const t = useTranslations('faq')
   const locale = useLocale()
   const [faqs, setFaqs] = useState<FAQItem[]>([])
@@ -97,7 +103,6 @@ export default function FAQ() {
     }
   }
 
-  // ✅ ref callback qui retourne void (TypeScript OK)
   const setHeaderRef = (idx: number): RefCallback<HTMLButtonElement> => (el) => {
     headerRefs.current[idx] = el
   }
@@ -116,42 +121,59 @@ export default function FAQ() {
     }
   }, [filteredFaqs])
 
+  const introContent = (
+    <>
+      {t('intro')}{' '}
+      <a href="/contact" className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline">
+        {t('contact_link')}
+      </a>
+      .
+    </>
+  )
+
   return (
-    <section className="container-app mx-auto max-w-3xl py-10 sm:py-12" aria-labelledby="faq-heading">
-      <h2 id="faq-heading" className="heading-section text-center">
-        {t('heading')}
-      </h2>
-      <p className="mt-3 text-center text-[15px] text-token-text/75 max-w-xl mx-auto">
-        {t('intro')}{' '}
-        <a href="/contact" className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline">
-          {t('contact_link')}
-        </a>
-        .
+    <section
+      className="container-app mx-auto max-w-3xl py-8 sm:py-10"
+      aria-labelledby={showSectionHeading ? 'faq-heading' : undefined}
+      aria-label={showSectionHeading ? undefined : t('heading')}
+    >
+      {showSectionHeading && (
+        <h2 id="faq-heading" className="heading-section text-center">
+          {t('heading')}
+        </h2>
+      )}
+      <p
+        className={cn(
+          'max-w-xl mx-auto text-center text-[15px] text-token-text/75',
+          showSectionHeading ? 'mt-3' : 'mb-6'
+        )}
+      >
+        {introContent}
       </p>
 
-      {/* Barre outils */}
-      <div className="mt-6 mb-6 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+      {/* Tools: search + expand/collapse */}
+      <div className="mt-6 mb-8 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
         <input
           type="search"
           inputMode="search"
           placeholder={t('search_placeholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full sm:w-2/3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] focus:ring-offset-2"
+          className="w-full sm:max-w-sm rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-3 text-[15px] sm:text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] focus:ring-offset-2"
           aria-label={t('search_aria')}
         />
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-shrink-0">
           <button
             type="button"
             onClick={expandAll}
-            className="rounded-xl bg-[hsl(var(--accent))] text-white px-3.5 py-2.5 text-sm font-semibold hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))]"
+            className="rounded-xl bg-[hsl(var(--accent))] text-white px-4 py-3 text-sm font-semibold hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))] min-h-[2.75rem] sm:min-h-0"
           >
             {t('expand_all')}
           </button>
           <button
             type="button"
             onClick={collapseAll}
-            className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3.5 py-2.5 text-sm text-token-text hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))]"
+            className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-3 text-sm text-token-text hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))] min-h-[2.75rem] sm:min-h-0"
           >
             {t('collapse_all')}
           </button>
@@ -160,9 +182,9 @@ export default function FAQ() {
 
       {/* État chargement / vide */}
       {loading && (
-        <div className="space-y-3" role="status" aria-live="polite" aria-busy="true">
-          {[1, 2, 3].map((k) => (
-            <div key={k} className="h-14 rounded-xl bg-[hsl(var(--surface-2))] animate-pulse" />
+        <div className="space-y-3 sm:space-y-4" role="status" aria-live="polite" aria-busy="true">
+          {[1, 2, 3, 4].map((k) => (
+            <div key={k} className="h-16 sm:h-[4.25rem] rounded-2xl bg-[hsl(var(--surface-2))] animate-pulse" />
           ))}
         </div>
       )}
@@ -178,31 +200,34 @@ export default function FAQ() {
       )}
 
       {/* Liste FAQ */}
-      <div role="list" aria-live="polite" className="divide-y divide-[hsl(var(--border))]">
+      <div role="list" aria-live="polite" className="space-y-3 sm:space-y-4">
         {filteredFaqs.map((faq, i) => {
           const isOpen = openSet.has(i)
           const headerId = `faq-header-${faq._id}-${i}`
           const panelId = `faq-panel-${faq._id}-${i}`
 
           return (
-            <div key={faq._id} className="py-4">
-              {/* ✅ commentaire déplacé en dehors de la balise */}
-              {/* corrige la signature de ref */}
+            <div
+              key={faq._id}
+              role="listitem"
+              className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] shadow-sm overflow-hidden transition-shadow hover:shadow-md"
+            >
               <button
                 ref={setHeaderRef(i)}
                 id={headerId}
                 aria-controls={panelId}
                 aria-expanded={isOpen}
-                className="w-full text-left flex items-start justify-between gap-4 text-[15px] sm:text-base font-semibold text-[hsl(var(--text))] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))] rounded-md py-1"
+                className="w-full text-left flex items-center justify-between gap-4 min-h-[3.25rem] sm:min-h-[3.5rem] px-4 py-4 sm:px-5 sm:py-4 text-[15px] sm:text-base font-semibold text-[hsl(var(--text))] rounded-2xl transition-colors hover:bg-[hsl(var(--surface-2))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))]"
                 onClick={() => toggleIndex(i)}
                 onKeyDown={(e) => onKeyNav(e, i)}
               >
-                <span>{faq.question}</span>
+                <span className="flex-1 pr-2 leading-snug">{faq.question}</span>
                 <span
-                  className="shrink-0 rounded-md bg-[hsl(var(--surface-2))] px-2 py-0.5 text-xs text-token-text/70"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--surface-2))] text-[hsl(var(--accent))] text-lg font-medium transition-transform duration-200"
                   aria-hidden="true"
+                  style={{ transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)' }}
                 >
-                  {isOpen ? '−' : '+'}
+                  +
                 </span>
               </button>
 
@@ -212,14 +237,14 @@ export default function FAQ() {
                     id={panelId}
                     role="region"
                     aria-labelledby={headerId}
-                    key="content"
+                    key={panelId}
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.25, ease: 'easeInOut' }}
-                    className="overflow-hidden"
+                    transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                    className="overflow-hidden border-t border-[hsl(var(--border))]"
                   >
-                    <div className="pt-3 text-[14px] leading-relaxed text-token-text/80">
+                    <div className="px-4 pb-4 pt-1 sm:px-5 sm:pb-5 sm:pt-2 text-[15px] sm:text-base leading-relaxed text-token-text/85">
                       {faq.answer}
                     </div>
                   </motion.div>
@@ -230,11 +255,9 @@ export default function FAQ() {
         })}
       </div>
 
-      {/* SEO JSON-LD */}
       {faqJsonLd && (
         <script
           type="application/ld+json"
-           
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
         />
       )}

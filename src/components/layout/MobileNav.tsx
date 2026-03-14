@@ -631,7 +631,7 @@ export default function MobileNav() {
             />
 
             <motion.div
-              className="relative w-full overflow-hidden border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/95 shadow-2xl sm:max-w-md sm:rounded-2xl"
+              className="relative flex max-h-[88dvh] w-full flex-col overflow-x-hidden overflow-y-auto overscroll-contain border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/95 shadow-2xl sm:max-h-[90vh] sm:max-w-md sm:rounded-2xl"
               variants={sheetVariants}
               drag={reducedMotion ? false : 'y'}
               dragConstraints={{ top: 0, bottom: 0 }}
@@ -640,18 +640,18 @@ export default function MobileNav() {
                 if (info.offset.y > 80) closeMenu('drag_close')
               }}
             >
-              <div className="pt-[env(safe-area-inset-top)]" />
+              <div className="shrink-0 pt-[env(safe-area-inset-top)]" />
               <div className="mx-auto mt-4 h-1 w-12 rounded-full bg-token-text/15" aria-hidden="true" />
 
               <div className="flex items-center justify-between gap-3 px-5 py-4">
-                <h2 id={titleId} className="text-lg font-semibold text-[hsl(var(--text))]">
+                <h2 id={titleId} className="text-lg font-semibold leading-tight text-[hsl(var(--text))]">
                   {t.ui.menu}
                 </h2>
 
                 <button
                   onClick={() => closeMenu('close_btn')}
                   type="button"
-                  className="flex min-h-[2.75rem] min-w-[2.75rem] items-center justify-center rounded-xl hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+                  className="flex min-h-[2.75rem] min-w-[2.75rem] shrink-0 items-center justify-center rounded-xl hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 active:bg-[hsl(var(--surface-2))]/80"
                   aria-label={t.ui.closeMenu}
                 >
                   <Icon.Close />
@@ -736,7 +736,7 @@ export default function MobileNav() {
               ) : null}
 
               <section className="border-t border-[hsl(var(--border))]/60 px-5 py-4" aria-label={t.ui.quickAccessLabel}>
-                <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-token-text/55">
+                <p className="mb-3.5 text-[11px] font-semibold uppercase tracking-wider text-token-text/55">
                   {t.ui.quickAccessLabel}
                 </p>
                 <div className="flex flex-wrap items-center gap-3">
@@ -854,11 +854,11 @@ export default function MobileNav() {
                 </AnimatePresence>
               </div>
 
-              <section className="border-t border-[hsl(var(--border))]/60 px-5 pt-5 pb-5" aria-label={t.ui.mobileNavAria}>
+              <section className="border-t border-[hsl(var(--border))]/60 px-5 pt-6 pb-5" aria-label={t.ui.mobileNavAria}>
                 <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-token-text/55">
                   {t.ui.shopLabel}
                 </p>
-                <ul className="grid grid-cols-1 gap-1.5 text-lg">
+                <ul className="grid grid-cols-1 gap-2 text-lg">
                   {t.nav.map((item) => {
                     const { href, label } = item
                     const promo = ('promo' in item && item.promo === true) || href.includes('promo=1')
@@ -939,7 +939,7 @@ export default function MobileNav() {
                 <button
                   onClick={() => closeMenu('footer_close')}
                   type="button"
-                  className="min-h-[3rem] px-4 text-sm font-medium text-token-text/70 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+                  className="min-h-[3rem] min-w-[3rem] shrink-0 rounded-xl px-4 text-sm font-medium text-token-text/70 hover:bg-[hsl(var(--surface-2))] hover:text-token-text/85 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 active:bg-[hsl(var(--surface-2))]/80"
                   aria-label={t.ui.closeMenu}
                 >
                   {t.ui.closeMenu}

@@ -451,8 +451,8 @@ export default function HeroCarousel({
     <section
       ref={containerRef}
       className={cn(
-        'relative w-full select-none overflow-hidden rounded-[1.75rem] bg-gradient-to-b from-black/85 via-black/75 to-black/90 shadow-[0_28px_80px_rgba(0,0,0,0.65)]',
-        'h-[58vh] sm:h-[70vh] lg:h-[82vh] will-change-transform touch-pan-y',
+        'relative w-full select-none overflow-hidden rounded-[1.75rem] bg-gradient-to-b from-black/90 via-black/80 to-black/92 shadow-[0_28px_80px_rgba(0,0,0,0.6)]',
+        'min-h-[320px] h-[62vh] sm:min-h-[400px] sm:h-[70vh] lg:h-[82vh] will-change-transform touch-pan-y',
         className
       )}
       role="region"
@@ -478,11 +478,11 @@ export default function HeroCarousel({
       {edgeFade ? (
         <>
           <div
-            className="pointer-events-none absolute inset-y-0 left-0 z-[2] w-24 bg-gradient-to-r from-black/55 via-black/10 to-transparent"
+            className="pointer-events-none absolute inset-0 z-[2] w-20 sm:w-32 bg-gradient-to-r from-black/70 via-black/25 to-transparent"
             aria-hidden="true"
           />
           <div
-            className="pointer-events-none absolute inset-y-0 right-0 z-[2] w-24 bg-gradient-to-l from-black/55 via-black/10 to-transparent"
+            className="pointer-events-none absolute inset-0 left-auto right-0 z-[2] w-20 sm:w-32 bg-gradient-to-l from-black/70 via-black/25 to-transparent"
             aria-hidden="true"
           />
         </>
@@ -491,10 +491,21 @@ export default function HeroCarousel({
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={String(current?.id)}
-          initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, scale: 1.01 }}
+          initial={
+            prefersReducedMotion
+              ? { opacity: 1 }
+              : { opacity: 0, scale: 1.02 }
+          }
           animate={{ opacity: 1, scale: 1 }}
-          exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0.25, scale: 0.99 }}
-          transition={{ duration: prefersReducedMotion ? 0 : 0.6, ease: 'easeOut' }}
+          exit={
+            prefersReducedMotion
+              ? { opacity: 1 }
+              : { opacity: 0.2, scale: 0.98 }
+          }
+          transition={{
+            duration: prefersReducedMotion ? 0 : 0.55,
+            ease: [0.32, 0.72, 0, 1],
+          }}
           className="absolute inset-0 z-0 will-change-transform"
           style={parallaxStyle}
           aria-roledescription="slide"
@@ -502,10 +513,10 @@ export default function HeroCarousel({
         >
           <motion.div
             key={`kb-${String(current?.id)}`}
-            initial={{ scale: 1.02 }}
-            animate={prefersReducedMotion ? { scale: 1 } : { scale: 1.07 }}
+            initial={{ scale: 1.03 }}
+            animate={prefersReducedMotion ? { scale: 1 } : { scale: 1.06 }}
             transition={{ duration: intervalMs / 1000, ease: 'linear' }}
-            className="absolute inset-0 will-change-transform"
+            className="absolute inset-0 will-change-transform m-3 sm:m-5 lg:m-6"
           >
             {current?.videoUrl ? (
               <video
@@ -572,14 +583,15 @@ export default function HeroCarousel({
         <div className="overlay-hero absolute inset-0" />
         {showOverlay ? (
           <div
-            className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/55 to-black/80"
+            className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/70"
             style={overlayOpacity ? { opacity: overlayOpacity } : undefined}
           />
         ) : null}
         <div
-          className="absolute inset-0 opacity-70 mix-blend-overlay"
+          className="absolute inset-0 opacity-50 mix-blend-overlay"
           style={{ background: 'var(--ring-conic)' }}
         />
+        <div className="hero-carousel-glow-right" aria-hidden="true" />
       </div>
 
       {current?.badge ? (
@@ -592,9 +604,9 @@ export default function HeroCarousel({
       ) : null}
 
       {showCounter && canNavigate ? (
-        <div className="glass absolute left-1/2 top-4 z-20 -translate-x-1/2 rounded-full border border-white/20 bg-white/5 px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-white/80 backdrop-blur-xl">
-          {index + 1}{' '}
-          <span className="mx-1.5 h-[1px] w-6 align-middle bg-gradient-to-r from-white/0 via-white/60 to-white/0" />{' '}
+        <div className="glass absolute left-1/2 top-4 sm:top-5 z-20 -translate-x-1/2 rounded-full border border-white/20 bg-white/5 px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-white/90 backdrop-blur-xl">
+          {index + 1}
+          <span className="mx-1.5 text-white/50" aria-hidden="true">/</span>
           {total}
         </div>
       ) : null}
@@ -657,7 +669,7 @@ export default function HeroCarousel({
           aria-label={isPaused ? t.play : t.pause}
           aria-pressed={isPaused}
           className={cn(
-            'absolute right-3 top-3 z-20 rounded-full border border-white/15 bg-black/40 px-3.5 py-2 text-[11px] font-medium text-white backdrop-blur-xl',
+            'absolute right-3 top-3 z-20 rounded-full border border-white/15 bg-black/45 px-3.5 py-2 text-[11px] font-medium text-white backdrop-blur-xl',
             'hover:bg-white/10 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60'
           )}
           data-gtm="hero_toggle"
@@ -671,7 +683,7 @@ export default function HeroCarousel({
 
       {effectiveAutoplay ? (
         <div
-          className="absolute bottom-6 left-1/2 z-20 hidden h-[5px] w-[70%] max-w-3xl -translate-x-1/2 overflow-hidden rounded-full border border-white/15 bg-black/50 backdrop-blur-xl sm:block"
+          className="absolute bottom-6 left-1/2 z-20 hidden h-1 w-[70%] max-w-3xl -translate-x-1/2 overflow-hidden rounded-full bg-white/10 backdrop-blur-xl sm:block"
           role="presentation"
           aria-hidden="true"
           onClick={(e) => {
@@ -687,16 +699,16 @@ export default function HeroCarousel({
           style={progressClickable ? { cursor: 'pointer' } : undefined}
         >
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-[hsl(var(--accent))] via-sky-300 to-white"
+            className="h-full rounded-full bg-gradient-to-r from-[hsl(var(--accent))] to-[hsl(var(--accent)/0.8)]"
             animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.1, ease: 'linear' }}
+            transition={{ duration: 0.15, ease: 'linear' }}
           />
         </div>
       ) : null}
 
       {showBullets && canNavigate ? (
-        <nav className="absolute bottom-3 left-1/2 z-20 -translate-x-1/2 sm:hidden" aria-label={t.nav}>
-          <ul className="flex items-center gap-2.5 rounded-full bg-black/40 px-3 py-1.5 shadow-[0_12px_36px_rgba(15,23,42,0.75)] backdrop-blur-xl">
+        <nav className="absolute bottom-5 left-1/2 z-20 -translate-x-1/2 sm:hidden" aria-label={t.nav}>
+          <ul className="flex items-center gap-2 rounded-full bg-black/45 px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.4)] backdrop-blur-xl">
             {slides.map((slide, i) => {
               const active = i === index
               const bulletLabel = t.goTo + (i + 1) + (slide.alt ? ` : ${slide.alt}` : '')
@@ -706,10 +718,10 @@ export default function HeroCarousel({
                   <button
                     type="button"
                     className={cn(
-                      'h-2.5 w-2.5 rounded-full transition',
+                      'rounded-full transition-all duration-300 ease-out',
                       active
-                        ? 'scale-110 bg-[hsl(var(--accent))] shadow-[0_0_0_2px_rgba(15,23,42,0.8)]'
-                        : 'bg-white/40 hover:bg-white/85'
+                        ? 'h-2 w-6 bg-white shadow-[0_0_8px_hsl(var(--accent)/0.4)]'
+                        : 'h-2 w-2 bg-white/50 hover:bg-white/75 hover:scale-110'
                     )}
                     aria-label={bulletLabel}
                     aria-current={active ? 'true' : undefined}
@@ -725,22 +737,25 @@ export default function HeroCarousel({
       ) : null}
 
       {showThumbnails && canNavigate ? (
-        <div className="absolute bottom-4 left-1/2 z-20 hidden -translate-x-1/2 sm:block">
-          <ul className="flex gap-3 rounded-full bg-black/40 px-3 py-2 shadow-[0_18px_60px_rgba(15,23,42,0.9)] backdrop-blur-2xl" aria-label={t.thumbs}>
+        <div className="absolute bottom-5 sm:bottom-6 left-1/2 z-20 hidden -translate-x-1/2 sm:block">
+          <ul className="flex gap-2.5 rounded-2xl bg-black/45 px-3 py-2.5 shadow-[0_12px_32px_rgba(0,0,0,0.45)] backdrop-blur-2xl" aria-label={t.thumbs}>
             {slides.map((slide, i) => {
               const active = i === index
               const thumb = getImageSrc(slide).desktop
 
               return (
                 <li key={slide.id ?? i}>
-                  <button
+                  <motion.button
                     type="button"
                     className={cn(
-                      'group relative h-10 w-16 overflow-hidden rounded-xl border border-white/15 shadow-[0_10px_35px_rgba(15,23,42,0.85)] sm:h-12 sm:w-20',
+                      'group relative h-11 w-[4.25rem] overflow-hidden rounded-xl border shadow-md sm:h-12 sm:w-20',
                       active
-                        ? 'border-[hsl(var(--accent))] ring-2 ring-[hsl(var(--accent))]'
-                        : 'hover:border-white/70'
+                        ? 'border-[hsl(var(--accent))] ring-2 ring-[hsl(var(--accent)/0.5)]'
+                        : 'border-white/20 hover:border-white/50'
                     )}
+                    whileHover={prefersReducedMotion ? undefined : { scale: 1.03 }}
+                    whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
+                    transition={{ duration: 0.2 }}
                     aria-label={`${t.goTo}${i + 1}`}
                     aria-current={active ? 'true' : undefined}
                     data-gtm="hero_thumb"
@@ -760,7 +775,7 @@ export default function HeroCarousel({
                     <span className="sr-only">
                       {slide.alt ? slide.alt : `${t.goTo}${i + 1}`}
                     </span>
-                  </button>
+                  </motion.button>
                 </li>
               )
             })}

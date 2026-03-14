@@ -321,6 +321,15 @@
     transform: scale(0.98);
   }
 
+  .hero-cta-primary {
+    color: hsl(var(--accent-fg));
+    background: var(--gradient-accent);
+    transition: filter var(--dur) var(--ease-smooth);
+  }
+  .hero-cta-primary:hover {
+    filter: brightness(1.06);
+  }
+
   .btn-premium,
   .btn-primary {
     transition:
