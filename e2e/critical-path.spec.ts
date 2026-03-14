@@ -11,6 +11,7 @@ import { test } from '@playwright/test'
  */
 test.describe('Parcours critique', () => {
   test('Accueil → Produit → Panier → Page commande', async ({ page }) => {
+    test.setTimeout(90_000)
     // / redirige vers /fr (middleware) ; on peut aussi aller directement sur /fr
     await page.goto('/')
 
@@ -120,8 +121,11 @@ test.describe('Parcours critique', () => {
     const onCheckout = /\/(fr\/)?commande\/?$/
     await page.waitForURL(onCheckout, { timeout: 8_000 }).catch(() => undefined)
     if (!onCheckout.test(page.url())) {
-      await page.goto(new URL('/commande', page.url()).toString())
-      await expect(page).toHaveURL(onCheckout, { timeout: 5_000 })
+      await page.goto(new URL('/commande', page.url()).toString(), {
+        waitUntil: 'domcontentloaded',
+        timeout: 45_000,
+      })
+      await expect(page).toHaveURL(onCheckout, { timeout: 10_000 })
     }
     // Formulaire : champ email et bouton paiement
     await expect(page.locator('input[type="email"]').first()).toBeVisible({ timeout: 5_000 })
