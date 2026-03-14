@@ -30,7 +30,7 @@ export default function CartIndicator() {
             : { scale: 1, rotate: 0 }
         }
         transition={{ duration: 0.5, ease: 'easeInOut' }}
-        onClick={() => router.push('/panier')}
+        onClick={() => router.push('/cart')}
         aria-label={`Panier : ${totalItems} article${totalItems > 1 ? 's' : ''}`}
       >
         <ShoppingCart className="w-5 h-5" />

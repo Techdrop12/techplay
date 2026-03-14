@@ -19,13 +19,13 @@ export default function Hero() {
           </p>
           <div className="mt-6 flex gap-4">
             <Link
-              href="/categorie/populaire"
+              href="/products"
               className="bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] px-6 py-3 rounded-xl shadow-[var(--shadow-sm)] hover:opacity-95"
             >
               {t('cta_new')}
             </Link>
             <Link
-              href="/a-propos"
+              href="/contact"
               className="border border-[hsl(var(--border))] px-6 py-3 rounded-xl hover:bg-[hsl(var(--surface))]"
             >
               {tConsent('learn_more')}

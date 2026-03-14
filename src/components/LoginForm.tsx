@@ -25,7 +25,7 @@ export default function LoginForm() {
 
     if (res?.ok) {
       toast.success('Connexion réussie');
-      router.push('/admin');
+      router.push('/admin/dashboard');
     } else {
       toast.error('Identifiants incorrects');
     }

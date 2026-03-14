@@ -41,7 +41,7 @@ interface BannerPromoProps {
 const defaultPromos: Promo[] = [
   {
     text: '🎁 Livraison gratuite ce soir jusqu’à minuit !',
-    url: '/produit',
+    url: '/products',
     bg: 'bg-gradient-to-r from-brand via-brand/90 to-accent',
     condition: () => {
       const h = new Date().getHours()
@@ -55,7 +55,7 @@ const defaultPromos: Promo[] = [
   },
   {
     text: '⭐ Offres limitées sur nos best-sellers',
-    url: '/categorie/best-sellers',
+    url: '/products/packs',
     bg: 'bg-gradient-to-r from-brand/90 to-accent',
   },
 ]

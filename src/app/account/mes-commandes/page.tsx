@@ -33,10 +33,19 @@ async function OrdersContent() {
   if (!email) {
     return (
       <main
-        className="mx-auto max-w-4xl px-4 py-10"
+        className="container-app mx-auto max-w-4xl px-4 pt-24 pb-20 sm:px-6"
         aria-labelledby="orders-title"
         role="main"
       >
+        <div className="mb-6">
+          <Link
+            href="/account"
+            className="text-[13px] font-medium text-[hsl(var(--accent))] transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+            aria-label="Retour à l’espace client"
+          >
+            ← Espace client
+          </Link>
+        </div>
         <h1 id="orders-title" className="heading-page mb-6">
           Mes commandes
         </h1>
@@ -70,10 +79,19 @@ async function OrdersContent() {
 
   return (
     <main
-      className="mx-auto max-w-4xl px-4 py-10"
+      className="container-app mx-auto max-w-4xl px-4 pt-24 pb-20 sm:px-6"
       aria-labelledby="orders-title"
       role="main"
     >
+      <div className="mb-6">
+        <Link
+          href="/account"
+          className="text-[13px] font-medium text-[hsl(var(--accent))] transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+          aria-label="Retour à l’espace client"
+        >
+          ← Espace client
+        </Link>
+      </div>
       <h1 id="orders-title" className="heading-page mb-6">
         Mes commandes
       </h1>
@@ -84,7 +102,7 @@ async function OrdersContent() {
 
 function OrdersSkeleton() {
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10" role="main" aria-busy="true">
+    <main className="container-app mx-auto max-w-4xl px-4 pt-24 pb-20 sm:px-6" role="main" aria-busy="true">
       <div className="mb-6 h-8 w-48 animate-pulse rounded-lg bg-[hsl(var(--surface-2))]" />
       <div className="space-y-4" role="status" aria-live="polite">
         {[...Array(2)].map((_, i) => (

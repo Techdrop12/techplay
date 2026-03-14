@@ -37,7 +37,7 @@ export default function RecentlyViewed() {
         {products.map((p) => (
           <Link
             key={p.slug}
-            href={`/fr/produit/${p.slug}`}
+            href={`/products/${p.slug}`}
             className="text-[hsl(var(--accent))] hover:underline text-sm"
           >
             {p.title}

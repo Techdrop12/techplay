@@ -1,6 +1,6 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
 interface FAQItem {
@@ -14,14 +14,19 @@ interface FAQBlockProps {
 
 export default function FAQBlock({ productId }: FAQBlockProps) {
   const t = useTranslations('faq')
+  const locale = useLocale()
   const [faq, setFaq] = useState<FAQItem[]>([])
 
   useEffect(() => {
-    if (!productId) return
-    fetch(`/api/faq/${productId}`)
-      .then((res) => res.json())
-      .then((data: { faq?: FAQItem[] }) => setFaq(Array.isArray(data?.faq) ? data.faq : []))
-  }, [productId])
+    const loc = typeof locale === 'string' ? locale : 'fr'
+    fetch(`/api/faq?locale=${encodeURIComponent(loc)}`)
+      .then((res) => res.ok ? res.json() : [])
+      .then((data: Array<{ question?: string; answer?: string }>) => {
+        const list = Array.isArray(data) ? data : []
+        setFaq(list.map((entry) => ({ q: entry.question, a: entry.answer })))
+      })
+      .catch(() => setFaq([]))
+  }, [locale])
 
   if (!faq.length) return null
 

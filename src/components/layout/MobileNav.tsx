@@ -763,10 +763,10 @@ export default function MobileNav() {
                   </Link>
 
                   <Link
-                    href="/login"
+                    href="/account"
                     prefetch={false}
-                    onPointerDown={() => prefetchOnPointer('/login')}
-                    onFocus={() => prefetchOnPointer('/login')}
+                    onPointerDown={() => prefetchOnPointer('/account')}
+                    onFocus={() => prefetchOnPointer('/account')}
                     onClick={() => {
                       track({ action: 'mobile_nav_quick_account' })
                       closeMenu('quick_account')

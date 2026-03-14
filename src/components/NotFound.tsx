@@ -24,7 +24,7 @@ export default function NotFound() {
   const popularLinks = [
     { href: '/', label: 'Accueil' },
     { href: '/products', label: 'Nos produits' },
-    { href: '/categorie/accessoires', label: 'Catégories' },
+    { href: '/categorie', label: 'Catégories' },
     { href: '/products/packs', label: 'Packs' },
     { href: '/wishlist', label: 'Wishlist' },
     { href: '/contact', label: 'Contact' },
@@ -80,7 +80,7 @@ export default function NotFound() {
 
       <div className="mt-8">
         <a
-          href={`mailto:support@techplay.example.com?subject=Lien brisé&body=URL introuvable : ${encodeURIComponent(attempted)}`}
+          href={`mailto:support@techplay.fr?subject=Lien brisé&body=URL introuvable : ${encodeURIComponent(attempted)}`}
           className="text-[12px] text-token-text/60 underline transition hover:text-[hsl(var(--text))]"
         >
           Signaler ce lien brisé

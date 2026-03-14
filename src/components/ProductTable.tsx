@@ -84,7 +84,7 @@ export default function ProductTable() {
                 <td className="p-2 border">{p.slug}</td>
                 <td className="p-2 border flex justify-center gap-2">
                   <button
-                    onClick={() => router.push(`/fr/admin/produit/${p._id}`)}
+                    onClick={() => router.push(`/admin/produit/${p._id}`)}
                     className="bg-[hsl(var(--accent))] hover:opacity-95 text-[hsl(var(--accent-fg))] px-3 py-1 rounded transition"
                     aria-label={t('modify')}
                   >

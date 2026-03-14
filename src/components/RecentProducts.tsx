@@ -32,7 +32,7 @@ export default function RecentProducts() {
             transition={{ delay: i * 0.05 }}
           >
             <Link
-              href={`/produit/${p.slug}`}
+              href={`/products/${p.slug}`}
               className="block border p-2 rounded-lg hover:shadow transition bg-white"
             >
               <div className="relative w-full h-32 mb-2">

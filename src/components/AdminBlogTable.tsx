@@ -99,10 +99,12 @@ export default function AdminBlogTable() {
                     {post.published ? 'Dépublier' : 'Publier'}
                   </button>
                   <Link
-                    href={`/admin/edit-blog/${post.slug}`}
+                    href={`/blog/${post.slug}`}
                     className="text-yellow-600 hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    Modifier
+                    Voir l&apos;article
                   </Link>
                   <button
                     onClick={() => deletePost(post._id)}

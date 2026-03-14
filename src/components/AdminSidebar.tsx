@@ -1,15 +1,6 @@
 'use client';
 
-import {
-  LayoutDashboard,
-  Package,
-  ScrollText,
-  Sparkles,
-  MessageSquareText,
-  ShieldCheck,
-  PlusSquare,
-  BarChart,
-} from 'lucide-react';
+import { LayoutDashboard, Package, Sparkles } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 import type { ReactNode } from 'react';
@@ -17,14 +8,9 @@ import type { ReactNode } from 'react';
 import Link from '@/components/LocalizedLink';
 
 const links: { href: string; label: string; icon: ReactNode }[] = [
-  { href: '/fr/admin/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
-  { href: '/fr/admin/produit', label: 'Produits', icon: <Package size={18} /> },
-  { href: '/fr/admin/produit/ajouter', label: 'Ajouter', icon: <PlusSquare size={18} /> },
-  { href: '/fr/admin/commandes', label: 'Commandes', icon: <ScrollText size={18} /> },
-  { href: '/fr/admin/avis', label: 'Avis clients', icon: <MessageSquareText size={18} /> },
-  { href: '/fr/admin/blog', label: 'Blog IA', icon: <Sparkles size={18} /> },
-  { href: '/fr/admin/analytics', label: 'Statistiques', icon: <BarChart size={18} /> },
-  { href: '/fr/admin/settings', label: 'Paramètres', icon: <ShieldCheck size={18} /> },
+  { href: '/admin/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
+  { href: '/admin/import', label: 'Import produits', icon: <Package size={18} /> },
+  { href: '/admin/generate-blog', label: 'Blog IA', icon: <Sparkles size={18} /> },
 ];
 
 export default function AdminSidebar() {

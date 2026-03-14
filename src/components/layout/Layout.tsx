@@ -221,15 +221,13 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
         data-pathname={pathname}
         aria-label={localeStrings[locale].mainLabel}
         className="relative z-0 min-h-[calc(var(--vh,1vh)*100)] bg-token-surface px-[max(0px,env(safe-area-inset-left))] pb-[max(0px,env(safe-area-inset-bottom))] pr-[max(0px,env(safe-area-inset-right))] pt-[var(--header-offset,4.5rem)] text-token-text transition-colors page-entrance"
-        style={{ opacity: 1, visibility: 'visible', pointerEvents: 'none' }}
+        style={{ opacity: 1, visibility: 'visible' }}
       >
-        <div className="min-h-full" style={{ pointerEvents: 'auto' }}>
-          <Suspense
-            fallback={<div className="px-4 py-8 text-sm text-token-text/70">{loadingFallback}</div>}
-          >
-            {children}
-          </Suspense>
-        </div>
+        <Suspense
+          fallback={<div className="px-4 py-8 text-sm text-token-text/70">{loadingFallback}</div>}
+        >
+          {children}
+        </Suspense>
       </main>
 
       <ScrollTopButton />

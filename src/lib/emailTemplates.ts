@@ -106,8 +106,8 @@ function baseLayout(opts: {
                   <div style="margin-top:8px">${escapeHtml(ADDRESS)}</div>
                   <div>Besoin d’aide ? <a href="mailto:${SUPPORT_EMAIL}" style="color:inherit">${SUPPORT_EMAIL}</a></div>
                   <div style="margin-top:8px">
-                    <a href="${SITE_URL}/preferences" style="color:inherit">Gérer mes préférences</a>
-                    • <a href="${SITE_URL}/unsubscribe" style="color:inherit">Se désabonner</a>
+                    <a href="${SITE_URL}/account" style="color:inherit">Espace client</a>
+                    • <a href="${SITE_URL}/contact" style="color:inherit">Nous contacter</a>
                   </div>
                   <div style="margin-top:8px">&copy; ${new Date().getFullYear()} ${escapeHtml(SITE_NAME)} — Tous droits réservés.</div>
                 </td>
@@ -124,8 +124,8 @@ function baseLayout(opts: {
   const textFooter = [
     ADDRESS,
     `Support: ${SUPPORT_EMAIL}`,
-    `Préférences: ${SITE_URL}/preferences`,
-    `Désabonnement: ${SITE_URL}/unsubscribe`,
+    `Espace client: ${SITE_URL}/account`,
+    `Contact: ${SITE_URL}/contact`,
   ].join('\n')
 
   return {
@@ -166,7 +166,7 @@ const confirmation: TemplateFn = (vars) => {
           : ''
       }
       <p style="margin:20px 0">
-        <a class="btn btn-primary" href="${SITE_URL}/account/orders" target="_blank" rel="noreferrer">Suivre ma commande</a>
+        <a class="btn btn-primary" href="${SITE_URL}/account/mes-commandes" target="_blank" rel="noreferrer">Suivre ma commande</a>
       </p>
       <p>Besoin d’aide ? Répondez simplement à cet e-mail — notre équipe est là pour vous 💙</p>
     `,
@@ -175,7 +175,7 @@ const confirmation: TemplateFn = (vars) => {
   const text =
     `Merci pour votre commande, ${name}\n` +
     (orderId ? `Numéro de commande : ${orderId}\n` : '') +
-    `Suivre ma commande : ${SITE_URL}/account/orders\n\n` +
+    `Suivre ma commande : ${SITE_URL}/account/mes-commandes\n\n` +
     textFooter
 
   return { subject, html, text }

@@ -54,7 +54,7 @@ export default function AddProductForm() {
       }
 
       toast.success('✅ Produit ajouté');
-      router.push('/fr/admin/produit');
+      router.push('/admin/dashboard');
     } catch (err) {
       toast.error((err as Error).message || 'Erreur');
     } finally {

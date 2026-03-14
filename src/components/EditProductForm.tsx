@@ -72,7 +72,7 @@ export default function EditProductForm({ productId }: EditProductFormProps) {
 
       if (!res.ok) throw new Error('Erreur modification');
       toast.success('Produit mis à jour');
-      router.push('/fr/admin/produit');
+      router.push('/admin/dashboard');
     } catch (err) {
       toast.error((err as Error).message || 'Erreur');
     } finally {

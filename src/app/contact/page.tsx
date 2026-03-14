@@ -4,10 +4,35 @@ import ContactBottomLinks from '@/components/ContactBottomLinks'
 import Link from '@/components/LocalizedLink'
 
 const SUPPORT_EMAIL = 'support@techplay.fr'
+const SUPPORT_PHONE = '+33 1 84 80 12 34'
+const ADDRESS = {
+  street: '12 rue de la Boutique',
+  postalCode: '75000',
+  city: 'Paris',
+  country: 'France',
+}
+
+const MAILTO_SUBJECTS = [
+  { label: 'Question sur une commande', subject: 'Question commande' },
+  { label: 'Retour ou SAV', subject: 'Retour / SAV' },
+  { label: 'Question technique', subject: 'Question technique' },
+  { label: 'Autre demande', subject: 'Contact TechPlay' },
+] as const
+
+const HORAIRES = [
+  { jours: 'Lundi – Vendredi', heures: '9 h – 18 h' },
+  { jours: 'Samedi', heures: '10 h – 16 h' },
+  { jours: 'Dimanche', heures: 'Fermé' },
+] as const
+
+function mailtoHref(subject: string): string {
+  return `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}`
+}
 
 export const metadata: Metadata = {
   title: 'Nous contacter',
-  description: 'Une question, un problème de commande ou un retour ? Contactez le support TechPlay. Réponse sous 24 à 48 h ouvrées.',
+  description:
+    'Une question, un problème de commande ou un retour ? Contactez le support TechPlay. Réponse sous 24 à 48 h ouvrées.',
   robots: { index: true, follow: true },
 }
 
@@ -22,19 +47,55 @@ export default function ContactPage() {
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[hsl(var(--accent))]">
           Support
         </p>
-        <h1
-          id="contact-title"
-          className="heading-page mt-2"
-        >
+        <h1 id="contact-title" className="heading-page mt-2">
           Nous contacter
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-token-text/75">
-          Une question, un problème de commande ou un retour ? Nous sommes là pour vous répondre.
+          Une question, un problème de commande ou un retour ? L&apos;équipe TechPlay est là pour
+          vous répondre.
         </p>
       </header>
 
       <div className="space-y-6">
-        {/* Primary contact block */}
+        {/* Sujet du message */}
+        <section
+          className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-sm"
+          aria-labelledby="contact-subject-heading"
+        >
+          <h2 id="contact-subject-heading" className="heading-subsection">
+            Choisir un sujet
+          </h2>
+          <p className="mt-2 text-[14px] text-token-text/75">
+            Cliquez sur le sujet qui correspond à votre demande pour ouvrir votre messagerie avec un
+            objet pré-rempli.
+          </p>
+          <ul className="mt-4 flex flex-wrap gap-3" role="list">
+            {MAILTO_SUBJECTS.map(({ label, subject }) => (
+              <li key={subject}>
+                <a
+                  href={mailtoHref(subject)}
+                  className="inline-flex items-center gap-2 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface-2))] px-4 py-3 text-[14px] font-medium transition hover:border-[hsl(var(--accent))] hover:bg-[hsl(var(--accent)/0.08)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                    <path d="m22 6-10 7L2 6" />
+                  </svg>
+                  {label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* Email principal */}
         <section
           className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-sm"
           aria-labelledby="contact-email-heading"
@@ -43,13 +104,22 @@ export default function ContactPage() {
             Écrire au support
           </h2>
           <p className="mt-2 text-[14px] text-token-text/75">
-            Envoyez-nous un email à l&apos;adresse ci-dessous. Nous nous engageons à vous répondre sous 24 à 48 h ouvrées.
+            Envoyez-nous un email à l&apos;adresse ci-dessous. Nous nous engageons à vous répondre
+            sous 24 à 48 h ouvrées.
           </p>
           <a
             href={`mailto:${SUPPORT_EMAIL}`}
             className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-5 py-3 text-[15px] font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-md)] transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
               <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
               <path d="m22 6-10 7L2 6" />
             </svg>
@@ -57,10 +127,66 @@ export default function ContactPage() {
           </a>
         </section>
 
-        {/* Reassurance strip */}
+        {/* Téléphone + Adresse + Horaires */}
+        <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-3">
+          <section
+            className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-5 py-5"
+            aria-labelledby="contact-phone-heading"
+          >
+            <h2 id="contact-phone-heading" className="text-sm font-semibold uppercase tracking-wider text-token-text/70">
+              Téléphone
+            </h2>
+            <a
+              href={`tel:${SUPPORT_PHONE.replace(/\s+/g, '')}`}
+              className="mt-2 inline-flex items-center gap-2 text-[15px] font-medium text-[hsl(var(--accent))] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 rounded"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+              </svg>
+              {SUPPORT_PHONE}
+            </a>
+            <p className="mt-1 text-[12px] text-token-text/60">Lun.–Ven. 9 h–18 h</p>
+          </section>
+
+          <section
+            className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-5 py-5"
+            aria-labelledby="contact-address-heading"
+          >
+            <h2 id="contact-address-heading" className="text-sm font-semibold uppercase tracking-wider text-token-text/70">
+              Adresse
+            </h2>
+            <address className="mt-2 not-italic text-[14px] text-token-text/85">
+              {ADDRESS.street}<br />
+              {ADDRESS.postalCode} {ADDRESS.city}<br />
+              {ADDRESS.country}
+            </address>
+          </section>
+
+          <section
+            className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-5 py-5"
+            aria-labelledby="contact-hours-heading"
+          >
+            <h2 id="contact-hours-heading" className="text-sm font-semibold uppercase tracking-wider text-token-text/70">
+              Horaires du support
+            </h2>
+            <dl className="mt-2 space-y-1 text-[14px] text-token-text/85">
+              {HORAIRES.map(({ jours, heures }) => (
+                <div key={jours} className="flex justify-between gap-2">
+                  <dt className="text-token-text/70">{jours}</dt>
+                  <dd className="font-medium">{heures}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        </div>
+
+        {/* Reassurance */}
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="flex gap-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 px-4 py-4">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))]" aria-hidden="true">
+            <span
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))]"
+              aria-hidden="true"
+            >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -71,7 +197,10 @@ export default function ContactPage() {
             </div>
           </div>
           <div className="flex gap-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 px-4 py-4">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--accent)/0.15)] text-[hsl(var(--accent))]" aria-hidden="true">
+            <span
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--accent)/0.15)] text-[hsl(var(--accent))]"
+              aria-hidden="true"
+            >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               </svg>
@@ -82,7 +211,10 @@ export default function ContactPage() {
             </div>
           </div>
           <div className="flex gap-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 px-4 py-4">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))]" aria-hidden="true">
+            <span
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))]"
+              aria-hidden="true"
+            >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                 <circle cx="9" cy="7" r="4" />
@@ -96,13 +228,21 @@ export default function ContactPage() {
           </div>
         </div>
 
-        {/* Secondary: FAQ / Home */}
+        {/* FAQ / Accueil */}
         <section className="rounded-2xl border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface))]/40 px-5 py-5 sm:px-6">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-token-text/60">
             En attendant
           </h2>
           <p className="mt-2 text-[14px] text-token-text/75">
-            Consultez la <Link href="/#faq" className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline" prefetch={false}>FAQ</Link> pour les questions fréquentes, ou retournez à l&apos;accueil pour continuer vos achats.
+            Consultez la{' '}
+            <Link
+              href="/#faq"
+              className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline"
+              prefetch={false}
+            >
+              FAQ
+            </Link>{' '}
+            pour les questions fréquentes, ou retournez à l&apos;accueil pour continuer vos achats.
           </p>
           <ContactBottomLinks />
         </section>

@@ -4,15 +4,13 @@ import NextLink, { type LinkProps } from 'next/link'
 import { usePathname } from 'next/navigation'
 import { forwardRef, type AnchorHTMLAttributes } from 'react'
 
-import type { UrlObject } from 'url'
-
 import { getCurrentLocale, localizePath, type Locale } from '@/lib/i18n-routing'
 
 type NextHref = LinkProps['href']
 
 type Props = Omit<LinkProps, 'href' | 'locale'> &
   Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> & {
-    href: string | UrlObject
+    href: NextHref
     locale?: Locale
     keepQuery?: boolean
     keepHash?: boolean
@@ -23,7 +21,7 @@ function isAbsolute(href: string): boolean {
 }
 
 function normalizeHref(
-  href: string | UrlObject,
+  href: NextHref,
   currentPathname: string,
   locale?: Locale,
   keepQuery = false,
@@ -36,7 +34,7 @@ function normalizeHref(
     return localizePath(href, resolvedLocale, { keepQuery, keepHash })
   }
 
-  const nextHref: UrlObject = { ...href }
+  const nextHref: NextHref = { ...href }
 
   if (typeof href.pathname === 'string' && href.pathname.trim() && !isAbsolute(href.pathname)) {
     nextHref.pathname = localizePath(href.pathname, resolvedLocale)

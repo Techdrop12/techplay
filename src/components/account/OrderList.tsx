@@ -99,7 +99,7 @@ export default function OrderList({ orders = [], className }: Props) {
       >
         <p className="text-token-text/75">Vous n’avez pas encore de commande.</p>
         <Link
-          href="/produit"
+          href="/products"
           className="mt-4 inline-block rounded-lg bg-accent px-4 py-2 font-semibold text-white hover:bg-accent/90 focus:outline-none focus:ring-4 focus:ring-accent/40"
         >
           Découvrir les produits

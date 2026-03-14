@@ -45,17 +45,27 @@ export default async function OrderDetailPage({ params }: Props) {
 
   return (
     <main
-      className="mx-auto max-w-2xl px-4 pt-28 pb-20"
+      className="container-app mx-auto max-w-2xl px-4 pt-24 pb-20 sm:px-6"
       aria-labelledby="order-title"
       role="main"
     >
-      <div className="mb-6">
+      <div className="mb-6 flex flex-wrap gap-3">
+        <Link
+          href="/account"
+          className="text-[13px] font-medium text-token-text/70 transition hover:text-[hsl(var(--accent))] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+          aria-label="Retour à l’espace client"
+        >
+          ← Espace client
+        </Link>
+        <span className="text-[13px] text-token-text/50" aria-hidden="true">
+          /
+        </span>
         <Link
           href="/account/mes-commandes"
           className="text-[13px] font-medium text-[hsl(var(--accent))] transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
           aria-label="Retour à la liste de mes commandes"
         >
-          ← Retour à mes commandes
+          Mes commandes
         </Link>
       </div>
 

@@ -147,7 +147,7 @@ function ActionBadge({
   return (
     <span
       className={cn(
-        'inline-flex h-9 w-9 items-center justify-center rounded-xl',
+        'pointer-events-none inline-flex h-9 w-9 items-center justify-center rounded-xl',
         'bg-[radial-gradient(120%_120%_at_30%_20%,hsl(var(--accent)/.16),hsl(var(--accent)/.06)_45%,transparent_70%)]',
         'ring-1 ring-[hsl(var(--accent)/.22)] shadow-[inset_0_1px_0_rgba(255,255,255,.18)]',
         className
@@ -474,13 +474,15 @@ export default function Header() {
           className="touch-target group inline-flex items-center justify-center rounded-xl p-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] md:min-h-0 md:min-w-0 md:p-1.5"
           data-gtm="header_logo_home"
         >
-          <Logo
-            className="h-7 w-auto md:h-9 lg:h-10"
-            withText={false}
-            srcLight="/logo.svg"
-            srcDark="/logo-dark.svg"
-            ariaLabel="TechPlay"
-          />
+          <span className="pointer-events-none inline-flex">
+            <Logo
+              className="h-7 w-auto md:h-9 lg:h-10"
+              withText={false}
+              srcLight="/logo.svg"
+              srcDark="/logo-dark.svg"
+              ariaLabel="TechPlay"
+            />
+          </span>
         </NextLink>
 
         <form
@@ -631,8 +633,8 @@ export default function Header() {
                               )}
                               data-gtm="header_mega_cat"
                             >
-                              <category.Icon className="opacity-80" />
-                              <span className="flex-1">
+                              <category.Icon className="pointer-events-none opacity-80" />
+                              <span className="pointer-events-none flex-1">
                                 <span className="block text-sm font-semibold">{category.label}</span>
                                 <span className="block text-xs text-token-text/60">
                                   {category.desc}
@@ -642,7 +644,7 @@ export default function Header() {
                                 width="18"
                                 height="18"
                                 viewBox="0 0 24 24"
-                                className="opacity-50 group-hover:opacity-90"
+                                className="pointer-events-none opacity-50 group-hover:opacity-90"
                                 aria-hidden="true"
                               >
                                 <path fill="currentColor" d="M9 18l6-6-6-6v12z" />
@@ -739,9 +741,11 @@ export default function Header() {
             data-gtm="header_cart_mobile"
             data-cart-icon
           >
-            <Cart />
+            <span className="pointer-events-none inline-flex">
+              <Cart />
+            </span>
             {cartCount > 0 ? (
-              <span className="absolute -right-1 -top-1 flex min-w-[1.15rem] items-center justify-center rounded-full bg-[hsl(var(--accent))] px-1 py-0.5 text-[10px] font-bold tabular-nums text-white">
+              <span className="pointer-events-none absolute -right-1 -top-1 flex min-w-[1.15rem] items-center justify-center rounded-full bg-[hsl(var(--accent))] px-1 py-0.5 text-[10px] font-bold tabular-nums text-white">
                 <span className="sr-only">Cart count: </span>
                 {cartCount > 99 ? '99+' : cartCount}
               </span>
@@ -783,12 +787,12 @@ export default function Header() {
             </div>
 
             <Link
-              href="/login"
+              href="/account"
               prefetch={false}
-              onPointerEnter={() => smartPrefetchStart('/login')}
-              onPointerLeave={() => smartPrefetchCancel('/login')}
-              onFocus={() => smartPrefetchStart('/login')}
-              onBlur={() => smartPrefetchCancel('/login')}
+              onPointerEnter={() => smartPrefetchStart('/account')}
+              onPointerLeave={() => smartPrefetchCancel('/account')}
+              onFocus={() => smartPrefetchStart('/account')}
+              onBlur={() => smartPrefetchCancel('/account')}
               className="hidden items-center justify-center rounded-lg p-0.5 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] xl:inline-flex"
               aria-label={t.account.aria}
               title={t.account.title}
@@ -820,17 +824,17 @@ export default function Header() {
               data-gtm="header_cart"
               data-cart-icon
             >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--accent))]/20 text-[hsl(var(--accent))]">
+              <span className="pointer-events-none flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--accent))]/20 text-[hsl(var(--accent))]">
                 <Cart />
               </span>
-              <span className="hidden font-semibold text-[hsl(var(--text))] xl:inline">
+              <span className="pointer-events-none hidden font-semibold text-[hsl(var(--text))] xl:inline">
                 {t.cartShort}
               </span>
               {cartCount > 0 ? (
                 <span
                   aria-live="polite"
                   aria-atomic="true"
-                  className="flex min-w-[1.4rem] items-center justify-center rounded-full bg-[hsl(var(--accent))] px-2 py-0.5 text-[13px] font-bold tabular-nums text-white"
+                  className="pointer-events-none flex min-w-[1.4rem] items-center justify-center rounded-full bg-[hsl(var(--accent))] px-2 py-0.5 text-[13px] font-bold tabular-nums text-white"
                 >
                   <span className="sr-only">Cart count: </span>
                   {cartCount > 99 ? '99+' : cartCount}
