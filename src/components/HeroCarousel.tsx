@@ -9,7 +9,6 @@ import {
   type MotionStyle,
 } from 'framer-motion'
 import Image from 'next/image'
-import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   useCallback,
@@ -451,7 +450,6 @@ export default function HeroCarousel({
 
   const slideAria = `${index + 1} / ${total}${current?.alt ? ` — ${current.alt}` : ''}`
   const { desktop: desktopSrc, mobile: mobileSrc } = getImageSrc(current)
-  const headline = current?.text?.trim() || current?.alt?.trim() || ''
 
   return (
     <section
@@ -512,7 +510,7 @@ export default function HeroCarousel({
             duration: prefersReducedMotion ? 0 : 0.6,
             ease: [0.25, 0.46, 0.45, 0.94],
           }}
-          className="absolute inset-0 z-0 will-change-transform"
+          className="pointer-events-none absolute inset-0 z-0 will-change-transform"
           style={parallaxStyle}
           aria-roledescription="slide"
           aria-label={slideAria}
@@ -537,11 +535,11 @@ export default function HeroCarousel({
                 ease: 'easeInOut',
               },
             }}
-            className="absolute inset-0 will-change-transform m-4 sm:m-6 lg:m-8"
+            className="pointer-events-none absolute inset-0 will-change-transform m-4 sm:m-6 lg:m-8"
           >
             {/* Soft glow behind product/image area */}
             <div
-              className="absolute inset-0 -z-10 rounded-[inherit] opacity-80"
+              className="pointer-events-none absolute inset-0 -z-10 rounded-[inherit] opacity-80"
               aria-hidden="true"
               style={{
                 background: `radial-gradient(ellipse 70% 70% at 50% 50%, hsl(var(--accent) / 0.2) 0%, hsl(var(--accent) / 0.06) 45%, transparent 70%)`,
@@ -578,7 +576,7 @@ export default function HeroCarousel({
                   priority={index === 0}
                   fetchPriority={index === 0 ? 'high' : 'auto'}
                   quality={85}
-                  className="object-contain object-bottom sm:object-center max-h-[85%] sm:max-h-none w-full"
+                  className="object-contain object-bottom max-h-[85%] w-full sm:hidden"
                   placeholder="blur"
                   blurDataURL={BLUR_DATA_URL}
                   draggable={false}
@@ -623,61 +621,8 @@ export default function HeroCarousel({
         <div className="hero-carousel-glow-right" aria-hidden="true" />
       </div>
 
-      {/* Content block: headline + CTAs — left on desktop, stacked on mobile */}
-      <div className="pointer-events-auto absolute inset-0 z-[2] flex flex-col justify-end pb-20 sm:pb-24 md:justify-center md:pb-0 md:pt-0">
-        <div className="container-app mx-auto w-full max-w-screen-xl px-5 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-start gap-6 sm:gap-7 md:gap-8 max-w-xl">
-            {headline ? (
-              <motion.h2
-                key={`headline-${String(current?.id)}`}
-                initial={prefersReducedMotion ? {} : { opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
-                className="text-3xl font-extrabold leading-tight tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)] sm:text-4xl md:text-5xl lg:text-6xl"
-              >
-                {headline}
-              </motion.h2>
-            ) : null}
-            <motion.div
-              initial={prefersReducedMotion ? {} : { opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-5"
-            >
-              <Link
-                href="/products"
-                prefetch={false}
-                className={cn(
-                  'inline-flex items-center justify-center gap-2 rounded-xl px-7 py-4 text-base font-semibold shadow-lg transition-all duration-200 ease-out',
-                  'bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))]',
-                  'hover:scale-[1.03] hover:shadow-xl hover:shadow-[hsl(var(--accent)/0.4)]',
-                  'focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/0.5)] focus-visible:ring-offset-2 focus-visible:ring-offset-black/50'
-                )}
-              >
-                {t.ctaPrimary}
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </Link>
-              <Link
-                href="/products/packs"
-                prefetch={false}
-                className={cn(
-                  'inline-flex items-center justify-center gap-2 rounded-xl border-2 border-white/40 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-sm',
-                  'transition-all duration-200 ease-out',
-                  'hover:scale-[1.02] hover:bg-white/20 hover:border-white/60',
-                  'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black/50'
-                )}
-              >
-                {t.ctaSecondary}
-              </Link>
-            </motion.div>
-          </div>
-        </div>
-      </div>
-
       {current?.badge ? (
-        <div className="absolute left-5 top-5 z-[3] sm:left-8 sm:top-7">
+        <div className="pointer-events-none absolute left-5 top-5 z-[3] sm:left-8 sm:top-7">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3.5 py-1.5 text-[11px] font-semibold tracking-[0.16em] text-black shadow-[0_12px_35px_rgba(15,23,42,0.42)] dark:bg-black/70 dark:text-white">
             <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))] ring-2 ring-[hsl(var(--accent)/0.25)]" />
             {current.badge}
@@ -686,7 +631,7 @@ export default function HeroCarousel({
       ) : null}
 
       {showCounter && canNavigate ? (
-        <div className="glass absolute left-1/2 top-4 sm:top-5 z-[3] -translate-x-1/2 rounded-full border border-white/25 bg-black/50 px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-white shadow-lg backdrop-blur-xl">
+        <div className="pointer-events-none glass absolute left-1/2 top-4 sm:top-5 z-[3] -translate-x-1/2 rounded-full border border-white/25 bg-black/50 px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-white shadow-lg backdrop-blur-xl">
           {index + 1}
           <span className="mx-1.5 text-white/50" aria-hidden="true">/</span>
           {total}
