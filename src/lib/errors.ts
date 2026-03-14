@@ -3,6 +3,7 @@
  */
 
 export function getErrorMessage(error: unknown): string {
+  if (error == null) return ''
   if (error instanceof Error) return error.message ?? ''
   if (typeof error === 'string') return error.trim()
   // Zod: first issue message (optional dependency, check by shape)

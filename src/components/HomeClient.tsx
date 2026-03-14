@@ -41,7 +41,7 @@ function CategoryPill({ label, active, onClick }: CategoryPillProps) {
         'transition-all outline-none focus-visible:ring-2 focus-visible:ring-accent/50',
         active
           ? 'bg-accent text-white shadow'
-          : 'bg-[hsl(var(--surface-2))] dark:bg-zinc-800/70 text-gray-800 dark:text-gray-100 hover:bg-[hsl(var(--surface-3))] dark:hover:bg-zinc-700'
+          : 'bg-[hsl(var(--surface-2))] text-[hsl(var(--text))] hover:bg-[hsl(var(--surface-3))]'
       ].join(' ')}
     >
       {label}
@@ -208,7 +208,7 @@ export default function HomeClient() {
         {/* Empty state */}
         {filteredProducts.length === 0 && (
           <div
-            className="text-center text-gray-500 dark:text-gray-300 mt-10"
+            className="text-center text-token-text/60 mt-10"
             role="status"
             aria-live="polite"
           >

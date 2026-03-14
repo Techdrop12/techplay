@@ -161,7 +161,7 @@ export default function EditProductForm({ productId }: EditProductFormProps) {
       <button
         type="submit"
         disabled={loading}
-        className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] px-4 py-2 rounded hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? 'Enregistrement...' : 'Enregistrer'}
       </button>

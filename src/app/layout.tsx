@@ -5,6 +5,7 @@ import './globals.css'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Inter, Sora } from 'next/font/google'
 import Script from 'next/script'
+import { NextIntlClientProvider } from 'next-intl'
 import { Suspense } from 'react'
 import { Toaster } from 'react-hot-toast'
 
@@ -22,6 +23,7 @@ import StickyCartSummary from '@/components/StickyCartSummary'
 import Tracking from '@/components/Tracking'
 import StickyFreeShippingBar from '@/components/ui/StickyFreeShippingBar'
 import ThemeProvider from '@/context/themeContext'
+import loadMessages from '@/i18n/loadMessages'
 import { BRAND } from '@/lib/constants'
 import { DEFAULT_LOCALE, toLangTag, toOgLocale } from '@/lib/language'
 
@@ -66,11 +68,11 @@ export async function generateMetadata(): Promise<Metadata> {
       'packs exclusifs',
     ],
     alternates: {
-      canonical: '/',
+      canonical: '/fr',
       languages: {
-        fr: '/',
+        fr: '/fr',
         en: '/en',
-        'x-default': '/',
+        'x-default': '/fr',
       },
     },
     openGraph: {
@@ -144,6 +146,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const defaultMessages = await loadMessages(DEFAULT_LOCALE)
   return (
     <html
       lang={toLangTag(DEFAULT_LOCALE)}
@@ -242,6 +245,7 @@ export default async function RootLayout({
       </head>
 
       <body className="min-h-screen bg-[hsl(var(--bg))] text-token-text antialiased dark:[color-scheme:dark]">
+        <NextIntlClientProvider locale={DEFAULT_LOCALE} messages={defaultMessages}>
         <SkipLink />
         {GTM_ID ? (
           <noscript
@@ -299,6 +303,7 @@ export default async function RootLayout({
             <SpeedInsights />
           </RootLayoutClient>
         </ThemeProvider>
+        </NextIntlClientProvider>
 
         {GTM_ID ? (
           <Script

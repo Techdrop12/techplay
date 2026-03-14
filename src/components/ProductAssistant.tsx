@@ -52,8 +52,8 @@ export default function ProductAssistant({ product }: ProductAssistantProps) {
   };
 
   return (
-    <div className="mt-10 p-4 border rounded bg-gray-50 shadow-sm">
-      <h3 className="font-semibold mb-3 flex items-center gap-2 text-gray-800">
+    <div className="mt-10 p-4 border border-[hsl(var(--border))] rounded-xl bg-[hsl(var(--surface))] shadow-[var(--shadow-sm)]">
+      <h3 className="font-semibold mb-3 flex items-center gap-2 text-[hsl(var(--text))]">
         <Bot size={18} /> Besoin d'un conseil instantané ?
       </h3>
 

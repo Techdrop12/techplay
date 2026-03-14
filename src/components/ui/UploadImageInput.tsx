@@ -23,7 +23,7 @@ export default function UploadImageInput({ onUpload }: UploadImageInputProps) {
         type="file"
         accept="image/*"
         onChange={handleChange}
-        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200"
+        className="block w-full text-sm text-token-text/60 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-[hsl(var(--accent)/0.15)] file:text-[hsl(var(--accent))] hover:file:opacity-90"
       />
     </div>
   );

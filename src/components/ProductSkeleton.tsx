@@ -20,7 +20,7 @@ export default function ProductSkeleton({ className, announce = false }: Props) 
     <article
       aria-hidden={announce ? undefined : true}
       className={cn(
-        'group relative rounded-[1.5rem] p-[1px] ring-conic shadow-sm',
+        'group relative rounded-2xl p-[1px] ring-conic shadow-[var(--shadow-sm)]',
         className
       )}
     >

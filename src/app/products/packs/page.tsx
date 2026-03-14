@@ -34,7 +34,7 @@ export default async function PacksPage() {
     <SectionWrapper>
       <SectionTitle title="Nos Packs" />
       {packs.length === 0 ? (
-        <div className="text-center text-gray-600 dark:text-gray-400 py-10">
+        <div className="text-center text-token-text/70 py-10">
           <p className="mb-4">Aucun pack disponible pour le moment.</p>
           <div className="inline-flex flex-wrap items-center justify-center gap-3">
             <Link
@@ -68,7 +68,7 @@ export default async function PacksPage() {
           fallback={
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="h-64 animate-pulse rounded-[1.5rem] bg-[hsl(var(--surface))]/80" aria-hidden />
+                <div key={i} className="h-64 animate-pulse rounded-2xl bg-[hsl(var(--surface-2))]" aria-hidden />
               ))}
             </div>
           }

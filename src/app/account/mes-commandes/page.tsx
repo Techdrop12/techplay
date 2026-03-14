@@ -74,7 +74,7 @@ async function OrdersContent() {
       aria-labelledby="orders-title"
       role="main"
     >
-      <h1 id="orders-title" className="mb-6 text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+      <h1 id="orders-title" className="heading-page mb-6">
         Mes commandes
       </h1>
       <OrderList orders={orders} />

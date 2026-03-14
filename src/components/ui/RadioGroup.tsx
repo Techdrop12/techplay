@@ -23,7 +23,7 @@ export default function RadioGroup({ options = [], name, selected, onChange }: R
             value={value}
             checked={selected === value}
             onChange={() => onChange(value)}
-            className="form-radio text-blue-600"
+            className="form-radio text-[hsl(var(--accent))]"
           />
           <span>{label}</span>
         </label>

@@ -1,19 +1,21 @@
-import { fileURLToPath } from 'node:url'
-
 import { defineConfig } from 'vitest/config'
+import path from 'node:path'
 
 export default defineConfig({
-  resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
-    },
-  },
   test: {
     environment: 'node',
-    include: ['tests/**/*.{test,spec}.{ts,tsx}'],
     globals: true,
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
     coverage: {
-      reporter: ['text', 'html'],
-    },
+      provider: 'v8',
+      reporter: ['text', 'lcov'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['node_modules/', '.next/', '**/*.d.ts', '**/*.config.*', '**/*.test.*', '**/*.spec.*']
+    }
   },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src')
+    }
+  }
 })

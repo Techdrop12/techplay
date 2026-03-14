@@ -329,7 +329,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
         <div className="flex items-center gap-2">
           <button
             type="submit"
-            className="w-full rounded-xl bg-[hsl(var(--accent))] px-4 py-2.5 text-[13px] font-semibold text-slate-950 shadow-[0_8px_24px_rgba(20,184,166,0.35)] transition hover:shadow-[0_12px_32px_rgba(20,184,166,0.45)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] sm:w-auto"
+            className="w-full rounded-xl bg-[hsl(var(--accent))] px-4 py-2.5 text-[13px] font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-sm)] transition hover:opacity-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] sm:w-auto"
           >
             Filtrer
           </button>
@@ -337,7 +337,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
           {(q || tagStr || categoryStr) && (
             <Link
               href="/blog"
-              className="text-[13px] font-medium text-gray-600 transition hover:text-[hsl(var(--accent))] dark:text-gray-400"
+              className="text-[13px] font-medium text-token-text/70 transition hover:text-[hsl(var(--accent))]"
               prefetch={false}
             >
               Réinitialiser
@@ -468,7 +468,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
                   aria-current={n === page ? 'page' : undefined}
                   className={`rounded-xl border px-3.5 py-2 text-[13px] font-medium transition ${
                     n === page
-                      ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent))] text-slate-950 shadow-[0_8px_24px_rgba(20,184,166,0.35)]'
+                      ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] shadow-[var(--shadow-sm)]'
                       : 'border-[hsl(var(--border))] hover:bg-[hsl(var(--surface))]/80'
                   }`}
                 >

@@ -100,9 +100,8 @@ export default function FreeShippingBadge({
   ringMode = 'conic',
 }: FreeShippingBadgeProps) {
   const prefersReduced = useReducedMotion()
-
-  if (!Number.isFinite(price) || price < 0) return null
-  if (!Number.isFinite(threshold) || threshold <= 0) return null
+  const [reachedPersisted, setReachedPersisted] = useState(false)
+  const reachedOnce = useRef(false)
 
   const autoLocale =
     locale || (typeof document !== 'undefined' ? document.documentElement.lang || 'fr' : 'fr')
@@ -131,16 +130,12 @@ export default function FreeShippingBadge({
   const isEligible = remaining <= 0
   const progress = Math.min(100, Math.round((price / threshold) * 100))
 
-  const [reachedPersisted, setReachedPersisted] = useState(false)
-
   useEffect(() => {
     if (!persistKey) return
     try {
       setReachedPersisted(sessionStorage.getItem(persistKey) === '1')
     } catch {}
   }, [persistKey])
-
-  const reachedOnce = useRef(false)
 
   useEffect(() => {
     if (isEligible) {
@@ -162,6 +157,9 @@ export default function FreeShippingBadge({
       reachedOnce.current = false
     }
   }, [isEligible, onReach, persistKey, threshold])
+
+  if (!Number.isFinite(price) || price < 0) return null
+  if (!Number.isFinite(threshold) || threshold <= 0) return null
 
   const Confetti = () =>
     celebrate && isEligible && !prefersReduced && !reachedPersisted ? <ConfettiSVG /> : null

@@ -71,7 +71,7 @@ export default async function OrderDetailPage({ params }: Props) {
       </p>
 
       <section
-        className="mt-8 rounded-[1.5rem] border border-white/10 bg-[hsl(var(--surface))]/95 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] dark:bg-[hsl(var(--surface))]/90 sm:p-8"
+        className="mt-8 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6 shadow-[var(--shadow-md)] sm:p-8"
         aria-label="Résumé de la commande"
       >
         <div>
@@ -83,7 +83,7 @@ export default async function OrderDetailPage({ params }: Props) {
 
         {items.length > 0 && (
           <div>
-            <h2 className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            <h2 className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-token-text/60">
               Articles
             </h2>
             <ul className="divide-y divide-[hsl(var(--border))]" role="list">

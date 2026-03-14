@@ -83,7 +83,7 @@ export default function WishlistClient() {
         </h1>
 
         {wishlist.length === 0 ? (
-          <div className="mt-12 text-center text-gray-500" role="status" aria-live="polite">
+          <div className="mt-12 text-center text-token-text/60" role="status" aria-live="polite">
             <p className="text-lg">{t('empty')}</p>
           </div>
         ) : (

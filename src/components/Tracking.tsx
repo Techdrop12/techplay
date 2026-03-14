@@ -91,8 +91,6 @@ function applyConsentState(
 }
 
 export default function Tracking() {
-  if (DISABLED) return null
-
   const [consent, setConsent] = useState<ConsentBooleans>(() =>
     typeof window === 'undefined' ? { analytics: false, ads: false } : readInitialConsent()
   )
@@ -147,6 +145,8 @@ export default function Tracking() {
   const canMeta = useMemo(() => Boolean(META_PIXEL_ID && consent.ads), [consent.ads])
   const canHotjar = useMemo(() => Boolean(HOTJAR_ID && consent.analytics), [consent.analytics])
   const canClarity = useMemo(() => Boolean(CLARITY_ID && consent.analytics), [consent.analytics])
+
+  if (DISABLED) return null
 
   return (
     <>

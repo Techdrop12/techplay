@@ -49,13 +49,13 @@ const sizes: Record<Size, string> = {
 }
 
 const variants: Record<Variant, string> = {
-  accent: 'bg-accent text-white hover:bg-accent/90',
+  accent: 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] hover:opacity-95',
   secondary:
-    'bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700',
+    'bg-[hsl(var(--surface-2))] text-[hsl(var(--text))] hover:bg-[hsl(var(--surface-3))]',
   outline:
-    'border border-gray-300 text-gray-900 hover:bg-gray-50 dark:border-zinc-700 dark:text-white dark:hover:bg-zinc-800',
+    'border border-[hsl(var(--border))] text-[hsl(var(--text))] hover:bg-[hsl(var(--surface-2))]',
   ghost:
-    'bg-transparent text-gray-900 hover:bg-gray-50 dark:text-white dark:hover:bg-zinc-800',
+    'bg-transparent text-[hsl(var(--text))] hover:bg-[hsl(var(--surface-2))]',
   soft:
     'bg-accent/10 text-accent hover:bg-accent/15 ring-1 ring-inset ring-accent/20',
   danger:

@@ -32,9 +32,9 @@ const sizeClasses: Record<Size, string> = {
 
 const variantClasses: Record<Variant, string> = {
   solid:
-    'bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 focus:bg-white dark:focus:bg-zinc-900',
+    'bg-[hsl(var(--surface))] border border-[hsl(var(--border))] focus:bg-[hsl(var(--surface))]',
   outline:
-    'bg-transparent border border-gray-300 dark:border-zinc-700',
+    'bg-transparent border border-[hsl(var(--border))]',
   ghost:
     'bg-transparent border border-transparent',
 }
@@ -85,7 +85,7 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
         {label && (
           <label
             htmlFor={textareaId}
-            className="mb-1.5 block text-sm font-medium text-gray-800 dark:text-gray-200"
+            className="mb-1.5 block text-sm font-medium text-[hsl(var(--text))]"
           >
             {label}
             {required ? (
@@ -110,7 +110,7 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
               if (autoGrow) resize()
             }}
             className={cn(
-              'w-full text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500',
+              'w-full text-[hsl(var(--text))] placeholder:text-token-text/50',
               'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent',
               'disabled:opacity-60 disabled:cursor-not-allowed',
               'resize-y', // Tailwind: redimension vertical par l’utilisateur
@@ -126,7 +126,7 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
           {maxLength && showCount ? (
             <div
               aria-live="polite"
-              className="pointer-events-none absolute bottom-1.5 right-2 text-xs text-gray-500 dark:text-gray-400"
+              className="pointer-events-none absolute bottom-1.5 right-2 text-xs text-token-text/60"
             >
               {String(props.value ?? '').length}/{maxLength}
             </div>
@@ -138,7 +138,7 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
             {error}
           </p>
         ) : help ? (
-          <p id={helpId} className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
+          <p id={helpId} className="mt-1.5 text-sm text-token-text/60">
             {help}
           </p>
         ) : null}

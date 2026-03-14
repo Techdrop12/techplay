@@ -43,7 +43,7 @@ export default function AIProductSummary({ product }: AIProductSummaryProps) {
   }, [product]);
 
   if (loading) {
-    return <p className="text-sm italic text-gray-500 animate-pulse">Génération du résumé IA…</p>;
+    return <p className="text-sm italic text-token-text/60 animate-pulse">Génération du résumé IA…</p>;
   }
 
   if (error) {
@@ -53,7 +53,7 @@ export default function AIProductSummary({ product }: AIProductSummaryProps) {
   if (!summary) return null;
 
   return (
-    <div className="mt-3 p-3 rounded bg-blue-50 text-blue-900 text-sm shadow-sm">
+    <div className="mt-3 p-3 rounded bg-[hsl(var(--accent)/0.08)] text-[hsl(var(--text))] text-sm shadow-[var(--shadow-sm)]">
       <strong>Résumé IA :</strong> {summary}
     </div>
   );

@@ -41,7 +41,7 @@ export default function ImportProductsTable() {
       <button
         onClick={handleImport}
         disabled={!file || importing}
-        className="bg-blue-600 text-white px-4 py-2 rounded"
+        className="bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] px-4 py-2 rounded-lg hover:opacity-95"
       >
         {importing ? 'Import…' : 'Importer'}
       </button>

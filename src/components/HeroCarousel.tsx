@@ -596,7 +596,7 @@ export default function HeroCarousel({
       {current?.badge ? (
         <div className="absolute left-5 top-5 z-20 sm:left-8 sm:top-7">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3.5 py-1.5 text-[11px] font-semibold tracking-[0.16em] text-black shadow-[0_12px_35px_rgba(15,23,42,0.42)] dark:bg-black/70 dark:text-white">
-            <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))] shadow-[0_0_0_4px_rgba(20,184,166,0.25)]" />
+            <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))] ring-2 ring-[hsl(var(--accent)/0.25)]" />
             {current.badge}
           </span>
         </div>
@@ -631,9 +631,9 @@ export default function HeroCarousel({
                   href={localizedHref(current.ctaLink)}
                   prefetch={false}
                   className={cn(
-                    'inline-flex items-center gap-2.5 rounded-full px-6 py-2.5 text-sm font-semibold text-slate-950 sm:px-8 sm:py-3 sm:text-[15px]',
-                    'bg-[hsl(var(--accent))] shadow-[0_18px_45px_rgba(20,184,166,0.55)] transition-all duration-200',
-                    'hover:-translate-y-0.5 hover:shadow-[0_22px_65px_rgba(20,184,166,0.75)] active:translate-y-0 active:shadow-[0_10px_30px_rgba(20,184,166,0.55)]',
+                    'inline-flex items-center gap-2.5 rounded-full px-6 py-2.5 text-sm font-semibold text-[hsl(var(--accent-fg))] sm:px-8 sm:py-3 sm:text-[15px]',
+                    'bg-[hsl(var(--accent))] shadow-[var(--shadow-lg)] transition-all duration-200',
+                    'hover:-translate-y-0.5 hover:opacity-95 active:translate-y-0',
                     'focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.55)] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900'
                   )}
                   aria-label={`${current.ctaLabel}${current.alt ? ` — ${current.alt}` : ''}`}

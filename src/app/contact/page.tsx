@@ -1,6 +1,14 @@
+import type { Metadata } from 'next'
+
 import Link from '@/components/LocalizedLink'
 
 const SUPPORT_EMAIL = 'support@techplay.fr'
+
+export const metadata: Metadata = {
+  title: 'Nous contacter',
+  description: 'Une question, un problème de commande ou un retour ? Contactez le support TechPlay. Réponse sous 24 à 48 h ouvrées.',
+  robots: { index: true, follow: true },
+}
 
 export default function ContactPage() {
   return (

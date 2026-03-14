@@ -161,7 +161,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
         <div className="flex items-center gap-2">
           <button
             type="submit"
-            className="w-full rounded-xl bg-[hsl(var(--accent))] px-4 py-2.5 text-[13px] font-semibold text-slate-950 shadow-[0_8px_24px_rgba(20,184,166,0.35)] transition hover:shadow-[0_12px_32px_rgba(20,184,166,0.45)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] sm:w-auto"
+            className="w-full rounded-xl bg-[hsl(var(--accent))] px-4 py-2.5 text-[13px] font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-sm)] transition hover:opacity-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] sm:w-auto"
           >
             Filtrer
           </button>
@@ -179,7 +179,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
       </form>
 
       {posts.length === 0 ? (
-        <p className="rounded-[1.25rem] border border-white/10 bg-[hsl(var(--surface))]/50 py-12 text-center text-[15px] text-gray-500 dark:text-gray-400" role="status" aria-live="polite">
+        <p className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] py-12 text-center text-[15px] text-token-text/60" role="status" aria-live="polite">
           Aucun article {q ? `pour “${q}”` : 'disponible'}.
         </p>
       ) : (
@@ -228,7 +228,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
               )
             }
 
-            if (n === 2 && page > 3) return <span key="dots-left" className="px-2 text-gray-400">…</span>
+            if (n === 2 && page > 3) return <span key="dots-left" className="px-2 text-token-text/50">…</span>
             if (n === pagination.pages - 1 && page < pagination.pages - 2) {
               return <span key="dots-right" className="px-2 text-token-text/50">…</span>
             }

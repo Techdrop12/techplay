@@ -12,7 +12,7 @@ export default function RatingForm() {
         <Star
           key={i}
           size={24}
-          className={i <= rating ? 'text-yellow-500' : 'text-gray-300'}
+          className={i <= rating ? 'text-yellow-500' : 'text-token-text/30'}
           onClick={() => setRating(i)}
           style={{ cursor: 'pointer' }}
         />

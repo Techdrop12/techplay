@@ -25,14 +25,14 @@ export default function Carousel({ images }: CarouselProps) {
       <button
         onClick={prev}
         aria-label="Image précédente"
-        className="absolute top-1/2 left-2 -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white rounded-full p-1 hover:bg-opacity-75"
+        className="absolute top-1/2 left-2 -translate-y-1/2 bg-[hsl(var(--text)/0.5)] text-[hsl(var(--accent-fg))] rounded-full p-1 hover:opacity-80"
       >
         ‹
       </button>
       <button
         onClick={next}
         aria-label="Image suivante"
-        className="absolute top-1/2 right-2 -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white rounded-full p-1 hover:bg-opacity-75"
+        className="absolute top-1/2 right-2 -translate-y-1/2 bg-[hsl(var(--text)/0.5)] text-[hsl(var(--accent-fg))] rounded-full p-1 hover:opacity-80"
       >
         ›
       </button>
@@ -42,7 +42,7 @@ export default function Carousel({ images }: CarouselProps) {
             key={i}
             onClick={() => setCurrent(i)}
             aria-label={`Voir image ${i + 1}`}
-            className={`w-3 h-3 rounded-full ${i === current ? 'bg-blue-600' : 'bg-gray-300'}`}
+            className={`w-3 h-3 rounded-full ${i === current ? 'bg-[hsl(var(--accent))]' : 'bg-[hsl(var(--surface-2))]'}`}
           />
         ))}
       </div>

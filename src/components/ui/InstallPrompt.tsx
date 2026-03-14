@@ -24,11 +24,11 @@ export default function InstallPrompt() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-white dark:bg-gray-900 border px-6 py-3 rounded shadow-md flex items-center gap-4 z-40">
+    <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-[hsl(var(--surface))] border border-[hsl(var(--border))] px-6 py-3 rounded-xl shadow-[var(--shadow-lg)] flex items-center gap-4 z-40">
       <p className="text-sm">📱 Installer TechPlay en app ?</p>
       <button
         onClick={install}
-        className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
+        className="bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] px-3 py-1 rounded hover:opacity-95 text-sm"
       >
         Installer
       </button>

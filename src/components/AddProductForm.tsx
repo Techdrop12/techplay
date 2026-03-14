@@ -65,7 +65,7 @@ export default function AddProductForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-lg shadow space-y-4"
+      className="max-w-xl mx-auto p-6 bg-[hsl(var(--surface))] rounded-2xl border border-[hsl(var(--border))] shadow-[var(--shadow-md)] space-y-4"
     >
       <h2 className="text-2xl font-semibold text-center">Ajouter un produit</h2>
 
@@ -107,7 +107,7 @@ export default function AddProductForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-black text-white py-2 px-4 rounded hover:bg-gray-800 transition"
+        className="w-full bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] py-2 px-4 rounded-lg hover:opacity-95 transition"
       >
         {loading ? 'Enregistrement…' : 'Ajouter le produit'}
       </button>

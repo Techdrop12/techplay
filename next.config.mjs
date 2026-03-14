@@ -128,7 +128,11 @@ const nextConfig = {
 
   experimental: {
     scrollRestoration: true,
-    optimizePackageImports: ['react-icons']
+    optimizePackageImports: [
+      'react-icons',
+      'lucide-react',
+      'framer-motion'
+    ]
   },
 
   images: {

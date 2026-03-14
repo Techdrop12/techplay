@@ -54,16 +54,16 @@ export default function AdminReviewTable() {
 
   return (
     <div className="p-6 bg-white dark:bg-zinc-900 rounded shadow">
-      <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">📝 Gestion des avis clients</h2>
+      <h2 className="text-2xl font-bold mb-4 text-[hsl(var(--text))]">📝 Gestion des avis clients</h2>
 
       {loading ? (
-        <p className="text-gray-500">Chargement des avis...</p>
+        <p className="text-token-text/60">Chargement des avis...</p>
       ) : reviews.length === 0 ? (
-        <p className="text-gray-400">Aucun avis pour le moment.</p>
+        <p className="text-token-text/50">Aucun avis pour le moment.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm border">
-            <thead className="bg-gray-50 dark:bg-zinc-800">
+            <thead className="bg-[hsl(var(--surface-2))]">
               <tr>
                 <th className="text-left px-4 py-2">Nom</th>
                 <th className="text-left px-4 py-2">Note</th>
@@ -79,7 +79,7 @@ export default function AdminReviewTable() {
                   key={r._id}
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="border-t hover:bg-gray-50 dark:hover:bg-zinc-800 transition"
+                  className="border-t border-[hsl(var(--border))] hover:bg-[hsl(var(--surface-2))] transition"
                 >
                   <td className="px-4 py-2 font-medium">{r.name}</td>
                   <td className="px-4 py-2">
@@ -88,15 +88,15 @@ export default function AdminReviewTable() {
                         <Star
                           key={i}
                           size={14}
-                          className={i <= r.rating ? 'text-yellow-400' : 'text-gray-300'}
+                          className={i <= r.rating ? 'text-yellow-400' : 'text-token-text/30'}
                           fill={i <= r.rating ? 'currentColor' : 'none'}
                         />
                       ))}
                     </div>
                   </td>
                   <td className="px-4 py-2 max-w-xs break-words">{r.comment}</td>
-                  <td className="px-4 py-2 text-xs text-gray-600">{r.productId}</td>
-                  <td className="px-4 py-2 text-xs text-gray-400">
+                  <td className="px-4 py-2 text-xs text-token-text/70">{r.productId}</td>
+                  <td className="px-4 py-2 text-xs text-token-text/50">
                     {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '—'}
                   </td>
                   <td className="px-4 py-2 text-center">

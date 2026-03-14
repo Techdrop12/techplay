@@ -88,12 +88,12 @@ export default function AddToCartButtonAB({
      
   }, [variant])
 
-  if (!variant) return null
-  const conf = presets[variant] || presets[keys[0]]
+  const conf = variant ? presets[variant] || presets[keys[0]] : null
 
   // Tracking click CTA (pas d’envoi Pixel AddToCart ici → on laisse le bouton le faire après succès)
   const handleWrapperClick = useCallback(
     async (e: unknown) => {
+      if (!variant || !conf) return
       const base = {
         ab_name: testKey,
         ab_variant: variant,
@@ -108,7 +108,7 @@ export default function AddToCartButtonAB({
       } catch {}
 
       // Variant B → “Buy now” : Pixel InitiateCheckout
-      if (conf.instantCheckout) {
+      if (conf!.instantCheckout) {
         try {
           pushDataLayer({ event: 'buy_now_click', ...base })
           logEvent('buy_now_click', base)
@@ -134,8 +134,10 @@ export default function AddToCartButtonAB({
         } catch {}
       }
     },
-    [conf.instantCheckout, locale, product, testKey, variant, rest]
+    [conf, locale, product, testKey, variant, rest]
   )
+
+  if (!variant) return null
 
   return (
     // className "contents" = pas de boîte supplémentaire (Tailwind)
@@ -143,8 +145,8 @@ export default function AddToCartButtonAB({
       <AddToCartButton
         product={product}
         locale={locale}
-        idleText={conf.label}
-        instantCheckout={!!conf.instantCheckout}
+        idleText={conf!.label}
+        instantCheckout={!!conf!.instantCheckout}
         className={className}
         gtmExtra={{ ab_name: testKey, ab_variant: variant, ...(rest?.gtmExtra || {}) }}
         {...rest}

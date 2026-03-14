@@ -29,7 +29,7 @@ export default function NotFoundPage() {
           404 – Page introuvable
         </h1>
 
-        <p className="mt-4 text-[15px] text-gray-600 dark:text-gray-300">
+        <p className="mt-4 text-[15px] text-token-text/75">
           Désolé, cette page n&apos;existe pas ou a été déplacée.
         </p>
 

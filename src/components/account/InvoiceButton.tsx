@@ -101,9 +101,9 @@ export default function InvoiceButton({
     variant === 'primary' &&
       'bg-accent px-3 py-2 font-semibold text-white hover:bg-accent/90',
     variant === 'link' &&
-      'text-blue-600 underline underline-offset-2 hover:opacity-80',
+      'text-[hsl(var(--accent))] underline underline-offset-2 hover:opacity-80',
     variant === 'ghost' &&
-      'px-3 py-2 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-zinc-800',
+      'px-3 py-2 text-token-text/80 hover:bg-[hsl(var(--surface-2))]',
     size === 'sm' && variant !== 'link' && 'text-sm',
     size === 'md' && variant !== 'link' && 'text-base',
     loading && 'cursor-not-allowed opacity-60',

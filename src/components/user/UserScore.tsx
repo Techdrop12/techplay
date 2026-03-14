@@ -14,6 +14,6 @@ export default function UserScore({ userId }: { userId: string }) {
   }, [userId])
 
   return score !== null ? (
-    <p className="text-sm text-gray-600">🎖 Score fidélité : {score}</p>
+    <p className="text-sm text-token-text/70">🎖 Score fidélité : {score}</p>
   ) : null
 }

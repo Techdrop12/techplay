@@ -320,7 +320,7 @@ export default function ProductGallery({
               type="button"
               className={[
                 'relative w-16 h-16 rounded border transition hover:opacity-90 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent',
-                selected ? 'border-black dark:border-white scale-105' : 'border-gray-300',
+                selected ? 'border-[hsl(var(--accent))] scale-105' : 'border-[hsl(var(--border))]',
               ].join(' ')}
               role="option"
               aria-selected={selected}
@@ -361,7 +361,7 @@ export default function ProductGallery({
           type="button"
           onClick={() => setLightboxOpen(true)}
           onKeyDown={onMainKeyDown}
-          className="relative w-full aspect-[4/3] md:aspect-square cursor-zoom-in rounded-[1.5rem] overflow-hidden shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+          className="relative w-full aspect-[4/3] md:aspect-square cursor-zoom-in rounded-2xl overflow-hidden shadow-[var(--shadow-sm)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
           aria-label="Agrandir le média"
         >
           {/* Edge fade pour le relief visuel */}

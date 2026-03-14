@@ -32,34 +32,57 @@ export default function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-4 p-4">
-      <h2 className="text-xl font-bold">Connexion administrateur</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="mx-auto max-w-md space-y-4 p-4"
+      aria-labelledby="login-heading"
+    >
+      <h2 id="login-heading" className="text-xl font-bold">
+        Connexion administrateur
+      </h2>
 
-      <input
-        type="email"
-        placeholder="Email"
-        className="border w-full p-2 rounded"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-      />
+      <div>
+        <label htmlFor="login-email" className="mb-1 block text-sm font-medium">
+          Email
+        </label>
+        <input
+          id="login-email"
+          type="email"
+          autoComplete="email"
+          placeholder="Email"
+          className="w-full rounded border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-2 text-[hsl(var(--text))]"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          aria-required="true"
+        />
+      </div>
 
-      <input
-        type="password"
-        placeholder="Mot de passe"
-        className="border w-full p-2 rounded"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
+      <div>
+        <label htmlFor="login-password" className="mb-1 block text-sm font-medium">
+          Mot de passe
+        </label>
+        <input
+          id="login-password"
+          type="password"
+          autoComplete="current-password"
+          placeholder="Mot de passe"
+          className="w-full rounded border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-2 text-[hsl(var(--text))]"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          aria-required="true"
+        />
+      </div>
 
       <button
         type="submit"
-        className="w-full bg-black text-white py-2 rounded"
+        className="w-full rounded bg-[hsl(var(--accent))] py-2 font-medium text-[hsl(var(--accent-fg))] hover:opacity-95 disabled:opacity-60"
         disabled={loading}
+        aria-busy={loading}
       >
-        {loading ? 'Connexion...' : 'Se connecter'}
+        {loading ? 'Connexion…' : 'Se connecter'}
       </button>
     </form>
-  );
+  )
 }

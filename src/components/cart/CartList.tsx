@@ -81,7 +81,7 @@ export default function CartList({
   if (isEmpty) {
     return (
       <motion.p
-        className="text-center text-gray-600 dark:text-gray-400 text-sm"
+        className="text-center text-token-text/70 text-sm"
         role="alert"
         aria-live="polite"
         aria-atomic="true"

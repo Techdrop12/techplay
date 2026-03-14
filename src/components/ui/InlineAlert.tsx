@@ -8,7 +8,7 @@ interface InlineAlertProps {
 }
 
 const variants: Record<InlineAlertType, string> = {
-  info: 'text-blue-600 bg-blue-100',
+  info: 'text-[hsl(var(--accent))] bg-[hsl(var(--accent)/0.12)]',
   success: 'text-green-600 bg-green-100',
   error: 'text-red-600 bg-red-100',
 };

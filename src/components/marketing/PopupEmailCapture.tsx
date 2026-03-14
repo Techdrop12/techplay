@@ -169,7 +169,7 @@ export default function PopupEmailCapture({
         aria-labelledby="email-popup-title"
         aria-describedby="email-popup-desc"
         className={[
-          'mx-3 w-full max-w-sm rounded-[1.5rem] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-5 shadow-xl outline-none',
+          'mx-3 w-full max-w-sm rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-5 shadow-[var(--shadow-lg)] outline-none',
           className || '',
         ].join(' ')}
         onMouseDown={(e) => e.stopPropagation()}
@@ -188,7 +188,7 @@ export default function PopupEmailCapture({
           </button>
         </div>
 
-        <p id="email-popup-desc" className="mt-1 text-[15px] text-gray-600 dark:text-gray-300">
+        <p id="email-popup-desc" className="mt-1 text-[15px] text-token-text/75">
           {isFr
             ? 'Recevez nos nouveautés et offres (pas de spam).'
             : 'Get product updates and offers (no spam).'}

@@ -29,7 +29,7 @@ export default function AvisBlock({ slug }: AvisBlockProps) {
       <h2 className="text-xl font-bold mb-4">Avis des clients</h2>
       <div className="space-y-4">
         {reviews.map((r, i) => (
-          <div key={i} className="border p-4 rounded-md bg-gray-50">
+          <div key={i} className="border border-[hsl(var(--border))] p-4 rounded-xl bg-[hsl(var(--surface))]">
             <div className="flex items-center gap-2 mb-1">
               <ReactStars
                 count={5}
@@ -39,9 +39,9 @@ export default function AvisBlock({ slug }: AvisBlockProps) {
                 edit={false}
                 activeColor="#facc15"
               />
-              <span className="text-sm font-semibold text-gray-700">{r.name}</span>
+              <span className="text-sm font-semibold text-[hsl(var(--text))]">{r.name}</span>
             </div>
-            <p className="text-sm text-gray-700">{r.comment}</p>
+            <p className="text-sm text-token-text/85">{r.comment}</p>
           </div>
         ))}
       </div>

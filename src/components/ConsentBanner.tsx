@@ -77,8 +77,6 @@ function applyConsent(p: Prefs) {
 }
 
 export default function ConsentBanner() {
-  if (DISABLED) return null
-
   const [open, setOpen] = useState(false)
   const [prefs, setPrefs] = useState<Prefs>({
     analytics: false,
@@ -145,6 +143,7 @@ export default function ConsentBanner() {
     return () => window.removeEventListener('keydown', onKey)
   }, [open])
 
+  if (DISABLED) return null
   if (!show) return null
 
   const acceptAll = () => {

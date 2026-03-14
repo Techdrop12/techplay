@@ -33,7 +33,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   if (checking) {
     return (
-      <div className="flex items-center justify-center min-h-screen text-center text-sm text-gray-500">
+      <div className="flex items-center justify-center min-h-screen text-center text-sm text-token-text/60">
         Vérification des droits d'accès...
       </div>
     );

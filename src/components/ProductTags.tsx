@@ -20,9 +20,9 @@ export default function ProductTags({
 
   const base = 'text-xs font-medium px-2 py-1 rounded inline-block transition'
   const variants = {
-    soft: 'bg-gray-200 dark:bg-zinc-700 text-gray-700 dark:text-gray-200',
-    solid: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100',
-    ghost: 'border border-gray-300 dark:border-zinc-600 text-gray-600 dark:text-gray-300',
+    soft: 'bg-[hsl(var(--surface-2))] text-token-text/85',
+    solid: 'bg-[hsl(var(--accent)/0.15)] text-[hsl(var(--accent))]',
+    ghost: 'border border-[hsl(var(--border))] text-token-text/70',
   }
 
   const style = variants[variant] || variants.soft

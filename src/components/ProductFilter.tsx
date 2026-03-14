@@ -149,7 +149,7 @@ export default function ProductFilter({
   // --------- UI
   return (
     <section
-      className="mb-6 rounded-[1.5rem] border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/95 p-4 sm:p-5"
+      className="mb-6 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-4 sm:p-5 shadow-[var(--shadow-sm)]"
       aria-label="Filtres produits"
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">

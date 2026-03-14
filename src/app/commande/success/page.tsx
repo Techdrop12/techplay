@@ -19,7 +19,7 @@ export default function OrderSuccessPage({
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-20 sm:py-28" role="main" aria-labelledby="success-title">
-      <div className="rounded-[1.75rem] border border-white/10 bg-[hsl(var(--surface))]/95 p-8 text-center shadow-[0_24px_80px_rgba(15,23,42,0.2)] dark:bg-[hsl(var(--surface))]/90 sm:p-10">
+      <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-8 text-center shadow-[var(--shadow-lg)] sm:p-10">
         <h1 id="success-title" className="heading-page">
           Merci pour votre commande
         </h1>

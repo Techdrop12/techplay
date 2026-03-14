@@ -30,7 +30,7 @@ export default function Dropdown({ label, options, selected, onSelect }: Dropdow
     <div className="relative inline-block text-left" ref={ref}>
       <button
         type="button"
-        className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+        className="inline-flex justify-center w-full rounded-md border border-[hsl(var(--border))] shadow-[var(--shadow-sm)] px-4 py-2 bg-[hsl(var(--surface))] text-sm font-medium text-[hsl(var(--text))] hover:bg-[hsl(var(--surface-2))]"
         onClick={() => setOpen(!open)}
         aria-haspopup="true"
         aria-expanded={open}
@@ -56,7 +56,7 @@ export default function Dropdown({ label, options, selected, onSelect }: Dropdow
                 onSelect(option);
                 setOpen(false);
               }}
-              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              className="block w-full text-left px-4 py-2 text-sm text-token-text/85 hover:bg-[hsl(var(--surface-2))]"
             >
               {option.label}
             </button>

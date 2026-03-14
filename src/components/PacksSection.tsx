@@ -192,6 +192,61 @@ export default function PacksSection({
   const [filterPromo, setFilterPromo] = useState(false)
   const [filterStock, setFilterStock] = useState(false)
 
+  const filteredSorted = useMemo(() => {
+    let arr = packs.filter(Boolean)
+    if (filterPromo) arr = arr.filter(isPromo)
+    if (filterStock) arr = arr.filter(isInStock)
+    const copy = [...arr]
+    copy.sort((a, b) => {
+      const priceA = getPackPrice(a) ?? Infinity
+      const priceB = getPackPrice(b) ?? Infinity
+      const savingsA = getSavingsPercent(a)
+      const savingsB = getSavingsPercent(b)
+      const itemsA = getItemsCount(a)
+      const itemsB = getItemsCount(b)
+      switch (sortBy) {
+        case 'priceAsc':
+          return priceA - priceB
+        case 'priceDesc':
+          return priceB - priceA
+        case 'items':
+          return itemsB - itemsA
+        case 'savings':
+        default:
+          return savingsB - savingsA
+      }
+    })
+    return copy
+  }, [packs, filterPromo, filterStock, sortBy])
+
+  const list = useMemo(() => {
+    if (!limit || expanded) return filteredSorted
+    return filteredSorted.slice(0, limit)
+  }, [filteredSorted, limit, expanded])
+
+  useEffect(() => {
+    if (!expanded) return
+    const remaining = Math.max(0, filteredSorted.length - (limit || 0))
+    if (remaining > 0) setAnnounce(`${remaining} packs supplémentaires affichés.`)
+  }, [expanded, filteredSorted.length, limit])
+
+  useEffect(() => {
+    if (!autoLoadOnIntersect || expanded) return
+    const el = sentinelRef.current
+    if (!el) return
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setExpanded(true)
+          pushDL('packs_autoload')
+        }
+      },
+      { threshold: 0.3 }
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [autoLoadOnIntersect, expanded])
+
   const isEmpty = !Array.isArray(packs) || packs.length === 0
 
   if (isEmpty) {
@@ -254,68 +309,6 @@ export default function PacksSection({
       </section>
     )
   }
-
-  const filteredSorted = useMemo(() => {
-    let arr = packs.filter(Boolean)
-
-    if (filterPromo) arr = arr.filter(isPromo)
-    if (filterStock) arr = arr.filter(isInStock)
-
-    const copy = [...arr]
-
-    copy.sort((a, b) => {
-      const priceA = getPackPrice(a) ?? Infinity
-      const priceB = getPackPrice(b) ?? Infinity
-      const savingsA = getSavingsPercent(a)
-      const savingsB = getSavingsPercent(b)
-      const itemsA = getItemsCount(a)
-      const itemsB = getItemsCount(b)
-
-      switch (sortBy) {
-        case 'priceAsc':
-          return priceA - priceB
-        case 'priceDesc':
-          return priceB - priceA
-        case 'items':
-          return itemsB - itemsA
-        case 'savings':
-        default:
-          return savingsB - savingsA
-      }
-    })
-
-    return copy
-  }, [packs, filterPromo, filterStock, sortBy])
-
-  const list = useMemo(() => {
-    if (!limit || expanded) return filteredSorted
-    return filteredSorted.slice(0, limit)
-  }, [filteredSorted, limit, expanded])
-
-  useEffect(() => {
-    if (!expanded) return
-    const remaining = Math.max(0, filteredSorted.length - (limit || 0))
-    if (remaining > 0) setAnnounce(`${remaining} packs supplémentaires affichés.`)
-  }, [expanded, filteredSorted.length, limit])
-
-  useEffect(() => {
-    if (!autoLoadOnIntersect || expanded) return
-    const el = sentinelRef.current
-    if (!el) return
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setExpanded(true)
-          pushDL('packs_autoload')
-        }
-      },
-      { threshold: 0.3 }
-    )
-
-    io.observe(el)
-    return () => io.disconnect()
-  }, [autoLoadOnIntersect, expanded])
 
   const totalCount = filteredSorted.length
   const visibleCount = list.length

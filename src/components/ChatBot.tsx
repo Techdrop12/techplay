@@ -29,9 +29,9 @@ export default function ChatBot() {
   return (
     <div className="fixed bottom-8 right-8 w-72 bg-white shadow-lg rounded-lg p-4 z-50 border">
       <div className="h-40 overflow-y-auto mb-2 text-xs">
-        {history.length === 0 && <div className="text-gray-400">Pose-moi une question sur nos produits ou commandes !</div>}
+        {history.length === 0 && <div className="text-token-text/50">Pose-moi une question sur nos produits ou commandes !</div>}
         {history.map((msg, i) => (
-          <div key={i} className={msg.role === 'bot' ? 'text-blue-700 my-1' : 'text-gray-800 my-1'}>
+          <div key={i} className={msg.role === 'bot' ? 'text-[hsl(var(--accent))] my-1' : 'text-token-text/90 my-1'}>
             <span className="font-bold">{msg.role === 'bot' ? 'Bot:' : 'Vous:'}</span> {msg.content}
           </div>
         ))}
@@ -47,7 +47,7 @@ export default function ChatBot() {
         <button
           onClick={send}
           disabled={loading}
-          className="bg-blue-600 text-white px-3 py-1 rounded-r"
+          className="bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] px-3 py-1 rounded-r"
         >
           {loading ? '...' : 'Envoyer'}
         </button>

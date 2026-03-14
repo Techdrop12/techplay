@@ -14,7 +14,7 @@ export default function ScoreTracker() {
   }, []);
 
   return (
-    <div className="mb-2 text-sm text-blue-800">
+    <div className="mb-2 text-sm text-[hsl(var(--accent))]">
       Score TechPlay : <span className="font-bold">{score}</span>
     </div>
   );

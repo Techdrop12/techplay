@@ -1,4 +1,12 @@
+import type { Metadata } from 'next'
+
 import Link from '@/components/LocalizedLink'
+
+export const metadata: Metadata = {
+  title: 'Mentions légales',
+  description: 'Mentions légales et éditeur du site TechPlay. Siège social, contact.',
+  robots: { index: true, follow: true },
+}
 
 export default function MentionsLegalesPage() {
   return (

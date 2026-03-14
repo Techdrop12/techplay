@@ -16,9 +16,9 @@ export default function InfoTooltip({ text }: InfoTooltipProps) {
       onMouseEnter={() => setVisible(true)}
       onMouseLeave={() => setVisible(false)}
     >
-      <span className="text-blue-500 cursor-help">ℹ️</span>
+      <span className="text-[hsl(var(--accent))] cursor-help">ℹ️</span>
       {visible && (
-        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-max max-w-xs bg-white dark:bg-zinc-800 border border-gray-300 dark:border-gray-700 text-sm text-gray-800 dark:text-white px-3 py-2 rounded shadow">
+        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-max max-w-xs bg-[hsl(var(--surface))] border border-[hsl(var(--border))] text-sm text-[hsl(var(--text))] px-3 py-2 rounded-lg shadow-[var(--shadow-md)]">
           {text}
         </div>
       )}

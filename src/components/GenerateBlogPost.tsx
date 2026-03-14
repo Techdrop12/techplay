@@ -54,13 +54,13 @@ export default function GenerateBlogPost() {
           placeholder="Sujet du blog"
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
-          className="border border-gray-300 rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-black"
+          className="border border-[hsl(var(--border))] rounded-lg p-2 w-full bg-[hsl(var(--surface))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
           disabled={loading}
         />
         <button
           type="submit"
           disabled={loading}
-          className="bg-black hover:bg-gray-800 text-white px-4 py-2 rounded w-full transition-all duration-200"
+          className="bg-[hsl(var(--accent))] hover:opacity-95 text-[hsl(var(--accent-fg))] px-4 py-2 rounded-lg w-full transition-all duration-200"
         >
           {loading ? 'Génération en cours...' : 'Générer'}
         </button>
@@ -68,7 +68,7 @@ export default function GenerateBlogPost() {
 
       {result && (
         <motion.div
-          className="mt-6 p-4 bg-gray-100 rounded whitespace-pre-line border border-gray-300"
+          className="mt-6 p-4 bg-[hsl(var(--surface-2))] rounded-xl whitespace-pre-line border border-[hsl(var(--border))]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}

@@ -17,10 +17,10 @@ export default function ToggleSwitch({ checked, onChange, label }: ToggleSwitchP
       />
       <span
         className={`w-10 h-6 rounded-full transition-colors duration-300 ${
-          checked ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
+          checked ? 'bg-[hsl(var(--accent))]' : 'bg-[hsl(var(--surface-2))]'
         }`}
       />
-      <span className="ml-3 text-gray-700 dark:text-gray-300">{label}</span>
+      <span className="ml-3 text-token-text/85">{label}</span>
     </label>
   );
 }

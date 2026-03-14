@@ -16,8 +16,8 @@ export default function GenerateBlogPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10" role="main" aria-labelledby="generate-blog-title">
-      <div className="rounded-[1.5rem] border border-white/10 bg-[hsl(var(--surface))]/95 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] dark:bg-[hsl(var(--surface))]/90 sm:p-8">
-        <h1 id="generate-blog-title" className="mb-6 text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+      <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6 shadow-[var(--shadow-md)] sm:p-8">
+        <h1 id="generate-blog-title" className="heading-page mb-6">
           Générer un article
         </h1>
         <form onSubmit={handleSubmit} className="space-y-4" aria-label="Générer un article de blog">
@@ -37,7 +37,7 @@ export default function GenerateBlogPage() {
           </div>
           <button
             type="submit"
-            className="inline-flex items-center justify-center rounded-full bg-[hsl(var(--accent))] px-5 py-2.5 text-[15px] font-semibold text-slate-950 shadow-[0_10px_30px_rgba(20,184,166,0.3)] transition hover:shadow-[0_14px_40px_rgba(20,184,166,0.4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+            className="inline-flex items-center justify-center rounded-full bg-[hsl(var(--accent))] px-5 py-2.5 text-[15px] font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-md)] transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
           >
             Générer
           </button>

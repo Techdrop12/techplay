@@ -148,7 +148,7 @@ export default function ReviewList({ productId }: ReviewListProps) {
                   aria-hidden="true"
                 />
               ))}
-              <span className="text-xs text-gray-500 ml-auto">
+              <span className="text-xs text-token-text/60 ml-auto">
                 {r.createdAt ? timeAgo(r.createdAt, 'fr') : '—'}
               </span>
             </div>

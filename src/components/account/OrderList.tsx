@@ -34,7 +34,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 const STATUS_STYLE: Record<string, string> = {
   pending: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
-  paid: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
+  paid: 'bg-[hsl(var(--accent)/0.15)] text-[hsl(var(--accent))]',
   shipped: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300',
   delivered: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
   canceled: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',

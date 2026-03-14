@@ -30,7 +30,7 @@ export default function ConfirmationDialog({
   return (
     <Modal isOpen={open} onClose={onClose} title={title} size="sm" closeOnOverlay>
       <Modal.Body>
-        <p className="text-sm text-gray-700 dark:text-gray-300">{message}</p>
+        <p className="text-sm text-token-text/85">{message}</p>
       </Modal.Body>
       <Modal.Footer>
         <div className="flex justify-end gap-3">

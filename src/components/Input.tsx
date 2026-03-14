@@ -29,7 +29,7 @@ const sizeClasses: Record<Size, string> = {
   sm: 'h-9 px-3 text-sm rounded-lg',
   md: 'h-10 px-3.5 text-base rounded-xl',
   lg: 'h-11 px-4 text-lg rounded-xl',
-  xl: 'h-12 px-4 text-[1.05rem] rounded-[1.5rem]',
+  xl: 'h-12 px-4 text-[1.05rem] rounded-2xl',
 }
 
 const variantClasses: Record<Variant, string> = {
@@ -145,7 +145,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="mb-1.5 block text-sm font-medium text-gray-800 dark:text-gray-200"
+            className="mb-1.5 block text-sm font-medium text-[hsl(var(--text))]"
           >
             {label}
             {required ? (
@@ -161,7 +161,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           {leadingIcon ? (
             <span
               aria-hidden="true"
-              className="pointer-events-none absolute inset-y-0 left-0 grid w-10 place-items-center text-gray-500"
+              className="pointer-events-none absolute inset-y-0 left-0 grid w-10 place-items-center text-token-text/60"
             >
               {leadingIcon}
             </span>
@@ -179,7 +179,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             inputMode={effectiveInputMode}
             spellCheck={effectiveSpellCheck}
             className={cn(
-              'w-full text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500',
+              'w-full text-[hsl(var(--text))] placeholder:text-token-text/50',
               'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent',
               'disabled:opacity-60 disabled:cursor-not-allowed',
               sizeClasses[size],
@@ -199,7 +199,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               tabIndex={-1}
               aria-label="Effacer le contenu"
               onClick={clearValue}
-              className="absolute inset-y-0 right-0 grid w-10 place-items-center text-gray-600 hover:text-gray-800 dark:text-gray-300"
+              className="absolute inset-y-0 right-0 grid w-10 place-items-center text-token-text/60 hover:text-[hsl(var(--text))]"
             >
               <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
                 <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -211,14 +211,14 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               tabIndex={-1}
               aria-label={reveal ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
               onClick={() => setReveal((v) => !v)}
-              className="absolute inset-y-0 right-0 grid w-10 place-items-center text-gray-600 dark:text-gray-300"
+              className="absolute inset-y-0 right-0 grid w-10 place-items-center text-token-text/60"
             >
               {reveal ? <EyeOffIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
             </button>
           ) : trailingIcon ? (
             <span
               aria-hidden="true"
-              className="absolute inset-y-0 right-0 grid w-10 place-items-center text-gray-500"
+              className="absolute inset-y-0 right-0 grid w-10 place-items-center text-token-text/60"
             >
               {trailingIcon}
             </span>
@@ -235,7 +235,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {error}
           </p>
         ) : help ? (
-          <p id={helpId} className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
+          <p id={helpId} className="mt-1.5 text-sm text-token-text/60">
             {help}
           </p>
         ) : null}

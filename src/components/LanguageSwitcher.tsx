@@ -51,8 +51,8 @@ export default function LanguageSwitcher() {
             className={[
               'px-2 py-1 rounded text-sm transition outline-none focus:ring-2',
               active
-                ? 'bg-blue-600 text-white cursor-default'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 hover:opacity-90 focus:ring-blue-400',
+                ? 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] cursor-default'
+                : 'bg-[hsl(var(--surface-2))] text-[hsl(var(--text))] hover:opacity-90 focus:ring-[hsl(var(--accent))]',
             ].join(' ')}
             data-gtm="lang_switch"
             data-lang={lang}

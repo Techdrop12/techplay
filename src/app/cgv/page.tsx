@@ -1,4 +1,12 @@
+import type { Metadata } from 'next'
+
 import Link from '@/components/LocalizedLink'
+
+export const metadata: Metadata = {
+  title: 'Conditions générales de vente',
+  description: 'Conditions générales de vente du site TechPlay. Livraison, retours, paiement sécurisé.',
+  robots: { index: true, follow: true },
+}
 
 export default function CGVPage() {
   return (

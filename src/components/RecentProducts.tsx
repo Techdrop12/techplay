@@ -46,7 +46,7 @@ export default function RecentProducts() {
                 />
               </div>
               <p className="text-sm font-medium line-clamp-2">{p.title ?? ''}</p>
-              <p className="text-xs text-gray-600">{typeof p.price === 'number' ? p.price : ''} €</p>
+              <p className="text-xs text-token-text/70">{typeof p.price === 'number' ? p.price : ''} €</p>
             </Link>
           </motion.div>
         ))}

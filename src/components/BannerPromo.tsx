@@ -118,7 +118,7 @@ export default function BannerPromo({
     yellow:
       'bg-yellow-100 text-yellow-900 dark:bg-yellow-200 dark:text-yellow-900',
     gray:
-      'bg-gray-200 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+      'bg-[hsl(var(--surface-2))] text-[hsl(var(--text))]',
     gradient:
       'bg-gradient-to-r from-brand via-brand/90 to-accent text-white dark:from-zinc-900 dark:via-zinc-900 dark:to-brand',
   }

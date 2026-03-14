@@ -11,7 +11,7 @@ export default function CartLoading() {
             />
           ))}
         </div>
-        <div className="h-64 animate-pulse rounded-[1.5rem] bg-[hsl(var(--surface))]/80 dark:bg-[hsl(var(--surface))]/60" />
+        <div className="h-64 animate-pulse rounded-2xl bg-[hsl(var(--surface-2))]" />
       </div>
     </div>
   )

@@ -51,7 +51,7 @@ export default function ABTestBanner({
     <div
       className={
         className ??
-        'bg-blue-100 text-blue-800 text-center py-2 text-sm'
+        'bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))] text-center py-2 text-sm'
       }
       data-ab-name={name}
       data-ab-variant={variant}

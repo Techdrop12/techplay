@@ -196,7 +196,7 @@ export default function QuantitySelector({
         className={cn(
           'px-3 py-1 border rounded-md text-lg font-bold transition',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-blue-600',
-          minusDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-zinc-800'
+          minusDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-[hsl(var(--surface-2))]'
         )}
         aria-label="Diminuer la quantité"
       >
@@ -246,7 +246,7 @@ export default function QuantitySelector({
         className={cn(
           'px-3 py-1 border rounded-md text-lg font-bold transition',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-blue-600',
-          plusDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-zinc-800'
+          plusDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-[hsl(var(--surface-2))]'
         )}
         aria-label="Augmenter la quantité"
       >

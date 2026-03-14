@@ -1,6 +1,7 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 
 import type { KeyboardEvent, RefCallback } from 'react'
@@ -15,6 +16,7 @@ interface FAQItem {
 }
 
 export default function FAQ() {
+  const t = useTranslations('faq')
   const [faqs, setFaqs] = useState<FAQItem[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -121,10 +123,14 @@ export default function FAQ() {
   return (
     <section className="container-app mx-auto max-w-3xl py-10 sm:py-12" aria-labelledby="faq-heading">
       <h2 id="faq-heading" className="heading-section text-center">
-        Questions fréquentes
+        {t('heading')}
       </h2>
       <p className="mt-3 text-center text-[15px] text-token-text/75 max-w-xl mx-auto">
-        Réponses rapides sur les commandes, livraisons et retours. Une question ? <a href="/contact" className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline">Nous contacter</a>.
+        {t('intro')}{' '}
+        <a href="/contact" className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline">
+          {t('contact_link')}
+        </a>
+        .
       </p>
 
       {/* Barre outils */}
@@ -132,11 +138,11 @@ export default function FAQ() {
         <input
           type="search"
           inputMode="search"
-          placeholder="Rechercher une question…"
+          placeholder={t('search_placeholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full sm:w-2/3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] focus:ring-offset-2"
-          aria-label="Rechercher dans la FAQ"
+          aria-label={t('search_aria')}
         />
         <div className="flex gap-2">
           <button
@@ -144,14 +150,14 @@ export default function FAQ() {
             onClick={expandAll}
             className="rounded-xl bg-[hsl(var(--accent))] text-white px-3.5 py-2.5 text-sm font-semibold hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))]"
           >
-            Tout ouvrir
+            {t('expand_all')}
           </button>
           <button
             type="button"
             onClick={collapseAll}
             className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3.5 py-2.5 text-sm text-token-text hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))]"
           >
-            Tout fermer
+            {t('collapse_all')}
           </button>
         </div>
       </div>
@@ -167,7 +173,11 @@ export default function FAQ() {
 
       {!loading && filteredFaqs.length === 0 && (
         <p className="text-center text-token-text/60 text-[15px]" role="status">
-          Aucun résultat pour « “{search} ». <a href="/contact" className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline">Nous contacter</a>.
+          {t('no_results', { query: search })}{' '}
+          <a href="/contact" className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline">
+            {t('contact_link')}
+          </a>
+          .
         </p>
       )}
 

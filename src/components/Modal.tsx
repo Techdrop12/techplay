@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 
@@ -127,6 +128,7 @@ function ModalRoot({
   overlayClassName,
   initialFocusRef,
 }: ModalProps) {
+  const tAria = useTranslations('aria')
   const overlayRef = React.useRef<HTMLDivElement | null>(null)
   const panelRef = React.useRef<HTMLDivElement | null>(null)
   const titleId = React.useId()
@@ -191,7 +193,7 @@ function ModalRoot({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Fermer la fenêtre modale"
+            aria-label={tAria('close_modal')}
             className="absolute right-3.5 top-3.5 inline-grid h-9 w-9 place-items-center rounded-full
                        text-token-text/70 hover:text-[hsl(var(--text))]
                        hover:bg-black/5 dark:hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
@@ -226,7 +228,7 @@ function Body({ children, className }: { children: React.ReactNode; className?: 
 
 function Footer({ children }: { children: React.ReactNode }) {
   return (
-    <div className="px-6 pb-6 pt-3 border-t border-black/10 dark:border-white/10">
+    <div className="px-6 pb-6 pt-3 border-t border-[hsl(var(--border))]">
       {children}
     </div>
   )

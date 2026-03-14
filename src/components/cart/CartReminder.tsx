@@ -69,7 +69,7 @@ export default function CartReminder() {
       role="alert"
       aria-live="polite"
       aria-label="Rappel panier"
-      className="fixed bottom-4 right-4 z-50 w-[90%] max-w-sm cursor-pointer rounded-lg bg-blue-600 px-4 py-3 text-white shadow-xl transition-opacity hover:opacity-90 sm:w-auto animate-fadeIn"
+      className="fixed bottom-4 right-4 z-50 w-[90%] max-w-sm cursor-pointer rounded-lg bg-[hsl(var(--accent))] px-4 py-3 text-[hsl(var(--accent-fg))] shadow-[var(--shadow-lg)] transition-opacity hover:opacity-90 sm:w-auto animate-fadeIn"
       onClick={handleClick}
     >
       <strong className="mb-1 block font-semibold">🛒 Vous avez un panier en attente</strong>

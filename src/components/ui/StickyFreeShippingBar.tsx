@@ -163,7 +163,7 @@ export default function StickyFreeShippingBar({
     >
       <div
         className={cn(
-          'mx-auto max-w-5xl rounded-2xl border border-white/10 shadow-[0_20px_60px_rgba(15,23,42,0.25)]',
+          'mx-auto max-w-5xl rounded-2xl border border-[hsl(var(--border))] shadow-[var(--shadow-lg)]',
           'bg-[hsl(var(--surface))]/95 supports-[backdrop-filter]:backdrop-blur-xl',
           'pointer-events-auto'
         )}
@@ -185,7 +185,7 @@ export default function StickyFreeShippingBar({
                 'hidden items-center rounded-full px-4 py-2 text-[13px] font-semibold transition sm:inline-flex',
                 reached
                   ? 'bg-emerald-500 text-emerald-950 shadow-[0_8px_24px_rgba(16,185,129,0.4)] hover:shadow-[0_12px_32px_rgba(16,185,129,0.5)]'
-                  : 'bg-[hsl(var(--accent))] text-slate-950 shadow-[0_8px_24px_rgba(20,184,166,0.4)] hover:shadow-[0_12px_32px_rgba(20,184,166,0.5)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2'
+                  : 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] shadow-[var(--shadow-sm)] hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2'
               )}
               aria-label={labelCart}
               onClick={() => pushDL('free_shipping_bar_cta', { reached })}
@@ -197,7 +197,7 @@ export default function StickyFreeShippingBar({
               type="button"
               onClick={onClose}
               aria-label={isFr ? 'Fermer la barre' : 'Close bar'}
-              className="rounded-full p-2 text-[13px] text-gray-500 transition hover:bg-white/10 hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-200"
+              className="rounded-full p-2 text-[13px] text-token-text/60 transition hover:bg-white/10 hover:text-[hsl(var(--text))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
             >
               ✕
             </button>

@@ -14,10 +14,10 @@ export default function SlideOverPanel({ open, onClose, children }: SlideOverPan
   return (
     <div className="fixed inset-0 z-50 flex">
       <div className="fixed inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative bg-white dark:bg-gray-900 w-80 shadow-lg p-4 overflow-y-auto">
+      <div className="relative bg-[hsl(var(--surface))] w-80 shadow-[var(--shadow-lg)] p-4 overflow-y-auto border-l border-[hsl(var(--border))]">
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-400 hover:text-gray-700"
+          className="absolute top-2 right-2 text-token-text/50 hover:text-[hsl(var(--text))]"
         >
           ✕
         </button>

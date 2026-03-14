@@ -23,7 +23,7 @@ export default function FeedbackButton() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-8 left-8 bg-blue-700 text-white px-4 py-2 rounded-full shadow-lg z-40"
+        className="fixed bottom-8 left-8 bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] px-4 py-2 rounded-full shadow-[var(--shadow-md)] z-40 hover:opacity-95"
       >
         💬 Feedback
       </button>
@@ -44,13 +44,13 @@ export default function FeedbackButton() {
                 />
                 <button
                   onClick={handleSend}
-                  className="bg-blue-600 text-white px-4 py-2 rounded"
+                  className="bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] px-4 py-2 rounded"
                 >
                   Envoyer
                 </button>
                 <button
                   onClick={() => setOpen(false)}
-                  className="ml-3 text-gray-600"
+                  className="ml-3 text-token-text/70"
                 >
                   Annuler
                 </button>

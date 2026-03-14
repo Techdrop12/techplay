@@ -59,7 +59,7 @@ export default function AdminBlogTable() {
 
   if (loading) {
     return (
-      <p className="text-gray-500 animate-pulse p-4">
+      <p className="text-token-text/60 animate-pulse p-4">
         Chargement des articles…
       </p>
     );
@@ -71,7 +71,7 @@ export default function AdminBlogTable() {
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm border-collapse">
           <thead>
-            <tr className="bg-gray-100 dark:bg-zinc-800 text-left">
+            <tr className="bg-[hsl(var(--surface-2))] text-left">
               <th className="px-4 py-2">Titre</th>
               <th className="px-4 py-2 text-center">Statut</th>
               <th className="px-4 py-2 text-center">Date</th>
@@ -82,7 +82,7 @@ export default function AdminBlogTable() {
             {posts.map((post) => (
               <tr
                 key={post._id}
-                className="border-t hover:bg-gray-50 dark:hover:bg-zinc-700"
+                className="border-t border-[hsl(var(--border))] hover:bg-[hsl(var(--surface-2))]"
               >
                 <td className="px-4 py-2">{post.title}</td>
                 <td className="px-4 py-2 text-center">
@@ -94,7 +94,7 @@ export default function AdminBlogTable() {
                 <td className="px-4 py-2 space-x-2 text-center">
                   <button
                     onClick={() => togglePublish(post._id)}
-                    className="text-blue-600 hover:underline"
+                    className="text-[hsl(var(--accent))] hover:underline"
                   >
                     {post.published ? 'Dépublier' : 'Publier'}
                   </button>
@@ -117,7 +117,7 @@ export default function AdminBlogTable() {
               <tr>
                 <td
                   colSpan={4}
-                  className="px-4 py-4 text-center text-gray-400"
+                  className="px-4 py-4 text-center text-token-text/50"
                 >
                   Aucun article pour le moment.
                 </td>

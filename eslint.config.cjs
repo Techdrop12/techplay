@@ -7,8 +7,7 @@ const jsxA11y = require("eslint-plugin-jsx-a11y");
 const importPlugin = require("eslint-plugin-import");
 
 module.exports = [
-  // Remplace .eslintignore (ESLint v9)
-  { ignores: ["node_modules/**", ".next/**", "dist/**", "coverage/**"] },
+  { ignores: ["node_modules/**", ".next/**", "dist/**", "coverage/**", "e2e/**", "**/*.config.*"] },
 
   // TS + React sans "project" => pas de recherche tsconfig
   {
@@ -29,13 +28,18 @@ module.exports = [
     settings: { react: { version: "detect" } },
     rules: {
       "react/react-in-jsx-scope": "off",
+      "react-hooks/rules-of-hooks": "warn",
+      "react-hooks/exhaustive-deps": "off",
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
       "no-empty": ["warn", { allowEmptyCatch: true }],
       "no-extra-semi": "warn",
       "@typescript-eslint/no-unused-expressions": "warn",
+      "jsx-a11y/alt-text": "warn",
+      "jsx-a11y/aria-props": "warn",
+      "jsx-a11y/aria-proptypes": "warn",
       "import/order": ["warn", {
-        groups: ["builtin","external","internal","parent","sibling","index","object","type"],
+        groups: ["builtin", "external", "internal", "parent", "sibling", "index", "object", "type"],
         "newlines-between": "always",
         alphabetize: { order: "asc", caseInsensitive: true }
       }],

@@ -13,7 +13,7 @@ export default function HeroBanner() {
       <Link
         href="/products"
         prefetch
-        className="inline-block bg-white text-indigo-700 font-semibold px-6 py-3 rounded-xl shadow hover:bg-gray-100 transition focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
+        className="inline-block bg-[hsl(var(--surface))] text-[hsl(var(--accent))] font-semibold px-6 py-3 rounded-xl shadow-[var(--shadow-sm)] border border-[hsl(var(--border))] hover:bg-[hsl(var(--surface-2))] transition focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.3)]"
         aria-label="Explorer les produits TechPlay"
       >
         Explorer les produits

@@ -237,7 +237,7 @@ export default function SearchBar({
             aria-controls={listboxId}
             aria-expanded={open}
             {...(activeDescId ? { 'aria-activedescendant': activeDescId } : {})}
-            className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 pl-10 pr-10 py-2.5 text-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent transition"
+            className="w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] pl-10 pr-10 py-2.5 text-sm placeholder:text-token-text/50 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] transition"
           />
 
           {query && (
@@ -249,7 +249,7 @@ export default function SearchBar({
                 inputRef.current?.focus()
               }}
               aria-label="Effacer la recherche"
-              className="absolute inset-y-0 right-2 my-1 px-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="absolute inset-y-0 right-2 my-1 px-2 rounded-lg text-token-text/60 hover:bg-[hsl(var(--surface-2))]"
             >
               ✕
             </button>
@@ -258,7 +258,7 @@ export default function SearchBar({
       </form>
 
       {(open || showRecents) && (
-        <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl">
+        <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] shadow-[var(--shadow-lg)]">
           {results.length > 0 ? (
             <ul id={listboxId} role="listbox" className="max-h-80 overflow-auto py-1">
               {results.map((res, i) => {
@@ -273,14 +273,14 @@ export default function SearchBar({
                     aria-selected={active}
                     className={cn(
                       'cursor-pointer select-none px-3 py-2 text-sm flex items-center justify-between',
-                      active ? 'bg-accent/10 text-accent' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                      active ? 'bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))]' : 'hover:bg-[hsl(var(--surface-2))]'
                     )}
                     onMouseEnter={() => setHighlighted(i)}
                     onMouseDown={(ev) => ev.preventDefault()}
                     onClick={() => goToProduct(p.slug, p.title)}
                   >
                     <span className="truncate">{highlight(p.title ?? '', res.matches)}</span>
-                    <span className="ml-3 text-xs text-gray-400 dark:text-gray-500 truncate max-w-[40%]">
+                    <span className="ml-3 text-xs text-token-text/50 truncate max-w-[40%]">
                       {Number.isFinite(Number(p.price))
                         ? formatPrice(Number(p.price), { locale, currency, stripZeros: true })
                         : ''}
@@ -289,7 +289,7 @@ export default function SearchBar({
                 )
               })}
 
-              <li className="border-t border-gray-200 dark:border-gray-800">
+              <li className="border-t border-[hsl(var(--border))]">
                 <button
                   type="button"
                   onClick={() => submitToListing(query)}
@@ -301,7 +301,7 @@ export default function SearchBar({
             </ul>
           ) : showRecents ? (
             <div className="p-2">
-              <p className="px-2 py-1 text-xs text-gray-500">Recherches récentes</p>
+              <p className="px-2 py-1 text-xs text-token-text/60">Recherches récentes</p>
               <div className="flex flex-wrap gap-2 px-2 pb-2">
                 {recents.map((q) => (
                   <button
@@ -312,7 +312,7 @@ export default function SearchBar({
                       inputRef.current?.focus()
                       setOpen(true)
                     }}
-                    className="rounded-full border px-2.5 py-1 text-xs hover:bg-gray-50 dark:hover:bg-gray-800"
+                    className="rounded-full border border-[hsl(var(--border))] px-2.5 py-1 text-xs hover:bg-[hsl(var(--surface-2))]"
                   >
                     {q}
                   </button>
@@ -325,7 +325,7 @@ export default function SearchBar({
                       setRecents([])
                       try { localStorage.removeItem(RECENTS_KEY) } catch {}
                     }}
-                    className="ml-auto text-xs text-gray-500 hover:underline"
+                    className="ml-auto text-xs text-token-text/60 hover:underline"
                   >
                     Effacer
                   </button>
@@ -333,7 +333,7 @@ export default function SearchBar({
               </div>
             </div>
           ) : (
-            <div className="px-3 py-3 text-sm text-gray-500">Aucun résultat.</div>
+            <div className="px-3 py-3 text-sm text-token-text/60">Aucun résultat.</div>
           )}
         </div>
       )}

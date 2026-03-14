@@ -14,13 +14,13 @@ const labelMap: Record<StatusBadgeStatus, string> = {
 const colorMap: Record<StatusBadgeStatus, string> = {
   pending: 'bg-yellow-100 text-yellow-800',
   paid: 'bg-green-100 text-green-800',
-  shipped: 'bg-blue-100 text-blue-800',
+  shipped: 'bg-[hsl(var(--accent)/0.15)] text-[hsl(var(--accent))]',
   cancelled: 'bg-red-100 text-red-800',
 };
 
 export default function StatusBadge({ status }: StatusBadgeProps) {
   const label = labelMap[status as StatusBadgeStatus] ?? status;
-  const color = colorMap[status as StatusBadgeStatus] ?? 'bg-gray-100 text-gray-800';
+  const color = colorMap[status as StatusBadgeStatus] ?? 'bg-[hsl(var(--surface-2))] text-[hsl(var(--text))]';
   return (
     <span className={`text-xs font-semibold px-2 py-1 rounded ${color}`}>
       {label}

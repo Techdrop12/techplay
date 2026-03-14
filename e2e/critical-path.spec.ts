@@ -11,6 +11,7 @@ import { test } from '@playwright/test'
  */
 test.describe('Parcours critique', () => {
   test('Accueil → Produit → Panier → Page commande', async ({ page }) => {
+    // / redirige vers /fr (middleware) ; on peut aussi aller directement sur /fr
     await page.goto('/')
 
     // Fermer la bannière cookies si elle est affichée (évite qu’elle gêne la suite)

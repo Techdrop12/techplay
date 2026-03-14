@@ -103,7 +103,8 @@ export default function FilterPanel({
   className,
 }: Props) {
   const reduced = useReducedMotion()
-  const groupId = id || useId()
+  const generatedId = useId()
+  const groupId = id ?? generatedId
   const liveId = useId()
   const containerRef = useRef<HTMLDivElement | null>(null)
   const btnRefs = useRef<Array<HTMLButtonElement | null>>([])

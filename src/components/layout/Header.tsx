@@ -549,7 +549,7 @@ export default function Header() {
           <div className="absolute inset-y-0 right-1.5 flex items-center">
             <button
               type="submit"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--accent))] text-white shadow-[0_10px_30px_rgba(20,184,166,0.55)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] shadow-[var(--shadow-sm)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
               aria-label={t.searchAria}
               title={t.searchAria}
               data-gtm="header_search_submit"

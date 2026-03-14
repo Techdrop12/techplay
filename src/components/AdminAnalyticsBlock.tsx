@@ -20,7 +20,7 @@ function StatCard({ label, value }: StatCardProps) {
   return (
     <div className="bg-white dark:bg-zinc-800 p-4 rounded shadow text-center">
       <div className="text-lg font-semibold">{value}</div>
-      <div className="text-xs text-gray-500 dark:text-gray-400">{label}</div>
+      <div className="text-xs text-token-text/60">{label}</div>
     </div>
   );
 }
@@ -41,7 +41,7 @@ export default function AdminAnalyticsBlock() {
   }
 
   if (!data) {
-    return <p className="text-gray-500 text-sm animate-pulse">Chargement des statistiques…</p>;
+    return <p className="text-token-text/60 text-sm animate-pulse">Chargement des statistiques…</p>;
   }
 
   return (

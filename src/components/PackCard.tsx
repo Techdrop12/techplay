@@ -408,8 +408,8 @@ export default function PackCard({ pack, priority = false, className }: PackCard
 
       <motion.div
         className={cn(
-          'relative overflow-hidden rounded-[1.5rem]',
-          'border border-white/40 dark:border-white/10',
+          'relative overflow-hidden rounded-2xl',
+          'border border-[hsl(var(--border))]',
           'bg-[hsl(var(--surface))]/98 dark:bg-[hsl(var(--surface))]/92 supports-[backdrop-filter]:backdrop-blur-2xl'
         )}
         style={

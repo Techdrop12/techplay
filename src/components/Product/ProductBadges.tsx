@@ -32,7 +32,7 @@ export default function ProductBadges({ product }: { product: unknown }) {
       )}
 
       {isNew && (
-        <span className="rounded bg-blue-100 px-2 py-1 text-xs text-blue-800">
+        <span className="rounded bg-[hsl(var(--accent)/0.15)] px-2 py-1 text-xs text-[hsl(var(--accent))]">
           Nouveau
         </span>
       )}

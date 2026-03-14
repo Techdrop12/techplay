@@ -5,5 +5,5 @@ interface IconCircleProps {
 }
 
 export default function IconCircle({ icon }: IconCircleProps) {
-  return <div className="rounded-full bg-gray-100 p-2">{icon}</div>;
+  return <div className="rounded-full bg-[hsl(var(--surface-2))] p-2">{icon}</div>;
 }

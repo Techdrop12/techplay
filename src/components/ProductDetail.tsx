@@ -905,7 +905,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           </div>
 
           <div className="mt-2 grid gap-2">
-            <details className="rounded-xl border border-white/10 bg-white/5 p-3.5 dark:bg-black/20">
+            <details className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface-2))]/50 p-3.5">
               <summary className="flex min-h-[44px] cursor-pointer list-none items-center text-[13px] font-semibold text-token-text [&::-webkit-details-marker]:hidden">{t.deliveryReturns}</summary>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-[13px] text-token-text/70">
                 <li>
@@ -924,7 +924,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
               </ul>
             </details>
 
-            <details className="rounded-xl border border-white/10 bg-white/5 p-3.5 dark:bg-black/20">
+            <details className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface-2))]/50 p-3.5">
               <summary className="flex min-h-[44px] cursor-pointer list-none items-center text-[13px] font-semibold text-token-text [&::-webkit-details-marker]:hidden">{t.specs}</summary>
               <p className="mt-2 text-[13px] text-token-text/70">
                 {brand ? (

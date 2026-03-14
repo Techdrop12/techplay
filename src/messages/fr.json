@@ -149,7 +149,20 @@
   "skeleton": {
     "loading_products": "Chargement des produits…",
     "loading_product": "Chargement du produit…",
-    "loading_cart": "Chargement du panier…"
+    "loading_cart": "Chargement du panier…",
+    "loading": "Chargement…"
+  },
+
+  "admin": {
+    "products_title": "Produits en base",
+    "loading_products": "Chargement…",
+    "error_load_products": "Erreur chargement produits",
+    "error_delete": "Erreur lors de la suppression",
+    "confirm_delete": "Confirmer la suppression de ce produit ?",
+    "product_deleted": "Produit supprimé",
+    "no_products": "Aucun produit trouvé.",
+    "modify": "Modifier",
+    "delete": "Supprimer"
   },
 
   "date": {
@@ -166,6 +179,13 @@
     "currency": "{value, number, ::currency/EUR}",
     "weight_kg": "{value, number} kg",
     "dimension_cm": "{value, number} cm"
+  },
+
+  "not_found": {
+    "back_home": "Retour à l'accueil",
+    "path_requested": "Chemin demandé :",
+    "details_heading": "Détails de la page introuvable",
+    "go_back": "Retour"
   },
 
   "abtest": {
@@ -194,6 +214,7 @@
     "title": "Recherche",
     "placeholder": "Rechercher un produit ou une marque…",
     "no_results": "Aucun résultat pour « {query} ».",
+    "no_results_generic": "Aucun résultat trouvé.",
     "results_count": "{count, plural, one {# résultat} other {# résultats}}"
   },
 
@@ -450,11 +471,24 @@
     "intro": "Une question ? Écrivez-nous à"
   },
 
+  "faq": {
+    "heading": "Questions fréquentes",
+    "intro": "Réponses rapides sur les commandes, livraisons et retours. Une question ?",
+    "contact_link": "Nous contacter",
+    "search_placeholder": "Rechercher une question…",
+    "search_aria": "Rechercher dans la FAQ",
+    "expand_all": "Tout ouvrir",
+    "collapse_all": "Tout fermer",
+    "no_results": "Aucun résultat pour « {query} ».",
+    "section_title": "Questions fréquentes"
+  },
+
   "error": {
     "404_title": "Page non trouvée",
     "404_message": "La page que vous cherchez n’existe pas.",
     "back_home": "Retour à l’accueil",
     "generic": "Une erreur est survenue.",
+    "fallback_message": "Une erreur est survenue :",
     "network": "Problème de connexion réseau",
     "server": "Erreur serveur, réessayez ultérieurement"
   },

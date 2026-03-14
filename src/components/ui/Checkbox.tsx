@@ -13,7 +13,7 @@ export default function Checkbox({ checked, onChange, label }: CheckboxProps) {
         type="checkbox"
         checked={checked}
         onChange={onChange}
-        className="form-checkbox h-5 w-5 text-blue-600"
+        className="form-checkbox h-5 w-5 text-[hsl(var(--accent))]"
       />
       <span>{label}</span>
     </label>

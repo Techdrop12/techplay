@@ -28,7 +28,7 @@ export default function DropdownMenu({ label, items = [] }: DropdownMenuProps) {
         {label}
       </button>
       {open && (
-        <ul className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 border rounded shadow">
+        <ul className="absolute right-0 mt-2 w-48 bg-[hsl(var(--surface))] border border-[hsl(var(--border))] rounded-lg shadow-[var(--shadow-md)]">
           {items.map((item: DropdownMenuItem, i: number) => (
             <li key={i}>
               <button

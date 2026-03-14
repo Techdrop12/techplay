@@ -21,7 +21,7 @@ export default function FlyToCartAnimation({ trigger }: FlyToCartAnimationProps)
     <AnimatePresence>
       {show && (
         <motion.div
-          className="fixed z-50 right-8 bottom-16 w-14 h-14 flex items-center justify-center bg-blue-600 text-white rounded-full shadow-lg"
+          className="fixed z-50 right-8 bottom-16 w-14 h-14 flex items-center justify-center bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] rounded-full shadow-[var(--shadow-lg)]"
           initial={{ opacity: 0, scale: 0.8, y: 50 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.8, y: -50 }}
