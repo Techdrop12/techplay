@@ -586,7 +586,7 @@ export default function Header() {
                     {!active ? (
                       <span
                         aria-hidden="true"
-                        className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-[hsl(var(--accent))] transition-all duration-300 group-hover:w-full"
+                        className="pointer-events-none absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-[hsl(var(--accent))] transition-all duration-300 group-hover:w-full"
                       />
                     ) : null}
                   </button>
@@ -720,7 +720,7 @@ export default function Header() {
                 {!active ? (
                   <span
                     aria-hidden="true"
-                    className="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-[hsl(var(--accent))] transition-all duration-300 group-hover:w-full"
+                    className="pointer-events-none absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-[hsl(var(--accent))] transition-all duration-300 group-hover:w-full"
                   />
                 ) : null}
               </Link>
