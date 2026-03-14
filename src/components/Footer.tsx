@@ -572,16 +572,16 @@ export default function Footer({
           </div>
 
           <div
-            className="grid grid-cols-2 gap-x-8 gap-y-10 py-6 sm:gap-x-10 sm:gap-y-12 sm:py-0 md:col-span-7 lg:grid-cols-[repeat(4,minmax(7.5rem,1fr))] lg:gap-x-10 lg:border-l lg:border-[hsl(var(--border))] lg:pl-12 xl:gap-x-12"
+            className="grid grid-cols-2 gap-x-6 gap-y-10 py-6 sm:gap-x-8 sm:gap-y-12 sm:py-0 md:col-span-7 lg:grid-cols-[repeat(4,minmax(0,1fr))] lg:gap-x-8 lg:border-l lg:border-[hsl(var(--border))] lg:pl-12 xl:gap-x-10"
             style={{ minWidth: 0 }}
           >
             {navGroups.map((group) => (
               <nav
                 key={group.title}
                 aria-label={group.title}
-                className="min-w-0 space-y-4"
+                className="min-w-0 space-y-4 overflow-hidden"
               >
-                <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--text))]">
+                <h3 className="break-words text-[11px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--text))]">
                   {group.title}
                 </h3>
 
