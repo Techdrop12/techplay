@@ -157,6 +157,8 @@ const nextConfig = {
 
   async redirects() {
     return [
+      {source: '/', destination: '/fr', permanent: false},
+
       {source: '/produit', destination: '/products', permanent: true},
       {source: '/produit/', destination: '/products', permanent: true},
       {source: '/produit/:slug', destination: '/products/:slug', permanent: true},

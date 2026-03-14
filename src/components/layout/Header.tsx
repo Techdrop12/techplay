@@ -206,6 +206,7 @@ function LocaleSwitch({ pathname }: { pathname: string }) {
   }
 
   const labels = { fr: 'FR', en: 'EN' } as const
+  const nextLocale = locale === 'fr' ? 'en' : 'fr'
 
   return (
     <div
@@ -213,30 +214,19 @@ function LocaleSwitch({ pathname }: { pathname: string }) {
       aria-label={t.localeSwitcherAria}
       className="inline-flex items-center rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/70 p-0.5 shadow-sm"
     >
-      {(['fr', 'en'] as const).map((lang) => {
-        const active = locale === lang
-
-        return (
-          <button
-            key={lang}
-            type="button"
-            onClick={() => setLang(lang)}
-            onMouseDown={(e) => e.preventDefault()}
-            disabled={active}
-            aria-pressed={active}
-            aria-label={lang === 'fr' ? 'Français' : 'English'}
-            className={cn(
-              'min-w-[2rem] rounded-md px-2 py-1 text-[11px] font-semibold uppercase tracking-wide transition outline-none focus:ring-2 focus:ring-offset-1',
-              active
-                ? 'cursor-default bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] focus:ring-[hsl(var(--accent)/.5)]'
-                : 'bg-transparent text-token-text/90 hover:bg-[hsl(var(--surface-2))] hover:text-token-text focus:ring-[hsl(var(--accent)/.4)]'
-            )}
-            title={lang === 'fr' ? 'Français' : 'English'}
-          >
-            {labels[lang]}
-          </button>
-        )
-      })}
+      <button
+        type="button"
+        onClick={() => setLang(nextLocale)}
+        onMouseDown={(e) => e.preventDefault()}
+        aria-label={locale === 'fr' ? 'Passer en anglais' : 'Switch to French'}
+        aria-current="true"
+        className="min-w-[2rem] rounded-md px-2 py-1 text-[11px] font-semibold uppercase tracking-wide transition outline-none focus:ring-2 focus:ring-offset-1 bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] hover:opacity-95 focus:ring-[hsl(var(--accent)/.5)]"
+        title={locale === 'fr' ? 'Passer en anglais' : 'Switch to French'}
+        data-gtm="lang_switch"
+        data-lang={locale}
+      >
+        {labels[locale]}
+      </button>
     </div>
   )
 }
