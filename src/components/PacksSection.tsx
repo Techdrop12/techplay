@@ -1,15 +1,16 @@
 'use client'
 
 import { motion, useReducedMotion, type Variants } from 'framer-motion'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import type { Pack } from '@/types/product'
 
 import Link from '@/components/LocalizedLink'
-import PackCard from '@/components/PackCard'
 import { getCurrentLocale } from '@/lib/i18n-routing'
-import { cn } from '@/lib/utils'
+import { safeProductImageUrl } from '@/lib/safeProductImage'
+import { cn, formatPrice } from '@/lib/utils'
 
 interface Props {
   packs: Pack[]
@@ -27,6 +28,9 @@ interface Props {
 }
 
 type PackRecord = Record<string, unknown>
+
+const BLUR_DATA_URL =
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+'
 
 function DuotoneGift({
   size = 18,
@@ -119,6 +123,31 @@ function getPackPrice(pack: Pack): number | undefined {
   return readNumber(record, ['price', 'prix', 'amount', 'totalPrice'])
 }
 
+function getPackTitle(pack: Pack): string {
+  const record = toRecord(pack)
+  return readString(record, ['title', 'name', 'label']) ?? 'Pack'
+}
+
+function getPackSlug(pack: Pack): string | undefined {
+  const record = toRecord(pack)
+  const slug = readString(record, ['slug'])
+  if (slug) return slug
+  const id = record._id ?? record.id
+  if (typeof id === 'string') return id
+  if (typeof id === 'number') return String(id)
+  return undefined
+}
+
+function getPackImage(pack: Pack): string {
+  const record = toRecord(pack)
+  const single = readString(record, ['image', 'img', 'cover'])
+  if (single) return safeProductImageUrl(single)
+  const raw = record.images ?? record.gallery
+  if (Array.isArray(raw) && typeof raw[0] === 'string' && raw[0].trim())
+    return safeProductImageUrl(raw[0])
+  return '/og-image.jpg'
+}
+
 function getItems(pack: Pack): PackRecord[] {
   const record = toRecord(pack)
   const raw = record.items ?? record.products ?? record.contents
@@ -127,6 +156,10 @@ function getItems(pack: Pack): PackRecord[] {
 
 function getItemPrice(item: PackRecord): number {
   return readNumber(item, ['price', 'prix', 'amount']) ?? 0
+}
+
+function getItemLabel(item: PackRecord): string | undefined {
+  return readString(item, ['title', 'name', 'label'])
 }
 
 function getSumItems(pack: Pack): number {
@@ -178,7 +211,8 @@ export default function PacksSection({
   const t = useMemo(() => {
     if (locale === 'en') {
       return {
-        heading: 'Recommended bundles',
+        heading: 'Recommended',
+        headingAccent: 'Bundles',
         sub: 'Expert picks: multiple products together at bundle price. Save more, free delivery.',
         seeAll: 'View all bundles',
         seeAllAria: 'View all TechPlay bundles',
@@ -202,13 +236,18 @@ export default function PacksSection({
         seeMore: 'Show more',
         moreShown: (n: number) => `${n} additional bundles displayed.`,
         emptyTitle: 'Bundles coming soon',
-        emptyDescription: 'Curated bundles are coming soon. Discover our product selection in the meantime.',
+        emptyDescription:
+          'Curated bundles are coming soon. Discover our product selection in the meantime.',
         emptyCtaLabel: 'Discover products',
         noscript: 'View all bundles',
+        viewPack: 'View bundle',
+        savePercent: (x: number) => `Save ${x}%`,
+        included: (n: number) => `${n} item${n > 1 ? 's' : ''} included`,
       }
     }
     return {
-      heading: 'Packs recommandés',
+      heading: 'Recommandés',
+      headingAccent: 'Packs',
       sub: 'Sélections expertes : plusieurs produits ensemble à prix pack. Économisez plus, livraison offerte.',
       seeAll: 'Voir tous les packs',
       seeAllAria: 'Voir tous les packs TechPlay',
@@ -236,6 +275,9 @@ export default function PacksSection({
         'Des bundles soignés arrivent bientôt. Découvrez notre sélection de produits en attendant.',
       emptyCtaLabel: 'Découvrir les produits',
       noscript: 'Voir tous les packs',
+      viewPack: 'Voir le pack',
+      savePercent: (x: number) => `Économisez ${x}%`,
+      included: (n: number) => `${n} article${n > 1 ? 's' : ''} inclus`,
     }
   }, [locale])
 
@@ -319,7 +361,7 @@ export default function PacksSection({
 
     return (
       <section
-        className={cn('container-app mx-auto py-10 sm:py-12', className)}
+        className={cn('container-app mx-auto py-12 sm:py-16', className)}
         aria-labelledby={showHeader ? headingId : undefined}
         role="region"
       >
@@ -327,38 +369,41 @@ export default function PacksSection({
           <div className="mb-10 flex flex-col items-center text-center sm:mb-12">
             <h2
               id={headingId}
-              className="flex items-center justify-center gap-2 heading-subsection font-bold sm:text-2xl"
+              className="flex flex-wrap items-center justify-center gap-2 text-2xl font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-3xl md:text-4xl"
             >
-              <DuotoneGift size={24} className="text-[hsl(var(--accent))]" />
+              <DuotoneGift size={28} className="text-[hsl(var(--accent))]" />
               <span>{t.heading}</span>
+              <span className="bg-gradient-to-r from-[hsl(var(--accent))] to-[hsl(var(--accent)/0.8)] bg-clip-text text-transparent">
+                {t.headingAccent}
+              </span>
             </h2>
-            <p id={subId} className="mt-2 text-sm text-token-text/70">
+            <p id={subId} className="mt-3 text-base text-[hsl(var(--text))]/70 sm:text-[15px]">
               {t.sub}
             </p>
           </div>
         )}
 
         <div
-          className="mx-auto max-w-xl rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding text-center shadow-sm"
+          className="mx-auto max-w-lg rounded-2xl border border-[hsl(var(--border))] bg-gradient-to-b from-[hsl(var(--surface))] to-[hsl(var(--surface-2))]/50 p-8 text-center shadow-[0_8px_32px_rgba(15,23,42,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.2)]"
           role="status"
           aria-live="polite"
         >
           <div className="flex justify-center">
-            <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[hsl(var(--accent)/0.08)] text-[hsl(var(--accent))]">
-              <DuotoneGift size={32} />
+            <span className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))] shadow-inner">
+              <DuotoneGift size={40} />
             </span>
           </div>
           <h3 className="mt-6 text-xl font-bold tracking-tight text-[hsl(var(--text))] sm:text-2xl">
             {title}
           </h3>
-          <p className="mt-3 text-[15px] leading-relaxed text-token-text/70">
+          <p className="mt-3 text-[15px] leading-relaxed text-[hsl(var(--text))]/70">
             {description}
           </p>
-          <div className="rhythm-content">
+          <div className="mt-8">
             <Link
               href={ctaHref}
               prefetch={false}
-              className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-[hsl(var(--accent)/0.9)] hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+              className="inline-flex items-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-6 py-3.5 text-sm font-semibold text-[hsl(var(--accent-foreground))] shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl hover:shadow-[hsl(var(--accent)/0.3)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/0.5)] focus-visible:ring-offset-2"
               onClick={() => pushDL('packs_empty_cta')}
             >
               {ctaLabel}
@@ -380,22 +425,25 @@ export default function PacksSection({
 
   return (
     <section
-      className={cn('container-app mx-auto py-10 sm:py-12', className)}
+      className={cn('container-app mx-auto py-12 sm:py-16', className)}
       aria-labelledby={showHeader ? headingId : undefined}
       role="region"
     >
       {showHeader && (
         <>
-          <div className="mb-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
+          <div className="mb-8 flex flex-col items-center justify-between gap-5 sm:flex-row sm:mb-10">
             <div className="text-center sm:text-left">
               <h2
                 id={headingId}
-                className="flex items-center justify-center gap-2 heading-subsection font-bold sm:justify-start"
+                className="flex flex-wrap items-center gap-2 text-2xl font-extrabold tracking-tight text-[hsl(var(--text))] sm:justify-start sm:text-3xl md:text-4xl"
               >
-                <DuotoneGift size={22} className="text-[hsl(var(--accent))]" />
+                <DuotoneGift size={26} className="shrink-0 text-[hsl(var(--accent))]" />
                 <span>{t.heading}</span>
+                <span className="bg-gradient-to-r from-[hsl(var(--accent))] to-[hsl(var(--accent)/0.8)] bg-clip-text text-transparent">
+                  {t.headingAccent}
+                </span>
               </h2>
-              <p id={subId} className="mt-2 text-sm text-token-text/70">
+              <p id={subId} className="mt-3 text-base text-[hsl(var(--text))]/70 sm:text-[15px]">
                 {t.sub}
                 {hasPacks && <span className="sr-only"> {t.packsAvailable(totalCount)}</span>}
               </p>
@@ -404,7 +452,7 @@ export default function PacksSection({
             <Link
               href="/products/packs"
               prefetch={false}
-              className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-[hsl(var(--accent)/.90)] hover:shadow-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
+              className="inline-flex items-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-5 py-3 text-sm font-semibold text-[hsl(var(--accent-foreground))] shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/0.4)]"
               aria-label={t.seeAllAria}
               onClick={() => pushDL('packs_see_all')}
             >
@@ -416,7 +464,7 @@ export default function PacksSection({
           </div>
 
           {hasPacks && (
-            <div className="mb-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-[12px] text-token-text/65 sm:justify-start">
+            <div className="mb-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-1.5 text-[13px] text-[hsl(var(--text))]/65 sm:justify-start">
               <span className="inline-flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))]" aria-hidden="true" />
                 {t.bulletExpert}
@@ -436,7 +484,7 @@ export default function PacksSection({
 
       {hasPacks && showControls && (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <div className="text-xs text-token-text/70">
+          <div className="text-xs text-[hsl(var(--text))]/70">
             <span className="font-semibold tabular-nums">{visibleCount}</span>
             <span className="mx-1">/</span>
             <span className="tabular-nums">{totalCount}</span>
@@ -485,10 +533,9 @@ export default function PacksSection({
             <label className="sr-only" htmlFor={sortId}>
               {t.sortLabel}
             </label>
-
             <select
               id={sortId}
-              className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-[12px] font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
+              className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-[12px] font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/0.3)]"
               value={sortBy}
               onChange={(e) => {
                 const next = (e.target.value as Props['initialSort']) || 'savings'
@@ -507,10 +554,8 @@ export default function PacksSection({
       )}
 
       {noResultsAfterFilter ? (
-        <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 card-padding text-center">
-          <p className="text-sm font-medium text-token-text/80">
-            {t.noResults}
-          </p>
+        <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 p-8 text-center">
+          <p className="text-sm font-medium text-[hsl(var(--text))]/80">{t.noResults}</p>
           <button
             type="button"
             onClick={() => {
@@ -518,7 +563,7 @@ export default function PacksSection({
               setFilterStock(false)
               pushDL('packs_filter_clear')
             }}
-            className="mt-4 inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 text-[13px] font-semibold transition hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+            className="mt-4 inline-flex items-center gap-2 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[13px] font-semibold transition hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
           >
             {t.resetFilters}
           </button>
@@ -527,7 +572,7 @@ export default function PacksSection({
         <motion.ul
           {...(!reduceMotion ? { variants: containerVariants, initial: 'hidden', whileInView: 'show' } : {})}
           viewport={{ once: true, amount: 0.2 }}
-          className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 sm:gap-8"
+          className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3 lg:gap-8"
           role="list"
           aria-describedby={showHeader ? subId : undefined}
           id={gridId}
@@ -535,17 +580,128 @@ export default function PacksSection({
           {list.map((pack, i) => {
             const record = toRecord(pack)
             const key = readString(record, ['slug', '_id', 'id']) ?? `pk-${i}`
+            const slug = getPackSlug(pack)
+            const packHref = slug ? `/products/packs/${slug}` : '/products/packs'
+            const title = getPackTitle(pack)
+            const packPrice = getPackPrice(pack) ?? 0
+            const sumBefore = getSumItems(pack)
+            const savingsPct = getSavingsPercent(pack)
+            const items = getItems(pack)
+            const itemLabels = items.slice(0, 4).map(getItemLabel).filter(Boolean) as string[]
+            const packImage = getPackImage(pack)
 
             return (
               <motion.li
                 key={key}
                 {...(!reduceMotion ? { variants: itemVariants } : {})}
-                {...(!reduceMotion ? { whileHover: { y: -4 } } : {})}
-                transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+                className="group list-none"
                 data-gtm="packs_item"
                 data-idx={i}
               >
-                <PackCard pack={pack} />
+                <div
+                  className={cn(
+                    'relative overflow-hidden rounded-2xl border border-[hsl(var(--border))]/80 p-[1px]',
+                    'bg-gradient-to-b from-white/40 via-white/5 to-transparent dark:from-white/10 dark:to-transparent',
+                    'shadow-[0_4px_24px_rgba(15,23,42,0.08)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.2)]',
+                    'transition-all duration-300 ease-[var(--ease-smooth)]',
+                    'hover:shadow-[0_12px_40px_rgba(15,23,42,0.12),0_0_0_1px_hsl(var(--accent)/0.2)] dark:hover:shadow-[0_12px_40px_rgba(0,0,0,0.35)]',
+                    'hover:border-[hsl(var(--accent)/0.3)] hover:-translate-y-0.5'
+                  )}
+                >
+                  <div className="relative overflow-hidden rounded-[15px] border border-[hsl(var(--border))]/60 bg-[hsl(var(--surface))]/98 dark:bg-[hsl(var(--surface))]/95">
+                    <Link
+                      href={packHref}
+                      prefetch={false}
+                      className="block focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/0.5)] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
+                      onClick={() => pushDL('packs_card_click', { slug: key })}
+                    >
+                      {/* Large bundle image */}
+                      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-[14px] bg-[hsl(var(--surface-2))] sm:aspect-[5/3]">
+                        <Image
+                          src={packImage}
+                          alt={title}
+                          fill
+                          sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
+                          className="object-cover transition-transform duration-500 ease-[var(--ease-smooth)] group-hover:scale-105"
+                          placeholder="blur"
+                          blurDataURL={BLUR_DATA_URL}
+                          quality={88}
+                          draggable={false}
+                        />
+                        <div
+                          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"
+                          aria-hidden="true"
+                        />
+                        {savingsPct > 0 && (
+                          <span className="absolute right-3 top-3 rounded-lg bg-red-500/95 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-white shadow-md">
+                            -{savingsPct}%
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col gap-4 p-5 sm:p-6">
+                        <h3
+                          className="line-clamp-2 text-lg font-bold leading-snug tracking-tight text-[hsl(var(--text))] sm:text-xl"
+                          title={title}
+                        >
+                          {title}
+                        </h3>
+
+                        {/* Included products preview */}
+                        {itemLabels.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            <span className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--text))]/60">
+                              {t.included(items.length)}
+                            </span>
+                            <ul className="flex flex-wrap gap-1.5" aria-hidden="true">
+                              {itemLabels.map((label, idx) => (
+                                <li
+                                  key={`${label}-${idx}`}
+                                  className="rounded-lg bg-[hsl(var(--accent)/0.08)] px-2.5 py-1 text-[12px] font-medium text-[hsl(var(--accent))]"
+                                >
+                                  {label}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Price before / price pack */}
+                        <div className="flex flex-wrap items-baseline gap-2">
+                          {sumBefore > packPrice && (
+                            <span className="text-sm font-medium text-[hsl(var(--text))]/50 line-through">
+                              {formatPrice(sumBefore)}
+                            </span>
+                          )}
+                          <span className="text-xl font-extrabold tabular-nums tracking-tight text-[hsl(var(--accent))] sm:text-2xl">
+                            {formatPrice(packPrice)}
+                          </span>
+                        </div>
+
+                        {/* Secondary: savings label */}
+                        {savingsPct > 0 && (
+                          <p className="text-[13px] font-semibold text-emerald-600 dark:text-emerald-400">
+                            {t.savePercent(savingsPct)}
+                          </p>
+                        )}
+
+                        {/* Primary CTA */}
+                        <span
+                          className={cn(
+                            'mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-5 py-3.5 text-sm font-semibold text-[hsl(var(--accent-foreground))]',
+                            'transition-all duration-200 hover:scale-[1.02] hover:shadow-lg hover:shadow-[hsl(var(--accent)/0.35)]',
+                            'focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.5)] focus-visible:ring-offset-2'
+                          )}
+                        >
+                          {t.viewPack}
+                          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="currentColor" d="M13.172 12L8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z" />
+                          </svg>
+                        </span>
+                      </div>
+                    </Link>
+                  </div>
+                </div>
               </motion.li>
             )
           })}
@@ -553,19 +709,16 @@ export default function PacksSection({
       )}
 
       {hasPacks && !noResultsAfterFilter && (
-        <div className="mt-8 flex items-center justify-between gap-4">
+        <div className="mt-10 flex items-center justify-between gap-4">
           <Link
             href="/products/packs"
             prefetch={false}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-[hsl(var(--accent))] hover:text-[hsl(var(--accent-600))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-[hsl(var(--accent))] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
           >
             <span>{t.seeAll}</span>
             <span aria-hidden>↗</span>
           </Link>
-
-          <p className="text-xs text-token-text/60">
-            {t.displayed(visibleCount, totalCount)}
-          </p>
+          <p className="text-xs text-[hsl(var(--text))]/60">{t.displayed(visibleCount, totalCount)}</p>
         </div>
       )}
 
@@ -577,16 +730,15 @@ export default function PacksSection({
               setExpanded(true)
               pushDL('packs_see_more_click')
             }}
-            className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-5 py-2.5 text-[13px] font-semibold shadow-sm transition hover:shadow focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
+            className="inline-flex items-center gap-2 rounded-xl border-2 border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-5 py-3 text-[13px] font-semibold shadow-sm transition-all hover:shadow focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/0.4)]"
             aria-controls={gridId}
-            aria-expanded={expanded ? 'true' : 'false'}
+            aria-expanded={expanded}
           >
             {t.seeMore}
             <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" className="opacity-80">
               <path fill="currentColor" d="M7 10l5 5 5-5z" />
             </svg>
           </button>
-
           {autoLoadOnIntersect && <div ref={sentinelRef} className="sr-only" aria-hidden="true" />}
         </div>
       )}

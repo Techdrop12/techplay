@@ -9,6 +9,7 @@ import {
   type MotionStyle,
 } from 'framer-motion'
 import Image from 'next/image'
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   useCallback,
@@ -189,6 +190,8 @@ export default function HeroCarousel({
           btnPlay: 'Play',
           btnPause: 'Pause',
           ctaFallback: 'Discover',
+          ctaPrimary: 'View products',
+          ctaSecondary: 'Explore packs',
           noscriptProducts: 'View products',
           slideWord: 'Slide ',
         }
@@ -207,6 +210,8 @@ export default function HeroCarousel({
           btnPlay: 'Lire',
           btnPause: 'Pause',
           ctaFallback: 'Découvrir',
+          ctaPrimary: 'Voir les produits',
+          ctaSecondary: 'Explorer les packs',
           noscriptProducts: 'Voir les produits',
           slideWord: 'Diapositive ',
         }
@@ -446,12 +451,13 @@ export default function HeroCarousel({
 
   const slideAria = `${index + 1} / ${total}${current?.alt ? ` — ${current.alt}` : ''}`
   const { desktop: desktopSrc, mobile: mobileSrc } = getImageSrc(current)
+  const headline = current?.text?.trim() || current?.alt?.trim() || ''
 
   return (
     <section
       ref={containerRef}
       className={cn(
-        'relative w-full select-none overflow-hidden rounded-[1.75rem] bg-gradient-to-b from-black/90 via-black/80 to-black/92 shadow-[0_28px_80px_rgba(0,0,0,0.6)]',
+        'relative w-full select-none overflow-hidden rounded-2xl bg-gradient-to-b from-black/90 via-black/80 to-black/92 shadow-[0_28px_80px_rgba(0,0,0,0.6)]',
         'min-h-[320px] h-[62vh] sm:min-h-[400px] sm:h-[70vh] lg:h-[82vh] will-change-transform touch-pan-y',
         className
       )}
@@ -503,26 +509,49 @@ export default function HeroCarousel({
               : { opacity: 0.2, scale: 0.98 }
           }
           transition={{
-            duration: prefersReducedMotion ? 0 : 0.55,
-            ease: [0.32, 0.72, 0, 1],
+            duration: prefersReducedMotion ? 0 : 0.6,
+            ease: [0.25, 0.46, 0.45, 0.94],
           }}
           className="absolute inset-0 z-0 will-change-transform"
           style={parallaxStyle}
           aria-roledescription="slide"
           aria-label={slideAria}
         >
+          {/* Image container: subtle floating animation + soft glow behind */}
           <motion.div
             key={`kb-${String(current?.id)}`}
-            initial={{ scale: 1.03 }}
-            animate={prefersReducedMotion ? { scale: 1 } : { scale: 1.06 }}
-            transition={{ duration: intervalMs / 1000, ease: 'linear' }}
-            className="absolute inset-0 will-change-transform m-3 sm:m-5 lg:m-6"
+            initial={{ scale: 1.02 }}
+            animate={
+              prefersReducedMotion
+                ? { scale: 1 }
+                : {
+                    scale: 1.05,
+                    y: [0, -6, 0],
+                  }
+            }
+            transition={{
+              scale: { duration: 1.2, ease: 'easeOut' },
+              y: {
+                duration: 5,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              },
+            }}
+            className="absolute inset-0 will-change-transform m-4 sm:m-6 lg:m-8"
           >
+            {/* Soft glow behind product/image area */}
+            <div
+              className="absolute inset-0 -z-10 rounded-[inherit] opacity-80"
+              aria-hidden="true"
+              style={{
+                background: `radial-gradient(ellipse 70% 70% at 50% 50%, hsl(var(--accent) / 0.2) 0%, hsl(var(--accent) / 0.06) 45%, transparent 70%)`,
+              }}
+            />
             {current?.videoUrl ? (
               <video
                 ref={videoRef}
                 key={String(current.videoUrl)}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover rounded-xl"
                 playsInline
                 muted
                 loop
@@ -549,7 +578,7 @@ export default function HeroCarousel({
                   priority={index === 0}
                   fetchPriority={index === 0 ? 'high' : 'auto'}
                   quality={85}
-                  className="object-contain sm:hidden"
+                  className="object-contain object-bottom sm:object-center max-h-[85%] sm:max-h-none w-full"
                   placeholder="blur"
                   blurDataURL={BLUR_DATA_URL}
                   draggable={false}
@@ -565,7 +594,7 @@ export default function HeroCarousel({
                   priority={index === 0}
                   fetchPriority={index === 0 ? 'high' : 'auto'}
                   quality={88}
-                  className="hidden object-contain sm:block"
+                  className="hidden object-contain object-center sm:block"
                   placeholder="blur"
                   blurDataURL={BLUR_DATA_URL}
                   draggable={false}
@@ -583,7 +612,7 @@ export default function HeroCarousel({
         <div className="overlay-hero absolute inset-0" />
         {showOverlay ? (
           <div
-            className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/70"
+            className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/25 to-black/70"
             style={overlayOpacity ? { opacity: overlayOpacity } : undefined}
           />
         ) : null}
@@ -594,8 +623,61 @@ export default function HeroCarousel({
         <div className="hero-carousel-glow-right" aria-hidden="true" />
       </div>
 
+      {/* Content block: headline + CTAs — left on desktop, stacked on mobile */}
+      <div className="pointer-events-auto absolute inset-0 z-[2] flex flex-col justify-end pb-20 sm:pb-24 md:justify-center md:pb-0 md:pt-0">
+        <div className="container-app mx-auto w-full max-w-screen-xl px-5 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-start gap-6 sm:gap-7 md:gap-8 max-w-xl">
+            {headline ? (
+              <motion.h2
+                key={`headline-${String(current?.id)}`}
+                initial={prefersReducedMotion ? {} : { opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
+                className="text-3xl font-extrabold leading-tight tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)] sm:text-4xl md:text-5xl lg:text-6xl"
+              >
+                {headline}
+              </motion.h2>
+            ) : null}
+            <motion.div
+              initial={prefersReducedMotion ? {} : { opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-5"
+            >
+              <Link
+                href="/products"
+                prefetch={false}
+                className={cn(
+                  'inline-flex items-center justify-center gap-2 rounded-xl px-7 py-4 text-base font-semibold shadow-lg transition-all duration-200 ease-out',
+                  'bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))]',
+                  'hover:scale-[1.03] hover:shadow-xl hover:shadow-[hsl(var(--accent)/0.4)]',
+                  'focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/0.5)] focus-visible:ring-offset-2 focus-visible:ring-offset-black/50'
+                )}
+              >
+                {t.ctaPrimary}
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </Link>
+              <Link
+                href="/products/packs"
+                prefetch={false}
+                className={cn(
+                  'inline-flex items-center justify-center gap-2 rounded-xl border-2 border-white/40 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-sm',
+                  'transition-all duration-200 ease-out',
+                  'hover:scale-[1.02] hover:bg-white/20 hover:border-white/60',
+                  'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black/50'
+                )}
+              >
+                {t.ctaSecondary}
+              </Link>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+
       {current?.badge ? (
-        <div className="absolute left-5 top-5 z-20 sm:left-8 sm:top-7">
+        <div className="absolute left-5 top-5 z-[3] sm:left-8 sm:top-7">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3.5 py-1.5 text-[11px] font-semibold tracking-[0.16em] text-black shadow-[0_12px_35px_rgba(15,23,42,0.42)] dark:bg-black/70 dark:text-white">
             <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))] ring-2 ring-[hsl(var(--accent)/0.25)]" />
             {current.badge}
@@ -604,7 +686,7 @@ export default function HeroCarousel({
       ) : null}
 
       {showCounter && canNavigate ? (
-        <div className="glass absolute left-1/2 top-4 sm:top-5 z-20 -translate-x-1/2 rounded-full border border-white/20 bg-white/5 px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-white/90 backdrop-blur-xl">
+        <div className="glass absolute left-1/2 top-4 sm:top-5 z-[3] -translate-x-1/2 rounded-full border border-white/25 bg-black/50 px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-white shadow-lg backdrop-blur-xl">
           {index + 1}
           <span className="mx-1.5 text-white/50" aria-hidden="true">/</span>
           {total}
@@ -617,16 +699,19 @@ export default function HeroCarousel({
             type="button"
             aria-label={t.prev}
             className={cn(
-              'group absolute left-2 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-black/35 text-white shadow-[0_10px_32px_rgba(15,23,42,0.6)] backdrop-blur-xl',
-              'hover:-translate-y-0.5 hover:bg-white/10 hover:border-white/50 sm:left-4 sm:h-11 sm:w-11',
-              'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60'
+              'group absolute left-2 top-1/2 z-[3] grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full',
+              'border-2 border-white/30 bg-black/50 text-white shadow-[0_12px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl',
+              'transition-all duration-200 ease-out',
+              'hover:scale-110 hover:bg-white/20 hover:border-white/60 hover:shadow-[0_0_0_0_1px_rgba(255,255,255,0.2)]',
+              'sm:left-4 sm:h-12 sm:w-12',
+              'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black/30'
             )}
             data-gtm="hero_prev"
             onClick={() => runManualAction(prev)}
           >
             <svg
-              width="20"
-              height="20"
+              width="22"
+              height="22"
               viewBox="0 0 24 24"
               aria-hidden="true"
               className="transition-transform duration-200 group-hover:-translate-x-0.5"
@@ -639,16 +724,19 @@ export default function HeroCarousel({
             type="button"
             aria-label={t.next}
             className={cn(
-              'group absolute right-2 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-black/35 text-white shadow-[0_10px_32px_rgba(15,23,42,0.6)] backdrop-blur-xl',
-              'hover:-translate-y-0.5 hover:bg-white/10 hover:border-white/50 sm:right-4 sm:h-11 sm:w-11',
-              'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60'
+              'group absolute right-2 top-1/2 z-[3] grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full',
+              'border-2 border-white/30 bg-black/50 text-white shadow-[0_12px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl',
+              'transition-all duration-200 ease-out',
+              'hover:scale-110 hover:bg-white/20 hover:border-white/60 hover:shadow-[0_0_0_0_1px_rgba(255,255,255,0.2)]',
+              'sm:right-4 sm:h-12 sm:w-12',
+              'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black/30'
             )}
             data-gtm="hero_next"
             onClick={() => runManualAction(next)}
           >
             <svg
-              width="20"
-              height="20"
+              width="22"
+              height="22"
               viewBox="0 0 24 24"
               aria-hidden="true"
               className="transition-transform duration-200 group-hover:translate-x-0.5"
@@ -669,8 +757,8 @@ export default function HeroCarousel({
           aria-label={isPaused ? t.play : t.pause}
           aria-pressed={isPaused}
           className={cn(
-            'absolute right-3 top-3 z-20 rounded-full border border-white/15 bg-black/45 px-3.5 py-2 text-[11px] font-medium text-white backdrop-blur-xl',
-            'hover:bg-white/10 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60'
+            'absolute right-3 top-3 z-[3] rounded-full border border-white/20 bg-black/50 px-3.5 py-2 text-[11px] font-medium text-white shadow-lg backdrop-blur-xl',
+            'transition-all duration-200 hover:scale-105 hover:bg-white/15 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60'
           )}
           data-gtm="hero_toggle"
         >
@@ -681,9 +769,10 @@ export default function HeroCarousel({
         </button>
       ) : null}
 
+      {/* Animated progress bar for slides */}
       {effectiveAutoplay ? (
         <div
-          className="absolute bottom-6 left-1/2 z-20 hidden h-1 w-[70%] max-w-3xl -translate-x-1/2 overflow-hidden rounded-full bg-white/10 backdrop-blur-xl sm:block"
+          className="absolute bottom-6 left-1/2 z-[3] hidden h-1.5 w-[75%] max-w-3xl -translate-x-1/2 overflow-hidden rounded-full bg-white/15 shadow-inner backdrop-blur-xl sm:block"
           role="presentation"
           aria-hidden="true"
           onClick={(e) => {
@@ -699,16 +788,17 @@ export default function HeroCarousel({
           style={progressClickable ? { cursor: 'pointer' } : undefined}
         >
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-[hsl(var(--accent))] to-[hsl(var(--accent)/0.8)]"
+            className="h-full rounded-full bg-gradient-to-r from-[hsl(var(--accent))] via-[hsl(var(--accent))] to-[hsl(var(--accent)/0.85)]"
+            initial={false}
             animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.15, ease: 'linear' }}
+            transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
           />
         </div>
       ) : null}
 
       {showBullets && canNavigate ? (
-        <nav className="absolute bottom-5 left-1/2 z-20 -translate-x-1/2 sm:hidden" aria-label={t.nav}>
-          <ul className="flex items-center gap-2 rounded-full bg-black/45 px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.4)] backdrop-blur-xl">
+        <nav className="absolute bottom-4 left-1/2 z-[3] -translate-x-1/2 sm:bottom-5 sm:hidden" aria-label={t.nav}>
+          <ul className="flex items-center gap-2.5 rounded-full bg-black/55 px-3.5 py-2.5 shadow-lg backdrop-blur-xl">
             {slides.map((slide, i) => {
               const active = i === index
               const bulletLabel = t.goTo + (i + 1) + (slide.alt ? ` : ${slide.alt}` : '')
@@ -720,8 +810,8 @@ export default function HeroCarousel({
                     className={cn(
                       'rounded-full transition-all duration-300 ease-out',
                       active
-                        ? 'h-2 w-6 bg-white shadow-[0_0_8px_hsl(var(--accent)/0.4)]'
-                        : 'h-2 w-2 bg-white/50 hover:bg-white/75 hover:scale-110'
+                        ? 'h-2.5 w-7 bg-white shadow-[0_0_10px_hsl(var(--accent)/0.5)]'
+                        : 'h-2.5 w-2.5 bg-white/50 hover:bg-white/80 hover:scale-110'
                     )}
                     aria-label={bulletLabel}
                     aria-current={active ? 'true' : undefined}
@@ -737,8 +827,8 @@ export default function HeroCarousel({
       ) : null}
 
       {showThumbnails && canNavigate ? (
-        <div className="absolute bottom-5 sm:bottom-6 left-1/2 z-20 hidden -translate-x-1/2 sm:block">
-          <ul className="flex gap-2.5 rounded-2xl bg-black/45 px-3 py-2.5 shadow-[0_12px_32px_rgba(0,0,0,0.45)] backdrop-blur-2xl" aria-label={t.thumbs}>
+        <div className="absolute bottom-4 sm:bottom-6 left-1/2 z-[3] hidden -translate-x-1/2 sm:block">
+          <ul className="flex gap-2.5 rounded-2xl bg-black/55 px-3 py-2.5 shadow-[0_12px_32px_rgba(0,0,0,0.5)] backdrop-blur-2xl" aria-label={t.thumbs}>
             {slides.map((slide, i) => {
               const active = i === index
               const thumb = getImageSrc(slide).desktop
@@ -748,12 +838,12 @@ export default function HeroCarousel({
                   <motion.button
                     type="button"
                     className={cn(
-                      'group relative h-11 w-[4.25rem] overflow-hidden rounded-xl border shadow-md sm:h-12 sm:w-20',
+                      'group relative h-11 w-[4.25rem] overflow-hidden rounded-xl border-2 shadow-md sm:h-12 sm:w-20',
                       active
                         ? 'border-[hsl(var(--accent))] ring-2 ring-[hsl(var(--accent)/0.5)]'
-                        : 'border-white/20 hover:border-white/50'
+                        : 'border-white/25 hover:border-white/50'
                     )}
-                    whileHover={prefersReducedMotion ? undefined : { scale: 1.03 }}
+                    whileHover={prefersReducedMotion ? undefined : { scale: 1.05 }}
                     whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
                     transition={{ duration: 0.2 }}
                     aria-label={`${t.goTo}${i + 1}`}

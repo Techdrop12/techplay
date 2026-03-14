@@ -23,6 +23,7 @@ import {
   FaTruck,
   FaTwitter,
 } from 'react-icons/fa'
+import { SiStripe } from 'react-icons/si'
 
 import Link from '@/components/LocalizedLink'
 import { BRAND } from '@/lib/constants'
@@ -523,11 +524,22 @@ export default function Footer({
                   </ul>
                 </div>
 
-                <p className="sr-only">Paiements acceptés</p>
-                <div className="flex items-center gap-5 text-2xl text-token-text/60" aria-hidden="true">
-                  <FaCcVisa className="transition-opacity hover:opacity-80" />
-                  <FaCcMastercard className="transition-opacity hover:opacity-80" />
-                  <FaCcPaypal className="transition-opacity hover:opacity-80" />
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--text))]/70">
+                  {locale === 'en' ? 'We accept' : 'Paiements acceptés'}
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-4" aria-hidden="true">
+                  <span className="flex h-9 w-12 items-center justify-center rounded-lg border border-[hsl(var(--border))]/80 bg-white/80 px-1.5 text-[hsl(var(--text))]/70 transition-colors hover:text-[hsl(var(--text))]" title="Visa">
+                    <FaCcVisa className="text-2xl" />
+                  </span>
+                  <span className="flex h-9 w-12 items-center justify-center rounded-lg border border-[hsl(var(--border))]/80 bg-white/80 px-1.5 text-[hsl(var(--text))]/70 transition-colors hover:text-[hsl(var(--text))]" title="Mastercard">
+                    <FaCcMastercard className="text-2xl" />
+                  </span>
+                  <span className="flex h-9 w-12 items-center justify-center rounded-lg border border-[hsl(var(--border))]/80 bg-white/80 px-1.5 text-[hsl(var(--text))]/70 transition-colors hover:text-[hsl(var(--text))]" title="PayPal">
+                    <FaCcPaypal className="text-xl" />
+                  </span>
+                  <span className="flex h-9 w-12 items-center justify-center rounded-lg border border-[hsl(var(--border))]/80 bg-white/80 px-1.5 text-[hsl(var(--text))]/70 transition-colors hover:text-[hsl(var(--text))]" title="Stripe">
+                    <SiStripe className="text-xl" />
+                  </span>
                 </div>
               </>
             ) : null}
@@ -579,13 +591,13 @@ export default function Footer({
               <nav
                 key={group.title}
                 aria-label={group.title}
-                className="min-w-0 space-y-4 overflow-hidden"
+                className="min-w-0 space-y-5 overflow-hidden"
               >
-                <h3 className="break-words text-[11px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--text))]">
+                <h3 className="break-words text-[13px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--text))]">
                   {group.title}
                 </h3>
 
-                <ul className="space-y-3">
+                <ul className="space-y-3.5">
                   {group.links.map(({ href, label, external }) => {
                     const finalHref = localizePath(href, locale)
                     const active =
@@ -599,7 +611,7 @@ export default function Footer({
                       group.title.toLowerCase().includes('legal')
 
                     const linkClass =
-                      'inline-flex min-h-[2.25rem] min-w-0 items-center gap-2.5 rounded-md py-2 text-[14px] text-token-text/85 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] sm:min-h-0 sm:py-0.5'
+                      'inline-flex min-h-[2.5rem] min-w-0 items-center gap-2.5 rounded-md py-2 text-[14px] text-[hsl(var(--text))]/85 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] sm:min-h-0 sm:py-1'
                     const content = (
                       <>
                         {isLegal ? (
@@ -662,18 +674,18 @@ export default function Footer({
                   aria-busy={status === 'loading'}
                   aria-describedby={message ? messageId : undefined}
                 >
-                  <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--text))]">
+                  <h3 className="text-[13px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--text))]">
                     {t.newsletterTitle}
                   </h3>
 
-                  <div className="flex gap-3">
+                  <div className="flex flex-col gap-3 sm:flex-row">
                     <input
                       id={emailId}
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder={t.newsletterPlaceholder}
-                      className="w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-3 text-[14px] text-[hsl(var(--text))] placeholder:text-token-text/50 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]"
+                      className="w-full rounded-xl border-2 border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-3.5 text-[15px] text-[hsl(var(--text))] placeholder:text-[hsl(var(--text))]/50 transition-[border-color,box-shadow] focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/0.25)] focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]"
                       aria-required="true"
                       aria-invalid={status === 'error' && !isValidEmail(email) ? 'true' : 'false'}
                       autoComplete="email"
@@ -685,7 +697,7 @@ export default function Footer({
                     <button
                       type="submit"
                       disabled={status === 'loading'}
-                      className="shrink-0 rounded-xl bg-[hsl(var(--accent))] px-5 py-3 text-[14px] font-semibold text-white shadow-md transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 disabled:opacity-60"
+                      className="shrink-0 rounded-xl bg-[hsl(var(--accent))] px-6 py-3.5 text-[15px] font-semibold text-[hsl(var(--accent-foreground))] shadow-md transition-all duration-200 hover:scale-[1.02] hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] disabled:opacity-60 disabled:hover:scale-100"
                       aria-label={t.newsletterButtonIdle}
                       data-gtm="footer_newsletter_submit"
                     >
@@ -743,14 +755,14 @@ export default function Footer({
                   ) : null}
                 </form>
 
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-token-text/70">{locale === 'en' ? 'Follow us' : 'Suivez-nous'}</p>
-                <div className="flex items-center gap-4 text-xl text-token-text/60">
+                <p className="text-[13px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--text))]/80">{locale === 'en' ? 'Follow us' : 'Suivez-nous'}</p>
+                <div className="flex items-center gap-3 text-xl text-[hsl(var(--text))]/60">
                   <a
                     href="https://facebook.com/techplay"
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={t.social.facebook}
-                    className="rounded-lg p-1.5 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
+                    className="rounded-lg p-2 transition-all duration-200 hover:scale-110 hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
                     onClick={() => onSocialClick('facebook')}
                     data-gtm="footer_social_facebook"
                   >
@@ -762,7 +774,7 @@ export default function Footer({
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={t.social.twitter}
-                    className="rounded-lg p-1.5 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
+                    className="rounded-lg p-2 transition-all duration-200 hover:scale-110 hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
                     onClick={() => onSocialClick('twitter')}
                     data-gtm="footer_social_twitter"
                   >
@@ -774,7 +786,7 @@ export default function Footer({
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={t.social.instagram}
-                    className="rounded-lg p-1.5 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
+                    className="rounded-lg p-2 transition-all duration-200 hover:scale-110 hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
                     onClick={() => onSocialClick('instagram')}
                     data-gtm="footer_social_instagram"
                   >
@@ -788,27 +800,34 @@ export default function Footer({
 
         {children ? <div className="mt-10 text-center">{children}</div> : null}
 
-        <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-[hsl(var(--border))] pt-8 text-[14px] md:flex-row">
-          <p className="text-token-text/75">
+        <div className="mt-14 flex flex-col items-center justify-between gap-6 border-t border-[hsl(var(--border))] pt-8 md:flex-row">
+          <p className="text-[14px] text-[hsl(var(--text))]/80">
             © {currentYear}{' '}
             <span className="font-semibold text-[hsl(var(--text))]">{companyName}</span>
-            <span className="text-token-text/60">. {t.rightsReserved}</span>
+            <span className="text-[hsl(var(--text))]/65">. {t.rightsReserved}</span>
           </p>
 
-          <ul className="flex flex-wrap items-center justify-center gap-4 text-[13px] text-token-text/70">
+          <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[14px] text-[hsl(var(--text))]/75">
             <li className="inline-flex items-center gap-2">
-              <FaLock className="text-token-text/60" aria-hidden="true" /> Stripe · Visa · Mastercard · PayPal
+              <FaLock className="h-4 w-4 shrink-0 text-[hsl(var(--text))]/60" aria-hidden="true" />
+              <span className="sr-only">{locale === 'en' ? 'Secure payment:' : 'Paiement sécurisé :'}</span>
+              <span className="inline-flex items-center gap-2" aria-hidden="true">
+                <SiStripe className="text-lg" title="Stripe" />
+                <FaCcVisa className="text-lg" title="Visa" />
+                <FaCcMastercard className="text-lg" title="Mastercard" />
+                <FaCcPaypal className="text-base" title="PayPal" />
+              </span>
             </li>
-            <li className="hidden sm:inline text-token-text/50">·</li>
+            <li className="hidden sm:inline text-[hsl(var(--text))]/45" aria-hidden="true">·</li>
             <li>{t.recentLocale}</li>
-            <li className="hidden sm:inline text-token-text/50">·</li>
+            <li className="hidden sm:inline text-[hsl(var(--text))]/45" aria-hidden="true">·</li>
             <li>
               <a
                 href="#cookies"
                 role="button"
                 aria-controls="tp-consent-panel"
                 onClick={(e) => openConsentManager(e)}
-                className="underline decoration-dotted underline-offset-2 hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+                className="underline decoration-dotted underline-offset-2 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
               >
                 {t.cookiePrefs}
               </a>

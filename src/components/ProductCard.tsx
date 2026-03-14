@@ -194,12 +194,15 @@ function ProductCard({
       aria-label={t.productAria}
       data-product-id={productId || product.slug}
       className={cn(
-        'group relative rounded-[1.75rem] p-[1px]',
+        'group relative rounded-2xl p-[1px]',
         'bg-gradient-to-b from-white/65 via-white/10 to-white/0 dark:from-white/15 dark:via-white/5 dark:to-transparent',
-        'shadow-[0_20px_48px_rgba(15,23,42,0.12)] dark:shadow-[0_20px_48px_rgba(0,0,0,0.35)]',
+        'shadow-[0_4px_20px_rgba(15,23,42,0.08)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.25)]',
         'transition-[box-shadow,transform,border-color] duration-300 ease-[var(--ease-smooth)]',
-        !prefersReducedMotion &&
-          'hover:shadow-[0_24px_56px_rgba(15,23,42,0.16)] hover:-translate-y-0.5 dark:hover:shadow-[0_24px_56px_rgba(0,0,0,0.45)]',
+        !prefersReducedMotion && [
+          'hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(15,23,42,0.14)] dark:hover:shadow-[0_12px_40px_rgba(0,0,0,0.4)]',
+          'hover:shadow-[0_0_0_1px_hsl(var(--accent)/0.25),0_12px_40px_rgba(15,23,42,0.14)]',
+          'dark:hover:shadow-[0_0_0_1px_hsl(var(--accent)/0.35),0_12px_40px_rgba(0,0,0,0.4)]',
+        ],
         className
       )}
     >
@@ -210,11 +213,11 @@ function ProductCard({
 
       <div
         className={cn(
-          'relative overflow-hidden rounded-[1.55rem]',
+          'relative overflow-hidden rounded-[15px]',
           'border border-[hsl(var(--border))]/80 dark:border-white/10',
           'bg-[hsl(var(--surface))]/98 dark:bg-[hsl(var(--surface))]/92 supports-[backdrop-filter]:backdrop-blur-2xl',
-          'transition-colors duration-300 ease-[var(--ease-smooth)]',
-          'group-hover:border-[hsl(var(--border))] dark:group-hover:border-white/20'
+          'transition-[box-shadow,border-color] duration-300 ease-[var(--ease-smooth)]',
+          'group-hover:border-[hsl(var(--accent)/0.4)] dark:group-hover:border-[hsl(var(--accent)/0.5)]'
         )}
       >
         <WishlistButton
@@ -235,7 +238,8 @@ function ProductCard({
           className="block rounded-[inherit] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/80"
           onClick={handleClick}
         >
-          <div className="card-shine relative aspect-[3/2] w-full overflow-hidden rounded-[1.45rem] bg-[hsl(var(--surface-2))] sm:aspect-[4/3]">
+          {/* Larger product image with zoom on hover */}
+          <div className="card-shine relative aspect-[4/3] w-full overflow-hidden rounded-t-[14px] bg-[hsl(var(--surface-2))] sm:aspect-[1/1]">
             <div className="absolute inset-0">
               <Image
                 src={image}
@@ -244,7 +248,7 @@ function ProductCard({
                 sizes="(min-width:1280px) 22vw, (min-width:1024px) 25vw, (min-width:640px) 33vw, 50vw"
                 className={cn(
                   'object-cover transition-transform duration-400 ease-[var(--ease-smooth)]',
-                  !prefersReducedMotion && 'group-hover:scale-[1.02]',
+                  !prefersReducedMotion && 'group-hover:scale-105',
                   secondImage && 'transition-opacity duration-300 group-hover:opacity-0'
                 )}
                 priority={priority}
@@ -263,7 +267,7 @@ function ProductCard({
                   sizes="(min-width:1280px) 22vw, (min-width:1024px) 25vw, (min-width:640px) 33vw, 50vw"
                   className={cn(
                     'absolute inset-0 object-cover opacity-0 transition-[opacity,transform] duration-400 ease-[var(--ease-smooth)] group-hover:opacity-100',
-                    !prefersReducedMotion && 'group-hover:scale-[1.02]'
+                    !prefersReducedMotion && 'group-hover:scale-105'
                   )}
                   aria-hidden
                   draggable={false}
@@ -278,38 +282,40 @@ function ProductCard({
               )}
             </div>
 
-            <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-col gap-1.5 sm:left-4 sm:top-4">
+            {/* Badges: En stock, Promo, Livraison offerte — consistent premium style */}
+            <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-col gap-2 sm:left-4 sm:top-4">
               {product.isNew ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/95 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-950 shadow-[0_12px_35px_rgba(4,120,87,0.75)] ring-1 ring-emerald-900/40">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-900/90 shadow-[0_0_0_4px_rgba(187,247,208,0.75)]" />
+                <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/95 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-950 shadow-md ring-1 ring-emerald-900/30">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-900/90" />
                   {t.new}
                 </span>
               ) : null}
 
               {product.isBestSeller ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-300/95 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-950 shadow-[0_12px_35px_rgba(120,53,15,0.6)] ring-1 ring-amber-900/35">
-                  <span className="h-1.5 w-1.5 rounded-full bg-amber-700 shadow-[0_0_0_4px_rgba(253,230,138,0.75)]" />
+                <span className="inline-flex items-center gap-1.5 rounded-lg bg-amber-300/95 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-amber-950 shadow-md ring-1 ring-amber-900/30">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-700" />
                   {t.best}
                 </span>
               ) : null}
 
               {discountPct ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/95 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-red-50 shadow-[0_12px_35px_rgba(127,29,29,0.7)] ring-1 ring-red-900/40">
-                  <span className="h-1.5 w-1.5 rounded-full bg-red-200 shadow-[0_0_0_4px_rgba(248,113,113,0.75)]" />
-                  -{discountPct}%
+                <span className="inline-flex items-center gap-1.5 rounded-lg bg-red-500/95 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-red-50 shadow-md ring-1 ring-red-900/30">
+                  <span className="h-1.5 w-1.5 rounded-full bg-red-200" />
+                  {t.sale} -{discountPct}%
                 </span>
               ) : null}
 
               {lowStock ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-200/95 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-950 shadow-[0_10px_28px_rgba(180,83,9,0.35)] ring-1 ring-amber-800/35 dark:bg-amber-400/90 dark:text-amber-950">
-                  <span className="h-1.5 w-1.5 rounded-full bg-amber-700 shadow-[0_0_0_4px_rgba(253,230,138,0.7)]" />
+                <span className="inline-flex items-center gap-1.5 rounded-lg bg-amber-200/95 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-amber-950 shadow-md ring-1 ring-amber-800/30 dark:bg-amber-400/90 dark:text-amber-950">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-700" />
                   {t.lowStock}
                 </span>
               ) : null}
             </div>
 
+            {/* Rating overlay when available */}
             {(ratingValue > 0 || reviewsCount > 0) ? (
-              <div className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full border border-white/20 bg-black/50 px-2.5 py-1.5 text-[11px] shadow-[0_14px_40px_rgba(15,23,42,0.8)] backdrop-blur-xl sm:right-4 sm:top-4">
+              <div className="absolute right-3 top-3 flex items-center gap-1.5 rounded-lg border border-white/20 bg-black/50 px-2.5 py-1.5 text-[11px] shadow-lg backdrop-blur-xl sm:right-4 sm:top-4">
                 <RatingStars value={ratingValue} size="xs" editable={false} filledClassName="text-amber-400" emptyClassName="text-white/40" />
                 <span className="font-semibold tabular-nums text-white">{ratingValue > 0 ? ratingValue.toFixed(1) : '—'}</span>
                 {reviewsCount > 0 ? <span className="text-white/80">({reviewsCount})</span> : null}
@@ -317,7 +323,7 @@ function ProductCard({
             ) : null}
 
             {outOfStock ? (
-              <div className="absolute inset-0 grid place-items-center bg-black/55 text-xs font-semibold uppercase tracking-[0.18em] text-white/90">
+              <div className="absolute inset-0 grid place-items-center bg-black/55 text-xs font-semibold uppercase tracking-wider text-white/90">
                 {t.outOfStock}
               </div>
             ) : null}
@@ -328,25 +334,24 @@ function ProductCard({
             />
           </div>
 
-          <div className="flex flex-col px-5 pt-6 pb-6 sm:px-6 sm:pt-7 sm:pb-7">
-            {/* 1. Title — primary scan target; fixed 2-line area keeps grid aligned */}
+          <div className="flex flex-col px-5 pt-5 pb-5 sm:px-6 sm:pt-6 sm:pb-6">
+            {/* Title — max 2 lines, clear hierarchy */}
             <h3
-              className="min-h-[2.75em] line-clamp-2 break-words text-base font-bold leading-snug tracking-tight text-[hsl(var(--text))] sm:text-[17px] [letter-spacing:var(--heading-tracking)]"
+              className="line-clamp-2 min-h-[2.75em] break-words text-base font-bold leading-snug tracking-tight text-[hsl(var(--text))] sm:text-[17px] [letter-spacing:var(--heading-tracking)]"
               title={title}
             >
               {title}
             </h3>
 
-            {/* 2. Brand/category — secondary context */}
             {product.brand || product.category ? (
-              <p className="mt-2 text-[11px] font-medium uppercase tracking-[0.16em] text-token-text/50">
+              <p className="mt-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-[hsl(var(--text))]/50">
                 {[product.brand, product.category].filter(Boolean).join(' · ')}
               </p>
             ) : null}
 
-            {/* 3. Price — prominent, clear */}
+            {/* Price — prominent and clear */}
             <div
-              className="mt-5 flex flex-wrap items-baseline gap-2.5"
+              className="mt-4 flex flex-wrap items-baseline gap-2.5"
               itemProp="offers"
               itemScope
               itemType="https://schema.org/Offer"
@@ -362,33 +367,33 @@ function ProductCard({
               </span>
               {hasDiscount && typeof oldPrice === 'number' ? (
                 <>
-                  <span className="text-sm font-medium text-token-text/45 line-through">
+                  <span className="text-sm font-medium text-[hsl(var(--text))]/50 line-through">
                     {formatPrice(oldPrice)}
                   </span>
-                  <span className="inline-flex items-center rounded-full bg-[hsl(var(--accent)/0.12)] px-2.5 py-[3px] text-[11px] font-semibold text-[hsl(var(--accent))]">
+                  <span className="inline-flex items-center rounded-lg bg-[hsl(var(--accent)/0.14)] px-2 py-0.5 text-[11px] font-semibold text-[hsl(var(--accent))]">
                     {t.save} {formatPrice(oldPrice - product.price)}
                   </span>
                 </>
               ) : null}
             </div>
 
-            {/* Rating + stock — support line */}
-            <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2">
+            {/* Rating (below title) + badges: En stock, Livraison offerte */}
+            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
               {(ratingValue > 0 || reviewsCount > 0) ? (
-                <span className="flex items-center gap-1.5 text-[12px] text-token-text/70">
+                <span className="flex items-center gap-1.5 text-[12px] text-[hsl(var(--text))]/70">
                   <RatingStars value={ratingValue} size="xs" editable={false} filledClassName="text-amber-500" emptyClassName="text-[hsl(var(--border))]" />
-                  <span className="font-semibold tabular-nums text-token-text/80">{ratingValue > 0 ? ratingValue.toFixed(1) : '—'}</span>
-                  {reviewsCount > 0 ? <span className="text-token-text/60">({reviewsCount})</span> : null}
+                  <span className="font-semibold tabular-nums text-[hsl(var(--text))]/80">{ratingValue > 0 ? ratingValue.toFixed(1) : '—'}</span>
+                  {reviewsCount > 0 ? <span className="text-[hsl(var(--text))]/60">({reviewsCount})</span> : null}
                 </span>
               ) : null}
               <span
                 className={cn(
-                  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium',
+                  'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-medium shadow-sm',
                   outOfStock
-                    ? 'bg-red-100/80 text-red-700 dark:bg-red-950/50 dark:text-red-300'
+                    ? 'bg-red-100/90 text-red-700 dark:bg-red-950/50 dark:text-red-300'
                     : lowStock
-                      ? 'bg-amber-100/80 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300'
-                      : 'bg-emerald-100/80 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300'
+                      ? 'bg-amber-100/90 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300'
+                      : 'bg-emerald-100/90 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300'
                 )}
               >
                 <span className="h-1 w-1 shrink-0 rounded-full bg-current/80" />
@@ -397,16 +402,22 @@ function ProductCard({
               <FreeShippingBadge price={product.price} minimal />
             </div>
 
-            {/* 4. CTA — clear primary action, integrated into card flow */}
-            <div className="mt-6 border-t border-[hsl(var(--border))]/40 pt-5">
+            {/* CTA — full width, icon + label, stronger hover */}
+            <div className="mt-5 border-t border-[hsl(var(--border))]/50 pt-5">
               <AddToCartButton
                 product={{ _id: product._id, slug: product.slug, title, image, price: product.price }}
                 stopPropagation
                 size="sm"
                 variant="outline"
                 fullWidth
+                withIcon
                 idleText={t.addToCart}
-                className="min-h-[2.75rem] w-full rounded-xl border-[hsl(var(--accent)/.5)] font-semibold text-[hsl(var(--accent))] shadow-none hover:bg-[hsl(var(--accent)/.08)] focus-visible:ring-2"
+                className={cn(
+                  'min-h-[3rem] w-full rounded-xl border-2 border-[hsl(var(--accent))] font-semibold text-[hsl(var(--accent))]',
+                  'transition-all duration-200 ease-[var(--ease-smooth)]',
+                  'hover:scale-[1.02] hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--accent-foreground))] hover:shadow-md hover:shadow-[hsl(var(--accent)/0.3)]',
+                  'focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.5)]'
+                )}
                 ariaLabel={`${t.addToCart} — ${title}`}
               />
             </div>
