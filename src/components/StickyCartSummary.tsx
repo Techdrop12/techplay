@@ -315,17 +315,18 @@ export default function StickyCartSummary({
         exit={prefersReduced ? { y: 0, opacity: 0 } : { y: 72, opacity: 0 }}
         transition={prefersReduced ? { duration: 0.15 } : { type: 'spring', stiffness: 320, damping: 26 }}
         className={cn(
-          'md:hidden fixed bottom-0 left-0 right-0 z-[60] pointer-events-none',
+          'md:hidden fixed bottom-0 left-0 right-0 z-[60]',
           'backdrop-blur supports-[backdrop-filter]:bg-white/85 dark:supports-[backdrop-filter]:bg-zinc-900/85',
           'border-t border-[hsl(var(--border))] shadow-[var(--shadow-md)]',
           'pb-[env(safe-area-inset-bottom)]',
           className
         )}
+        style={{ pointerEvents: 'none' }}
         role="region"
         aria-label={tx('mobile_summary')}
         data-visible="true"
       >
-        <div className="pointer-events-auto">
+        <div style={{ pointerEvents: 'auto' }}>
           <div className="flex items-center justify-between px-4 py-2">
             <button
               type="button"

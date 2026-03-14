@@ -26,6 +26,7 @@ import {
 
 import Link from '@/components/LocalizedLink'
 import { BRAND } from '@/lib/constants'
+import { cn } from '@/lib/utils'
 import { getErrorMessageWithFallback } from '@/lib/errors'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 
@@ -250,19 +251,20 @@ function pushDataLayer(eventName: string, payload: Record<string, unknown> = {})
 }
 
 
-function LegalIcon({ label }: { label: string }) {
+function LegalIcon({ label, className }: { label: string; className?: string }) {
   const lower = label.toLowerCase()
+  const base = cn('shrink-0 text-[hsl(var(--accent))]', className)
 
   if (lower.includes('mention') || lower.includes('legal')) {
-    return <FaFileAlt className="text-[hsl(var(--accent))]" aria-hidden="true" />
+    return <FaFileAlt className={base} aria-hidden="true" />
   }
 
   if (lower.includes('confidential') || lower.includes('privacy')) {
-    return <FaLock className="text-[hsl(var(--accent))]" aria-hidden="true" />
+    return <FaLock className={base} aria-hidden="true" />
   }
 
   if (lower.includes('cgv') || lower.includes('terms')) {
-    return <FaFileAlt className="text-[hsl(var(--accent))]" aria-hidden="true" />
+    return <FaFileAlt className={base} aria-hidden="true" />
   }
 
   return null
@@ -569,9 +571,16 @@ export default function Footer({
             ) : null}
           </div>
 
-          <div className="grid grid-cols-2 gap-8 py-6 sm:gap-10 sm:py-0 md:col-span-7 lg:grid-cols-4 lg:border-l lg:border-[hsl(var(--border))] lg:pl-12">
+          <div
+            className="grid grid-cols-2 gap-x-8 gap-y-10 py-6 sm:gap-x-10 sm:gap-y-12 sm:py-0 md:col-span-7 lg:grid-cols-[repeat(4,minmax(7.5rem,1fr))] lg:gap-x-10 lg:border-l lg:border-[hsl(var(--border))] lg:pl-12 xl:gap-x-12"
+            style={{ minWidth: 0 }}
+          >
             {navGroups.map((group) => (
-              <nav key={group.title} aria-label={group.title} className="space-y-4">
+              <nav
+                key={group.title}
+                aria-label={group.title}
+                className="min-w-0 space-y-4"
+              >
                 <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--text))]">
                   {group.title}
                 </h3>
@@ -585,16 +594,18 @@ export default function Footer({
                         : pathname === finalHref || pathname.startsWith(`${finalHref}/`)
 
                     const isCookie = label.toLowerCase().includes('cookie')
+                    const isLegal =
+                      group.title.toLowerCase().includes('légal') ||
+                      group.title.toLowerCase().includes('legal')
 
                     const linkClass =
-                      'inline-flex min-h-[2.25rem] items-center gap-2 rounded-md py-2 text-[14px] text-token-text/85 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] sm:min-h-0 sm:py-0.5'
+                      'inline-flex min-h-[2.25rem] min-w-0 items-center gap-2.5 rounded-md py-2 text-[14px] text-token-text/85 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] sm:min-h-0 sm:py-0.5'
                     const content = (
                       <>
-                        {group.title.toLowerCase().includes('légal') ||
-                        group.title.toLowerCase().includes('legal') ? (
-                          <LegalIcon label={label} />
+                        {isLegal ? (
+                          <LegalIcon label={label} className="h-5 w-5" />
                         ) : null}
-                        <span>{label}</span>
+                        <span className="min-w-0 break-words">{label}</span>
                       </>
                     )
 

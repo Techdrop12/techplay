@@ -326,7 +326,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
                     <div className="skeleton h-full min-h-[280px] rounded-[var(--radius-2xl)] sm:min-h-[320px] lg:min-h-[380px]" />
                   }
                 >
-                  <HeroCarousel overlayOpacity={0.25} textSize="xl" />
+                  <HeroCarousel overlayOpacity={0.25} />
                   <noscript>
                     <p className="px-4 py-3 text-sm text-token-text/80">
                       <a href="/products" className="underline underline-offset-4">

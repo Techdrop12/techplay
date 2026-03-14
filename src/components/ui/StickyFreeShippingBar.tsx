@@ -156,7 +156,8 @@ export default function StickyFreeShippingBar({
 
   return (
     <div
-      className={cn('pointer-events-none fixed z-50 px-3 sm:px-4', sideClasses, className)}
+      className={cn('fixed z-50 px-3 sm:px-4', sideClasses, className)}
+      style={{ pointerEvents: 'none' }}
       role="region"
       aria-label={isFr ? 'Barre livraison offerte' : 'Free shipping bar'}
       data-position={position}
@@ -164,9 +165,9 @@ export default function StickyFreeShippingBar({
       <div
         className={cn(
           'mx-auto max-w-5xl rounded-2xl border border-[hsl(var(--border))] shadow-[var(--shadow-lg)]',
-          'bg-[hsl(var(--surface))]/95 supports-[backdrop-filter]:backdrop-blur-xl',
-          'pointer-events-auto'
+          'bg-[hsl(var(--surface))]/95 supports-[backdrop-filter]:backdrop-blur-xl'
         )}
+        style={{ pointerEvents: 'auto' }}
       >
         <div className="flex flex-col items-center justify-between gap-2 px-3 py-2.5 sm:flex-row sm:gap-4 sm:px-4">
           <FreeShippingBadge

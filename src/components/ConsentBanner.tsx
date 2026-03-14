@@ -186,9 +186,13 @@ export default function ConsentBanner() {
       aria-describedby="tp-consent-desc"
       aria-live="polite"
       data-nosnippet
-      className="fixed inset-x-0 bottom-0 z-[60] mx-auto max-w-4xl rounded-t-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/95 px-4 py-4 shadow-2xl backdrop-blur sm:bottom-6 sm:rounded-2xl sm:px-6 sm:py-5 pointer-events-none"
+      className="fixed inset-x-0 bottom-0 z-[60] mx-auto max-w-4xl rounded-t-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/95 px-4 py-4 shadow-2xl backdrop-blur sm:bottom-6 sm:rounded-2xl sm:px-6 sm:py-5"
+      style={{ pointerEvents: 'none' }}
     >
-      <div className="flex flex-col gap-3 pointer-events-auto sm:flex-row sm:items-start sm:gap-5">
+      <div
+        className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-5"
+        style={{ pointerEvents: 'auto' }}
+      >
         <div className="flex-1">
           <h2 id="tp-consent-title" className="text-base font-bold">
             {t('banner_title_long')}
