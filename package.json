@@ -20,7 +20,7 @@
     "clean": "rimraf .next",
     "audit": "npm audit --audit-level=moderate",
     "prepare": "husky",
-    "postinstall": "next telemetry disable",
+    "postinstall": "node scripts/patch-node-domexception.cjs && next telemetry disable",
     "start:prod": "next build && next start -p 3000",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix --no-error-on-unmatched-pattern"
   },

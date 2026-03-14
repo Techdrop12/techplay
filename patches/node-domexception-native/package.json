@@ -1,0 +1,9 @@
+{
+  "name": "node-domexception",
+  "version": "1.0.0-native",
+  "description": "Stub: use native DOMException (Node 18+). Replaces deprecated node-domexception@1.0.0.",
+  "main": "index.js",
+  "engines": {
+    "node": ">=18"
+  }
+}
