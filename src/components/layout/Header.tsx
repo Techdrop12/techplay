@@ -128,8 +128,6 @@ type WishlistStoreLike = {
 }
 
 const LINKS: NavLink[] = [
-  { href: '/products', labelKey: 'products' },
-  { href: '/products/packs', labelKey: 'packs' },
   { href: '/categorie', labelKey: 'categories' },
   { href: '/blog', labelKey: 'blog' },
   { href: '/contact', labelKey: 'contact' },
@@ -207,11 +205,13 @@ function LocaleSwitch({ pathname }: { pathname: string }) {
     router.replace(localizePath(pathname, nextLocale))
   }
 
+  const labels = { fr: 'FR', en: 'EN' } as const
+
   return (
     <div
       role="group"
       aria-label={t.localeSwitcherAria}
-      className="inline-flex items-center rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 p-0.5"
+      className="inline-flex items-center rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/70 p-0.5 shadow-sm"
     >
       {(['fr', 'en'] as const).map((lang) => {
         const active = locale === lang
@@ -224,15 +224,16 @@ function LocaleSwitch({ pathname }: { pathname: string }) {
             onMouseDown={(e) => e.preventDefault()}
             disabled={active}
             aria-pressed={active}
+            aria-label={lang === 'fr' ? 'Français' : 'English'}
             className={cn(
-              'rounded-full px-2.5 py-1.5 text-xs font-semibold transition outline-none focus:ring-2',
+              'min-w-[2rem] rounded-md px-2 py-1 text-[11px] font-semibold uppercase tracking-wide transition outline-none focus:ring-2 focus:ring-offset-1',
               active
-                ? 'cursor-default bg-[hsl(var(--accent))] text-white focus:ring-[hsl(var(--accent)/.4)]'
-                : 'bg-transparent text-token-text hover:opacity-90 focus:ring-[hsl(var(--accent)/.4)]'
+                ? 'cursor-default bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] focus:ring-[hsl(var(--accent)/.5)]'
+                : 'bg-transparent text-token-text/90 hover:bg-[hsl(var(--surface-2))] hover:text-token-text focus:ring-[hsl(var(--accent)/.4)]'
             )}
             title={lang === 'fr' ? 'Français' : 'English'}
           >
-            {lang.toUpperCase()}
+            {labels[lang]}
           </button>
         )
       })}
@@ -498,32 +499,51 @@ export default function Header() {
           role="search"
           aria-label={t.searchAria}
           onSubmit={onSearchSubmit}
-          className="relative hidden min-w-0 flex-1 items-center md:flex lg:max-w-md xl:max-w-xl"
+          className="relative hidden min-w-0 flex-1 items-center md:flex lg:max-w-sm xl:max-w-md"
         >
           <label htmlFor="header-search" className="sr-only">
             {t.searchAria}
           </label>
 
-          <input
-            ref={searchRef}
-            id="header-search"
-            type="search"
-            name="q"
-            placeholder={`${t.placeholderPrefix} ${placeholder}`}
-            list="header-search-suggestions"
-            className={cn(
-              'w-full rounded-full border px-4 py-2.5 pr-12 text-sm',
-              'border-[hsl(var(--border))] bg-[hsl(var(--surface))]/75 placeholder:text-token-text/40',
-              'focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/.30)]'
-            )}
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="none"
-            spellCheck={false}
-            enterKeyHint="search"
-            aria-keyshortcuts="/ Control+K Meta+K"
-            aria-describedby="header-search-hint"
-          />
+          <div className="relative w-full">
+            <span
+              className="pointer-events-none absolute left-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center text-token-text/50"
+              aria-hidden
+            >
+              <Search className="h-4 w-4" />
+            </span>
+            <input
+              ref={searchRef}
+              id="header-search"
+              type="search"
+              name="q"
+              placeholder={`${t.placeholderPrefix} ${placeholder}`}
+              list="header-search-suggestions"
+              className={cn(
+                'w-full rounded-xl border-2 py-2.5 pl-10 pr-11 text-sm',
+                'border-[hsl(var(--border))] bg-[hsl(var(--surface))] placeholder:text-token-text/50',
+                'focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/.25)] focus:ring-offset-0'
+              )}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck={false}
+              enterKeyHint="search"
+              aria-keyshortcuts="/ Control+K Meta+K"
+              aria-describedby="header-search-hint"
+            />
+            <div className="absolute inset-y-0 right-1 flex items-center">
+              <button
+                type="submit"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] shadow-sm hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
+                aria-label={t.searchAria}
+                title={t.searchAria}
+                data-gtm="header_search_submit"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
 
           <datalist id="header-search-suggestions">
             {t.trends.map((item) => (
@@ -533,18 +553,6 @@ export default function Header() {
 
           <div id="header-search-hint" className="sr-only">
             {t.searchHint}
-          </div>
-
-          <div className="absolute inset-y-0 right-1.5 flex items-center">
-            <button
-              type="submit"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] shadow-[var(--shadow-sm)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
-              aria-label={t.searchAria}
-              title={t.searchAria}
-              data-gtm="header_search_submit"
-            >
-              <Search />
-            </button>
           </div>
         </form>
 

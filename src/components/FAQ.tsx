@@ -1,13 +1,12 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 
 import type { KeyboardEvent, RefCallback } from 'react'
 
 import { error as logError } from '@/lib/logger'
-
 
 interface FAQItem {
   _id: string
@@ -15,8 +14,21 @@ interface FAQItem {
   answer: string
 }
 
+const FALLBACK_FAQ_FR: FAQItem[] = [
+  { _id: '1', question: 'Quels sont les délais de livraison ?', answer: 'Livraison en 48 à 72 h ouvrées. Livraison offerte dès 49 € d’achat.' },
+  { _id: '2', question: 'Puis-je retourner un article ?', answer: 'Oui. Retours gratuits sous 30 jours : contactez-nous pour obtenir l’étiquette de retour.' },
+  { _id: '3', question: 'Le paiement est-il sécurisé ?', answer: 'Oui. Paiement par Stripe (CB, Apple Pay, Google Pay). Données cryptées.' },
+]
+
+const FALLBACK_FAQ_EN: FAQItem[] = [
+  { _id: '1', question: 'What are the delivery times?', answer: 'Delivery within 48 to 72 business hours. Free shipping from €49.' },
+  { _id: '2', question: 'Can I return an item?', answer: 'Yes. Free returns within 30 days: contact us to get a return label.' },
+  { _id: '3', question: 'Is payment secure?', answer: 'Yes. Payment via Stripe (card, Apple Pay, Google Pay). Data encrypted.' },
+]
+
 export default function FAQ() {
   const t = useTranslations('faq')
+  const locale = useLocale()
   const [faqs, setFaqs] = useState<FAQItem[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -26,33 +38,17 @@ export default function FAQ() {
   const fetchFAQs = useCallback(async () => {
     try {
       setLoading(true)
-      const res = await fetch('/api/faq', { cache: 'no-store' })
-      if (!res.ok) throw new Error('Erreur API')
+      const res = await fetch(`/api/faq?locale=${locale}`, { cache: 'no-store' })
+      if (!res.ok) throw new Error('API error')
       const data = await res.json()
       setFaqs(Array.isArray(data) ? data : [])
     } catch (error) {
       logError('Erreur de chargement des FAQs', error)
-      setFaqs([
-        {
-          _id: '1',
-          question: 'Quels sont les délais de livraison ?',
-          answer: 'Livraison en 48 à 72 h ouvrées. Livraison offerte dès 49 € d’achat.',
-        },
-        {
-          _id: '2',
-          question: 'Puis-je retourner un article ?',
-          answer: 'Oui. Retours gratuits sous 30 jours : contactez-nous pour obtenir l’étiquette de retour.',
-        },
-        {
-          _id: '3',
-          question: 'Le paiement est-il sécurisé ?',
-          answer: 'Oui. Paiement par Stripe (CB, Apple Pay, Google Pay). Données cryptées.',
-        },
-      ])
+      setFaqs(locale === 'en' ? FALLBACK_FAQ_EN : FALLBACK_FAQ_FR)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [locale])
 
   useEffect(() => {
     fetchFAQs()

@@ -37,6 +37,8 @@ interface TrustBadgesProps {
   variant?: 'card' | 'pill' | 'subtle' | 'premium'
   /** Densité */
   compact?: boolean
+  /** Afficher le libellé en entier (pas de "..." ) */
+  truncateLabels?: boolean
 }
 
 /* ----------------------------- Icônes vectorielles ----------------------------- */
@@ -118,6 +120,7 @@ function TrustBadges({
   className,
   variant = 'card',
   compact = false,
+  truncateLabels = true,
 }: TrustBadgesProps) {
   const t = useTranslations('trust_badges')
   const defaultBadges = useDefaultBadges()
@@ -163,7 +166,7 @@ function TrustBadges({
             <div className={cn(base, variants[variant])} aria-label={label}>
               <Icon name={icon ?? 'shield'} className="text-[hsl(var(--accent))]" />
 
-              <span className="relative z-10 truncate">{label}</span>
+              <span className={cn('relative z-10', truncateLabels && 'truncate')}>{label}</span>
               {sr ? <span className="sr-only"> — {sr}</span> : null}
             </div>
           )

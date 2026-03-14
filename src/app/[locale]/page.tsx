@@ -271,15 +271,15 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
         id="main"
         role="main"
         tabIndex={-1}
-        className="container-app mx-auto max-w-screen-xl scroll-smooth rhythm-sections py-6 sm:py-10"
+        className="scroll-smooth rhythm-sections py-0 sm:py-0"
       >
         <section
           id="hero"
           aria-label={t.heroAria}
-          className="motion-section relative overflow-hidden rounded-[var(--radius-3xl)] border border-[hsl(var(--border))] bg-[length:120%_120%] shadow-[var(--shadow-xl)]"
+          className="motion-section relative w-full overflow-hidden rounded-b-[var(--radius-3xl)] border-0 border-b border-[hsl(var(--border))] bg-[length:120%_120%] shadow-[var(--shadow-xl)]"
           style={{ backgroundImage: 'var(--gradient-hero)' }}
         >
-          <div className="container-app relative z-10 grid gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1.2fr)] lg:items-center lg:gap-12 lg:py-12">
+          <div className="container-app relative z-10 mx-auto grid max-w-screen-2xl gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1.2fr)] lg:items-center lg:gap-12 lg:py-12">
             <div className="space-y-6 sm:space-y-7">
               <span className="animate-in inline-block text-[var(--step-subtitle)] font-bold uppercase tracking-[0.22em] text-[hsl(var(--accent))]">
                 {t.heroBadge}
@@ -309,6 +309,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
               <TrustBadges
                 variant="pill"
                 compact
+                truncateLabels={false}
                 className="!mt-4 !border-0 !bg-transparent !py-0 [&_ul]:!max-w-none [&_ul]:!px-0 [&_ul]:grid-cols-3"
                 badges={[
                   { icon: 'truck', label: locale === 'en' ? 'Fast delivery' : 'Livraison rapide' },
@@ -338,6 +339,8 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
             </div>
           </div>
         </section>
+
+        <div className="container-app mx-auto max-w-screen-xl rhythm-sections py-6 sm:py-10">
         <section
           id="best-products"
           aria-label={t.productsSectionLabel}
@@ -379,6 +382,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
           </div>
         </section>
         <SplitCTA locale={locale} />
+        </div>
       </main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }} />
       {itemListJsonLd ? (
