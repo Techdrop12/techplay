@@ -17,6 +17,18 @@ const isSupported = (v?: string): v is Locale =>
 
 const ensureLeadingSlash = (p: string) => (p.startsWith('/') ? p : `/${p}`)
 
+// Routes that live under app/[locale]/... — only these get a locale prefix. All others (e.g. /contact, /blog) are root-only.
+const LOCALIZED_PATHNAMES: readonly string[] = ['/', '/products', '/wishlist']
+
+function normalizePathname(p: string): string {
+  const s = ensureLeadingSlash(p).replace(/\/$/, '') || '/'
+  return s
+}
+
+function isLocalizedRoute(pathname: string): boolean {
+  return (LOCALIZED_PATHNAMES as readonly string[]).includes(normalizePathname(pathname))
+}
+
 const isExternalUrl = (p: string) =>
   /^([a-z][a-z0-9+\-.]*:)?\/\//i.test(p) || p.startsWith('mailto:') || p.startsWith('tel:')
 
@@ -110,13 +122,17 @@ export function localizePath(
   if (isExternalUrl(input) || input.startsWith('#')) return input
 
   const parsed = parsePath(input)
-  const localizedPathname = _withLocale(stripLocalePrefix(parsed.pathname), locale)
+  const stripped = stripLocalePrefix(parsed.pathname)
 
   const search =
     opts.customQuery ?? (parsed.search || (opts.keepQuery ? getCurrentSearch() : ''))
 
   const hash =
     opts.customHash ?? (parsed.hash || (opts.keepHash ? getCurrentHash() : ''))
+
+  const localizedPathname = isLocalizedRoute(stripped)
+    ? _withLocale(stripped, locale)
+    : stripped
 
   return `${localizedPathname}${search}${hash}`
 }
