@@ -195,8 +195,8 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
       </div>
 
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-grid opacity-[0.06] dark:opacity-[0.08]" />
-        <div className="absolute inset-0 overlay-hero opacity-60 mix-blend-multiply dark:mix-blend-screen" />
+        <div className="pointer-events-none absolute inset-0 bg-grid opacity-[0.06] dark:opacity-[0.08]" />
+        <div className="pointer-events-none absolute inset-0 overlay-hero opacity-60 mix-blend-multiply dark:mix-blend-screen" />
       </div>
 
       <div

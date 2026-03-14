@@ -612,12 +612,12 @@ export default function HeroCarousel({
         <div className="overlay-hero absolute inset-0" />
         {showOverlay ? (
           <div
-            className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/25 to-black/70"
+            className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/60 via-black/25 to-black/70"
             style={overlayOpacity ? { opacity: overlayOpacity } : undefined}
           />
         ) : null}
         <div
-          className="absolute inset-0 opacity-50 mix-blend-overlay"
+          className="pointer-events-none absolute inset-0 opacity-50 mix-blend-overlay"
           style={{ background: 'var(--ring-conic)' }}
         />
         <div className="hero-carousel-glow-right" aria-hidden="true" />
