@@ -267,12 +267,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
         aria-hidden
         className="pointer-events-none fixed left-1/2 top-0 h-[520px] w-[760px] -translate-x-1/2 -translate-y-1/3 rounded-[999px] bg-[hsl(var(--accent)/.22)] blur-3xl"
       />
-      <main
-        id="main"
-        role="main"
-        tabIndex={-1}
-        className="scroll-smooth rhythm-sections py-0"
-      >
+      <div className="scroll-smooth rhythm-sections py-0">
         <section
           id="hero"
           aria-label={t.heroAria}
@@ -385,7 +380,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
         </section>
         <SplitCTA locale={locale} />
         </div>
-      </main>
+      </div>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }} />
       {itemListJsonLd ? (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />

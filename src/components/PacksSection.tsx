@@ -1,12 +1,14 @@
 'use client'
 
 import { motion, useReducedMotion, type Variants } from 'framer-motion'
+import { usePathname } from 'next/navigation'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import type { Pack } from '@/types/product'
 
 import Link from '@/components/LocalizedLink'
 import PackCard from '@/components/PackCard'
+import { getCurrentLocale } from '@/lib/i18n-routing'
 import { cn } from '@/lib/utils'
 
 interface Props {
@@ -17,7 +19,7 @@ interface Props {
   showControls?: boolean
   initialSort?: 'savings' | 'priceAsc' | 'priceDesc' | 'items'
   autoLoadOnIntersect?: boolean
-  /** Optional copy for empty state (defaults to French) */
+  /** Optional copy for empty state (overrides locale-aware defaults) */
   emptyTitle?: string
   emptyDescription?: string
   emptyCtaLabel?: string
@@ -157,13 +159,6 @@ function isPromo(pack: Pack): boolean {
   return getSavingsPercent(pack) > 0
 }
 
-const EMPTY_DEFAULTS = {
-  title: 'Packs bientôt disponibles',
-  description: 'Des bundles soignés arrivent bientôt. Découvrez notre sélection de produits en attendant.',
-  ctaLabel: 'Découvrir les produits',
-  ctaHref: '/products',
-} as const
-
 export default function PacksSection({
   packs,
   className,
@@ -177,6 +172,73 @@ export default function PacksSection({
   emptyCtaLabel,
   emptyCtaHref,
 }: Props) {
+  const pathname = usePathname() || '/'
+  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr'
+
+  const t = useMemo(() => {
+    if (locale === 'en') {
+      return {
+        heading: 'Recommended bundles',
+        sub: 'Expert picks: multiple products together at bundle price. Save more, free delivery.',
+        seeAll: 'View all bundles',
+        seeAllAria: 'View all TechPlay bundles',
+        bulletExpert: 'Selected by our experts',
+        bulletSavings: 'Savings on bundles',
+        bulletShipping: 'Free delivery',
+        packsLabel: 'bundles',
+        packsAvailable: (n: number) => `${n} bundles available.`,
+        filterPromo: 'On sale',
+        filterPromoAria: 'Filter: on sale',
+        filterStock: 'In stock',
+        filterStockAria: 'Filter: in stock',
+        sortLabel: 'Sort bundles',
+        sortSavings: 'Savings %',
+        sortPriceAsc: 'Price ↑',
+        sortPriceDesc: 'Price ↓',
+        sortItems: 'Item count',
+        noResults: 'No bundles match the selected filters.',
+        resetFilters: 'Reset filters',
+        displayed: (visible: number, total: number) => `${visible} / ${total} bundles displayed`,
+        seeMore: 'Show more',
+        moreShown: (n: number) => `${n} additional bundles displayed.`,
+        emptyTitle: 'Bundles coming soon',
+        emptyDescription: 'Curated bundles are coming soon. Discover our product selection in the meantime.',
+        emptyCtaLabel: 'Discover products',
+        noscript: 'View all bundles',
+      }
+    }
+    return {
+      heading: 'Packs recommandés',
+      sub: 'Sélections expertes : plusieurs produits ensemble à prix pack. Économisez plus, livraison offerte.',
+      seeAll: 'Voir tous les packs',
+      seeAllAria: 'Voir tous les packs TechPlay',
+      bulletExpert: 'Sélectionnés par nos experts',
+      bulletSavings: 'Économies sur les bundles',
+      bulletShipping: 'Livraison offerte',
+      packsLabel: 'packs',
+      packsAvailable: (n: number) => `${n} packs disponibles.`,
+      filterPromo: 'Promo',
+      filterPromoAria: 'Filtrer : en promotion',
+      filterStock: 'En stock',
+      filterStockAria: 'Filtrer : en stock',
+      sortLabel: 'Trier les packs',
+      sortSavings: 'Économie %',
+      sortPriceAsc: 'Prix ↑',
+      sortPriceDesc: 'Prix ↓',
+      sortItems: "Nb d'articles",
+      noResults: 'Aucun pack ne correspond aux filtres sélectionnés.',
+      resetFilters: 'Réinitialiser les filtres',
+      displayed: (visible: number, total: number) => `${visible} / ${total} packs affichés`,
+      seeMore: 'Voir plus',
+      moreShown: (n: number) => `${n} packs supplémentaires affichés.`,
+      emptyTitle: 'Packs bientôt disponibles',
+      emptyDescription:
+        'Des bundles soignés arrivent bientôt. Découvrez notre sélection de produits en attendant.',
+      emptyCtaLabel: 'Découvrir les produits',
+      noscript: 'Voir tous les packs',
+    }
+  }, [locale])
+
   const headingId = useId()
   const subId = `${headingId}-sub`
   const gridId = `${headingId}-grid`
@@ -227,8 +289,8 @@ export default function PacksSection({
   useEffect(() => {
     if (!expanded) return
     const remaining = Math.max(0, filteredSorted.length - (limit || 0))
-    if (remaining > 0) setAnnounce(`${remaining} packs supplémentaires affichés.`)
-  }, [expanded, filteredSorted.length, limit])
+    if (remaining > 0) setAnnounce(t.moreShown(remaining))
+  }, [expanded, filteredSorted.length, limit, t])
 
   useEffect(() => {
     if (!autoLoadOnIntersect || expanded) return
@@ -250,10 +312,10 @@ export default function PacksSection({
   const isEmpty = !Array.isArray(packs) || packs.length === 0
 
   if (isEmpty) {
-    const title = emptyTitle ?? EMPTY_DEFAULTS.title
-    const description = emptyDescription ?? EMPTY_DEFAULTS.description
-    const ctaLabel = emptyCtaLabel ?? EMPTY_DEFAULTS.ctaLabel
-    const ctaHref = emptyCtaHref ?? EMPTY_DEFAULTS.ctaHref
+    const title = emptyTitle ?? t.emptyTitle
+    const description = emptyDescription ?? t.emptyDescription
+    const ctaLabel = emptyCtaLabel ?? t.emptyCtaLabel
+    const ctaHref = emptyCtaHref ?? '/products'
 
     return (
       <section
@@ -268,10 +330,10 @@ export default function PacksSection({
               className="flex items-center justify-center gap-2 heading-subsection font-bold sm:text-2xl"
             >
               <DuotoneGift size={24} className="text-[hsl(var(--accent))]" />
-              <span>Packs recommandés</span>
+              <span>{t.heading}</span>
             </h2>
             <p id={subId} className="mt-2 text-sm text-token-text/70">
-              Sélections expertes : plusieurs produits ensemble à prix pack. Économisez plus, livraison offerte.
+              {t.sub}
             </p>
           </div>
         )}
@@ -331,11 +393,11 @@ export default function PacksSection({
                 className="flex items-center justify-center gap-2 heading-subsection font-bold sm:justify-start"
               >
                 <DuotoneGift size={22} className="text-[hsl(var(--accent))]" />
-                <span>Packs recommandés</span>
+                <span>{t.heading}</span>
               </h2>
               <p id={subId} className="mt-2 text-sm text-token-text/70">
-                Sélections expertes : plusieurs produits ensemble à prix pack. Économisez plus, livraison offerte.
-                {hasPacks && <span className="sr-only"> {totalCount} packs disponibles.</span>}
+                {t.sub}
+                {hasPacks && <span className="sr-only"> {t.packsAvailable(totalCount)}</span>}
               </p>
             </div>
 
@@ -343,10 +405,10 @@ export default function PacksSection({
               href="/products/packs"
               prefetch={false}
               className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-[hsl(var(--accent)/.90)] hover:shadow-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
-              aria-label="Voir tous les packs TechPlay"
+              aria-label={t.seeAllAria}
               onClick={() => pushDL('packs_see_all')}
             >
-              Voir tous les packs
+              {t.seeAll}
               <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" className="opacity-90">
                 <path fill="currentColor" d="M13.172 12L8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z" />
               </svg>
@@ -357,15 +419,15 @@ export default function PacksSection({
             <div className="mb-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-[12px] text-token-text/65 sm:justify-start">
               <span className="inline-flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))]" aria-hidden="true" />
-                Sélectionnés par nos experts
+                {t.bulletExpert}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
-                Économies sur les bundles
+                {t.bulletSavings}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden="true" />
-                Livraison offerte
+                {t.bulletShipping}
               </span>
             </div>
           )}
@@ -378,7 +440,7 @@ export default function PacksSection({
             <span className="font-semibold tabular-nums">{visibleCount}</span>
             <span className="mx-1">/</span>
             <span className="tabular-nums">{totalCount}</span>
-            <span className="ml-1">packs</span>
+            <span className="ml-1">{t.packsLabel}</span>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -396,9 +458,9 @@ export default function PacksSection({
                   : 'border-[hsl(var(--border))] bg-[hsl(var(--surface))] hover:shadow'
               )}
               aria-pressed={filterPromo}
-              aria-label="Filtrer : en promotion"
+              aria-label={t.filterPromoAria}
             >
-              Promo
+              {t.filterPromo}
             </button>
 
             <button
@@ -415,13 +477,13 @@ export default function PacksSection({
                   : 'border-[hsl(var(--border))] bg-[hsl(var(--surface))] hover:shadow'
               )}
               aria-pressed={filterStock}
-              aria-label="Filtrer : en stock"
+              aria-label={t.filterStockAria}
             >
-              En stock
+              {t.filterStock}
             </button>
 
             <label className="sr-only" htmlFor={sortId}>
-              Trier
+              {t.sortLabel}
             </label>
 
             <select
@@ -433,12 +495,12 @@ export default function PacksSection({
                 setSortBy(next)
                 pushDL('packs_sort', { sort: next })
               }}
-              aria-label="Trier les packs"
+              aria-label={t.sortLabel}
             >
-              <option value="savings">Économie %</option>
-              <option value="priceAsc">Prix ↑</option>
-              <option value="priceDesc">Prix ↓</option>
-              <option value="items">Nb d’articles</option>
+              <option value="savings">{t.sortSavings}</option>
+              <option value="priceAsc">{t.sortPriceAsc}</option>
+              <option value="priceDesc">{t.sortPriceDesc}</option>
+              <option value="items">{t.sortItems}</option>
             </select>
           </div>
         </div>
@@ -447,7 +509,7 @@ export default function PacksSection({
       {noResultsAfterFilter ? (
         <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 card-padding text-center">
           <p className="text-sm font-medium text-token-text/80">
-            Aucun pack ne correspond aux filtres sélectionnés.
+            {t.noResults}
           </p>
           <button
             type="button"
@@ -458,7 +520,7 @@ export default function PacksSection({
             }}
             className="mt-4 inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 text-[13px] font-semibold transition hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
           >
-            Réinitialiser les filtres
+            {t.resetFilters}
           </button>
         </div>
       ) : (
@@ -497,12 +559,12 @@ export default function PacksSection({
             prefetch={false}
             className="inline-flex items-center gap-2 text-sm font-semibold text-[hsl(var(--accent))] hover:text-[hsl(var(--accent-600))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
           >
-            <span>Voir tous les packs</span>
+            <span>{t.seeAll}</span>
             <span aria-hidden>↗</span>
           </Link>
 
           <p className="text-xs text-token-text/60">
-            {visibleCount} / {totalCount} packs affichés
+            {t.displayed(visibleCount, totalCount)}
           </p>
         </div>
       )}
@@ -519,7 +581,7 @@ export default function PacksSection({
             aria-controls={gridId}
             aria-expanded={expanded ? 'true' : 'false'}
           >
-            Voir plus
+            {t.seeMore}
             <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" className="opacity-80">
               <path fill="currentColor" d="M7 10l5 5 5-5z" />
             </svg>
@@ -535,7 +597,7 @@ export default function PacksSection({
 
       <noscript>
         <p className="mt-6 text-center">
-          <a href="/products/packs">Voir tous les packs</a>
+          <a href="/products/packs">{t.noscript}</a>
         </p>
       </noscript>
     </section>

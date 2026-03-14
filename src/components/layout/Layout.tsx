@@ -190,13 +190,6 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
 
   return (
     <>
-      <a
-        href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-[max(0.5rem,env(safe-area-inset-top))] focus:z-[100] rounded-xl bg-[hsl(var(--surface))] px-3 py-2 text-token-text focus-ring"
-      >
-        {localeStrings[locale].skipToContent}
-      </a>
-
       <div aria-live="polite" role="status" className="sr-only">
         {routeAnnouncement}
       </div>
