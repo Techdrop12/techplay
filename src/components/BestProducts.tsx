@@ -15,7 +15,7 @@ import {
 import type { Product } from '@/types/product'
 
 import ProductCard from '@/components/ProductCard'
-import { getCurrentLocale } from '@/lib/i18n-routing'
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 import { cn } from '@/lib/utils'
 
 type SortKey = 'popular' | 'priceAsc' | 'priceDesc' | 'rating'
@@ -567,7 +567,7 @@ export default function BestProducts({
 
       <noscript>
         <p className="mt-6 text-center">
-          <a href="/products">{t.noscript}</a>
+          <a href={localizePath('/products', locale)}>{t.noscript}</a>
         </p>
       </noscript>
     </section>

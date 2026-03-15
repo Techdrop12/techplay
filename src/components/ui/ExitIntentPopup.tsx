@@ -1,9 +1,11 @@
 // src/components/ui/ExitIntentPopup.tsx
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import Link from '@/components/LocalizedLink'
+import { useFocusTrap } from '@/lib/useFocusTrap'
+import { useTranslations } from 'next-intl'
 
 type Props = {
   requireCartItems?: boolean
@@ -39,12 +41,9 @@ export default function ExitIntentPopup({
   const [eligible, setEligible] = useState(!requireCartItems)
   const timerRef = useRef<number | null>(null)
   const shownOnce = useRef(false)
-
-  const isFr = useMemo(() => {
-    if (!isBrowser()) return true
-    const lang = document.documentElement.lang || 'fr'
-    return lang.toLowerCase().startsWith('fr')
-  }, [])
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const t = useTranslations('exit_intent')
+  useFocusTrap(open, dialogRef, { restoreFocus: true })
 
   const hiddenByRoute = useMemo(() => {
     if (!isBrowser()) return false
@@ -63,13 +62,13 @@ export default function ExitIntentPopup({
     }
   }
 
-  const persistDismiss = () => {
+  const persistDismiss = useCallback(() => {
     if (!isBrowser()) return
     try {
       const until = Date.now() + ttlDays * 24 * 60 * 60 * 1000
       localStorage.setItem(storageKey, String(until))
     } catch {}
-  }
+  }, [storageKey, ttlDays])
 
   useEffect(() => {
     if (!isBrowser() || !requireCartItems) return
@@ -116,11 +115,23 @@ export default function ExitIntentPopup({
   // eslint-disable-next-line react-hooks/exhaustive-deps -- isDismissed read in body only
   }, [eligible, hiddenByRoute, triggerAtTopY])
 
-  const close = () => {
+  const close = useCallback(() => {
     setOpen(false)
     persistDismiss()
     pushDL('exit_intent_closed')
-  }
+  }, [persistDismiss])
+
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        close()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open, close])
 
   useEffect(() => {
     if (!open || !isBrowser()) return
@@ -134,8 +145,7 @@ export default function ExitIntentPopup({
 
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- close stable
-  }, [open])
+  }, [open, close])
 
   const onBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) close()
@@ -150,21 +160,21 @@ export default function ExitIntentPopup({
       role="presentation"
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="exit-intent-title"
         aria-describedby="exit-intent-desc"
+        tabIndex={-1}
         className="mx-3 w-full max-w-md rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6 text-center shadow-[var(--shadow-lg)] outline-none"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <h3 id="exit-intent-title" className="mb-2 text-xl font-bold">
-          {isFr ? 'Avant de partir…' : 'Before you go…'}
+          {t('title')}
         </h3>
 
         <p id="exit-intent-desc" className="mb-4 text-[15px] text-token-text/75">
-          {isFr
-            ? `Profitez de -10 % avec le code ${promoCode}`
-            : `Enjoy -10% with code ${promoCode}`}
+          {t('description', { code: promoCode })}
         </p>
 
         <div className="flex flex-col gap-2">
@@ -176,7 +186,7 @@ export default function ExitIntentPopup({
               pushDL('exit_intent_cta_click')
             }}
           >
-            {isFr ? 'Voir mon panier →' : 'Go to cart →'}
+            {t('cta')}
           </Link>
 
           <button
@@ -184,7 +194,7 @@ export default function ExitIntentPopup({
             onClick={close}
             className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-5 py-2.5 text-[13px] font-medium transition hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
           >
-            {isFr ? 'Continuer mes achats' : 'Keep browsing'}
+            {t('keep_browsing')}
           </button>
         </div>
       </div>

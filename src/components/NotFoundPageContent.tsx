@@ -44,6 +44,18 @@ export default function NotFoundPageContent() {
         >
           {t('link_contact')}
         </Link>
+        <Link
+          href="/search"
+          className="btn-ghost inline-flex min-h-[48px] items-center justify-center rounded-full px-5 py-2.5 text-[15px] font-semibold focus-visible:ring-offset-2"
+        >
+          {t('link_search')}
+        </Link>
+        <Link
+          href="/categorie"
+          className="btn-ghost inline-flex min-h-[48px] items-center justify-center rounded-full px-5 py-2.5 text-[15px] font-semibold focus-visible:ring-offset-2"
+        >
+          {t('link_category')}
+        </Link>
       </div>
       <Suspense fallback={<p className="mt-10 text-[13px] text-token-text/60">{tCommon('loading')}</p>}>
         <NotFoundClient />

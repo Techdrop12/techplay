@@ -1,4 +1,4 @@
-import type { Locale } from "@/i18n/config";
+import type { Locale } from '@/lib/language'
 
 export function toLocale(input: unknown): Locale | undefined {
   if (typeof input !== "string") return undefined;

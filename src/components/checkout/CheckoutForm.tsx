@@ -4,6 +4,8 @@ import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
+import ErrorWithRetry from '@/components/ui/ErrorWithRetry'
+import Link from '@/components/LocalizedLink'
 import { useCart } from '@/hooks/useCart'
 import { createCheckoutSession } from '@/lib/checkout'
 import { detectCurrency } from '@/lib/currency'
@@ -285,7 +287,7 @@ export default function CheckoutForm() {
           // no-op
         }
 
-        announce('Création de la session de paiement…')
+        announce(t('creating_session_announce'))
 
         const session = (await createCheckoutSession({
           email: email.trim(),
@@ -388,12 +390,16 @@ export default function CheckoutForm() {
         {status}
       </p>
 
-      <div className="space-y-1">
-        <h2 id="checkout-form-title" className="text-base font-semibold tracking-tight text-[hsl(var(--text))]">
-          Coordonnées
+      {/* En-tête tunnel : étape + réassurance */}
+      <div className="rounded-xl bg-[hsl(var(--surface-2))]/60 px-4 py-3">
+        <h2 id="checkout-form-title" className="text-lg font-bold tracking-tight text-[hsl(var(--text))]">
+          {t('coords_heading')}
         </h2>
-        <p className="text-[13px] text-token-text/70">
-          Indiquez votre email et adresse de livraison. Vous serez redirigé vers le paiement sécurisé (Stripe).
+        <p className="mt-1 text-[13px] text-token-text/70">
+          {t('coords_intro')}
+        </p>
+        <p className="mt-2 text-[12px] text-token-text/60" aria-hidden="true">
+          {t('secure_note')}
         </p>
       </div>
 
@@ -429,12 +435,12 @@ export default function CheckoutForm() {
             aria-describedby={emailDescribedBy || undefined}
             data-gtm="checkout_email_input"
             className={cn(
-              'w-full min-h-[3rem] rounded-xl border px-3.5 py-3 text-[13px] transition sm:min-h-0',
-              'bg-[hsl(var(--surface))]/80 dark:bg-[hsl(var(--surface))]/60',
+              'w-full min-h-[3rem] rounded-xl border-2 px-3.5 py-3 text-[14px] transition sm:min-h-0',
+              'bg-[hsl(var(--surface))]/90 dark:bg-[hsl(var(--surface))]/70',
               'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]',
               errors.email
                 ? 'border-red-500 focus:ring-red-500'
-                : 'border-[hsl(var(--border))] focus:ring-[hsl(var(--accent))]'
+                : 'border-[hsl(var(--border))] focus:border-[hsl(var(--accent))] focus:ring-[hsl(var(--accent))]'
             )}
           />
           <p id={emailHintId} className="mt-1 text-[11px] text-token-text/60">
@@ -472,12 +478,12 @@ export default function CheckoutForm() {
             aria-describedby={addressDescribedBy || undefined}
             data-gtm="checkout_address_input"
             className={cn(
-              'min-h-[4.5rem] w-full resize-y rounded-xl border px-3.5 py-3 text-[13px] transition sm:min-h-[96px]',
-              'bg-[hsl(var(--surface))]/80 dark:bg-[hsl(var(--surface))]/60',
+              'min-h-[4.5rem] w-full resize-y rounded-xl border-2 px-3.5 py-3 text-[14px] transition sm:min-h-[96px]',
+              'bg-[hsl(var(--surface))]/90 dark:bg-[hsl(var(--surface))]/70',
               'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]',
               errors.address
                 ? 'border-red-500 focus:ring-red-500'
-                : 'border-[hsl(var(--border))] focus:ring-[hsl(var(--accent))]'
+                : 'border-[hsl(var(--border))] focus:border-[hsl(var(--accent))] focus:ring-[hsl(var(--accent))]'
             )}
           />
           <p id={addressHintId} className="mt-1 text-[11px] text-token-text/60">
@@ -507,7 +513,7 @@ export default function CheckoutForm() {
           disabled={loading}
           aria-busy={loading ? 'true' : 'false'}
           data-gtm="checkout_submit_btn"
-          className="touch-target inline-flex min-h-[2.75rem] w-full items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-4 py-3.5 text-[15px] font-bold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-sm)] transition hover:opacity-95 active:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+          className="touch-target inline-flex min-h-[3.25rem] w-full items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-4 py-3.5 text-[15px] font-bold text-[hsl(var(--accent-fg))] shadow-lg transition-all duration-200 hover:shadow-xl active:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? (
             <span className="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden />
@@ -518,25 +524,22 @@ export default function CheckoutForm() {
         </button>
 
         {lastError && (
-          <div className="rounded-xl border border-red-200 bg-red-50/80 p-3.5 dark:border-red-900/50 dark:bg-red-950/30" role="alert">
-            <p className="text-sm text-red-700 dark:text-red-300">{lastError}</p>
-            <button
-              type="button"
-              onClick={() => {
-                setLastError(null)
-                emailRef.current?.focus()
-              }}
-              className="mt-2 text-sm font-medium text-red-700 underline underline-offset-2 hover:no-underline dark:text-red-300"
-            >
-              {t('retry_btn')}
-            </button>
-          </div>
+          <ErrorWithRetry
+            message={lastError}
+            onRetry={() => {
+              setLastError(null)
+              emailRef.current?.focus()
+            }}
+            retryLabel={t('retry_btn')}
+          />
         )}
 
         <p className="text-center text-[11px] text-token-text/60" role="status">
-          Paiement sécurisé (Stripe) · CB, Apple Pay, Google Pay · En continuant vous acceptez nos{' '}
-          <a className="underline underline-offset-1" href="/cgv">CGV</a> et notre{' '}
-          <a className="underline underline-offset-1" href="/confidentialite">politique de confidentialité</a>.
+          {t('secure_footer_prefix')}
+          <Link className="underline underline-offset-1" href="/cgv">{t('link_cgv')}</Link>
+          {t('secure_footer_mid')}
+          <Link className="underline underline-offset-1" href="/confidentialite">{t('privacy_link')}</Link>
+          {t('secure_footer_suffix')}
         </p>
       </fieldset>
     </form>

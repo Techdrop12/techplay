@@ -26,6 +26,7 @@ import {
 import { SiStripe } from 'react-icons/si'
 
 import Link from '@/components/LocalizedLink'
+import { useTranslations } from 'next-intl'
 import { BRAND } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { getErrorMessageWithFallback } from '@/lib/errors'
@@ -294,6 +295,7 @@ export default function Footer({
 }: FooterProps) {
   const pathname = usePathname() || '/'
   const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr'
+  const tFooter = useTranslations('footer')
   const t = T[locale]
   const origin = String(siteUrl || '').replace(/\/$/, '')
 
@@ -486,24 +488,27 @@ export default function Footer({
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_600px_at_90%_0%,hsl(var(--accent)/0.04),transparent_50%)]"
       />
 
-      <div className="relative mx-auto max-w-screen-xl px-6 pb-10 pt-16 sm:px-8 sm:pt-20">
+      <div className="relative mx-auto max-w-screen-xl px-6 pb-12 pt-20 sm:px-8 sm:pt-24">
         <h2 className="sr-only" id="footer-heading">
           {t.footerHeading}
         </h2>
 
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-12 lg:gap-16">
+        <div className="grid grid-cols-1 gap-14 md:grid-cols-12 lg:gap-20">
+          {/* Bloc marque — présence éditoriale */}
           <div className="space-y-8 md:col-span-5">
-            <div>
-              <p className="text-xl font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-2xl">
+            <header className="border-b border-[hsl(var(--border))]/60 pb-6 md:pb-8">
+              <p className="text-2xl font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-3xl">
                 <span>{companyName}</span>
                 <span className="text-[hsl(var(--accent))]">.</span>
               </p>
-              <p className="mt-3 max-w-sm text-[14px] leading-relaxed text-token-text/75">{t.brandText}</p>
-            </div>
+              <p className="mt-4 max-w-md text-[15px] leading-relaxed text-token-text/80 sm:mt-5 sm:text-base">
+                {t.brandText}
+              </p>
+            </header>
 
             {!compact ? (
               <>
-                <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 p-4 dark:bg-[hsl(var(--surface))]/50" aria-label={t.badgesAria}>
+                <div className="rounded-2xl border-2 border-[hsl(var(--border))] bg-[hsl(var(--surface))]/90 p-5 dark:bg-[hsl(var(--surface))]/50" aria-label={t.badgesAria}>
                   <ul className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3" role="list">
                     <li className="flex items-center gap-3">
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
@@ -527,7 +532,7 @@ export default function Footer({
                 </div>
 
                 <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--text))]/70">
-                  {locale === 'en' ? 'We accept' : 'Paiements acceptés'}
+                  {tFooter('we_accept')}
                 </p>
                 <div className="mt-2 flex flex-wrap items-center gap-4" aria-hidden="true">
                   <span className="flex h-9 w-12 items-center justify-center rounded-lg border border-[hsl(var(--border))]/80 bg-white/80 px-1.5 text-[hsl(var(--text))]/70 transition-colors hover:text-[hsl(var(--text))]" title="Visa">
@@ -549,7 +554,7 @@ export default function Footer({
             {(contact?.email || contact?.phone || contact?.address?.streetAddress) ? (
               <>
                 <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--text))]">
-                  {locale === 'en' ? 'Get in touch' : 'Nous joindre'}
+                  {tFooter('get_in_touch')}
                 </h3>
                 <ul className="mt-3 space-y-2 text-[14px] text-token-text/85">
                   {contact?.email ? (
@@ -699,7 +704,7 @@ export default function Footer({
                     <button
                       type="submit"
                       disabled={status === 'loading'}
-                      className="shrink-0 rounded-xl bg-[hsl(var(--accent))] px-6 py-3.5 text-[15px] font-semibold text-[hsl(var(--accent-foreground))] shadow-md transition-all duration-200 hover:scale-[1.02] hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] disabled:opacity-60 disabled:hover:scale-100"
+                      className="shrink-0 rounded-xl bg-[hsl(var(--accent))] px-6 py-3.5 text-[15px] font-bold text-[hsl(var(--accent-foreground))] shadow-lg transition-all duration-200 hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] disabled:opacity-60 disabled:hover:shadow-lg"
                       aria-label={t.newsletterButtonIdle}
                       data-gtm="footer_newsletter_submit"
                     >
@@ -756,7 +761,7 @@ export default function Footer({
                   ) : null}
                 </form>
 
-                <p className="text-[13px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--text))]/80">{locale === 'en' ? 'Follow us' : 'Suivez-nous'}</p>
+                <p className="text-[13px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--text))]/80">{tFooter('follow_us')}</p>
                 <div className="flex items-center gap-3 text-xl text-[hsl(var(--text))]/60">
                   <a
                     href="https://facebook.com/techplay"
@@ -811,7 +816,7 @@ export default function Footer({
           <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[14px] text-[hsl(var(--text))]/75">
             <li className="inline-flex items-center gap-2">
               <FaLock className="h-4 w-4 shrink-0 text-[hsl(var(--text))]/60" aria-hidden="true" />
-              <span className="sr-only">{locale === 'en' ? 'Secure payment:' : 'Paiement sécurisé :'}</span>
+              <span className="sr-only">{tFooter('secure_payment')}</span>
               <span className="inline-flex items-center gap-2" aria-hidden="true">
                 <SiStripe className="text-lg" title="Stripe" />
                 <FaCcVisa className="text-lg" title="Visa" />

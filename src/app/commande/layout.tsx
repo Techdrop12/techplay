@@ -1,9 +1,16 @@
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 
-export const metadata: Metadata = {
-  title: 'Commande',
-  description: 'Finalisez votre commande en toute sécurité. Paiement Stripe, livraison 48–72 h.',
-  robots: { index: false, follow: false },
+import { generateMeta } from '@/lib/seo'
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('seo')
+  return generateMeta({
+    title: t('commande_title'),
+    description: t('commande_description'),
+    url: '/commande',
+    noindex: true,
+  })
 }
 
 export default function CommandeLayout({

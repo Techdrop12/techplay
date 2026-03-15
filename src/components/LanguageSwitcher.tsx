@@ -33,6 +33,11 @@ export default function LanguageSwitcher() {
     } catch {}
 
     const href = localizePath(pathname, next, { keepQuery: true, keepHash: true })
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : pathname
+    if (href === pathname || href === currentPath) {
+      if (typeof window !== 'undefined') window.location.assign(href)
+      return
+    }
     router.replace(href)
   }
 
@@ -49,7 +54,7 @@ export default function LanguageSwitcher() {
             disabled={active}
             aria-pressed={active}
             aria-current={active ? 'true' : undefined}
-            aria-label={`Changer la langue vers ${localeLabels[lang]}`}
+            aria-label={t('change_lang_to', { lang: localeLabels[lang] })}
             className={[
               'px-2 py-1 rounded text-sm transition outline-none focus:ring-2',
               active

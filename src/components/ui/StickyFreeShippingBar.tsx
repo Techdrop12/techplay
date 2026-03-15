@@ -3,6 +3,7 @@
 
 import { usePathname } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 
 import FreeShippingBadge from '@/components/FreeShippingBadge'
 import Link from '@/components/LocalizedLink'
@@ -61,6 +62,7 @@ export default function StickyFreeShippingBar({
 }: Props) {
   const pathname = usePathname() || '/'
   const locale = getCurrentLocale(pathname)
+  const t = useTranslations('misc')
   const { cart } = useCart()
 
   const [visible, setVisible] = useState(false)
@@ -137,13 +139,7 @@ export default function StickyFreeShippingBar({
     pushDL('free_shipping_bar_show', { reached, subtotal, threshold })
   }, [visible, reached, subtotal, threshold])
 
-  const isFr = String(
-    typeof document !== 'undefined' ? document.documentElement.lang : 'fr-FR'
-  )
-    .toLowerCase()
-    .startsWith('fr')
-
-  const labelCart = ctaLabel ?? (isFr ? 'Voir le panier' : 'View cart')
+  const labelCart = ctaLabel ?? t('view_cart')
 
   if (dismissed || hiddenByRoute || !visible) return null
   if (!showOnEmptyCart && subtotal <= 0) return null
@@ -159,7 +155,7 @@ export default function StickyFreeShippingBar({
       className={cn('fixed z-50 px-3 sm:px-4', sideClasses, className)}
       style={{ pointerEvents: 'none' }}
       role="region"
-      aria-label={isFr ? 'Barre livraison offerte' : 'Free shipping bar'}
+      aria-label={t('free_shipping_bar_aria')}
       data-position={position}
     >
       <div
@@ -197,7 +193,7 @@ export default function StickyFreeShippingBar({
             <button
               type="button"
               onClick={onClose}
-              aria-label={isFr ? 'Fermer la barre' : 'Close bar'}
+              aria-label={t('close_bar_aria')}
               className="rounded-full p-2 text-[13px] text-token-text/60 transition hover:bg-white/10 hover:text-[hsl(var(--text))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
             >
               ✕

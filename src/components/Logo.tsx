@@ -69,12 +69,13 @@ export default function Logo({
 
     const darkSource = srcDark || srcLight
 
+    const imgAlt = withText ? '' : ariaLabel
     return (
       <span className="relative inline-flex h-full w-auto items-center">
         <img
           src={srcLight}
-          alt=""
-          aria-hidden="true"
+          alt={imgAlt}
+          {...(withText ? { 'aria-hidden': true } : {})}
           decoding="async"
           loading={priority ? 'eager' : 'lazy'}
           fetchPriority={priority ? 'high' : 'auto'}
@@ -82,8 +83,8 @@ export default function Logo({
         />
         <img
           src={darkSource}
-          alt=""
-          aria-hidden="true"
+          alt={imgAlt}
+          {...(withText ? { 'aria-hidden': true } : {})}
           decoding="async"
           loading={priority ? 'eager' : 'lazy'}
           fetchPriority={priority ? 'high' : 'auto'}

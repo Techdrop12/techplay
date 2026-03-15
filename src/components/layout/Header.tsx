@@ -53,6 +53,7 @@ const STR = {
     wishlistAria: (n: number) => (n > 0 ? `Voir la wishlist (${n})` : 'Voir la wishlist'),
     cartAria: (n: number) => (n > 0 ? `Voir le panier (${n})` : 'Voir le panier'),
     cartShort: 'Panier',
+    cartItemsCount: (n: number) => (n === 1 ? '1 article' : `${n} articles`),
     account: {
       aria: 'Espace client',
       title: 'Espace client',
@@ -60,6 +61,8 @@ const STR = {
     headerAria: 'En-tête du site',
     logoAria: 'TechPlay — Accueil',
     localeSwitcherAria: 'Sélecteur de langue',
+    switch_to_en: 'Passer en anglais',
+    switch_to_fr: 'Passer en français',
   },
   en: {
     nav: {
@@ -90,6 +93,7 @@ const STR = {
     wishlistAria: (n: number) => (n > 0 ? `View wishlist (${n})` : 'View wishlist'),
     cartAria: (n: number) => (n > 0 ? `View cart (${n})` : 'View cart'),
     cartShort: 'Cart',
+    cartItemsCount: (n: number) => (n === 1 ? '1 item' : `${n} items`),
     account: {
       aria: 'Account',
       title: 'Account',
@@ -97,6 +101,8 @@ const STR = {
     headerAria: 'Site header',
     logoAria: 'TechPlay — Home',
     localeSwitcherAria: 'Language selector',
+    switch_to_en: 'Switch to English',
+    switch_to_fr: 'Switch to French',
   },
 } as const
 
@@ -202,7 +208,15 @@ function LocaleSwitch({ pathname }: { pathname: string }) {
       // no-op
     }
 
-    router.replace(localizePath(pathname, nextLocale))
+    const href = localizePath(pathname, nextLocale)
+    // Sur les pages sans préfixe locale (ex. /blog, /contact), l’URL ne change pas :
+    // forcer un rechargement pour que le serveur relise le cookie et affiche la bonne langue.
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : pathname
+    if (href === pathname || href === currentPath) {
+      if (typeof window !== 'undefined') window.location.assign(href)
+      return
+    }
+    router.replace(href)
   }
 
   const labels = { fr: 'FR', en: 'EN' } as const
@@ -218,10 +232,10 @@ function LocaleSwitch({ pathname }: { pathname: string }) {
         type="button"
         onClick={() => setLang(nextLocale)}
         onMouseDown={(e) => e.preventDefault()}
-        aria-label={locale === 'fr' ? 'Passer en anglais' : 'Switch to French'}
+        aria-label={locale === 'fr' ? t.switch_to_en : t.switch_to_fr}
         aria-current="true"
         className="min-w-[2rem] rounded-md px-2 py-1 text-[11px] font-semibold uppercase tracking-wide transition outline-none focus:ring-2 focus:ring-offset-1 bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] hover:opacity-95 focus:ring-[hsl(var(--accent)/.5)]"
-        title={locale === 'fr' ? 'Passer en anglais' : 'Switch to French'}
+        title={locale === 'fr' ? t.switch_to_en : t.switch_to_fr}
         data-gtm="lang_switch"
         data-lang={locale}
       >
@@ -458,17 +472,18 @@ export default function Header() {
         hidden ? '-translate-y-full' : 'translate-y-0'
       )}
     >
-      <div className="container-app flex h-16 items-center justify-between gap-4 md:h-[4.5rem] md:gap-3 lg:h-[4.75rem]">
+      <div className="container-app flex h-16 items-center justify-between gap-3 md:h-[4.5rem] md:gap-5 lg:h-[4.75rem]">
+        {/* Zone 1 — Branding */}
         <Link
           href="/"
           aria-label={t.logoAria}
           rel="home"
-          className="touch-target group inline-flex items-center justify-center rounded-xl p-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] md:min-h-0 md:min-w-0 md:p-1.5"
+          className="touch-target shrink-0 rounded-xl p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] md:p-1.5"
           data-gtm="header_logo_home"
         >
           <span className="pointer-events-none inline-flex">
             <Logo
-              className="h-7 w-auto md:h-9 lg:h-10"
+              className="h-8 w-auto md:h-9 lg:h-10"
               withText={false}
               srcLight="/logo.svg"
               srcDark="/logo-dark.svg"
@@ -477,71 +492,9 @@ export default function Header() {
           </span>
         </Link>
 
-        <form
-          action={searchAction}
-          method="get"
-          role="search"
-          aria-label={t.searchAria}
-          onSubmit={onSearchSubmit}
-          className="relative hidden min-w-0 flex-1 items-center md:flex lg:max-w-sm xl:max-w-md"
-        >
-          <label htmlFor="header-search" className="sr-only">
-            {t.searchAria}
-          </label>
-
-          <div className="relative w-full">
-            <span
-              className="pointer-events-none absolute left-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center text-token-text/50"
-              aria-hidden
-            >
-              <Search className="h-4 w-4" />
-            </span>
-            <input
-              ref={searchRef}
-              id="header-search"
-              type="search"
-              name="q"
-              placeholder={`${t.placeholderPrefix} ${placeholder}`}
-              list="header-search-suggestions"
-              className={cn(
-                'w-full rounded-xl border-2 py-2.5 pl-10 pr-11 text-sm',
-                'border-[hsl(var(--border))] bg-[hsl(var(--surface))] placeholder:text-token-text/50',
-                'focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/.25)] focus:ring-offset-0'
-              )}
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="none"
-              spellCheck={false}
-              enterKeyHint="search"
-              aria-keyshortcuts="/ Control+K Meta+K"
-              aria-describedby="header-search-hint"
-            />
-            <div className="absolute inset-y-0 right-1 flex items-center">
-              <button
-                type="submit"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] shadow-sm hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
-                aria-label={t.searchAria}
-                title={t.searchAria}
-                data-gtm="header_search_submit"
-              >
-                <Search className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-
-          <datalist id="header-search-suggestions">
-            {t.trends.map((item) => (
-              <option key={item} value={item} />
-            ))}
-          </datalist>
-
-          <div id="header-search-hint" className="sr-only">
-            {t.searchHint}
-          </div>
-        </form>
-
+        {/* Zone 2 — Navigation principale (desktop) : bloc visuel distinct */}
         <nav
-          className="hidden items-center whitespace-nowrap text-[15px] font-medium tracking-tight text-token-text lg:flex lg:gap-5 xl:gap-7 xl:text-base"
+          className="hidden shrink-0 items-center border-l border-[hsl(var(--border))]/50 pl-4 lg:flex lg:gap-6 xl:gap-8 xl:pl-6"
           aria-label={t.headerNavAria}
         >
           {LINKS.map(({ href, labelKey }) => {
@@ -568,15 +521,14 @@ export default function Header() {
                     onBlur={() => closeCats(100)}
                     onMouseDown={(e) => e.preventDefault()}
                     className={cn(
-                      'group relative rounded-full px-1.5 py-1 text-sm transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]',
+                      'group relative rounded-full px-2 py-1.5 text-[14px] font-medium transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]',
                       active
-                        ? 'font-semibold text-[hsl(var(--accent))] after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-[hsl(var(--accent))]'
-                        : 'hover:text-[hsl(var(--accent))] focus-visible:text-[hsl(var(--accent))]'
+                        ? 'font-semibold text-[hsl(var(--accent))] after:absolute after:-bottom-0.5 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-[hsl(var(--accent))]'
+                        : 'text-token-text hover:text-[hsl(var(--accent))] focus-visible:text-[hsl(var(--accent))]'
                     )}
                     data-gtm="header_mega_btn"
                   >
                     {label}
-
                     {!active ? (
                       <span
                         aria-hidden="true"
@@ -650,11 +602,8 @@ export default function Header() {
                           <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent))]/90">
                             {t.selection}
                           </p>
-
                           <h3 className="mt-1 text-lg font-extrabold">{t.packsTitle}</h3>
-
                           <p className="mt-2 text-sm text-token-text/70">{t.packsDesc}</p>
-
                           <div className="mt-3 flex flex-wrap gap-2">
                             <Link
                               href="/products/packs"
@@ -667,7 +616,6 @@ export default function Header() {
                             >
                               {t.viewPacks}
                             </Link>
-
                             <Link
                               href="/products"
                               onPointerEnter={() => smartPrefetchStart('/products')}
@@ -706,7 +654,6 @@ export default function Header() {
                 data-gtm={`header_nav_${labelKey}`}
               >
                 {label}
-
                 {!active ? (
                   <span
                     aria-hidden="true"
@@ -718,7 +665,73 @@ export default function Header() {
           })}
         </nav>
 
-        <div className="flex min-h-[2.75rem] items-center gap-3 md:hidden" style={{ touchAction: 'manipulation' }}>
+        {/* Zone 3 — Recherche (desktop) */}
+        <form
+          action={searchAction}
+          method="get"
+          role="search"
+          aria-label={t.searchAria}
+          onSubmit={onSearchSubmit}
+          className="relative hidden min-w-0 flex-1 items-center md:flex lg:max-w-xs xl:max-w-sm"
+        >
+          <label htmlFor="header-search" className="sr-only">
+            {t.searchAria}
+          </label>
+
+          <div className="relative w-full">
+            <span
+              className="pointer-events-none absolute left-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center text-token-text/50"
+              aria-hidden
+            >
+              <Search className="h-4 w-4" />
+            </span>
+            <input
+              ref={searchRef}
+              id="header-search"
+              type="search"
+              name="q"
+              placeholder={`${t.placeholderPrefix} ${placeholder}`}
+              list="header-search-suggestions"
+              className={cn(
+                'w-full rounded-xl border-2 py-2.5 pl-10 pr-11 text-sm transition-[border-color,box-shadow]',
+                'border-[hsl(var(--border))] bg-[hsl(var(--surface))] placeholder:text-token-text/50',
+                'hover:border-[hsl(var(--border))]/90',
+                'focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/0.3)] focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]'
+              )}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck={false}
+              enterKeyHint="search"
+              aria-keyshortcuts="/ Control+K Meta+K"
+              aria-describedby="header-search-hint"
+            />
+            <div className="absolute inset-y-0 right-1 flex items-center">
+              <button
+                type="submit"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] shadow-md transition-all duration-200 hover:scale-[1.05] hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
+                aria-label={t.searchAria}
+                title={t.searchAria}
+                data-gtm="header_search_submit"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          <datalist id="header-search-suggestions">
+            {t.trends.map((item) => (
+              <option key={item} value={item} />
+            ))}
+          </datalist>
+
+          <div id="header-search-hint" className="sr-only">
+            {t.searchHint}
+          </div>
+        </form>
+
+        {/* Zone 4 — Mobile : panier + menu */}
+        <div className="flex min-h-[2.75rem] items-center gap-3 lg:hidden" style={{ touchAction: 'manipulation' }}>
           <Link
             href={L('/commande')}
             onPointerEnter={() => smartPrefetchStart('/commande')}
@@ -800,25 +813,30 @@ export default function Header() {
               onFocus={() => smartPrefetchStart('/commande')}
               onBlur={() => smartPrefetchCancel('/commande')}
               className={cn(
-                'relative inline-flex min-h-[2.75rem] items-center gap-2 rounded-full border-2 px-4 py-2 transition-colors',
-                'border-[hsl(var(--accent)/.35)] bg-[hsl(var(--accent)/.14)] hover:border-[hsl(var(--accent)/.5)] hover:bg-[hsl(var(--accent)/.2)]',
-                'focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]'
+                'relative inline-flex min-h-[2.75rem] items-center gap-2.5 rounded-full border-2 px-4 py-2 transition-all duration-200',
+                'border-[hsl(var(--accent)/0.4)] bg-[hsl(var(--accent)/0.12)] hover:border-[hsl(var(--accent)/0.6)] hover:bg-[hsl(var(--accent)/0.18)] hover:shadow-md',
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.5)] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]'
               )}
               aria-label={t.cartAria(cartCount)}
               data-gtm="header_cart"
               data-cart-icon
             >
-              <span className="pointer-events-none flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--accent))]/20 text-[hsl(var(--accent))]">
+              <span className="pointer-events-none flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--accent))]/25 text-[hsl(var(--accent))]">
                 <Cart />
               </span>
-              <span className="pointer-events-none hidden font-semibold text-[hsl(var(--text))] xl:inline">
-                {t.cartShort}
+              <span className="pointer-events-none hidden flex-col leading-tight xl:inline-flex">
+                <span className="font-semibold text-[hsl(var(--text))]">{t.cartShort}</span>
+                {cartCount > 0 ? (
+                  <span className="text-[11px] font-medium text-token-text/60">
+                    {t.cartItemsCount(cartCount)}
+                  </span>
+                ) : null}
               </span>
               {cartCount > 0 ? (
                 <span
                   aria-live="polite"
                   aria-atomic="true"
-                  className="pointer-events-none flex min-w-[1.4rem] items-center justify-center rounded-full bg-[hsl(var(--accent))] px-2 py-0.5 text-[13px] font-bold tabular-nums text-white"
+                  className="pointer-events-none flex min-w-[1.5rem] items-center justify-center rounded-full bg-[hsl(var(--accent))] px-2 py-0.5 text-[13px] font-bold tabular-nums text-white shadow-sm"
                 >
                   <span className="sr-only">Cart count: </span>
                   {cartCount > 99 ? '99+' : cartCount}

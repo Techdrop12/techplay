@@ -9,7 +9,7 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { Pack } from '@/types/product'
 
 import Link from '@/components/LocalizedLink'
-import { getCurrentLocale } from '@/lib/i18n-routing'
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 import { safeProductImageUrl } from '@/lib/safeProductImage'
 import { cn, formatPrice } from '@/lib/utils'
 
@@ -746,7 +746,7 @@ export default function PacksSection({
 
       <noscript>
         <p className="mt-6 text-center">
-          <a href="/products/packs">{t.noscript}</a>
+          <a href={localizePath('/products/packs', locale)}>{t.noscript}</a>
         </p>
       </noscript>
     </section>

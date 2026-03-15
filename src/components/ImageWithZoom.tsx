@@ -9,6 +9,8 @@ export default function ImageWithZoom({ src, alt }: { src: string; alt: string }
       <img
         src={src}
         alt={alt}
+        loading="lazy"
+        decoding="async"
         className={`transition-transform duration-300 ${zoomed ? "scale-150" : "scale-100"}`}
       />
     </div>

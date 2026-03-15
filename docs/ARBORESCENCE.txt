@@ -1,0 +1,684 @@
+TechPlay_FINAL_DELIVERY
+├── .github
+│   └── workflows
+│       ├── ci.yml
+│       └── deploy.yml
+├── .env.example
+├── .gitattributes
+├── .gitignore
+├── .npmrc
+├── .prettierrc
+├── CONTRIBUTING.md
+├── eslint.config.cjs
+├── next-env.d.ts
+├── next-intl.config.js
+├── next-sitemap.config.js
+├── next.config.mjs
+├── package.json
+├── package-lock.json
+├── playwright.config.ts
+├── postcss.config.cjs
+├── README.md
+├── robots.txt
+├── tailwind.config.ts
+├── tsconfig.json
+├── vercel.json
+├── VERIFICATION_FULL_OPTION.md
+├── vitest.config.ts
+├── docs
+│   ├── ARBORESCENCE.txt
+│   ├── AMELIORATIONS_RESTANTES.md
+│   ├── AUDIT_AMELIORATIONS.md
+│   ├── AUDIT_PROJET.md
+│   ├── AUDIT.md
+│   ├── CODE_MORT.md
+│   ├── COHERENCE_PROJET.md
+│   ├── DEAD_CODE.md
+│   ├── DEPLOYMENT_RECOMMENDATIONS.md
+│   ├── ENV.md
+│   ├── ERROR_HANDLING.md
+│   ├── IMPORTS_COHERENCE.md
+│   ├── LIB_README.md
+│   ├── RUNBOOK.md
+│   ├── SECURITE.md
+│   └── WARNINGS_NON_BLOQUANTS.md
+├── e2e
+│   └── critical-path.spec.ts
+├── public
+│   ├── carousel
+│   │   ├── hero-1-desktop.jpg
+│   │   ├── hero-1-mobile.jpg
+│   │   ├── hero-2-desktop.jpg
+│   │   ├── hero-2-mobile.jpg
+│   │   ├── hero-3-desktop.jpg
+│   │   └── hero-3-mobile.jpg
+│   ├── icons
+│   │   ├── icon-192x192.png
+│   │   ├── icon-512x512.png
+│   │   └── maskable-icon.png
+│   ├── fallback.png
+│   ├── favicon.ico
+│   ├── logo-dark.svg
+│   ├── logo.png
+│   ├── logo.svg
+│   ├── og-image.jpg
+│   ├── og-products.jpg
+│   └── site.webmanifest
+├── patches
+│   └── node-domexception-native
+│       ├── index.js
+│       └── package.json
+├── scripts
+│   ├── convert-js-to-ts.mjs
+│   ├── env-check.js
+│   └── patch-node-domexception.cjs
+├── src
+│   ├── app
+│   │   ├── [locale]
+│   │   │   ├── error.tsx
+│   │   │   ├── layout.tsx
+│   │   │   ├── loading.tsx
+│   │   │   └── page.tsx
+│   │   ├── account
+│   │   │   ├── mes-commandes
+│   │   │   │   ├── [id]
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── page.tsx
+│   │   │   ├── profil
+│   │   │   │   └── page.tsx
+│   │   │   ├── error.tsx
+│   │   │   ├── loading.tsx
+│   │   │   └── page.tsx
+│   │   ├── admin
+│   │   │   ├── avis
+│   │   │   │   └── page.tsx
+│   │   │   ├── blog
+│   │   │   │   ├── [id]
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── nouveau
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── page.tsx
+│   │   │   ├── commandes
+│   │   │   │   └── page.tsx
+│   │   │   ├── contact
+│   │   │   │   └── page.tsx
+│   │   │   ├── dashboard
+│   │   │   │   └── page.tsx
+│   │   │   ├── generate-blog
+│   │   │   │   ├── layout.tsx
+│   │   │   │   └── page.tsx
+│   │   │   ├── import
+│   │   │   │   └── page.tsx
+│   │   │   ├── newsletter
+│   │   │   │   └── page.tsx
+│   │   │   ├── pages
+│   │   │   │   └── page.tsx
+│   │   │   ├── produits
+│   │   │   │   ├── nouveau
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── page.tsx
+│   │   │   ├── error.tsx
+│   │   │   ├── layout.tsx
+│   │   │   ├── loading.tsx
+│   │   │   └── sync-stock.ts
+│   │   ├── blog
+│   │   │   ├── [slug]
+│   │   │   │   ├── loading.tsx
+│   │   │   │   └── page.tsx
+│   │   │   ├── error.tsx
+│   │   │   ├── loading.tsx
+│   │   │   └── page.tsx
+│   │   ├── cart
+│   │   │   ├── error.tsx
+│   │   │   ├── loading.tsx
+│   │   │   └── page.tsx
+│   │   ├── categorie
+│   │   │   ├── [category]
+│   │   │   │   ├── loading.tsx
+│   │   │   │   └── page.tsx
+│   │   │   ├── error.tsx
+│   │   │   ├── loading.tsx
+│   │   │   └── page.tsx
+│   │   ├── cgv
+│   │   │   ├── loading.tsx
+│   │   │   └── page.tsx
+│   │   ├── commande
+│   │   │   ├── success
+│   │   │   │   ├── loading.tsx
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── PurchaseTrackerClient.tsx
+│   │   │   ├── error.tsx
+│   │   │   ├── layout.tsx
+│   │   │   ├── loading.tsx
+│   │   │   └── page.tsx
+│   │   ├── confidentialite
+│   │   │   ├── layout.tsx
+│   │   │   ├── loading.tsx
+│   │   │   └── page.tsx
+│   │   ├── contact
+│   │   │   ├── loading.tsx
+│   │   │   └── page.tsx
+│   │   ├── login
+│   │   │   ├── error.tsx
+│   │   │   ├── layout.tsx
+│   │   │   ├── loading.tsx
+│   │   │   └── page.tsx
+│   │   ├── maintenance
+│   │   │   └── page.tsx
+│   │   ├── mentions-legales
+│   │   │   ├── loading.tsx
+│   │   │   └── page.tsx
+│   │   ├── products
+│   │   │   ├── [slug]
+│   │   │   │   ├── loading.tsx
+│   │   │   │   └── page.tsx
+│   │   │   ├── packs
+│   │   │   │   ├── [slug]
+│   │   │   │   │   ├── loading.tsx
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── page.tsx
+│   │   │   ├── error.tsx
+│   │   │   ├── loading.tsx
+│   │   │   └── page.tsx
+│   │   ├── search
+│   │   │   ├── loading.tsx
+│   │   │   └── page.tsx
+│   │   ├── success
+│   │   │   ├── layout.tsx
+│   │   │   ├── loading.tsx
+│   │   │   └── page.tsx
+│   │   ├── error.tsx
+│   │   ├── globals.css
+│   │   ├── globals.d.ts
+│   │   ├── layout.tsx
+│   │   ├── not-found.tsx
+│   │   └── robots.ts
+│   ├── components
+│   │   ├── A
+│   │   │   └── BTestBanner.tsx
+│   │   ├── account
+│   │   │   ├── AccountLogoutButton.tsx
+│   │   │   ├── AccountProfileForm.tsx
+│   │   │   ├── InvoiceButton.tsx
+│   │   │   └── OrderList.tsx
+│   │   ├── admin
+│   │   │   └── TableSkeleton.tsx
+│   │   ├── blog
+│   │   │   ├── BlogCard.tsx
+│   │   │   └── BlogList.tsx
+│   │   ├── cart
+│   │   │   ├── AbandonCartTracker.tsx
+│   │   │   ├── CartItem.tsx
+│   │   │   ├── CartList.tsx
+│   │   │   ├── CartPageClient.tsx
+│   │   │   ├── CartPageFallback.tsx
+│   │   │   ├── CartReminder.tsx
+│   │   │   ├── CartSummary.tsx
+│   │   │   └── EmptyCart.tsx
+│   │   ├── catalogue
+│   │   │   ├── FilterPanel.tsx
+│   │   │   ├── SearchBar.tsx
+│   │   │   └── SortDropdown.tsx
+│   │   ├── checkout
+│   │   │   ├── CheckoutForm.tsx
+│   │   │   ├── CheckoutSection.tsx
+│   │   │   ├── OrderSummary.tsx
+│   │   │   └── PurchaseTracker.tsx
+│   │   ├── confidentialite
+│   │   │   └── ConfidentialitePrefs.tsx
+│   │   ├── icons
+│   │   │   └── Icon.tsx
+│   │   ├── JsonLd
+│   │   │   ├── ArticleJsonLd.tsx
+│   │   │   ├── BlogJsonLd.tsx
+│   │   │   ├── BlogListJsonLd.tsx
+│   │   │   ├── BreadcrumbJsonLd.tsx
+│   │   │   ├── index.ts
+│   │   │   ├── OrganizationJsonLd.tsx
+│   │   │   ├── ProductJsonLd.tsx
+│   │   │   └── WebSiteJsonLd.tsx
+│   │   ├── layout
+│   │   │   ├── Header.tsx
+│   │   │   ├── Layout.tsx
+│   │   │   └── MobileNav.tsx
+│   │   ├── marketing
+│   │   │   └── PopupEmailCapture.tsx
+│   │   ├── Product
+│   │   │   ├── OutOfStockBadge.tsx
+│   │   │   ├── PriceWithPromo.tsx
+│   │   │   ├── ProductBadges.tsx
+│   │   │   ├── ProductReviewForm.tsx
+│   │   │   ├── ProductReviews.tsx
+│   │   │   ├── ProductTabs.tsx
+│   │   │   └── StockWarning.tsx
+│   │   ├── search
+│   │   │   └── SearchPageContent.tsx
+│   │   ├── seo
+│   │   │   ├── index.ts
+│   │   │   ├── OGMetaTags.tsx
+│   │   │   └── SeoMonitor.ts
+│   │   ├── ui
+│   │   │   ├── ABTestBanner.tsx
+│   │   │   ├── ABTestLabel.tsx
+│   │   │   ├── AccessibilitySkipLink.ts
+│   │   │   ├── Accordion.tsx
+│   │   │   ├── AnimatedCheck.tsx
+│   │   │   ├── AnimatedCheckmark.tsx
+│   │   │   ├── AnnouncementBar.tsx
+│   │   │   ├── AutoAnimateWrapper.tsx
+│   │   │   ├── Avatar.tsx
+│   │   │   ├── BackToTopButton.tsx
+│   │   │   ├── BadgePill.tsx
+│   │   │   ├── ButtonGroup.tsx
+│   │   │   ├── Carousel.tsx
+│   │   │   ├── Checkbox.tsx
+│   │   │   ├── CheckoutSteps.tsx
+│   │   │   ├── ComingSoon.tsx
+│   │   │   ├── Container.tsx
+│   │   │   ├── Countdown.tsx
+│   │   │   ├── DeliveryBadge.tsx
+│   │   │   ├── DeliveryEstimate.tsx
+│   │   │   ├── Divider.tsx
+│   │   │   ├── Dropdown.tsx
+│   │   │   ├── DropdownMenu.tsx
+│   │   │   ├── EmptyState.tsx
+│   │   │   ├── EmptyWishlist.tsx
+│   │   │   ├── Error.tsx
+│   │   │   ├── ErrorFallback.tsx
+│   │   │   ├── ErrorWithRetry.tsx
+│   │   │   ├── ExitIntentPopup.tsx
+│   │   │   ├── ExpandableSection.tsx
+│   │   │   ├── FeaturedLabel.tsx
+│   │   │   ├── FloatingButton.tsx
+│   │   │   ├── FloatingCTA.tsx
+│   │   │   ├── GradientBackground.tsx
+│   │   │   ├── Hero.tsx
+│   │   │   ├── HeroSection.tsx
+│   │   │   ├── Highlight.tsx
+│   │   │   ├── HighlightBox.tsx
+│   │   │   ├── IconCircle.tsx
+│   │   │   ├── IconLabel.tsx
+│   │   │   ├── InfoTooltip.tsx
+│   │   │   ├── Input.tsx
+│   │   │   ├── InstallPrompt.tsx
+│   │   │   ├── InstallPwaPrompt.tsx
+│   │   │   ├── LinkButton.tsx
+│   │   │   ├── LoadingDots.tsx
+│   │   │   ├── LoadingOverlay.tsx
+│   │   │   ├── MobileMenuToggle.tsx
+│   │   │   ├── Modal.tsx
+│   │   │   ├── NoResult.tsx
+│   │   │   ├── NotificationBell.tsx
+│   │   │   ├── PageTransition.tsx
+│   │   │   ├── Pagination.tsx
+│   │   │   ├── PaginationControls.tsx
+│   │   │   ├── Pill.tsx
+│   │   │   ├── premium-icons.tsx
+│   │   │   ├── PriceTag.tsx
+│   │   │   ├── PricingHighlight.tsx
+│   │   │   ├── ProductHighlightBadge.tsx
+│   │   │   ├── ProductLabel.tsx
+│   │   │   ├── ProductLoader.tsx
+│   │   │   ├── ProductPriceTag.tsx
+│   │   │   ├── ProgressBar.tsx
+│   │   │   ├── PromoBar.tsx
+│   │   │   ├── PulseLoader.tsx
+│   │   │   ├── PushSubscribe.tsx
+│   │   │   ├── RadioGroup.tsx
+│   │   │   ├── RatingStars.tsx
+│   │   │   ├── RatingSummary.tsx
+│   │   │   ├── ResponsiveGrid.tsx
+│   │   │   ├── ReviewVerifiedBadge.tsx
+│   │   │   ├── SaleTimer.tsx
+│   │   │   ├── ScrollProgress.tsx
+│   │   │   ├── ScrollProgressBar.tsx
+│   │   │   ├── ScrollTopButton.tsx
+│   │   │   ├── Select.tsx
+│   │   │   ├── Separator.tsx
+│   │   │   ├── ShippingEstimate.tsx
+│   │   │   ├── SiteStats.tsx
+│   │   │   ├── Skeleton.tsx
+│   │   │   ├── SlideOverPanel.tsx
+│   │   │   ├── Spinner.tsx
+│   │   │   ├── StatusBadge.tsx
+│   │   │   ├── StickyFreeShippingBar.tsx
+│   │   │   ├── StickyHeader.tsx
+│   │   │   ├── Switch.tsx
+│   │   │   ├── TabSwitcher.tsx
+│   │   │   ├── Tag.tsx
+│   │   │   ├── TagList.tsx
+│   │   │   ├── TextArea.tsx
+│   │   │   ├── ThemeToggle.tsx
+│   │   │   ├── ToggleSwitch.tsx
+│   │   │   ├── Tooltip.tsx
+│   │   │   ├── TrustIndicators.tsx
+│   │   │   ├── UploadImageInput.tsx
+│   │   │   └── use-toast.ts
+│   │   ├── user
+│   │   │   └── UserScore.tsx
+│   │   ├── ABTestSwitcher.ts
+│   │   ├── AccessibilitySkip.tsx
+│   │   ├── AddBlogPostForm.tsx
+│   │   ├── AddProductForm.tsx
+│   │   ├── AddToCartButton.tsx
+│   │   ├── AddToCartButtonAB.tsx
+│   │   ├── AdminAnalyticsBlock.tsx
+│   │   ├── AdminBlogTable.tsx
+│   │   ├── AdminHeader.tsx
+│   │   ├── AdminLayout.tsx
+│   │   ├── AdminReviewTable.tsx
+│   │   ├── AdminShell.tsx
+│   │   ├── AdminSidebar.tsx
+│   │   ├── AdminStatsBlock.tsx
+│   │   ├── AfterIdleClient.tsx
+│   │   ├── AIProductSummary.tsx
+│   │   ├── Analytics.tsx
+│   │   ├── AnimatedSection.tsx
+│   │   ├── AppInstallPrompt.tsx
+│   │   ├── AvisBlock.tsx
+│   │   ├── BackToHomeLink.tsx
+│   │   ├── BackToTop.tsx
+│   │   ├── BackToTopButton.tsx
+│   │   ├── Badge.tsx
+│   │   ├── BannerPromo.tsx
+│   │   ├── BestProducts.tsx
+│   │   ├── Breadcrumbs.tsx
+│   │   ├── Button.tsx
+│   │   ├── CallToAction.tsx
+│   │   ├── CartIndicator.tsx
+│   │   ├── ChatBot.tsx
+│   │   ├── Clarity.tsx
+│   │   ├── ClientOnly.tsx
+│   │   ├── ClientTrackingScript.tsx
+│   │   ├── ConfirmationDialog.tsx
+│   │   ├── ConsentBanner.tsx
+│   │   ├── ContactBottomLinks.tsx
+│   │   ├── ContactForm.tsx
+│   │   ├── ContactSubmissionsTable.tsx
+│   │   ├── Container.tsx
+│   │   ├── CTA.tsx
+│   │   ├── DarkModeScript.tsx
+│   │   ├── DynamicPromoBanner.tsx
+│   │   ├── EditBlogPostForm.tsx
+│   │   ├── EditProductForm.tsx
+│   │   ├── FAQ.tsx
+│   │   ├── FAQBlock.tsx
+│   │   ├── FeedbackButton.tsx
+│   │   ├── FlyToCartAnimation.tsx
+│   │   ├── Footer.tsx
+│   │   ├── FreeShippingBadge.tsx
+│   │   ├── Garanties.tsx
+│   │   ├── GenerateBlogPost.tsx
+│   │   ├── GeoDetector.tsx
+│   │   ├── GradientText.tsx
+│   │   ├── HeroBanner.tsx
+│   │   ├── HeroCarousel.tsx
+│   │   ├── Highlight.tsx
+│   │   ├── HomeClient.tsx
+│   │   ├── Hotjar.tsx
+│   │   ├── ImageWithZoom.tsx
+│   │   ├── ImportProductsTable.tsx
+│   │   ├── Input.tsx
+│   │   ├── LanguageSwitcher.tsx
+│   │   ├── LiveChat.tsx
+│   │   ├── Loader.tsx
+│   │   ├── LoadingDots.tsx
+│   │   ├── LoadingLabel.tsx
+│   │   ├── LoadingOverlay.tsx
+│   │   ├── LoadingSectionSkeleton.tsx
+│   │   ├── LocalizedLink.tsx
+│   │   ├── LoginForm.tsx
+│   │   ├── Logo.tsx
+│   │   ├── LowStockWarning.tsx
+│   │   ├── MetaPixel.tsx
+│   │   ├── Modal.tsx
+│   │   ├── MotionWrapper.tsx
+│   │   ├── NewsletterSubscribersTable.tsx
+│   │   ├── NotFound.tsx
+│   │   ├── NotFoundPageContent.tsx
+│   │   ├── OfflineBanner.tsx
+│   │   ├── OrderTable.tsx
+│   │   ├── PackCard.tsx
+│   │   ├── PackDetails.tsx
+│   │   ├── PacksSection.tsx
+│   │   ├── PageTransitions.tsx
+│   │   ├── Price.tsx
+│   │   ├── PricingBadge.tsx
+│   │   ├── ProductABTestBadge.tsx
+│   │   ├── ProductAssistant.tsx
+│   │   ├── ProductCard.tsx
+│   │   ├── ProductCardSkeleton.tsx
+│   │   ├── ProductCatalogue.tsx
+│   │   ├── ProductDetail.tsx
+│   │   ├── ProductFilter.tsx
+│   │   ├── ProductGallery.tsx
+│   │   ├── ProductGrid.tsx
+│   │   ├── ProductScore.tsx
+│   │   ├── ProductSkeleton.tsx
+│   │   ├── ProductSkeletonGrid.tsx
+│   │   ├── ProductTable.tsx
+│   │   ├── ProductTags.tsx
+│   │   ├── PromoBadge.tsx
+│   │   ├── PromoBanner.tsx
+│   │   ├── PushPermission.tsx
+│   │   ├── QuantitySelector.tsx
+│   │   ├── RatingForm.tsx
+│   │   ├── RatingStars.tsx
+│   │   ├── RatingSummary.tsx
+│   │   ├── Reassurance.tsx
+│   │   ├── RecentlyViewed.tsx
+│   │   ├── RecentProducts.tsx
+│   │   ├── RegisterSW.tsx
+│   │   ├── RelatedProducts.tsx
+│   │   ├── ReviewForm.tsx
+│   │   ├── ReviewList.tsx
+│   │   ├── RootLayoutClient.tsx
+│   │   ├── ScoreTracker.tsx
+│   │   ├── ScrollProgress.tsx
+│   │   ├── ScrollToTop.tsx
+│   │   ├── Section.tsx
+│   │   ├── SectionDivider.tsx
+│   │   ├── SectionHeader.tsx
+│   │   ├── SectionTitle.tsx
+│   │   ├── SectionWrapper.tsx
+│   │   ├── SEOHead.tsx
+│   │   ├── ShippingSimulator.tsx
+│   │   ├── SitePagesEditor.tsx
+│   │   ├── SkeletonProductCard.tsx
+│   │   ├── SkipLink.tsx
+│   │   ├── Spinner.tsx
+│   │   ├── StarsRating.tsx
+│   │   ├── StickyCartSummary.tsx
+│   │   ├── Subtitle.tsx
+│   │   ├── Title.tsx
+│   │   ├── ToastSystem.tsx
+│   │   ├── Tracking.tsx
+│   │   ├── TrustBadges.tsx
+│   │   ├── TrustedBy.tsx
+│   │   ├── UpsellBlock.tsx
+│   │   ├── UpsellProducts.tsx
+│   │   ├── UrgencyBanner.tsx
+│   │   └── WishlistButton.tsx
+│   ├── context
+│   │   ├── cartAnimationContext.tsx
+│   │   ├── cartContext.tsx
+│   │   ├── langContext.tsx
+│   │   ├── themeContext.tsx
+│   │   ├── upsellContext.tsx
+│   │   └── wishlist.tsx
+│   ├── data
+│   │   ├── import.json
+│   │   ├── packs.ts
+│   │   ├── products.ts
+│   │   ├── seed-import.ts
+│   │   ├── supplier-stock.json
+│   │   ├── sync-stock.ts
+│   │   └── types.ts
+│   ├── hooks
+│   │   ├── useCart.ts
+│   │   ├── useRecommendations.ts
+│   │   ├── useScrollDirection.ts
+│   │   └── useWishlist.ts
+│   ├── i18n
+│   │   ├── config.ts
+│   │   └── loadMessages.ts
+│   ├── lib
+│   │   ├── cron
+│   │   │   └── cleanInactiveProducts.ts
+│   │   ├── db
+│   │   │   ├── mongo.ts
+│   │   │   ├── orders.ts
+│   │   │   └── users.ts
+│   │   ├── email
+│   │   │   └── sendBrevo.ts
+│   │   ├── hooks
+│   │   │   ├── useDarkMode.ts
+│   │   │   └── useRecentView.ts
+│   │   ├── models
+│   │   │   └── reviewModel.ts
+│   │   ├── promos
+│   │   │   └── scheduledPromos.ts
+│   │   ├── schema
+│   │   │   ├── blog.ts
+│   │   │   ├── invoice.ts
+│   │   │   ├── pack.ts
+│   │   │   ├── product.ts
+│   │   │   ├── review.ts
+│   │   │   └── user.ts
+│   │   ├── seo
+│   │   │   ├── index.ts
+│   │   │   └── seoMonitor.ts
+│   │   ├── utils
+│   │   │   └── onErrorLogger.ts
+│   │   ├── ab-banner.ts
+│   │   ├── ab-test.ts
+│   │   ├── abandon-cart.ts
+│   │   ├── ai-blog.ts
+│   │   ├── ai-tools.ts
+│   │   ├── analytics-events.ts
+│   │   ├── analytics.ts
+│   │   ├── api-client.ts
+│   │   ├── apiResponse.ts
+│   │   ├── auth-options.ts
+│   │   ├── auth.ts
+│   │   ├── bcrypt.ts
+│   │   ├── blog-ai.ts
+│   │   ├── blog.ts
+│   │   ├── cart.ts
+│   │   ├── categories.tsx
+│   │   ├── checkout.ts
+│   │   ├── constants.ts
+│   │   ├── cron.ts
+│   │   ├── currency.ts
+│   │   ├── data.ts
+│   │   ├── db.ts
+│   │   ├── dbConnect.ts
+│   │   ├── delaySimulator.ts
+│   │   ├── email.ts
+│   │   ├── emailTemplates.ts
+│   │   ├── errors.test.ts
+│   │   ├── errors.ts
+│   │   ├── fetcher.ts
+│   │   ├── firebase-admin.ts
+│   │   ├── firebase-client.ts
+│   │   ├── formatDate.test.ts
+│   │   ├── formatDate.ts
+│   │   ├── formatPrice.test.ts
+│   │   ├── formatPrice.ts
+│   │   ├── ga.ts
+│   │   ├── gamification.ts
+│   │   ├── hotjar.ts
+│   │   ├── i18n-routing.tsx
+│   │   ├── image-generator.ts
+│   │   ├── isAdmin.ts
+│   │   ├── language.ts
+│   │   ├── logEvent.ts
+│   │   ├── logger.ts
+│   │   ├── meta-pixel.ts
+│   │   ├── meta.ts
+│   │   ├── mongoClientPromise.ts
+│   │   ├── notifications.ts
+│   │   ├── openai.ts
+│   │   ├── parseJsonBody.ts
+│   │   ├── pdf.ts
+│   │   ├── performance.ts
+│   │   ├── plain.ts
+│   │   ├── productImage.ts
+│   │   ├── products-catalogue-params.ts
+│   │   ├── rateLimit.ts
+│   │   ├── recentProducts.ts
+│   │   ├── requireAdmin.ts
+│   │   ├── safeProductImage.ts
+│   │   ├── sanity.ts
+│   │   ├── scroll.ts
+│   │   ├── secureCompare.ts
+│   │   ├── sendConfirmationEmail.ts
+│   │   ├── seo.ts
+│   │   ├── site-pages.ts
+│   │   ├── sitemap.ts
+│   │   ├── stripe.ts
+│   │   ├── toLocale.ts
+│   │   ├── translate.ts
+│   │   ├── useAnalytics.ts
+│   │   ├── useBreadcrumbSegments.ts
+│   │   ├── useFocusTrap.ts
+│   │   ├── utils.test.ts
+│   │   ├── utils.ts
+│   │   ├── validateBody.ts
+│   │   ├── wishlist.ts
+│   │   └── zodSchemas.ts
+│   ├── messages
+│   │   ├── en.json
+│   │   └── fr.json
+│   ├── models
+│   │   ├── Article.ts
+│   │   ├── Blog.ts
+│   │   ├── Category.ts
+│   │   ├── ContactSubmission.ts
+│   │   ├── Email.ts
+│   │   ├── NewsletterSubscriber.ts
+│   │   ├── Order.ts
+│   │   ├── Pack.ts
+│   │   ├── Product.ts
+│   │   ├── Review.ts
+│   │   ├── SitePage.ts
+│   │   ├── Token.ts
+│   │   ├── TrackingEvent.ts
+│   │   ├── User.ts
+│   │   └── Wishlist.ts
+│   ├── styles
+│   │   ├── design-tokens.css
+│   │   ├── hero-carousel.css
+│   │   └── shipping-simulator.d.ts
+│   ├── types
+│   │   ├── analytics.ts
+│   │   ├── blog.ts
+│   │   ├── externals.d.ts
+│   │   ├── global.d.ts
+│   │   ├── index.ts
+│   │   ├── modules.d.ts
+│   │   ├── order.ts
+│   │   ├── process-env.d.ts
+│   │   ├── product.ts
+│   │   ├── react-rating-stars-component.d.ts
+│   │   └── sib-api-v3-sdk.d.ts
+│   ├── env.server.ts
+│   ├── env.ts
+│   ├── proxy.ts
+│   └── sw.ts
+└── tests
+    ├── api
+    │   ├── checkout.test.ts
+    │   └── stripe-webhook.test.ts
+    ├── lib
+    │   ├── apiResponse.test.ts
+    │   ├── constants.test.ts
+    │   ├── errors.test.ts
+    │   ├── formatDate.test.ts
+    │   ├── formatPrice.test.ts
+    │   ├── parseJsonBody.test.ts
+    │   ├── secureCompare.test.ts
+    │   └── validateBody.test.ts
+    ├── rateLimit.test.ts
+    └── seo.test.ts
+

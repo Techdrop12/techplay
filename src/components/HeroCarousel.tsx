@@ -23,7 +23,8 @@ import {
   type TouchEventHandler,
 } from 'react'
 
-import { getCurrentLocale } from '@/lib/i18n-routing'
+import Link from '@/components/LocalizedLink'
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
 import { cn } from '@/lib/utils'
 import '@/styles/hero-carousel.css'
 
@@ -193,6 +194,8 @@ export default function HeroCarousel({
           ctaSecondary: 'Explore packs',
           noscriptProducts: 'View products',
           slideWord: 'Slide ',
+          proofLine: 'Free delivery from €49 · Secure payment',
+          trustLine: 'Delivery 48–72h · 30-day free returns',
         }
       : {
           mainLabel: 'Carrousel principal TechPlay',
@@ -213,6 +216,8 @@ export default function HeroCarousel({
           ctaSecondary: 'Explorer les packs',
           noscriptProducts: 'Voir les produits',
           slideWord: 'Diapositive ',
+          proofLine: 'Livraison offerte dès 49€ · Paiement sécurisé',
+          trustLine: 'Livraison 48–72h · Retours gratuits 30 jours',
         }
   }, [locale])
 
@@ -455,8 +460,8 @@ export default function HeroCarousel({
     <section
       ref={containerRef}
       className={cn(
-        'relative w-full select-none overflow-hidden rounded-2xl bg-gradient-to-b from-black/90 via-black/80 to-black/92 shadow-[0_28px_80px_rgba(0,0,0,0.6)]',
-        'min-h-[320px] h-[62vh] sm:min-h-[400px] sm:h-[70vh] lg:h-[82vh] will-change-transform touch-pan-y',
+        'relative w-full select-none overflow-hidden rounded-2xl bg-gradient-to-b from-black/92 via-black/85 to-black/94 shadow-[0_32px_96px_rgba(0,0,0,0.55)]',
+        'min-h-[340px] h-[65vh] sm:min-h-[420px] sm:h-[72vh] lg:h-[84vh] will-change-transform touch-pan-y',
         className
       )}
       role="region"
@@ -614,6 +619,11 @@ export default function HeroCarousel({
             style={overlayOpacity ? { opacity: overlayOpacity } : undefined}
           />
         ) : null}
+        {/* Dégradé gauche pour lisibilité du bloc éditorial — composition premium */}
+        <div
+          className="pointer-events-none absolute inset-0 w-full max-w-[min(100%,42rem)] bg-gradient-to-r from-black/75 via-black/20 to-transparent md:max-w-[28rem] lg:max-w-[36rem]"
+          aria-hidden="true"
+        />
         <div
           className="pointer-events-none absolute inset-0 opacity-50 mix-blend-overlay"
           style={{ background: 'var(--ring-conic)' }}
@@ -621,12 +631,56 @@ export default function HeroCarousel({
         <div className="hero-carousel-glow-right" aria-hidden="true" />
       </div>
 
-      {current?.badge ? (
-        <div className="pointer-events-none absolute left-5 top-5 z-[3] sm:left-8 sm:top-7">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3.5 py-1.5 text-[11px] font-semibold tracking-[0.16em] text-black shadow-[0_12px_35px_rgba(15,23,42,0.42)] dark:bg-black/70 dark:text-white">
-            <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))] ring-2 ring-[hsl(var(--accent)/0.25)]" />
-            {current.badge}
-          </span>
+      {/* Bloc éditorial — composition premium : badge → titre → preuve → CTA → confiance */}
+      {(current?.text || current?.ctaLabel) ? (
+        <div
+          className="pointer-events-auto absolute inset-0 z-[2] flex flex-col justify-end pb-12 pl-5 pr-5 sm:pb-16 sm:pl-8 md:justify-center md:pb-0 md:pl-12 lg:pl-[clamp(2rem,6vw,4rem)] xl:pl-20"
+          aria-hidden="false"
+        >
+          <div className="mx-auto w-full max-w-[32rem] md:mx-0 md:max-w-[28rem] lg:max-w-[34rem]">
+            {/* 1. Étiquette / catégorie — intégrée au flux */}
+            {current.badge ? (
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/80 sm:mb-4 sm:text-xs">
+                {current.badge}
+              </p>
+            ) : null}
+            {/* 2. Titre principal — hiérarchie forte */}
+            {current.text ? (
+              <h2 className="text-[2rem] font-extrabold leading-[1.12] tracking-tight text-white sm:text-4xl md:text-[2.5rem] md:leading-[1.15] lg:text-[3rem] lg:leading-[1.1] xl:text-[3.25rem] [text-shadow:0_2px_24px_rgba(0,0,0,0.5)]">
+                {current.text}
+              </h2>
+            ) : null}
+            {/* 3. Ligne de preuve — valeur perçue */}
+            <p className="mt-4 text-[13px] text-white/90 sm:mt-5 sm:text-sm md:text-[13px]" role="doc-subtitle">
+              {t.proofLine}
+            </p>
+            {/* 4. CTA principal — action claire */}
+            {current.ctaLabel && current.ctaLink ? (
+              <div className="mt-6 sm:mt-8">
+                <Link
+                  href={localizePath(current.ctaLink, locale)}
+                  className={cn(
+                    'inline-flex w-full items-center justify-center gap-2.5 sm:w-auto sm:min-w-[12rem]',
+                    'rounded-2xl px-6 py-3.5 text-[15px] font-bold tracking-tight',
+                    'bg-white text-black',
+                    'shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-300',
+                    'hover:bg-white/95 hover:shadow-[0_12px_40px_rgba(0,0,0,0.5)]',
+                    'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40'
+                  )}
+                  data-gtm="hero_cta"
+                >
+                  {current.ctaLabel}
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="shrink-0">
+                    <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </Link>
+              </div>
+            ) : null}
+            {/* 5. Ligne de confiance — réassurance */}
+            <p className="mt-4 text-[11px] text-white/70 sm:mt-5 sm:text-xs" aria-hidden="true">
+              {t.trustLine}
+            </p>
+          </div>
         </div>
       ) : null}
 
@@ -799,7 +853,7 @@ export default function HeroCarousel({
                   >
                     <Image
                       src={thumb}
-                      alt=""
+                      alt={slide.alt || `${t.goTo}${i + 1}`}
                       fill
                       sizes="80px"
                       className="object-cover brightness-[1.08] contrast-[1.05] transition-transform duration-300 group-hover:scale-105"
@@ -820,7 +874,7 @@ export default function HeroCarousel({
 
       <noscript>
         <p className="mt-2 text-center">
-          <a href="/products">{t.noscriptProducts}</a>
+          <a href={localizePath('/products', locale === 'en' ? 'en' : 'fr')}>{t.noscriptProducts}</a>
         </p>
       </noscript>
     </section>

@@ -98,16 +98,16 @@ Ce document récapitule toutes les améliorations « full option » et vérifie 
 
 ---
 
-## 9. Pages légales éditables (public)
+## 9. Pages légales (public)
 
-| Page | Source du contenu | Fallback |
-|------|-------------------|----------|
-| CGV | `getSitePage('cgv')` | Texte statique par défaut |
-| Mentions légales | `getSitePage('mentions-legales')` | Texte statique par défaut |
-| Confidentialité | `getSitePage('confidentialite')` + bloc préférences (client) | Texte statique par défaut |
+| Page | Source du contenu | SEO / i18n |
+|------|-------------------|------------|
+| CGV | `getTranslations('cgv')` – 13 articles, sommaire, ancres, liens (mentions, contact) | `generateMeta()` canonical/hreflang |
+| Mentions légales | `getTranslations('mentions_legales')` – sections éditeur, hébergeur, données, etc. | Idem |
+| Confidentialité | `getTranslations('confidentialite')` – 12 sections, bloc préférences cookies | Idem |
 
-- API publique : `GET /api/site-pages/[slug]` (sans auth) pour usage futur si besoin.
-- Édition : Admin > Pages légales (`/admin/pages`).
+- Contenu structuré en `fr.json` / `en.json` (namespaces `cgv`, `mentions_legales`, `confidentialite`). Admin > Pages légales (`/admin/pages`) pour édition si besoin.
+- API publique : `GET /api/site-pages/[slug]` (sans auth).
 
 ---
 
@@ -179,3 +179,29 @@ Cohérence : toutes les chaînes visibles sur ces pages sont traduisibles (FR/EN
 | **APIs** | Tous les `console.error` des routes API remplacés par `@/lib/logger` (error) pour logs assainis en production. |
 | **i18n admin** | OrderTable : `export_csv`, `change_order_status_aria`, `pagination_prev`/`pagination_next`. NewsletterSubscribersTable : `newsletter_export_csv`, `newsletter_page_info`, `newsletter_table_aria`, `error_load_newsletter`, aria pagination. ContactSubmissionsTable : `contact_table_aria`, dates selon `useLocale()`. ProductTable : en-têtes tableau (table_title, table_price, table_stock, table_slug, actions), aria pagination, aria-label sur le tableau. ImportProductsTable : aria-label sur le bouton d’import. |
 | **Clés admin** | Ajout dans `fr.json` / `en.json` : `change_order_status_aria`, `newsletter_table_aria`, `newsletter_page_info`, `error_load_newsletter`, `contact_table_aria`, `pagination_prev`, `pagination_next`, `reviews_page_info`. |
+
+---
+
+## 16. Sécurité, i18n et perf (dernier passage)
+
+| Domaine | Vérification |
+|--------|----------------|
+| **Sécurité** | Voir `docs/SECURITE.md`. Stripe webhook (signature), checkout (Zod + rate limit + Origin), contact (Zod + **rate limit 10 req/min**), avis (rate limit + reCAPTCHA optionnel), cron/revalidate (token timing-safe). En prod : `STRIPE_SECRET_KEY` et `NEXTAUTH_SECRET`/`AUTH_SECRET` obligatoires. |
+| **Métadonnées** | Login, commande, success, account, search, cart, maintenance, catégories : `generateMetadata()` + `getTranslations('seo')` ou namespace dédié + `generateMeta()` (canonical, hreflang). |
+| **i18n** | Page recherche : `getTranslations('search')` (titre, hint, produits/blog, untitled). Popup email : namespace `email_popup`. LanguageSwitcher : `change_lang_to`. StickyFreeShippingBar : `close_bar_aria` (misc). |
+| **Perf / a11y** | ImageWithZoom : `loading="lazy"` et `decoding="async"`. Modal : trapFocus + restoreFocus. |
+| **Layout confidentialité** | Metadata statique retirée ; seule la page contrôle le SEO via `generateMetadata()`. |
+
+Ce document reste la référence pour vérifier que toutes les briques « full option » sont en place et cohérentes.
+
+---
+
+## 17. Gros chantier – UX, erreurs, a11y
+
+| Domaine | Vérification |
+|--------|--------------|
+| **Skip link** | Composant `SkipLink` dans le layout racine : lien « Aller au contenu » visible au focus (sr-only + focus:not-sr-only). |
+| **404** | Page avec liens utiles : Accueil, Voir les produits, Nous contacter, **Recherche**, **Catégories** (i18n `not_found.link_search`, `link_category`). |
+| **Erreur + retry** | Composant réutilisable `ErrorWithRetry` (message, onRetry, retryLabel). Utilisé dans **CheckoutForm** en cas d’échec création session Stripe (remplace le bloc d’erreur inline). |
+| **Focus trap** | Hook `useFocusTrap(active, containerRef, options)` dans `@/lib/useFocusTrap`. Utilisé dans **ConsentBanner** (dialog cookies) et **PopupEmailCapture** (dialog email) : piège Tab, focus initial, restauration du focus à la fermeture. ProductGallery lightbox avait déjà un trap Tab + Escape. |
+| **Loading** | Pages produits, détail produit, catégorie, recherche ont un `loading.tsx` (skeleton). |

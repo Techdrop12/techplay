@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 
-import { error as logError } from '@/lib/logger'
+import { apiError } from '@/lib/apiResponse'
 import { connectToDatabase } from '@/lib/db'
+import { error as logError } from '@/lib/logger'
 import Product from '@/models/Product'
 import { requireAdmin } from '@/lib/requireAdmin'
 
@@ -49,10 +50,7 @@ export async function GET(req: Request) {
     return NextResponse.json(toPlain({ items: docs, total, page, limit, pages }))
   } catch (e) {
     logError('[admin/products] GET', e)
-    return NextResponse.json(
-      { error: 'Erreur serveur' },
-      { status: 500 }
-    )
+    return apiError('Erreur serveur', 500, { details: e instanceof Error ? e.message : undefined })
   }
 }
 
@@ -87,25 +85,16 @@ export async function POST(req: Request) {
         : []
 
     if (!title || !slug) {
-      return NextResponse.json(
-        { error: 'Titre et slug requis' },
-        { status: 400 }
-      )
+      return apiError('Titre et slug requis', 400)
     }
     if (!Number.isFinite(price) || price < 0) {
-      return NextResponse.json(
-        { error: 'Prix invalide' },
-        { status: 400 }
-      )
+      return apiError('Prix invalide', 400)
     }
 
     await connectToDatabase()
     const existing = await Product.findOne({ $or: [{ slug }, { sku: slug.toUpperCase() }] }).lean().exec()
     if (existing) {
-      return NextResponse.json(
-        { error: 'Un produit avec ce slug ou SKU existe déjà' },
-        { status: 400 }
-      )
+      return apiError('Un produit avec ce slug ou SKU existe déjà', 400)
     }
 
     const sku = (body?.sku && String(body.sku).trim())
@@ -130,9 +119,6 @@ export async function POST(req: Request) {
     return NextResponse.json(toPlain(doc))
   } catch (e) {
     logError('[admin/products] POST', e)
-    return NextResponse.json(
-      { error: 'Erreur lors de la création' },
-      { status: 500 }
-    )
+    return apiError('Erreur lors de la création', 500, { details: e instanceof Error ? e.message : undefined })
   }
 }

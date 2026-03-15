@@ -72,5 +72,9 @@ if (isProduction) {
   if (!serverEnv.STRIPE_SECRET_KEY?.trim()) {
     throw new Error('STRIPE_SECRET_KEY is required in production')
   }
+  const authSecret = serverEnv.NEXTAUTH_SECRET ?? serverEnv.AUTH_SECRET
+  if (!authSecret?.trim() || authSecret === 'change-me') {
+    throw new Error('NEXTAUTH_SECRET or AUTH_SECRET must be set and strong in production')
+  }
 }
 

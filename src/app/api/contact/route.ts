@@ -1,14 +1,33 @@
+import { NextResponse } from 'next/server'
+
 import { error as logError } from '@/lib/logger'
 import { connectToDatabase } from '@/lib/db'
 import ContactSubmission from '@/models/ContactSubmission'
 import { apiError, apiSuccess, safeErrorForLog } from '@/lib/apiResponse'
+import { createRateLimiter, ipFromRequest } from '@/lib/rateLimit'
 import { contactSchema } from '@/lib/zodSchemas'
+
+const contactLimiter = createRateLimiter({
+  id: 'contact',
+  limit: 10,
+  intervalMs: 60_000,
+  strategy: 'fixed-window',
+})
 
 function toPlain(obj: unknown) {
   return JSON.parse(JSON.stringify(obj))
 }
 
 export async function POST(req: Request) {
+  const ip = ipFromRequest(req)
+  const rl = contactLimiter.check(ip)
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: 'Trop de requêtes. Réessayez dans une minute.' },
+      { status: 429, headers: contactLimiter.headers(rl) }
+    )
+  }
+
   let body: unknown
   try {
     body = await req.json()

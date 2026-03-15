@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 
 import mongoose from 'mongoose'
-import { error as logError } from '@/lib/logger'
+import { apiError } from '@/lib/apiResponse'
 import { connectToDatabase } from '@/lib/db'
+import { error as logError } from '@/lib/logger'
 import Product from '@/models/Product'
 
 const PRODUCT_FIELDS =
@@ -39,6 +40,6 @@ export async function GET(req: Request) {
     return NextResponse.json(JSON.parse(JSON.stringify(docs)))
   } catch (e) {
     logError('[products/by-ids]', e)
-    return NextResponse.json({ error: 'Erreur' }, { status: 500 })
+    return apiError('Erreur', 500, { details: e instanceof Error ? e.message : undefined })
   }
 }

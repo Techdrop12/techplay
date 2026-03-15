@@ -33,23 +33,30 @@ export function toISO(date: Dateish) {
   return toDate(date).toISOString()
 }
 
-/** Format relatif court pour avis/commentaires (« à l'instant », « 5 min », « 2 j ») */
-export function timeAgo(date: Dateish, locale = 'fr'): string {
+export type TimeAgoLabels = {
+  justNow: string
+  min: (n: number) => string
+  h: (n: number) => string
+  d: (n: number) => string
+}
+
+/** Format relatif court pour avis/commentaires (« à l'instant », « 5 min », « 2 j »). Si labels fourni, il est utilisé (i18n). */
+export function timeAgo(date: Dateish, locale = 'fr', labels?: TimeAgoLabels): string {
   const d = toDate(date).getTime()
   const diff = Date.now() - d
   const abs = Math.abs(diff)
   const minute = 60_000
   const hour = 3_600_000
   const day = 86_400_000
-  if (abs < minute) return locale === 'fr' ? 'à l\'instant' : 'just now'
+  if (abs < minute) return labels ? labels.justNow : locale === 'fr' ? "à l'instant" : 'just now'
   if (abs < hour) {
     const n = Math.round(diff / minute)
-    return locale === 'fr' ? `${n} min` : `${n} min`
+    return labels ? labels.min(n) : locale === 'fr' ? `${n} min` : `${n} min`
   }
   if (abs < day) {
     const n = Math.round(diff / hour)
-    return locale === 'fr' ? `${n} h` : `${n}h`
+    return labels ? labels.h(n) : locale === 'fr' ? `${n} h` : `${n}h`
   }
   const n = Math.round(diff / day)
-  return locale === 'fr' ? `${n} j` : `${n}d`
+  return labels ? labels.d(n) : locale === 'fr' ? `${n} j` : `${n}d`
 }

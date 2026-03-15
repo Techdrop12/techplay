@@ -373,10 +373,10 @@ export default function PackCard({ pack, priority = false, className }: PackCard
       itemScope
       itemType="https://schema.org/Product"
       className={cn(
-        'group relative rounded-[1.75rem] border border-[hsl(var(--accent)/0.2)] p-[2px]',
-        'shadow-[0_20px_50px_rgba(15,23,42,0.4),0_0_0_1px_hsl(var(--accent)/0.06)]',
+        'group relative rounded-[1.75rem] border border-[hsl(var(--accent)/0.22)] p-[2px]',
+        'shadow-[0_16px_48px_rgba(15,23,42,0.12),0_0_0_1px_hsl(var(--accent)/0.08)]',
         'transition-all duration-300 ease-[var(--ease-smooth)]',
-        'hover:shadow-[0_24px_60px_rgba(15,23,42,0.5),0_0_24px_hsl(var(--accent)/0.12)] hover:-translate-y-1 hover:border-[hsl(var(--accent)/0.35)]',
+        'hover:shadow-[0_24px_56px_rgba(15,23,42,0.18),0_0_0_1px_hsl(var(--accent)/0.2),0_0_32px_hsl(var(--accent)/0.08)] hover:-translate-y-1.5 hover:border-[hsl(var(--accent)/0.4)]',
         className
       )}
       style={articleStyle}
@@ -530,29 +530,27 @@ export default function PackCard({ pack, priority = false, className }: PackCard
             />
           </div>
 
-          <div className="border-t border-[hsl(var(--border))]/60 bg-[hsl(var(--surface))]/30 p-5 sm:p-6">
+          {/* Bloc contenu — structure : identité → valeur pack → prix → économie → action */}
+          <div className="border-t border-[hsl(var(--border))]/50 bg-[hsl(var(--surface))]/40 p-4 sm:p-5">
+            {/* 1. Identité + valeur pack */}
             <h3
-              className="line-clamp-2 text-[15px] font-bold tracking-tight text-[hsl(var(--text))] sm:text-[17px]"
+              className="line-clamp-2 text-[15px] font-bold leading-snug tracking-tight text-[hsl(var(--text))] sm:text-base"
               title={title}
             >
               {title}
             </h3>
-
             {items.length > 0 ? (
-              <div className="mt-2 flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--accent)/0.1)] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--accent))]">
-                  <span className="h-1 w-1 rounded-full bg-[hsl(var(--accent))]" aria-hidden="true" />
-                  {t.included(items.length)}
-                </span>
-              </div>
+              <p className="mt-1.5 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--accent))]">
+                {t.included(items.length)}
+              </p>
             ) : null}
 
             {itemChips.length > 0 ? (
-              <ul className="mt-3 flex flex-wrap gap-1.5" aria-label={t.previewItems}>
+              <ul className="mt-2 flex flex-wrap gap-1.5" aria-label={t.previewItems}>
                 {itemChips.map((label, index) => (
                   <li
                     key={`${label}-${index}`}
-                    className="rounded-lg border border-[hsl(var(--accent)/0.2)] bg-[hsl(var(--accent)/0.06)] px-2.5 py-1 text-[11px] font-medium text-token-text/90"
+                    className="rounded-md border border-[hsl(var(--accent)/0.2)] bg-[hsl(var(--accent)/0.06)] px-2 py-0.5 text-[11px] font-medium text-token-text/85"
                   >
                     {label}
                   </li>
@@ -561,13 +559,14 @@ export default function PackCard({ pack, priority = false, className }: PackCard
             ) : null}
 
             {description ? (
-              <p className="mt-2 line-clamp-3 text-[13px] text-token-text/70">
+              <p className="mt-2 line-clamp-2 text-[12px] text-token-text/65">
                 {description}
               </p>
             ) : null}
 
+            {/* 2. Prix — bloc dédié */}
             <div
-              className="mt-4 flex flex-wrap items-end gap-3 rounded-xl border border-[hsl(var(--accent)/0.15)] bg-[hsl(var(--accent)/0.04)] p-3 sm:p-3.5"
+              className="mt-4 flex flex-wrap items-baseline gap-2 rounded-lg bg-[hsl(var(--surface-2))]/90 px-3 py-2.5 sm:py-3"
               itemProp="offers"
               itemScope
               itemType="https://schema.org/Offer"
@@ -579,46 +578,41 @@ export default function PackCard({ pack, priority = false, className }: PackCard
                 href={outOfStock ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock'}
               />
               <meta itemProp="price" content={Math.max(0, Number(price || 0)).toFixed(2)} />
-
               <span
                 className="text-xl font-extrabold tracking-tight text-[hsl(var(--accent))] sm:text-2xl"
                 aria-label={`Prix : ${formatPrice(price)}`}
               >
                 {formatPrice(price)}
               </span>
-
               {typeof referencePrice === 'number' && referencePrice > price ? (
                 <>
                   <span className="text-sm text-token-text/50 line-through">
                     {formatPrice(referencePrice)}
                   </span>
                   {typeof discountPercent === 'number' ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
-                      -{discountPercent}%
+                    <span className="ml-auto rounded-md bg-emerald-500/15 px-2 py-0.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+                      −{discountPercent}%
                     </span>
                   ) : null}
                 </>
               ) : null}
             </div>
 
+            {/* 3. Économie — une ligne si applicable */}
             {typeof savingsEuro === 'number' && savingsEuro > 0 ? (
-              <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg bg-emerald-500/10 px-3 py-2 text-[12px]">
-                <span className="font-semibold text-emerald-700 dark:text-emerald-300">
-                  {t.save} {formatPrice(savingsEuro)}
-                </span>
+              <p className="mt-2 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
+                {t.save} {formatPrice(savingsEuro)}
                 {typeof itemsValue === 'number' ? (
-                  <>
-                    <span className="text-token-text/50" aria-hidden="true">·</span>
-                    <span className="text-token-text/60">{t.itemValue} {formatPrice(itemsValue)}</span>
-                  </>
+                  <span className="ml-1 font-normal text-token-text/60">({t.itemValue} {formatPrice(itemsValue)})</span>
                 ) : null}
-              </div>
+              </p>
             ) : null}
 
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-              <span className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent)/0.1)] px-3 py-2 text-[13px] font-semibold text-[hsl(var(--accent))] transition-colors group-hover:bg-[hsl(var(--accent)/0.15)]">
+            {/* 4. Action + livraison */}
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 sm:mt-5">
+              <span className="inline-flex min-h-[2.75rem] items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-4 py-2.5 text-[13px] font-bold text-[hsl(var(--accent-foreground))] transition-opacity group-hover:opacity-95">
                 {t.readPack}
-                <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" className="shrink-0 transition-transform duration-200 group-hover:translate-x-0.5">
+                <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" className="shrink-0">
                   <path fill="currentColor" d="M13.172 12L8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z" />
                 </svg>
               </span>

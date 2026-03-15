@@ -1,9 +1,16 @@
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 
-export const metadata: Metadata = {
-  title: 'Commande confirmée',
-  description: 'Votre commande TechPlay a bien été enregistrée. Merci pour votre achat.',
-  robots: { index: false, follow: true },
+import { generateMeta } from '@/lib/seo'
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('seo')
+  return generateMeta({
+    title: t('success_title'),
+    description: t('success_description'),
+    url: '/success',
+    noindex: true,
+  })
 }
 
 export default function SuccessLayout({

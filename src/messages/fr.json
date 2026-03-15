@@ -19,7 +19,15 @@
     "blog_title": "Blog TechPlay",
     "blog_description": "Actualités, conseils et sélections par TechPlay.",
     "product_not_found_title": "Produit introuvable",
-    "product_not_found_description": "Le produit que vous cherchez n’existe pas ou n’est plus disponible."
+    "product_not_found_description": "Le produit que vous cherchez n’existe pas ou n’est plus disponible.",
+    "login_title": "Connexion",
+    "login_description": "Connectez-vous à votre compte TechPlay pour accéder à votre espace et à vos commandes.",
+    "commande_title": "Commande",
+    "commande_description": "Finalisez votre commande en toute sécurité. Paiement Stripe, livraison 48–72 h.",
+    "account_title": "Espace client – TechPlay",
+    "account_description": "Accédez à vos commandes, suivez vos livraisons et gérez votre compte TechPlay.",
+    "search_title": "Recherche – TechPlay",
+    "search_description": "Résultats de recherche produits et blog."
   },
   "seo_extra": {
     "pack_not_found_title": "Pack introuvable – TechPlay",
@@ -27,7 +35,6 @@
     "not_found_page_title": "Page introuvable – TechPlay",
     "not_found_page_description": "La page demandée n'existe pas ou a été déplacée."
   },
-
   "common": {
     "brand": "TechPlay",
     "loading": "Chargement…",
@@ -68,6 +75,7 @@
     "loading_results": "Chargement des résultats",
     "close_promo_banner_aria": "Fermer la bannière promotionnelle",
     "language_switcher_aria": "Sélecteur de langue",
+    "change_lang_to": "Changer la langue vers {lang}",
     "added_to_cart_aria": "Ajouté au panier",
     "filter_by_category_aria": "Filtrer par catégorie",
     "view_product_aria": "Voir le produit",
@@ -78,16 +86,9 @@
     "carousel_prev_aria": "Image précédente",
     "carousel_next_aria": "Image suivante"
   },
-
   "hero": {
-    "title": "Bienvenue sur TechPlay",
-    "subtitle": "Les meilleurs produits tech et gadgets du moment",
-    "banner_title": "Bienvenue chez TechPlay",
-    "banner_subtitle": "Découvrez les meilleurs gadgets high-tech et accessoires innovants. Livraison rapide. SAV premium.",
-    "banner_cta": "Explorer les produits",
-    "banner_cta_aria": "Explorer les produits TechPlay"
+    "cta_new": "Voir les nouveautés"
   },
-
   "nav": {
     "home": "Accueil",
     "products": "Produits",
@@ -100,7 +101,6 @@
     "admin": "Admin",
     "login": "Connexion"
   },
-
   "footer": {
     "about": "À propos",
     "cgv": "CGV",
@@ -109,11 +109,14 @@
     "newsletter_title": "Restez informé",
     "newsletter_sub": "Actus, promos et nouveautés.",
     "payments": "Paiements acceptés",
+    "we_accept": "Paiements acceptés",
+    "get_in_touch": "Nous joindre",
+    "follow_us": "Suivez-nous",
+    "secure_payment": "Paiement sécurisé :",
     "shipping": "Livraison",
     "returns": "Retours",
     "security": "Sécurité"
   },
-
   "product_card": {
     "new": "Nouveau",
     "best_seller": "Best seller",
@@ -127,7 +130,6 @@
     "product_aria": "Produit : {title}",
     "save": "Économie"
   },
-
   "buttons": {
     "add_to_cart": "Ajouter au panier",
     "view_product": "Voir le produit",
@@ -142,7 +144,6 @@
     "load_more": "Charger plus",
     "see_all": "Tout voir"
   },
-
   "forms": {
     "email": "Email",
     "password": "Mot de passe",
@@ -158,7 +159,6 @@
     "coupon": "Code promo",
     "submit": "Envoyer"
   },
-
   "validation": {
     "required": "Champ requis",
     "email_invalid": "Email invalide",
@@ -167,7 +167,6 @@
     "password_weak": "Mot de passe trop faible",
     "postcode_invalid": "Code postal invalide"
   },
-
   "aria": {
     "skip_to_content": "Aller au contenu principal",
     "scroll_top": "Remonter en haut",
@@ -181,7 +180,6 @@
     "toggle_wishlist": "Basculer la liste de souhaits",
     "toggle_cart": "Ouvrir/fermer le panier"
   },
-
   "consent": {
     "banner_title": "Votre vie privée",
     "banner_desc": "Nous utilisons des cookies pour mesurer l’audience et améliorer votre expérience.",
@@ -201,7 +199,6 @@
     "functional_always_active": "Fonctionnels & sécurité sont toujours actifs.",
     "learn_more": "En savoir plus"
   },
-
   "toasts": {
     "added_to_cart": "Ajouté au panier",
     "removed_from_cart": "Retiré du panier",
@@ -209,14 +206,12 @@
     "added_to_wishlist": "Ajouté à la liste de souhaits",
     "removed_from_wishlist": "Retiré de la liste de souhaits"
   },
-
   "skeleton": {
     "loading_products": "Chargement des produits…",
     "loading_product": "Chargement du produit…",
     "loading_cart": "Chargement du panier…",
     "loading": "Chargement…"
   },
-
   "admin": {
     "products_title": "Produits en base",
     "loading_products": "Chargement…",
@@ -231,7 +226,7 @@
     "error_load_reviews": "Erreur lors du chargement des avis",
     "error_load_orders": "Erreur chargement commandes",
     "error_load_contact": "Erreur chargement messages",
-    "error_load_newsletter": "Erreur chargement inscrits",
+    "error_load_newsletter": "Erreur chargement",
     "error_delete": "Erreur lors de la suppression",
     "error_load_product": "Erreur chargement produit",
     "error_update": "Erreur modification",
@@ -288,7 +283,6 @@
     "change_order_status_aria": "Changer le statut de la commande {id}",
     "newsletter_table_aria": "Inscrits newsletter",
     "newsletter_page_info": "Page {page} / {pages}",
-    "error_load_newsletter": "Erreur chargement",
     "contact_table_aria": "Messages contact",
     "filter_status_blog": "Filtrer par statut",
     "all": "Tous",
@@ -403,7 +397,6 @@
     "admin_nav_aria": "Navigation admin",
     "loading_article_aria": "Chargement de l'article",
     "logout_aria": "Se déconnecter",
-    "product_updated": "Produit mis à jour",
     "product_added": "Produit ajouté",
     "product_error": "Erreur",
     "product_created_error": "Erreur lors de la création",
@@ -419,7 +412,6 @@
     "back_to_products": "← Retour aux produits",
     "back_to_articles": "← Retour aux articles",
     "back_to_account": "← Retour au compte",
-    "add_product_heading": "Ajouter un produit",
     "edit_article_heading": "Modifier l'article",
     "title_required": "Titre requis",
     "article_title_placeholder": "Titre de l'article",
@@ -433,7 +425,6 @@
     "new_article_heading": "Nouvel article",
     "article_creation_error": "Erreur création"
   },
-
   "date": {
     "today": "Aujourd’hui",
     "yesterday": "Hier",
@@ -443,28 +434,44 @@
     "long": "{value, date, long}",
     "relative": "{value, relative}"
   },
-
   "units": {
     "currency": "{value, number, ::currency/EUR}",
     "weight_kg": "{value, number} kg",
     "dimension_cm": "{value, number} cm"
   },
-
   "not_found": {
-    "back_home": "Retour à l'accueil",
+    "title": "404 – Page introuvable",
+    "message": "Désolé, cette page n'existe pas ou a été déplacée.",
+    "details_heading": "Détails",
     "path_requested": "Chemin demandé :",
-    "details_heading": "Détails de la page introuvable",
-    "go_back": "Retour"
+    "back_home": "Retour à l'accueil",
+    "go_back": "Page précédente",
+    "useful_links": "Liens utiles",
+    "link_products": "Voir les produits",
+    "link_contact": "Nous contacter",
+    "link_search": "Recherche",
+    "link_category": "Catégories"
   },
-
+  "free_shipping": {
+    "eligible_short": "Livraison offerte",
+    "eligible_long": "Livraison gratuite",
+    "missing": "Plus que {amount} pour la livraison gratuite",
+    "sr_eligible": "Seuil de livraison gratuite atteint (seuil {threshold}).",
+    "sr_missing": "Il manque {remaining} pour atteindre la livraison gratuite (seuil {threshold}).",
+    "progress_label": "Progression vers la livraison gratuite",
+    "policy": "Voir conditions",
+    "aria_100_reached": "100% atteint"
+  },
   "abtest": {
     "badge": "Expérience en test",
     "variant": "Variante {name}"
   },
-
   "home": {
     "title": "Accueil",
     "description": "Découvrez les meilleurs gadgets high-tech et accessoires livrés chez vous.",
+    "trust_fast_delivery": "Livraison rapide",
+    "trust_warranty": "Garantie 2 ans",
+    "trust_secure": "Paiement sécurisé",
     "categories": "Catégories",
     "all": "Tous",
     "add_to_cart": "Ajouter au panier",
@@ -478,9 +485,9 @@
     "error_loading_products": "Erreur lors du chargement des produits.",
     "no_products_available": "Aucun produit disponible."
   },
-
   "search": {
     "title": "Recherche",
+    "title_with_query": "Recherche : « {query} »",
     "placeholder": "Rechercher un produit ou une marque…",
     "no_results": "Aucun résultat pour « {query} ».",
     "no_results_generic": "Aucun résultat trouvé.",
@@ -490,9 +497,38 @@
     "recent_searches": "Recherches récentes",
     "no_result": "Aucun résultat.",
     "see_more_results": "Voir plus de résultats pour « {query} »",
-    "placeholder_shortcut": "Rechercher un produit…  /  Ctrl/⌘+K"
+    "placeholder_shortcut": "Rechercher un produit…  /  Ctrl/⌘+K",
+    "hint_no_query": "Saisissez un mot-clé dans la barre de recherche (header) ou via l'URL :",
+    "products_heading": "Produits",
+    "no_products": "Aucun produit trouvé.",
+    "blog_heading": "Articles du blog",
+    "no_blog_posts": "Aucun article trouvé.",
+    "untitled": "Sans titre"
   },
-
+  "email_popup": {
+    "title": "Restez informé",
+    "description": "Recevez nos nouveautés et offres (pas de spam).",
+    "close_aria": "Fermer",
+    "closed_announce": "Fenêtre fermée",
+    "placeholder": "Votre email",
+    "submit": "S'inscrire",
+    "sending": "Envoi…",
+    "no_thanks": "Non merci",
+    "privacy_prefix": "En vous inscrivant, vous acceptez notre ",
+    "privacy_link": "politique de confidentialité",
+    "privacy_suffix": ".",
+    "invalid_email": "Adresse email invalide",
+    "sending_announce": "Envoi en cours…",
+    "success_announce": "Inscription réussie",
+    "fail_announce": "Échec de l'inscription",
+    "error_fallback": "Une erreur est survenue"
+  },
+  "exit_intent": {
+    "title": "Avant de partir…",
+    "description": "Profitez de -10 % avec le code {code}",
+    "cta": "Voir mon panier →",
+    "keep_browsing": "Continuer mes achats"
+  },
   "filters": {
     "title": "Filtres",
     "price": "Prix",
@@ -522,9 +558,9 @@
     "price_max_aria": "Prix maximum",
     "sort_products_aria": "Trier les produits"
   },
-
   "sort": {
     "label": "Trier par",
+    "popularity": "Popularité",
     "relevance": "Pertinence",
     "price_asc": "Prix croissant",
     "price_desc": "Prix décroissant",
@@ -532,13 +568,17 @@
     "rating": "Meilleures notes",
     "promo": "Meilleures promos"
   },
-
+  "date": {
+    "time_ago_just_now": "à l'instant",
+    "time_ago_min": "{n} min",
+    "time_ago_h": "{n} h",
+    "time_ago_d": "{n} j"
+  },
   "pagination": {
     "prev": "Précédent",
     "next": "Suivant",
     "page_of": "Page {page} sur {pages}"
   },
-
   "product_list": {
     "results": "{count, plural, one {# produit} other {# produits}}",
     "best_sellers": "Meilleures ventes",
@@ -554,7 +594,6 @@
     "displayed_count": "{count, plural, one {# produit affiché.} other {# produits affichés.}}",
     "load_more_aria": "Charger plus de produits"
   },
-
   "product": {
     "default_title": "Produit",
     "added_to_cart": "{title} ajouté au panier",
@@ -589,7 +628,6 @@
     "ai_summary_label": "Résumé IA :",
     "question_product_aria": "Question produit"
   },
-
   "feedback": {
     "button": "Feedback",
     "title": "Donnez-nous votre avis !",
@@ -598,7 +636,6 @@
     "send": "Envoyer",
     "cancel": "Annuler"
   },
-
   "packs": {
     "title": "Nos Packs",
     "page_title": "Nos Packs",
@@ -612,7 +649,6 @@
     "category_claviers": "Claviers",
     "category_souris": "Souris"
   },
-
   "pack": {
     "items": "{count, plural, one {# article} other {# articles}} inclus",
     "save": "Économisez {value, number, ::currency/EUR}",
@@ -620,7 +656,6 @@
     "image_alt": "Image du pack {title}",
     "rating_aria": "Note : {rating} étoiles"
   },
-
   "wishlist": {
     "title": "Ma liste de souhaits",
     "empty": "Votre liste de souhaits est vide.",
@@ -644,84 +679,43 @@
     "intro_with_items": "Retrouvez ici les produits que vous avez mis de côté. Ajoutez-les au panier en un clic.",
     "saved_on_device": "Sauvegardé sur cet appareil. Ajoutez au panier depuis chaque carte."
   },
-
   "cart": {
-    "summary_title": "Récapitulatif",
-    "your_cart": "Votre panier",
-    "empty": "Votre panier est vide",
-    "sr_empty": "Panier vide",
-    "sr_count_in_cart": "{count, plural, one {# article dans le panier} other {# articles dans le panier}}",
-    "sr_added": "{diff, plural, one {# article ajouté} other {# articles ajoutés}}. {count} au total.",
-    "sr_removed": "{diff, plural, one {# article retiré} other {# articles retirés}}. {count} au total.",
-    "product_fallback": "Produit",
-    "total": "Total",
-    "subtotal": "Sous-total",
-    "taxes": "TVA",
-    "shipping": "Livraison",
-    "discount": "Réduction",
-    "checkout": "Passer au paiement",
-    "continue": "← Continuer vos achats",
-    "error": "Erreur lors du paiement",
-    "free_shipping_reached": "Frais de port offerts !",
-    "add_x_more": "Ajoutez {missing} € pour la livraison gratuite",
-    "add_x_more_fmt": "Ajoutez {missing, number, ::currency/EUR} pour la livraison gratuite",
-    "summary_mobile_label": "Résumé du panier",
-    "items_count": "{count, plural, one {# article} other {# articles}}",
-    "view_cart": "Voir le panier",
-    "checkout_btn": "Passer commande",
-    "checkout_btn_aria": "Passer commande et payer",
-    "shipping_free": "Offerte",
-    "vat_est": "TVA (est.)",
-    "discount_label": "Remise",
-    "remove_code": "Retirer",
-    "remove_code_aria": "Retirer le code promo",
-    "coupon_placeholder": "Code promo",
-    "coupon_aria": "Code promo",
-    "apply_code": "Appliquer le code",
-    "you_save": "Vous économisez {amount}.",
-    "footer_secure": "Paiement sécurisé · Livraison offerte dès {threshold} · Retours 30 jours. Montants estimatifs.",
-    "code_invalid": "Code invalide.",
-    "code_applied": "Code appliqué ✔︎",
-    "code_removed": "Code retiré.",
-    "code_label": "Code :",
-    "announce_invalid": "Code promo invalide",
-    "announce_applied": "Code {code} appliqué",
-    "announce_removed": "Code promo retiré",
+    "view_product_aria": "Voir la fiche produit de {title}",
+    "remove_aria": "Supprimer {title} du panier",
+    "total_label": "Total",
+    "cart_items_aria": "Articles du panier",
+    "clear_cart_aria": "Vider le panier",
+    "cart_reminder_aria": "Rappel panier",
+    "cart_empty_toast": "Votre panier est vide.",
+    "add_to_cart_error": "Impossible d'ajouter au panier. Réessayez.",
+    "items_heading": "Articles",
     "no_items": "Aucun article dans le panier.",
-    "empty_sub": "Découvrez nos produits et nos packs à prix avantageux.",
     "view_products": "Voir les produits",
-    "view_packs": "Voir les packs",
-    "breadcrumb_aria": "Fil d'Ariane",
-    "cart_content_aria": "Contenu du panier",
-    "page_title": "Mon panier",
-    "explore_products": "Explorer les produits",
-    "cart_empty_sr": "Panier vide",
-    "items_in_cart_sr": "{count} article(s) dans le panier",
-    "items_added_sr": "{diff} article(s) ajouté(s). {count} au total.",
-    "items_removed_sr": "{diff} article(s) retiré(s). {count} au total."
+    "error_title": "Oups, le panier a rencontré un problème",
+    "error_message_retry": "Réessayez ou videz le panier si le problème persiste.",
+    "back_to_cart": "Revenir au panier",
+    "unit_label": "unité",
+    "quantity_decrease_aria": "Diminuer la quantité de {title}",
+    "quantity_increase_aria": "Augmenter la quantité de {title}",
+    "quantity_for_aria": "Quantité pour {title}",
+    "total_for_aria": "Total pour {title} : {amount}",
+    "remove_item_aria": "Supprimer {title} du panier",
+    "remove_item_title": "Supprimer {title}"
   },
-
-  "hero": {
-    "cta_new": "Voir les nouveautés"
-  },
-
   "promo_bar": {
     "text": "Livraison offerte dès 49€ d'achat · Retours gratuits 14j · Support 7j/7"
   },
-
   "theme": {
     "switch_to_light": "Passer en thème clair",
     "switch_to_dark": "Passer en thème sombre",
     "light": "Clair",
     "dark": "Sombre"
   },
-
   "reassurance": {
     "returns_30": "Retours gratuits 30 jours",
     "shipping_50": "Livraison offerte dès 50 €",
     "payment_100": "Paiement 100 % sécurisé"
   },
-
   "trust_badges": {
     "payment_secure": "Paiement sécurisé",
     "payment_secure_sr": "Paiement sécurisé par Stripe, chiffrement SSL",
@@ -733,30 +727,15 @@
     "returns_30_sr": "Retours et remboursement sous 30 jours",
     "heading_sr": "Nos garanties de confiance"
   },
-
-  "not_found": {
-    "title": "404 – Page introuvable",
-    "message": "Désolé, cette page n'existe pas ou a été déplacée.",
-    "details_heading": "Détails",
-    "path_requested": "Chemin demandé :",
-    "back_home": "Retour à l'accueil",
-    "go_back": "Page précédente",
-    "useful_links": "Liens utiles",
-    "link_products": "Voir les produits",
-    "link_contact": "Nous contacter"
-  },
-
   "error_page": {
     "title": "Une erreur est survenue",
     "contact_support": "Contacter le support",
     "back_to_cart": "Voir le panier"
   },
-
   "offline": {
     "message": "Vous êtes hors ligne. Vérifiez votre connexion.",
     "retry": "Réessayer"
   },
-
   "success_page": {
     "title": "Commande validée",
     "thank_you": "Merci pour votre commande",
@@ -768,24 +747,20 @@
     "continue_shopping": "Continuer mes achats",
     "view_orders": "Voir mes commandes"
   },
-
   "login_error": {
     "title": "Erreur de connexion",
     "message": "Une erreur est survenue. Vous pouvez réessayer ou retourner à l'accueil."
   },
-
   "checkout_steps": {
     "cart": "Panier",
     "details": "Coordonnées",
     "payment": "Paiement",
     "confirmation": "Confirmation"
   },
-
   "delivery": {
     "estimate_label": "Livraison estimée :",
     "business_days": "(jours ouvrés)"
   },
-
   "commande": {
     "title": "Valider ma commande",
     "checkout_title": "Paiement",
@@ -797,7 +772,6 @@
     "processing": "Traitement…",
     "payment_error": "Une erreur est survenue lors du paiement."
   },
-
   "orders": {
     "my_orders": "Mes commandes",
     "no_orders_found": "Vous n’avez pas encore de commande.",
@@ -842,7 +816,6 @@
       "canceled": "Annulée"
     }
   },
-
   "account": {
     "overview": "Mon compte",
     "profile": "Profil",
@@ -906,7 +879,6 @@
     "profile_page_title": "Mon profil",
     "profile_intro": "Modifiez les informations affichées sur votre compte."
   },
-
   "auth": {
     "login": "Connexion",
     "login_title": "Connexion à votre compte",
@@ -928,7 +900,6 @@
     "login_loading": "Connexion…",
     "submit_btn": "Se connecter"
   },
-
   "address": {
     "default_billing": "Facturation par défaut",
     "default_shipping": "Livraison par défaut",
@@ -936,7 +907,6 @@
     "edit": "Modifier l’adresse",
     "remove": "Supprimer l’adresse"
   },
-
   "payments": {
     "pay_with": "Payer avec {provider}",
     "card_ending": "Carte se terminant par {last4}",
@@ -944,7 +914,6 @@
     "status_processing": "Paiement en cours",
     "status_failed": "Paiement échoué"
   },
-
   "shipping": {
     "method": "Mode de livraison",
     "standard": "Standard",
@@ -952,19 +921,16 @@
     "free_from": "Offerte dès {amount, number, ::currency/EUR}",
     "est_delivery": "Livraison estimée : {date, date, medium}"
   },
-
   "returns": {
     "policy": "Retours sous 14 jours",
     "start_return": "Démarrer un retour",
     "help": "Besoin d’aide ? Contactez le support."
   },
-
   "rma": {
     "title": "Service après-vente",
     "create_ticket": "Créer un ticket",
     "ticket_id": "Ticket #{id}"
   },
-
   "notifications": {
     "title": "Notifications",
     "marketing": "Offres et nouveautés",
@@ -972,16 +938,16 @@
     "product_alerts": "Alertes produit",
     "save": "Enregistrer les préférences"
   },
-
   "newsletter": {
     "title": "Newsletter",
     "placeholder": "Votre email",
     "subscribe": "S’abonner",
     "subscribed": "Merci, vous êtes inscrit(e) !"
   },
-
   "blog": {
     "title": "Blog TechPlay",
+    "jsonld_name": "Blog TechPlay",
+    "jsonld_description": "Actualités, conseils et tendances high-tech sélectionnés par l'équipe TechPlay.",
     "section_kicker": "Guides & actualités",
     "page_title": "Blog gaming & setup",
     "page_subtitle": "Meilleurs claviers 2026, guides setup, astuces FPS — contenu éditorial pour ramener du trafic et convertir.",
@@ -1007,6 +973,8 @@
     "sort_aria": "Trier",
     "articles_list_aria": "Liste des articles",
     "pagination_articles_aria": "Pagination des articles",
+    "pagination_prev": "Précédent",
+    "pagination_next": "Suivant",
     "back_to_home": "Retour à l'accueil",
     "editorial_coming_soon": "Éditorial à venir",
     "editorial_coming_intro": "Nous préparons des guides setup gaming, sélections claviers et astuces FPS. Revenez bientôt, ou découvrez nos produits en attendant.",
@@ -1020,9 +988,46 @@
     "article_summary_placeholder": "Résumé ou contenu court",
     "article_image_placeholder": "https://...",
     "article_author_placeholder": "Nom de l'auteur",
-    "generator_subject_placeholder": "Sujet du blog"
+    "generator_subject_placeholder": "Sujet du blog",
+    "meta_title_suffix": " | TechPlay",
+    "meta_page": "Page {page}",
+    "search_meta_description": "Articles correspondant à « {query} » sur le blog TechPlay."
   },
-
+  "confidentialite": {
+    "page_title": "Politique de confidentialité",
+    "meta_description": "Politique de confidentialité et protection des données personnelles sur TechPlay. RGPD, cookies, vos droits.",
+    "last_updated": "Dernière mise à jour : janvier 2025",
+    "toc_title": "Sommaire",
+    "link_contact": "Nous contacter",
+    "link_mentions": "Mentions légales",
+    "see_also": "Voir aussi",
+    "section_intro_title": "1. Introduction",
+    "section_intro_content": "La présente politique de confidentialité décrit comment TechPlay SAS (ci-après « nous ») collecte, utilise et protège les données personnelles des utilisateurs du site TechPlay (le « Site »). Elle s’inscrit dans le cadre du Règlement (UE) 2016/679 (RGPD) et de la loi « Informatique et Libertés » du 6 janvier 1978 modifiée.",
+    "section_responsable_title": "2. Responsable du traitement",
+    "section_responsable_content": "Le responsable du traitement des données est TechPlay SAS, 12 rue de la Boutique, 75001 Paris, France. Pour toute question relative à vos données personnelles : support@techplay.fr ou via la page Contact.",
+    "section_donnees_title": "3. Données collectées",
+    "section_donnees_content": "Nous pouvons collecter : identité et coordonnées (nom, email, adresse, téléphone) lors de la commande ou du formulaire de contact ; données de connexion (adresse IP, logs) pour la sécurité et le bon fonctionnement du Site ; données de navigation et cookies (voir section Cookies) ; données de commande et de paiement (historique, montants), le paiement étant traité par notre prestataire sécurisé (Stripe).",
+    "section_finalites_title": "4. Finalités",
+    "section_finalites_content": "Les données sont utilisées pour : exécuter et suivre vos commandes ; gérer la relation client et le support ; envoyer les confirmations et factures ; améliorer nos services et le Site ; réaliser des statistiques d’audience ; et, avec votre consentement, vous envoyer des offres et actualités (newsletter, prospection).",
+    "section_bases_title": "5. Bases légales",
+    "section_bases_content": "Le traitement repose sur : l’exécution du contrat (commandes, livraison) ; votre consentement (cookies non essentiels, newsletter) ; notre intérêt légitime (sécurité, amélioration du service, statistiques) ; et les obligations légales (facturation, conservation).",
+    "section_destinataires_title": "6. Destinataires et transferts",
+    "section_destinataires_content": "Les données sont accessibles aux services internes habilités de TechPlay SAS et, le cas échéant, à nos prestataires (hébergement, paiement, envoi d’emails, analytics) dans le cadre de contrats stricts. Certains prestataires peuvent être situés hors UE ; dans ce cas, des garanties appropriées (clauses types, décisions d’adéquation) sont mises en place. Les données ne sont pas vendues à des tiers.",
+    "section_duree_title": "7. Durée de conservation",
+    "section_duree_content": "Les données sont conservées pour la durée nécessaire aux finalités : données de commande et facturation : 10 ans (obligations légales) ; données du formulaire de contact : durée du traitement de la demande puis archivage ou suppression ; cookies : selon la durée indiquée dans le bandeau cookies ; données de prospection : jusqu’à retrait du consentement ou opposition. Au-delà, les données sont supprimées ou anonymisées.",
+    "section_droits_title": "8. Vos droits",
+    "section_droits_content": "Vous disposez des droits d’accès, de rectification, d’effacement, de limitation du traitement, de portabilité et d’opposition, ainsi que du droit de retirer votre consentement à tout moment. Pour les exercer : support@techplay.fr ou courrier à l’adresse du siège. Vous avez également le droit d’introduire une réclamation auprès de la CNIL (www.cnil.fr). Pour la prospection par email, vous pouvez vous désinscrire via le lien en bas de chaque message.",
+    "section_cookies_title": "9. Cookies et traceurs",
+    "section_cookies_content": "Le Site utilise des cookies et traceurs pour le fonctionnement technique (session, préférences), la mesure d’audience et, avec votre consentement, la publicité et le ciblage. Vous pouvez gérer vos préférences via le bandeau cookies affiché lors de votre première visite ou via les paramètres de votre navigateur. Le refus de certains cookies peut limiter certaines fonctionnalités du Site.",
+    "section_securite_title": "10. Sécurité",
+    "section_securite_content": "Nous mettons en œuvre des mesures techniques et organisationnelles appropriées pour protéger vos données contre l’accès non autorisé, la perte ou l’altération (accès restreint, chiffrement, hébergement sécurisé, paiement via prestataire certifié).",
+    "section_modifications_title": "11. Modifications",
+    "section_modifications_content": "Nous nous réservons le droit de modifier cette politique pour refléter les évolutions juridiques ou de nos pratiques. La version en vigueur est celle publiée sur le Site. Nous vous invitons à la consulter régulièrement.",
+    "section_contact_title": "12. Contact",
+    "section_contact_content": "Pour toute question relative à cette politique ou à vos données : support@techplay.fr, formulaire de contact sur le Site, ou courrier à TechPlay SAS, 12 rue de la Boutique, 75001 Paris, France.",
+    "cookie_banner_hint": "Vous pouvez gérer vos préférences via la bannière cookies en bas de page.",
+    "link_cgv": "Conditions générales de vente"
+  },
   "category": {
     "title": "Catégorie : {category}",
     "no_products": "Aucun produit trouvé pour cette catégorie.",
@@ -1040,7 +1045,6 @@
     "index_title": "Catégories produits",
     "index_intro": "Choisissez une catégorie pour découvrir nos produits high-tech : audio, gaming, bureautique et plus."
   },
-
   "checkout": {
     "title": "Paiement",
     "email_hint": "Confirmation et facture envoyées à cette adresse.",
@@ -1081,18 +1085,81 @@
     "address_placeholder": "12 rue des Fleurs, 75000 Paris",
     "terms_and_privacy": "CGV et notre politique de confidentialité",
     "validation_email": "Adresse email invalide",
-    "validation_address": "Adresse trop courte"
+    "validation_address": "Adresse trop courte",
+    "coords_heading": "Coordonnées",
+    "coords_intro": "Indiquez votre email et adresse de livraison. Vous serez redirigé vers le paiement sécurisé (Stripe).",
+    "secure_footer_prefix": "Paiement sécurisé (Stripe) · CB, Apple Pay, Google Pay · En continuant vous acceptez nos ",
+    "link_cgv": "CGV",
+    "secure_footer_mid": " et notre ",
+    "secure_footer_suffix": ".",
+    "creating_session_announce": "Création de la session de paiement…"
   },
-
+  "mentions_legales": {
+    "page_title": "Mentions légales",
+    "meta_description": "Mentions légales du site TechPlay : éditeur, hébergeur, données personnelles, cookies, droit applicable.",
+    "last_updated": "Dernière mise à jour : janvier 2025",
+    "section_editeur_title": "1. Éditeur du site",
+    "section_editeur_content": "Le site TechPlay (ci-après « le Site ») est édité par la société TechPlay SAS, société par actions simplifiée au capital de 10 000 euros, dont le siège social est situé 12 rue de la Boutique, 75001 Paris, France.\n\nRCS Paris 123 456 789\nNuméro de TVA intracommunautaire : FR 12 345678 901\n\nLe Site constitue une œuvre de l’esprit protégée par le droit d’auteur. Sa reproduction ou représentation, totale ou partielle, sans autorisation préalable écrite de TechPlay SAS est interdite et constitutive de contrefaçon.",
+    "section_hebergeur_title": "2. Hébergeur",
+    "section_hebergeur_content": "Le Site est hébergé par :\n\nVercel Inc.\n440 N Barranca Ave #4133\nCovina, CA 91723\nÉtats-Unis\n\nPour toute question relative à l’hébergement ou à la disponibilité du Site, vous pouvez contacter l’hébergeur via les moyens mis à disposition sur son site officiel.",
+    "section_directeur_title": "3. Directeur de la publication",
+    "section_directeur_content": "Le directeur de la publication du Site est le représentant légal de TechPlay SAS, en qualité de président.",
+    "section_contact_title": "4. Contact",
+    "section_contact_content": "Pour toute question relative aux présentes mentions légales, au Site ou à nos services :\n\n• Par courrier : TechPlay SAS, 12 rue de la Boutique, 75001 Paris, France\n• Par email : support@techplay.fr\n• Via le formulaire de contact disponible sur le Site dans la rubrique « Support & contact »",
+    "section_ci_title": "5. Propriété intellectuelle",
+    "section_ci_content": "L’ensemble des éléments du Site (textes, graphismes, logos, icônes, images, vidéos, bases de données, logiciels, charte graphique, etc.) est protégé par le droit d’auteur, le droit des marques et le droit des bases de données.\n\nToute reproduction, représentation, modification, diffusion ou exploitation, totale ou partielle, sans autorisation écrite préalable de TechPlay SAS est interdite et susceptible de constituer une contrefaçon au sens du Code de propriété intellectuelle. Les marques et logos figurant sur le Site sont des marques déposées.",
+    "section_data_title": "6. Données personnelles et RGPD",
+    "section_data_content": "Les données personnelles collectées via le Site sont traitées conformément au Règlement (UE) 2016/679 (RGPD) et à la loi « Informatique et Libertés » du 6 janvier 1978 modifiée.\n\nResponsable du traitement : TechPlay SAS.\n\nFinalités : gestion des commandes, relation client, prospection (avec consentement), statistiques, amélioration des services.\n\nBases légales : exécution du contrat, consentement, intérêt légitime.\n\nDestinataires : services internes habilités, prestataires techniques (hébergement, paiement, envoi d’emails), autorités si obligation légale.\n\nConservation : durée nécessaire aux finalités (ex. factures : 10 ans), puis archivage ou suppression.\n\nVos droits : accès, rectification, effacement, limitation, portabilité, opposition, retrait du consentement, définition de directives post-mortem. Exercice par email à support@techplay.fr ou par courrier. Droit de réclamation auprès de la CNIL (www.cnil.fr).",
+    "section_cookies_title": "7. Cookies et traceurs",
+    "section_cookies_content": "Le Site utilise des cookies et traceurs pour le fonctionnement technique, la mesure d’audience et, sous réserve de votre consentement, la publicité et le ciblage.\n\nVous pouvez à tout moment gérer vos préférences via le bandeau cookies ou les paramètres de votre navigateur. Le refus de certains cookies peut affecter l’utilisation de certaines fonctionnalités du Site.\n\nPour plus d’informations, consultez notre page dédiée ou la politique de confidentialité.",
+    "section_mediateur_title": "8. Médiation et litiges",
+    "section_mediateur_content": "Conformément aux articles L.612-1 et suivants du Code de la consommation, le client consommateur peut recourir gratuitement au médiateur de la consommation dont TechPlay SAS relève, en vue de la résolution amiable du litige. Les coordonnées du médiateur seront communiquées sur demande.\n\nLa Commission européenne met également à disposition une plateforme de résolution des litiges en ligne (RLL) : https://ec.europa.eu/consumers/odr.",
+    "section_droit_title": "9. Droit applicable et juridiction",
+    "section_droit_content": "Les présentes mentions légales sont régies par le droit français. En cas de litige, et à défaut de résolution amiable, les tribunaux français seront seuls compétents.",
+    "section_credits_title": "10. Crédits",
+    "section_credits_content": "Conception et réalisation du Site : équipe TechPlay. Icônes et visuels : droits réservés TechPlay SAS et/ou leurs auteurs. Hébergement : Vercel Inc.",
+    "toc_title": "Sommaire",
+    "link_contact": "Page contact",
+    "link_privacy": "Politique de confidentialité",
+    "link_cgv": "Conditions générales de vente",
+    "see_also": "Voir aussi"
+  },
   "cgv": {
     "title": "Conditions Générales de Vente",
-    "intro": "Les présentes conditions s’appliquent à toutes les commandes effectuées sur le site TechPlay.",
-    "section1_title": "Article 1 : Objet",
-    "section1_text": "Les présentes conditions régissent les ventes de produits TechPlay.",
-    "section2_title": "Article 2 : Commande",
-    "section2_text": "La commande devient ferme dès paiement validé."
+    "meta_description": "Conditions générales de vente TechPlay : commande, paiement, livraison, retours, garanties.",
+    "intro": "Les présentes Conditions Générales de Vente (CGV) s’appliquent à toutes les commandes passées sur le site TechPlay. En passant commande, le client accepte sans réserve les présentes CGV. Elles prévalent sur tout autre document.",
+    "last_updated": "Dernière mise à jour : janvier 2025",
+    "art1_title": "Article 1 – Objet et champ d’application",
+    "art1_content": "Les présentes CGV régissent les ventes de produits effectuées par TechPlay SAS (ci-après « le Vendeur ») au profit des acheteurs (ci-après « le Client ») via le site TechPlay (ci-après « le Site »).\n\nToute commande implique l’acceptation intégrale des présentes CGV. Des conditions particulières (promotions, offres ciblées) peuvent s’y ajouter ; en cas de contradiction, les conditions les plus favorables au Client prévalent.",
+    "art2_title": "Article 2 – Produits et informations",
+    "art2_content": "Les produits proposés sont ceux qui figurent sur le Site au jour de la consultation. Les photographies et descriptions sont les plus fidèles possibles mais n’engagent pas le Vendeur contractuellement. Les offres sont valables dans la limite des stocks disponibles.",
+    "art3_title": "Article 3 – Prix",
+    "art3_content": "Les prix sont indiqués en euros toutes taxes comprises (TVA française applicable). Les frais de livraison sont indiqués avant validation de la commande et peuvent être offerts au-delà d’un montant d’achat défini. Le Vendeur se réserve le droit de modifier ses prix à tout moment ; le prix applicable est celui en vigueur au moment de la validation de la commande.",
+    "art4_title": "Article 4 – Commande",
+    "art4_content": "Le Client choisit les produits, les ajoute au panier et valide sa commande après vérification du récapitulatif. La commande n’est définitive qu’après confirmation du paiement. Un email de confirmation récapitule la commande. Le Vendeur se réserve le droit de refuser toute commande pour motif légitime (anomalie, litige antérieur, etc.).",
+    "art5_title": "Article 5 – Paiement",
+    "art5_content": "Le paiement s’effectue en ligne par carte bancaire (CB, Visa, Mastercard) ou autres moyens proposés sur le Site, via une solution sécurisée (Stripe). Les montants sont débités au moment de la validation. En cas de refus du paiement, la commande est annulée. Le Client garantit disposer des autorisations nécessaires pour utiliser le moyen de paiement choisi.",
+    "art6_title": "Article 6 – Livraison",
+    "art6_content": "Les délais de livraison sont donnés à titre indicatif. Ils courent à compter de la validation du paiement. En cas de retard, le Client est informé ; une résiliation pour retard majeur peut être possible selon les dispositions légales. Les risques sont transférés au Client à la remise du colis au transporteur. Le Client doit vérifier l’état du colis à la livraison et signaler toute anomalie au transporteur et au Vendeur.",
+    "art7_title": "Article 7 – Droit de rétractation (consommateurs)",
+    "art7_content": "Conformément à l’article L.221-18 du Code de la consommation, le Client consommateur dispose d’un délai de 14 jours calendaires à compter de la réception du produit pour exercer son droit de rétractation, sans avoir à justifier de motifs. Il notifie sa décision par tout moyen (formulaire, email, courrier). Les produits doivent être renvoyés dans leur état d’origine, emballage inclus, dans un délai de 14 jours suivant la notification. Les frais de retour sont à la charge du Client sauf si le Vendeur en décide autrement. Le remboursement est effectué sous 14 jours suivant la réception des produits ou la preuve d’expédition. Certains produits peuvent être exclus du droit de rétractation (produits confectionnés sur mesure, produits dégradables, etc.) conformément à la loi.",
+    "art8_title": "Article 8 – Garanties légales",
+    "art8_content": "Le Vendeur est tenu des garanties légales : conformité (articles L.217-4 et suivants du Code de la consommation) et vices cachés (articles 1641 et suivants du Code civil). En cas de non-conformité, le Client peut demander la réparation ou le remplacement du bien ; en cas d’échec ou d’impossibilité, la réduction du prix ou la résolution de la vente. Les actions peuvent être engagées dans les délais légaux (2 ans pour la conformité, délais de droit commun pour les vices cachés).",
+    "art9_title": "Article 9 – Réclamations et SAV",
+    "art9_content": "Toute réclamation ou demande SAV doit être adressée au service client (support@techplay.fr ou formulaire de contact). Le Vendeur s’engage à traiter les demandes dans les meilleurs délais. En cas de litige, le Client peut recourir à la médiation de la consommation (voir mentions légales).",
+    "art10_title": "Article 10 – Responsabilité",
+    "art10_content": "La responsabilité du Vendeur est limitée au montant de la commande. Il ne peut être tenu responsable des dommages indirects (manque à gagner, perte de données, etc.) sauf en cas de faute lourde ou de manquement à une obligation essentielle. Le Client est responsable de l’usage qu’il fait des produits.",
+    "art11_title": "Article 11 – Données personnelles",
+    "art11_content": "Les données collectées dans le cadre de la commande et de la relation commerciale sont traitées conformément au RGPD et à la politique de confidentialité du Site. Le Client dispose des droits d’accès, rectification, effacement, limitation, portabilité et opposition. Pour plus d’informations, voir les mentions légales.",
+    "art12_title": "Article 12 – Droit applicable et litiges",
+    "art12_content": "Les présentes CGV sont régies par le droit français. Pour les Clients consommateurs résidant dans l’UE, les dispositions impératives de leur pays de résidence restent applicables. Tout litige sera soumis aux tribunaux compétents selon les règles de droit commun, avec possibilité de recours à la médiation de la consommation.",
+    "art13_title": "Article 13 – Modifications",
+    "art13_content": "Le Vendeur se réserve le droit de modifier les présentes CGV. Les conditions applicables sont celles en vigueur à la date de la commande. Les modifications sont portées à la connaissance des Clients par publication sur le Site.",
+    "toc_title": "Sommaire",
+    "link_mentions": "Mentions légales",
+    "link_contact": "Nous contacter",
+    "see_also": "Voir aussi"
   },
-
   "a_propos": {
     "title": "À propos",
     "description": "TechPlay est une boutique spécialisée dans la vente de produits tech et gaming de qualité.",
@@ -1103,7 +1170,6 @@
     "our_values_title": "Nos valeurs",
     "our_values_text": "Qualité, transparence et passion."
   },
-
   "contact": {
     "title": "Contact",
     "intro": "Une question ? Écrivez-nous à",
@@ -1153,7 +1219,6 @@
     "message_received": "Message bien reçu",
     "message_received_detail": "Nous vous répondrons à l'adresse indiquée sous 24 à 48 h ouvrées."
   },
-
   "faq": {
     "heading": "Questions fréquentes",
     "intro": "Réponses rapides sur les commandes, livraisons et retours. Une question ?",
@@ -1168,14 +1233,12 @@
     "error": "Impossible de charger la FAQ.",
     "empty": "Aucune question pour le moment."
   },
-
   "avis": {
     "title": "Avis des clients",
     "loading": "Chargement des avis…",
     "error": "Impossible de charger les avis.",
     "empty": "Aucun avis pour le moment."
   },
-
   "error": {
     "404_title": "Page non trouvée",
     "404_message": "La page que vous cherchez n’existe pas.",
@@ -1185,7 +1248,6 @@
     "network": "Problème de connexion réseau",
     "server": "Erreur serveur, réessayez ultérieurement"
   },
-
   "orderSuccess": {
     "title": "Merci pour votre commande 🎉",
     "confirmationSent": "Un email de confirmation a été envoyé à l'adresse indiquée.",
@@ -1196,16 +1258,17 @@
     "continueShopping": "Continuer mes achats",
     "viewOrders": "Voir mes commandes"
   },
-
   "maintenance": {
     "title": "Maintenance",
-    "message": "Le site est momentanément indisponible. Revenez plus tard."
+    "meta_title": "Maintenance",
+    "meta_description": "TechPlay est temporairement en maintenance. Revenez dans quelques instants.",
+    "heading": "Maintenance en cours",
+    "message": "Le site est actuellement en cours d'amélioration. Merci de revenir plus tard.",
+    "cta": "Actualiser la page"
   },
-
   "sitemap": {
     "title": "Plan du site"
   },
-
   "reviews": {
     "empty_error": "Votre message est vide.",
     "minlen_error": "Votre message doit contenir au moins 20 caractères.",
@@ -1241,37 +1304,11 @@
     "honeypot_label": "Ne pas remplir ce champ",
     "loading_aria": "Chargement des avis"
   },
-
   "privacy_prefs": {
     "analytics_label": "Mesure d'audience (Analytics)",
     "ads_label": "Publicité",
     "save_btn": "Enregistrer"
   },
-
-  "cart": {
-    "view_product_aria": "Voir la fiche produit de {title}",
-    "remove_aria": "Supprimer {title} du panier",
-    "total_label": "Total",
-    "cart_items_aria": "Articles du panier",
-    "clear_cart_aria": "Vider le panier",
-    "cart_reminder_aria": "Rappel panier",
-    "cart_empty_toast": "Votre panier est vide.",
-    "add_to_cart_error": "Impossible d'ajouter au panier. Réessayez.",
-    "items_heading": "Articles",
-    "no_items": "Aucun article dans le panier.",
-    "view_products": "Voir les produits",
-    "error_title": "Oups, le panier a rencontré un problème",
-    "error_message_retry": "Réessayez ou videz le panier si le problème persiste.",
-    "back_to_cart": "Revenir au panier",
-    "unit_label": "unité",
-    "quantity_decrease_aria": "Diminuer la quantité de {title}",
-    "quantity_increase_aria": "Augmenter la quantité de {title}",
-    "quantity_for_aria": "Quantité pour {title}",
-    "total_for_aria": "Total pour {title} : {amount}",
-    "remove_item_aria": "Supprimer {title} du panier",
-    "remove_item_title": "Supprimer {title}"
-  },
-
   "misc": {
     "hero_boost": "Boostez votre quotidien avec",
     "install_prompt": "Installer TechPlay en app ?",
@@ -1289,6 +1326,8 @@
     "view_products": "Voir les produits",
     "view_cart_go": "Voir mon panier →",
     "close_bar_aria": "Fermer la barre",
+    "free_shipping_bar_aria": "Barre livraison offerte",
+    "view_cart": "Voir le panier",
     "logout_aria": "Se déconnecter",
     "product_tags_aria": "Étiquettes du produit",
     "quick_links_aria": "Liens rapides",

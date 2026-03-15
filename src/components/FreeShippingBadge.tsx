@@ -1,6 +1,7 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 
 import { UI } from '@/lib/constants'
@@ -90,7 +91,7 @@ export default function FreeShippingBadge({
   className,
   minimal = false,
   withProgress = !minimal,
-  locale,
+  locale: _locale,
   variant = 'bar',
   size = 'md',
   celebrate = true,
@@ -102,28 +103,18 @@ export default function FreeShippingBadge({
   const prefersReduced = useReducedMotion()
   const [reachedPersisted, setReachedPersisted] = useState(false)
   const reachedOnce = useRef(false)
-
-  const autoLocale =
-    locale || (typeof document !== 'undefined' ? document.documentElement.lang || 'fr' : 'fr')
-  const isFr = String(autoLocale).toLowerCase().startsWith('fr')
+  const t = useTranslations('free_shipping')
 
   const T = {
-    eligibleShort: isFr ? 'Livraison offerte' : 'Free shipping',
-    eligibleLong: isFr ? 'Livraison gratuite' : 'Free shipping',
-    missing: (amt: number) =>
-      isFr
-        ? `Plus que ${formatPrice(amt)} pour la livraison gratuite`
-        : `Only ${formatPrice(amt)} away from free shipping`,
-    srEligible: (thr: number) =>
-      isFr
-        ? `Seuil de livraison gratuite atteint (seuil ${formatPrice(thr)}).`
-        : `Free shipping unlocked (threshold ${formatPrice(thr)}).`,
+    eligibleShort: t('eligible_short'),
+    eligibleLong: t('eligible_long'),
+    missing: (amt: number) => t('missing', { amount: formatPrice(amt) }),
+    srEligible: (thr: number) => t('sr_eligible', { threshold: formatPrice(thr) }),
     srMissing: (rem: number, thr: number) =>
-      isFr
-        ? `Il manque ${formatPrice(rem)} pour atteindre la livraison gratuite (seuil ${formatPrice(thr)}).`
-        : `You need ${formatPrice(rem)} more to unlock free shipping (threshold ${formatPrice(thr)}).`,
-    progressLabel: isFr ? 'Progression vers la livraison gratuite' : 'Progress toward free shipping',
-    policy: isFr ? 'Voir conditions' : 'See policy',
+      t('sr_missing', { remaining: formatPrice(rem), threshold: formatPrice(thr) }),
+    progressLabel: t('progress_label'),
+    policy: t('policy'),
+    aria100: t('aria_100_reached'),
   }
 
   const remaining = Math.max(0, threshold - price)
@@ -198,7 +189,7 @@ export default function FreeShippingBadge({
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={pct}
-            aria-valuetext={isEligible ? (isFr ? '100% atteint' : '100% reached') : `${pct}%`}
+            aria-valuetext={isEligible ? T.aria100 : `${pct}%`}
             style={{ width: ringDim, height: ringDim }}
           >
             <svg width={ringDim} height={ringDim} viewBox={`0 0 ${ringDim} ${ringDim}`} className="rotate-[-90deg]">
@@ -287,7 +278,7 @@ export default function FreeShippingBadge({
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={pct}
-          aria-valuetext={isEligible ? (isFr ? '100% atteint' : '100% reached') : `${pct}%`}
+          aria-valuetext={isEligible ? T.aria100 : `${pct}%`}
         >
           <div
             className="grid place-items-center rounded-full bg-white dark:bg-zinc-900"
@@ -385,7 +376,7 @@ export default function FreeShippingBadge({
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={progress}
-          aria-valuetext={isEligible ? (isFr ? '100% atteint' : '100% reached') : `${progress}%`}
+          aria-valuetext={isEligible ? T.aria100 : `${progress}%`}
         >
           <motion.div
             className={cn(

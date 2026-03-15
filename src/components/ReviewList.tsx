@@ -1,13 +1,13 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import { Star } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { useEffect, useMemo, useState } from 'react';
+import { motion } from 'framer-motion'
+import { Star } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
+import { useEffect, useMemo, useState } from 'react'
 
-import type { Review } from '@/types/product';
+import type { Review } from '@/types/product'
 
-import { timeAgo } from '@/lib/formatDate';
+import { timeAgo, type TimeAgoLabels } from '@/lib/formatDate'
 
 /** Review avec champs optionnels API (helpful, verified) */
 type ReviewWithExtras = Review & { helpful?: number; verified?: boolean };
@@ -27,7 +27,18 @@ interface ReviewListProps {
 }
 
 export default function ReviewList({ productId }: ReviewListProps) {
-  const t = useTranslations('reviews');
+  const locale = useLocale() as 'fr' | 'en'
+  const t = useTranslations('reviews')
+  const tDate = useTranslations('date')
+  const timeAgoLabels: TimeAgoLabels = useMemo(
+    () => ({
+      justNow: tDate('time_ago_just_now'),
+      min: (n) => tDate('time_ago_min', { n }),
+      h: (n) => tDate('time_ago_h', { n }),
+      d: (n) => tDate('time_ago_d', { n }),
+    }),
+    [tDate]
+  )
   const [reviews, setReviews] = useState<ReviewWithExtras[]>([]);
   const [filter, setFilter] = useState<number | null>(null);
   const [sort, setSort] = useState('recent');
@@ -161,7 +172,7 @@ export default function ReviewList({ productId }: ReviewListProps) {
                 />
               ))}
               <span className="text-xs text-token-text/60 ml-auto">
-                {r.createdAt ? timeAgo(r.createdAt, 'fr') : '—'}
+                {r.createdAt ? timeAgo(r.createdAt, locale, timeAgoLabels) : '—'}
               </span>
             </div>
 

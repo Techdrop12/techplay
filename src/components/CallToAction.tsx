@@ -1,4 +1,6 @@
-import Link from "next/link";
+'use client'
+
+import Link from '@/components/LocalizedLink'
 
 export default function CallToAction() {
   return (
@@ -9,5 +11,5 @@ export default function CallToAction() {
         Explorer la boutique
       </Link>
     </section>
-  );
+  )
 }

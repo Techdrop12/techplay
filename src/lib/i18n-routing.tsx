@@ -18,7 +18,7 @@ const isSupported = (v?: string): v is Locale =>
 const ensureLeadingSlash = (p: string) => (p.startsWith('/') ? p : `/${p}`)
 
 // Routes that live under app/[locale]/... — only these get a locale prefix. All others (e.g. /contact, /blog) are root-only.
-const LOCALIZED_PATHNAMES: readonly string[] = ['/', '/products', '/wishlist']
+const LOCALIZED_PATHNAMES: readonly string[] = ['/', '/products', '/wishlist', '/search']
 
 function normalizePathname(p: string): string {
   const s = ensureLeadingSlash(p).replace(/\/$/, '') || '/'

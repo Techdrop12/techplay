@@ -2,6 +2,7 @@
 
 import type { BlogPost } from '@/types/blog'
 
+import { useTranslations } from 'next-intl'
 import { BRAND } from '@/lib/constants'
 import { localizePath, type Locale } from '@/lib/i18n-routing'
 
@@ -28,6 +29,7 @@ export default function BlogJsonLd({
   locale = 'fr',
   siteUrl = BRAND.URL,
 }: BlogJsonLdProps) {
+  const t = useTranslations('blog')
   if (!Array.isArray(posts) || posts.length === 0) return null
 
   const blogPath = localizePath('/blog', locale)
@@ -38,12 +40,9 @@ export default function BlogJsonLd({
     '@type': 'Blog',
     '@id': blogUrl,
     url: blogUrl,
-    name: locale === 'fr' ? 'Blog TechPlay' : 'TechPlay Blog',
-    description:
-      locale === 'fr'
-        ? 'Actualités, conseils et tendances high-tech sélectionnés par l’équipe TechPlay.'
-        : 'Tech news, advice, and trending topics curated by the TechPlay team.',
-    mainEntityOfPage: {
+    name: t('jsonld_name'),
+description: t('jsonld_description'),
+        mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': blogUrl,
     },

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 
-import { error as logError } from '@/lib/logger'
+import { apiError } from '@/lib/apiResponse'
 import { connectToDatabase } from '@/lib/db'
+import { error as logError } from '@/lib/logger'
 import Product from '@/models/Product'
 import { requireAdmin } from '@/lib/requireAdmin'
 
@@ -17,16 +18,16 @@ export async function GET(
   if (err) return err
 
   const { id } = await params
-  if (!id) return NextResponse.json({ error: 'ID manquant' }, { status: 400 })
+  if (!id) return apiError('ID manquant', 400)
 
   try {
     await connectToDatabase()
     const doc = await Product.findById(id).lean().exec()
-    if (!doc) return NextResponse.json({ error: 'Produit introuvable' }, { status: 404 })
+    if (!doc) return apiError('Produit introuvable', 404)
     return NextResponse.json(toPlain(doc))
   } catch (e) {
     logError('[admin/products/:id] GET', e)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    return apiError('Erreur serveur', 500, { details: e instanceof Error ? e.message : undefined })
   }
 }
 
@@ -38,14 +39,14 @@ export async function PUT(
   if (err) return err
 
   const { id } = await params
-  if (!id) return NextResponse.json({ error: 'ID manquant' }, { status: 400 })
+  if (!id) return apiError('ID manquant', 400)
 
   try {
     const body = await req.json()
     await connectToDatabase()
 
     const product = await Product.findById(id).exec()
-    if (!product) return NextResponse.json({ error: 'Produit introuvable' }, { status: 404 })
+    if (!product) return apiError('Produit introuvable', 404)
 
     if (body.title != null) product.title = String(body.title).trim()
     if (body.slug != null) product.slug = String(body.slug).trim().toLowerCase()
@@ -73,7 +74,7 @@ export async function PUT(
     return NextResponse.json(toPlain(product))
   } catch (e) {
     logError('[admin/products/:id] PUT', e)
-    return NextResponse.json({ error: 'Erreur lors de la mise à jour' }, { status: 500 })
+    return apiError('Erreur lors de la mise à jour', 500, { details: e instanceof Error ? e.message : undefined })
   }
 }
 
@@ -85,15 +86,15 @@ export async function DELETE(
   if (err) return err
 
   const { id } = await params
-  if (!id) return NextResponse.json({ error: 'ID manquant' }, { status: 400 })
+  if (!id) return apiError('ID manquant', 400)
 
   try {
     await connectToDatabase()
     const doc = await Product.findByIdAndDelete(id).exec()
-    if (!doc) return NextResponse.json({ error: 'Produit introuvable' }, { status: 404 })
+    if (!doc) return apiError('Produit introuvable', 404)
     return NextResponse.json({ ok: true })
   } catch (e) {
     logError('[admin/products/:id] DELETE', e)
-    return NextResponse.json({ error: 'Erreur lors de la suppression' }, { status: 500 })
+    return apiError('Erreur lors de la suppression', 500, { details: e instanceof Error ? e.message : undefined })
   }
 }

@@ -4,6 +4,9 @@
 import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 
+import Link from '@/components/LocalizedLink'
+import { useFocusTrap } from '@/lib/useFocusTrap'
+
 const DISABLED = (process.env.NEXT_PUBLIC_ANALYTICS_DISABLED || '').toLowerCase() === 'true'
 
 type Prefs = {
@@ -87,6 +90,9 @@ export default function ConsentBanner() {
   })
   const [show, setShow] = useState(false)
   const firstToggleRef = useRef<HTMLInputElement | null>(null)
+  const dialogRef = useRef<HTMLDivElement | null>(null)
+
+  useFocusTrap(show, dialogRef, { restoreFocus: true })
 
   useEffect(() => {
     const dnt =
@@ -180,6 +186,7 @@ export default function ConsentBanner() {
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="tp-consent-title"
@@ -233,17 +240,17 @@ export default function ConsentBanner() {
               </label>
 
               <p className="mt-1 text-xs text-token-text/60">
-                Fonctionnels & sécurité sont toujours actifs.
+                {t('functional_always_active')}
               </p>
             </div>
           )}
 
-          <a
+          <Link
             href="/confidentialite"
             className="mt-2 inline-block text-xs text-[hsl(var(--accent))] underline underline-offset-4"
           >
             {t('learn_more')}
-          </a>
+          </Link>
         </div>
 
         <div className="flex w-full flex-col gap-2 sm:min-w-[240px] sm:w-auto">

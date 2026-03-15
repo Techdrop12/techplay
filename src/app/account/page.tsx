@@ -7,6 +7,7 @@ import { getSession } from '@/lib/auth'
 import { getUserOrders } from '@/lib/db/orders'
 import { formatDateTime } from '@/lib/formatDate'
 import { formatPrice } from '@/lib/utils'
+import { generateMeta } from '@/lib/seo'
 
 type OrderSummary = {
   id: string
@@ -16,10 +17,14 @@ type OrderSummary = {
   status?: string
 }
 
-export const metadata: Metadata = {
-  title: 'Espace client – TechPlay',
-  description: 'Accédez à vos commandes, suivez vos livraisons et gérez votre compte TechPlay.',
-  robots: { index: false, follow: false },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('seo')
+  return generateMeta({
+    title: t('account_title'),
+    description: t('account_description'),
+    url: '/account',
+    noindex: true,
+  })
 }
 
 type OrderDoc = { _id?: { toString: () => string }; createdAt?: unknown; total?: number; items?: unknown[]; status?: string }

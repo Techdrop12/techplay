@@ -62,13 +62,16 @@ export default function ContactForm() {
       if (!res.ok) {
         const msg = data?.error || t('toast_error')
         setApiError(msg)
+        toast.error(msg)
         return
       }
       setSent(true)
       setForm({ name: '', email: '', message: '', consent: false })
       toast.success(t('toast_success'))
-    } catch (e) {
-      setApiError(e instanceof Error ? e.message : t('toast_error'))
+    } catch {
+      const msg = t('toast_error')
+      setApiError(msg)
+      toast.error(msg)
     } finally {
       setLoading(false)
     }

@@ -201,16 +201,20 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   const q = opts.q
   const page = opts.page
 
-  const baseTitle = 'Blog Gaming & Setup – Best Keyboards 2026, Guides, FPS Tips | TechPlay'
+  const tBlog = await getTranslations('blog')
+  const suffix = tBlog('meta_title_suffix')
+  const pageStr = tBlog('meta_page', { page: String(page) })
+
+  const baseTitle = tBlog('page_title') + suffix
   const title = q
-    ? `Résultats pour “${q}” – Page ${page}`
+    ? `${tBlog('search_results_title', { query: q })} – ${pageStr}${suffix}`
     : page > 1
-      ? `Blog TechPlay – Page ${page}`
+      ? `${tBlog('title')} – ${pageStr}${suffix}`
       : baseTitle
 
   const description = q
-    ? `Articles correspondant à « ${q} » sur le blog TechPlay.`
-    : 'Meilleurs claviers gaming 2026, guides setup, comment améliorer son aim en FPS. Articles éditoriaux pour ramener du trafic Google et convertir sur TechPlay.'
+    ? tBlog('search_meta_description', { query: q })
+    : tBlog('page_subtitle')
 
   const sp = new URLSearchParams()
   if (q) sp.set('q', q)
@@ -288,16 +292,16 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
     <main className="mx-auto max-w-7xl px-4 pt-20 pb-16 sm:px-6 sm:pt-24 sm:pb-20 lg:px-8" aria-labelledby="blog-title">
       <header className="mb-12 text-center sm:mb-14">
         <p className="heading-kicker">
-          Guides & actualités
+          {tBlog('section_kicker')}
         </p>
         <h1
           id="blog-title"
           className="heading-section mt-2 sm:[font-size:var(--step-5)] lg:text-5xl"
         >
-          {q ? `Résultats pour « ${q} »` : 'Blog gaming & setup'}
+          {q ? tBlog('search_results_title', { query: q }) : tBlog('page_title')}
         </h1>
         <p className="mx-auto mt-4 max-w-2xl heading-section-sub">
-          {q ? 'Articles correspondant à votre recherche.' : 'Meilleurs claviers 2026, guides setup, astuces FPS — contenu éditorial pour ramener du trafic et convertir.'}
+          {q ? tBlog('search_results_subtitle') : tBlog('page_subtitle')}
         </p>
       </header>
 
@@ -375,9 +379,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
                 {tBlog('no_articles_search')}
               </h2>
               <p className="mt-3 text-[15px] leading-relaxed text-token-text/70">
-                {locale === 'en'
-                  ? `We didn't find anything for « ${q} ». Try different keywords or browse our guides when they're live.`
-                  : `Aucun résultat pour « ${q} ». Essayez d'autres mots-clés ou consultez nos guides dès leur publication.`}
+                {tBlog('no_results_for_query', { query: q })}
               </p>
               <Link
                 href={localizePath('/blog', locale)}
@@ -402,7 +404,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
                 </span>
               </div>
               <h2 className="mt-6 heading-subsection">
-                {locale === 'en' ? 'Editorial coming soon' : 'Éditorial à venir'}
+                {tBlog('editorial_coming_soon')}
               </h2>
               <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-token-text/70">
                 {tBlog('editorial_coming_intro')}
@@ -412,7 +414,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
                   href={localizePath('/products', locale)}
                   className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] px-5 py-2.5 text-[13px] font-semibold text-white shadow-md transition hover:bg-[hsl(var(--accent)/0.9)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
                 >
-                  {locale === 'en' ? 'Explore products' : 'Découvrir les produits'}
+                  {tBlog('explore_products')}
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M5 12h14M12 5l7 7-7 7" />
                   </svg>
@@ -449,7 +451,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
                 : 'border-[hsl(var(--border))] hover:bg-[hsl(var(--surface))]/80'
             }`}
           >
-            ← Précédent
+            ← {tBlog('pagination_prev')}
           </Link>
 
           {Array.from({ length: pagination.pages }).map((_, i) => {
@@ -492,7 +494,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
                 : 'border-[hsl(var(--border))] hover:bg-[hsl(var(--surface))]/80'
             }`}
           >
-            Suivant →
+            {tBlog('pagination_next')} →
           </Link>
         </nav>
       )}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useId } from 'react'
+import { useTranslations } from 'next-intl'
 
 import { cn } from '@/lib/utils'
 
@@ -9,19 +10,20 @@ type SortValue = 'asc' | 'desc' | 'alpha'
 type Props = {
   sort: SortValue
   setSort: (value: SortValue) => void
+  /** @deprecated Locale is read from next-intl; prop kept for backward compatibility */
   locale?: 'fr' | 'en'
   className?: string
 }
 
-const OPTIONS: { value: SortValue; labelFr: string; labelEn: string }[] = [
-  { value: 'alpha', labelFr: 'Popularité', labelEn: 'Popularity' },
-  { value: 'asc', labelFr: 'Prix croissant', labelEn: 'Price: low to high' },
-  { value: 'desc', labelFr: 'Prix décroissant', labelEn: 'Price: high to low' },
+const OPTIONS: { value: SortValue; key: string }[] = [
+  { value: 'alpha', key: 'popularity' },
+  { value: 'asc', key: 'price_asc' },
+  { value: 'desc', key: 'price_desc' },
 ]
 
-export default function SortDropdown({ sort, setSort, locale = 'fr', className }: Props) {
+export default function SortDropdown({ sort, setSort, locale: _locale, className }: Props) {
   const groupId = useId()
-  const isEn = locale === 'en'
+  const t = useTranslations('sort')
 
   return (
     <div
@@ -36,16 +38,16 @@ export default function SortDropdown({ sort, setSort, locale = 'fr', className }
         id={`${groupId}-label`}
         className="text-xs font-semibold uppercase tracking-[0.12em] text-token-text/70"
       >
-        {isEn ? 'Sort by' : 'Trier par'}
+        {t('label')}
       </p>
       <div
         role="radiogroup"
         aria-labelledby={`${groupId}-label`}
         className="flex flex-wrap gap-2 sm:gap-2.5"
       >
-        {OPTIONS.map(({ value, labelFr, labelEn }) => {
+        {OPTIONS.map(({ value, key }) => {
           const active = sort === value
-          const label = isEn ? labelEn : labelFr
+          const label = t(key)
 
           return (
             <button

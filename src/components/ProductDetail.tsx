@@ -641,7 +641,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
                     >
                       <Image
                         src={src}
-                        alt=""
+                        alt={title ? `${title} (${idx + 1})` : ''}
                         fill
                         sizes="96px"
                         className="object-cover"
@@ -658,12 +658,12 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         ) : null}
       </div>
 
-      <div className="flex flex-col gap-6 sm:gap-8 lg:gap-10">
-        {/* 1. Title — mobile-first hierarchy */}
+      {/* Colonne droite : titre + bloc achat — sticky desktop pour mise en scène commerciale */}
+      <div className="flex flex-col gap-6 sm:gap-8 lg:sticky lg:top-24 lg:self-start lg:gap-6">
         <div className="min-w-0">
           <h1
             id="product-title"
-            className="text-[1.75rem] font-extrabold leading-snug tracking-tight text-[hsl(var(--text))] sm:text-3xl lg:text-[1.75rem] [letter-spacing:var(--heading-tracking)]"
+            className="text-[1.75rem] font-extrabold leading-snug tracking-tight text-[hsl(var(--text))] sm:text-3xl lg:text-2xl [letter-spacing:var(--heading-tracking)]"
             tabIndex={-1}
             itemProp="name"
           >
@@ -680,21 +680,24 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
 
         {/* Purchase section: price + CTA + trust — touch-friendly on mobile */}
         <div
-          className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-5 py-5 shadow-sm sm:p-6"
+          className="rounded-2xl border-2 border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-5 py-5 shadow-[0_8px_32px_rgba(15,23,42,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.2)] sm:p-6"
           aria-label={safeLocale === 'en' ? 'Purchase options' : 'Options d’achat'}
         >
-          {/* 2. Price — prominent, scannable on mobile */}
-          <div className="flex flex-wrap items-baseline gap-3 pb-5 sm:pb-6" aria-live="polite">
+          {/* Prix — bloc dédié */}
+          <div
+            className="flex flex-wrap items-baseline gap-3 rounded-lg bg-[hsl(var(--surface-2))]/80 px-3 py-3 sm:px-4 sm:py-3.5"
+            aria-live="polite"
+            itemProp="offers"
+            itemScope
+            itemType="https://schema.org/Offer"
+          >
+            <meta itemProp="priceCurrency" content={currency} />
+            <meta itemProp="price" content={priceStr} />
+            <meta itemProp="availability" content={availability} />
             <span
-              className="text-[1.875rem] font-extrabold tabular-nums tracking-tight text-[hsl(var(--accent))] sm:text-3xl"
+              className="text-[2rem] font-extrabold tabular-nums tracking-tight text-[hsl(var(--accent))] sm:text-3xl"
               aria-label={safeLocale === 'en' ? `Price: ${formatPrice(price, { currency })}` : `Prix : ${formatPrice(price, { currency })}`}
-              itemProp="offers"
-              itemScope
-              itemType="https://schema.org/Offer"
             >
-              <meta itemProp="priceCurrency" content={currency} />
-              <meta itemProp="price" content={priceStr} />
-              <meta itemProp="availability" content={availability} />
               {formatPrice(price, { currency })}
             </span>
             {typeof oldPrice === 'number' && oldPrice > price ? (
@@ -703,19 +706,35 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
               </span>
             ) : null}
             {discount && amountSaved ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--accent)/0.12)] px-2.5 py-1 text-[12px] font-semibold text-[hsl(var(--accent))]">
-                {t.save} {formatPrice(amountSaved, { currency })} ({discount}%)
+              <span className="ml-auto rounded-md bg-[hsl(var(--accent)/0.12)] px-2.5 py-1 text-[12px] font-bold text-[hsl(var(--accent))]">
+                {t.save} {formatPrice(amountSaved, { currency })} (−{discount}%)
               </span>
             ) : null}
             {quantity > 1 ? (
-              <span className="text-[13px] text-token-text/70">
+              <span className="w-full text-[13px] text-token-text/70 sm:w-auto">
                 Total ({quantity}×)&nbsp;: <span className="font-semibold text-[hsl(var(--text))]">{formatPrice(total, { currency })}</span>
               </span>
             ) : null}
           </div>
 
-          {/* 3. Buy action — quantity + CTA (44px+ touch targets on mobile) */}
-          <div className="space-y-4 sm:space-y-4">
+          {/* Réassurance — au-dessus du CTA */}
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg bg-[hsl(var(--surface-2))]/50 px-3 py-2.5 text-[12px] sm:gap-x-5">
+            <span className="inline-flex items-center gap-1.5 text-token-text/80">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400" aria-hidden="true">✓</span>
+              {t.shipping}
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-token-text/80">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-600 dark:bg-sky-900/50 dark:text-sky-400" aria-hidden="true">🔒</span>
+              {t.returns}
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-token-text/80">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400" aria-hidden="true">⚡</span>
+              {t.secured}
+            </span>
+          </div>
+
+          {/* Quantité + CTA */}
+          <div className="mt-5 space-y-4">
             <div className="flex min-h-[44px] flex-col justify-center gap-3 xs:flex-row xs:items-center xs:gap-4">
               <label htmlFor="quantity" className="text-sm font-semibold text-[hsl(var(--text))] sm:text-sm">
                 {t.quantity}
@@ -753,7 +772,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
                   }}
                   size="lg"
                   fullWidth
-                  className="min-h-[56px] py-4 text-base font-semibold shadow-md transition hover:shadow-lg focus-visible:ring-2 focus-visible:ring-offset-2 sm:min-h-[52px] sm:py-3.5"
+                  className="min-h-[56px] py-4 text-base font-bold rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl focus-visible:ring-2 focus-visible:ring-offset-2 sm:min-h-[52px] sm:py-3.5"
                   aria-label={`${t.addToCart} ${title}`}
                 />
                 <p className="text-center text-[12px] text-token-text/60" role="status">
@@ -775,22 +794,6 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
                 </button>
               </div>
             )}
-
-            {/* Reassurance: shipping, returns, secure payment */}
-            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-[hsl(var(--border))] pt-4">
-              <span className="inline-flex items-center gap-1.5 text-[12px] text-token-text/70">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400" aria-hidden="true">✓</span>
-                {t.shipping}
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-[12px] text-token-text/70">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-600 dark:bg-sky-900/50 dark:text-sky-400" aria-hidden="true">🔒</span>
-                {t.returns}
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-[12px] text-token-text/70">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400" aria-hidden="true">⚡</span>
-                {t.secured}
-              </span>
-            </div>
           </div>
         </div>
 

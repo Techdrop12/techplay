@@ -78,7 +78,7 @@ export default function CartItem({ item }: CartItemProps) {
       animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
       exit={prefersReduced ? undefined : { opacity: 0, y: -8 }}
       transition={{ duration: 0.22 }}
-      className="group flex items-center gap-4 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/50 p-4 transition-colors hover:bg-[hsl(var(--surface))]/80"
+      className="group flex items-center gap-4 rounded-2xl border-2 border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 p-4 shadow-sm transition-all duration-200 hover:bg-[hsl(var(--surface))] hover:shadow-md sm:p-5"
       role="listitem"
       aria-label={`Produit dans le panier : ${item.title}`}
       data-id={item._id}

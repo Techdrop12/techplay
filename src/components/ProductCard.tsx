@@ -14,7 +14,7 @@ import RatingStars from '@/components/RatingStars'
 import WishlistButton from '@/components/WishlistButton'
 import { pushDataLayer } from '@/lib/ga'
 import { logEvent } from '@/lib/logEvent'
-import { safeProductImageUrl } from '@/lib/safeProductImage'
+import { getProductImage, getProductSecondImage } from '@/lib/productImage'
 import { cn, formatPrice } from '@/lib/utils'
 
 interface ProductCardProps {
@@ -25,34 +25,6 @@ interface ProductCardProps {
 
 const BLUR_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+'
-
-function getImage(product: Product): string {
-  if (typeof product.image === 'string' && product.image.trim()) {
-    return safeProductImageUrl(product.image.trim())
-  }
-
-  if (Array.isArray(product.images)) {
-    const first = product.images.find((img) => typeof img === 'string' && img.trim())
-    if (first) return safeProductImageUrl(first)
-  }
-
-  if (Array.isArray(product.gallery)) {
-    const first = product.gallery.find((img) => typeof img === 'string' && img.trim())
-    if (first) return safeProductImageUrl(first)
-  }
-
-  return '/og-image.jpg'
-}
-
-function getSecondImage(product: Product): string | null {
-  const pool: string[] = []
-  if (typeof product.image === 'string' && product.image.trim()) pool.push(product.image.trim())
-  if (Array.isArray(product.images)) pool.push(...product.images.filter((img): img is string => typeof img === 'string' && img.trim().length > 0))
-  if (Array.isArray(product.gallery)) pool.push(...product.gallery.filter((img): img is string => typeof img === 'string' && img.trim().length > 0))
-  const uniq = Array.from(new Set(pool)).map((url) => safeProductImageUrl(url))
-  if (uniq.length < 2) return null
-  return uniq[1]
-}
 
 function getTitle(product: Product): string {
   return product.title?.trim() || 'Produit'
@@ -111,8 +83,8 @@ function ProductCard({
 
   const title = useMemo(() => getTitle(product), [product])
   const _description = useMemo(() => getDescription(product), [product])
-  const image = useMemo(() => (imgError ? '/og-image.jpg' : getImage(product)), [product, imgError])
-  const secondImage = useMemo(() => getSecondImage(product), [product])
+  const image = useMemo(() => (imgError ? '/og-image.jpg' : getProductImage(product)), [product, imgError])
+  const secondImage = useMemo(() => getProductSecondImage(product), [product])
   const oldPrice = useMemo(() => getOldPrice(product), [product])
   const ratingValue = useMemo(() => getRatingValue(product), [product])
   const reviewsCount = useMemo(() => getReviewsCount(product), [product])
@@ -164,13 +136,13 @@ function ProductCard({
       data-product-id={productId || product.slug}
       className={cn(
         'group relative rounded-2xl p-[1px]',
-        'bg-gradient-to-b from-white/65 via-white/10 to-white/0 dark:from-white/15 dark:via-white/5 dark:to-transparent',
-        'shadow-[0_4px_20px_rgba(15,23,42,0.08)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.25)]',
+        'bg-gradient-to-b from-white/70 via-white/12 to-white/0 dark:from-white/18 dark:via-white/6 dark:to-transparent',
+        'shadow-[0_4px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.22)]',
         'transition-[box-shadow,transform,border-color] duration-300 ease-[var(--ease-smooth)]',
         !prefersReducedMotion && [
-          'hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(15,23,42,0.14)] dark:hover:shadow-[0_12px_40px_rgba(0,0,0,0.4)]',
-          'hover:shadow-[0_0_0_1px_hsl(var(--accent)/0.25),0_12px_40px_rgba(15,23,42,0.14)]',
-          'dark:hover:shadow-[0_0_0_1px_hsl(var(--accent)/0.35),0_12px_40px_rgba(0,0,0,0.4)]',
+          'hover:-translate-y-1.5 hover:shadow-[0_20px_48px_rgba(15,23,42,0.12)] dark:hover:shadow-[0_20px_48px_rgba(0,0,0,0.38)]',
+          'hover:shadow-[0_0_0_1px_hsl(var(--accent)/0.2),0_20px_48px_rgba(15,23,42,0.12)]',
+          'dark:hover:shadow-[0_0_0_1px_hsl(var(--accent)/0.3),0_20px_48px_rgba(0,0,0,0.38)]',
         ],
         className
       )}
@@ -303,24 +275,26 @@ function ProductCard({
             />
           </div>
 
-          <div className="flex flex-col px-5 pt-5 pb-5 sm:px-6 sm:pt-6 sm:pb-6">
-            {/* Title — max 2 lines, clear hierarchy */}
-            <h3
-              className="line-clamp-2 min-h-[2.75em] break-words text-base font-bold leading-snug tracking-tight text-[hsl(var(--text))] sm:text-[17px] [letter-spacing:var(--heading-tracking)]"
-              title={title}
-            >
-              {title}
-            </h3>
+          {/* Bloc contenu — structure : identité → prix → réassurance → action */}
+          <div className="flex flex-col px-4 pt-4 pb-4 sm:px-5 sm:pt-5 sm:pb-5">
+            {/* 1. Identité produit */}
+            <div className="min-w-0">
+              <h3
+                className="line-clamp-2 break-words text-[15px] font-bold leading-snug tracking-tight text-[hsl(var(--text))] sm:text-base"
+                title={title}
+              >
+                {title}
+              </h3>
+              {product.brand || product.category ? (
+                <p className="mt-1 text-[11px] font-medium uppercase tracking-wider text-[hsl(var(--text))]/50">
+                  {[product.brand, product.category].filter(Boolean).join(' · ')}
+                </p>
+              ) : null}
+            </div>
 
-            {product.brand || product.category ? (
-              <p className="mt-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-[hsl(var(--text))]/50">
-                {[product.brand, product.category].filter(Boolean).join(' · ')}
-              </p>
-            ) : null}
-
-            {/* Price — prominent and clear */}
+            {/* 2. Prix — bloc dédié, hiérarchie forte */}
             <div
-              className="mt-4 flex flex-wrap items-baseline gap-2.5"
+              className="mt-4 flex flex-wrap items-baseline gap-2 rounded-lg bg-[hsl(var(--surface-2))]/80 px-3 py-2.5 sm:mt-5 sm:px-3.5 sm:py-3"
               itemProp="offers"
               itemScope
               itemType="https://schema.org/Offer"
@@ -339,53 +313,53 @@ function ProductCard({
                   <span className="text-sm font-medium text-[hsl(var(--text))]/50 line-through">
                     {formatPrice(oldPrice)}
                   </span>
-                  <span className="inline-flex items-center rounded-lg bg-[hsl(var(--accent)/0.14)] px-2 py-0.5 text-[11px] font-semibold text-[hsl(var(--accent))]">
-                    {t('save')} {formatPrice(oldPrice - product.price)}
+                  <span className="ml-auto inline-flex rounded-md bg-[hsl(var(--accent)/0.15)] px-2 py-0.5 text-[11px] font-bold text-[hsl(var(--accent))]">
+                    −{formatPrice(oldPrice - product.price)}
                   </span>
                 </>
               ) : null}
             </div>
 
-            {/* Rating (below title) + badges: En stock, Livraison offerte */}
-            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+            {/* 3. Réassurance — une ligne : note, stock, livraison */}
+            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] sm:mt-4">
               {(ratingValue > 0 || reviewsCount > 0) ? (
-                <span className="flex items-center gap-1.5 text-[12px] text-[hsl(var(--text))]/70">
+                <span className="flex items-center gap-1 text-[hsl(var(--text))]/70">
                   <RatingStars value={ratingValue} size="xs" editable={false} filledClassName="text-amber-500" emptyClassName="text-[hsl(var(--border))]" />
-                  <span className="font-semibold tabular-nums text-[hsl(var(--text))]/80">{ratingValue > 0 ? ratingValue.toFixed(1) : '—'}</span>
-                  {reviewsCount > 0 ? <span className="text-[hsl(var(--text))]/60">({reviewsCount})</span> : null}
+                  <span className="font-semibold tabular-nums">{ratingValue > 0 ? ratingValue.toFixed(1) : '—'}</span>
+                  {reviewsCount > 0 ? <span className="text-[hsl(var(--text))]/55">({reviewsCount})</span> : null}
                 </span>
               ) : null}
               <span
                 className={cn(
-                  'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-medium shadow-sm',
+                  'inline-flex items-center gap-1 font-medium',
                   outOfStock
-                    ? 'bg-red-100/90 text-red-700 dark:bg-red-950/50 dark:text-red-300'
+                    ? 'text-red-600 dark:text-red-400'
                     : lowStock
-                      ? 'bg-amber-100/90 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300'
-                      : 'bg-emerald-100/90 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300'
+                      ? 'text-amber-600 dark:text-amber-400'
+                      : 'text-[hsl(var(--text))]/60'
                 )}
               >
-                <span className="h-1 w-1 shrink-0 rounded-full bg-current/80" />
+                <span className="h-1 w-1 shrink-0 rounded-full bg-current" />
                 {outOfStock ? t('out_of_stock') : lowStock ? t('low_stock') : t('in_stock')}
               </span>
               <FreeShippingBadge price={product.price} minimal />
             </div>
 
-            {/* CTA — full width, icon + label, stronger hover */}
-            <div className="mt-5 border-t border-[hsl(var(--border))]/50 pt-5">
+            {/* 4. Action principale — CTA plein, bloc unique */}
+            <div className="mt-4 sm:mt-5">
               <AddToCartButton
                 product={{ _id: product._id, slug: product.slug, title, image, price: product.price }}
                 stopPropagation
                 size="sm"
-                variant="outline"
+                variant="solid"
                 fullWidth
                 withIcon
                 idleText={t('add_to_cart')}
                 className={cn(
-                  'min-h-[3rem] w-full rounded-xl border-2 border-[hsl(var(--accent))] font-semibold text-[hsl(var(--accent))]',
-                  'transition-all duration-200 ease-[var(--ease-smooth)]',
-                  'hover:scale-[1.02] hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--accent-foreground))] hover:shadow-md hover:shadow-[hsl(var(--accent)/0.3)]',
-                  'focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.5)]'
+                  'min-h-[3rem] w-full rounded-xl font-bold',
+                  'bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))]',
+                  'transition-all duration-250 ease-[var(--ease-smooth)]',
+                  'hover:opacity-95 focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.5)] focus-visible:ring-offset-2'
                 )}
                 ariaLabel={`${t('add_to_cart')} — ${title}`}
               />

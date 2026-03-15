@@ -2,6 +2,10 @@
 
 import { usePathname } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
+
+import Link from '@/components/LocalizedLink'
+import { useFocusTrap } from '@/lib/useFocusTrap'
 
 type Props = {
   delayMs?: number
@@ -25,6 +29,7 @@ export default function PopupEmailCapture({
   className,
 }: Props) {
   const pathname = usePathname() || ''
+  const t = useTranslations('email_popup')
   const [open, setOpen] = useState(false)
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
@@ -33,6 +38,9 @@ export default function PopupEmailCapture({
 
   const inputRef = useRef<HTMLInputElement | null>(null)
   const srRef = useRef<HTMLParagraphElement | null>(null)
+  const dialogRef = useRef<HTMLDivElement | null>(null)
+
+  useFocusTrap(open, dialogRef, { initialFocusRef: inputRef, restoreFocus: true })
 
   useEffect(() => {
     try {
@@ -73,16 +81,12 @@ export default function PopupEmailCapture({
 
   useEffect(() => {
     if (!open) return
-
-    inputRef.current?.focus()
-
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault()
         close()
       }
     }
-
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   // eslint-disable-next-line react-hooks/exhaustive-deps -- close stable
@@ -96,7 +100,7 @@ export default function PopupEmailCapture({
   const close = () => {
     setOpen(false)
     persistDismiss()
-    announce('Fenêtre fermée')
+    announce(t('closed_announce'))
   }
 
   const onBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -109,14 +113,14 @@ export default function PopupEmailCapture({
 
     const value = email.trim()
     if (!EMAIL_RE.test(value)) {
-      setError('Adresse email invalide')
+      setError(t('invalid_email'))
       inputRef.current?.focus()
       return
     }
 
     setLoading(true)
     setError(null)
-    announce('Envoi en cours…')
+    announce(t('sending_announce'))
 
     try {
       const res = await fetch('/api/email/welcome', {
@@ -136,24 +140,19 @@ export default function PopupEmailCapture({
         window.dataLayer?.push({ event: 'email_capture_success' })
       } catch {}
 
-      announce('Inscription réussie')
+      announce(t('success_announce'))
       persistDismiss()
       setOpen(false)
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Une erreur est survenue'
+      const message = err instanceof Error ? err.message : t('error_fallback')
       setError(message)
-      announce("Échec de l'inscription")
+      announce(t('fail_announce'))
     } finally {
       setLoading(false)
     }
   }
 
   if (!open) return null
-
-  const isFr =
-    typeof document !== 'undefined'
-      ? (document.documentElement.lang || 'fr').toLowerCase().startsWith('fr')
-      : true
 
   return (
     <div
@@ -166,6 +165,7 @@ export default function PopupEmailCapture({
       </p>
 
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="email-popup-title"
@@ -178,12 +178,12 @@ export default function PopupEmailCapture({
       >
         <div className="flex items-start justify-between gap-4">
           <h3 id="email-popup-title" className="text-lg font-bold">
-            {isFr ? 'Restez informé' : 'Stay in the loop'}
+            {t('title')}
           </h3>
 
           <button
             onClick={close}
-            aria-label={isFr ? 'Fermer' : 'Close'}
+            aria-label={t('close_aria')}
             className="rounded p-1 text-token-text/60 hover:text-[hsl(var(--text))] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))]"
           >
             ✕
@@ -191,9 +191,7 @@ export default function PopupEmailCapture({
         </div>
 
         <p id="email-popup-desc" className="mt-1 text-[15px] text-token-text/75">
-          {isFr
-            ? 'Recevez nos nouveautés et offres (pas de spam).'
-            : 'Get product updates and offers (no spam).'}
+          {t('description')}
         </p>
 
         <form onSubmit={submit} className="mt-4 space-y-3" noValidate>
@@ -209,7 +207,7 @@ export default function PopupEmailCapture({
                 ? 'border-red-500 focus:ring-red-500'
                 : 'border-[hsl(var(--border))] focus:ring-2 focus:ring-[hsl(var(--accent))] focus:outline-none',
             ].join(' ')}
-            placeholder={isFr ? 'Votre email' : 'Your email'}
+            placeholder={t('placeholder')}
             value={email}
             onChange={(e) => {
               setEmail(e.target.value)
@@ -232,7 +230,7 @@ export default function PopupEmailCapture({
             className="w-full rounded-lg bg-[hsl(var(--accent))] py-2 font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-sm)] transition hover:opacity-90 disabled:opacity-60"
             aria-busy={loading ? 'true' : 'false'}
           >
-            {loading ? (isFr ? 'Envoi…' : 'Sending…') : isFr ? "S'inscrire" : 'Subscribe'}
+            {loading ? t('sending') : t('submit')}
           </button>
 
           <button
@@ -240,15 +238,15 @@ export default function PopupEmailCapture({
             onClick={close}
             className="w-full rounded-lg border border-[hsl(var(--border))] py-2 text-sm text-token-text/70 hover:bg-[hsl(var(--surface-2))]"
           >
-            {isFr ? 'Non merci' : 'No thanks'}
+            {t('no_thanks')}
           </button>
 
           <p className="mt-1 text-[11px] text-token-text/60">
-            {isFr ? 'En vous inscrivant, vous acceptez notre ' : 'By subscribing you agree to our '}
-            <a className="underline" href="/confidentialite">
-              {isFr ? 'politique de confidentialité' : 'privacy policy'}
-            </a>
-            .
+            {t('privacy_prefix')}
+            <Link className="underline" href="/confidentialite">
+              {t('privacy_link')}
+            </Link>
+            {t('privacy_suffix')}
           </p>
         </form>
       </div>

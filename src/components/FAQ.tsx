@@ -6,6 +6,7 @@ import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 
 import type { KeyboardEvent, RefCallback } from 'react'
 
+import Link from '@/components/LocalizedLink'
 import { error as logError } from '@/lib/logger'
 import { cn } from '@/lib/utils'
 
@@ -124,9 +125,9 @@ export default function FAQ({ showSectionHeading = true }: FAQProps) {
   const introContent = (
     <>
       {t('intro')}{' '}
-      <a href="/contact" className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline">
+      <Link href="/contact" className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline">
         {t('contact_link')}
-      </a>
+      </Link>
       .
     </>
   )
@@ -192,9 +193,9 @@ export default function FAQ({ showSectionHeading = true }: FAQProps) {
       {!loading && filteredFaqs.length === 0 && (
         <p className="text-center text-token-text/60 text-[15px]" role="status">
           {t('no_results', { query: search })}{' '}
-          <a href="/contact" className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline">
+          <Link href="/contact" className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline">
             {t('contact_link')}
-          </a>
+          </Link>
           .
         </p>
       )}

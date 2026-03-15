@@ -1,34 +1,133 @@
 import type { Metadata } from 'next'
-
+import { getTranslations } from 'next-intl/server'
 import BackToHomeLink from '@/components/BackToHomeLink'
-import { getSitePage } from '@/lib/site-pages'
+import Link from '@/components/LocalizedLink'
+import { generateMeta } from '@/lib/seo'
 
-export const metadata: Metadata = {
-  title: 'Mentions légales',
-  description: 'Mentions légales et éditeur du site TechPlay. Siège social, contact.',
-  robots: { index: true, follow: true },
+const SECTIONS = [
+  'editeur',
+  'hebergeur',
+  'directeur',
+  'contact',
+  'ci',
+  'data',
+  'cookies',
+  'mediateur',
+  'droit',
+  'credits',
+] as const
+
+function splitParagraphs(text: string): string[] {
+  return text
+    .split(/\n\n+/)
+    .map((p) => p.trim())
+    .filter(Boolean)
 }
 
-const FALLBACK_TITLE = 'Mentions légales'
-const FALLBACK_CONTENT = '<p class="content-readability text-[15px] text-token-text/85">Éditeur du site : TechPlay • Siège social : Paris, France • Contact : contact@techplay.fr</p>'
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('mentions_legales')
+  return generateMeta({
+    title: t('page_title'),
+    description: t('meta_description'),
+    url: '/mentions-legales',
+    image: '/og-image.jpg',
+  })
+}
 
 export default async function MentionsLegalesPage() {
-  const page = await getSitePage('mentions-legales')
-  const title = (page?.title?.trim()) || FALLBACK_TITLE
-  const content = (page?.content?.trim()) || FALLBACK_CONTENT
+  const t = await getTranslations('mentions_legales')
 
   return (
-    <main className="container-app mx-auto max-w-3xl py-10" role="main" aria-labelledby="mentions-title">
+    <main
+      className="container-app mx-auto max-w-3xl py-10"
+      role="main"
+      aria-labelledby="mentions-title"
+    >
       <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[var(--shadow-md)]">
-        <h1 id="mentions-title" className="heading-page mb-6">
-          {title}
+        <h1 id="mentions-title" className="heading-page mb-2">
+          {t('page_title')}
         </h1>
-        <div
-          className="content-readability text-[15px] text-token-text/85 prose prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: content }}
-        />
-        <div className="mt-8">
+        <p className="mb-6 text-[13px] text-token-text/60">{t('last_updated')}</p>
+
+        <nav
+          aria-label={t('toc_title')}
+          className="mb-10 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface-2))]/50 px-5 py-4"
+        >
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-token-text/70">
+            {t('toc_title')}
+          </h2>
+          <ul className="flex flex-col gap-1.5 text-[14px]">
+            {SECTIONS.map((key) => {
+              const title = t(`section_${key}_title`)
+              return (
+                <li key={key}>
+                  <a
+                    href={`#section-${key}`}
+                    className="text-[hsl(var(--accent))] underline-offset-2 hover:underline"
+                  >
+                    {title}
+                  </a>
+                </li>
+              )
+            })}
+          </ul>
+        </nav>
+
+        <div className="content-readability space-y-10 text-[15px] text-token-text/85">
+          {SECTIONS.map((key) => {
+            const title = t(`section_${key}_title`)
+            const content = t(`section_${key}_content`)
+            const paragraphs = splitParagraphs(content)
+            return (
+              <section
+                key={key}
+                id={`section-${key}`}
+                className="scroll-mt-24 space-y-3"
+              >
+                <h2 className="heading-subsection text-[1.1rem] font-semibold text-[hsl(var(--text))]">
+                  {title}
+                </h2>
+                <div className="space-y-2">
+                  {paragraphs.map((para, i) => (
+                    <p key={i} className="leading-relaxed">
+                      {para}
+                    </p>
+                  ))}
+                </div>
+                {key === 'contact' && (
+                  <p className="mt-3">
+                    <Link
+                      href="/contact"
+                      className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline"
+                    >
+                      → {t('link_contact')}
+                    </Link>
+                  </p>
+                )}
+                {(key === 'data' || key === 'cookies') && (
+                  <p className="mt-3">
+                    <Link
+                      href="/confidentialite"
+                      className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline"
+                    >
+                      → {t('link_privacy')}
+                    </Link>
+                  </p>
+                )}
+              </section>
+            )
+          })}
+        </div>
+
+        <div className="mt-10 flex flex-wrap items-center gap-4 border-t border-[hsl(var(--border))] pt-8">
           <BackToHomeLink variant="outline" className="focus-visible:ring-offset-2" />
+          <span className="text-[14px] text-token-text/60">{t('see_also')} :</span>
+          <Link
+            href="/cgv"
+            className="text-[14px] font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline"
+          >
+            {t('link_cgv')}
+          </Link>
         </div>
       </div>
     </main>

@@ -8,8 +8,7 @@ import type { Product } from '@/types/product'
 import FreeShippingBadge from '@/components/FreeShippingBadge'
 import Link from '@/components/LocalizedLink'
 import { UI } from '@/lib/constants'
-import { formatPrice } from '@/lib/utils'
-import { cn } from '@/lib/utils'
+import { cn, formatPrice } from '@/lib/utils'
 
 type CouponSpec =
   | { type: 'percent'; value: number } // ex: 10 = -10%
@@ -142,7 +141,7 @@ export default function CartSummary({
   return (
     <section
       className={cn(
-        'card space-y-5 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[var(--shadow-md)]',
+        'card space-y-5 rounded-2xl border-2 border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[0_8px_32px_rgba(15,23,42,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.18)]',
         className
       )}
       role="region"
@@ -151,7 +150,7 @@ export default function CartSummary({
       {/* Live region pour lecteurs d’écran */}
       <p ref={srRef} className="sr-only" role="status" aria-live="polite" />
 
-      <h2 id="cart-summary-title" className="text-base font-semibold tracking-tight text-[hsl(var(--text))] border-b border-[hsl(var(--border))] pb-3">
+      <h2 id="cart-summary-title" className="text-lg font-bold tracking-tight text-[hsl(var(--text))] border-b border-[hsl(var(--border))] pb-3">
         {t('summary_title')}
       </h2>
 
@@ -176,9 +175,9 @@ export default function CartSummary({
         <Row label={t('shipping')} value={shipping === 0 ? t('shipping_free') : formatPrice(shipping)} />
       </div>
       <hr className="border-[hsl(var(--border))]" />
-      <div className="flex items-baseline justify-between gap-4">
-        <span className="text-sm font-semibold text-[hsl(var(--text))]">Total</span>
-        <span className="text-lg font-bold tabular-nums text-[hsl(var(--text))]" aria-label={t('total')}>
+      <div className="flex items-baseline justify-between gap-4 py-1">
+        <span className="text-base font-bold text-[hsl(var(--text))]">Total</span>
+        <span className="text-xl font-extrabold tabular-nums text-[hsl(var(--text))]" aria-label={t('total')}>
           {formatPrice(total)}
         </span>
       </div>
@@ -192,7 +191,7 @@ export default function CartSummary({
 
       <Link
         href="/commande"
-        className="btn-premium flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-[15px] font-bold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2"
+        className="btn-premium flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-[15px] font-bold shadow-lg transition-all duration-200 hover:shadow-xl focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2"
         aria-label={t('checkout_btn_aria')}
       >
         {t('checkout_btn')}

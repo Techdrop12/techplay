@@ -18,10 +18,10 @@ const CATEGORIES: { slug: string; label: string; description: string }[] = [
 ]
 
 export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('category')
   return generateMeta({
-    title: 'Catégories produits – TechPlay',
-    description:
-      'Parcourez les catégories TechPlay : casques, claviers, souris, audio, stockage, écrans. Trouvez le produit high-tech qu\'il vous faut.',
+    title: t('index_title'),
+    description: t('index_intro'),
     url: '/categorie',
     image: '/og-image.jpg',
   })
@@ -29,14 +29,15 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function CategoryIndexPage() {
   const t = await getTranslations('category')
+  const tNav = await getTranslations('nav')
   const crumbs = jsonLdBreadcrumbs([
-    { name: 'Accueil', url: '/' },
-    { name: 'Catégories', url: '/categorie' },
+    { name: tNav('home'), url: '/' },
+    { name: t('categories_aria'), url: '/categorie' },
   ])
 
   const itemList = jsonLdItemList({
-    name: 'Catégories produits TechPlay',
-    description: 'Liste des catégories de produits high-tech.',
+    name: t('index_title'),
+    description: t('index_intro'),
     url: '/categorie',
     items: CATEGORIES.map((c) => ({ name: c.label, url: `/categorie/${c.slug}` })),
   })

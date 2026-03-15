@@ -13,7 +13,9 @@ import TrustBadges from '@/components/TrustBadges'
 import { getPosts } from '@/lib/blog'
 import { BRAND } from '@/lib/constants'
 import { getBestProducts, getRecommendedPacks } from '@/lib/data'
+import { localizePath } from '@/lib/i18n-routing'
 import { isLocale } from '@/lib/language'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
 
 const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'))
 const BestProducts = dynamic(() => import('@/components/BestProducts'), {
@@ -225,7 +227,9 @@ function SplitCTA({ locale }: { locale: HomeLocale }) {
 }
 
 async function HomePageView({ locale }: { locale: HomeLocale }) {
+  setRequestLocale(locale)
   const t = STR[locale]
+  const tHome = await getTranslations('home')
   const [bestProductsResult, recommendedPacksResult, blogResult] = await Promise.allSettled([
     getBestProducts(),
     getRecommendedPacks(),
@@ -322,9 +326,9 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
                 truncateLabels={false}
                 className="!mt-8 !border-0 !bg-transparent !py-4 [&_ul]:!max-w-none [&_ul]:grid-cols-1 [&_ul]:sm:grid-cols-3 [&_ul]:gap-4"
                 badges={[
-                  { icon: 'truck', label: locale === 'en' ? 'Fast delivery' : 'Livraison rapide' },
-                  { icon: 'shield', label: locale === 'en' ? '2-year warranty' : 'Garantie 2 ans' },
-                  { icon: 'lock', label: locale === 'en' ? 'Secure payment' : 'Paiement sécurisé' },
+                  { icon: 'truck', label: tHome('trust_fast_delivery') },
+                  { icon: 'shield', label: tHome('trust_warranty') },
+                  { icon: 'lock', label: tHome('trust_secure') },
                 ]}
               />
             </div>
@@ -339,7 +343,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
                   <HeroCarousel overlayOpacity={0.25} />
                   <noscript>
                     <p className="px-4 py-3 text-sm text-token-text/80">
-                      <a href="/products" className="underline underline-offset-4">
+                      <a href={localizePath('/products', locale)} className="underline underline-offset-4">
                         {t.noscriptProducts}
                       </a>
                     </p>

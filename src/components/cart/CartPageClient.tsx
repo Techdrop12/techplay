@@ -2,7 +2,7 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useMemo, useRef } from 'react'
 
 import type { Product } from '@/types/product'
@@ -16,9 +16,12 @@ import { event as gaEvent, mapProductToGaItem, trackViewCart } from '@/lib/ga'
 
 type CartProduct = Product & { quantity: number }
 
+const CART_REASSURANCE = { fr: 'Livraison 48–72h · Paiement sécurisé · Retours gratuits 30 jours', en: 'Delivery 48–72h · Secure payment · 30-day free returns' } as const
+
 export default function CartPageClient() {
   const t = useTranslations('cart')
   const tNav = useTranslations('nav')
+  const locale = useLocale() as 'fr' | 'en'
   const { cart } = useCart()
   const prefersReduced = useReducedMotion()
   const srRef = useRef<HTMLParagraphElement | null>(null)
@@ -83,11 +86,11 @@ export default function CartPageClient() {
 
   return (
     <main
-      className="container-app mx-auto max-w-6xl py-8 sm:py-10"
+      className="container-app mx-auto max-w-6xl py-10 sm:py-12"
       role="main"
       aria-labelledby="cart-title"
     >
-      <nav aria-label={t('breadcrumb_aria')} className="mb-6 text-[12px] text-token-text/60">
+      <nav aria-label={t('breadcrumb_aria')} className="mb-8 text-[13px] text-token-text/60">
         <ol className="flex items-center gap-1.5">
           <li>
             <Link href="/" className="transition hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded">
@@ -103,13 +106,19 @@ export default function CartPageClient() {
 
       <motion.h1
         id="cart-title"
-        className="text-2xl font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-3xl"
+        className="text-2xl font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-3xl lg:text-[2rem]"
         initial={prefersReduced ? false : { opacity: 0, y: 6 }}
         animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
         transition={{ duration: 0.25 }}
       >
         {t('page_title')}{count > 0 ? ` · ${t('items_count', { count })}` : ''}
       </motion.h1>
+
+      {!isEmpty ? (
+        <p className="mt-2 text-[13px] text-token-text/70" role="doc-subtitle">
+          {CART_REASSURANCE[locale === 'en' ? 'en' : 'fr']}
+        </p>
+      ) : null}
 
       {isEmpty ? (
         <motion.div
@@ -119,16 +128,16 @@ export default function CartPageClient() {
           transition={{ duration: 0.3 }}
         >
           <EmptyCart />
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
+          <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:justify-center">
             <Link
               href="/products"
-              className="touch-target inline-flex min-h-[2.75rem] items-center justify-center gap-2 rounded-full bg-[hsl(var(--accent))] px-6 py-3 text-sm font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-md)] transition hover:opacity-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)]"
+              className="touch-target inline-flex min-h-[3rem] items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-8 py-3.5 text-[15px] font-bold text-[hsl(var(--accent-fg))] shadow-lg transition-all duration-200 hover:shadow-xl focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)]"
             >
               {t('explore_products')}
             </Link>
             <Link
               href="/products/packs"
-              className="touch-target inline-flex min-h-[2.75rem] items-center justify-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-6 py-3 text-sm font-medium text-[hsl(var(--text))] transition hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+              className="touch-target inline-flex min-h-[3rem] items-center justify-center gap-2 rounded-xl border-2 border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-8 py-3.5 text-[15px] font-semibold text-[hsl(var(--text))] transition hover:border-[hsl(var(--accent)/0.4)] hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
             >
               {t('view_packs')}
             </Link>

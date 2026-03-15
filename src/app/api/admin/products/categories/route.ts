@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 
-import { error as logError } from '@/lib/logger'
+import { apiError } from '@/lib/apiResponse'
 import { connectToDatabase } from '@/lib/db'
+import { error as logError } from '@/lib/logger'
 import Product from '@/models/Product'
 import { requireAdmin } from '@/lib/requireAdmin'
 
@@ -16,6 +17,6 @@ export async function GET() {
     return NextResponse.json(sorted)
   } catch (e) {
     logError('[admin/products/categories]', e)
-    return NextResponse.json({ error: 'Erreur' }, { status: 500 })
+    return apiError('Erreur', 500, { details: e instanceof Error ? e.message : undefined })
   }
 }

@@ -25,7 +25,7 @@ export default function EmptyCart({ locale: _locale }: EmptyCartProps) {
       role="status"
       aria-live="polite"
       aria-label={message}
-      className="card py-16 text-center shadow-[var(--shadow-lg)]"
+      className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] py-16 text-center shadow-[var(--shadow-sm)]"
     >
       <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-[hsl(var(--surface-2))] text-token-text/50" aria-hidden>
         <svg viewBox="0 0 24 24" className="h-10 w-10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
