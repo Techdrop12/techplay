@@ -493,6 +493,7 @@ export default function MobileNav() {
 
   useEffect(() => {
     if (open) closeMenu('route_change')
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- run on pathname change only
   }, [pathname])
 
   const handleInstall = async () => {

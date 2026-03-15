@@ -17,6 +17,7 @@ interface Subscriber {
 const PAGE_SIZE = 50
 
 export default function NewsletterSubscribersTable() {
+  const t = useTranslations('admin')
   const [items, setItems] = useState<Subscriber[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(0)

@@ -13,6 +13,7 @@ interface AIProductSummaryProps {
 }
 
 export default function AIProductSummary({ product }: AIProductSummaryProps) {
+  const t = useTranslations('common')
   const [summary, setSummary] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +42,8 @@ export default function AIProductSummary({ product }: AIProductSummaryProps) {
       })
       .catch(() => setError(t('ai_summary_error')))
       .finally(() => setLoading(false))
-  }, [product, t])
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- t is stable, product is the trigger
+  }, [product])
 
   if (loading) {
     return <p className="text-sm italic text-token-text/60 animate-pulse">{t('ai_summary_loading')}</p>

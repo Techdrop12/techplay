@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic'
 import { useTranslations } from 'next-intl'
 import { usePathname, useRouter } from 'next/navigation'
-import { Suspense, type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, type ReactNode, useEffect, useRef, useState } from 'react'
 
 import Header from './Header'
 

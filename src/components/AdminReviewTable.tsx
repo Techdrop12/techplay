@@ -30,6 +30,7 @@ export default function AdminReviewTable() {
 
   useEffect(() => {
     fetchReviews()
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount
   }, [])
 
   const fetchReviews = async () => {

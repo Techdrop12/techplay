@@ -20,9 +20,9 @@ export async function GET() {
       .lean()
       .exec()
 
-    const list = docs.map((d: { _id: unknown; user?: { name?: string }; rating: number; comment?: string; product?: unknown; createdAt?: Date }) => ({
+    const list = docs.map((d) => ({
       _id: d._id,
-      name: d.user?.name ?? '—',
+      name: (d.user as { name?: string } | undefined)?.name ?? '—',
       rating: d.rating,
       comment: d.comment ?? '',
       productId: d.product?.toString?.() ?? d.product,

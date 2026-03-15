@@ -37,7 +37,7 @@ export default function ABTestBanner({
       pushDataLayer({ event: 'ab_assign', ab_name: name, ab_variant: v })
       logEvent('ab_assign', { ab_name: name, ab_variant: v })
     } catch {}
-     
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- run once for AB assignment
   }, [name])
 
   const label = useMemo(() => {

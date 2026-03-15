@@ -4,7 +4,6 @@ import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
-import TableSkeleton from '@/components/admin/TableSkeleton'
 import Link from '@/components/LocalizedLink'
 
 interface BlogPost {

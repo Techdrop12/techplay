@@ -179,6 +179,7 @@ export default function ProductGallery({
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- goNext/goPrev stable, lightbox key handler
   }, [lightboxOpen, isImage]);
 
   // Navigation

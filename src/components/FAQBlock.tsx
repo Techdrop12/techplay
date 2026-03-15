@@ -12,7 +12,7 @@ interface FAQBlockProps {
   productId: string
 }
 
-export default function FAQBlock({ productId }: FAQBlockProps) {
+export default function FAQBlock({ productId: _productId }: FAQBlockProps) {
   const t = useTranslations('faq')
   const locale = useLocale()
   const [faq, setFaq] = useState<FAQItem[]>([])

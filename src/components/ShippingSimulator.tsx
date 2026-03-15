@@ -55,6 +55,7 @@ export default function ShippingSimulator({
 
   const holidaysSet = useMemo(
     () => new Set((holidays || []).filter(Boolean)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- holidays from props, stable ref
     [JSON.stringify(holidays || [])]
   );
 
@@ -182,6 +183,7 @@ export default function ShippingSimulator({
         srRef.current.textContent = txt;
       }
     } catch {}
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- addDays/fmtDate/isHoliday are stable
   }, [
     productKey,
     minDays,

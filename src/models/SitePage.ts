@@ -1,4 +1,4 @@
-import mongoose, { Schema, InferSchemaType, Types } from 'mongoose'
+import mongoose, { Schema, InferSchemaType } from 'mongoose'
 
 const SitePageSchema = new Schema(
   {

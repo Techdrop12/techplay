@@ -3,7 +3,6 @@
 import { useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 
-import BackToHomeLink from '@/components/BackToHomeLink'
 import Link from '@/components/LocalizedLink'
 import { getErrorMessage } from '@/lib/errors'
 

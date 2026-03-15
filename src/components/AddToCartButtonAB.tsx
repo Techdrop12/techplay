@@ -46,6 +46,7 @@ export default function AddToCartButtonAB({
   className,
   ...rest
 }: Props) {
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- presets from props, used in keys useMemo
   const presets: Record<string, VariantConfig> =
     variants ??
     (locale === 'fr'
@@ -73,7 +74,7 @@ export default function AddToCartButtonAB({
         logEvent('ab_assign', { ab_name: testKey, ab_variant: v })
       } catch {}
     }
-     
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- run once for AB assignment
   }, [testKey])
 
   // Impression CTA
@@ -85,7 +86,7 @@ export default function AddToCartButtonAB({
       pushDataLayer({ event: 'ab_impression', ab_name: testKey, ab_variant: variant, pid: product._id })
       logEvent('ab_impression', { ab_name: testKey, ab_variant: variant, pid: product._id })
     } catch {}
-     
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- impression once per variant
   }, [variant])
 
   const conf = variant ? presets[variant] || presets[keys[0]] : null

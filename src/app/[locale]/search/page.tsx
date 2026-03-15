@@ -105,7 +105,7 @@ export default async function LocaleSearchPage({ params, searchParams }: Props) 
               <p className="text-token-text/60">{isEn ? 'No posts found.' : 'Aucun article trouvé.'}</p>
             ) : (
               <ul className="space-y-3" role="list">
-                {blogItems.map((post: { _id?: string; id?: string; slug?: string; title?: string }) => (
+                {(blogItems as { _id?: string; id?: string; slug?: string; title?: string }[]).map((post) => (
                   <li key={String(post._id ?? post.id ?? post.slug)}>
                     <Link
                       href={`/blog/${post.slug ?? ''}`}

@@ -237,7 +237,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
   const recommendedPacks: Pack[] = recommendedPacksResult.status === 'fulfilled' ? recommendedPacksResult.value : []
   const blogData = blogResult.status === 'fulfilled' ? blogResult.value : null
   const blogItems = blogData?.items ?? []
-  const blogPostsForCards = blogItems.slice(0, 3).map((item: Record<string, unknown>) => ({
+  const blogPostsForCards = (blogItems as Record<string, unknown>[]).slice(0, 3).map((item: Record<string, unknown>) => ({
     _id: String(item._id ?? item.id ?? ''),
     slug: String(item.slug ?? ''),
     title: String(item.title ?? ''),

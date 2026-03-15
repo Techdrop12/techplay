@@ -27,6 +27,9 @@ if (!globalWithMongoose.mongoose) {
 }
 
 export async function connectToDatabase(): Promise<typeof mongoose> {
+  if (!uri) {
+    throw new Error('Missing Mongo URI (MONGODB_URI / MONGODB_URL / MONGO_URL)')
+  }
   if (globalWithMongoose.mongoose.conn) {
     return globalWithMongoose.mongoose.conn
   }

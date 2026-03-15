@@ -57,6 +57,7 @@ function normalizeStatus(status?: OrderStatus): string {
 }
 
 export default function OrderList({ orders = [], className }: Props) {
+  const locale = useLocale()
   const t = useTranslations('orders')
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortOption>('recent')

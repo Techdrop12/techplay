@@ -68,6 +68,7 @@ export default function PopupEmailCapture({
 
     const timer = window.setTimeout(() => setOpen(true), delayMs)
     return () => clearTimeout(timer)
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- isDismissed read in body only
   }, [hiddenByRoute, delayMs])
 
   useEffect(() => {
@@ -84,6 +85,7 @@ export default function PopupEmailCapture({
 
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- close stable
   }, [open])
 
   const announce = (msg: string) => {

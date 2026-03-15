@@ -113,6 +113,7 @@ export default function ExitIntentPopup({
 
     document.addEventListener('mouseout', onMouseOut)
     return () => document.removeEventListener('mouseout', onMouseOut)
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- isDismissed read in body only
   }, [eligible, hiddenByRoute, triggerAtTopY])
 
   const close = () => {
@@ -133,6 +134,7 @@ export default function ExitIntentPopup({
 
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- close stable
   }, [open])
 
   const onBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {

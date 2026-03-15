@@ -427,10 +427,11 @@ export default function Header() {
   }, [catOpen])
 
   useEffect(() => {
+    const timers = prefetchTimers.current
     return () => {
       clearCatTimer()
-      prefetchTimers.current.forEach((timer) => window.clearTimeout(timer))
-      prefetchTimers.current.clear()
+      timers.forEach((timer) => window.clearTimeout(timer))
+      timers.clear()
     }
   }, [])
 

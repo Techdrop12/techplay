@@ -40,6 +40,7 @@ export default function WishlistClient() {
     clear: () => void
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- items from wishlistState, used in saveToServer/wishlist
   const items = Array.isArray(wishlistState?.items) ? wishlistState.items : []
   const count = typeof wishlistState?.count === 'number' ? wishlistState.count : items.length
 

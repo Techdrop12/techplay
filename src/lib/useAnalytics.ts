@@ -94,11 +94,12 @@ export function useAnalytics(
   event: string,
   params: Record<string, unknown> = {}
 ): void {
+  const paramsKey = JSON.stringify(params)
   useEffect(() => {
     if (!event) return
     try {
       track(event, params)
     } catch {}
-     
-  }, [event, JSON.stringify(params)])
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- params serialized in paramsKey
+  }, [event, paramsKey])
 }

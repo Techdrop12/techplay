@@ -18,7 +18,7 @@ interface SitePageDoc {
 export default function SitePagesEditor({ slugs }: { slugs: readonly SlugConfig[] }) {
   const t = useTranslations('admin')
   const [selected, setSelected] = useState(slugs[0]?.slug ?? '')
-  const [page, setPage] = useState<SitePageDoc | null>(null)
+  const [_page, setPage] = useState<SitePageDoc | null>(null)
   const [form, setForm] = useState({ title: '', content: '' })
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)

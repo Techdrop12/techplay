@@ -245,6 +245,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
   const price = Math.max(0, toNum(product.price) ?? 0)
   const oldPrice = toNum(product.oldPrice)
   const rating = toNum(product.rating)
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- reviews/safeGallery from product, used in useMemo/useEffect
   const reviews = Array.isArray(product.reviews) ? product.reviews : []
   const reviewsCount = toNum(product.reviewsCount)
   const isNew = Boolean(product.isNew)
@@ -255,6 +256,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     : []
 
   const gallery = useMemo(() => buildGallery(source), [source])
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- safeGallery derived from gallery
   const safeGallery = gallery.length > 0 ? gallery : [image]
 
   const [quantity, setQuantity] = useState(1)

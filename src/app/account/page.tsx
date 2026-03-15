@@ -105,7 +105,7 @@ export default async function AccountPage() {
     const raw = await getUserOrders(email) as OrderDoc[]
     orders = raw.map((o: OrderDoc) => ({
       id: o._id?.toString() ?? '',
-      date: o.createdAt,
+      date: o.createdAt as string | number | Date | undefined,
       total: o.total ?? undefined,
       itemsCount: Array.isArray(o.items) ? o.items.length : 0,
       status: o.status ?? undefined,
@@ -260,7 +260,7 @@ export default async function AccountPage() {
           <ul className="space-y-3" role="list">
             {recentOrders.map((order) => {
               const statusKey = (order.status ?? '').toLowerCase()
-              const statusLabel = STATUS_LABEL[statusKey] || order.status ?? '—'
+              const statusLabel = (STATUS_LABEL[statusKey] || order.status) ?? '—'
               const badgeClass = STATUS_STYLE[statusKey] ?? 'bg-[hsl(var(--surface-2))] text-[hsl(var(--text))]'
               return (
                 <li key={order.id}>

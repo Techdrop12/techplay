@@ -189,6 +189,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
   const isNew = readBoolean(packRecord, ['isNew', 'new'])
   const isBestSeller = readBoolean(packRecord, ['isBestSeller', 'bestSeller', 'bestseller'])
   const stock = readNumber(packRecord, ['stock'])
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- items from readArray, used in useMemos below
   const items = readArray(packRecord, ['items', 'contents']) ?? []
   const rating = readNumber(packRecord, ['rating'])
   const reviewsCount = readNumber(packRecord, ['reviewsCount', 'reviews'])

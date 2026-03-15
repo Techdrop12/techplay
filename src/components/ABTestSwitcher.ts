@@ -29,7 +29,7 @@ export default function ABTestSwitcher({
       pushDataLayer({ event: 'ab_assign', ab_name: testKey, ab_variant: v })
       logEvent('ab_assign', { ab_name: testKey, ab_variant: v })
     } catch {}
-     
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount for assignment
   }, [testKey])
 
   if (!variant) return null
