@@ -2,6 +2,7 @@
 'use client'
 
 import Fuse from 'fuse.js'
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
@@ -68,6 +69,8 @@ export default function SearchBar({
   currency = 'EUR',
   limit = 8,
 }: Props) {
+  const tSearch = useTranslations('search')
+  const tMisc = useTranslations('misc')
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement | null>(null)
   const listboxId = `${id}-listbox`
@@ -214,7 +217,7 @@ export default function SearchBar({
       className={cn('relative w-full max-w-xl mx-auto', className)}
       role="search"
     >
-      <form onSubmit={onSubmit} aria-label="Recherche produits">
+      <form onSubmit={onSubmit} aria-label={tMisc('search_form_aria')}>
         <div className="relative">
           <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
             <span aria-hidden>🔍</span>
@@ -231,7 +234,7 @@ export default function SearchBar({
               if (results.length || showRecents) setOpen(true)
             }}
             onKeyDown={onKeyDown}
-            placeholder="Rechercher un produit…  /  Ctrl/⌘+K"
+            placeholder={tSearch('placeholder_shortcut')}
             autoComplete="off"
             aria-autocomplete="list"
             aria-controls={listboxId}
@@ -248,7 +251,7 @@ export default function SearchBar({
                 setOpen(showRecents)
                 inputRef.current?.focus()
               }}
-              aria-label="Effacer la recherche"
+              aria-label={tMisc('clear_search_aria')}
               className="absolute inset-y-0 right-2 my-1 px-2 rounded-lg text-token-text/60 hover:bg-[hsl(var(--surface-2))]"
             >
               ✕
@@ -295,13 +298,13 @@ export default function SearchBar({
                   onClick={() => submitToListing(query)}
                   className="w-full text-left px-3 py-2 text-sm text-accent hover:bg-accent/10"
                 >
-                  Voir plus de résultats pour « {query} »
+                  {tSearch('see_more_results', { query })}
                 </button>
               </li>
             </ul>
           ) : showRecents ? (
             <div className="p-2">
-              <p className="px-2 py-1 text-xs text-token-text/60">Recherches récentes</p>
+              <p className="px-2 py-1 text-xs text-token-text/60">{tSearch('recent_searches')}</p>
               <div className="flex flex-wrap gap-2 px-2 pb-2">
                 {recents.map((q) => (
                   <button
@@ -333,7 +336,7 @@ export default function SearchBar({
               </div>
             </div>
           ) : (
-            <div className="px-3 py-3 text-sm text-token-text/60">Aucun résultat.</div>
+            <div className="px-3 py-3 text-sm text-token-text/60">{tSearch('no_result')}</div>
           )}
         </div>
       )}

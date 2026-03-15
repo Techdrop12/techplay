@@ -4,6 +4,7 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { Minus, Plus, Trash2 } from 'lucide-react'
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import Link from '@/components/LocalizedLink'
@@ -28,6 +29,7 @@ const MAX_QTY = 99
 const clamp = (n: number) => Math.max(MIN_QTY, Math.min(MAX_QTY, Math.trunc(n || 0)))
 
 export default function CartItem({ item }: CartItemProps) {
+  const t = useTranslations('cart')
   const prefersReduced = useReducedMotion()
   const { removeFromCart, increment, decrement, updateQuantity } = useCart()
 
@@ -104,7 +106,7 @@ export default function CartItem({ item }: CartItemProps) {
         >
           {item.title}
         </Link>
-        <p className="text-[12px] text-token-text/60">{formatPrice(item.price)}/unité</p>
+        <p className="text-[12px] text-token-text/60">{formatPrice(item.price)}/{t('unit_label')}</p>
         <div className="inline-flex items-center gap-0 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-0.5 py-1 sm:px-1 sm:py-0.5">
           <button
             type="button"
@@ -124,7 +126,7 @@ export default function CartItem({ item }: CartItemProps) {
             onKeyDown={(e) => {
               if (e.key === 'Enter') e.currentTarget.blur()
             }}
-            aria-label={`Quantité pour ${item.title}`}
+            aria-label={t('quantity_for_aria', { title: item.title })}
             className="w-8 bg-transparent text-center text-[13px] font-medium outline-none tabular-nums"
           />
           <button
@@ -132,7 +134,7 @@ export default function CartItem({ item }: CartItemProps) {
             onClick={inc}
             disabled={item.quantity >= MAX_QTY}
             className="rounded p-1 transition hover:bg-white/50 disabled:opacity-40 dark:hover:bg-white/10"
-            aria-label={`Augmenter la quantité de ${item.title}`}
+            aria-label={t('quantity_increase_aria', { title: item.title })}
           >
             <Plus className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
@@ -150,8 +152,8 @@ export default function CartItem({ item }: CartItemProps) {
           type="button"
           onClick={handleRemove}
           className="touch-target rounded-lg p-2.5 text-token-text/60 transition hover:bg-red-100 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:hover:bg-red-900/25 dark:hover:text-red-400 sm:p-2"
-          aria-label={`Supprimer ${item.title} du panier`}
-          title={`Supprimer ${item.title}`}
+          aria-label={t('remove_item_aria', { title: item.title })}
+          title={t('remove_item_title', { title: item.title })}
         >
           <Trash2 className="h-4 w-4" aria-hidden="true" />
         </button>

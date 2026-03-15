@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 
+import { error as logError } from '@/lib/logger'
 import { connectToDatabase } from '@/lib/db'
 import NewsletterSubscriber from '@/models/NewsletterSubscriber'
 import { requireAdmin } from '@/lib/requireAdmin'
@@ -29,7 +30,7 @@ export async function GET(req: Request) {
     ])
     return NextResponse.json(toPlain({ items: docs, total }))
   } catch (e) {
-    console.error('[admin/newsletter-subscribers]', e)
+    logError('[admin/newsletter-subscribers]', e)
     return NextResponse.json(
       { error: 'Erreur chargement' },
       { status: 500 }

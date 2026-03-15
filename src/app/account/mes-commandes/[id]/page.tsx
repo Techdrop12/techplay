@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 
 import InvoiceButton from '@/components/account/InvoiceButton'
 import Link from '@/components/LocalizedLink'
@@ -22,6 +23,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function OrderDetailPage({ params }: Props) {
   const { id: orderId } = await params
+  const t = await getTranslations('account')
+  const tOrders = await getTranslations('orders')
   const session = await getSession()
   const order = await getOrderById(orderId)
 
@@ -55,7 +58,7 @@ export default async function OrderDetailPage({ params }: Props) {
           className="text-[13px] font-medium text-token-text/70 transition hover:text-[hsl(var(--accent))] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
           aria-label="Retour à l’espace client"
         >
-          ← Espace client
+          {t('back_to_account')}
         </Link>
         <span className="text-[13px] text-token-text/50" aria-hidden="true">
           /
@@ -63,9 +66,9 @@ export default async function OrderDetailPage({ params }: Props) {
         <Link
           href="/account/mes-commandes"
           className="text-[13px] font-medium text-[hsl(var(--accent))] transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-          aria-label="Retour à la liste de mes commandes"
+          aria-label={t('back_to_orders_aria')}
         >
-          Mes commandes
+          {t('link_my_orders')}
         </Link>
       </div>
 
@@ -73,7 +76,7 @@ export default async function OrderDetailPage({ params }: Props) {
         id="order-title"
         className="heading-page sm:text-3xl"
       >
-        Commande #{orderId}
+        {tOrders('order_id_display', { id: orderId })}
       </h1>
 
       <p className="mt-3 text-[15px] text-token-text/75">
@@ -82,11 +85,11 @@ export default async function OrderDetailPage({ params }: Props) {
 
       <section
         className="mt-8 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6 shadow-[var(--shadow-md)] sm:p-8"
-        aria-label="Résumé de la commande"
+        aria-label={t('order_summary_aria')}
       >
         <div>
           <h2 className="text-[12px] font-semibold uppercase tracking-wide text-token-text/60">
-            Statut
+            {tOrders('status')}
           </h2>
           <p className="mt-1 text-[15px] font-medium">{status}</p>
         </div>
@@ -94,7 +97,7 @@ export default async function OrderDetailPage({ params }: Props) {
         {items.length > 0 && (
           <div>
             <h2 className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-token-text/60">
-              Articles
+              {tOrders('articles_heading')}
             </h2>
             <ul className="divide-y divide-[hsl(var(--border))]" role="list">
               {items.map((line: { title?: string | null; quantity?: number | null; price?: number | null }, idx: number) => (
@@ -112,16 +115,16 @@ export default async function OrderDetailPage({ params }: Props) {
         )}
 
         <div>
-<h2 className="text-[12px] font-semibold uppercase tracking-wide text-token-text/60">
-          Adresse de livraison
-        </h2>
+          <h2 className="text-[12px] font-semibold uppercase tracking-wide text-token-text/60">
+            {tOrders('delivery_address_heading')}
+          </h2>
           <p className="mt-1 whitespace-pre-line text-[15px] text-token-text/85">{address}</p>
         </div>
 
         {(trackingNumber || shippingProvider) && (
           <div>
             <h2 className="text-[12px] font-semibold uppercase tracking-wide text-token-text/60">
-              Suivi
+              {tOrders('tracking_heading')}
             </h2>
             <p className="mt-1">
               {shippingProvider && <span className="font-medium">{shippingProvider}</span>}
@@ -135,7 +138,7 @@ export default async function OrderDetailPage({ params }: Props) {
 
         <div className="flex flex-wrap gap-3 pt-2">
           <span className="text-[15px] font-bold">
-            Total : {typeof order.total === 'number' ? formatPrice(order.total) : '—'}
+            {tOrders('order_total_label')} {typeof order.total === 'number' ? formatPrice(order.total) : '—'}
           </span>
           <InvoiceButton
             orderId={orderId}

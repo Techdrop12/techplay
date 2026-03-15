@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 
+import { error as logError } from '@/lib/logger'
 import dbConnect from '@/lib/dbConnect'
 import Blog from '@/models/Blog'
 import { requireAdmin } from '@/lib/requireAdmin'
@@ -23,7 +24,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, published: doc.published })
   } catch (e) {
-    console.error('[blog/toggle-publish]', e)
+    logError('[blog/toggle-publish]', e)
     return NextResponse.json(
       { error: 'Erreur mise à jour' },
       { status: 500 }

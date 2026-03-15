@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server'
-
+import { error as logError } from '@/lib/logger'
+import { apiError, apiSuccess } from '@/lib/apiResponse'
 import { connectToDatabase } from '@/lib/db'
 import Order from '@/models/Order'
 import { requireAdmin } from '@/lib/requireAdmin'
@@ -18,16 +18,16 @@ export async function GET(
   if (err) return err
 
   const { id } = await params
-  if (!id) return NextResponse.json({ error: 'ID manquant' }, { status: 400 })
+  if (!id) return apiError('ID manquant', 400)
 
   try {
     await connectToDatabase()
     const doc = await Order.findById(id).lean().exec()
-    if (!doc) return NextResponse.json({ error: 'Commande introuvable' }, { status: 404 })
-    return NextResponse.json(toPlain(doc))
+    if (!doc) return apiError('Commande introuvable', 404)
+    return apiSuccess(toPlain(doc) as Record<string, unknown>)
   } catch (e) {
-    console.error('[admin/orders/:id] GET', e)
-    return NextResponse.json({ error: 'Erreur' }, { status: 500 })
+    logError('[admin/orders/:id] GET', e)
+    return apiError('Erreur', 500, { details: (e as Error).message })
   }
 }
 
@@ -39,22 +39,19 @@ export async function PATCH(
   if (err) return err
 
   const { id } = await params
-  if (!id) return NextResponse.json({ error: 'ID manquant' }, { status: 400 })
+  if (!id) return apiError('ID manquant', 400)
 
   let body: { status?: string }
   try {
     body = await req.json()
   } catch {
-    return NextResponse.json({ error: 'Body JSON invalide' }, { status: 400 })
+    return apiError('Body JSON invalide', 400)
   }
 
   const status = body?.status != null ? String(body.status).trim() : ''
-  if (!status) return NextResponse.json({ error: 'Statut manquant' }, { status: 400 })
+  if (!status) return apiError('Statut manquant', 400)
   if (!ALLOWED_STATUSES.includes(status as (typeof ALLOWED_STATUSES)[number])) {
-    return NextResponse.json(
-      { error: `Statut invalide. Autorisés: ${ALLOWED_STATUSES.join(', ')}` },
-      { status: 400 }
-    )
+    return apiError(`Statut invalide. Autorisés: ${ALLOWED_STATUSES.join(', ')}`, 400)
   }
 
   try {
@@ -66,10 +63,10 @@ export async function PATCH(
     )
       .lean()
       .exec()
-    if (!doc) return NextResponse.json({ error: 'Commande introuvable' }, { status: 404 })
-    return NextResponse.json(toPlain(doc))
+    if (!doc) return apiError('Commande introuvable', 404)
+    return apiSuccess(toPlain(doc) as Record<string, unknown>)
   } catch (e) {
-    console.error('[admin/orders/:id] PATCH', e)
-    return NextResponse.json({ error: 'Erreur mise à jour' }, { status: 500 })
+    logError('[admin/orders/:id] PATCH', e)
+    return apiError('Erreur mise à jour', 500, { details: (e as Error).message })
   }
 }

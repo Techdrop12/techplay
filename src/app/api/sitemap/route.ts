@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 
 import { buildStaticSitemap, entriesToXml } from '@/lib/sitemap'
 
-export const runtime = 'edge'          // rapide, pas de dépendance Node
+export const runtime = 'nodejs'
 export const revalidate = 3600         // 1h de cache ISR
 
 export async function GET() {

@@ -197,6 +197,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           notifyToast: 'We can notify you when it comes back.',
           galleryLabel: 'Product gallery thumbnails',
           save: 'Save',
+          reviewsSectionAria: 'Customer reviews',
         }
       : {
           newLabel: 'Nouveau',
@@ -230,6 +231,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           notifyToast: '🔔 Nous pouvons vous prévenir quand il revient.',
           galleryLabel: 'Miniatures du produit',
           save: 'Économisez',
+          reviewsSectionAria: 'Avis clients',
         }
 
   const source = product as ProductLike
@@ -941,7 +943,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           </div>
       </div>
 
-      <div className="mt-12 lg:col-span-2" id="reviews" aria-label="Avis clients">
+      <div className="mt-12 lg:col-span-2" id="reviews" aria-label={t.reviewsSectionAria}>
         <div className="mb-6">
           <RatingSummary
             average={aggregate.average}

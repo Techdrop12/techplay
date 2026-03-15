@@ -9,6 +9,7 @@
 import { NextResponse } from 'next/server'
 
 import { getSession } from '@/lib/auth'
+import { apiError, apiSuccess } from '@/lib/apiResponse'
 import {
   type Order,
   type OrderItem,
@@ -283,7 +284,7 @@ export async function POST(req: Request) {
 
   const session = await getSession()
   if (!session?.user?.email) {
-    return NextResponse.json({ error: 'Non autorisé. Connexion requise.' }, { status: 401 })
+    return apiError('Non autorisé. Connexion requise.', 401)
   }
 
   let body: unknown = {}
@@ -297,7 +298,7 @@ export async function POST(req: Request) {
   const order = buildOrderFromBody(body)
 
   if (!Array.isArray(order.items) || order.items.length === 0) {
-    return NextResponse.json({ error: 'Aucun article dans la commande.' }, { status: 400 })
+    return apiError('Aucun article dans la commande.', 400)
   }
 
   const resHeaders = new Headers(invoiceLimiter.headers(rl))
@@ -309,7 +310,7 @@ export async function POST(req: Request) {
 
   const url = new URL(req.url)
   if (url.searchParams.get('debug') === 'json') {
-    return NextResponse.json(data, { status: 200 })
+    return apiSuccess(data as unknown as Record<string, unknown>)
   }
 
   const { stream, filename } = await renderInvoicePDFStream(data, {

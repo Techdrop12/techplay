@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import type { ReactNode } from 'react';
@@ -13,23 +14,34 @@ interface AdminLayoutProps {
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
+  const router = useRouter();
   const [accessGranted, setAccessGranted] = useState(false);
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem('admin_access');
-    const token = stored || prompt('🔐 Entrez le mot de passe administrateur :');
+    let cancelled = false;
 
-    if (token === process.env.NEXT_PUBLIC_ADMIN_TOKEN) {
-      localStorage.setItem('admin_access', token);
-      setAccessGranted(true);
-    } else {
-      alert('⛔ Accès refusé. Redirection...');
-      window.location.href = '/';
+    async function checkAdmin() {
+      try {
+        const res = await fetch('/api/admin/verify', { credentials: 'include' });
+        if (cancelled) return;
+        if (res.ok) {
+          setAccessGranted(true);
+        } else {
+          router.replace('/login?callbackUrl=/admin');
+        }
+      } catch {
+        if (!cancelled) router.replace('/login?callbackUrl=/admin');
+      } finally {
+        if (!cancelled) setChecking(false);
+      }
     }
 
-    setChecking(false);
-  }, []);
+    checkAdmin();
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
   if (checking) {
     return (

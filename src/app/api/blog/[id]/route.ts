@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server'
-
+import { error as logError } from '@/lib/logger'
+import { apiError, apiSuccess } from '@/lib/apiResponse'
 import dbConnect from '@/lib/dbConnect'
 import Blog from '@/models/Blog'
 import { requireAdmin } from '@/lib/requireAdmin'
@@ -16,16 +16,16 @@ export async function GET(
   if (err) return err
 
   const { id } = await params
-  if (!id) return NextResponse.json({ error: 'ID manquant' }, { status: 400 })
+  if (!id) return apiError('ID manquant', 400)
 
   try {
     await dbConnect()
     const doc = await Blog.findById(id).lean().exec()
-    if (!doc) return NextResponse.json({ error: 'Article introuvable' }, { status: 404 })
-    return NextResponse.json(toPlain(doc))
+    if (!doc) return apiError('Article introuvable', 404)
+    return apiSuccess(toPlain(doc) as Record<string, unknown>)
   } catch (e) {
-    console.error('[blog/:id] GET', e)
-    return NextResponse.json({ error: 'Erreur' }, { status: 500 })
+    logError('[blog/:id] GET', e)
+    return apiError('Erreur', 500, { details: (e as Error).message })
   }
 }
 
@@ -37,7 +37,7 @@ export async function PUT(
   if (err) return err
 
   const { id } = await params
-  if (!id) return NextResponse.json({ error: 'ID manquant' }, { status: 400 })
+  if (!id) return apiError('ID manquant', 400)
 
   let body: {
     title?: string
@@ -50,19 +50,19 @@ export async function PUT(
   try {
     body = await req.json()
   } catch {
-    return NextResponse.json({ error: 'Body JSON invalide' }, { status: 400 })
+    return apiError('Body JSON invalide', 400)
   }
 
   const title = body?.title != null ? String(body.title).trim() : undefined
   const slug = body?.slug != null ? String(body.slug).trim().toLowerCase().replace(/\s+/g, '-') : undefined
   if (title !== undefined && !title) {
-    return NextResponse.json({ error: 'Titre requis' }, { status: 400 })
+    return apiError('Titre requis', 400)
   }
 
   try {
     await dbConnect()
     const doc = await Blog.findById(id).exec()
-    if (!doc) return NextResponse.json({ error: 'Article introuvable' }, { status: 404 })
+    if (!doc) return apiError('Article introuvable', 404)
 
     if (title != null) doc.title = title
     if (slug != null) doc.slug = slug
@@ -77,14 +77,14 @@ export async function PUT(
     if (slug != null && slug !== doc.slug) {
       const existing = await Blog.findOne({ slug, _id: { $ne: id } }).lean().exec()
       if (existing) {
-        return NextResponse.json({ error: 'Un autre article utilise ce slug' }, { status: 400 })
+        return apiError('Un autre article utilise ce slug', 400)
       }
     }
 
     await doc.save()
-    return NextResponse.json(toPlain(doc))
+    return apiSuccess(toPlain(doc) as Record<string, unknown>)
   } catch (e) {
-    console.error('[blog/:id] PUT', e)
-    return NextResponse.json({ error: 'Erreur mise à jour' }, { status: 500 })
+    logError('[blog/:id] PUT', e)
+    return apiError('Erreur mise à jour', 500, { details: (e as Error).message })
   }
 }

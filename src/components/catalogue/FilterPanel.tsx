@@ -207,7 +207,7 @@ export default function FilterPanel({
         ref={containerRef}
         id={groupId}
         role="radiogroup"
-        aria-label="Filtrer par catégorie"
+        aria-label={t('filter_by_category_aria')}
         aria-describedby={liveId}
         onKeyDown={onKeyDown}
         className="relative flex gap-2.5 overflow-x-auto snap-x snap-mandatory no-scrollbar"

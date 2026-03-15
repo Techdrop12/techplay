@@ -2,10 +2,13 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 export default function GenerateBlogPost() {
+  const tMisc = useTranslations('misc');
+  const tBlog = useTranslations('blog');
   const [topic, setTopic] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -13,7 +16,7 @@ export default function GenerateBlogPost() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!topic.trim()) {
-      toast.error('Merci de saisir un sujet');
+      toast.error(tMisc('generator_enter_subject'));
       return;
     }
     setLoading(true);
@@ -26,16 +29,16 @@ export default function GenerateBlogPost() {
 
       if (!res.ok) {
         const { message } = await res.json();
-        toast.error(message || 'Erreur lors de la génération');
+        toast.error(message || tMisc('generator_error'));
         setLoading(false);
         return;
       }
 
       const data = await res.json();
       setResult(data.post?.content ?? data.content ?? '');
-      toast.success('Article généré avec succès !');
+      toast.success(tMisc('generator_success'));
     } catch {
-      toast.error('Erreur réseau');
+      toast.error(tMisc('generator_error_network'));
     }
     setLoading(false);
   };
@@ -47,11 +50,11 @@ export default function GenerateBlogPost() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <h2 className="text-xl font-bold mb-4">Générer un article de blog</h2>
+      <h2 className="text-xl font-bold mb-4">{tMisc('generator_heading')}</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="text"
-          placeholder="Sujet du blog"
+          placeholder={tBlog('generator_subject_placeholder')}
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
           className="border border-[hsl(var(--border))] rounded-lg p-2 w-full bg-[hsl(var(--surface))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"

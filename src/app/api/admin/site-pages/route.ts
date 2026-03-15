@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 
+import { error as logError } from '@/lib/logger'
 import { connectToDatabase } from '@/lib/db'
 import SitePage from '@/models/SitePage'
 import { requireAdmin } from '@/lib/requireAdmin'
@@ -25,7 +26,7 @@ export async function GET(req: Request) {
     const docs = await SitePage.find({}).sort({ slug: 1 }).lean().exec()
     return NextResponse.json(toPlain(docs))
   } catch (e) {
-    console.error('[admin/site-pages]', e)
+    logError('[admin/site-pages]', e)
     return NextResponse.json({ error: 'Erreur' }, { status: 500 })
   }
 }
@@ -55,7 +56,7 @@ export async function PUT(req: Request) {
       .exec()
     return NextResponse.json(toPlain(doc))
   } catch (e) {
-    console.error('[admin/site-pages] PUT', e)
+    logError('[admin/site-pages] PUT', e)
     return NextResponse.json({ error: 'Erreur' }, { status: 500 })
   }
 }

@@ -3,10 +3,12 @@
 import { motion } from 'framer-motion'
 import { Star, Trash2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
 import TableSkeleton from '@/components/admin/TableSkeleton'
+
+const PAGE_SIZE = 20
 
 interface ReviewRow {
   _id: string
@@ -22,29 +24,36 @@ export default function AdminReviewTable() {
   const [reviews, setReviews] = useState<ReviewRow[]>([])
   const [loading, setLoading] = useState(false)
   const [ratingFilter, setRatingFilter] = useState<number | ''>('')
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
+  const [pages, setPages] = useState(1)
 
-  const filteredReviews =
-    ratingFilter === ''
-      ? reviews
-      : reviews.filter((r) => r.rating === ratingFilter)
-
-  useEffect(() => {
-    fetchReviews()
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount
-  }, [])
-
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/reviews')
+      const params = new URLSearchParams({ page: String(page), limit: String(PAGE_SIZE) })
+      if (ratingFilter !== '') params.set('rating', String(ratingFilter))
+      const res = await fetch(`/api/reviews?${params}`)
       const data = await res.json()
-      setReviews(Array.isArray(data) ? data : [])
+      if (!res.ok) {
+        toast.error(data?.error ?? t('error_load_reviews'))
+        setReviews([])
+        return
+      }
+      setReviews(Array.isArray(data?.items) ? data.items : [])
+      setTotal(Number(data?.total) ?? 0)
+      setPages(Math.max(1, Number(data?.pages) ?? 1))
     } catch {
       toast.error(t('error_load_reviews'))
+      setReviews([])
     } finally {
       setLoading(false)
     }
-  }
+  }, [page, ratingFilter, t])
+
+  useEffect(() => {
+    fetchReviews()
+  }, [fetchReviews])
 
   const handleDelete = async (id: string) => {
     if (!confirm(t('confirm_delete_review'))) return
@@ -53,6 +62,7 @@ export default function AdminReviewTable() {
       if (res.ok) {
         toast.success(t('review_deleted'))
         setReviews((prev) => prev.filter((r) => r._id !== id))
+        setTotal((prev) => Math.max(0, prev - 1))
       } else {
         throw new Error()
       }
@@ -61,27 +71,57 @@ export default function AdminReviewTable() {
     }
   }
 
+  const tPagination = useTranslations('pagination')
+
   return (
     <div className="p-6 bg-white dark:bg-zinc-900 rounded-xl shadow-[var(--shadow-sm)] border border-[hsl(var(--border))]">
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <h2 className="text-2xl font-bold text-[hsl(var(--text))]">📝 {t('reviews_title')}</h2>
         <select
           value={ratingFilter}
-          onChange={(e) => setRatingFilter(e.target.value === '' ? '' : Number(e.target.value))}
+          onChange={(e) => {
+            setRatingFilter(e.target.value === '' ? '' : Number(e.target.value))
+            setPage(1)
+          }}
           className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
-          aria-label="Filtrer par note"
+          aria-label={t('all_ratings')}
         >
           <option value="">{t('all_ratings')}</option>
           {[5, 4, 3, 2, 1].map((n) => (
             <option key={n} value={n}>{n} {n > 1 ? t('stars') : t('star_one')}</option>
           ))}
         </select>
+        {!loading && total > 0 && (
+          <>
+            <span className="text-sm text-token-text/70">
+              {t('reviews_page_info', { page, pages, total })}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1 || loading}
+              className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-2 py-1.5 text-sm disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+              aria-label={tPagination('prev')}
+            >
+              ←
+            </button>
+            <button
+              type="button"
+              onClick={() => setPage((p) => p + 1)}
+              disabled={page >= pages || loading}
+              className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-2 py-1.5 text-sm disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+              aria-label={tPagination('next')}
+            >
+              →
+            </button>
+          </>
+        )}
       </div>
 
       {loading ? (
         <TableSkeleton rows={6} cols={6} ariaLabel={t('loading_reviews')} />
       ) : reviews.length === 0 ? (
-        <p className="text-token-text/50">{t('no_reviews')}</p>
+        <p className="text-token-text/50">{ratingFilter !== '' ? t('no_reviews_filter') : t('no_reviews')}</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm border border-[hsl(var(--border))] rounded-lg overflow-hidden" aria-label={t('reviews_title')}>
@@ -96,7 +136,7 @@ export default function AdminReviewTable() {
               </tr>
             </thead>
             <tbody>
-              {filteredReviews.map((r) => (
+              {reviews.map((r) => (
                 <motion.tr
                   key={r._id}
                   initial={{ opacity: 0, y: 5 }}
@@ -137,9 +177,6 @@ export default function AdminReviewTable() {
             </tbody>
           </table>
         </div>
-      )}
-      {!loading && reviews.length > 0 && filteredReviews.length === 0 && (
-        <p className="text-token-text/50 mt-2">{t('no_reviews_filter')}</p>
       )}
     </div>
   )

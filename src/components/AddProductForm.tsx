@@ -68,14 +68,14 @@ export default function AddProductForm() {
 
       const data = await res.json()
       if (!res.ok) {
-        setApiError(data?.error ?? data?.message ?? 'Erreur lors de la création')
+        setApiError(data?.error ?? data?.message ?? t('product_created_error'))
         return
       }
 
-      toast.success('✅ Produit ajouté')
+      toast.success(t('product_added'))
       router.push('/admin/dashboard')
     } catch (err) {
-      setApiError((err as Error).message || 'Erreur')
+      setApiError((err as Error).message || t('product_error'))
     } finally {
       setLoading(false)
     }

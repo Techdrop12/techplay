@@ -59,13 +59,13 @@ export default function NotFound() {
           aria-label={t('go_back')}
           className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-5 py-3 text-[15px] font-semibold transition hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)] focus-visible:ring-offset-2"
         >
-          ⟲ Page précédente
+          ⟲ {t('go_back')}
         </button>
       </div>
 
       <nav
         className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3"
-        aria-label="Liens rapides"
+        aria-label={t('useful_links')}
       >
         {popularLinks.map((l) => (
           <Link

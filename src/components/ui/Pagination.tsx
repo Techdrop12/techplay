@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
@@ -7,11 +9,12 @@ interface PaginationProps {
 }
 
 export default function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
+  const t = useTranslations('misc');
   const pages = [];
   for (let i = 1; i <= totalPages; i++) pages.push(i);
 
   return (
-    <nav aria-label="Pagination" className="flex justify-center space-x-2 my-4">
+    <nav aria-label={t('pagination_aria')} className="flex justify-center space-x-2 my-4">
       {pages.map((page) => (
         <button
           key={page}

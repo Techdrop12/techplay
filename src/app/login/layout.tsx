@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Connexion administrateur',
-  description: 'Connexion à l’espace d’administration TechPlay.',
+  title: 'Connexion',
+  description: 'Connectez-vous à votre compte TechPlay pour accéder à votre espace et à vos commandes.',
   robots: { index: false, follow: false },
 }
 

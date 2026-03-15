@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 
 import { cn } from '@/lib/utils'
 
@@ -11,6 +12,7 @@ interface PromoBadgeProps {
 }
 
 export default function PromoBadge({ discount, text = 'Promo', className }: PromoBadgeProps) {
+  const t = useTranslations('misc')
   // Ne rien afficher si pas de discount et pas de texte personnalisé
   if (!discount && !text) return null
 
@@ -25,7 +27,7 @@ export default function PromoBadge({ discount, text = 'Promo', className }: Prom
         className
       )}
       role="status"
-      aria-label="Promotion"
+      aria-label={t('promo_aria')}
     >
       {content}
     </motion.div>

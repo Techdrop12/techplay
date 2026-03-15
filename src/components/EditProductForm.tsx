@@ -74,10 +74,10 @@ export default function EditProductForm({ productId }: EditProductFormProps) {
       });
 
       if (!res.ok) throw new Error('Erreur modification');
-      toast.success('Produit mis à jour');
+      toast.success(t('product_updated'));
       router.push('/admin/dashboard');
     } catch (err) {
-      toast.error((err as Error).message || 'Erreur');
+      toast.error((err as Error).message || t('product_error'));
     } finally {
       setLoading(false);
     }
@@ -96,7 +96,7 @@ export default function EditProductForm({ productId }: EditProductFormProps) {
       <h2 id="edit-product-heading" className="text-xl font-bold text-[hsl(var(--text))]">{t('edit_product')}</h2>
 
       <div>
-        <label htmlFor="edit-product-title" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">Titre</label>
+        <label htmlFor="edit-product-title" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">{t('edit_product_title_label')}</label>
         <input
           id="edit-product-title"
           name="title"
@@ -108,7 +108,7 @@ export default function EditProductForm({ productId }: EditProductFormProps) {
         />
       </div>
       <div>
-        <label htmlFor="edit-product-slug" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">Slug (URL)</label>
+        <label htmlFor="edit-product-slug" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">{t('edit_product_slug_label')}</label>
         <input
           id="edit-product-slug"
           name="slug"
@@ -120,7 +120,7 @@ export default function EditProductForm({ productId }: EditProductFormProps) {
         />
       </div>
       <div>
-        <label htmlFor="edit-product-description" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">Description</label>
+        <label htmlFor="edit-product-description" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">{t('edit_product_description_label')}</label>
         <textarea
           id="edit-product-description"
           name="description"
@@ -132,7 +132,7 @@ export default function EditProductForm({ productId }: EditProductFormProps) {
         />
       </div>
       <div>
-        <label htmlFor="edit-product-price" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">Prix (€)</label>
+        <label htmlFor="edit-product-price" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">{t('edit_product_price_label')}</label>
         <input
           id="edit-product-price"
           name="price"
@@ -146,7 +146,7 @@ export default function EditProductForm({ productId }: EditProductFormProps) {
         />
       </div>
       <div>
-        <label htmlFor="edit-product-image" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">URL image principale</label>
+        <label htmlFor="edit-product-image" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">{t('edit_product_image_label')}</label>
         <input
           id="edit-product-image"
           name="image"
@@ -158,29 +158,29 @@ export default function EditProductForm({ productId }: EditProductFormProps) {
         />
       </div>
       <div>
-        <label htmlFor="edit-product-images" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">Images supplémentaires (séparées par virgules)</label>
+        <label htmlFor="edit-product-images" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">{t('edit_product_images_label')}</label>
         <input
           id="edit-product-images"
           name="images"
           value={Array.isArray(formData.images) ? formData.images.join(', ') : formData.images}
           onChange={handleChange}
-          placeholder="Images supplémentaires (séparées par virgules)"
+          placeholder={t('edit_product_images_placeholder')}
           className="w-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-[hsl(var(--text))] px-3 py-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
         />
       </div>
       <div>
-        <label htmlFor="edit-product-category" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">Catégorie</label>
+        <label htmlFor="edit-product-category" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">{t('edit_product_category_label')}</label>
         <input
           id="edit-product-category"
           name="category"
           value={formData.category}
           onChange={handleChange}
-          placeholder="Catégorie"
+          placeholder={t('edit_product_category_placeholder')}
           className="w-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-[hsl(var(--text))] px-3 py-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
         />
       </div>
       <div>
-        <label htmlFor="edit-product-stock" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">Stock</label>
+        <label htmlFor="edit-product-stock" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">{t('edit_product_stock_label')}</label>
         <input
           id="edit-product-stock"
           name="stock"
@@ -192,13 +192,13 @@ export default function EditProductForm({ productId }: EditProductFormProps) {
         />
       </div>
       <div>
-        <label htmlFor="edit-product-tags" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">Tags (séparés par virgules)</label>
+        <label htmlFor="edit-product-tags" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">{t('edit_product_tags_label')}</label>
         <input
           id="edit-product-tags"
           name="tags"
           value={formData.tags}
           onChange={handleChange}
-          placeholder="Tags (séparés par virgules)"
+          placeholder={t('edit_product_tags_placeholder')}
           className="w-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-[hsl(var(--text))] px-3 py-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
         />
       </div>

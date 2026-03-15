@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
 type Prefs = {
@@ -54,6 +55,7 @@ function applyConsent(prefs: Prefs) {
 }
 
 export default function ConfidentialitePrefs() {
+  const t = useTranslations('privacy_prefs')
   const [prefs, setPrefs] = useState<Prefs>({ analytics: false, ads: false })
   const [message, setMessage] = useState('')
 
@@ -118,7 +120,7 @@ export default function ConfidentialitePrefs() {
             onClick={save}
             className="btn-premium rounded-full px-5 py-2.5 text-[13px] font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
           >
-            Enregistrer
+            {t('save_btn')}
           </button>
           <button
             type="button"

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 
+import { error as logError } from '@/lib/logger'
 import { connectToDatabase } from '@/lib/db'
 import ContactSubmission from '@/models/ContactSubmission'
 import { requireAdmin } from '@/lib/requireAdmin'
@@ -21,7 +22,7 @@ export async function GET() {
       .exec()
     return NextResponse.json(toPlain(docs))
   } catch (e) {
-    console.error('[admin/contact-submissions]', e)
+    logError('[admin/contact-submissions]', e)
     return NextResponse.json(
       { error: 'Erreur chargement messages' },
       { status: 500 }

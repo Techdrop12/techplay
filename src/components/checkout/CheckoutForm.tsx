@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
@@ -95,6 +96,7 @@ function IconCard({ size = 18, className = '' }: { size?: number; className?: st
 }
 
 export default function CheckoutForm() {
+  const t = useTranslations('checkout')
   const { cart } = useCart()
 
   const [email, setEmail] = useState('')
@@ -217,7 +219,7 @@ export default function CheckoutForm() {
       if (honeypot) return
       setLastError(null)
       if (!gaItems.length) {
-        toast.error('Votre panier est vide.')
+        toast.error(t('cart_empty_toast'))
         return
       }
       if (!validate()) return
@@ -296,11 +298,11 @@ export default function CheckoutForm() {
         })) as CheckoutSessionResult | null | undefined
 
         if (session?.url) {
-          toast('Redirection vers le paiement…', {
+          toast(t('redirect_toast'), {
             icon: <IconCard className="text-[hsl(var(--accent))]" />,
           })
 
-          announce('Redirection vers Stripe')
+          announce(t('redirect_announce'))
 
           try {
             pushDataLayer({
@@ -349,6 +351,7 @@ export default function CheckoutForm() {
       loading,
       pixelContents,
       subtotal,
+      t,
       validate,
     ]
   )
@@ -419,7 +422,7 @@ export default function CheckoutForm() {
             autoCapitalize="off"
             autoCorrect="off"
             spellCheck={false}
-            placeholder="vous@exemple.com"
+            placeholder={t('email_placeholder')}
             maxLength={120}
             aria-required="true"
             aria-invalid={errors.email ? 'true' : 'false'}
@@ -435,7 +438,7 @@ export default function CheckoutForm() {
             )}
           />
           <p id={emailHintId} className="mt-1 text-[11px] text-token-text/60">
-            Confirmation et facture envoyées à cette adresse.
+            {t('email_hint')}
           </p>
           {errors.email ? (
             <p id="email-error" className="mt-1 text-xs text-red-600" role="alert">
@@ -446,7 +449,7 @@ export default function CheckoutForm() {
 
         <div>
           <label htmlFor="checkout-address" className="mb-1 block text-[13px] font-medium text-[hsl(var(--text))]">
-            Adresse de livraison
+            {t('shipping_label')}
           </label>
           <textarea
             ref={addressRef}
@@ -462,7 +465,7 @@ export default function CheckoutForm() {
             }}
             required
             autoComplete="shipping street-address"
-            placeholder="12 rue des Fleurs, 75000 Paris"
+            placeholder={t('address_placeholder')}
             maxLength={220}
             aria-required="true"
             aria-invalid={errors.address ? 'true' : 'false'}
@@ -478,7 +481,7 @@ export default function CheckoutForm() {
             )}
           />
           <p id={addressHintId} className="mt-1 text-[11px] text-token-text/60">
-            Numéro et libellé de rue, code postal, ville.
+            {t('address_hint')}
           </p>
           {errors.address ? (
             <p id="address-error" className="mt-1 text-xs text-red-600" role="alert">
@@ -488,7 +491,7 @@ export default function CheckoutForm() {
         </div>
 
         <div className="hidden" aria-hidden="true">
-          <label htmlFor="website">Site web</label>
+          <label htmlFor="website">{t('website_label')}</label>
           <input
             id="website"
             type="text"
@@ -511,7 +514,7 @@ export default function CheckoutForm() {
           ) : (
             <IconCard />
           )}
-          <span>{loading ? 'Redirection…' : 'Payer ' + formatPrice(subtotal, { currency })}</span>
+          <span>{loading ? t('redirecting_btn') : t('pay_btn') + ' ' + formatPrice(subtotal, { currency })}</span>
         </button>
 
         {lastError && (
@@ -525,7 +528,7 @@ export default function CheckoutForm() {
               }}
               className="mt-2 text-sm font-medium text-red-700 underline underline-offset-2 hover:no-underline dark:text-red-300"
             >
-              Réessayer
+              {t('retry_btn')}
             </button>
           </div>
         )}

@@ -1,8 +1,9 @@
-import { NextResponse } from 'next/server'
-
+import { error as logError } from '@/lib/logger'
 import dbConnect from '@/lib/dbConnect'
 import Blog from '@/models/Blog'
 import { requireAdmin } from '@/lib/requireAdmin'
+import { apiError, apiSuccess } from '@/lib/apiResponse'
+import { blogCreateSchema, type BlogCreateInput } from '@/lib/zodSchemas'
 
 function slugify(s: string): string {
   return String(s)
@@ -20,48 +21,49 @@ export async function POST(req: Request) {
   const err = await requireAdmin()
   if (err) return err
 
-  let body: { title?: string; slug?: string; description?: string; image?: string; author?: string; published?: boolean }
+  let raw: unknown
   try {
-    body = await req.json()
+    raw = await req.json()
   } catch {
-    return NextResponse.json({ error: 'Body JSON invalide' }, { status: 400 })
+    return apiError('Body JSON invalide', 400)
   }
 
-  const title = body?.title != null ? String(body.title).trim() : ''
-  if (!title) return NextResponse.json({ error: 'Titre manquant' }, { status: 400 })
+  const parsed = blogCreateSchema.safeParse(raw)
+  if (!parsed.success) {
+    const msg = parsed.error.issues[0]?.message ?? 'Données invalides'
+    return apiError(msg, 400)
+  }
 
+  const body = parsed.data as BlogCreateInput
+  const title = body.title
   const slug =
-    body?.slug != null && String(body.slug).trim()
-      ? String(body.slug).trim().toLowerCase().replace(/\s+/g, '-')
+    body.slug && body.slug.length > 0
+      ? body.slug.toLowerCase().replace(/\s+/g, '-')
       : slugify(title)
 
   try {
     await dbConnect()
     const existing = await Blog.findOne({ slug }).lean().exec()
     if (existing) {
-      return NextResponse.json(
-        { error: 'Un article avec ce slug existe déjà' },
-        { status: 400 }
-      )
+      return apiError('Un article avec ce slug existe déjà', 400)
     }
 
-    const published = Boolean(body?.published)
+    const published = Boolean(body.published)
     const doc = await Blog.create({
       title,
       slug,
-      description: body?.description != null ? String(body.description) : undefined,
-      image: body?.image != null ? String(body.image).trim() : undefined,
-      author: body?.author != null ? String(body.author).trim() : undefined,
+      description: body.description ?? undefined,
+      image: body.image && body.image.length > 0 ? body.image : undefined,
+      author: body.author ?? undefined,
       published,
       publishedAt: published ? new Date() : undefined,
     })
 
-    return NextResponse.json(toPlain(doc))
+    return apiSuccess(toPlain(doc) as Record<string, unknown>)
   } catch (e) {
-    console.error('[blog] POST', e)
-    return NextResponse.json(
-      { error: 'Erreur lors de la création' },
-      { status: 500 }
-    )
+    logError('[blog] POST', e)
+    return apiError('Erreur lors de la création', 500, {
+      details: e instanceof Error ? e.message : undefined,
+    })
   }
 }

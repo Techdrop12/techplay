@@ -120,6 +120,7 @@ const T = {
       shipping: 'Livraison 48–72 h',
       support: 'Support réactif',
     },
+    badgesAria: 'Garanties',
     newsletterTitle: 'Newsletter',
     newsletterPlaceholder: 'votre@email.com',
     newsletterButtonIdle: 'S’inscrire',
@@ -193,6 +194,7 @@ const T = {
       shipping: '48–72h delivery',
       support: 'Quick support',
     },
+    badgesAria: 'Our guarantees',
     newsletterTitle: 'Newsletter',
     newsletterPlaceholder: 'your@email.com',
     newsletterButtonIdle: 'Subscribe',
@@ -501,7 +503,7 @@ export default function Footer({
 
             {!compact ? (
               <>
-                <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 p-4 dark:bg-[hsl(var(--surface))]/50" aria-label="Garanties">
+                <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 p-4 dark:bg-[hsl(var(--surface))]/50" aria-label={t.badgesAria}>
                   <ul className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3" role="list">
                     <li className="flex items-center gap-3">
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">

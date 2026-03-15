@@ -152,6 +152,9 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const { category } = await params
   const sp = searchParams ? await searchParams : undefined
   const t = await getTranslations('common')
+  const tCategory = await getTranslations('category')
+  const tPagination = await getTranslations('pagination')
+  const tSort = await getTranslations('sort')
   const displayCategory = category.charAt(0).toUpperCase() + category.slice(1).replace(/-/g, ' ')
   const CatIcon = ICON_BY_SLUG[category]
 
@@ -254,22 +257,22 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           type="search"
           name="q"
           defaultValue={q}
-          placeholder="Rechercher dans cette catégorie…"
+          placeholder={tCategory('search_placeholder')}
           className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-          aria-label="Rechercher"
+          aria-label={t('search')}
         />
 
         <select
           name="sort"
           defaultValue={sort}
           className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-          aria-label="Trier"
+          aria-label={tCategory('sort_aria')}
         >
-          <option value="new">Nouveautés</option>
-          <option value="price_asc">Prix croissant</option>
-          <option value="price_desc">Prix décroissant</option>
-          <option value="rating">Meilleures notes</option>
-          <option value="promo">Meilleures promos</option>
+          <option value="new">{tSort('newest')}</option>
+          <option value="price_asc">{tSort('price_asc')}</option>
+          <option value="price_desc">{tSort('price_desc')}</option>
+          <option value="rating">{tSort('rating')}</option>
+          <option value="promo">{tSort('promo')}</option>
         </select>
 
         <input
@@ -277,9 +280,9 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           name="min"
           inputMode="numeric"
           defaultValue={min ?? ''}
-          placeholder="Prix min (€)"
+          placeholder={tCategory('price_min_placeholder')}
           className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-          aria-label="Prix minimum"
+          aria-label={tCategory('price_min_aria')}
           min={0}
         />
 
@@ -289,16 +292,16 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             name="max"
             inputMode="numeric"
             defaultValue={max ?? ''}
-            placeholder="Prix max (€)"
+            placeholder={tCategory('price_max_placeholder')}
             className="w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-            aria-label="Prix maximum"
+            aria-label={tCategory('price_max_aria')}
             min={0}
           />
           <button
             type="submit"
             className="shrink-0 rounded-full bg-[hsl(var(--accent))] px-5 py-2.5 text-[15px] font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-md)] transition hover:opacity-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)]"
           >
-            Filtrer
+            {tCategory('filter_btn')}
           </button>
         </div>
 
@@ -321,25 +324,25 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         emptyMessage={`Aucun produit trouvé dans la catégorie "${displayCategory}".`}
       />
 
-      <nav aria-label="Pagination" className="mt-10 flex flex-wrap items-center justify-center gap-3 text-[13px]">
+      <nav aria-label={tCategory('pagination_aria')} className="mt-10 flex flex-wrap items-center justify-center gap-3 text-[13px]">
         {hasPrev ? (
           <Link className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 transition hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2" href={buildUrl(page - 1)}>
-            ← Précédent
+            ← {tPagination('prev')}
           </Link>
         ) : (
-          <span className="rounded-xl border border-[hsl(var(--border))] px-4 py-2 opacity-40">← Précédent</span>
+          <span className="rounded-xl border border-[hsl(var(--border))] px-4 py-2 opacity-40">← {tPagination('prev')}</span>
         )}
 
         <span className="px-2">
-          Page <strong>{page}</strong> / {Math.max(1, Math.ceil(total / PAGE_SIZE))}
+          {tPagination('page_of', { page, pages: Math.max(1, Math.ceil(total / PAGE_SIZE)) })}
         </span>
 
         {hasNext ? (
           <Link className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 transition hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2" href={buildUrl(page + 1)}>
-            Suivant →
+            {tPagination('next')} →
           </Link>
         ) : (
-          <span className="rounded-xl border border-[hsl(var(--border))] px-4 py-2 opacity-40">Suivant →</span>
+          <span className="rounded-xl border border-[hsl(var(--border))] px-4 py-2 opacity-40">{tPagination('next')} →</span>
         )}
       </nav>
 

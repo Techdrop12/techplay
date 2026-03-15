@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Bot, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -15,6 +16,8 @@ interface ProductAssistantProps {
 }
 
 export default function ProductAssistant({ product }: ProductAssistantProps) {
+  const t = useTranslations('misc');
+  const tProduct = useTranslations('product');
   const [question, setQuestion] = useState('');
   const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
@@ -44,7 +47,7 @@ export default function ProductAssistant({ product }: ProductAssistantProps) {
 
       setResponse(data.reply);
     } catch {
-      toast.error("Erreur lors de la réponse de l'assistant");
+      toast.error(t('product_assistant_error'));
       setResponse("Désolé, une erreur s'est produite.");
     } finally {
       setLoading(false);
@@ -62,9 +65,9 @@ export default function ProductAssistant({ product }: ProductAssistantProps) {
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && askAI()}
-          placeholder="Posez une question sur ce produit..."
+          placeholder={t('chatbot_placeholder')}
           className="flex-1 border px-3 py-2 rounded text-sm"
-          aria-label="Question produit"
+          aria-label={tProduct('question_product_aria')}
         />
         <button
           onClick={askAI}

@@ -32,11 +32,11 @@ export default function NewsletterSubscribersTable() {
       setItems(data.items ?? [])
       setTotal(data.total ?? 0)
     } catch {
-      toast.error('Erreur chargement')
+      toast.error(t('error_load_newsletter'))
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     fetchPage(page * PAGE_SIZE)
@@ -79,24 +79,26 @@ export default function NewsletterSubscribersTable() {
             onClick={exportCsv}
             className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-sm font-medium hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
           >
-            Exporter CSV (page)
+            {t('newsletter_export_csv')}
           </button>
           <button
             type="button"
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             disabled={page === 0 || loading}
             className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-sm disabled:opacity-50"
+            aria-label={t('pagination_prev')}
           >
             ←
           </button>
           <span className="text-sm text-token-text/70">
-            Page {page + 1} / {totalPages}
+            {t('newsletter_page_info', { page: page + 1, pages: totalPages })}
           </span>
           <button
             type="button"
             onClick={() => setPage((p) => p + 1)}
             disabled={page >= totalPages - 1 || loading}
             className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-sm disabled:opacity-50"
+            aria-label={t('pagination_next')}
           >
             →
           </button>
@@ -106,7 +108,7 @@ export default function NewsletterSubscribersTable() {
         <p className="text-token-text/60">{t('no_newsletter')}</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full text-sm" aria-label="Inscrits newsletter">
+          <table className="min-w-full text-sm" aria-label={t('newsletter_table_aria')}>
             <thead>
               <tr className="border-b border-[hsl(var(--border))] bg-[hsl(var(--surface-2))] text-left">
                 <th className="px-4 py-2">{t('newsletter_email')}</th>

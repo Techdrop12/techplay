@@ -1,6 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
 
 interface FlyToCartAnimationProps {
@@ -8,6 +9,7 @@ interface FlyToCartAnimationProps {
 }
 
 export default function FlyToCartAnimation({ trigger }: FlyToCartAnimationProps) {
+  const t = useTranslations('common');
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -27,7 +29,7 @@ export default function FlyToCartAnimation({ trigger }: FlyToCartAnimationProps)
           exit={{ opacity: 0, scale: 0.8, y: -50 }}
           transition={{ duration: 0.8 }}
         >
-          <span role="img" aria-label="Ajouté au panier">
+          <span role="img" aria-label={t('added_to_cart_aria')}>
             🛒
           </span>
         </motion.div>

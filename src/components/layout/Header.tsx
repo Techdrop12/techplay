@@ -1,6 +1,5 @@
 'use client'
 
-import NextLink from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
 
@@ -446,19 +445,6 @@ export default function Header() {
     }
   }
 
-  const onLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (e.metaKey || e.ctrlKey || e.button === 1) return
-
-    e.preventDefault()
-    const url = L('/')
-
-    try {
-      router.push(url)
-    } catch {
-      window.location.assign(url)
-    }
-  }
-
   return (
     <header
       role="banner"
@@ -473,12 +459,11 @@ export default function Header() {
       )}
     >
       <div className="container-app flex h-16 items-center justify-between gap-4 md:h-[4.5rem] md:gap-3 lg:h-[4.75rem]">
-        <NextLink
-          href={L('/')}
+        <Link
+          href="/"
           prefetch={false}
           aria-label={t.logoAria}
           rel="home"
-          onClick={onLogoClick}
           className="touch-target group inline-flex items-center justify-center rounded-xl p-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] md:min-h-0 md:min-w-0 md:p-1.5"
           data-gtm="header_logo_home"
         >
@@ -491,7 +476,7 @@ export default function Header() {
               ariaLabel="TechPlay"
             />
           </span>
-        </NextLink>
+        </Link>
 
         <form
           action={searchAction}

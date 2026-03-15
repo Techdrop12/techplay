@@ -75,6 +75,7 @@ function normalizeCartItem(value: unknown): CheckoutItem | null {
 
 export default function CheckoutPage() {
   const t = useTranslations('checkout')
+  const tMisc = useTranslations('misc')
   const { cart } = useCart()
   const hasFiredRef = useRef(false)
 
@@ -147,7 +148,7 @@ export default function CheckoutPage() {
       aria-labelledby="checkout-title"
       role="main"
     >
-      <nav aria-label="Fil d’Ariane" className="mb-6 text-[12px] text-token-text/60">
+      <nav aria-label={tMisc('breadcrumb_aria')} className="mb-6 text-[12px] text-token-text/60">
         <ol className="flex items-center gap-1.5">
           <li>
             <Link href="/" className="transition hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded" prefetch={false}>
@@ -155,7 +156,7 @@ export default function CheckoutPage() {
             </Link>
           </li>
           <li aria-hidden="true">/</li>
-          <li aria-current="page" className="text-token-text/90">Commande</li>
+          <li aria-current="page" className="text-token-text/90">{t('breadcrumb_order')}</li>
         </ol>
       </nav>
 

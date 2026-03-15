@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 
 import type { Pack } from '@/types/product'
 
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export default function PackDetails({ pack }: Props) {
+  const t = useTranslations('pack')
   const {
     _id,
     title = 'Pack',
@@ -43,7 +45,7 @@ export default function PackDetails({ pack }: Props) {
       <div className="relative w-full aspect-square rounded-2xl overflow-hidden border border-[hsl(var(--border))] shadow-[var(--shadow-md)]">
         <Image
           src={safeProductImageUrl(image)}
-          alt={`Image du pack ${title}`}
+          alt={t('image_alt', { title })}
           fill
           className="object-cover"
           sizes="(max-width: 768px) 100vw, 50vw"
@@ -76,7 +78,7 @@ export default function PackDetails({ pack }: Props) {
 
         {/* Étoiles */}
         {rating > 0 && (
-          <StarsRating rating={rating} aria-label={`Note : ${rating} étoiles`} />
+          <StarsRating rating={rating} aria-label={t('rating_aria', { rating })} />
         )}
 
         {/* Wishlist */}
@@ -91,7 +93,6 @@ export default function PackDetails({ pack }: Props) {
           floating={false}
         />
 
-        {/* Ajouter au panier */}
         <AddToCartButton
           product={{
             _id,
@@ -102,7 +103,7 @@ export default function PackDetails({ pack }: Props) {
             quantity: 1,
           }}
           fullWidth
-          idleText="Ajouter le pack au panier"
+          idleText={t('add_pack_to_cart')}
         />
 
         {/* Description */}

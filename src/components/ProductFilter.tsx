@@ -30,6 +30,8 @@ export default function ProductFilter({
   initial = {},
 }: ProductFilterProps) {
   const t = useTranslations('common')
+  const tFilters = useTranslations('filters')
+  const tSort = useTranslations('sort')
   const [q, setQ] = useState(initial.q ?? '');
   const [selectedCategory, setSelectedCategory] = useState(initial.category ?? '');
   const [minPrice, setMinPrice] = useState(
@@ -152,33 +154,33 @@ export default function ProductFilter({
   return (
     <section
       className="mb-6 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-4 sm:p-5 shadow-[var(--shadow-sm)]"
-      aria-label="Filtres produits"
+      aria-label={tFilters('filters_aria')}
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
         {/* Recherche */}
         <label className="flex flex-col gap-1">
-          <span className="text-[13px] font-medium">Recherche</span>
+          <span className="text-[13px] font-medium">{tFilters('search_label')}</span>
           <input
             type="search"
             inputMode="search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Nom, mot-clé…"
+            placeholder={tFilters('placeholder_name')}
             className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-            aria-label="Rechercher un produit"
+            aria-label={tFilters('search_product_aria')}
           />
         </label>
 
         {/* Catégorie */}
         <label className="flex flex-col gap-1">
-          <span className="text-[13px] font-medium">Catégorie</span>
+          <span className="text-[13px] font-medium">{tFilters('category_label')}</span>
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
             className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-            aria-label="Filtrer par catégorie"
+            aria-label={tFilters('filter_category_aria')}
           >
-            <option value="">Toutes catégories</option>
+            <option value="">{tFilters('all_categories')}</option>
             {categories.map((cat) => (
               <option key={cat} value={cat}>
                 {cat}
@@ -189,7 +191,7 @@ export default function ProductFilter({
 
         {/* Prix min */}
         <label className="flex flex-col gap-1">
-          <span className="text-[13px] font-medium">Prix min (€)</span>
+          <span className="text-[13px] font-medium">{tFilters('price_min')}</span>
           <input
             type="number"
             min={0}
@@ -198,13 +200,13 @@ export default function ProductFilter({
             onChange={(e) => setMinPrice(e.target.value)}
             placeholder="0"
             className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-            aria-label="Prix minimum"
+            aria-label={tFilters('price_min_aria')}
           />
         </label>
 
         {/* Prix max */}
         <label className="flex flex-col gap-1">
-          <span className="text-[13px] font-medium">Prix max (€)</span>
+          <span className="text-[13px] font-medium">{tFilters('price_max')}</span>
           <input
             type="number"
             min={0}
@@ -213,20 +215,20 @@ export default function ProductFilter({
             onChange={(e) => setMaxPrice(e.target.value)}
             placeholder="999"
             className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-            aria-label="Prix maximum"
+            aria-label={tFilters('price_max_aria')}
           />
         </label>
 
         {/* Note min */}
         <label className="flex flex-col gap-1">
-          <span className="text-[13px] font-medium">Note minimale</span>
+          <span className="text-[13px] font-medium">{tFilters('rating_min')}</span>
           <select
             value={ratingMin}
             onChange={(e) => setRatingMin(e.target.value)}
             className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-            aria-label="Filtrer par note minimale"
+            aria-label={tFilters('filter_rating_aria')}
           >
-            <option value="">Toutes</option>
+            <option value="">{tFilters('all_ratings')}</option>
             <option value="3">≥ 3★</option>
             <option value="4">≥ 4★</option>
             <option value="4.5">≥ 4.5★</option>
@@ -235,18 +237,18 @@ export default function ProductFilter({
 
         {/* Tri */}
         <label className="flex flex-col gap-1">
-          <span className="text-[13px] font-medium">Trier par</span>
+          <span className="text-[13px] font-medium">{tFilters('sort_by')}</span>
           <select
             value={sort}
             onChange={(e) => setSort((e.target.value || 'new') as ProductFilterSort)}
             className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-            aria-label="Trier les produits"
+            aria-label={tFilters('sort_products_aria')}
           >
-            <option value="new">Nouveautés</option>
-            <option value="price_asc">Prix croissant</option>
-            <option value="price_desc">Prix décroissant</option>
-            <option value="rating">Meilleures notes</option>
-            <option value="promo">Meilleures promos</option>
+            <option value="new">{tSort('newest')}</option>
+            <option value="price_asc">{tSort('price_asc')}</option>
+            <option value="price_desc">{tSort('price_desc')}</option>
+            <option value="rating">{tSort('rating')}</option>
+            <option value="promo">{tSort('promo')}</option>
           </select>
         </label>
       </div>
@@ -260,9 +262,9 @@ export default function ProductFilter({
               checked={onlyNew}
               onChange={(e) => setOnlyNew(e.target.checked)}
               className="h-4 w-4 accent-[hsl(var(--accent))]"
-              aria-label="Afficher uniquement les nouveautés"
+              aria-label={tFilters('new_only_aria')}
             />
-            Nouveautés
+            {tSort('newest')}
           </label>
           <label className="inline-flex items-center gap-2 text-[13px]">
             <input
@@ -270,9 +272,9 @@ export default function ProductFilter({
               checked={onlyPromo}
               onChange={(e) => setOnlyPromo(e.target.checked)}
               className="h-4 w-4 accent-[hsl(var(--accent))]"
-              aria-label="Afficher uniquement les articles en promotion"
+              aria-label={tFilters('promo_only_aria')}
             />
-            En promo
+            {tFilters('on_sale')}
           </label>
         </div>
 

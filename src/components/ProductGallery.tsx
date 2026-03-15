@@ -35,6 +35,7 @@ export default function ProductGallery({
   showIndex = true,
 }: ProductGalleryProps) {
   const t = useTranslations('common')
+  const tProduct = useTranslations('product')
   const prefersReducedMotion = useReducedMotion()
 
   /** Normalisation des médias (string -> {src, kind:'image'}) + fallback pour URLs cassées (ex. fakestoreapi) */
@@ -299,7 +300,7 @@ export default function ProductGallery({
     <div
       className="outline-none"
       aria-roledescription="carousel"
-      aria-label="Galerie produit"
+      aria-label={tProduct('gallery_aria')}
     >
       {/* Live region pour lecteur d’écran */}
       <span ref={liveRef} className="sr-only" role="status" aria-live="polite" />
@@ -309,7 +310,7 @@ export default function ProductGallery({
         ref={thumbsRef}
         className="flex md:flex-col gap-2 md:w-24 overflow-x-auto md:overflow-y-auto mb-4 scroll-smooth"
         role="listbox"
-        aria-label="Miniatures du produit"
+        aria-label={tProduct('thumbnails_aria')}
         onKeyDown={onThumbsKeyDown}
       >
         {media.map((m, i) => {
@@ -365,7 +366,7 @@ export default function ProductGallery({
           onClick={() => setLightboxOpen(true)}
           onKeyDown={onMainKeyDown}
           className="relative w-full aspect-[4/3] md:aspect-square cursor-zoom-in rounded-2xl overflow-hidden shadow-[var(--shadow-sm)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-          aria-label="Agrandir le média"
+          aria-label={tProduct('gallery_zoom_aria')}
         >
           {/* Edge fade pour le relief visuel */}
           {edgeFade && (
@@ -413,7 +414,7 @@ export default function ProductGallery({
 
           {/* Aide zoom */}
           <span className="absolute bottom-2 right-2 text-xs bg-black/70 text-white px-2 py-1 rounded z-[2]">
-            Cliquer pour zoom
+            {tProduct('gallery_click_zoom')}
           </span>
         </motion.button>
 
@@ -423,7 +424,7 @@ export default function ProductGallery({
             <button
               type="button"
               onClick={goPrev}
-              aria-label="Média précédent"
+              aria-label={tProduct('gallery_prev_aria')}
               className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               ‹
@@ -431,7 +432,7 @@ export default function ProductGallery({
             <button
               type="button"
               onClick={goNext}
-              aria-label="Média suivant"
+              aria-label={tProduct('gallery_next_aria')}
               className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               ›
@@ -451,7 +452,7 @@ export default function ProductGallery({
             exit={{ opacity: 0 }}
             role="dialog"
             aria-modal="true"
-            aria-label="Aperçu en grand"
+            aria-label={tProduct('gallery_fullscreen_aria')}
             onClick={() => setLightboxOpen(false)}
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
@@ -513,7 +514,7 @@ export default function ProductGallery({
                   <button
                     type="button"
                     onClick={goPrev}
-                    aria-label="Média précédent"
+                    aria-label={tProduct('gallery_prev_aria')}
                     className="absolute left-2 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-white/20 text-white text-2xl leading-none backdrop-blur hover:bg-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                   >
                     ‹
@@ -521,7 +522,7 @@ export default function ProductGallery({
                   <button
                     type="button"
                     onClick={goNext}
-                    aria-label="Média suivant"
+                    aria-label={tProduct('gallery_next_aria')}
                     className="absolute right-2 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-white/20 text-white text-2xl leading-none backdrop-blur hover:bg-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                   >
                     ›
@@ -539,7 +540,7 @@ export default function ProductGallery({
                   <button
                     type="button"
                     onClick={() => setZoom((z) => Math.max(1, z - 0.2))}
-                    aria-label="Zoom -"
+                    aria-label={tProduct('zoom_minus_aria')}
                     className="h-10 w-10 rounded-full bg-white/20 text-white text-lg backdrop-blur hover:bg-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                   >
                     −
@@ -547,7 +548,7 @@ export default function ProductGallery({
                   <button
                     type="button"
                     onClick={() => setZoom((z) => Math.min(3, z + 0.2))}
-                    aria-label="Zoom +"
+                    aria-label={tProduct('zoom_plus_aria')}
                     className="h-10 w-10 rounded-full bg-white/20 text-white text-lg backdrop-blur hover:bg-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                   >
                     +
@@ -567,7 +568,7 @@ export default function ProductGallery({
                 type="button"
                 data-close
                 onClick={() => setLightboxOpen(false)}
-                aria-label="Fermer"
+                aria-label={t('close_aria')}
                 className="absolute top-2 right-2 h-10 w-10 rounded-full bg-white/20 text-white text-lg backdrop-blur hover:bg-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 ✕

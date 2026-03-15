@@ -1,9 +1,10 @@
 import mongoose from 'mongoose'
-import { NextResponse } from 'next/server'
 
+import { error as logError } from '@/lib/logger'
 import { connectToDatabase } from '@/lib/db'
 import Wishlist from '@/models/Wishlist'
 import { getSession } from '@/lib/auth'
+import { apiError, apiSuccess } from '@/lib/apiResponse'
 
 function toPlain(obj: unknown) {
   return JSON.parse(JSON.stringify(obj))
@@ -13,7 +14,7 @@ export async function GET() {
   const session = await getSession()
   const email = session?.user?.email?.trim()
   if (!email) {
-    return NextResponse.json({ error: 'Non connecté' }, { status: 401 })
+    return apiError('Non connecté', 401)
   }
 
   try {
@@ -23,10 +24,10 @@ export async function GET() {
       .lean()
       .exec()
     const ids = (doc?.productIds ?? []).map((id: { toString: () => string }) => id.toString())
-    return NextResponse.json(toPlain({ productIds: ids }))
+    return apiSuccess(toPlain({ productIds: ids }) as Record<string, unknown>)
   } catch (e) {
-    console.error('[wishlist] GET', e)
-    return NextResponse.json({ error: 'Erreur' }, { status: 500 })
+    logError('[wishlist] GET', e)
+    return apiError('Erreur', 500, { details: e instanceof Error ? e.message : undefined })
   }
 }
 
@@ -34,17 +35,17 @@ export async function POST(req: Request) {
   const session = await getSession()
   const email = session?.user?.email?.trim()
   if (!email) {
-    return NextResponse.json({ error: 'Non connecté' }, { status: 401 })
+    return apiError('Non connecté', 401)
   }
 
   let body: { productId?: string }
   try {
     body = await req.json()
   } catch {
-    return NextResponse.json({ error: 'Body JSON invalide' }, { status: 400 })
+    return apiError('Body JSON invalide', 400)
   }
   const productId = body?.productId != null ? String(body.productId).trim() : ''
-  if (!productId) return NextResponse.json({ error: 'productId manquant' }, { status: 400 })
+  if (!productId) return apiError('productId manquant', 400)
 
   try {
     await connectToDatabase()
@@ -58,10 +59,10 @@ export async function POST(req: Request) {
       .lean()
       .exec()
     const ids = (doc?.productIds ?? []).map((id: { toString: () => string }) => id.toString())
-    return NextResponse.json(toPlain({ productIds: ids }))
+    return apiSuccess(toPlain({ productIds: ids }) as Record<string, unknown>)
   } catch (e) {
-    console.error('[wishlist] POST', e)
-    return NextResponse.json({ error: 'Erreur' }, { status: 500 })
+    logError('[wishlist] POST', e)
+    return apiError('Erreur', 500, { details: e instanceof Error ? e.message : undefined })
   }
 }
 
@@ -69,12 +70,12 @@ export async function DELETE(req: Request) {
   const session = await getSession()
   const email = session?.user?.email?.trim()
   if (!email) {
-    return NextResponse.json({ error: 'Non connecté' }, { status: 401 })
+    return apiError('Non connecté', 401)
   }
 
   const url = new URL(req.url)
   const productId = url.searchParams.get('productId')?.trim()
-  if (!productId) return NextResponse.json({ error: 'productId manquant' }, { status: 400 })
+  if (!productId) return apiError('productId manquant', 400)
 
   try {
     await connectToDatabase()
@@ -84,10 +85,10 @@ export async function DELETE(req: Request) {
       { $pull: { productIds: oid } },
       { new: true }
     ).exec()
-    return NextResponse.json({ ok: true })
+    return apiSuccess({ ok: true })
   } catch (e) {
-    console.error('[wishlist] DELETE', e)
-    return NextResponse.json({ error: 'Erreur' }, { status: 500 })
+    logError('[wishlist] DELETE', e)
+    return apiError('Erreur', 500, { details: e instanceof Error ? e.message : undefined })
   }
 }
 
@@ -95,14 +96,14 @@ export async function PUT(req: Request) {
   const session = await getSession()
   const email = session?.user?.email?.trim()
   if (!email) {
-    return NextResponse.json({ error: 'Non connecté' }, { status: 401 })
+    return apiError('Non connecté', 401)
   }
 
   let body: { productIds?: string[] }
   try {
     body = await req.json()
   } catch {
-    return NextResponse.json({ error: 'Body JSON invalide' }, { status: 400 })
+    return apiError('Body JSON invalide', 400)
   }
   const raw = body?.productIds
   const productIds = Array.isArray(raw)
@@ -132,9 +133,9 @@ export async function PUT(req: Request) {
       .lean()
       .exec()
     const ids = (doc?.productIds ?? []).map((id: { toString: () => string }) => id.toString())
-    return NextResponse.json(toPlain({ productIds: ids }))
+    return apiSuccess(toPlain({ productIds: ids }) as Record<string, unknown>)
   } catch (e) {
-    console.error('[wishlist] PUT', e)
-    return NextResponse.json({ error: 'Erreur' }, { status: 500 })
+    logError('[wishlist] PUT', e)
+    return apiError('Erreur', 500, { details: e instanceof Error ? e.message : undefined })
   }
 }

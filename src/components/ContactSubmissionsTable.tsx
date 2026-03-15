@@ -1,6 +1,6 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
@@ -17,8 +17,10 @@ interface Submission {
 
 export default function ContactSubmissionsTable() {
   const t = useTranslations('admin')
+  const locale = useLocale()
   const [list, setList] = useState<Submission[]>([])
   const [loading, setLoading] = useState(true)
+  const dateLocale = locale === 'fr' ? 'fr-FR' : 'en-GB'
 
   useEffect(() => {
     fetch('/api/admin/contact-submissions')
@@ -42,7 +44,7 @@ export default function ContactSubmissionsTable() {
 
   return (
     <div className="overflow-x-auto p-4">
-      <table className="min-w-full text-sm border-collapse" aria-label="Messages contact">
+      <table className="min-w-full text-sm border-collapse" aria-label={t('contact_table_aria')}>
         <thead>
           <tr className="bg-[hsl(var(--surface-2))] text-left">
             <th className="px-4 py-2 border-b border-[hsl(var(--border))]">{t('contact_date')}</th>
@@ -58,7 +60,7 @@ export default function ContactSubmissionsTable() {
               className="border-b border-[hsl(var(--border))] hover:bg-[hsl(var(--surface-2))]"
             >
               <td className="px-4 py-2 text-token-text/70">
-                {row.createdAt ? new Date(row.createdAt).toLocaleString('fr-FR') : '—'}
+                {row.createdAt ? new Date(row.createdAt).toLocaleString(dateLocale) : '—'}
               </td>
               <td className="px-4 py-2">{row.name || '—'}</td>
               <td className="px-4 py-2">

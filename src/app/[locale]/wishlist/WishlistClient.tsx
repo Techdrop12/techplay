@@ -57,13 +57,13 @@ export default function WishlistClient() {
         body: JSON.stringify({ productIds: ids }),
       })
       if (!res.ok) throw new Error('Erreur')
-      toast.success('Liste sauvegardée sur votre compte.')
+      toast.success(t('save_success'))
     } catch {
-      toast.error('Impossible de sauvegarder la liste.')
+      toast.error(t('save_error'))
     } finally {
       setSyncing(false)
     }
-  }, [isLoggedIn, items])
+  }, [isLoggedIn, items, t])
 
   const loadFromServer = useCallback(async () => {
     if (!isLoggedIn || !wishlistState.clear) return
@@ -75,7 +75,7 @@ export default function WishlistClient() {
       const productIds: string[] = data?.productIds ?? []
       if (productIds.length === 0) {
         wishlistState.clear()
-        toast.success('Liste chargée (vide).')
+        toast.success(t('load_empty'))
         setSyncing(false)
         return
       }
@@ -84,13 +84,13 @@ export default function WishlistClient() {
       const products = (await productsRes.json()) as (Product & { _id: string })[]
       wishlistState.clear()
       products.forEach((p) => wishlistState.add({ ...p, id: String(p._id ?? '') }))
-      toast.success('Liste chargée depuis votre compte.')
+      toast.success(t('load_success'))
     } catch {
-      toast.error('Impossible de charger la liste.')
+      toast.error(t('load_error'))
     } finally {
       setSyncing(false)
     }
-  }, [isLoggedIn, wishlistState])
+  }, [isLoggedIn, wishlistState, t])
 
   const wishlist = useMemo(() => {
     return items
@@ -134,7 +134,7 @@ export default function WishlistClient() {
     >
       <header className="mb-10 text-center sm:mb-12">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[hsl(var(--accent))]">
-          Favoris
+          {t('badge_favoris')}
         </p>
         <h1 id="wishlist-title" className="heading-page mt-2">
           {t('title')}
@@ -142,14 +142,14 @@ export default function WishlistClient() {
         <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-token-text/75">
           {wishlist.length === 0
             ? t('empty')
-            : 'Retrouvez ici les produits que vous avez mis de côté. Ajoutez-les au panier en un clic.'}
+            : t('intro_with_items')}
         </p>
       </header>
 
       {wishlist.length === 0 ? (
         <section
           className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-sm text-center"
-          aria-label="Liste vide"
+          aria-label={t('empty_aria')}
         >
           <p className="text-[15px] text-token-text/75">{t('empty')}</p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
@@ -173,7 +173,7 @@ export default function WishlistClient() {
             ))}
           </section>
           <p className="mt-6 text-center text-[13px] text-token-text/60">
-            Sauvegardé sur cet appareil. Ajoutez au panier depuis chaque carte.
+            {t('saved_on_device')}
           </p>
           {isLoggedIn && (
             <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
@@ -183,7 +183,7 @@ export default function WishlistClient() {
                 disabled={syncing}
                 className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 text-sm font-medium text-[hsl(var(--text))] hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] disabled:opacity-60"
               >
-                {syncing ? 'Synchronisation…' : 'Sauvegarder sur mon compte'}
+                {syncing ? t('syncing_btn') : t('save_account_btn')}
               </button>
               <button
                 type="button"
@@ -191,7 +191,7 @@ export default function WishlistClient() {
                 disabled={syncing}
                 className="rounded-xl bg-[hsl(var(--accent))] px-4 py-2 text-sm font-semibold text-[hsl(var(--accent-fg))] hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] disabled:opacity-60"
               >
-                Charger depuis mon compte
+                {t('load_from_account')}
               </button>
             </div>
           )}

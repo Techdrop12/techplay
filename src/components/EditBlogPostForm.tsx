@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useState, useEffect } from 'react'
 import { toast } from 'react-hot-toast'
 
@@ -9,6 +10,7 @@ interface EditBlogPostFormProps {
 }
 
 export default function EditBlogPostForm({ postId }: EditBlogPostFormProps) {
+  const t = useTranslations('admin')
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(true)
@@ -40,13 +42,13 @@ export default function EditBlogPostForm({ postId }: EditBlogPostFormProps) {
         })
       })
       .catch((e) => {
-        if (!cancelled) toast.error(e?.message || 'Erreur chargement')
+        if (!cancelled) toast.error(e?.message || t('loading_error'))
       })
       .finally(() => {
         if (!cancelled) setFetching(false)
       })
     return () => { cancelled = true }
-  }, [postId])
+  }, [postId, t])
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -85,11 +87,11 @@ export default function EditBlogPostForm({ postId }: EditBlogPostFormProps) {
         setApiError(data?.error || 'Erreur')
         return
       }
-      toast.success('Article mis à jour')
+      toast.success(t('article_updated'))
       router.push('/admin/blog')
       router.refresh()
     } catch (e) {
-      setApiError(e instanceof Error ? e.message : 'Erreur mise à jour')
+      setApiError(e instanceof Error ? e.message : t('update_error'))
     } finally {
       setLoading(false)
     }
@@ -97,7 +99,7 @@ export default function EditBlogPostForm({ postId }: EditBlogPostFormProps) {
 
   if (fetching) {
     return (
-      <div className="max-w-xl animate-pulse space-y-4" role="status" aria-label="Chargement de l'article">
+      <div className="max-w-xl animate-pulse space-y-4" role="status" aria-label={t('loading_article_aria')}>
         <div className="h-10 rounded-lg bg-[hsl(var(--border))]" />
         <div className="h-10 rounded-lg bg-[hsl(var(--border))]" />
         <div className="h-24 rounded-lg bg-[hsl(var(--border))]" />
@@ -108,7 +110,7 @@ export default function EditBlogPostForm({ postId }: EditBlogPostFormProps) {
   const inputErrorClass = 'border-red-500 dark:border-red-400 focus-visible:ring-red-500'
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-w-xl" noValidate aria-labelledby="edit-blog-heading">
-      <h2 id="edit-blog-heading" className="sr-only">Modifier l'article</h2>
+      <h2 id="edit-blog-heading" className="sr-only">{t('edit_article_sr')}</h2>
       {apiError && (
         <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-200">
           {apiError}
@@ -214,7 +216,7 @@ export default function EditBlogPostForm({ postId }: EditBlogPostFormProps) {
           onClick={() => router.push('/admin/blog')}
           className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-sm font-medium text-[hsl(var(--text))] hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
         >
-          Annuler
+          {t('cancel_btn')}
         </button>
       </div>
     </form>

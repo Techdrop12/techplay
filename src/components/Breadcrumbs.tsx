@@ -54,6 +54,7 @@ export default function Breadcrumbs({
   ...rest
 }: BreadcrumbsProps) {
   const t = useTranslations('nav')
+  const tMisc = useTranslations('misc')
   const defaultHome: HomeCrumb = { href: '/', label: t('home') }
   const home = homeProp ?? defaultHome
 
@@ -88,7 +89,7 @@ export default function Breadcrumbs({
 
   return (
     <nav
-      aria-label="Fil d’Ariane"
+      aria-label={tMisc('breadcrumb_aria')}
       className={`mb-4 text-sm text-muted-foreground ${className}`}
       {...rest}
     >

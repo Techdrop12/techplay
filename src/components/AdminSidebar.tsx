@@ -39,7 +39,7 @@ export default function AdminSidebar() {
   return (
     <aside className="hidden md:flex flex-col w-64 border-r border-[hsl(var(--border))] bg-[hsl(var(--surface))] min-h-screen px-4 py-6 shadow-[var(--shadow-sm)]">
       <h2 className="text-lg font-bold text-[hsl(var(--text))] mb-6 px-2">🛠 {t('admin_space')}</h2>
-      <nav className="space-y-1" aria-label="Navigation admin">
+      <nav className="space-y-1" aria-label={t('admin_nav_aria')}>
         {linkKeys.map(({ href, labelKey, icon }) => {
           const active = pathname === href || (href !== '/admin/dashboard' && pathname?.startsWith(href))
           return (

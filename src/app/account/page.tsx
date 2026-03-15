@@ -144,7 +144,7 @@ export default async function AccountPage() {
           <h2 id="login-cta-heading" className="sr-only">
             {t('login_cta_heading')}
           </h2>
-          <ul className="mb-8 space-y-4 text-left" aria-label="Avantages">
+          <ul className="mb-8 space-y-4 text-left" aria-label={t('benefits_aria')}>
             <li className="flex items-center gap-3 text-[15px] text-token-text/85">
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))]">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -221,7 +221,7 @@ export default async function AccountPage() {
       </header>
 
       {/* Stats */}
-      <section aria-label="Résumé de votre activité" className="mb-10">
+      <section aria-label={t('activity_summary')} className="mb-10">
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-5 shadow-sm">
             <p className="text-[12px] font-semibold uppercase tracking-wider text-token-text/60">Commandes</p>

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
+import { error as logError } from '@/lib/logger'
 import { connectToDatabase } from '@/lib/db'
 import NewsletterSubscriber from '@/models/NewsletterSubscriber'
 import { createRateLimiter, withRateLimit } from '@/lib/rateLimit'
@@ -48,7 +49,7 @@ async function handler(req: Request) {
         { upsert: true, new: true }
       )
     } catch (e) {
-      console.error('[notifications/subscribe] newsletter save', e)
+      logError('[notifications/subscribe] newsletter save', e)
     }
   }
 

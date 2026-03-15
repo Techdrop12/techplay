@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useCallback, useId, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
 import { toast } from 'react-hot-toast'
 
@@ -241,6 +242,7 @@ export default function AddToCartButton({
   instantCheckout = false,
   locale = 'fr',
 }: Props) {
+  const tCart = useTranslations('cart')
   const router = useRouter()
   const cartApi = useCart() as CartHookLike
   const addToCartFn = isFunction(cartApi?.addToCart) ? cartApi.addToCart : null
@@ -404,8 +406,6 @@ export default function AddToCartButton({
         toast.success(successText, {
           duration: 2400,
           position: 'top-right',
-          style: { borderRadius: '10px', background: '#111827', color: '#fff' },
-          iconTheme: { primary: '#2563eb', secondary: '#fff' },
         })
 
         setSrMessage(`${title} ajouté au panier`)
@@ -464,7 +464,7 @@ export default function AddToCartButton({
           }
         }
       } catch (err: unknown) {
-        toast.error("Impossible d'ajouter au panier. Réessayez.")
+        toast.error(tCart('add_to_cart_error'))
         onError?.(err)
       } finally {
         window.setTimeout(() => setLoading(false), 420)
@@ -496,6 +496,7 @@ export default function AddToCartButton({
       disableDataLayer,
       gtmExtra,
       focusCartIcon,
+      tCart,
     ]
   )
 

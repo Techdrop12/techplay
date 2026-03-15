@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 
 import mongoose from 'mongoose'
+import { error as logError } from '@/lib/logger'
 import { connectToDatabase } from '@/lib/db'
 import Product from '@/models/Product'
 
@@ -37,7 +38,7 @@ export async function GET(req: Request) {
       .exec()
     return NextResponse.json(JSON.parse(JSON.stringify(docs)))
   } catch (e) {
-    console.error('[products/by-ids]', e)
+    logError('[products/by-ids]', e)
     return NextResponse.json({ error: 'Erreur' }, { status: 500 })
   }
 }

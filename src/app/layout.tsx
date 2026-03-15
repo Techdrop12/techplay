@@ -290,12 +290,20 @@ export default async function RootLayout({
 
               <Toaster
                 position="top-right"
+                gutter={12}
+                containerClassName="toast-container"
                 toastOptions={{
                   duration: 3500,
+                  className: 'toast-item',
                   style: {
-                    borderRadius: '14px',
-                    background: '#111827',
-                    color: '#fff',
+                    borderRadius: 'var(--radius-lg)',
+                    padding: '14px 18px',
+                    fontSize: '0.9375rem',
+                    fontWeight: 500,
+                    boxShadow: 'var(--shadow-lg)',
+                    border: '1px solid hsl(var(--border))',
+                    background: 'hsl(var(--surface))',
+                    color: 'hsl(var(--text))',
                   },
                 }}
               />

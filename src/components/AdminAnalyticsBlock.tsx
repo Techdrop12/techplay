@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
 import type { ReactNode } from 'react';
@@ -26,6 +27,7 @@ function StatCard({ label, value }: StatCardProps) {
 }
 
 export default function AdminAnalyticsBlock() {
+  const t = useTranslations('admin');
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [error, setError] = useState(false);
 
@@ -37,11 +39,11 @@ export default function AdminAnalyticsBlock() {
   }, []);
 
   if (error) {
-    return <p className="text-red-500 text-sm">Erreur de chargement des statistiques</p>;
+    return <p className="text-red-500 text-sm">{t('stats_error')}</p>;
   }
 
   if (!data) {
-    return <p className="text-token-text/60 text-sm animate-pulse">Chargement des statistiques…</p>;
+    return <p className="text-token-text/60 text-sm animate-pulse">{t('stats_loading')}</p>;
   }
 
   return (

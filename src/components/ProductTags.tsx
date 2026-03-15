@@ -2,6 +2,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 
 import { cn } from '@/lib/utils'
 
@@ -16,6 +17,7 @@ export default function ProductTags({
   variant = 'soft',
   className = '',
 }: ProductTagsProps) {
+  const t = useTranslations('misc')
   if (!tags.length) return null
 
   const base = 'text-xs font-medium px-2 py-1 rounded inline-block transition'
@@ -34,7 +36,7 @@ export default function ProductTags({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       role="list"
-      aria-label="Étiquettes du produit"
+      aria-label={t('product_tags_aria')}
     >
       {tags.map((tag, index) => (
         <motion.span

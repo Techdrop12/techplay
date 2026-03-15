@@ -1,9 +1,9 @@
 /* src/app/api/og/route.tsx
-   OG dynamiques pour /products (Edge) — version premium (chips, robustesse, i18n FR/EN)
+   OG dynamiques pour /products — version premium (chips, robustesse, i18n FR/EN)
 */
 import { ImageResponse } from 'next/og'
 
-export const runtime = 'edge'
+export const runtime = 'nodejs'
 export const alt = 'Catalogue TechPlay'
 export const contentType = 'image/png'
 export const size = { width: 1200, height: 630 }

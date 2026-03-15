@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 
+import { error as logError } from '@/lib/logger'
 import { connectToDatabase } from '@/lib/db'
 import Review from '@/models/Review'
 import { requireAdmin } from '@/lib/requireAdmin'
@@ -20,7 +21,7 @@ export async function DELETE(
     if (!doc) return NextResponse.json({ error: 'Avis introuvable' }, { status: 404 })
     return NextResponse.json({ ok: true })
   } catch (e) {
-    console.error('[reviews/:id] DELETE', e)
+    logError('[reviews/:id] DELETE', e)
     return NextResponse.json(
       { error: 'Erreur suppression' },
       { status: 500 }

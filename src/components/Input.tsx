@@ -2,6 +2,7 @@
 'use client'
 
 import * as React from 'react'
+import { useTranslations } from 'next-intl'
 
 import { cn } from '@/lib/utils'
 
@@ -95,6 +96,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const errorId = error ? `${inputId}-error` : undefined
     const describedBy = [errorId, helpId].filter(Boolean).join(' ') || undefined
 
+    const t = useTranslations('common')
     const [reveal, setReveal] = React.useState(false)
     const isPassword = type === 'password'
     const effectiveType = isPassword && reveal ? 'text' : type
@@ -197,7 +199,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             <button
               type="button"
               tabIndex={-1}
-              aria-label="Effacer le contenu"
+              aria-label={t('clear_content_aria')}
               onClick={clearValue}
               className="absolute inset-y-0 right-0 grid w-10 place-items-center text-token-text/60 hover:text-[hsl(var(--text))]"
             >

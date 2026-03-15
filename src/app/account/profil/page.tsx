@@ -1,17 +1,22 @@
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 
 import AccountProfileForm from '@/components/account/AccountProfileForm'
 import Link from '@/components/LocalizedLink'
 import { getSession } from '@/lib/auth'
 
-export const metadata: Metadata = {
-  title: 'Mon profil – TechPlay',
-  description: 'Modifier votre nom et vos informations de compte.',
-  robots: { index: false, follow: false },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('account')
+  return {
+    title: `${t('profile_page_title')} – TechPlay`,
+    description: t('profile_meta_description'),
+    robots: { index: false, follow: false },
+  }
 }
 
 export default async function AccountProfilPage() {
+  const t = await getTranslations('account')
   const session = await getSession()
   const isLoggedIn = Boolean(session?.user?.email?.trim())
   if (!isLoggedIn) {
@@ -32,13 +37,13 @@ export default async function AccountProfilPage() {
           href="/account"
           className="text-[14px] text-token-text/70 hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded"
         >
-          ← Retour au compte
+          {t('back_to_account_link')}
         </Link>
         <h1 id="profil-title" className="heading-page mt-3">
-          Mon profil
+          {t('profile_page_title')}
         </h1>
         <p className="mt-1 text-[15px] text-token-text/70">
-          Modifiez les informations affichées sur votre compte.
+          {t('profile_intro')}
         </p>
       </header>
 

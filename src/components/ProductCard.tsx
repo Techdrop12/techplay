@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { memo, useMemo, useState } from 'react'
 
 import type { Product } from '@/types/product'
@@ -13,7 +13,6 @@ import Link from '@/components/LocalizedLink'
 import RatingStars from '@/components/RatingStars'
 import WishlistButton from '@/components/WishlistButton'
 import { pushDataLayer } from '@/lib/ga'
-import { getCurrentLocale } from '@/lib/i18n-routing'
 import { logEvent } from '@/lib/logEvent'
 import { safeProductImageUrl } from '@/lib/safeProductImage'
 import { cn, formatPrice } from '@/lib/utils'
@@ -104,9 +103,8 @@ function ProductCard({
   className,
   priority = false,
 }: ProductCardProps) {
-  const pathname = usePathname() || '/'
-  const locale = getCurrentLocale(pathname)
   const prefersReducedMotion = useReducedMotion()
+  const t = useTranslations('product_card')
 
   const [imgLoaded, setImgLoaded] = useState(false)
   const [imgError, setImgError] = useState(false)
@@ -126,35 +124,6 @@ function ProductCard({
 
   const outOfStock = typeof product.stock === 'number' && product.stock <= 0
   const lowStock = typeof product.stock === 'number' && product.stock > 0 && product.stock <= 5
-
-  const t =
-    locale === 'en'
-      ? {
-          new: 'New',
-          best: 'Best seller',
-          sale: 'Sale',
-          lowStock: 'Low stock',
-          outOfStock: 'Out of stock',
-          inStock: 'In stock',
-          seeProduct: 'View product',
-          addToCart: 'Add to cart',
-          reviews: 'reviews',
-          productAria: `Product: ${title}`,
-          save: 'Save',
-        }
-      : {
-          new: 'Nouveau',
-          best: 'Best seller',
-          sale: 'Promo',
-          lowStock: 'Stock faible',
-          outOfStock: 'Rupture',
-          inStock: 'En stock',
-          seeProduct: 'Voir le produit',
-          addToCart: 'Ajouter au panier',
-          reviews: 'avis',
-          productAria: `Produit : ${title}`,
-          save: 'Économie',
-        }
 
   const handleClick = () => {
     try {
@@ -191,7 +160,7 @@ function ProductCard({
     <motion.article
       itemScope
       itemType="https://schema.org/Product"
-      aria-label={t.productAria}
+      aria-label={t('product_aria', { title })}
       data-product-id={productId || product.slug}
       className={cn(
         'group relative rounded-2xl p-[1px]',
@@ -247,9 +216,10 @@ function ProductCard({
                 fill
                 sizes="(min-width:1280px) 22vw, (min-width:1024px) 25vw, (min-width:640px) 33vw, 50vw"
                 className={cn(
-                  'object-cover transition-transform duration-400 ease-[var(--ease-smooth)]',
+                  'object-cover transition-[transform,opacity] duration-300 ease-[var(--ease-smooth)]',
+                  imgLoaded ? 'opacity-100' : 'opacity-0',
                   !prefersReducedMotion && 'group-hover:scale-105',
-                  secondImage && 'transition-opacity duration-300 group-hover:opacity-0'
+                  secondImage && 'duration-400 group-hover:opacity-0'
                 )}
                 priority={priority}
                 placeholder="blur"
@@ -287,28 +257,28 @@ function ProductCard({
               {product.isNew ? (
                 <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/95 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-950 shadow-md ring-1 ring-emerald-900/30">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-900/90" />
-                  {t.new}
+                  {t('new')}
                 </span>
               ) : null}
 
               {product.isBestSeller ? (
                 <span className="inline-flex items-center gap-1.5 rounded-lg bg-amber-300/95 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-amber-950 shadow-md ring-1 ring-amber-900/30">
                   <span className="h-1.5 w-1.5 rounded-full bg-amber-700" />
-                  {t.best}
+                  {t('best_seller')}
                 </span>
               ) : null}
 
               {discountPct ? (
                 <span className="inline-flex items-center gap-1.5 rounded-lg bg-red-500/95 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-red-50 shadow-md ring-1 ring-red-900/30">
                   <span className="h-1.5 w-1.5 rounded-full bg-red-200" />
-                  {t.sale} -{discountPct}%
+                  {t('sale')} -{discountPct}%
                 </span>
               ) : null}
 
               {lowStock ? (
                 <span className="inline-flex items-center gap-1.5 rounded-lg bg-amber-200/95 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-amber-950 shadow-md ring-1 ring-amber-800/30 dark:bg-amber-400/90 dark:text-amber-950">
                   <span className="h-1.5 w-1.5 rounded-full bg-amber-700" />
-                  {t.lowStock}
+                  {t('low_stock')}
                 </span>
               ) : null}
             </div>
@@ -324,7 +294,7 @@ function ProductCard({
 
             {outOfStock ? (
               <div className="absolute inset-0 grid place-items-center bg-black/55 text-xs font-semibold uppercase tracking-wider text-white/90">
-                {t.outOfStock}
+                {t('out_of_stock')}
               </div>
             ) : null}
 
@@ -371,7 +341,7 @@ function ProductCard({
                     {formatPrice(oldPrice)}
                   </span>
                   <span className="inline-flex items-center rounded-lg bg-[hsl(var(--accent)/0.14)] px-2 py-0.5 text-[11px] font-semibold text-[hsl(var(--accent))]">
-                    {t.save} {formatPrice(oldPrice - product.price)}
+                    {t('save')} {formatPrice(oldPrice - product.price)}
                   </span>
                 </>
               ) : null}
@@ -397,7 +367,7 @@ function ProductCard({
                 )}
               >
                 <span className="h-1 w-1 shrink-0 rounded-full bg-current/80" />
-                {outOfStock ? t.outOfStock : lowStock ? t.lowStock : t.inStock}
+                {outOfStock ? t('out_of_stock') : lowStock ? t('low_stock') : t('in_stock')}
               </span>
               <FreeShippingBadge price={product.price} minimal />
             </div>
@@ -411,14 +381,14 @@ function ProductCard({
                 variant="outline"
                 fullWidth
                 withIcon
-                idleText={t.addToCart}
+                idleText={t('add_to_cart')}
                 className={cn(
                   'min-h-[3rem] w-full rounded-xl border-2 border-[hsl(var(--accent))] font-semibold text-[hsl(var(--accent))]',
                   'transition-all duration-200 ease-[var(--ease-smooth)]',
                   'hover:scale-[1.02] hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--accent-foreground))] hover:shadow-md hover:shadow-[hsl(var(--accent)/0.3)]',
                   'focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.5)]'
                 )}
-                ariaLabel={`${t.addToCart} — ${title}`}
+                ariaLabel={`${t('add_to_cart')} — ${title}`}
               />
             </div>
           </div>

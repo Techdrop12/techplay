@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 
+import { error as logError } from '@/lib/logger'
 import { connectToDatabase } from '@/lib/db'
 import Product from '@/models/Product'
 import { requireAdmin } from '@/lib/requireAdmin'
@@ -106,7 +107,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, count: created })
   } catch (e) {
-    console.error('[admin/import-products]', e)
+    logError('[admin/import-products]', e)
     return NextResponse.json(
       { error: 'Erreur lors de l\'import' },
       { status: 500 }

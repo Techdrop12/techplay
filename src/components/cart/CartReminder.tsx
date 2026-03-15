@@ -1,12 +1,14 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
 import { useCart } from '@/hooks/useCart'
 import { pageview } from '@/lib/analytics'
 
 export default function CartReminder() {
+  const t = useTranslations('cart')
   const { cart } = useCart()
   const router = useRouter()
   const [show, setShow] = useState(false)
@@ -68,7 +70,7 @@ export default function CartReminder() {
     <div
       role="alert"
       aria-live="polite"
-      aria-label="Rappel panier"
+      aria-label={t('cart_reminder_aria')}
       className="fixed bottom-4 right-4 z-50 w-[90%] max-w-sm cursor-pointer rounded-lg bg-[hsl(var(--accent))] px-4 py-3 text-[hsl(var(--accent-fg))] shadow-[var(--shadow-lg)] transition-opacity hover:opacity-90 sm:w-auto animate-fadeIn"
       onClick={handleClick}
     >

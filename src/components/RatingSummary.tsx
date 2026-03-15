@@ -1,6 +1,7 @@
 // src/components/RatingSummary.tsx
 'use client'
 
+import { useTranslations } from 'next-intl'
 import * as React from 'react'
 
 import RatingStars from '@/components/RatingStars'
@@ -67,6 +68,7 @@ export default function RatingSummary({
   jsonLd,
   className,
 }: RatingSummaryProps) {
+  const t = useTranslations('misc')
   const avg = clamp(Number.isFinite(average) ? average : 0, 0, 5)
   const rounded = Math.round(avg * 10) / 10
 
@@ -121,7 +123,7 @@ export default function RatingSummary({
         <strong className="text-base tabular-nums">{rounded.toFixed(1)} ★</strong>
         <RatingStars value={avg} editable={false} size={18} ariaLabel={`Note moyenne ${rounded}/5`} />
         <span className="tabular-nums">
-          ({(total ?? 0).toLocaleString()} avis)
+          {t('reviews_count_display', { count: (total ?? 0).toLocaleString() })}
         </span>
       </div>
 

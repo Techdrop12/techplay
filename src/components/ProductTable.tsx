@@ -121,6 +121,7 @@ export default function ProductTable() {
           onClick={() => setPage((p) => Math.max(1, p - 1))}
           disabled={page <= 1 || loading}
           className="rounded-lg border border-[hsl(var(--border))] px-2 py-1.5 text-sm disabled:opacity-50"
+          aria-label={t('pagination_prev')}
         >
           ←
         </button>
@@ -129,18 +130,19 @@ export default function ProductTable() {
           onClick={() => setPage((p) => p + 1)}
           disabled={page >= pages || loading}
           className="rounded-lg border border-[hsl(var(--border))] px-2 py-1.5 text-sm disabled:opacity-50"
+          aria-label={t('pagination_next')}
         >
           →
         </button>
       </div>
-      <table className="min-w-full text-sm bg-[hsl(var(--surface))] border border-[hsl(var(--border))] shadow-[var(--shadow-sm)]">
+      <table className="min-w-full text-sm bg-[hsl(var(--surface))] border border-[hsl(var(--border))] shadow-[var(--shadow-sm)]" aria-label={t('products_title')}>
         <thead>
           <tr className="bg-[hsl(var(--surface-2))] text-left">
-            <th className="p-2 border">Titre</th>
-            <th className="p-2 border">Prix</th>
-            <th className="p-2 border">Stock</th>
-            <th className="p-2 border">Slug</th>
-            <th className="p-2 border text-center">Actions</th>
+            <th className="p-2 border">{t('table_title')}</th>
+            <th className="p-2 border">{t('table_price')}</th>
+            <th className="p-2 border">{t('table_stock')}</th>
+            <th className="p-2 border">{t('table_slug')}</th>
+            <th className="p-2 border text-center">{t('actions')}</th>
           </tr>
         </thead>
         <tbody>

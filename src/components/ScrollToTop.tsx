@@ -1,6 +1,7 @@
 // src/components/ScrollToTop.tsx
 'use client'
 
+import { useTranslations } from 'next-intl'
 import * as React from 'react'
 
 import { cn } from '@/lib/utils'
@@ -15,11 +16,12 @@ export interface ScrollToTopProps extends React.ButtonHTMLAttributes<HTMLButtonE
 export default function ScrollToTop({
   threshold = 320,
   positionClassName = 'bottom-6 right-6',
-  ariaLabel = 'Remonter en haut',
+  ariaLabel,
   highContrast = false,
   className,
   ...props
 }: ScrollToTopProps) {
+  const tAria = useTranslations('aria')
   const [visible, setVisible] = React.useState(false)
   const rafRef = React.useRef<number | null>(null)
 
@@ -63,7 +65,7 @@ export default function ScrollToTop({
       type="button"
       onClick={scrollTop}
       className={cn(
-        'fixed z-50 inline-grid h-11 w-11 place-items-center rounded-full shadow-[var(--shadow-md)] outline-none transition',
+        'fixed z-50 inline-grid h-11 w-11 place-items-center rounded-full shadow-[var(--shadow-md)] outline-none transition active:scale-95',
         'scroll-top-entrance',
         'focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2',
         highContrast
@@ -72,8 +74,8 @@ export default function ScrollToTop({
         positionClassName,
         className
       )}
-      aria-label={ariaLabel}
-      title={ariaLabel}
+      aria-label={ariaLabel ?? tAria('scroll_top')}
+      title={ariaLabel ?? tAria('scroll_top')}
       {...props}
     >
       <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">

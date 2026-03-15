@@ -148,6 +148,10 @@
     text-decoration-thickness: 2px;
   }
 
+  a:active {
+    opacity: 0.88;
+  }
+
   a:focus-visible {
     outline: none;
     box-shadow:
@@ -438,11 +442,13 @@
   }
 
   .page-entrance {
+    opacity: 0;
     animation: fadeInUpPage var(--dur) var(--ease-out) forwards;
   }
 
   @media (prefers-reduced-motion: reduce) {
     .page-entrance {
+      opacity: 1;
       animation: none;
     }
   }
@@ -587,14 +593,24 @@
       hsl(var(--surface-2)) 65%
     );
     background-size: 200% 100%;
-    animation: shimmer 1.8s var(--ease-smooth) infinite;
+    animation: shimmer 2.2s var(--ease-smooth) infinite;
   }
+
+  .loading-stagger .skeleton:nth-of-type(1) { animation-delay: 0s; }
+  .loading-stagger .skeleton:nth-of-type(2) { animation-delay: 0.06s; }
+  .loading-stagger .skeleton:nth-of-type(3) { animation-delay: 0.12s; }
+  .loading-stagger .skeleton:nth-of-type(4) { animation-delay: 0.18s; }
+  .loading-stagger .skeleton:nth-of-type(5) { animation-delay: 0.24s; }
+  .loading-stagger .skeleton:nth-of-type(6) { animation-delay: 0.3s; }
+  .loading-stagger .skeleton:nth-of-type(7) { animation-delay: 0.36s; }
+  .loading-stagger .skeleton:nth-of-type(8) { animation-delay: 0.42s; }
 
   @media (prefers-reduced-motion: reduce) {
     .skeleton {
       animation: none;
       background: hsl(var(--surface-2));
     }
+    .loading-stagger .skeleton { animation-delay: 0s; }
   }
 
   .focus-glow:focus-visible {
@@ -725,6 +741,39 @@
       animation: none;
     }
   }
+
+/* ================== Toasts (react-hot-toast) ================== */
+.toast-container {
+  z-index: 9999;
+}
+.toast-item {
+  animation: toastIn 0.28s var(--ease-out) forwards;
+}
+.toast-item[data-type='success'] {
+  background: hsl(var(--success)) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+.toast-item[data-type='error'] {
+  background: hsl(var(--danger)) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateX(1rem) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast-item {
+    animation: none;
+  }
+}
 
 /* ================== Utilities =================== */
 @layer utilities {
@@ -933,6 +982,13 @@
 
 .nav-progress-bar-inner {
   animation: nav-progress-fill 0.28s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-progress-bar-inner {
+    animation: none;
+    width: 100%;
+  }
 }
 
 /* fadeInUp et slideUpStagger sont définis dans design-tokens.css */

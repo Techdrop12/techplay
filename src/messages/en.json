@@ -64,7 +64,19 @@
     "quantity_increase": "Increase quantity",
     "quantity_value": "Quantity {value}",
     "reset_filters": "Reset filters",
-    "reset_zoom": "Reset zoom"
+    "reset_zoom": "Reset zoom",
+    "loading_results": "Loading results",
+    "close_promo_banner_aria": "Close promotional banner",
+    "language_switcher_aria": "Language switcher",
+    "added_to_cart_aria": "Added to cart",
+    "filter_by_category_aria": "Filter by category",
+    "view_product_aria": "View product",
+    "remove_from_cart_aria": "Remove from cart",
+    "close_aria": "Close",
+    "view_image_aria": "View image {index}",
+    "clear_content_aria": "Clear content",
+    "carousel_prev_aria": "Previous image",
+    "carousel_next_aria": "Next image"
   },
 
   "hero": {
@@ -100,6 +112,20 @@
     "shipping": "Shipping",
     "returns": "Returns",
     "security": "Security"
+  },
+
+  "product_card": {
+    "new": "New",
+    "best_seller": "Best seller",
+    "sale": "Sale",
+    "low_stock": "Low stock",
+    "out_of_stock": "Out of stock",
+    "in_stock": "In stock",
+    "see_product": "View product",
+    "add_to_cart": "Add to cart",
+    "reviews": "reviews",
+    "product_aria": "Product: {title}",
+    "save": "Save"
   },
 
   "buttons": {
@@ -144,6 +170,7 @@
 
   "aria": {
     "skip_to_content": "Skip to main content",
+    "scroll_top": "Back to top",
     "main_content": "Main content",
     "close_panel": "Close panel",
     "side_panel": "Side panel",
@@ -258,6 +285,11 @@
     "orders_status": "Status",
     "orders_date": "Date",
     "change_status": "Change order status",
+    "change_order_status_aria": "Change order status {id}",
+    "newsletter_table_aria": "Newsletter subscribers",
+    "newsletter_page_info": "Page {page} / {pages}",
+    "error_load_newsletter": "Error loading",
+    "contact_table_aria": "Contact messages",
     "filter_status_blog": "Filter by status",
     "all": "All",
     "table_title": "Title",
@@ -275,6 +307,9 @@
     "review_date": "Date",
     "action": "Action",
     "no_reviews_filter": "No reviews for this rating.",
+    "reviews_page_info": "Page {page} / {pages} ({total} reviews)",
+    "pagination_prev": "Previous",
+    "pagination_next": "Next",
     "search_products_placeholder": "Search (title, slug)",
     "search_products_aria": "Search products",
     "filter_category": "Filter by category",
@@ -345,7 +380,56 @@
     "generate_button": "Generate",
     "header_title": "TechPlay Admin",
     "header_open_menu": "Open menu",
-    "header_signout": "Sign out"
+    "header_signout": "Sign out",
+    "edit_product_title_label": "Title",
+    "edit_product_slug_label": "Slug (URL)",
+    "edit_product_description_label": "Description",
+    "edit_product_price_label": "Price (€)",
+    "edit_product_image_label": "Main image URL",
+    "edit_product_images_label": "Additional images (comma-separated)",
+    "edit_product_category_label": "Category",
+    "edit_product_stock_label": "Stock",
+    "edit_product_tags_label": "Tags (comma-separated)",
+    "edit_product_images_placeholder": "Additional images (comma-separated)",
+    "edit_product_category_placeholder": "Category",
+    "edit_product_tags_placeholder": "Tags (comma-separated)",
+    "edit_blog_heading": "Edit article",
+    "add_blog_heading": "New article",
+    "saving_btn": "Saving…",
+    "save_btn": "Save",
+    "pages_content_placeholder": "<p>Your content…</p> or plain text",
+    "stats_loading": "Loading statistics…",
+    "stats_error": "Error loading statistics",
+    "admin_nav_aria": "Admin navigation",
+    "loading_article_aria": "Loading article",
+    "logout_aria": "Sign out",
+    "product_updated": "Product updated",
+    "product_added": "Product added",
+    "product_error": "Error",
+    "product_created_error": "Error creating product",
+    "article_updated": "Article updated",
+    "article_created": "Article created",
+    "article_error": "Error",
+    "loading_error": "Loading error",
+    "update_error": "Update error",
+    "edit_article_sr": "Edit article",
+    "saving_btn_label": "Saving…",
+    "save_btn_label": "Save",
+    "cancel_btn": "Cancel",
+    "back_to_products": "← Back to products",
+    "back_to_articles": "← Back to articles",
+    "back_to_account": "← Back to account",
+    "add_product_heading": "Add product",
+    "edit_article_heading": "Edit article",
+    "edit_product_heading": "Edit product",
+    "status_update_error": "Error updating status",
+    "blog_section_title": "Blog articles",
+    "products_management_heading": "Product management",
+    "add_product_btn": "+ Add product",
+    "blog_description": "Publish, unpublish or delete articles.",
+    "new_article_btn": "+ New article",
+    "new_article_heading": "New article",
+    "article_creation_error": "Creation error"
   },
 
   "date": {
@@ -398,7 +482,13 @@
     "placeholder": "Search for a product or brand…",
     "no_results": "No results for \"{query}\".",
     "no_results_generic": "No results found.",
-    "results_count": "{count, plural, one {# result} other {# results}}"
+    "results_count": "{count, plural, one {# result} other {# results}}",
+    "loading_aria": "Loading results",
+    "search_aria": "Search",
+    "recent_searches": "Recent searches",
+    "no_result": "No results.",
+    "see_more_results": "See more results for \"{query}\"",
+    "placeholder_shortcut": "Search for a product…  /  Ctrl/⌘+K"
   },
 
   "filters": {
@@ -410,7 +500,25 @@
     "availability": "Availability",
     "in_stock": "In stock",
     "on_sale": "On sale",
-    "reset": "Reset"
+    "reset": "Reset",
+    "search_label": "Search",
+    "category_label": "Category",
+    "price_min": "Min price (€)",
+    "price_max": "Max price (€)",
+    "rating_min": "Minimum rating",
+    "all_categories": "All categories",
+    "all_ratings": "All",
+    "sort_by": "Sort by",
+    "new_only_aria": "Show new items only",
+    "promo_only_aria": "Show items on sale only",
+    "search_product_aria": "Search for a product",
+    "filter_category_aria": "Filter by category",
+    "filter_rating_aria": "Filter by minimum rating",
+    "placeholder_name": "Name, keyword…",
+    "filters_aria": "Product filters",
+    "price_min_aria": "Minimum price",
+    "price_max_aria": "Maximum price",
+    "sort_products_aria": "Sort products"
   },
 
   "sort": {
@@ -419,7 +527,8 @@
     "price_asc": "Price: Low to High",
     "price_desc": "Price: High to Low",
     "newest": "Newest",
-    "rating": "Top rated"
+    "rating": "Top rated",
+    "promo": "Best deals"
   },
 
   "pagination": {
@@ -460,6 +569,19 @@
     "shipping_info": "Shipping & returns",
     "delivery_estimate": "Estimated delivery: {date, date, medium}",
     "you_may_also_like": "You may also like",
+    "related_products_heading": "Related products",
+    "gallery_zoom_aria": "Zoom media",
+    "gallery_prev_aria": "Previous media",
+    "gallery_next_aria": "Next media",
+    "gallery_fullscreen_aria": "Fullscreen preview",
+    "gallery_close_aria": "Close",
+    "gallery_click_zoom": "Click to zoom",
+    "gallery_aria": "Product gallery",
+    "thumbnails_aria": "Product thumbnails",
+    "zoom_minus_aria": "Zoom -",
+    "zoom_plus_aria": "Zoom +",
+    "reviews_section_aria": "Customer reviews",
+    "question_product_aria": "Product question",
     "ai_summary_loading": "Generating AI summary…",
     "ai_summary_error": "Error generating summary.",
     "ai_summary_unavailable": "Summary unavailable.",
@@ -485,7 +607,10 @@
 
   "pack": {
     "items": "{count, plural, one {# item} other {# items}} included",
-    "save": "Save {value, number, ::currency/EUR}"
+    "save": "Save {value, number, ::currency/EUR}",
+    "add_pack_to_cart": "Add pack to cart",
+    "image_alt": "Pack image: {title}",
+    "rating_aria": "Rating: {rating} stars"
   },
 
   "wishlist": {
@@ -496,7 +621,20 @@
     "remove": "Remove from wishlist",
     "limit_reached": "Wishlist limit reached",
     "added": "Added to wishlist",
-    "removed": "Removed from wishlist"
+    "removed": "Removed from wishlist",
+    "loading_aria": "Loading wishlist",
+    "empty_aria": "Empty list",
+    "load_from_account": "Load from my account",
+    "save_success": "List saved to your account.",
+    "save_error": "Could not save list.",
+    "load_success": "List loaded from your account.",
+    "load_empty": "List loaded (empty).",
+    "load_error": "Could not load list.",
+    "syncing_btn": "Syncing…",
+    "save_account_btn": "Save to my account",
+    "badge_favoris": "Favorites",
+    "intro_with_items": "Here are the products you've set aside. Add them to cart in one click.",
+    "saved_on_device": "Saved on this device. Add to cart from each card."
   },
 
   "cart": {
@@ -630,21 +768,6 @@
     "confirmation": "Confirmation"
   },
 
-  "checkout": {
-    "title": "Checkout",
-    "billing": "Billing address",
-    "shipping": "Shipping address",
-    "same_as_billing": "Same as billing",
-    "method": "Payment method",
-    "place_order": "Pay now",
-    "processing": "Processing…",
-    "pay_secure": "Secure payment",
-    "error_generic": "An error occurred during payment.",
-    "summary_title": "Summary",
-    "summary_aria": "Order summary",
-    "total_to_pay": "Total to pay"
-  },
-
   "delivery": {
     "estimate_label": "Estimated delivery:",
     "business_days": "(business days)"
@@ -688,9 +811,14 @@
     "sort_amount_desc": "Amount descending",
     "sort_amount_asc": "Amount ascending",
     "detail_btn": "Details",
+    "order_id_display": "Order #{id}",
+    "delivery_address_heading": "Delivery address",
+    "tracking_heading": "Tracking",
+    "articles_heading": "Items",
     "orders_count": "{count, plural, one {# order} other {# orders}}",
     "articles_count": "{count, plural, one {# item} other {# items}}",
     "discover_products": "Browse products",
+    "list_aria": "Orders list",
     "statuses": {
       "paid": "Paid",
       "pending": "Pending",
@@ -744,6 +872,7 @@
     "contact_support": "Contact support",
     "faq_link": "FAQ",
     "activity_summary": "Your activity summary",
+    "benefits_aria": "Benefits",
     "back_to_account": "← Customer area",
     "back_to_account_aria": "Back to customer area",
     "orders_login_message": "Sign in to view your order history.",
@@ -756,22 +885,34 @@
     "profile_email_label": "Email",
     "profile_email_note": "Email cannot be changed here.",
     "profile_display_name": "Display name",
-    "profile_display_name_placeholder": "Your name"
+    "profile_display_name_placeholder": "Your name",
+    "back_to_orders_aria": "Back to my orders",
+    "order_summary_aria": "Order summary",
+    "back_to_account_link": "← Back to account",
+    "profile_meta_description": "Edit your name and account information.",
+    "profile_page_title": "My profile",
+    "profile_intro": "Edit the information displayed on your account."
   },
 
   "auth": {
     "login": "Login",
+    "login_title": "Sign in to your account",
     "login_admin_title": "Admin login",
     "login_form_label": "Login form",
     "email": "Email",
     "password": "Password",
+    "email_placeholder": "Email",
+    "password_placeholder": "Password",
     "register": "Create account",
     "logout": "Logout",
     "forgot_password": "Forgot password?",
     "reset_password": "Reset password",
     "send_link": "Send link",
     "check_email": "Check your email",
-    "two_factor": "Two-factor authentication"
+    "two_factor": "Two-factor authentication",
+    "login_success": "Login successful",
+    "login_error": "Invalid credentials",
+    "login_loading": "Signing in…"
   },
 
   "address": {
@@ -836,15 +977,60 @@
     "search_aria": "Search blog",
     "read_more": "Read more",
     "author": "Author: {author}",
-    "published_on": "Published on {date}"
+    "published_on": "Published on {date}",
+    "filter_btn": "Filter",
+    "sort_aria": "Sort",
+    "articles_list_aria": "Articles list",
+    "pagination_articles_aria": "Articles pagination",
+    "back_to_home": "Back to home",
+    "article_title_placeholder": "Article title",
+    "article_slug_placeholder": "my-article",
+    "article_summary_placeholder": "Summary or short content",
+    "article_image_placeholder": "https://...",
+    "article_author_placeholder": "Author name",
+    "generator_subject_placeholder": "Blog topic"
   },
 
   "category": {
     "title": "Category: {category}",
-    "no_products": "No products found in this category."
+    "no_products": "No products found in this category.",
+    "nav_aria": "Categories",
+    "categories_aria": "Categories",
+    "sort_aria": "Sort",
+    "price_min_aria": "Minimum price",
+    "price_max_aria": "Maximum price",
+    "pagination_aria": "Pagination",
+    "price_min_placeholder": "Min price (€)",
+    "price_max_placeholder": "Max price (€)",
+    "search_placeholder": "Search in this category…",
+    "filter_btn": "Filter",
+    "see_all_catalog": "View full catalog",
+    "index_title": "Product categories",
+    "index_intro": "Choose a category to discover our tech products: audio, gaming, office and more."
   },
 
   "checkout": {
+    "title": "Checkout",
+    "email_hint": "Confirmation and invoice sent to this address.",
+    "address_hint": "Street number and name, postcode, city.",
+    "redirect_toast": "Redirecting to payment…",
+    "redirect_announce": "Redirecting to Stripe",
+    "redirecting_btn": "Redirecting…",
+    "pay_btn": "Pay",
+    "retry_btn": "Retry",
+    "cart_empty_toast": "Your cart is empty.",
+    "billing": "Billing address",
+    "shipping": "Shipping address",
+    "shipping_label": "Shipping address",
+    "same_as_billing": "Same as billing",
+    "method": "Payment method",
+    "place_order": "Pay now",
+    "processing": "Processing…",
+    "pay_secure": "Secure payment",
+    "error_generic": "An error occurred during payment.",
+    "summary_title": "Summary",
+    "summary_aria": "Order summary",
+    "total_to_pay": "Total to pay",
     "breadcrumb_home": "Home",
     "breadcrumb_order": "Checkout",
     "page_title": "Complete my order",
@@ -853,11 +1039,15 @@
     "browse_products": "Browse products",
     "view_packs": "View packs",
     "cart_aria": "Cart items",
-    "summary_aria": "Summary and payment",
     "secure_note": "Secure Stripe payment · Delivery 48–72 h · 30-day returns",
     "total": "Total",
     "continue_to_payment_aria": "Go to payment form",
-    "continue_btn": "Continue"
+    "continue_btn": "Continue",
+    "website_label": "Website",
+    "privacy_link": "privacy policy",
+    "email_placeholder": "you@example.com",
+    "address_placeholder": "123 Main St, City, Postcode",
+    "terms_and_privacy": "Terms and our privacy policy"
   },
 
   "cgv": {
@@ -913,7 +1103,18 @@
     "waiting_heading": "In the meantime",
     "waiting_intro": "Check our",
     "waiting_outro": "for common questions, or go back to the homepage to continue shopping.",
-    "faq_link": "FAQ"
+    "faq_link": "FAQ",
+    "message_placeholder": "Describe your request in a few words…",
+    "min_chars": "Minimum 10 characters.",
+    "name_placeholder": "Your name",
+    "email_placeholder_contact": "you@example.com",
+    "toast_success": "Message sent. We will reply within 24–48 hours.",
+    "toast_error": "Send error",
+    "send_another": "Send another message",
+    "submit_btn": "Send message",
+    "sending_btn": "Sending…",
+    "message_received": "Message received",
+    "message_received_detail": "We will reply at the address provided within 24–48 business hours."
   },
 
   "faq": {
@@ -998,6 +1199,83 @@
     "sort_label": "Sort by",
     "sort_recent": "Recent",
     "sort_helpful": "Helpful",
-    "verified": "Verified purchase"
+    "verified": "Verified purchase",
+    "website_label": "Website",
+    "honeypot_label": "Do not fill this field",
+    "loading_aria": "Loading reviews"
+  },
+
+  "privacy_prefs": {
+    "analytics_label": "Analytics",
+    "ads_label": "Advertising",
+    "save_btn": "Save"
+  },
+
+  "cart": {
+    "view_product_aria": "View product page for {title}",
+    "remove_aria": "Remove {title} from cart",
+    "total_label": "Total",
+    "cart_items_aria": "Cart items",
+    "clear_cart_aria": "Clear cart",
+    "cart_reminder_aria": "Cart reminder",
+    "cart_empty_toast": "Your cart is empty.",
+    "add_to_cart_error": "Could not add to cart. Please try again.",
+    "items_heading": "Items",
+    "no_items": "No items in cart.",
+    "view_products": "View products",
+    "error_title": "Oops, something went wrong with your cart",
+    "error_message_retry": "Please try again or clear your cart if the issue persists.",
+    "back_to_cart": "Back to cart",
+    "unit_label": "unit",
+    "quantity_decrease_aria": "Decrease quantity of {title}",
+    "quantity_increase_aria": "Increase quantity of {title}",
+    "quantity_for_aria": "Quantity for {title}",
+    "total_for_aria": "Total for {title}: {amount}",
+    "remove_item_aria": "Remove {title} from cart",
+    "remove_item_title": "Remove {title}"
+  },
+
+  "misc": {
+    "hero_boost": "Boost your daily life with",
+    "install_prompt": "Install TechPlay as an app?",
+    "coming_soon": "This section will be available very soon.",
+    "upsell_intro": "Complete your cart with these popular products",
+    "related_heading": "Related products",
+    "generator_heading": "Generate a blog post",
+    "generator_content_heading": "Generated content:",
+    "generator_error": "Error during generation",
+    "generator_error_network": "Network error",
+    "generator_enter_subject": "Please enter a topic",
+    "generator_success": "Article generated successfully!",
+    "product_assistant_error": "Error getting assistant response",
+    "call_to_action_heading": "Ready to discover our best products?",
+    "view_products": "View products",
+    "view_cart_go": "Go to cart →",
+    "close_bar_aria": "Close bar",
+    "logout_aria": "Sign out",
+    "product_tags_aria": "Product tags",
+    "quick_links_aria": "Quick links",
+    "sort_aria": "Sort",
+    "menu_aria": "Menu",
+    "promo_aria": "Promotion",
+    "breadcrumb_aria": "Breadcrumb",
+    "clear_search_aria": "Clear search",
+    "search_form_aria": "Product search",
+    "pagination_aria": "Pagination",
+    "call_to_action_subtitle": "Quality, reliability and design. Don't miss our exclusive packs.",
+    "reviews_count_display": "({count} reviews)",
+    "chatbot_placeholder": "Ask me a question about our products or orders!",
+    "no_thanks": "No thanks",
+    "our_packs": "Our Packs",
+    "secure_checkout_returns": "Secure checkout · Free returns",
+    "free_return_30": "Free return within 30 days",
+    "total_colon": "Total",
+    "returns_exchanges": "Returns & exchanges"
+  },
+
+  "wishlist": {
+    "loading_aria": "Loading wishlist",
+    "empty_aria": "Empty list",
+    "load_from_account": "Load from my account"
   }
 }

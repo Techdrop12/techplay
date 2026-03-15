@@ -1,6 +1,7 @@
 'use client'
 
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 
 import Link from '@/components/LocalizedLink'
@@ -90,6 +91,8 @@ export default function BannerPromo({
   rotateMs = 6000,
   pauseOnHover = true,
 }: BannerPromoProps) {
+  const t = useTranslations('common')
+  const tMisc = useTranslations('misc')
   const prefersReducedMotion = useReducedMotion()
   const [visible, setVisible] = useState(true)
   const [idx, setIdx] = useState(0)
@@ -179,7 +182,7 @@ export default function BannerPromo({
         sticky && 'sticky top-0',
       )}
       role="region"
-      aria-label="Promotion"
+      aria-label={tMisc('promo_aria')}
       onMouseEnter={() => (pausedRef.current = true)}
       onMouseLeave={() => (pausedRef.current = false)}
     >
@@ -218,7 +221,7 @@ export default function BannerPromo({
             <button
               onClick={handleClose}
               className="shrink-0 rounded px-2 py-1 text-xs/none font-semibold bg-white/10 hover:bg-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white/60"
-              aria-label="Fermer la bannière promotionnelle"
+              aria-label={t('close_promo_banner_aria')}
             >
               ×
             </button>

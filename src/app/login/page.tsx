@@ -1,25 +1,28 @@
 'use client'
 
 import { signIn } from 'next-auth/react'
+import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 export default function LoginPage() {
   const t = useTranslations('auth')
   const tAccount = useTranslations('account')
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams.get('callbackUrl') ?? '/'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await signIn('credentials', { email, password, callbackUrl: '/' })
+    await signIn('credentials', { email, password, callbackUrl })
   }
 
   return (
     <main className="mx-auto max-w-sm px-4 py-10" role="main" aria-labelledby="login-title">
       <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[var(--shadow-md)]">
         <h1 id="login-title" className="heading-page mb-6">
-          {t('login_admin_title')}
+          {t('login_title')}
         </h1>
         <form onSubmit={handleSubmit} className="space-y-4" aria-label={t('login_form_label')}>
           <div>

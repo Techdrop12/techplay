@@ -107,12 +107,12 @@ export default function CartList({
   }
 
   return (
-    <section aria-label="Articles du panier" className={className}>
+    <section aria-label={t('cart_items_aria')} className={className}>
       <span ref={srRef} className="sr-only" role="status" aria-live="polite" />
 
       <div className="mb-4 flex items-center justify-between border-b border-[hsl(var(--border))] pb-3">
         <h2 className="text-base font-semibold tracking-tight text-[hsl(var(--text))]">
-          Articles
+          {t('items_heading')}
         </h2>
         {showControls && (
           <button
@@ -121,9 +121,9 @@ export default function CartList({
             disabled={itemsCount === 0}
             aria-disabled={itemsCount === 0}
             className="text-[13px] text-token-text/70 underline decoration-token-text/40 underline-offset-2 transition hover:text-red-600 hover:decoration-red-600 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:text-red-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded"
-            aria-label="Vider le panier"
+            aria-label={t('clear_cart_aria')}
           >
-            Vider le panier
+            {t('clear_cart_aria')}
           </button>
         )}
       </div>

@@ -64,7 +64,19 @@
     "quantity_increase": "Augmenter la quantité",
     "quantity_value": "Quantité {value}",
     "reset_filters": "Réinitialiser les filtres",
-    "reset_zoom": "Réinitialiser le zoom"
+    "reset_zoom": "Réinitialiser le zoom",
+    "loading_results": "Chargement des résultats",
+    "close_promo_banner_aria": "Fermer la bannière promotionnelle",
+    "language_switcher_aria": "Sélecteur de langue",
+    "added_to_cart_aria": "Ajouté au panier",
+    "filter_by_category_aria": "Filtrer par catégorie",
+    "view_product_aria": "Voir le produit",
+    "remove_from_cart_aria": "Supprimer du panier",
+    "close_aria": "Fermer",
+    "view_image_aria": "Voir image {index}",
+    "clear_content_aria": "Effacer le contenu",
+    "carousel_prev_aria": "Image précédente",
+    "carousel_next_aria": "Image suivante"
   },
 
   "hero": {
@@ -100,6 +112,20 @@
     "shipping": "Livraison",
     "returns": "Retours",
     "security": "Sécurité"
+  },
+
+  "product_card": {
+    "new": "Nouveau",
+    "best_seller": "Best seller",
+    "sale": "Promo",
+    "low_stock": "Stock faible",
+    "out_of_stock": "Rupture",
+    "in_stock": "En stock",
+    "see_product": "Voir le produit",
+    "add_to_cart": "Ajouter au panier",
+    "reviews": "avis",
+    "product_aria": "Produit : {title}",
+    "save": "Économie"
   },
 
   "buttons": {
@@ -144,6 +170,7 @@
 
   "aria": {
     "skip_to_content": "Aller au contenu principal",
+    "scroll_top": "Remonter en haut",
     "main_content": "Contenu principal",
     "close_panel": "Fermer le panneau",
     "side_panel": "Panneau latéral",
@@ -258,6 +285,11 @@
     "orders_status": "Statut",
     "orders_date": "Date",
     "change_status": "Changer le statut de la commande",
+    "change_order_status_aria": "Changer le statut de la commande {id}",
+    "newsletter_table_aria": "Inscrits newsletter",
+    "newsletter_page_info": "Page {page} / {pages}",
+    "error_load_newsletter": "Erreur chargement",
+    "contact_table_aria": "Messages contact",
     "filter_status_blog": "Filtrer par statut",
     "all": "Tous",
     "table_title": "Titre",
@@ -275,6 +307,9 @@
     "review_date": "Date",
     "action": "Action",
     "no_reviews_filter": "Aucun avis pour cette note.",
+    "reviews_page_info": "Page {page} / {pages} ({total} avis)",
+    "pagination_prev": "Précédent",
+    "pagination_next": "Suivant",
     "search_products_placeholder": "Rechercher (titre, slug)",
     "search_products_aria": "Rechercher dans les produits",
     "filter_category": "Filtrer par catégorie",
@@ -345,7 +380,56 @@
     "generate_button": "Générer",
     "header_title": "TechPlay Admin",
     "header_open_menu": "Ouvrir le menu",
-    "header_signout": "Déconnexion"
+    "header_signout": "Déconnexion",
+    "edit_product_title_label": "Titre",
+    "edit_product_slug_label": "Slug (URL)",
+    "edit_product_description_label": "Description",
+    "edit_product_price_label": "Prix (€)",
+    "edit_product_image_label": "URL image principale",
+    "edit_product_images_label": "Images supplémentaires (séparées par virgules)",
+    "edit_product_category_label": "Catégorie",
+    "edit_product_stock_label": "Stock",
+    "edit_product_tags_label": "Tags (séparés par virgules)",
+    "edit_product_images_placeholder": "Images supplémentaires (séparées par virgules)",
+    "edit_product_category_placeholder": "Catégorie",
+    "edit_product_tags_placeholder": "Tags (séparés par virgules)",
+    "edit_blog_heading": "Modifier l'article",
+    "add_blog_heading": "Nouvel article",
+    "saving_btn": "Enregistrement…",
+    "save_btn": "Enregistrer",
+    "pages_content_placeholder": "<p>Votre contenu…</p> ou texte simple",
+    "stats_loading": "Chargement des statistiques…",
+    "stats_error": "Erreur de chargement des statistiques",
+    "admin_nav_aria": "Navigation admin",
+    "loading_article_aria": "Chargement de l'article",
+    "logout_aria": "Se déconnecter",
+    "product_updated": "Produit mis à jour",
+    "product_added": "Produit ajouté",
+    "product_error": "Erreur",
+    "product_created_error": "Erreur lors de la création",
+    "article_updated": "Article mis à jour",
+    "article_created": "Article créé",
+    "article_error": "Erreur",
+    "loading_error": "Erreur chargement",
+    "update_error": "Erreur mise à jour",
+    "edit_article_sr": "Modifier l'article",
+    "saving_btn_label": "Enregistrement…",
+    "save_btn_label": "Enregistrer",
+    "cancel_btn": "Annuler",
+    "back_to_products": "← Retour aux produits",
+    "back_to_articles": "← Retour aux articles",
+    "back_to_account": "← Retour au compte",
+    "add_product_heading": "Ajouter un produit",
+    "edit_article_heading": "Modifier l'article",
+    "edit_product_heading": "Modifier le produit",
+    "status_update_error": "Erreur mise à jour statut",
+    "blog_section_title": "Articles du blog",
+    "products_management_heading": "Gestion des produits",
+    "add_product_btn": "+ Ajouter un produit",
+    "blog_description": "Publier, dépublier ou supprimer des articles.",
+    "new_article_btn": "+ Nouvel article",
+    "new_article_heading": "Nouvel article",
+    "article_creation_error": "Erreur création"
   },
 
   "date": {
@@ -398,7 +482,13 @@
     "placeholder": "Rechercher un produit ou une marque…",
     "no_results": "Aucun résultat pour « {query} ».",
     "no_results_generic": "Aucun résultat trouvé.",
-    "results_count": "{count, plural, one {# résultat} other {# résultats}}"
+    "results_count": "{count, plural, one {# résultat} other {# résultats}}",
+    "loading_aria": "Chargement des résultats",
+    "search_aria": "Rechercher",
+    "recent_searches": "Recherches récentes",
+    "no_result": "Aucun résultat.",
+    "see_more_results": "Voir plus de résultats pour « {query} »",
+    "placeholder_shortcut": "Rechercher un produit…  /  Ctrl/⌘+K"
   },
 
   "filters": {
@@ -410,7 +500,25 @@
     "availability": "Disponibilité",
     "in_stock": "En stock",
     "on_sale": "En promo",
-    "reset": "Réinitialiser"
+    "reset": "Réinitialiser",
+    "search_label": "Recherche",
+    "category_label": "Catégorie",
+    "price_min": "Prix min (€)",
+    "price_max": "Prix max (€)",
+    "rating_min": "Note minimale",
+    "all_categories": "Toutes catégories",
+    "all_ratings": "Toutes",
+    "sort_by": "Trier par",
+    "new_only_aria": "Afficher uniquement les nouveautés",
+    "promo_only_aria": "Afficher uniquement les articles en promotion",
+    "search_product_aria": "Rechercher un produit",
+    "filter_category_aria": "Filtrer par catégorie",
+    "filter_rating_aria": "Filtrer par note minimale",
+    "placeholder_name": "Nom, mot-clé…",
+    "filters_aria": "Filtres produits",
+    "price_min_aria": "Prix minimum",
+    "price_max_aria": "Prix maximum",
+    "sort_products_aria": "Trier les produits"
   },
 
   "sort": {
@@ -419,7 +527,8 @@
     "price_asc": "Prix croissant",
     "price_desc": "Prix décroissant",
     "newest": "Nouveautés",
-    "rating": "Meilleures notes"
+    "rating": "Meilleures notes",
+    "promo": "Meilleures promos"
   },
 
   "pagination": {
@@ -460,10 +569,23 @@
     "shipping_info": "Livraison & retours",
     "delivery_estimate": "Livraison estimée : {date, date, medium}",
     "you_may_also_like": "Vous aimerez aussi",
+    "related_products_heading": "Produits similaires",
+    "gallery_zoom_aria": "Agrandir le média",
+    "gallery_prev_aria": "Média précédent",
+    "gallery_next_aria": "Média suivant",
+    "gallery_fullscreen_aria": "Aperçu en grand",
+    "gallery_close_aria": "Fermer",
+    "gallery_click_zoom": "Cliquer pour zoom",
+    "gallery_aria": "Galerie produit",
+    "thumbnails_aria": "Miniatures du produit",
+    "zoom_minus_aria": "Zoom -",
+    "zoom_plus_aria": "Zoom +",
+    "reviews_section_aria": "Avis clients",
     "ai_summary_loading": "Génération du résumé IA…",
     "ai_summary_error": "Erreur lors de la génération du résumé.",
     "ai_summary_unavailable": "Résumé non disponible.",
-    "ai_summary_label": "Résumé IA :"
+    "ai_summary_label": "Résumé IA :",
+    "question_product_aria": "Question produit"
   },
 
   "feedback": {
@@ -485,7 +607,10 @@
 
   "pack": {
     "items": "{count, plural, one {# article} other {# articles}} inclus",
-    "save": "Économisez {value, number, ::currency/EUR}"
+    "save": "Économisez {value, number, ::currency/EUR}",
+    "add_pack_to_cart": "Ajouter le pack au panier",
+    "image_alt": "Image du pack {title}",
+    "rating_aria": "Note : {rating} étoiles"
   },
 
   "wishlist": {
@@ -496,7 +621,20 @@
     "remove": "Supprimer de la liste de souhaits",
     "limit_reached": "Limite de liste de souhaits atteinte",
     "added": "Ajouté à la liste de souhaits",
-    "removed": "Retiré de la liste de souhaits"
+    "removed": "Retiré de la liste de souhaits",
+    "loading_aria": "Chargement de la liste de souhaits",
+    "empty_aria": "Liste vide",
+    "load_from_account": "Charger depuis mon compte",
+    "save_success": "Liste sauvegardée sur votre compte.",
+    "save_error": "Impossible de sauvegarder la liste.",
+    "load_success": "Liste chargée depuis votre compte.",
+    "load_empty": "Liste chargée (vide).",
+    "load_error": "Impossible de charger la liste.",
+    "syncing_btn": "Synchronisation…",
+    "save_account_btn": "Sauvegarder sur mon compte",
+    "badge_favoris": "Favoris",
+    "intro_with_items": "Retrouvez ici les produits que vous avez mis de côté. Ajoutez-les au panier en un clic.",
+    "saved_on_device": "Sauvegardé sur cet appareil. Ajoutez au panier depuis chaque carte."
   },
 
   "cart": {
@@ -630,21 +768,6 @@
     "confirmation": "Confirmation"
   },
 
-  "checkout": {
-    "title": "Paiement",
-    "billing": "Adresse de facturation",
-    "shipping": "Adresse de livraison",
-    "same_as_billing": "Identique à la facturation",
-    "method": "Mode de paiement",
-    "place_order": "Payer maintenant",
-    "processing": "Traitement…",
-    "pay_secure": "Paiement sécurisé",
-    "error_generic": "Une erreur est survenue lors du paiement.",
-    "summary_title": "Récapitulatif",
-    "summary_aria": "Récapitulatif commande",
-    "total_to_pay": "Total à payer"
-  },
-
   "delivery": {
     "estimate_label": "Livraison estimée :",
     "business_days": "(jours ouvrés)"
@@ -688,9 +811,14 @@
     "sort_amount_desc": "Montant décroissant",
     "sort_amount_asc": "Montant croissant",
     "detail_btn": "Détail",
+    "order_id_display": "Commande #{id}",
+    "delivery_address_heading": "Adresse de livraison",
+    "tracking_heading": "Suivi",
+    "articles_heading": "Articles",
     "orders_count": "{count, plural, one {# commande} other {# commandes}}",
     "articles_count": "{count, plural, one {# article} other {# articles}}",
     "discover_products": "Découvrir les produits",
+    "list_aria": "Liste des commandes",
     "statuses": {
       "paid": "Payée",
       "pending": "En attente",
@@ -744,6 +872,7 @@
     "contact_support": "Contactez notre support",
     "faq_link": "FAQ",
     "activity_summary": "Résumé de votre activité",
+    "benefits_aria": "Avantages",
     "back_to_account": "← Espace client",
     "back_to_account_aria": "Retour à l'espace client",
     "orders_login_message": "Connectez-vous pour voir l'historique de vos commandes.",
@@ -756,22 +885,34 @@
     "profile_email_label": "Email",
     "profile_email_note": "L'email ne peut pas être modifié ici.",
     "profile_display_name": "Nom affiché",
-    "profile_display_name_placeholder": "Votre nom ou prénom"
+    "profile_display_name_placeholder": "Votre nom ou prénom",
+    "back_to_orders_aria": "Retour à la liste de mes commandes",
+    "order_summary_aria": "Résumé de la commande",
+    "back_to_account_link": "← Retour au compte",
+    "profile_meta_description": "Modifier votre nom et vos informations de compte.",
+    "profile_page_title": "Mon profil",
+    "profile_intro": "Modifiez les informations affichées sur votre compte."
   },
 
   "auth": {
     "login": "Connexion",
+    "login_title": "Connexion à votre compte",
     "login_admin_title": "Connexion admin",
     "login_form_label": "Formulaire de connexion",
     "email": "Email",
     "password": "Mot de passe",
+    "email_placeholder": "Email",
+    "password_placeholder": "Mot de passe",
     "register": "Créer un compte",
     "logout": "Déconnexion",
     "forgot_password": "Mot de passe oublié ?",
     "reset_password": "Réinitialiser le mot de passe",
     "send_link": "Envoyer le lien",
     "check_email": "Vérifiez votre email",
-    "two_factor": "Double authentification"
+    "two_factor": "Double authentification",
+    "login_success": "Connexion réussie",
+    "login_error": "Identifiants incorrects",
+    "login_loading": "Connexion…"
   },
 
   "address": {
@@ -836,15 +977,60 @@
     "search_aria": "Rechercher dans le blog",
     "read_more": "Lire la suite",
     "author": "Auteur : {author}",
-    "published_on": "Publié le {date}"
+    "published_on": "Publié le {date}",
+    "filter_btn": "Filtrer",
+    "sort_aria": "Trier",
+    "articles_list_aria": "Liste des articles",
+    "pagination_articles_aria": "Pagination des articles",
+    "back_to_home": "Retour à l'accueil",
+    "article_title_placeholder": "Titre de l'article",
+    "article_slug_placeholder": "mon-article",
+    "article_summary_placeholder": "Résumé ou contenu court",
+    "article_image_placeholder": "https://...",
+    "article_author_placeholder": "Nom de l'auteur",
+    "generator_subject_placeholder": "Sujet du blog"
   },
 
   "category": {
     "title": "Catégorie : {category}",
-    "no_products": "Aucun produit trouvé pour cette catégorie."
+    "no_products": "Aucun produit trouvé pour cette catégorie.",
+    "nav_aria": "Catégories",
+    "categories_aria": "Catégories",
+    "sort_aria": "Trier",
+    "price_min_aria": "Prix minimum",
+    "price_max_aria": "Prix maximum",
+    "pagination_aria": "Pagination",
+    "price_min_placeholder": "Prix min (€)",
+    "price_max_placeholder": "Prix max (€)",
+    "search_placeholder": "Rechercher dans cette catégorie…",
+    "filter_btn": "Filtrer",
+    "see_all_catalog": "Voir tout le catalogue",
+    "index_title": "Catégories produits",
+    "index_intro": "Choisissez une catégorie pour découvrir nos produits high-tech : audio, gaming, bureautique et plus."
   },
 
   "checkout": {
+    "title": "Paiement",
+    "email_hint": "Confirmation et facture envoyées à cette adresse.",
+    "address_hint": "Numéro et libellé de rue, code postal, ville.",
+    "redirect_toast": "Redirection vers le paiement…",
+    "redirect_announce": "Redirection vers Stripe",
+    "redirecting_btn": "Redirection…",
+    "pay_btn": "Payer",
+    "retry_btn": "Réessayer",
+    "cart_empty_toast": "Votre panier est vide.",
+    "billing": "Adresse de facturation",
+    "shipping": "Adresse de livraison",
+    "shipping_label": "Adresse de livraison",
+    "same_as_billing": "Identique à la facturation",
+    "method": "Mode de paiement",
+    "place_order": "Payer maintenant",
+    "processing": "Traitement…",
+    "pay_secure": "Paiement sécurisé",
+    "error_generic": "Une erreur est survenue lors du paiement.",
+    "summary_title": "Récapitulatif",
+    "summary_aria": "Récapitulatif commande",
+    "total_to_pay": "Total à payer",
     "breadcrumb_home": "Accueil",
     "breadcrumb_order": "Commande",
     "page_title": "Finaliser ma commande",
@@ -853,11 +1039,15 @@
     "browse_products": "Parcourir les produits",
     "view_packs": "Voir les packs",
     "cart_aria": "Articles du panier",
-    "summary_aria": "Résumé et paiement",
     "secure_note": "Paiement sécurisé Stripe · Livraison 48–72 h · Retours 30 jours",
     "total": "Total",
     "continue_to_payment_aria": "Aller au formulaire de paiement",
-    "continue_btn": "Continuer"
+    "continue_btn": "Continuer",
+    "website_label": "Site web",
+    "privacy_link": "politique de confidentialité",
+    "email_placeholder": "vous@exemple.com",
+    "address_placeholder": "12 rue des Fleurs, 75000 Paris",
+    "terms_and_privacy": "CGV et notre politique de confidentialité"
   },
 
   "cgv": {
@@ -913,7 +1103,18 @@
     "waiting_heading": "En attendant",
     "waiting_intro": "Consultez la",
     "waiting_outro": "pour les questions fréquentes, ou retournez à l'accueil pour continuer vos achats.",
-    "faq_link": "FAQ"
+    "faq_link": "FAQ",
+    "message_placeholder": "Décrivez votre demande en quelques mots…",
+    "min_chars": "Minimum 10 caractères.",
+    "name_placeholder": "Votre nom",
+    "email_placeholder_contact": "vous@exemple.fr",
+    "toast_success": "Message envoyé. Nous vous répondrons sous 24 à 48 h.",
+    "toast_error": "Erreur d'envoi",
+    "send_another": "Envoyer un autre message",
+    "submit_btn": "Envoyer le message",
+    "sending_btn": "Envoi en cours…",
+    "message_received": "Message bien reçu",
+    "message_received_detail": "Nous vous répondrons à l'adresse indiquée sous 24 à 48 h ouvrées."
   },
 
   "faq": {
@@ -998,6 +1199,77 @@
     "sort_label": "Trier",
     "sort_recent": "Récents",
     "sort_helpful": "Utiles",
-    "verified": "Achat vérifié"
+    "verified": "Achat vérifié",
+    "website_label": "Site web",
+    "honeypot_label": "Ne pas remplir ce champ",
+    "loading_aria": "Chargement des avis"
+  },
+
+  "privacy_prefs": {
+    "analytics_label": "Mesure d'audience (Analytics)",
+    "ads_label": "Publicité",
+    "save_btn": "Enregistrer"
+  },
+
+  "cart": {
+    "view_product_aria": "Voir la fiche produit de {title}",
+    "remove_aria": "Supprimer {title} du panier",
+    "total_label": "Total",
+    "cart_items_aria": "Articles du panier",
+    "clear_cart_aria": "Vider le panier",
+    "cart_reminder_aria": "Rappel panier",
+    "cart_empty_toast": "Votre panier est vide.",
+    "add_to_cart_error": "Impossible d'ajouter au panier. Réessayez.",
+    "items_heading": "Articles",
+    "no_items": "Aucun article dans le panier.",
+    "view_products": "Voir les produits",
+    "error_title": "Oups, le panier a rencontré un problème",
+    "error_message_retry": "Réessayez ou videz le panier si le problème persiste.",
+    "back_to_cart": "Revenir au panier",
+    "unit_label": "unité",
+    "quantity_decrease_aria": "Diminuer la quantité de {title}",
+    "quantity_increase_aria": "Augmenter la quantité de {title}",
+    "quantity_for_aria": "Quantité pour {title}",
+    "total_for_aria": "Total pour {title} : {amount}",
+    "remove_item_aria": "Supprimer {title} du panier",
+    "remove_item_title": "Supprimer {title}"
+  },
+
+  "misc": {
+    "hero_boost": "Boostez votre quotidien avec",
+    "install_prompt": "Installer TechPlay en app ?",
+    "coming_soon": "Cette section sera disponible très bientôt.",
+    "upsell_intro": "Complétez votre panier avec ces produits populaires",
+    "related_heading": "Produits similaires",
+    "generator_heading": "Générer un article de blog",
+    "generator_content_heading": "Contenu généré :",
+    "generator_error": "Erreur lors de la génération",
+    "generator_error_network": "Erreur réseau",
+    "generator_enter_subject": "Merci de saisir un sujet",
+    "generator_success": "Article généré avec succès !",
+    "product_assistant_error": "Erreur lors de la réponse de l'assistant",
+    "call_to_action_heading": "Prêt à découvrir nos meilleurs produits ?",
+    "view_products": "Voir les produits",
+    "view_cart_go": "Voir mon panier →",
+    "close_bar_aria": "Fermer la barre",
+    "logout_aria": "Se déconnecter",
+    "product_tags_aria": "Étiquettes du produit",
+    "quick_links_aria": "Liens rapides",
+    "sort_aria": "Trier",
+    "menu_aria": "Menu",
+    "promo_aria": "Promotion",
+    "breadcrumb_aria": "Fil d'Ariane",
+    "clear_search_aria": "Effacer la recherche",
+    "search_form_aria": "Recherche produits",
+    "pagination_aria": "Pagination",
+    "call_to_action_subtitle": "Qualité, fiabilité et design réunis. Ne ratez pas nos packs exclusifs.",
+    "reviews_count_display": "({count} avis)",
+    "chatbot_placeholder": "Pose-moi une question sur nos produits ou commandes !",
+    "no_thanks": "Non merci",
+    "our_packs": "Nos Packs",
+    "secure_checkout_returns": "Paiement sécurisé · Retours gratuits",
+    "free_return_30": "Retour gratuit sous 30 jours",
+    "total_colon": "Total",
+    "returns_exchanges": "Retours & échanges"
   }
 }

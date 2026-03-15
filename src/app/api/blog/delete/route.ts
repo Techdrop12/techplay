@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 
+import { error as logError } from '@/lib/logger'
 import dbConnect from '@/lib/dbConnect'
 import Blog from '@/models/Blog'
 import { requireAdmin } from '@/lib/requireAdmin'
@@ -18,7 +19,7 @@ export async function DELETE(req: Request) {
     if (!doc) return NextResponse.json({ error: 'Article introuvable' }, { status: 404 })
     return NextResponse.json({ ok: true })
   } catch (e) {
-    console.error('[blog/delete]', e)
+    logError('[blog/delete]', e)
     return NextResponse.json(
       { error: 'Erreur suppression' },
       { status: 500 }

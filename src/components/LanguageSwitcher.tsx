@@ -2,6 +2,7 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 
 import { event as gaEvent } from '@/lib/ga'
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
@@ -13,6 +14,7 @@ import {
 } from '@/lib/language'
 
 export default function LanguageSwitcher() {
+  const t = useTranslations('common')
   const pathname = usePathname() || '/'
   const router = useRouter()
   const current = getCurrentLocale(pathname)
@@ -35,7 +37,7 @@ export default function LanguageSwitcher() {
   }
 
   return (
-    <div className="inline-flex gap-2" role="group" aria-label="Sélecteur de langue">
+    <div className="inline-flex gap-2" role="group" aria-label={t('language_switcher_aria')}>
       {(SUPPORTED_LOCALES as readonly Locale[]).map((lang) => {
         const active = current === lang
         return (

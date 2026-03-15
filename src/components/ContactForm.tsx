@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { toast } from 'react-hot-toast'
 
@@ -8,6 +9,7 @@ import { contactSchema } from '@/lib/zodSchemas'
 type FieldErrors = Partial<Record<string, string>>
 
 export default function ContactForm() {
+  const t = useTranslations('contact')
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
   const [apiError, setApiError] = useState<string | null>(null)
@@ -58,15 +60,15 @@ export default function ContactForm() {
       })
       const data = await res.json()
       if (!res.ok) {
-        const msg = data?.error || 'Erreur'
+        const msg = data?.error || t('toast_error')
         setApiError(msg)
         return
       }
       setSent(true)
       setForm({ name: '', email: '', message: '', consent: false })
-      toast.success('Message envoyé. Nous vous répondrons sous 24 à 48 h.')
+      toast.success(t('toast_success'))
     } catch (e) {
-      setApiError(e instanceof Error ? e.message : 'Erreur d\'envoi')
+      setApiError(e instanceof Error ? e.message : t('toast_error'))
     } finally {
       setLoading(false)
     }
@@ -80,17 +82,17 @@ export default function ContactForm() {
         aria-live="polite"
       >
         <p className="font-semibold text-green-800 dark:text-green-200">
-          Message bien reçu
+          {t('message_received')}
         </p>
         <p className="mt-2 text-[14px] text-green-700 dark:text-green-300">
-          Nous vous répondrons à l&apos;adresse indiquée sous 24 à 48 h ouvrées.
+          {t('message_received_detail')}
         </p>
         <button
           type="button"
           onClick={() => setSent(false)}
           className="mt-4 text-sm font-medium text-green-700 dark:text-green-300 underline hover:no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 rounded"
         >
-          Envoyer un autre message
+          {t('send_another')}
         </button>
       </div>
     )
@@ -131,7 +133,7 @@ export default function ContactForm() {
           value={form.name}
           onChange={handleChange}
           className={`w-full rounded-xl border bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${fieldErrors.name ? inputErrorClass : 'border-[hsl(var(--border))] focus-visible:ring-[hsl(var(--accent))]'}`}
-          placeholder="Votre nom"
+          placeholder={t('name_placeholder')}
           aria-invalid={!!fieldErrors.name}
           aria-describedby={fieldErrors.name ? 'contact-name-error' : undefined}
         />
@@ -154,7 +156,7 @@ export default function ContactForm() {
           value={form.email}
           onChange={handleChange}
           className={`w-full rounded-xl border bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${fieldErrors.email ? inputErrorClass : 'border-[hsl(var(--border))] focus-visible:ring-[hsl(var(--accent))]'}`}
-          placeholder="vous@exemple.fr"
+          placeholder={t('email_placeholder_contact')}
           aria-invalid={!!fieldErrors.email}
           aria-describedby={fieldErrors.email ? 'contact-email-error' : undefined}
         />
@@ -178,7 +180,7 @@ export default function ContactForm() {
           value={form.message}
           onChange={handleChange}
           className={`w-full rounded-xl border bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${fieldErrors.message ? inputErrorClass : 'border-[hsl(var(--border))] focus-visible:ring-[hsl(var(--accent))]'}`}
-          placeholder="Décrivez votre demande en quelques mots…"
+          placeholder={t('message_placeholder')}
           aria-invalid={!!fieldErrors.message}
           aria-describedby={fieldErrors.message ? 'contact-message-error' : undefined}
         />
@@ -187,7 +189,7 @@ export default function ContactForm() {
             {fieldErrors.message}
           </p>
         ) : (
-          <p className="mt-1 text-[12px] text-token-text/60">Minimum 10 caractères.</p>
+          <p className="mt-1 text-[12px] text-token-text/60">{t('min_chars')}</p>
         )}
       </div>
 
@@ -211,7 +213,7 @@ export default function ContactForm() {
         aria-busy={loading}
         className="w-full rounded-xl bg-[hsl(var(--accent))] px-5 py-3 text-[15px] font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-md)] transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 disabled:opacity-60"
       >
-        {loading ? 'Envoi en cours…' : 'Envoyer le message'}
+        {loading ? t('sending_btn') : t('submit_btn')}
       </button>
     </form>
   )

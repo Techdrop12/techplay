@@ -112,7 +112,7 @@ export default function OrderList({ orders = [], className }: Props) {
   }
 
   return (
-    <section className={cn('space-y-4', className)} aria-label="Liste des commandes">
+    <section className={cn('space-y-4', className)} aria-label={t('list_aria')}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="text-sm text-muted-foreground">
           {t('orders_count', { count: filtered.length })}

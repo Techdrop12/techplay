@@ -66,6 +66,17 @@ export const checkoutSchema = z.object({
 })
 export type CheckoutInput = z.infer<typeof checkoutSchema>
 
+/** Blog create/update (API admin) */
+export const blogCreateSchema = z.object({
+  title: z.string().trim().min(1, 'Titre manquant').max(200, 'Titre trop long'),
+  slug: z.string().trim().max(100).optional(),
+  description: z.string().trim().max(5000).optional(),
+  image: z.union([z.string().trim().url(), z.literal('')]).optional(),
+  author: z.string().trim().max(100).optional(),
+  published: z.boolean().optional().default(false),
+})
+export type BlogCreateInput = z.infer<typeof blogCreateSchema>
+
 /** Helper parse + message d’erreur clair */
 export function safeParseOrThrow<T extends ZodTypeAny>(schema: T, data: unknown) {
   const parsed = schema.safeParse(data)

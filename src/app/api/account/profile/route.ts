@@ -1,38 +1,38 @@
-import { NextResponse } from 'next/server'
-
+import { error as logError } from '@/lib/logger'
 import { getSession } from '@/lib/auth'
 import { updateUserByEmail } from '@/lib/db/users'
+import { apiError, apiSuccess } from '@/lib/apiResponse'
 
 export async function PATCH(req: Request) {
   const session = await getSession()
   const email = session?.user?.email?.trim()
   if (!email) {
-    return NextResponse.json({ error: 'Non connecté' }, { status: 401 })
+    return apiError('Non connecté', 401)
   }
 
   let body: { name?: string }
   try {
     body = await req.json()
   } catch {
-    return NextResponse.json({ error: 'Body JSON invalide' }, { status: 400 })
+    return apiError('Body JSON invalide', 400)
   }
 
   const name = body?.name != null ? String(body.name).trim() : undefined
   if (name === undefined) {
-    return NextResponse.json({ error: 'Aucune donnée à mettre à jour' }, { status: 400 })
+    return apiError('Aucune donnée à mettre à jour', 400)
   }
 
   try {
     const updated = await updateUserByEmail(email, { name })
     if (!updated) {
-      return NextResponse.json(
-        { error: 'Compte introuvable en base. La mise à jour du profil est disponible pour les comptes enregistrés.' },
-        { status: 404 }
+      return apiError(
+        'Compte introuvable en base. La mise à jour du profil est disponible pour les comptes enregistrés.',
+        404
       )
     }
-    return NextResponse.json(updated)
+    return apiSuccess(updated as Record<string, unknown>)
   } catch (e) {
-    console.error('[account/profile] PATCH', e)
-    return NextResponse.json({ error: 'Erreur mise à jour' }, { status: 500 })
+    logError('[account/profile] PATCH', e)
+    return apiError('Erreur mise à jour', 500, { details: e instanceof Error ? e.message : undefined })
   }
 }

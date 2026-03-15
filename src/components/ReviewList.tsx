@@ -12,9 +12,9 @@ import { timeAgo } from '@/lib/formatDate';
 /** Review avec champs optionnels API (helpful, verified) */
 type ReviewWithExtras = Review & { helpful?: number; verified?: boolean };
 
-function Skeleton() {
+function Skeleton({ ariaLabel }: { ariaLabel: string }) {
   return (
-    <ul role="list" aria-label="Chargement des avis" className="space-y-4 animate-pulse">
+    <ul role="list" aria-label={ariaLabel} className="space-y-4 animate-pulse">
       {[...Array(3)].map((_, i) => (
         <li key={i} className="p-4 bg-[hsl(var(--surface-2))] rounded-xl h-24" />
       ))}
@@ -75,7 +75,7 @@ export default function ReviewList({ productId }: ReviewListProps) {
       });
   }, [reviews, filter, sort]);
 
-  if (loading) return <Skeleton />;
+  if (loading) return <Skeleton ariaLabel={t('loading_aria')} />;
 
   if (error) {
     return (

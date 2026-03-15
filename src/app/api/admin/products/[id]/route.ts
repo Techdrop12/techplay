@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 
+import { error as logError } from '@/lib/logger'
 import { connectToDatabase } from '@/lib/db'
 import Product from '@/models/Product'
 import { requireAdmin } from '@/lib/requireAdmin'
@@ -24,7 +25,7 @@ export async function GET(
     if (!doc) return NextResponse.json({ error: 'Produit introuvable' }, { status: 404 })
     return NextResponse.json(toPlain(doc))
   } catch (e) {
-    console.error('[admin/products/:id] GET', e)
+    logError('[admin/products/:id] GET', e)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }
@@ -71,7 +72,7 @@ export async function PUT(
     await product.save()
     return NextResponse.json(toPlain(product))
   } catch (e) {
-    console.error('[admin/products/:id] PUT', e)
+    logError('[admin/products/:id] PUT', e)
     return NextResponse.json({ error: 'Erreur lors de la mise à jour' }, { status: 500 })
   }
 }
@@ -92,7 +93,7 @@ export async function DELETE(
     if (!doc) return NextResponse.json({ error: 'Produit introuvable' }, { status: 404 })
     return NextResponse.json({ ok: true })
   } catch (e) {
-    console.error('[admin/products/:id] DELETE', e)
+    logError('[admin/products/:id] DELETE', e)
     return NextResponse.json({ error: 'Erreur lors de la suppression' }, { status: 500 })
   }
 }

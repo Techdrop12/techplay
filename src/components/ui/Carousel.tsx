@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 interface CarouselProps {
@@ -7,6 +8,7 @@ interface CarouselProps {
 }
 
 export default function Carousel({ images }: CarouselProps) {
+  const t = useTranslations('common');
   const [current, setCurrent] = useState(0);
   const length = images.length;
 
@@ -24,14 +26,14 @@ export default function Carousel({ images }: CarouselProps) {
       />
       <button
         onClick={prev}
-        aria-label="Image précédente"
+        aria-label={t('carousel_prev_aria')}
         className="absolute top-1/2 left-2 -translate-y-1/2 bg-[hsl(var(--text)/0.5)] text-[hsl(var(--accent-fg))] rounded-full p-1 hover:opacity-80"
       >
         ‹
       </button>
       <button
         onClick={next}
-        aria-label="Image suivante"
+        aria-label={t('carousel_next_aria')}
         className="absolute top-1/2 right-2 -translate-y-1/2 bg-[hsl(var(--text)/0.5)] text-[hsl(var(--accent-fg))] rounded-full p-1 hover:opacity-80"
       >
         ›
@@ -41,7 +43,7 @@ export default function Carousel({ images }: CarouselProps) {
           <button
             key={i}
             onClick={() => setCurrent(i)}
-            aria-label={`Voir image ${i + 1}`}
+            aria-label={t('view_image_aria', { index: i + 1 })}
             className={`w-3 h-3 rounded-full ${i === current ? 'bg-[hsl(var(--accent))]' : 'bg-[hsl(var(--surface-2))]'}`}
           />
         ))}

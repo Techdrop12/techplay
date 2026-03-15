@@ -60,7 +60,7 @@ export default function OrderTable() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || 'Erreur');
+        throw new Error(data?.error || t('update_error'));
       }
       setOrders((prev) =>
         prev.map((o) => (o._id === orderId ? { ...o, status: newStatus } : o))
@@ -68,7 +68,7 @@ export default function OrderTable() {
       toast.success(t('status_updated'));
       fetchOrders();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Erreur mise à jour statut');
+      toast.error(e instanceof Error ? e.message : t('status_update_error'));
     }
   };
 
@@ -123,6 +123,7 @@ export default function OrderTable() {
           onClick={() => setPage((p) => Math.max(1, p - 1))}
           disabled={page <= 1 || loading}
           className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-2 py-1.5 text-sm disabled:opacity-50"
+          aria-label={t('pagination_prev')}
         >
           ←
         </button>
@@ -131,6 +132,7 @@ export default function OrderTable() {
           onClick={() => setPage((p) => p + 1)}
           disabled={page >= pages || loading}
           className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-2 py-1.5 text-sm disabled:opacity-50"
+          aria-label={t('pagination_next')}
         >
           →
         </button>
@@ -139,7 +141,7 @@ export default function OrderTable() {
           onClick={exportCsv}
           className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-sm font-medium text-[hsl(var(--text))] hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
         >
-          Exporter CSV
+          {t('export_csv')}
         </button>
       </div>
       <table className="min-w-full table-auto border border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-sm">
@@ -165,7 +167,7 @@ export default function OrderTable() {
                   value={o.status ?? ''}
                   onChange={(e) => updateStatus(o._id, e.target.value)}
                   className="rounded border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-2 py-1 text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
-                  aria-label={`Changer le statut de la commande ${o._id}`}
+                  aria-label={t('change_order_status_aria', { id: o._id })}
                 >
                   {STATUS_OPTIONS.map((s) => (
                     <option key={s} value={s}>{s}</option>

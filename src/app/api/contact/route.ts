@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server'
-
+import { error as logError } from '@/lib/logger'
 import { connectToDatabase } from '@/lib/db'
 import ContactSubmission from '@/models/ContactSubmission'
+import { apiError, apiSuccess } from '@/lib/apiResponse'
 import { contactSchema } from '@/lib/zodSchemas'
 
 function toPlain(obj: unknown) {
@@ -13,14 +13,14 @@ export async function POST(req: Request) {
   try {
     body = await req.json()
   } catch {
-    return NextResponse.json({ error: 'Body JSON invalide' }, { status: 400 })
+    return apiError('Body JSON invalide', 400)
   }
 
   const parsed = contactSchema.safeParse(body)
   if (!parsed.success) {
     const first = parsed.error.flatten().fieldErrors
     const message = first?.message?.[0] ?? first?.email?.[0] ?? first?.name?.[0] ?? 'Données invalides'
-    return NextResponse.json({ error: message }, { status: 400 })
+    return apiError(message, 400)
   }
 
   const { name, email, message, consent } = parsed.data
@@ -33,12 +33,11 @@ export async function POST(req: Request) {
       message: message.trim(),
       consent: Boolean(consent),
     })
-    return NextResponse.json(toPlain({ ok: true, id: doc._id }))
+    return apiSuccess(toPlain({ ok: true, id: doc._id }) as Record<string, unknown>)
   } catch (e) {
-    console.error('[contact] POST', e)
-    return NextResponse.json(
-      { error: 'Erreur lors de l\'envoi. Réessayez plus tard.' },
-      { status: 500 }
-    )
+    logError('[contact] POST', e)
+    return apiError("Erreur lors de l'envoi. Réessayez plus tard.", 500, {
+      details: e instanceof Error ? e.message : undefined,
+    })
   }
 }

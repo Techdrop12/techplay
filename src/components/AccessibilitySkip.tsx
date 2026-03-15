@@ -21,7 +21,6 @@ export default function AccessibilitySkip({
         const el =
           document.getElementById(id) ||
           document.querySelector(String(target)) ||
-          document.querySelector('#main-content') ||
           document.querySelector('main');
 
         if (!el) return;

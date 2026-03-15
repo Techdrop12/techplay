@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 
+import { error as logError } from '@/lib/logger'
 import { connectToDatabase } from '@/lib/db'
 import Order from '@/models/Order'
 import { requireAdmin } from '@/lib/requireAdmin'
@@ -43,7 +44,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json(toPlain({ items: list, total, page, limit, pages: Math.max(1, Math.ceil(total / limit)) }))
   } catch (e) {
-    console.error('[admin/orders]', e)
+    logError('[admin/orders]', e)
     return NextResponse.json(
       { error: 'Erreur chargement commandes' },
       { status: 500 }

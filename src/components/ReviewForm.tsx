@@ -90,7 +90,7 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
     if (disabled) return
 
     // Honeypot -> bot probable
-    if (hp) { toast.success('Merci !'); return }
+    if (hp) { toast.success(tr('thank_you', 'Merci pour votre avis !')); return }
 
     const bodyTrim = comment.trim()
     if (!bodyTrim) { toast.error(tr('empty_error', 'Votre message est vide.')); return }

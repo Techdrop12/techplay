@@ -56,9 +56,9 @@ Ce document récapitule toutes les améliorations « full option » et vérifie 
 
 | Fonctionnalité | API | Page / Composant | Cohérent |
 |----------------|-----|------------------|----------|
-| Liste avis | `GET /api/reviews` (admin) | `AdminReviewTable` | ✅ |
+| Liste avis (paginée) | `GET /api/reviews?page=&limit=&rating=` → `{ items, total, page, limit, pages }` | `AdminReviewTable` (pagination + filtre note côté serveur) | ✅ |
 | Suppression avis | `DELETE /api/reviews/[id]` | `AdminReviewTable` | ✅ |
-| Filtre par note | — | `AdminReviewTable` (client-side) | ✅ |
+| Filtre par note | Même API avec `rating=` (1–5) | `AdminReviewTable` (dropdown, reset page à 1) | ✅ |
 | Messages contact | `GET /api/admin/contact-submissions` | `/admin/contact` + `ContactSubmissionsTable` | ✅ |
 | Inscrits newsletter | `GET /api/admin/newsletter-subscribers?limit=&skip=` | `/admin/newsletter` + `NewsletterSubscribersTable` (pagination + export CSV) | ✅ |
 | Pages légales (CGV, mentions, confidentialité) | `GET /api/admin/site-pages?slug=` + `PUT /api/admin/site-pages` | `/admin/pages` + `SitePagesEditor` (onglets) | ✅ |
@@ -127,7 +127,7 @@ Ce document récapitule toutes les améliorations « full option » et vérifie 
 
 ## 11. Résumé – « Impossible de faire mieux » (full option)
 
-- **Admin** : produits (CRUD, pagination, filtres, import), blog (CRUD, publish/unpublish), commandes (liste paginée, statut, export CSV), avis (liste, filtre note, suppression), contact (messages), newsletter (inscrits, export), pages légales (édition CGV, mentions, confidentialité), analytics, dashboard avec actions rapides.
+- **Admin** : produits (CRUD, pagination, filtres, import), blog (CRUD, publish/unpublish), commandes (liste paginée, statut, export CSV), avis (liste **paginée**, filtre note côté serveur, suppression), contact (messages), newsletter (inscrits, export), pages légales (édition CGV, mentions, confidentialité), analytics, dashboard avec actions rapides.
 - **Public** : contact (formulaire + envoi), recherche (produits + blog), homepage (section blog), fiche produit (produits similaires), compte (profil nom), wishlist (sync si connecté), pages légales (contenu éditable + confidentialité avec toggles).
 
 ---
@@ -154,7 +154,7 @@ Ce document récapitule toutes les améliorations « full option » et vérifie 
 | **Admin tables** | Skeleton de chargement : composant `TableSkeleton` ; utilisé dans ProductTable, OrderTable, ContactSubmissionsTable, NewsletterSubscribersTable. |
 | **i18n admin** | Nouvelles clés admin (orders, contact, newsletter) dans `fr.json` et `en.json` ; OrderTable, ContactSubmissionsTable, NewsletterSubscribersTable utilisent `useTranslations('admin')` pour tous les textes. |
 
-Tout est cohérent et prêt pour une utilisation « full option ». Pour aller au-delà, on pourrait ajouter par exemple : pagination des avis en admin, coupons gérés en admin, ou flux d’emails (newsletter) ; ce n’est pas nécessaire pour considérer la version actuelle comme complète et cohérente.
+Tout est cohérent et prêt pour une utilisation « full option ». Pour aller au-delà, on pourrait ajouter par exemple : coupons gérés en admin, ou flux d’emails (newsletter) ; ce n’est pas nécessaire pour considérer la version actuelle comme complète et cohérente.
 
 ---
 
@@ -168,3 +168,14 @@ Tout est cohérent et prêt pour une utilisation « full option ». Pour aller a
 | **Checkout** | Page `/commande` : `useTranslations('checkout')` pour fil d’Ariane, titre, sous-titre (articles + paiement), panier vide, « Parcourir les produits », « Voir les packs », aria sections, note Stripe, « Total », « Continuer », aria formulaire paiement. Namespace `checkout` en `fr.json` et `en.json`. |
 
 Cohérence : toutes les chaînes visibles sur ces pages sont traduisibles (FR/EN) et les libellés d’accessibilité (aria-label, sr-only) passent par l’i18n.
+
+---
+
+## 15. Améliorations récentes (pagination avis, logger, i18n admin)
+
+| Domaine | Amélioration |
+|--------|--------------|
+| **Avis admin** | Pagination : `GET /api/reviews?page=&limit=&rating=` retourne `{ items, total, page, limit, pages }` ; filtre par note côté serveur ; AdminReviewTable avec boutons Précédent/Suivant, `reviews_page_info`, aria pagination. |
+| **APIs** | Tous les `console.error` des routes API remplacés par `@/lib/logger` (error) pour logs assainis en production. |
+| **i18n admin** | OrderTable : `export_csv`, `change_order_status_aria`, `pagination_prev`/`pagination_next`. NewsletterSubscribersTable : `newsletter_export_csv`, `newsletter_page_info`, `newsletter_table_aria`, `error_load_newsletter`, aria pagination. ContactSubmissionsTable : `contact_table_aria`, dates selon `useLocale()`. ProductTable : en-têtes tableau (table_title, table_price, table_stock, table_slug, actions), aria pagination, aria-label sur le tableau. ImportProductsTable : aria-label sur le bouton d’import. |
+| **Clés admin** | Ajout dans `fr.json` / `en.json` : `change_order_status_aria`, `newsletter_table_aria`, `newsletter_page_info`, `error_load_newsletter`, `contact_table_aria`, `pagination_prev`, `pagination_next`, `reviews_page_info`. |

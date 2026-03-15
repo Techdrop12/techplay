@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 
+import { error as logError } from '@/lib/logger'
 import { connectToDatabase } from '@/lib/db'
 import SitePage from '@/models/SitePage'
 
@@ -20,7 +21,7 @@ export async function GET(
     if (!doc) return NextResponse.json(null)
     return NextResponse.json(toPlain(doc))
   } catch (e) {
-    console.error('[site-pages/:slug]', e)
+    logError('[site-pages/:slug]', e)
     return NextResponse.json({ error: 'Erreur' }, { status: 500 })
   }
 }

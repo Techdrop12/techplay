@@ -240,6 +240,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
       : DEFAULT_LOCALE
 
   const t = await getTranslations('common')
+  const tBlog = await getTranslations('blog')
   const resolved = searchParams ? await searchParams : undefined
   const opts = toBlogOptions(resolved)
 
@@ -310,16 +311,16 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
           type="search"
           name="q"
           defaultValue={q}
-          placeholder="Rechercher un article…"
+          placeholder={tBlog('search_placeholder')}
           className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-3.5 py-2.5 text-[13px] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]"
-          aria-label="Rechercher dans le blog"
+          aria-label={tBlog('search_aria')}
         />
 
         <select
           name="sort"
           defaultValue={sort}
           className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-3.5 py-2.5 text-[13px] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]"
-          aria-label="Trier"
+          aria-label={tBlog('sort_aria')}
         >
           <option value="newest">Plus récents</option>
           <option value="oldest">Plus anciens</option>
@@ -333,7 +334,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
             type="submit"
             className="w-full rounded-xl bg-[hsl(var(--accent))] px-4 py-2.5 text-[13px] font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-sm)] transition hover:opacity-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] sm:w-auto"
           >
-            Filtrer
+            {tBlog('filter_btn')}
           </button>
 
           {(q || tagStr || categoryStr) && (
@@ -433,7 +434,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
           )}
         </div>
       ) : (
-        <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3" aria-label="Liste des articles">
+        <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3" aria-label={tBlog('articles_list_aria')}>
           {posts.map((post, idx) => (
             <BlogCard
               key={post._id || post.slug || `post-${idx}`}
@@ -444,7 +445,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
       )}
 
       {pagination.pages > 1 && (
-        <nav className="mt-10 flex flex-wrap items-center justify-center gap-2" aria-label="Pagination des articles">
+        <nav className="mt-10 flex flex-wrap items-center justify-center gap-2" aria-label={tBlog('pagination_articles_aria')}>
           <Link
             href={persist({ page: Math.max(1, page - 1) })}
             prefetch={false}

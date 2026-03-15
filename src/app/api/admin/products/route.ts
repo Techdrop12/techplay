@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 
+import { error as logError } from '@/lib/logger'
 import { connectToDatabase } from '@/lib/db'
 import Product from '@/models/Product'
 import { requireAdmin } from '@/lib/requireAdmin'
@@ -47,7 +48,7 @@ export async function GET(req: Request) {
     const pages = Math.max(1, Math.ceil(total / limit))
     return NextResponse.json(toPlain({ items: docs, total, page, limit, pages }))
   } catch (e) {
-    console.error('[admin/products] GET', e)
+    logError('[admin/products] GET', e)
     return NextResponse.json(
       { error: 'Erreur serveur' },
       { status: 500 }
@@ -128,7 +129,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(toPlain(doc))
   } catch (e) {
-    console.error('[admin/products] POST', e)
+    logError('[admin/products] POST', e)
     return NextResponse.json(
       { error: 'Erreur lors de la création' },
       { status: 500 }

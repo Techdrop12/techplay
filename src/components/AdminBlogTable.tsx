@@ -87,10 +87,10 @@ export default function AdminBlogTable() {
         <table className="min-w-full text-sm border-collapse" aria-label={t('articles_title')}>
           <thead>
             <tr className="bg-[hsl(var(--surface-2))] text-left">
-              <th className="px-4 py-2">Titre</th>
-              <th className="px-4 py-2 text-center">Statut</th>
-              <th className="px-4 py-2 text-center">Date</th>
-              <th className="px-4 py-2 text-center">Actions</th>
+              <th className="px-4 py-2">{t('table_title')}</th>
+              <th className="px-4 py-2 text-center">{t('table_status')}</th>
+              <th className="px-4 py-2 text-center">{t('table_date')}</th>
+              <th className="px-4 py-2 text-center">{t('actions')}</th>
             </tr>
           </thead>
           <tbody>

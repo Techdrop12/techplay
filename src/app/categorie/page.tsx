@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 
 import Link from '@/components/LocalizedLink'
 import { generateMeta, jsonLdBreadcrumbs, jsonLdItemList } from '@/lib/seo'
@@ -26,7 +27,8 @@ export async function generateMetadata(): Promise<Metadata> {
   })
 }
 
-export default function CategoryIndexPage() {
+export default async function CategoryIndexPage() {
+  const t = await getTranslations('category')
   const crumbs = jsonLdBreadcrumbs([
     { name: 'Accueil', url: '/' },
     { name: 'Catégories', url: '/categorie' },
@@ -45,13 +47,13 @@ export default function CategoryIndexPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }} />
 
       <h1 id="categories-title" className="heading-page mb-2">
-        Catégories produits
+        {t('index_title')}
       </h1>
       <p className="mb-10 text-[15px] text-token-text/75">
-        Choisissez une catégorie pour découvrir nos produits high-tech : audio, gaming, bureautique et plus.
+        {t('index_intro')}
       </p>
 
-      <nav aria-label="Catégories" className="grid gap-4 sm:grid-cols-2">
+      <nav aria-label={t('categories_aria')} className="grid gap-4 sm:grid-cols-2">
         {CATEGORIES.map((cat) => (
           <Link
             key={cat.slug}
@@ -68,7 +70,7 @@ export default function CategoryIndexPage() {
 
       <p className="mt-10 text-center text-[13px] text-token-text/60">
         <Link href="/products" className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline" prefetch={false}>
-          Voir tout le catalogue
+          {t('see_all_catalog')}
         </Link>
       </p>
     </main>

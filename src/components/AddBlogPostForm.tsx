@@ -1,10 +1,12 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { toast } from 'react-hot-toast'
 
 export default function AddBlogPostForm() {
+  const t = useTranslations('admin')
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({
@@ -52,14 +54,14 @@ export default function AddBlogPostForm() {
       })
       const data = await res.json()
       if (!res.ok) {
-        setApiError(data?.error || 'Erreur')
+        setApiError(data?.error || t('article_error'))
         return
       }
-      toast.success('Article créé')
+      toast.success(t('article_created'))
       router.push('/admin/blog')
       router.refresh()
     } catch (e) {
-      setApiError(e instanceof Error ? e.message : 'Erreur création')
+      setApiError(e instanceof Error ? e.message : t('article_creation_error'))
     } finally {
       setLoading(false)
     }

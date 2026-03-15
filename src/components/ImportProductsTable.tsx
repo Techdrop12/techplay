@@ -57,6 +57,7 @@ export default function ImportProductsTable() {
         onClick={handleImport}
         disabled={!file || importing}
         aria-busy={importing}
+        aria-label={importing ? t('import_importing') : t('import_button')}
         className="bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] px-4 py-2 rounded-lg hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] disabled:opacity-60"
       >
         {importing ? t('import_importing') : t('import_button')}
