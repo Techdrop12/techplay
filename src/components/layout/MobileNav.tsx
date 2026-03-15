@@ -745,7 +745,6 @@ export default function MobileNav() {
 
                   <Link
                     href="/wishlist"
-                    prefetch={false}
                     onPointerDown={() => prefetchOnPointer('/wishlist')}
                     onFocus={() => prefetchOnPointer('/wishlist')}
                     onClick={() => {
@@ -765,7 +764,6 @@ export default function MobileNav() {
 
                   <Link
                     href="/account"
-                    prefetch={false}
                     onPointerDown={() => prefetchOnPointer('/account')}
                     onFocus={() => prefetchOnPointer('/account')}
                     onClick={() => {
@@ -821,7 +819,6 @@ export default function MobileNav() {
                           <li key={category.href}>
                             <Link
                               href={category.href}
-                              prefetch={false}
                               onPointerDown={() => prefetchOnPointer(category.href)}
                               onFocus={() => prefetchOnPointer(category.href)}
                               onClick={() => {
@@ -886,7 +883,6 @@ export default function MobileNav() {
                       <li key={href}>
                         <Link
                           href={href}
-                          prefetch={false}
                           onPointerDown={() => prefetchOnPointer(href)}
                           onFocus={() => prefetchOnPointer(href)}
                           onClick={() => {
@@ -919,7 +915,6 @@ export default function MobileNav() {
               <div className="flex items-center gap-3 border-t border-[hsl(var(--border))] px-5 py-4">
                 <Link
                   href="/commande"
-                  prefetch={false}
                   onPointerDown={() => prefetchOnPointer('/commande')}
                   onFocus={() => prefetchOnPointer('/commande')}
                   onClick={() => {

@@ -421,6 +421,8 @@
     "back_to_account": "← Retour au compte",
     "add_product_heading": "Ajouter un produit",
     "edit_article_heading": "Modifier l'article",
+    "title_required": "Titre requis",
+    "article_title_placeholder": "Titre de l'article",
     "edit_product_heading": "Modifier le produit",
     "status_update_error": "Erreur mise à jour statut",
     "blog_section_title": "Articles du blog",
@@ -598,11 +600,17 @@
   },
 
   "packs": {
-    "title": "Packs",
+    "title": "Nos Packs",
+    "page_title": "Nos Packs",
+    "page_description": "Découvrez nos packs exclusifs et thématiques à prix réduits.",
     "empty": "Aucun pack disponible pour le moment.",
     "emptyTitle": "Packs bientôt disponibles",
     "emptyDescription": "Nous préparons des bundles soignés pour vous. En attendant, découvrez notre sélection de produits.",
-    "emptyCtaLabel": "Découvrir les produits"
+    "emptyCtaLabel": "Découvrir les produits",
+    "view_all_products": "Voir tous les produits",
+    "category_heads": "Casques",
+    "category_claviers": "Claviers",
+    "category_souris": "Souris"
   },
 
   "pack": {
@@ -641,6 +649,11 @@
     "summary_title": "Récapitulatif",
     "your_cart": "Votre panier",
     "empty": "Votre panier est vide",
+    "sr_empty": "Panier vide",
+    "sr_count_in_cart": "{count, plural, one {# article dans le panier} other {# articles dans le panier}}",
+    "sr_added": "{diff, plural, one {# article ajouté} other {# articles ajoutés}}. {count} au total.",
+    "sr_removed": "{diff, plural, one {# article retiré} other {# articles retirés}}. {count} au total.",
+    "product_fallback": "Produit",
     "total": "Total",
     "subtotal": "Sous-total",
     "taxes": "TVA",
@@ -912,7 +925,8 @@
     "two_factor": "Double authentification",
     "login_success": "Connexion réussie",
     "login_error": "Identifiants incorrects",
-    "login_loading": "Connexion…"
+    "login_loading": "Connexion…",
+    "submit_btn": "Se connecter"
   },
 
   "address": {
@@ -968,6 +982,17 @@
 
   "blog": {
     "title": "Blog TechPlay",
+    "section_kicker": "Guides & actualités",
+    "page_title": "Blog gaming & setup",
+    "page_subtitle": "Meilleurs claviers 2026, guides setup, astuces FPS — contenu éditorial pour ramener du trafic et convertir.",
+    "search_results_title": "Résultats pour « {query} »",
+    "search_results_subtitle": "Articles correspondant à votre recherche.",
+    "sort_newest": "Plus récents",
+    "sort_oldest": "Plus anciens",
+    "sort_popular": "Populaires",
+    "sort_az": "Titre A→Z",
+    "sort_za": "Titre Z→A",
+    "breadcrumb_home": "Accueil",
     "no_posts": "Aucun article pour le moment.",
     "no_articles_search": "Aucun article pour cette recherche",
     "no_results_for_query": "Aucun résultat pour « {query} ». Essayez d'autres mots-clés ou consultez nos guides dès leur publication.",
@@ -983,6 +1008,13 @@
     "articles_list_aria": "Liste des articles",
     "pagination_articles_aria": "Pagination des articles",
     "back_to_home": "Retour à l'accueil",
+    "editorial_coming_soon": "Éditorial à venir",
+    "editorial_coming_intro": "Nous préparons des guides setup gaming, sélections claviers et astuces FPS. Revenez bientôt, ou découvrez nos produits en attendant.",
+    "explore_products": "Découvrir les produits",
+    "articles_title": "Nos articles",
+    "no_articles_available": "Aucun article {context}",
+    "no_articles_for_query": "Aucun article pour « {query} »",
+    "no_articles_empty": "Aucun article disponible",
     "article_title_placeholder": "Titre de l'article",
     "article_slug_placeholder": "mon-article",
     "article_summary_placeholder": "Résumé ou contenu court",
@@ -1047,7 +1079,9 @@
     "privacy_link": "politique de confidentialité",
     "email_placeholder": "vous@exemple.com",
     "address_placeholder": "12 rue des Fleurs, 75000 Paris",
-    "terms_and_privacy": "CGV et notre politique de confidentialité"
+    "terms_and_privacy": "CGV et notre politique de confidentialité",
+    "validation_email": "Adresse email invalide",
+    "validation_address": "Adresse trop courte"
   },
 
   "cgv": {
@@ -1111,6 +1145,9 @@
     "toast_success": "Message envoyé. Nous vous répondrons sous 24 à 48 h.",
     "toast_error": "Erreur d'envoi",
     "send_another": "Envoyer un autre message",
+    "form_heading": "Envoyer un message",
+    "form_intro": "Remplissez le formulaire ci-dessous. Réponse sous 24 à 48 h ouvrées.",
+    "name_label": "Nom (optionnel)",
     "submit_btn": "Envoyer le message",
     "sending_btn": "Envoi en cours…",
     "message_received": "Message bien reçu",

@@ -1,6 +1,5 @@
-import { NextResponse } from 'next/server'
-
 import { error as logError } from '@/lib/logger'
+import { apiError, apiSuccess, safeErrorForLog } from '@/lib/apiResponse'
 import { connectToDatabase } from '@/lib/db'
 import Review from '@/models/Review'
 import { requireAdmin } from '@/lib/requireAdmin'
@@ -44,12 +43,9 @@ export async function GET(req: Request) {
     }))
 
     const pages = Math.max(1, Math.ceil(total / limit))
-    return NextResponse.json(toPlain({ items: list, total, page, limit, pages }))
+    return apiSuccess(toPlain({ items: list, total, page, limit, pages }) as Record<string, unknown>)
   } catch (e) {
-    logError('[reviews] GET', e)
-    return NextResponse.json(
-      { error: 'Erreur chargement avis' },
-      { status: 500 }
-    )
+    logError('[reviews] GET', safeErrorForLog(e))
+    return apiError('Erreur chargement avis', 500)
   }
 }

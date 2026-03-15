@@ -90,7 +90,7 @@ export default function CartPageClient() {
       <nav aria-label={t('breadcrumb_aria')} className="mb-6 text-[12px] text-token-text/60">
         <ol className="flex items-center gap-1.5">
           <li>
-            <Link href="/" className="transition hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded" prefetch={false}>
+            <Link href="/" className="transition hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded">
               {tNav('home')}
             </Link>
           </li>

@@ -1,6 +1,5 @@
-import { NextResponse } from 'next/server'
-
 import { error as logError } from '@/lib/logger'
+import { apiError, apiJson, safeErrorForLog } from '@/lib/apiResponse'
 import dbConnect from '@/lib/dbConnect'
 import Blog from '@/models/Blog'
 import { requireAdmin } from '@/lib/requireAdmin'
@@ -20,12 +19,9 @@ export async function GET() {
       .select('_id title slug published publishedAt createdAt')
       .lean()
       .exec()
-    return NextResponse.json(toPlain(docs))
+    return apiJson(toPlain(docs))
   } catch (e) {
-    logError('[blog/all]', e)
-    return NextResponse.json(
-      { error: 'Erreur chargement articles' },
-      { status: 500 }
-    )
+    logError('[blog/all]', safeErrorForLog(e))
+    return apiError('Erreur chargement articles', 500)
   }
 }

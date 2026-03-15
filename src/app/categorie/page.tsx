@@ -69,7 +69,7 @@ export default async function CategoryIndexPage() {
       </nav>
 
       <p className="mt-10 text-center text-[13px] text-token-text/60">
-        <Link href="/products" className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline" prefetch={false}>
+        <Link href="/products" className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline">
           {t('see_all_catalog')}
         </Link>
       </p>

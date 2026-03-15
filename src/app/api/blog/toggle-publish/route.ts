@@ -1,6 +1,5 @@
-import { NextResponse } from 'next/server'
-
 import { error as logError } from '@/lib/logger'
+import { apiError, apiSuccess, safeErrorForLog } from '@/lib/apiResponse'
 import dbConnect from '@/lib/dbConnect'
 import Blog from '@/models/Blog'
 import { requireAdmin } from '@/lib/requireAdmin'
@@ -11,23 +10,20 @@ export async function POST(req: Request) {
 
   const url = new URL(req.url)
   const id = url.searchParams.get('id')
-  if (!id) return NextResponse.json({ error: 'id manquant' }, { status: 400 })
+  if (!id) return apiError('id manquant', 400)
 
   try {
     await dbConnect()
     const doc = await Blog.findById(id).exec()
-    if (!doc) return NextResponse.json({ error: 'Article introuvable' }, { status: 404 })
+    if (!doc) return apiError('Article introuvable', 404)
 
     doc.published = !doc.published
     if (doc.published && !doc.publishedAt) doc.publishedAt = new Date()
     await doc.save()
 
-    return NextResponse.json({ ok: true, published: doc.published })
+    return apiSuccess({ ok: true, published: doc.published })
   } catch (e) {
-    logError('[blog/toggle-publish]', e)
-    return NextResponse.json(
-      { error: 'Erreur mise à jour' },
-      { status: 500 }
-    )
+    logError('[blog/toggle-publish]', safeErrorForLog(e))
+    return apiError('Erreur mise à jour', 500)
   }
 }

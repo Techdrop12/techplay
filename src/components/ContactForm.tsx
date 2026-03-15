@@ -107,10 +107,10 @@ export default function ContactForm() {
       noValidate
     >
       <h2 id="contact-form-heading" className="heading-subsection">
-        Envoyer un message
+        {t('form_heading')}
       </h2>
       <p className="text-[14px] text-token-text/75">
-        Remplissez le formulaire ci-dessous. Réponse sous 24 à 48 h ouvrées.
+        {t('form_intro')}
       </p>
 
       {apiError && (
@@ -124,7 +124,7 @@ export default function ContactForm() {
 
       <div>
         <label htmlFor="contact-name" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">
-          Nom (optionnel)
+          {t('name_label')}
         </label>
         <input
           id="contact-name"

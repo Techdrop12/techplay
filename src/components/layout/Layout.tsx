@@ -73,7 +73,8 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
 
     setIsNavigating(true)
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
-    const timeout = window.setTimeout(() => setIsNavigating(false), 320)
+    // Garder la barre visible plus longtemps pour que le contenu ait le temps de s'afficher
+    const timeout = window.setTimeout(() => setIsNavigating(false), 520)
 
     return () => window.clearTimeout(timeout)
   }, [pathname])

@@ -461,7 +461,6 @@ export default function Header() {
       <div className="container-app flex h-16 items-center justify-between gap-4 md:h-[4.5rem] md:gap-3 lg:h-[4.75rem]">
         <Link
           href="/"
-          prefetch={false}
           aria-label={t.logoAria}
           rel="home"
           className="touch-target group inline-flex items-center justify-center rounded-xl p-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] md:min-h-0 md:min-w-0 md:p-1.5"
@@ -614,7 +613,6 @@ export default function Header() {
                             <Link
                               role="menuitem"
                               href={category.href}
-                              prefetch={false}
                               onPointerEnter={() => smartPrefetchStart(category.href)}
                               onPointerLeave={() => smartPrefetchCancel(category.href)}
                               onFocus={() => smartPrefetchStart(category.href)}
@@ -660,7 +658,6 @@ export default function Header() {
                           <div className="mt-3 flex flex-wrap gap-2">
                             <Link
                               href="/products/packs"
-                              prefetch={false}
                               onPointerEnter={() => smartPrefetchStart('/products/packs')}
                               onPointerLeave={() => smartPrefetchCancel('/products/packs')}
                               onFocus={() => smartPrefetchStart('/products/packs')}
@@ -673,7 +670,6 @@ export default function Header() {
 
                             <Link
                               href="/products"
-                              prefetch={false}
                               onPointerEnter={() => smartPrefetchStart('/products')}
                               onPointerLeave={() => smartPrefetchCancel('/products')}
                               onFocus={() => smartPrefetchStart('/products')}
@@ -696,7 +692,6 @@ export default function Header() {
               <Link
                 key={href}
                 href={href}
-                prefetch={false}
                 onPointerEnter={() => smartPrefetchStart(href)}
                 onPointerLeave={() => smartPrefetchCancel(href)}
                 onFocus={() => smartPrefetchStart(href)}
@@ -726,7 +721,6 @@ export default function Header() {
         <div className="flex min-h-[2.75rem] items-center gap-3 md:hidden" style={{ touchAction: 'manipulation' }}>
           <Link
             href={L('/commande')}
-            prefetch={false}
             onPointerEnter={() => smartPrefetchStart('/commande')}
             onPointerLeave={() => smartPrefetchCancel('/commande')}
             className="touch-target relative flex items-center justify-center rounded-xl p-2.5 hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 md:p-1.5"
@@ -755,7 +749,6 @@ export default function Header() {
             <div className="relative">
               <Link
                 href="/wishlist"
-                prefetch={false}
                 onPointerEnter={() => smartPrefetchStart('/wishlist')}
                 onPointerLeave={() => smartPrefetchCancel('/wishlist')}
                 onFocus={() => smartPrefetchStart('/wishlist')}
@@ -781,7 +774,6 @@ export default function Header() {
 
             <Link
               href="/account"
-              prefetch={false}
               onPointerEnter={() => smartPrefetchStart('/account')}
               onPointerLeave={() => smartPrefetchCancel('/account')}
               onFocus={() => smartPrefetchStart('/account')}
@@ -803,7 +795,6 @@ export default function Header() {
           >
             <Link
               href="/commande"
-              prefetch={false}
               onPointerEnter={() => smartPrefetchStart('/commande')}
               onPointerLeave={() => smartPrefetchCancel('/commande')}
               onFocus={() => smartPrefetchStart('/commande')}

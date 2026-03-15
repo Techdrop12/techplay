@@ -201,7 +201,6 @@ function SplitCTA({ locale }: { locale: HomeLocale }) {
           <div className="mt-8 flex flex-wrap gap-4">
             <Link
               href="/products/packs"
-              prefetch={false}
               className="btn btn-premium btn-lg inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-[var(--step-0)] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)]"
               data-gtm="home_cta_packs"
             >
@@ -209,7 +208,6 @@ function SplitCTA({ locale }: { locale: HomeLocale }) {
             </Link>
             <Link
               href="/products"
-              prefetch={false}
               className="btn btn-outline btn-lg inline-flex items-center gap-2 rounded-full border-[hsl(var(--border))] px-8 py-3.5 text-[var(--step-0)] hover:bg-[hsl(var(--surface-2))] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.3)]"
               data-gtm="home_cta_products"
             >
@@ -305,7 +303,6 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
               <div className="animate-in animate-in-delay-3 flex flex-col items-stretch gap-4 pt-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
                 <Link
                   href="/products"
-                  prefetch={false}
                   className="hero-cta-primary inline-flex w-full items-center justify-center gap-2.5 rounded-full px-8 py-4 text-[var(--step-0)] font-bold shadow-[var(--shadow-lg),0_0_24px_hsl(var(--accent)/0.25)] transition-all duration-200 hover:shadow-[var(--shadow-lg),0_0_32px_hsl(var(--accent)/0.35)] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] sm:w-auto"
                   data-gtm="home_hero_primary"
                 >
@@ -313,7 +310,6 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
                 </Link>
                 <Link
                   href="/products/packs"
-                  prefetch={false}
                   className="btn btn-ghost inline-flex w-full items-center justify-center gap-2 rounded-full border-2 border-[hsl(var(--border))] px-6 py-3 text-[14px] font-semibold text-token-text/90 hover:border-[hsl(var(--accent)/.3)] hover:bg-[hsl(var(--surface-2))] hover:text-[hsl(var(--text))] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.25)] sm:w-auto"
                   data-gtm="home_hero_secondary"
                 >
@@ -398,7 +394,6 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
             <div className="mt-6 text-center">
               <Link
                 href="/blog"
-                prefetch={false}
                 className="btn btn-outline inline-flex items-center gap-2 rounded-full border-[hsl(var(--border))] px-6 py-2.5 text-[14px] font-semibold hover:bg-[hsl(var(--surface-2))] focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
               >
                 {t.blogCta}

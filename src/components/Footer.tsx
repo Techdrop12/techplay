@@ -650,7 +650,6 @@ export default function Footer({
                         ) : (
                           <Link
                             href={href}
-                            prefetch={false}
                             aria-current={active ? 'page' : undefined}
                             className={linkClass}
                             onClick={(e) => onNavClick(group.title, label, href, e)}
@@ -725,7 +724,6 @@ export default function Footer({
                       {t.consentTextStart}
                       <Link
                         href="/confidentialite"
-                        prefetch={false}
                         className="underline hover:text-[hsl(var(--accent))]"
                       >
                         {t.privacyPolicy}

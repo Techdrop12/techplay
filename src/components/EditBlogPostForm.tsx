@@ -65,7 +65,7 @@ export default function EditBlogPostForm({ postId }: EditBlogPostFormProps) {
     setApiError(null)
     setFieldErrors({})
     if (!form.title.trim()) {
-      setFieldErrors({ title: 'Titre requis' })
+      setFieldErrors({ title: t('title_required') })
       return
     }
     setLoading(true)
@@ -209,7 +209,7 @@ export default function EditBlogPostForm({ postId }: EditBlogPostFormProps) {
           aria-busy={loading}
           className="rounded-xl bg-[hsl(var(--accent))] px-4 py-2.5 text-sm font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-sm)] transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 disabled:opacity-60"
         >
-          {loading ? 'Enregistrement…' : 'Enregistrer'}
+          {loading ? t('saving_btn') : t('save_btn')}
         </button>
         <button
           type="button"

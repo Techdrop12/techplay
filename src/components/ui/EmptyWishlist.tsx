@@ -26,7 +26,6 @@ export default function EmptyWishlist() {
       <p className="text-[15px] font-medium text-[hsl(var(--text))]">{t('empty')}</p>
       <Link
         href="/products"
-        prefetch={false}
         className="btn-premium mt-6 inline-flex min-h-[2.75rem] items-center justify-center rounded-full px-6 py-2.5 text-sm font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
       >
         {t('cta_products')}

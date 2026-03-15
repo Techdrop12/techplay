@@ -1,6 +1,5 @@
-import { NextResponse } from 'next/server'
-
 import { error as logError } from '@/lib/logger'
+import { apiError, apiSuccess, safeErrorForLog } from '@/lib/apiResponse'
 import { connectToDatabase } from '@/lib/db'
 import Order from '@/models/Order'
 import { requireAdmin } from '@/lib/requireAdmin'
@@ -42,12 +41,9 @@ export async function GET(req: Request) {
       createdAt: d.createdAt,
     }))
 
-    return NextResponse.json(toPlain({ items: list, total, page, limit, pages: Math.max(1, Math.ceil(total / limit)) }))
+    return apiSuccess(toPlain({ items: list, total, page, limit, pages: Math.max(1, Math.ceil(total / limit)) }) as Record<string, unknown>)
   } catch (e) {
-    logError('[admin/orders]', e)
-    return NextResponse.json(
-      { error: 'Erreur chargement commandes' },
-      { status: 500 }
-    )
+    logError('[admin/orders]', safeErrorForLog(e))
+    return apiError('Erreur chargement commandes', 500)
   }
 }

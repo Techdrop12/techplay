@@ -203,7 +203,6 @@ function ProductCard({
 
         <Link
           href={href}
-          prefetch={false}
           className="block rounded-[inherit] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/80"
           onClick={handleClick}
         >

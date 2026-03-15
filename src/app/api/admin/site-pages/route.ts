@@ -1,6 +1,5 @@
-import { NextResponse } from 'next/server'
-
 import { error as logError } from '@/lib/logger'
+import { apiError, apiSuccess, safeErrorForLog } from '@/lib/apiResponse'
 import { connectToDatabase } from '@/lib/db'
 import SitePage from '@/models/SitePage'
 import { requireAdmin } from '@/lib/requireAdmin'
@@ -20,14 +19,14 @@ export async function GET(req: Request) {
     await connectToDatabase()
     if (slug) {
       const doc = await SitePage.findOne({ slug }).lean().exec()
-      if (!doc) return NextResponse.json({ error: 'Page introuvable' }, { status: 404 })
-      return NextResponse.json(toPlain(doc))
+      if (!doc) return apiError('Page introuvable', 404)
+      return apiSuccess(toPlain(doc) as Record<string, unknown>)
     }
     const docs = await SitePage.find({}).sort({ slug: 1 }).lean().exec()
-    return NextResponse.json(toPlain(docs))
+    return apiSuccess(toPlain(docs) as Record<string, unknown>)
   } catch (e) {
-    logError('[admin/site-pages]', e)
-    return NextResponse.json({ error: 'Erreur' }, { status: 500 })
+    logError('[admin/site-pages]', safeErrorForLog(e))
+    return apiError('Erreur', 500)
   }
 }
 
@@ -39,11 +38,11 @@ export async function PUT(req: Request) {
   try {
     body = await req.json()
   } catch {
-    return NextResponse.json({ error: 'Body invalide' }, { status: 400 })
+    return apiError('Body invalide', 400)
   }
   const slug = body?.slug?.trim()
   const title = body?.title?.trim()
-  if (!slug || !title) return NextResponse.json({ error: 'slug et title requis' }, { status: 400 })
+  if (!slug || !title) return apiError('slug et title requis', 400)
 
   try {
     await connectToDatabase()
@@ -54,9 +53,9 @@ export async function PUT(req: Request) {
     )
       .lean()
       .exec()
-    return NextResponse.json(toPlain(doc))
+    return apiSuccess(toPlain(doc) as Record<string, unknown>)
   } catch (e) {
-    logError('[admin/site-pages] PUT', e)
-    return NextResponse.json({ error: 'Erreur' }, { status: 500 })
+    logError('[admin/site-pages] PUT', safeErrorForLog(e))
+    return apiError('Erreur', 500)
   }
 }

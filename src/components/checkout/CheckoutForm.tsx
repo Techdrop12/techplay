@@ -193,8 +193,8 @@ export default function CheckoutForm() {
   const validate = useCallback(() => {
     const nextErrors: FormErrors = {}
 
-    if (!isEmail(email)) nextErrors.email = 'Adresse email invalide'
-    if (!isAddress(address)) nextErrors.address = 'Adresse trop courte'
+    if (!isEmail(email)) nextErrors.email = t('validation_email')
+    if (!isAddress(address)) nextErrors.address = t('validation_address')
 
     setErrors(nextErrors)
 
@@ -209,7 +209,7 @@ export default function CheckoutForm() {
     }
 
     return true
-  }, [address, email])
+  }, [address, email, t])
 
   const handleSubmit = useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {

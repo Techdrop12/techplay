@@ -280,8 +280,8 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
   }
 
   const crumbs = jsonLdBreadcrumbs([
-    { name: 'Accueil', url: localizePath('/', locale) },
-    { name: 'Blog', url: localizePath('/blog', locale) },
+    { name: tBlog('breadcrumb_home'), url: localizePath('/', locale) },
+    { name: tBlog('title'), url: localizePath('/blog', locale) },
   ])
 
   return (
@@ -322,11 +322,11 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
           className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-3.5 py-2.5 text-[13px] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]"
           aria-label={tBlog('sort_aria')}
         >
-          <option value="newest">Plus récents</option>
-          <option value="oldest">Plus anciens</option>
-          <option value="popular">Populaires</option>
-          <option value="az">Titre A→Z</option>
-          <option value="za">Titre Z→A</option>
+          <option value="newest">{tBlog('sort_newest')}</option>
+          <option value="oldest">{tBlog('sort_oldest')}</option>
+          <option value="popular">{tBlog('sort_popular')}</option>
+          <option value="az">{tBlog('sort_az')}</option>
+          <option value="za">{tBlog('sort_za')}</option>
         </select>
 
         <div className="flex items-center gap-2">
@@ -341,7 +341,6 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
             <Link
               href="/blog"
               className="text-[13px] font-medium text-token-text/70 transition hover:text-[hsl(var(--accent))]"
-              prefetch={false}
             >
               {t('reset_filters')}
             </Link>
@@ -373,7 +372,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
                 </span>
               </div>
               <h2 className="mt-6 heading-subsection">
-                {locale === 'en' ? 'No articles match your search' : 'Aucun article pour cette recherche'}
+                {tBlog('no_articles_search')}
               </h2>
               <p className="mt-3 text-[15px] leading-relaxed text-token-text/70">
                 {locale === 'en'
@@ -382,10 +381,9 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
               </p>
               <Link
                 href={localizePath('/blog', locale)}
-                prefetch={false}
                 className="mt-6 inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-5 py-2.5 text-[13px] font-semibold transition hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
               >
-                {locale === 'en' ? 'View all articles' : 'Voir tout le blog'}
+                {tBlog('view_all_articles')}
               </Link>
             </>
           ) : (
@@ -407,14 +405,11 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
                 {locale === 'en' ? 'Editorial coming soon' : 'Éditorial à venir'}
               </h2>
               <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-token-text/70">
-                {locale === 'en'
-                  ? "We're preparing guides on gaming setups, keyboard picks, and FPS tips. Check back soon — or explore our products in the meantime."
-                  : 'Nous préparons des guides setup gaming, sélections claviers et astuces FPS. Revenez bientôt, ou découvrez nos produits en attendant.'}
+                {tBlog('editorial_coming_intro')}
               </p>
               <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
                 <Link
                   href={localizePath('/products', locale)}
-                  prefetch={false}
                   className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] px-5 py-2.5 text-[13px] font-semibold text-white shadow-md transition hover:bg-[hsl(var(--accent)/0.9)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
                 >
                   {locale === 'en' ? 'Explore products' : 'Découvrir les produits'}
@@ -424,10 +419,9 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
                 </Link>
                 <Link
                   href={localizePath('/', locale)}
-                  prefetch={false}
                   className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-5 py-2.5 text-[13px] font-semibold transition hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
                 >
-                  {locale === 'en' ? 'Back to home' : "Retour à l'accueil"}
+                  {tBlog('back_to_home')}
                 </Link>
               </div>
             </>
@@ -448,7 +442,6 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
         <nav className="mt-10 flex flex-wrap items-center justify-center gap-2" aria-label={tBlog('pagination_articles_aria')}>
           <Link
             href={persist({ page: Math.max(1, page - 1) })}
-            prefetch={false}
             aria-disabled={page <= 1}
             className={`rounded-xl border px-3.5 py-2 text-[13px] font-medium transition ${
               page <= 1
@@ -467,7 +460,6 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
                 <Link
                   key={n}
                   href={persist({ page: n })}
-                  prefetch={false}
                   aria-current={n === page ? 'page' : undefined}
                   className={`rounded-xl border px-3.5 py-2 text-[13px] font-medium transition ${
                     n === page
@@ -493,7 +485,6 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
 
           <Link
             href={persist({ page: Math.min(pagination.pages, page + 1) })}
-            prefetch={false}
             aria-disabled={page >= pagination.pages}
             className={`rounded-xl border px-3.5 py-2 text-[13px] font-medium transition ${
               page >= pagination.pages

@@ -41,7 +41,7 @@ export default function EmptyCart({ locale: _locale }: EmptyCartProps) {
         <Link href="/products" className="btn-premium inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)]">
           {cta}
         </Link>
-        <Link href="/products/packs" className="btn-outline inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]" prefetch={false}>
+        <Link href="/products/packs" className="btn-outline inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]">
           {ctaPacks}
         </Link>
       </div>

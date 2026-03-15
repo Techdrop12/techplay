@@ -89,7 +89,7 @@ export default function LoginForm() {
             {t('login_loading')}
           </>
         ) : (
-          'Se connecter'
+          t('submit_btn')
         )}
       </button>
     </form>

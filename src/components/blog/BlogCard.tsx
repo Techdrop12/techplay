@@ -40,7 +40,7 @@ export default function BlogCard({ article }: BlogCardProps) {
       )}
       aria-label={`Lire l'article : ${article.title}`}
     >
-      <Link href={`/blog/${article.slug}`} prefetch={false} className="flex flex-1 flex-col">
+      <Link href={`/blog/${article.slug}`} className="flex flex-1 flex-col">
         {/* Editorial feature image — no overlay, clean frame */}
         <div className="relative aspect-[16/10] w-full overflow-hidden bg-[hsl(var(--surface-2))]">
           <Image

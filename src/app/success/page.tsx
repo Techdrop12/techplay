@@ -19,7 +19,7 @@ export default function SuccessPage() {
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <BackToHomeLink className="focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)]" />
-          <Link href="/products" className="btn-outline inline-flex min-h-[48px] items-center justify-center rounded-full px-6 py-2.5 text-[15px] font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)]" prefetch={false}>
+          <Link href="/products" className="btn-outline inline-flex min-h-[48px] items-center justify-center rounded-full px-6 py-2.5 text-[15px] font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)]">
             {t('continue_shopping')}
           </Link>
         </div>

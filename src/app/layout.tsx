@@ -6,6 +6,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Inter, Sora } from 'next/font/google'
 import Script from 'next/script'
 import { NextIntlClientProvider } from 'next-intl'
+import { getLocale, getMessages } from 'next-intl/server'
 import { Suspense } from 'react'
 import { Toaster } from 'react-hot-toast'
 
@@ -147,17 +148,20 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const defaultMessages = await loadMessages(DEFAULT_LOCALE)
+  const locale = await getLocale()
+  const messages = await getMessages()
+  const resolvedMessages = messages && typeof messages === 'object' ? messages : await loadMessages(DEFAULT_LOCALE)
+  const resolvedLocale = locale && (locale === 'fr' || locale === 'en') ? locale : DEFAULT_LOCALE
   return (
     <html
-      lang={toLangTag(DEFAULT_LOCALE)}
+      lang={toLangTag(resolvedLocale)}
       dir="ltr"
       className={`${inter.variable} ${sora.variable} scroll-smooth`}
       suppressHydrationWarning
     >
       <head>
         <meta httpEquiv="x-dns-prefetch-control" content="on" />
-        <meta httpEquiv="content-language" content={DEFAULT_LOCALE} />
+        <meta httpEquiv="content-language" content={resolvedLocale} />
         <meta name="application-name" content={SITE_NAME} />
         <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
 
@@ -170,7 +174,9 @@ export default async function RootLayout({
               (function () {
                 try {
                   var path = window.location.pathname || '/';
-                  var locale = /^\\/en(?:\\/|$)/.test(path) ? 'en' : 'fr';
+                  var cookie = document.cookie.split('; ').find(function (c) { return c.startsWith('NEXT_LOCALE='); });
+                  var localeFromCookie = cookie ? cookie.split('=')[1] : '';
+                  var locale = (localeFromCookie === 'en' || localeFromCookie === 'fr') ? localeFromCookie : (/^\\/en(?:\\/|$)/.test(path) ? 'en' : 'fr');
                   var html = document.documentElement;
                   html.lang = locale === 'en' ? 'en-US' : 'fr-FR';
                   html.setAttribute('data-locale', locale);
@@ -246,7 +252,7 @@ export default async function RootLayout({
       </head>
 
       <body className="min-h-screen bg-[hsl(var(--bg))] text-token-text antialiased dark:[color-scheme:dark]">
-        <NextIntlClientProvider locale={DEFAULT_LOCALE} messages={defaultMessages}>
+        <NextIntlClientProvider locale={resolvedLocale} messages={resolvedMessages}>
         <SkipLink />
         {GTM_ID ? (
           <noscript

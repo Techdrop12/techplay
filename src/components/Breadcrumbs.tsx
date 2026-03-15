@@ -150,14 +150,14 @@ export default function Breadcrumbs({
 /** Variante auto qui se base sur l’URL courante via le hook unifié. */
 export function AutoBreadcrumbs(props: Omit<BreadcrumbsProps, 'links'>) {
   const links = useBreadcrumbSegments()
-  // Home label fr/en
+  const t = useTranslations('common')
   const locale = links[0]?.href?.startsWith('/en') ? 'en' : 'fr'
   const home =
     props.home === false
       ? false
       : {
           href: locale === 'en' ? '/en' : '/fr',
-          label: locale === 'en' ? 'Home' : 'Accueil',
+          label: t('home'),
         }
 
   return (

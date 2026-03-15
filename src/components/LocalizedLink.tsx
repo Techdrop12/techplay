@@ -66,7 +66,7 @@ function isInternalLink(href: NextHref): boolean {
   return true
 }
 
-const FALLBACK_NAV_DELAY_MS = 280
+const FALLBACK_NAV_DELAY_MS = 420
 const NAV_START_EVENT = 'nextjs:nav-start'
 
 const LocalizedLink = forwardRef<HTMLAnchorElement, Props>(function LocalizedLink(

@@ -421,6 +421,8 @@
     "back_to_account": "← Back to account",
     "add_product_heading": "Add product",
     "edit_article_heading": "Edit article",
+    "title_required": "Title required",
+    "article_title_placeholder": "Article title",
     "edit_product_heading": "Edit product",
     "status_update_error": "Error updating status",
     "blog_section_title": "Blog articles",
@@ -598,11 +600,17 @@
   },
 
   "packs": {
-    "title": "Packs",
+    "title": "Our Packs",
+    "page_title": "Our Packs",
+    "page_description": "Discover our exclusive themed packs at reduced prices.",
     "empty": "No packs available at the moment.",
     "emptyTitle": "Packs coming soon",
     "emptyDescription": "We're curating bundles for you. In the meantime, explore our product selection.",
-    "emptyCtaLabel": "Discover products"
+    "emptyCtaLabel": "Discover products",
+    "view_all_products": "View all products",
+    "category_heads": "Headsets",
+    "category_claviers": "Keyboards",
+    "category_souris": "Mice"
   },
 
   "pack": {
@@ -641,6 +649,11 @@
     "summary_title": "Summary",
     "your_cart": "Your cart",
     "empty": "Your cart is empty",
+    "sr_empty": "Cart empty",
+    "sr_count_in_cart": "{count, plural, one {# item in cart} other {# items in cart}}",
+    "sr_added": "{diff, plural, one {# item added} other {# items added}}. {count} in total.",
+    "sr_removed": "{diff, plural, one {# item removed} other {# items removed}}. {count} in total.",
+    "product_fallback": "Product",
     "total": "Total",
     "subtotal": "Subtotal",
     "taxes": "VAT",
@@ -912,7 +925,8 @@
     "two_factor": "Two-factor authentication",
     "login_success": "Login successful",
     "login_error": "Invalid credentials",
-    "login_loading": "Signing in…"
+    "login_loading": "Signing in…",
+    "submit_btn": "Sign in"
   },
 
   "address": {
@@ -968,6 +982,17 @@
 
   "blog": {
     "title": "TechPlay Blog",
+    "section_kicker": "Guides & News",
+    "page_title": "Gaming & setup blog",
+    "page_subtitle": "Best keyboards 2026, setup guides, FPS tips — editorial content to drive traffic and convert.",
+    "search_results_title": "Results for « {query} »",
+    "search_results_subtitle": "Articles matching your search.",
+    "sort_newest": "Newest",
+    "sort_oldest": "Oldest",
+    "sort_popular": "Popular",
+    "sort_az": "Title A→Z",
+    "sort_za": "Title Z→A",
+    "breadcrumb_home": "Home",
     "no_posts": "No posts available at the moment.",
     "no_articles_search": "No articles match your search",
     "no_results_for_query": "No results for « {query} ». Try different keywords or check back when we publish new guides.",
@@ -983,6 +1008,13 @@
     "articles_list_aria": "Articles list",
     "pagination_articles_aria": "Articles pagination",
     "back_to_home": "Back to home",
+    "editorial_coming_soon": "Editorial coming soon",
+    "editorial_coming_intro": "We're preparing guides on gaming setups, keyboard picks, and FPS tips. Check back soon — or explore our products in the meantime.",
+    "explore_products": "Explore products",
+    "articles_title": "Our articles",
+    "no_articles_available": "No articles {context}",
+    "no_articles_for_query": "No articles for « {query} »",
+    "no_articles_empty": "No articles available",
     "article_title_placeholder": "Article title",
     "article_slug_placeholder": "my-article",
     "article_summary_placeholder": "Summary or short content",
@@ -1047,7 +1079,9 @@
     "privacy_link": "privacy policy",
     "email_placeholder": "you@example.com",
     "address_placeholder": "123 Main St, City, Postcode",
-    "terms_and_privacy": "Terms and our privacy policy"
+    "terms_and_privacy": "Terms and our privacy policy",
+    "validation_email": "Invalid email address",
+    "validation_address": "Address too short"
   },
 
   "cgv": {
@@ -1111,6 +1145,9 @@
     "toast_success": "Message sent. We will reply within 24–48 hours.",
     "toast_error": "Send error",
     "send_another": "Send another message",
+    "form_heading": "Send a message",
+    "form_intro": "Fill out the form below. We aim to reply within 24–48 business hours.",
+    "name_label": "Name (optional)",
     "submit_btn": "Send message",
     "sending_btn": "Sending…",
     "message_received": "Message received",

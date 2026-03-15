@@ -31,18 +31,20 @@ function mailtoHref(subject: string): string {
   return `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}`
 }
 
-export const metadata: Metadata = {
-  title: 'Nous contacter',
-  description:
-    'Une question, un problème de commande ou un retour ? Contactez le support TechPlay. Réponse sous 24 à 48 h ouvrées.',
-  robots: { index: true, follow: true },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('contact')
+  return {
+    title: t('page_title'),
+    description: t('page_subtitle'),
+    robots: { index: true, follow: true },
+  }
 }
 
 export default async function ContactPage() {
   const t = await getTranslations('contact')
   return (
     <main
-      className="container-app mx-auto max-w-3xl px-4 pt-24 pb-20 sm:px-6"
+      className="container-app mx-auto w-full max-w-3xl px-4 pt-24 pb-20 sm:px-6 overflow-x-hidden"
       role="main"
       aria-labelledby="contact-title"
     >
@@ -128,9 +130,9 @@ export default async function ContactPage() {
         </section>
 
         {/* Téléphone + Adresse + Horaires */}
-        <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           <section
-            className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-5 py-5"
+            className="min-w-0 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-5 py-5"
             aria-labelledby="contact-phone-heading"
           >
             <h2 id="contact-phone-heading" className="text-sm font-semibold uppercase tracking-wider text-token-text/70">
@@ -149,13 +151,13 @@ export default async function ContactPage() {
           </section>
 
           <section
-            className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-5 py-5"
+            className="min-w-0 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-5 py-5"
             aria-labelledby="contact-address-heading"
           >
             <h2 id="contact-address-heading" className="text-sm font-semibold uppercase tracking-wider text-token-text/70">
               {t('address_heading')}
             </h2>
-            <address className="mt-2 not-italic text-[14px] text-token-text/85">
+            <address className="mt-2 min-w-0 break-words not-italic text-[14px] text-token-text/85">
               {ADDRESS.street}<br />
               {ADDRESS.postalCode} {ADDRESS.city}<br />
               {ADDRESS.country}
@@ -163,25 +165,25 @@ export default async function ContactPage() {
           </section>
 
           <section
-            className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-5 py-5"
+            className="min-w-0 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-5 py-5"
             aria-labelledby="contact-hours-heading"
           >
             <h2 id="contact-hours-heading" className="text-sm font-semibold uppercase tracking-wider text-token-text/70">
               {t('hours_heading')}
             </h2>
-            <dl className="mt-2 space-y-1 text-[14px] text-token-text/85">
+            <dl className="mt-2 min-w-0 space-y-1 text-[14px] text-token-text/85">
               {HOURS_KEYS.map(({ joursKey, heuresKey }) => (
-                <div key={joursKey} className="flex justify-between gap-2">
-                  <dt className="text-token-text/70">{t(joursKey)}</dt>
-                  <dd className="font-medium">{t(heuresKey)}</dd>
+                <div key={joursKey} className="flex min-w-0 justify-between gap-2">
+                  <dt className="min-w-0 shrink text-token-text/70">{t(joursKey)}</dt>
+                  <dd className="shrink-0 font-medium">{t(heuresKey)}</dd>
                 </div>
               ))}
             </dl>
           </section>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
-          <div className="flex gap-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 px-4 py-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="flex min-w-0 gap-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 px-4 py-4">
             <span
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))]"
               aria-hidden="true"
@@ -190,12 +192,12 @@ export default async function ContactPage() {
                 <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </span>
-            <div>
+            <div className="min-w-0 flex-1">
               <p className="text-[13px] font-semibold text-[hsl(var(--text))]">{t('reassurance_fast')}</p>
               <p className="mt-0.5 text-[12px] text-token-text/70">{t('reassurance_fast_desc')}</p>
             </div>
           </div>
-          <div className="flex gap-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 px-4 py-4">
+          <div className="flex min-w-0 gap-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 px-4 py-4">
             <span
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--accent)/0.15)] text-[hsl(var(--accent))]"
               aria-hidden="true"
@@ -204,12 +206,12 @@ export default async function ContactPage() {
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               </svg>
             </span>
-            <div>
+            <div className="min-w-0 flex-1">
               <p className="text-[13px] font-semibold text-[hsl(var(--text))]">{t('reassurance_data')}</p>
               <p className="mt-0.5 text-[12px] text-token-text/70">{t('reassurance_data_desc')}</p>
             </div>
           </div>
-          <div className="flex gap-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 px-4 py-4">
+          <div className="flex min-w-0 gap-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 px-4 py-4">
             <span
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))]"
               aria-hidden="true"
@@ -220,7 +222,7 @@ export default async function ContactPage() {
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
               </svg>
             </span>
-            <div>
+            <div className="min-w-0 flex-1">
               <p className="text-[13px] font-semibold text-[hsl(var(--text))]">{t('reassurance_team')}</p>
               <p className="mt-0.5 text-[12px] text-token-text/70">{t('reassurance_team_desc')}</p>
             </div>

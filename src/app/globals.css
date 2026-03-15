@@ -981,7 +981,7 @@
 }
 
 .nav-progress-bar-inner {
-  animation: nav-progress-fill 0.28s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+  animation: nav-progress-fill 0.42s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {

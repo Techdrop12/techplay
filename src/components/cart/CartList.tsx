@@ -43,12 +43,12 @@ export default function CartList({
       (items || []).map((it, index) => ({
         _id: String(it._id ?? it.slug ?? `cart-item-${index}`),
         slug: it.slug ?? '',
-        title: it.title ?? 'Produit',
+        title: it.title ?? t('product_fallback'),
         image: it.image ?? '/placeholder.png',
         price: Number(it.price ?? 0),
         quantity: Math.max(1, Number(it.quantity || 1)),
       })),
-    [items]
+    [items, t]
   )
 
   const isEmpty = safeItems.length === 0
@@ -64,21 +64,21 @@ export default function CartList({
     const prev = prevCountRef.current
     let text: string
 
-    if (isEmpty) text = 'Panier vide'
-    else if (prev === 0) text = `${itemsCount} article${itemsCount > 1 ? 's' : ''} dans le panier`
+    if (isEmpty) text = t('sr_empty')
+    else if (prev === 0) text = t('sr_count_in_cart', { count: itemsCount })
     else if (itemsCount > prev) {
       const diff = itemsCount - prev
-      text = `${diff} article${diff > 1 ? 's' : ''} ajouté${diff > 1 ? 's' : ''}. ${itemsCount} au total.`
+      text = t('sr_added', { diff, count: itemsCount })
     } else if (itemsCount < prev) {
       const diff = prev - itemsCount
-      text = `${diff} article${diff > 1 ? 's' : ''} retiré${diff > 1 ? 's' : ''}. ${itemsCount} au total.`
+      text = t('sr_removed', { diff, count: itemsCount })
     } else {
-      text = `${itemsCount} article${itemsCount > 1 ? 's' : ''} dans le panier`
+      text = t('sr_count_in_cart', { count: itemsCount })
     }
 
     srRef.current.textContent = text
     prevCountRef.current = itemsCount
-  }, [isEmpty, itemsCount])
+  }, [isEmpty, itemsCount, t])
 
   if (isEmpty) {
     return (

@@ -403,7 +403,6 @@ export default function PacksSection({
           <div className="mt-8">
             <Link
               href={ctaHref}
-              prefetch={false}
               className="inline-flex items-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-6 py-3.5 text-sm font-semibold text-[hsl(var(--accent-foreground))] shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl hover:shadow-[hsl(var(--accent)/0.3)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/0.5)] focus-visible:ring-offset-2"
               onClick={() => pushDL('packs_empty_cta')}
             >
@@ -452,7 +451,6 @@ export default function PacksSection({
 
             <Link
               href="/products/packs"
-              prefetch={false}
               className="inline-flex items-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-5 py-3 text-sm font-semibold text-[hsl(var(--accent-foreground))] shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/0.4)]"
               aria-label={t.seeAllAria}
               onClick={() => pushDL('packs_see_all')}
@@ -612,7 +610,6 @@ export default function PacksSection({
                   <div className="relative overflow-hidden rounded-[15px] border border-[hsl(var(--border))]/60 bg-[hsl(var(--surface))]/98 dark:bg-[hsl(var(--surface))]/95">
                     <Link
                       href={packHref}
-                      prefetch={false}
                       className="block focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/0.5)] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
                       onClick={() => pushDL('packs_card_click', { slug: key })}
                     >
@@ -713,7 +710,6 @@ export default function PacksSection({
         <div className="mt-10 flex items-center justify-between gap-4">
           <Link
             href="/products/packs"
-            prefetch={false}
             className="inline-flex items-center gap-2 text-sm font-semibold text-[hsl(var(--accent))] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
           >
             <span>{t.seeAll}</span>

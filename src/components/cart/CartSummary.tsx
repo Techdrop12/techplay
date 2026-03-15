@@ -194,7 +194,6 @@ export default function CartSummary({
         href="/commande"
         className="btn-premium flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-[15px] font-bold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2"
         aria-label={t('checkout_btn_aria')}
-        prefetch={false}
       >
         {t('checkout_btn')}
         <span aria-hidden="true">→</span>

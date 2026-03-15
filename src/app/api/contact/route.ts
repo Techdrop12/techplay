@@ -1,7 +1,7 @@
 import { error as logError } from '@/lib/logger'
 import { connectToDatabase } from '@/lib/db'
 import ContactSubmission from '@/models/ContactSubmission'
-import { apiError, apiSuccess } from '@/lib/apiResponse'
+import { apiError, apiSuccess, safeErrorForLog } from '@/lib/apiResponse'
 import { contactSchema } from '@/lib/zodSchemas'
 
 function toPlain(obj: unknown) {
@@ -35,9 +35,7 @@ export async function POST(req: Request) {
     })
     return apiSuccess(toPlain({ ok: true, id: doc._id }) as Record<string, unknown>)
   } catch (e) {
-    logError('[contact] POST', e)
-    return apiError("Erreur lors de l'envoi. Réessayez plus tard.", 500, {
-      details: e instanceof Error ? e.message : undefined,
-    })
+    logError('[contact] POST', safeErrorForLog(e))
+    return apiError("Erreur lors de l'envoi. Réessayez plus tard.", 500)
   }
 }

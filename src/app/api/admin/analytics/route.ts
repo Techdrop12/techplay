@@ -1,6 +1,5 @@
-import { NextResponse } from 'next/server'
-
 import { error as logError } from '@/lib/logger'
+import { apiError, apiSuccess, safeErrorForLog } from '@/lib/apiResponse'
 import { connectToDatabase } from '@/lib/db'
 import Order from '@/models/Order'
 import Product from '@/models/Product'
@@ -25,7 +24,7 @@ export async function GET() {
     const totalSales = ordersAgg[0]?.totalSales ?? 0
     const averageBasket = ordersCount > 0 ? totalSales / ordersCount : 0
 
-    return NextResponse.json({
+    return apiSuccess({
       totalSales: Math.round(totalSales * 100) / 100,
       orders: ordersCount,
       products: productsCount,
@@ -33,10 +32,7 @@ export async function GET() {
       generatedAt: new Date().toISOString(),
     })
   } catch (e) {
-    logError('[admin/analytics]', e)
-    return NextResponse.json(
-      { error: 'Erreur serveur' },
-      { status: 500 }
-    )
+    logError('[admin/analytics]', safeErrorForLog(e))
+    return apiError('Erreur serveur', 500)
   }
 }

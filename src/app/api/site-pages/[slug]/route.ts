@@ -1,6 +1,5 @@
-import { NextResponse } from 'next/server'
-
 import { error as logError } from '@/lib/logger'
+import { apiError, apiSuccess, safeErrorForLog } from '@/lib/apiResponse'
 import { connectToDatabase } from '@/lib/db'
 import SitePage from '@/models/SitePage'
 
@@ -13,15 +12,15 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params
-  if (!slug?.trim()) return NextResponse.json({ error: 'Slug manquant' }, { status: 400 })
+  if (!slug?.trim()) return apiError('Slug manquant', 400)
 
   try {
     await connectToDatabase()
     const doc = await SitePage.findOne({ slug: slug.trim().toLowerCase() }).lean().exec()
-    if (!doc) return NextResponse.json(null)
-    return NextResponse.json(toPlain(doc))
+    if (!doc) return apiError('Page non trouvée', 404)
+    return apiSuccess(toPlain(doc) as Record<string, unknown>)
   } catch (e) {
-    logError('[site-pages/:slug]', e)
-    return NextResponse.json({ error: 'Erreur' }, { status: 500 })
+    logError('[site-pages/:slug]', safeErrorForLog(e))
+    return apiError('Erreur', 500)
   }
 }

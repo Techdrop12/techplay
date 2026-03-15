@@ -120,8 +120,8 @@ export default async function BlogPage({ searchParams }: PageProps) {
   }
 
   const crumbs = jsonLdBreadcrumbs([
-    { name: 'Accueil', url: localizePath('/', locale) },
-    { name: 'Blog', url: localizePath('/blog', locale) },
+    { name: tBlog('breadcrumb_home'), url: localizePath('/', locale) },
+    { name: tBlog('title'), url: localizePath('/blog', locale) },
   ])
 
   return (
@@ -130,7 +130,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
         id="blog-title"
         className="heading-page mb-6 text-center sm:mb-8 sm:text-4xl lg:text-5xl"
       >
-        {q ? `Résultats pour “${q}”` : 'Nos articles'}
+        {q ? tBlog('search_results_title', { query: q }) : tBlog('articles_title')}
       </h1>
 
       <form
@@ -154,11 +154,11 @@ export default async function BlogPage({ searchParams }: PageProps) {
           className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-3.5 py-2.5 text-[13px] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]"
           aria-label={tBlog('sort_aria')}
         >
-          <option value="newest">Plus récents</option>
-          <option value="oldest">Plus anciens</option>
-          <option value="popular">Populaires</option>
-          <option value="az">Titre A→Z</option>
-          <option value="za">Titre Z→A</option>
+          <option value="newest">{tBlog('sort_newest')}</option>
+          <option value="oldest">{tBlog('sort_oldest')}</option>
+          <option value="popular">{tBlog('sort_popular')}</option>
+          <option value="az">{tBlog('sort_az')}</option>
+          <option value="za">{tBlog('sort_za')}</option>
         </select>
 
         <div className="flex items-center gap-2">
@@ -170,7 +170,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
           </button>
 
           {(q || tag || category) && (
-            <Link href="/blog" className="text-sm text-token-text/70 hover:underline" prefetch={false}>
+            <Link href="/blog" className="text-sm text-token-text/70 hover:underline">
               {t('reset_filters')}
             </Link>
           )}
@@ -183,7 +183,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
 
       {posts.length === 0 ? (
         <p className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] py-12 text-center text-[15px] text-token-text/60" role="status" aria-live="polite">
-          Aucun article {q ? `pour “${q}”` : 'disponible'}.
+          {q ? tBlog('no_articles_for_query', { query: q }) : tBlog('no_articles_empty')}
         </p>
       ) : (
         <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8" aria-label={tBlog('articles_list_aria')}>
@@ -199,7 +199,6 @@ export default async function BlogPage({ searchParams }: PageProps) {
         <nav className="mt-10 flex items-center justify-center gap-2" aria-label={tBlog('pagination_articles_aria')}>
           <Link
             href={persist(Math.max(1, page - 1))}
-            prefetch={false}
             aria-disabled={page <= 1}
             className={`rounded-xl border px-3.5 py-2 text-[13px] font-medium transition ${
               page <= 1
@@ -218,7 +217,6 @@ export default async function BlogPage({ searchParams }: PageProps) {
                 <Link
                   key={n}
                   href={persist(n)}
-                  prefetch={false}
                   aria-current={n === page ? 'page' : undefined}
                   className={`rounded-xl border px-3.5 py-2 text-[13px] font-medium transition ${
                     n === page
@@ -241,7 +239,6 @@ export default async function BlogPage({ searchParams }: PageProps) {
 
           <Link
             href={persist(Math.min(pagination.pages, page + 1))}
-            prefetch={false}
             aria-disabled={page >= pagination.pages}
             className={`rounded-xl border px-3.5 py-2 text-[13px] font-medium transition ${
               page >= pagination.pages
