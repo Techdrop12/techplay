@@ -6,6 +6,7 @@
 'use client'
 
 import React from 'react'
+import { useTranslations } from 'next-intl'
 
 import { cn } from '@/lib/utils'
 
@@ -16,6 +17,7 @@ type Props = {
 }
 
 export default function ProductSkeleton({ className, announce = false }: Props) {
+  const t = useTranslations('skeleton')
   return (
     <article
       aria-hidden={announce ? undefined : true}
@@ -87,7 +89,7 @@ export default function ProductSkeleton({ className, announce = false }: Props) 
 
       {announce && (
         <p className="sr-only" role="status" aria-live="polite">
-          Chargement du produit…
+          {t('loading_product')}
         </p>
       )}
     </article>

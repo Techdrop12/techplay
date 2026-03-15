@@ -1,12 +1,14 @@
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
+import { getTranslations } from 'next-intl/server'
 
 import type { Product } from '@/types/product'
 import type { Metadata } from 'next'
 
 import ProductJsonLd from '@/components/JsonLd/ProductJsonLd'
 import ProductDetail from '@/components/ProductDetail'
-import { getProductBySlug } from '@/lib/data'
+import ProductGrid from '@/components/ProductGrid'
+import { getProductBySlug, getRelatedProducts } from '@/lib/data'
 import { DEFAULT_LOCALE } from '@/lib/language'
 import { getFallbackDescription } from '@/lib/meta'
 import { generateProductMeta, jsonLdBreadcrumbs } from '@/lib/seo'
@@ -87,9 +89,10 @@ export async function generateMetadata({
   const path = `/products/${slug}`
 
   if (!product || !productRecord) {
+    const t = await getTranslations('seo')
     return {
-      title: 'Produit introuvable',
-      description: 'Le produit demandé est introuvable.',
+      title: t('product_not_found_title'),
+      description: t('product_not_found_description'),
       robots: { index: false, follow: true },
     }
   }
@@ -150,10 +153,10 @@ export default async function ProductPage({
 }) {
   const { slug } = await params
   const product = await getProductCached(slug)
-
   if (!product) {
     notFound()
   }
+  const relatedProducts = await getRelatedProducts(slug, product.category ?? null, 4)
 
   const crumbs = jsonLdBreadcrumbs([
     { name: 'Accueil', url: '/' },
@@ -168,6 +171,22 @@ export default async function ProductPage({
         aria-label={`Page produit : ${product.title?.trim() || 'Produit'}`}
       >
         <ProductDetail product={product} locale={DEFAULT_LOCALE} />
+        {relatedProducts.length > 0 && (
+          <section
+            className="mt-16 pt-10 border-t border-[hsl(var(--border))]"
+            aria-labelledby="related-products-heading"
+          >
+            <h2 id="related-products-heading" className="text-xl font-bold text-[hsl(var(--text))] mb-6">
+              Vous aimerez aussi
+            </h2>
+            <ProductGrid
+              products={relatedProducts}
+              listName={LIST_NAMES.RELATED}
+              emptyMessage=""
+              showWishlistIcon
+            />
+          </section>
+        )}
       </main>
 
       <ProductJsonLd product={product} maxReviews={3} />

@@ -6,16 +6,20 @@ import { Suspense } from 'react'
 
 import type { OrderDoc } from '@/models/Order'
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 
 import OrderList, { type OrderSummary } from '@/components/account/OrderList'
 import Link from '@/components/LocalizedLink'
 import { getSession } from '@/lib/auth'
 import { getUserOrders } from '@/lib/db/orders'
 
-export const metadata: Metadata = {
-  title: 'Mes commandes – TechPlay',
-  description: 'Historique et suivi de vos commandes TechPlay.',
-  robots: { index: false, follow: false },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('orders')
+  return {
+    title: `${t('my_orders')} – TechPlay`,
+    description: 'Historique et suivi de vos commandes TechPlay.',
+    robots: { index: false, follow: false },
+  }
 }
 
 export default function MyOrdersPage() {
@@ -29,6 +33,8 @@ export default function MyOrdersPage() {
 async function OrdersContent() {
   const session = await getSession()
   const email = session?.user?.email?.trim()
+  const tAccount = await getTranslations('account')
+  const tOrders = await getTranslations('orders')
 
   if (!email) {
     return (
@@ -41,26 +47,26 @@ async function OrdersContent() {
           <Link
             href="/account"
             className="text-[13px] font-medium text-[hsl(var(--accent))] transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-            aria-label="Retour à l’espace client"
+            aria-label={tAccount('back_to_account_aria')}
           >
-            ← Espace client
+            {tAccount('back_to_account')}
           </Link>
         </div>
         <h1 id="orders-title" className="heading-page mb-6">
-          Mes commandes
+          {tOrders('my_orders')}
         </h1>
         <div
           className="rounded-2xl border border-dashed border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-8 text-center"
           role="status"
         >
           <p className="text-token-text/75">
-            Connectez-vous pour voir l&apos;historique de vos commandes.
+            {tAccount('orders_login_message')}
           </p>
           <Link
             href="/login"
             className="mt-4 inline-flex items-center justify-center rounded-full bg-[hsl(var(--accent))] px-5 py-2.5 text-[15px] font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-md)] transition hover:opacity-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)]"
           >
-            Se connecter
+            {tAccount('sign_in')}
           </Link>
         </div>
       </main>
@@ -87,13 +93,13 @@ async function OrdersContent() {
         <Link
           href="/account"
           className="text-[13px] font-medium text-[hsl(var(--accent))] transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-          aria-label="Retour à l’espace client"
+          aria-label={tAccount('back_to_account_aria')}
         >
-          ← Espace client
+          {tAccount('back_to_account')}
         </Link>
       </div>
       <h1 id="orders-title" className="heading-page mb-6">
-        Mes commandes
+        {tOrders('my_orders')}
       </h1>
       <OrderList orders={orders} />
     </main>

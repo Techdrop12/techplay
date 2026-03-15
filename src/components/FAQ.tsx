@@ -223,7 +223,7 @@ export default function FAQ({ showSectionHeading = true }: FAQProps) {
               >
                 <span className="flex-1 pr-2 leading-snug">{faq.question}</span>
                 <span
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--surface-2))] text-[hsl(var(--accent))] text-lg font-medium transition-transform duration-200"
+                  className="flex min-h-[2.75rem] min-w-[2.75rem] shrink-0 items-center justify-center rounded-full bg-[hsl(var(--surface-2))] text-[hsl(var(--accent))] text-lg font-medium transition-transform duration-200"
                   aria-hidden="true"
                   style={{ transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)' }}
                 >

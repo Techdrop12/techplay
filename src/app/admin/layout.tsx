@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 
+import AdminShell from '@/components/AdminShell'
 import { isAdmin } from '@/lib/auth'
 
 export default async function AdminLayout({
@@ -11,5 +12,5 @@ export default async function AdminLayout({
   if (!ok) {
     redirect('/login')
   }
-  return <>{children}</>
+  return <AdminShell>{children}</AdminShell>
 }

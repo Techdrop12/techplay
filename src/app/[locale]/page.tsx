@@ -7,6 +7,7 @@ import type { Metadata } from 'next'
 
 import ClientTrackingScript from '@/components/ClientTrackingScript'
 import Link from '@/components/LocalizedLink'
+import LoadingSectionSkeleton from '@/components/LoadingSectionSkeleton'
 import SectionHeader from '@/components/SectionHeader'
 import TrustBadges from '@/components/TrustBadges'
 import { getPosts } from '@/lib/blog'
@@ -16,13 +17,16 @@ import { isLocale } from '@/lib/language'
 
 const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'))
 const BestProducts = dynamic(() => import('@/components/BestProducts'), {
-  loading: () => <SectionSkeleton title="Chargement" />,
+  loading: () => <LoadingSectionSkeleton />,
 })
 const PacksSection = dynamic(() => import('@/components/PacksSection'), {
-  loading: () => <SectionSkeleton title="Chargement" />,
+  loading: () => <LoadingSectionSkeleton />,
 })
 const FAQ = dynamic(() => import('@/components/FAQ'), {
-  loading: () => <SectionSkeleton title="Chargement" />,
+  loading: () => <LoadingSectionSkeleton />,
+})
+const BlogCard = dynamic(() => import('@/components/blog/BlogCard').then((m) => m.default), {
+  loading: () => <div className="skeleton aspect-[16/10] rounded-2xl" />,
 })
 
 const SITE_URL = BRAND.URL
@@ -231,7 +235,20 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
   ])
   const bestProducts: Product[] = bestProductsResult.status === 'fulfilled' ? bestProductsResult.value : []
   const recommendedPacks: Pack[] = recommendedPacksResult.status === 'fulfilled' ? recommendedPacksResult.value : []
-  const _blogData = blogResult.status === 'fulfilled' ? blogResult.value : null
+  const blogData = blogResult.status === 'fulfilled' ? blogResult.value : null
+  const blogItems = blogData?.items ?? []
+  const blogPostsForCards = blogItems.slice(0, 3).map((item: Record<string, unknown>) => ({
+    _id: String(item._id ?? item.id ?? ''),
+    slug: String(item.slug ?? ''),
+    title: String(item.title ?? ''),
+    content: '',
+    description: String(item.description ?? item.excerpt ?? ''),
+    createdAt: item.createdAt instanceof Date ? item.createdAt.toISOString() : String(item.createdAt ?? new Date().toISOString()),
+    updatedAt: item.updatedAt ? (item.updatedAt instanceof Date ? item.updatedAt.toISOString() : String(item.updatedAt)) : undefined,
+    image: String(item.image ?? item.coverImage ?? '/og-image.jpg'),
+    author: String(item.author ?? 'TechPlay'),
+    tags: Array.isArray(item.tags) ? item.tags : [],
+  }))
 
   const itemListJsonLd =
     bestProducts.length > 0
@@ -365,6 +382,30 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
           </div>
         </section>
         <TrustBadges variant="premium" />
+        {blogPostsForCards.length > 0 && (
+          <section
+            id="blog"
+            aria-label={t.blogSectionLabel}
+            className="motion-section motion-section-delay-2 section-spacing-sm"
+            style={lazySectionStyle500}
+          >
+            <SectionHeader kicker={t.blogKicker} title={t.blogTitle} sub={t.blogSub} />
+            <div className="rhythm-content grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {blogPostsForCards.map((post) => (
+                <BlogCard key={post._id} article={post} />
+              ))}
+            </div>
+            <div className="mt-6 text-center">
+              <Link
+                href="/blog"
+                prefetch={false}
+                className="btn btn-outline inline-flex items-center gap-2 rounded-full border-[hsl(var(--border))] px-6 py-2.5 text-[14px] font-semibold hover:bg-[hsl(var(--surface-2))] focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+              >
+                {t.blogCta}
+              </Link>
+            </div>
+          </section>
+        )}
         <section
           id="faq"
           aria-label={t.faqTitle}

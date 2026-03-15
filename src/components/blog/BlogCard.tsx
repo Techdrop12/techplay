@@ -14,6 +14,9 @@ interface BlogCardProps {
   article: BlogPost
 }
 
+const BLUR_DATA_URL =
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+'
+
 function getSafeImage(article: BlogPost): string {
   if (article.image && typeof article.image === 'string') {
     return safeProductImageUrl(article.image)
@@ -46,6 +49,8 @@ export default function BlogCard({ article }: BlogCardProps) {
             fill
             sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
             className="object-cover transition-transform duration-500 ease-[var(--ease-smooth)] group-hover:scale-[1.02]"
+            placeholder="blur"
+            blurDataURL={BLUR_DATA_URL}
             priority
           />
           {category ? (

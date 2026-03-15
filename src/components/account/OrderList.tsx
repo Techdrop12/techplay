@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
 
 import InvoiceButton from './InvoiceButton'
 
@@ -24,13 +25,13 @@ interface Props {
   className?: string
 }
 
-const STATUS_LABEL: Record<string, string> = {
-  pending: 'En attente',
-  paid: 'Payée',
-  shipped: 'Expédiée',
-  delivered: 'Livrée',
-  canceled: 'Annulée',
-}
+const STATUS_KEYS = [
+  'pending',
+  'paid',
+  'shipped',
+  'delivered',
+  'canceled',
+] as const
 
 const STATUS_STYLE: Record<string, string> = {
   pending: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
@@ -56,6 +57,7 @@ function normalizeStatus(status?: OrderStatus): string {
 }
 
 export default function OrderList({ orders = [], className }: Props) {
+  const t = useTranslations('orders')
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortOption>('recent')
 
@@ -97,12 +99,12 @@ export default function OrderList({ orders = [], className }: Props) {
         role="status"
         aria-live="polite"
       >
-        <p className="text-token-text/75">Vous n’avez pas encore de commande.</p>
+        <p className="text-token-text/75">{t('no_orders_found')}</p>
         <Link
           href="/products"
           className="mt-4 inline-block rounded-lg bg-accent px-4 py-2 font-semibold text-white hover:bg-accent/90 focus:outline-none focus:ring-4 focus:ring-accent/40"
         >
-          Découvrir les produits
+          {t('discover_products')}
         </Link>
       </div>
     )
@@ -112,23 +114,23 @@ export default function OrderList({ orders = [], className }: Props) {
     <section className={cn('space-y-4', className)} aria-label="Liste des commandes">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="text-sm text-muted-foreground">
-          {filtered.length} commande{filtered.length > 1 ? 's' : ''}
+          {t('orders_count', { count: filtered.length })}
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <label className="flex items-center gap-2">
-            <span className="sr-only">Rechercher une commande</span>
+            <span className="sr-only">{t('search_aria')}</span>
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Rechercher par n° de commande…"
+              placeholder={t('search_placeholder')}
               className="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-2 text-sm sm:w-64"
-              aria-label="Rechercher par numéro de commande"
+              aria-label={t('search_aria')}
             />
           </label>
 
           <label className="flex items-center gap-2">
-            <span className="sr-only">Trier</span>
+            <span className="sr-only">{t('sort_aria')}</span>
             <select
               value={sort}
               onChange={(e) => {
@@ -136,12 +138,12 @@ export default function OrderList({ orders = [], className }: Props) {
                 if (isSortOption(value)) setSort(value)
               }}
               className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-2 text-sm"
-              aria-label="Trier les commandes"
+              aria-label={t('sort_aria')}
             >
-              <option value="recent">Plus récentes</option>
-              <option value="old">Plus anciennes</option>
-              <option value="amountDesc">Montant décroissant</option>
-              <option value="amountAsc">Montant croissant</option>
+              <option value="recent">{t('sort_recent')}</option>
+              <option value="old">{t('sort_old')}</option>
+              <option value="amountDesc">{t('sort_amount_desc')}</option>
+              <option value="amountAsc">{t('sort_amount_asc')}</option>
             </select>
           </label>
         </div>
@@ -153,20 +155,23 @@ export default function OrderList({ orders = [], className }: Props) {
           const badgeClass =
             STATUS_STYLE[statusKey] ||
             'bg-[hsl(var(--surface-2))] text-[hsl(var(--text))]'
-          const statusLabel = STATUS_LABEL[statusKey] || order.status || '—'
+          const statusLabel =
+            STATUS_KEYS.includes(statusKey as (typeof STATUS_KEYS)[number])
+              ? t(`statuses.${statusKey}`)
+              : (order.status as string) || '—'
           const itemsCount = typeof order.itemsCount === 'number' ? order.itemsCount : 0
 
           return (
             <li
               key={order.id}
               className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-4 shadow-[var(--shadow-sm)] transition hover:shadow-[var(--shadow-md)]"
-              aria-label={`Commande ${order.id}`}
+              aria-label={`${t('order_label')} ${order.id}`}
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="font-semibold">
-                      Commande <span className="text-token-text/60">#{order.id}</span>
+                      {t('order_label')} <span className="text-token-text/60">#{order.id}</span>
                     </p>
 
                     <span
@@ -181,13 +186,13 @@ export default function OrderList({ orders = [], className }: Props) {
                   </div>
 
                   <div className="mt-1 text-sm text-muted-foreground">
-                    {order.date ? formatDateTime(order.date, 'fr-FR') : '—'} · {itemsCount || '—'} article{itemsCount > 1 ? 's' : ''}
+                    {order.date ? formatDateTime(order.date, locale === 'en' ? 'en-GB' : 'fr-FR') : '—'} · {t('articles_count', { count: itemsCount || 0 })}
                   </div>
                 </div>
 
                 <div className="flex flex-col items-start gap-2 sm:items-end">
                   <div className="text-sm">
-                    Total :{' '}
+                    {t('order_total_label')}{' '}
                     <strong className="text-[hsl(var(--text))]">
                       {typeof order.total === 'number' ? formatPrice(order.total) : '—'}
                     </strong>
@@ -197,9 +202,9 @@ export default function OrderList({ orders = [], className }: Props) {
                     <Link
                       href={`/account/mes-commandes/${order.id}`}
                       className="inline-flex items-center rounded-lg border border-[hsl(var(--border))] px-3 py-1.5 text-sm font-medium hover:bg-[hsl(var(--surface-2))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
-                      aria-label={`Voir le détail de la commande ${order.id}`}
+                      aria-label={t('view_order_aria', { id: order.id })}
                     >
-                      Détail
+                      {t('detail_btn')}
                     </Link>
 
                     <InvoiceButton orderId={order.id} />

@@ -1,11 +1,12 @@
 // src/components/ProductGallery.tsx
-'use client';
+'use client'
 
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import Image from 'next/image';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import Image from 'next/image'
+import { useTranslations } from 'next-intl'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { safeProductImageUrl } from '@/lib/safeProductImage';
+import { safeProductImageUrl } from '@/lib/safeProductImage'
 
 const BLUR = 'data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=';
 const PLACEHOLDER = '/default.jpg';
@@ -33,7 +34,8 @@ export default function ProductGallery({
   edgeFade = true,
   showIndex = true,
 }: ProductGalleryProps) {
-  const prefersReducedMotion = useReducedMotion();
+  const t = useTranslations('common')
+  const prefersReducedMotion = useReducedMotion()
 
   /** Normalisation des médias (string -> {src, kind:'image'}) + fallback pour URLs cassées (ex. fakestoreapi) */
   const media = useMemo(() => {
@@ -552,10 +554,10 @@ export default function ProductGallery({
                   <button
                     type="button"
                     onClick={() => { setZoom(1); panRef.current = { x: 0, y: 0 }; }}
-                    aria-label="Réinitialiser le zoom"
+                    aria-label={t('reset_zoom')}
                     className="h-10 px-3 rounded-full bg-white/20 text-white text-sm backdrop-blur hover:bg-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                   >
-                    Reset
+                    {t('reset_zoom')}
                   </button>
                 </div>
               )}

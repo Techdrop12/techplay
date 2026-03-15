@@ -30,6 +30,7 @@ export const LIST_NAMES = {
   WISHLIST: 'wishlist',
   CART_REMINDER: 'cart_reminder',
   PRODUCT_GRID: 'product_grid',
+  RELATED: 'related',
 } as const
 
 export type ListName = (typeof LIST_NAMES)[keyof typeof LIST_NAMES]

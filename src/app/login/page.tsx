@@ -1,9 +1,12 @@
 'use client'
 
 import { signIn } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 export default function LoginPage() {
+  const t = useTranslations('auth')
+  const tAccount = useTranslations('account')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
@@ -16,17 +19,17 @@ export default function LoginPage() {
     <main className="mx-auto max-w-sm px-4 py-10" role="main" aria-labelledby="login-title">
       <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[var(--shadow-md)]">
         <h1 id="login-title" className="heading-page mb-6">
-          Connexion admin
+          {t('login_admin_title')}
         </h1>
-        <form onSubmit={handleSubmit} className="space-y-4" aria-label="Formulaire de connexion">
+        <form onSubmit={handleSubmit} className="space-y-4" aria-label={t('login_form_label')}>
           <div>
             <label htmlFor="login-email" className="sr-only">
-              Email
+              {t('email')}
             </label>
             <input
               id="login-email"
               type="email"
-              placeholder="Email"
+              placeholder={t('email')}
               autoComplete="email"
               className="w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
               value={email}
@@ -37,12 +40,12 @@ export default function LoginPage() {
           </div>
           <div>
             <label htmlFor="login-password" className="sr-only">
-              Mot de passe
+              {t('password')}
             </label>
             <input
               id="login-password"
               type="password"
-              placeholder="Mot de passe"
+              placeholder={t('password')}
               autoComplete="current-password"
               className="w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
               value={password}
@@ -55,7 +58,7 @@ export default function LoginPage() {
             type="submit"
             className="w-full rounded-full bg-[hsl(var(--accent))] px-4 py-2.5 text-[15px] font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-md)] transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
           >
-            Se connecter
+            {tAccount('sign_in')}
           </button>
         </form>
       </div>

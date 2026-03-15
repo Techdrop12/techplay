@@ -1,7 +1,7 @@
 import type { Product } from '@/types/product'
 import type { Metadata } from 'next'
-import type { SVGProps, JSX } from 'react';
-
+import type { SVGProps, JSX } from 'react'
+import { getTranslations } from 'next-intl/server'
 
 import Link from '@/components/LocalizedLink'
 import ProductGrid from '@/components/ProductGrid'
@@ -151,6 +151,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 export default async function CategoryPage({ params, searchParams }: Props) {
   const { category } = await params
   const sp = searchParams ? await searchParams : undefined
+  const t = await getTranslations('common')
   const displayCategory = category.charAt(0).toUpperCase() + category.slice(1).replace(/-/g, ' ')
   const CatIcon = ICON_BY_SLUG[category]
 
@@ -306,9 +307,9 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             <Link
               href={`/categorie/${category}`}
               className="inline-block text-[13px] text-token-text/70 transition hover:text-[hsl(var(--accent))]"
-              aria-label="Réinitialiser les filtres"
+              aria-label={t('reset_filters')}
             >
-              Réinitialiser les filtres
+              {t('reset_filters')}
             </Link>
           </div>
         )}

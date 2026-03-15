@@ -15,6 +15,7 @@ import type React from 'react'
 import AfterIdleClient from '@/components/AfterIdleClient'
 import AppInstallPrompt from '@/components/AppInstallPrompt'
 import ConsentBanner from '@/components/ConsentBanner'
+import OfflineBanner from '@/components/OfflineBanner'
 import DarkModeScript from '@/components/DarkModeScript'
 import Layout from '@/components/layout/Layout'
 import RootLayoutClient from '@/components/RootLayoutClient'
@@ -285,6 +286,7 @@ export default async function RootLayout({
               <StickyFreeShippingBar />
               <StickyCartSummary />
               <ConsentBanner />
+              <OfflineBanner />
 
               <Toaster
                 position="top-right"

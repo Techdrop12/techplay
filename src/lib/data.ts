@@ -92,6 +92,25 @@ export async function getProductBySlug(slug: string): Promise<ProductType | null
   return product ? toPlain<ProductType>(product) : null
 }
 
+export async function getRelatedProducts(
+  currentSlug: string,
+  category: string | null | undefined,
+  limit = 4
+): Promise<ProductType[]> {
+  await connectToDatabase()
+  const filter: Record<string, unknown> = { slug: { $ne: currentSlug } }
+  if (category && String(category).trim()) {
+    filter.category = { $regex: new RegExp(`^${escapeRegex(String(category).trim())}$`, 'i') }
+  }
+  const docs = await Product.find(filter)
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .select(PRODUCT_LIST_FIELDS)
+    .lean()
+    .exec()
+  return toPlain<ProductType[]>(docs)
+}
+
 export async function getRecommendedPacks(): Promise<PackType[]> {
   await connectToDatabase()
 

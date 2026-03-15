@@ -339,7 +339,7 @@ export default function ProductGrid({
             aria-label={t('load_more_aria')}
             data-gtm="grid_load_more"
           >
-            {isLoading ? 'Chargement…' : 'Charger plus'}
+            {isLoading ? t('loading_products') : t('load_more')}
           </button>
         </div>
       ) : null}

@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 
 import ContactBottomLinks from '@/components/ContactBottomLinks'
+import ContactForm from '@/components/ContactForm'
 import Link from '@/components/LocalizedLink'
 
 const SUPPORT_EMAIL = 'support@techplay.fr'
@@ -12,17 +14,17 @@ const ADDRESS = {
   country: 'France',
 }
 
-const MAILTO_SUBJECTS = [
-  { label: 'Question sur une commande', subject: 'Question commande' },
-  { label: 'Retour ou SAV', subject: 'Retour / SAV' },
-  { label: 'Question technique', subject: 'Question technique' },
-  { label: 'Autre demande', subject: 'Contact TechPlay' },
+const MAILTO_SUBJECT_KEYS = [
+  { labelKey: 'subject_order' as const, subject: 'Question commande' },
+  { labelKey: 'subject_return' as const, subject: 'Retour / SAV' },
+  { labelKey: 'subject_tech' as const, subject: 'Question technique' },
+  { labelKey: 'subject_other' as const, subject: 'Contact TechPlay' },
 ] as const
 
-const HORAIRES = [
-  { jours: 'Lundi – Vendredi', heures: '9 h – 18 h' },
-  { jours: 'Samedi', heures: '10 h – 16 h' },
-  { jours: 'Dimanche', heures: 'Fermé' },
+const HOURS_KEYS = [
+  { joursKey: 'hours_mon_fri' as const, heuresKey: 'hours_9_18' as const },
+  { joursKey: 'hours_sat' as const, heuresKey: 'hours_10_16' as const },
+  { joursKey: 'hours_sun' as const, heuresKey: 'hours_closed' as const },
 ] as const
 
 function mailtoHref(subject: string): string {
@@ -36,7 +38,8 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 }
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const t = await getTranslations('contact')
   return (
     <main
       className="container-app mx-auto max-w-3xl px-4 pt-24 pb-20 sm:px-6"
@@ -45,32 +48,29 @@ export default function ContactPage() {
     >
       <header className="mb-10 text-center sm:mb-12">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[hsl(var(--accent))]">
-          Support
+          {t('page_badge')}
         </p>
         <h1 id="contact-title" className="heading-page mt-2">
-          Nous contacter
+          {t('page_title')}
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-token-text/75">
-          Une question, un problème de commande ou un retour ? L&apos;équipe TechPlay est là pour
-          vous répondre.
+          {t('page_subtitle')}
         </p>
       </header>
 
       <div className="space-y-6">
-        {/* Sujet du message */}
         <section
           className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-sm"
           aria-labelledby="contact-subject-heading"
         >
           <h2 id="contact-subject-heading" className="heading-subsection">
-            Choisir un sujet
+            {t('subject_heading')}
           </h2>
           <p className="mt-2 text-[14px] text-token-text/75">
-            Cliquez sur le sujet qui correspond à votre demande pour ouvrir votre messagerie avec un
-            objet pré-rempli.
+            {t('subject_intro')}
           </p>
           <ul className="mt-4 flex flex-wrap gap-3" role="list">
-            {MAILTO_SUBJECTS.map(({ label, subject }) => (
+            {MAILTO_SUBJECT_KEYS.map(({ labelKey, subject }) => (
               <li key={subject}>
                 <a
                   href={mailtoHref(subject)}
@@ -88,24 +88,24 @@ export default function ContactPage() {
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                     <path d="m22 6-10 7L2 6" />
                   </svg>
-                  {label}
+                  {t(labelKey)}
                 </a>
               </li>
             ))}
           </ul>
         </section>
 
-        {/* Email principal */}
+        <ContactForm />
+
         <section
           className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-sm"
           aria-labelledby="contact-email-heading"
         >
           <h2 id="contact-email-heading" className="heading-subsection">
-            Écrire au support
+            {t('email_heading')}
           </h2>
           <p className="mt-2 text-[14px] text-token-text/75">
-            Envoyez-nous un email à l&apos;adresse ci-dessous. Nous nous engageons à vous répondre
-            sous 24 à 48 h ouvrées.
+            {t('email_intro')}
           </p>
           <a
             href={`mailto:${SUPPORT_EMAIL}`}
@@ -134,7 +134,7 @@ export default function ContactPage() {
             aria-labelledby="contact-phone-heading"
           >
             <h2 id="contact-phone-heading" className="text-sm font-semibold uppercase tracking-wider text-token-text/70">
-              Téléphone
+              {t('phone_heading')}
             </h2>
             <a
               href={`tel:${SUPPORT_PHONE.replace(/\s+/g, '')}`}
@@ -145,7 +145,7 @@ export default function ContactPage() {
               </svg>
               {SUPPORT_PHONE}
             </a>
-            <p className="mt-1 text-[12px] text-token-text/60">Lun.–Ven. 9 h–18 h</p>
+            <p className="mt-1 text-[12px] text-token-text/60">{t('phone_hours')}</p>
           </section>
 
           <section
@@ -153,7 +153,7 @@ export default function ContactPage() {
             aria-labelledby="contact-address-heading"
           >
             <h2 id="contact-address-heading" className="text-sm font-semibold uppercase tracking-wider text-token-text/70">
-              Adresse
+              {t('address_heading')}
             </h2>
             <address className="mt-2 not-italic text-[14px] text-token-text/85">
               {ADDRESS.street}<br />
@@ -167,20 +167,19 @@ export default function ContactPage() {
             aria-labelledby="contact-hours-heading"
           >
             <h2 id="contact-hours-heading" className="text-sm font-semibold uppercase tracking-wider text-token-text/70">
-              Horaires du support
+              {t('hours_heading')}
             </h2>
             <dl className="mt-2 space-y-1 text-[14px] text-token-text/85">
-              {HORAIRES.map(({ jours, heures }) => (
-                <div key={jours} className="flex justify-between gap-2">
-                  <dt className="text-token-text/70">{jours}</dt>
-                  <dd className="font-medium">{heures}</dd>
+              {HOURS_KEYS.map(({ joursKey, heuresKey }) => (
+                <div key={joursKey} className="flex justify-between gap-2">
+                  <dt className="text-token-text/70">{t(joursKey)}</dt>
+                  <dd className="font-medium">{t(heuresKey)}</dd>
                 </div>
               ))}
             </dl>
           </section>
         </div>
 
-        {/* Reassurance */}
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="flex gap-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 px-4 py-4">
             <span
@@ -192,8 +191,8 @@ export default function ContactPage() {
               </svg>
             </span>
             <div>
-              <p className="text-[13px] font-semibold text-[hsl(var(--text))]">Réponse rapide</p>
-              <p className="mt-0.5 text-[12px] text-token-text/70">Sous 24–48 h ouvrées</p>
+              <p className="text-[13px] font-semibold text-[hsl(var(--text))]">{t('reassurance_fast')}</p>
+              <p className="mt-0.5 text-[12px] text-token-text/70">{t('reassurance_fast_desc')}</p>
             </div>
           </div>
           <div className="flex gap-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 px-4 py-4">
@@ -206,8 +205,8 @@ export default function ContactPage() {
               </svg>
             </span>
             <div>
-              <p className="text-[13px] font-semibold text-[hsl(var(--text))]">Données protégées</p>
-              <p className="mt-0.5 text-[12px] text-token-text/70">Vos infos restent confidentielles</p>
+              <p className="text-[13px] font-semibold text-[hsl(var(--text))]">{t('reassurance_data')}</p>
+              <p className="mt-0.5 text-[12px] text-token-text/70">{t('reassurance_data_desc')}</p>
             </div>
           </div>
           <div className="flex gap-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 px-4 py-4">
@@ -222,27 +221,26 @@ export default function ContactPage() {
               </svg>
             </span>
             <div>
-              <p className="text-[13px] font-semibold text-[hsl(var(--text))]">Équipe dédiée</p>
-              <p className="mt-0.5 text-[12px] text-token-text/70">Support client TechPlay</p>
+              <p className="text-[13px] font-semibold text-[hsl(var(--text))]">{t('reassurance_team')}</p>
+              <p className="mt-0.5 text-[12px] text-token-text/70">{t('reassurance_team_desc')}</p>
             </div>
           </div>
         </div>
 
-        {/* FAQ / Accueil */}
         <section className="rounded-2xl border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface))]/40 px-5 py-5 sm:px-6">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-token-text/60">
-            En attendant
+            {t('waiting_heading')}
           </h2>
           <p className="mt-2 text-[14px] text-token-text/75">
-            Consultez la{' '}
+            {t('waiting_intro')}{' '}
             <Link
               href="/#faq"
               className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline"
               prefetch={false}
             >
-              FAQ
+              {t('faq_link')}
             </Link>{' '}
-            pour les questions fréquentes, ou retournez à l&apos;accueil pour continuer vos achats.
+            {t('waiting_outro')}
           </p>
           <ContactBottomLinks />
         </section>

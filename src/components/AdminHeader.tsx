@@ -1,25 +1,27 @@
-'use client';
+'use client'
 
-import { LogOut, Menu, User } from 'lucide-react';
-import { useSession, signOut } from 'next-auth/react';
-import { useState } from 'react';
+import { LogOut, Menu, User } from 'lucide-react'
+import { useSession, signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { useState } from 'react'
 
 export default function AdminHeader() {
-  const { data: session } = useSession();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const t = useTranslations('admin')
+  const { data: session } = useSession()
+  const [menuOpen, setMenuOpen] = useState(false)
 
-  const userName = session?.user?.name || 'Admin';
-  const userEmail = session?.user?.email || '';
+  const userName = session?.user?.name || 'Admin'
+  const userEmail = session?.user?.email || ''
 
   return (
     <header className="bg-[hsl(var(--surface))] border-b border-[hsl(var(--border))] shadow-[var(--shadow-sm)] px-4 py-3 flex justify-between items-center sticky top-0 z-40">
-      <div className="text-xl font-bold text-[hsl(var(--text))]">TechPlay Admin</div>
+      <div className="text-xl font-bold text-[hsl(var(--text))]">{t('header_title')}</div>
 
       <div className="flex items-center gap-4">
         <button
           className="sm:hidden text-token-text/70 hover:text-[hsl(var(--text))]"
           onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Ouvrir le menu"
+          aria-label={t('header_open_menu')}
         >
           <Menu />
         </button>
@@ -34,7 +36,7 @@ export default function AdminHeader() {
           onClick={() => signOut()}
         >
           <LogOut size={18} />
-          <span className="hidden sm:inline">Déconnexion</span>
+          <span className="hidden sm:inline">{t('header_signout')}</span>
         </button>
       </div>
 
@@ -49,7 +51,7 @@ export default function AdminHeader() {
             onClick={() => signOut()}
           >
             <LogOut size={14} className="inline mr-1" />
-            Déconnexion
+            {t('header_signout')}
           </button>
         </div>
       )}

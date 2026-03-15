@@ -21,4 +21,22 @@ export async function getInactiveUsers(sinceDate: Date | string): Promise<unknow
   return User.find({ lastLogin: { $lt: d }, isActive: true }).lean().exec() as Promise<unknown[]>
 }
 
-export default { getUserByEmail, createUser, getInactiveUsers }
+export async function updateUserByEmail(
+  email: string,
+  data: { name?: string }
+): Promise<unknown> {
+  await dbConnect()
+  const e = String(email ?? '').toLowerCase().trim()
+  if (!e) return null
+  const doc = await User.findOneAndUpdate(
+    { email: e },
+    { $set: data },
+    { new: true }
+  )
+    .select('name email')
+    .lean()
+    .exec()
+  return doc
+}
+
+export default { getUserByEmail, createUser, getInactiveUsers, updateUserByEmail }

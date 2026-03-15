@@ -475,7 +475,7 @@ export default function Footer({
 
   return (
     <footer
-      className="relative overflow-hidden border-t border-[hsl(var(--border))] bg-[hsl(var(--surface-2))] text-[hsl(var(--text))]"
+      className="relative overflow-hidden border-t border-[hsl(var(--border))] bg-[hsl(var(--surface-2))] text-[hsl(var(--text))] pb-[max(1.5rem,env(safe-area-inset-bottom))]"
       role="contentinfo"
       aria-label={t.ariaFooter}
     >
@@ -688,6 +688,7 @@ export default function Footer({
                       className="w-full rounded-xl border-2 border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-3.5 text-[15px] text-[hsl(var(--text))] placeholder:text-[hsl(var(--text))]/50 transition-[border-color,box-shadow] focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/0.25)] focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]"
                       aria-required="true"
                       aria-invalid={status === 'error' && !isValidEmail(email) ? 'true' : 'false'}
+                      aria-describedby={status === 'error' ? messageId : undefined}
                       autoComplete="email"
                       autoCapitalize="off"
                       autoCorrect="off"

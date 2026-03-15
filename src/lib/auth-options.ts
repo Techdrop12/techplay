@@ -128,11 +128,12 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     async jwt({ token, user }) {
-      const nextToken = token as JWT & { userId?: string; role?: AppRole }
+      const nextToken = token as JWT & { userId?: string; role?: AppRole; email?: string }
 
       if (user) {
         nextToken.userId = typeof user.id === 'string' ? user.id : undefined
         nextToken.role = getUserRole(user)
+        if (user.email) nextToken.email = user.email
       }
 
       return nextToken
@@ -142,11 +143,22 @@ export const authOptions: NextAuthOptions = {
       const nextSession = session as Session & {
         user?: Session['user'] & { id?: string; role?: AppRole }
       }
-      const nextToken = token as JWT & { userId?: string; role?: AppRole }
+      const nextToken = token as JWT & { userId?: string; role?: AppRole; email?: string }
 
       if (nextSession.user) {
         nextSession.user.id = nextToken.userId
         nextSession.user.role = nextToken.role || 'user'
+        // Load latest name from DB when available (for profile updates)
+        const email = nextToken.email ?? session?.user?.email
+        if (email && typeof email === 'string') {
+          try {
+            const { getUserByEmail } = await import('@/lib/db/users')
+            const dbUser = await getUserByEmail(email) as { name?: string } | null
+            if (dbUser?.name != null) nextSession.user.name = dbUser.name
+          } catch {
+            // ignore
+          }
+        }
       }
 
       return nextSession

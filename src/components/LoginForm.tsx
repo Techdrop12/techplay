@@ -77,11 +77,18 @@ export default function LoginForm() {
 
       <button
         type="submit"
-        className="w-full rounded bg-[hsl(var(--accent))] py-2 font-medium text-[hsl(var(--accent-fg))] hover:opacity-95 disabled:opacity-60"
+        className="inline-flex w-full items-center justify-center gap-2 rounded bg-[hsl(var(--accent))] py-2 font-medium text-[hsl(var(--accent-fg))] hover:opacity-95 disabled:opacity-60 transition-opacity"
         disabled={loading}
         aria-busy={loading}
       >
-        {loading ? 'Connexion…' : 'Se connecter'}
+        {loading ? (
+          <>
+            <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden />
+            Connexion…
+          </>
+        ) : (
+          'Se connecter'
+        )}
       </button>
     </form>
   )

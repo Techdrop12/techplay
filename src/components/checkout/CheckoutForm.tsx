@@ -506,7 +506,11 @@ export default function CheckoutForm() {
           data-gtm="checkout_submit_btn"
           className="touch-target inline-flex min-h-[2.75rem] w-full items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-4 py-3.5 text-[15px] font-bold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-sm)] transition hover:opacity-95 active:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          <IconCard />
+          {loading ? (
+            <span className="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden />
+          ) : (
+            <IconCard />
+          )}
           <span>{loading ? 'Redirection…' : 'Payer ' + formatPrice(subtotal, { currency })}</span>
         </button>
 

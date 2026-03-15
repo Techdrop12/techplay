@@ -1,12 +1,28 @@
-'use client';
+'use client'
 
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { toast } from 'react-hot-toast';
+import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { useState } from 'react'
+import { toast } from 'react-hot-toast'
+
+const FIELDS = [
+  { name: 'title', labelKey: 'table_title', type: 'text' as const },
+  { name: 'slug', labelKey: 'table_slug', type: 'text' as const },
+  { name: 'description', labelKey: 'description', type: 'textarea' as const },
+  { name: 'price', labelKey: 'table_price', type: 'number' as const },
+  { name: 'image', labelKey: 'image_main', type: 'text' as const },
+  { name: 'images', labelKey: 'images_extra', type: 'text' as const },
+  { name: 'category', labelKey: 'category', type: 'text' as const },
+  { name: 'stock', labelKey: 'table_stock', type: 'number' as const },
+  { name: 'tags', labelKey: 'tags_label', type: 'text' as const },
+]
 
 export default function AddProductForm() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const t = useTranslations('admin')
+  const tCommon = useTranslations('common')
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+  const [apiError, setApiError] = useState<string | null>(null)
   const [formData, setFormData] = useState<Record<string, string>>({
     title: '',
     slug: '',
@@ -17,16 +33,18 @@ export default function AddProductForm() {
     category: '',
     stock: '',
     tags: '',
-  });
+  })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+    if (apiError) setApiError(null)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+    e.preventDefault()
+    setApiError(null)
+    setLoading(true)
     try {
       const payload = {
         ...formData,
@@ -40,77 +58,85 @@ export default function AddProductForm() {
           .split(',')
           .map((t) => t.trim())
           .filter(Boolean),
-      };
+      }
 
       const res = await fetch('/api/admin/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-      });
+      })
 
+      const data = await res.json()
       if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error?.message || 'Erreur lors de la création');
+        setApiError(data?.error ?? data?.message ?? 'Erreur lors de la création')
+        return
       }
 
-      toast.success('✅ Produit ajouté');
-      router.push('/admin/dashboard');
+      toast.success('✅ Produit ajouté')
+      router.push('/admin/dashboard')
     } catch (err) {
-      toast.error((err as Error).message || 'Erreur');
+      setApiError((err as Error).message || 'Erreur')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
+
+  const inputClass = 'w-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] text-[hsl(var(--text))]'
 
   return (
     <form
       onSubmit={handleSubmit}
       className="max-w-xl mx-auto p-6 bg-[hsl(var(--surface))] rounded-2xl border border-[hsl(var(--border))] shadow-[var(--shadow-md)] space-y-4"
+      aria-labelledby="add-product-heading"
+      noValidate
     >
-      <h2 className="text-2xl font-semibold text-center">Ajouter un produit</h2>
+      <h2 id="add-product-heading" className="text-2xl font-semibold text-center text-[hsl(var(--text))]">
+        {t('add_product_heading')}
+      </h2>
 
-      {[
-        { name: 'title', label: 'Titre', type: 'text' },
-        { name: 'slug', label: 'Slug (URL)', type: 'text' },
-        { name: 'description', label: 'Description', type: 'textarea' },
-        { name: 'price', label: 'Prix (€)', type: 'number' },
-        { name: 'image', label: 'Image principale (URL)', type: 'text' },
-        { name: 'images', label: 'Autres images (séparées par virgule)', type: 'text' },
-        { name: 'category', label: 'Catégorie', type: 'text' },
-        { name: 'stock', label: 'Stock', type: 'number' },
-        { name: 'tags', label: 'Tags (séparés par virgule)', type: 'text' },
-      ].map(({ name, label, type }) =>
-        type === 'textarea' ? (
-          <textarea
-            key={name}
-            name={name}
-            placeholder={label}
-            value={formData[name]}
-            onChange={handleChange}
-            required
-            className="w-full border px-3 py-2 rounded resize-none"
-          />
-        ) : (
-          <input
-            key={name}
-            type={type}
-            name={name}
-            placeholder={label}
-            value={formData[name]}
-            onChange={handleChange}
-            required={['title', 'slug', 'description', 'price', 'image'].includes(name)}
-            className="w-full border px-3 py-2 rounded"
-          />
-        )
+      {apiError && (
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-200">
+          {apiError}
+        </div>
       )}
+
+      {FIELDS.map(({ name, labelKey, type }) => (
+        <div key={name}>
+          <label htmlFor={`add-product-${name}`} className="block text-sm font-medium text-[hsl(var(--text))] mb-1">
+            {t(labelKey)}
+          </label>
+          {type === 'textarea' ? (
+            <textarea
+              id={`add-product-${name}`}
+              name={name}
+              value={formData[name]}
+              onChange={handleChange}
+              required={['title', 'slug', 'description', 'price', 'image'].includes(name)}
+              className={`${inputClass} resize-none`}
+              placeholder={name === 'description' ? 'Description du produit' : undefined}
+            />
+          ) : (
+            <input
+              id={`add-product-${name}`}
+              type={type}
+              name={name}
+              value={formData[name]}
+              onChange={handleChange}
+              required={['title', 'slug', 'description', 'price', 'image'].includes(name)}
+              className={inputClass}
+            />
+          )}
+        </div>
+      ))}
 
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] py-2 px-4 rounded-lg hover:opacity-95 transition"
+        aria-busy={loading}
+        className="w-full bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] py-2 px-4 rounded-lg hover:opacity-95 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] disabled:opacity-60"
       >
-        {loading ? 'Enregistrement…' : 'Ajouter le produit'}
+        {loading ? tCommon('saving') : t('add_product_submit')}
       </button>
     </form>
-  );
+  )
 }

@@ -1,0 +1,218 @@
+'use client'
+
+import { useState } from 'react'
+import { toast } from 'react-hot-toast'
+
+import { contactSchema } from '@/lib/zodSchemas'
+
+type FieldErrors = Partial<Record<string, string>>
+
+export default function ContactForm() {
+  const [loading, setLoading] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [apiError, setApiError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    message: '',
+    consent: false,
+  })
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type } = e.target
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+    }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setApiError(null)
+    setFieldErrors({})
+    const payload = {
+      name: form.name.trim() || undefined,
+      email: form.email.trim(),
+      message: form.message.trim(),
+      consent: form.consent,
+    }
+    const parsed = contactSchema.safeParse(payload)
+    if (!parsed.success) {
+      const errors: FieldErrors = {}
+      for (const issue of parsed.error.issues) {
+        const path = issue.path[0] as string
+        if (path && !errors[path]) errors[path] = issue.message
+      }
+      setFieldErrors(errors)
+      return
+    }
+    setLoading(true)
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(parsed.data),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        const msg = data?.error || 'Erreur'
+        setApiError(msg)
+        return
+      }
+      setSent(true)
+      setForm({ name: '', email: '', message: '', consent: false })
+      toast.success('Message envoyé. Nous vous répondrons sous 24 à 48 h.')
+    } catch (e) {
+      setApiError(e instanceof Error ? e.message : 'Erreur d\'envoi')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (sent) {
+    return (
+      <div
+        className="rounded-2xl border border-green-200 bg-green-50 dark:border-green-900/50 dark:bg-green-900/20 p-6 text-center"
+        role="status"
+        aria-live="polite"
+      >
+        <p className="font-semibold text-green-800 dark:text-green-200">
+          Message bien reçu
+        </p>
+        <p className="mt-2 text-[14px] text-green-700 dark:text-green-300">
+          Nous vous répondrons à l&apos;adresse indiquée sous 24 à 48 h ouvrées.
+        </p>
+        <button
+          type="button"
+          onClick={() => setSent(false)}
+          className="mt-4 text-sm font-medium text-green-700 dark:text-green-300 underline hover:no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 rounded"
+        >
+          Envoyer un autre message
+        </button>
+      </div>
+    )
+  }
+
+  const inputErrorClass = 'border-red-500 dark:border-red-400 focus-visible:ring-red-500'
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6 shadow-sm"
+      aria-labelledby="contact-form-heading"
+      noValidate
+    >
+      <h2 id="contact-form-heading" className="heading-subsection">
+        Envoyer un message
+      </h2>
+      <p className="text-[14px] text-token-text/75">
+        Remplissez le formulaire ci-dessous. Réponse sous 24 à 48 h ouvrées.
+      </p>
+
+      {apiError && (
+        <div
+          role="alert"
+          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-200"
+        >
+          {apiError}
+        </div>
+      )}
+
+      <div>
+        <label htmlFor="contact-name" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">
+          Nom (optionnel)
+        </label>
+        <input
+          id="contact-name"
+          name="name"
+          type="text"
+          value={form.name}
+          onChange={handleChange}
+          className={`w-full rounded-xl border bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${fieldErrors.name ? inputErrorClass : 'border-[hsl(var(--border))] focus-visible:ring-[hsl(var(--accent))]'}`}
+          placeholder="Votre nom"
+          aria-invalid={!!fieldErrors.name}
+          aria-describedby={fieldErrors.name ? 'contact-name-error' : undefined}
+        />
+        {fieldErrors.name && (
+          <p id="contact-name-error" role="alert" className="mt-1 text-sm text-red-600 dark:text-red-400">
+            {fieldErrors.name}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <label htmlFor="contact-email" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">
+          Email *
+        </label>
+        <input
+          id="contact-email"
+          name="email"
+          type="email"
+          required
+          value={form.email}
+          onChange={handleChange}
+          className={`w-full rounded-xl border bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${fieldErrors.email ? inputErrorClass : 'border-[hsl(var(--border))] focus-visible:ring-[hsl(var(--accent))]'}`}
+          placeholder="vous@exemple.fr"
+          aria-invalid={!!fieldErrors.email}
+          aria-describedby={fieldErrors.email ? 'contact-email-error' : undefined}
+        />
+        {fieldErrors.email && (
+          <p id="contact-email-error" role="alert" className="mt-1 text-sm text-red-600 dark:text-red-400">
+            {fieldErrors.email}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <label htmlFor="contact-message" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">
+          Message *
+        </label>
+        <textarea
+          id="contact-message"
+          name="message"
+          required
+          rows={5}
+          minLength={10}
+          value={form.message}
+          onChange={handleChange}
+          className={`w-full rounded-xl border bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${fieldErrors.message ? inputErrorClass : 'border-[hsl(var(--border))] focus-visible:ring-[hsl(var(--accent))]'}`}
+          placeholder="Décrivez votre demande en quelques mots…"
+          aria-invalid={!!fieldErrors.message}
+          aria-describedby={fieldErrors.message ? 'contact-message-error' : undefined}
+        />
+        {fieldErrors.message ? (
+          <p id="contact-message-error" role="alert" className="mt-1 text-sm text-red-600 dark:text-red-400">
+            {fieldErrors.message}
+          </p>
+        ) : (
+          <p className="mt-1 text-[12px] text-token-text/60">Minimum 10 caractères.</p>
+        )}
+      </div>
+
+      <div className="flex items-center gap-2">
+        <input
+          id="contact-consent"
+          name="consent"
+          type="checkbox"
+          checked={form.consent}
+          onChange={handleChange}
+          className="rounded border-[hsl(var(--border))] text-[hsl(var(--accent))] focus:ring-[hsl(var(--accent))]"
+        />
+        <label htmlFor="contact-consent" className="text-sm text-token-text/80">
+          J&apos;accepte que mes données soient utilisées pour me recontacter.
+        </label>
+      </div>
+
+      <button
+        type="submit"
+        disabled={loading}
+        aria-busy={loading}
+        className="w-full rounded-xl bg-[hsl(var(--accent))] px-5 py-3 text-[15px] font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-md)] transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 disabled:opacity-60"
+      >
+        {loading ? 'Envoi en cours…' : 'Envoyer le message'}
+      </button>
+    </form>
+  )
+}

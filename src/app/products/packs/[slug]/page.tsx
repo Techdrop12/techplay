@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 
 import type { Pack } from '@/types/product'
 import type { Metadata } from 'next'
@@ -16,9 +17,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params
   const pack = await getPackBySlug(slug)
   if (!pack) {
+    const t = await getTranslations('seo_extra')
     return {
-      title: 'Pack introuvable – TechPlay',
-      description: 'Ce pack n’est pas ou plus disponible sur notre boutique TechPlay.',
+      title: t('pack_not_found_title'),
+      description: t('pack_not_found_description'),
       robots: { index: false, follow: true },
     }
   }
@@ -52,7 +54,7 @@ export default async function PackPage({ params }: { params: Promise<{ slug: str
         <PackDetails pack={safePack} />
       </main>
 
-      {/* On réutilise le JSON-LD “Product” pour le pack (prix, image, etc.) */}
+      {/* On réutilise le JSON-LD "Product" pour le pack (prix, image, etc.) */}
       <ProductJsonLd product={safePack} />
     </>
   )

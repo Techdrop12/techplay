@@ -16,6 +16,7 @@ import {
   UserIcon as User,
 } from '@/components/ui/premium-icons'
 import ThemeToggle from '@/components/ui/ThemeToggle'
+import { useTheme } from '@/context/themeContext'
 import { useCart } from '@/hooks/useCart'
 import { useWishlist } from '@/hooks/useWishlist'
 import { getCategories } from '@/lib/categories'
@@ -238,7 +239,7 @@ export default function Header() {
   const t = STR[locale]
   const L = (path: string) => localizePath(path, locale)
 
-  const searchAction = L('/products')
+  const searchAction = L('/search')
   const categories = useMemo(() => getCategories(locale), [locale])
 
   const cartStore = useCart() as CartStoreLike
@@ -250,6 +251,7 @@ export default function Header() {
     [wishlistStore?.wishlist]
   )
 
+  const { resolvedTheme } = useTheme()
   const [hidden, setHidden] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [catOpen, setCatOpen] = useState(false)
@@ -283,6 +285,11 @@ export default function Header() {
     clearCatTimer()
     catTimerRef.current = window.setTimeout(() => setCatOpen(false), delay)
   }
+
+  // Fermer le menu catégories au changement de thème (évite qu’un overlay reste actif et bloque les clics)
+  useEffect(() => {
+    setCatOpen(false)
+  }, [resolvedTheme])
 
   const isActive = (href: string) => {
     const localized = L(href)

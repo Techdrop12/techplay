@@ -1,6 +1,7 @@
 'use client'
 
 import { motion, useReducedMotion, type Variants } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import { usePathname } from 'next/navigation'
 import {
   useEffect,
@@ -206,6 +207,8 @@ export default function BestProducts({
   const pathname = usePathname() || '/'
   const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr'
   const reduceMotion = useReducedMotion()
+  const tProductList = useTranslations('product_list')
+  const tCommon = useTranslations('common')
 
   const t = useMemo(() => {
     if (locale === 'en') {
@@ -374,7 +377,7 @@ export default function BestProducts({
         </div>
 
         <p className="mt-6 text-center text-sm text-token-text/70" role="status" aria-live="polite">
-          {t.loading}
+          {tProductList('loading_products')}
         </p>
       </section>
     )
@@ -494,7 +497,7 @@ export default function BestProducts({
                 }}
                 className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-xs font-semibold transition hover:shadow"
               >
-                {t.reset}
+                {tCommon('reset_filters')}
               </button>
             ) : null}
           </div>

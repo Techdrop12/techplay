@@ -1,5 +1,6 @@
 // src/app/blog/page.tsx
 import { cookies, headers } from 'next/headers'
+import { getTranslations } from 'next-intl/server'
 
 import type { Metadata } from 'next'
 
@@ -238,6 +239,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
       ? pickedLocale
       : DEFAULT_LOCALE
 
+  const t = await getTranslations('common')
   const resolved = searchParams ? await searchParams : undefined
   const opts = toBlogOptions(resolved)
 
@@ -340,7 +342,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
               className="text-[13px] font-medium text-token-text/70 transition hover:text-[hsl(var(--accent))]"
               prefetch={false}
             >
-              Réinitialiser
+              {t('reset_filters')}
             </Link>
           )}
         </div>

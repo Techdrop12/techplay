@@ -1,7 +1,9 @@
 'use client'
 
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { toast } from 'react-hot-toast'
 
 import type { Product } from '@/types/product'
 
@@ -26,14 +28,68 @@ function getProductKey(p: Keyable, i: number): string | number {
 
 export default function WishlistClient() {
   const t = useTranslations('wishlist')
+  const { data: session } = useSession()
+  const [syncing, setSyncing] = useState(false)
+  const isLoggedIn = Boolean(session?.user?.email)
 
   const wishlistState = useWishlist() as {
     items?: unknown[]
     count?: number
+    add: (item: unknown) => void
+    remove: (id: string) => void
+    clear: () => void
   }
 
   const items = Array.isArray(wishlistState?.items) ? wishlistState.items : []
   const count = typeof wishlistState?.count === 'number' ? wishlistState.count : items.length
+
+  const saveToServer = useCallback(async () => {
+    if (!isLoggedIn) return
+    setSyncing(true)
+    try {
+      const ids = items
+        .map((item) => (item as { id?: string; _id?: string })?.id ?? (item as { _id?: string })?._id)
+        .filter(Boolean) as string[]
+      const res = await fetch('/api/wishlist', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productIds: ids }),
+      })
+      if (!res.ok) throw new Error('Erreur')
+      toast.success('Liste sauvegardée sur votre compte.')
+    } catch {
+      toast.error('Impossible de sauvegarder la liste.')
+    } finally {
+      setSyncing(false)
+    }
+  }, [isLoggedIn, items])
+
+  const loadFromServer = useCallback(async () => {
+    if (!isLoggedIn || !wishlistState.clear) return
+    setSyncing(true)
+    try {
+      const res = await fetch('/api/wishlist')
+      if (!res.ok) throw new Error('Erreur')
+      const data = await res.json()
+      const productIds: string[] = data?.productIds ?? []
+      if (productIds.length === 0) {
+        wishlistState.clear()
+        toast.success('Liste chargée (vide).')
+        setSyncing(false)
+        return
+      }
+      const productsRes = await fetch(`/api/products/by-ids?ids=${productIds.join(',')}`)
+      if (!productsRes.ok) throw new Error('Erreur chargement produits')
+      const products = (await productsRes.json()) as (Product & { _id: string })[]
+      wishlistState.clear()
+      products.forEach((p) => wishlistState.add({ ...p, id: String(p._id ?? '') }))
+      toast.success('Liste chargée depuis votre compte.')
+    } catch {
+      toast.error('Impossible de charger la liste.')
+    } finally {
+      setSyncing(false)
+    }
+  }, [isLoggedIn, wishlistState])
 
   const wishlist = useMemo(() => {
     return items
@@ -118,6 +174,26 @@ export default function WishlistClient() {
           <p className="mt-6 text-center text-[13px] text-token-text/60">
             Sauvegardé sur cet appareil. Ajoutez au panier depuis chaque carte.
           </p>
+          {isLoggedIn && (
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={saveToServer}
+                disabled={syncing}
+                className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 text-sm font-medium text-[hsl(var(--text))] hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] disabled:opacity-60"
+              >
+                {syncing ? 'Synchronisation…' : 'Sauvegarder sur mon compte'}
+              </button>
+              <button
+                type="button"
+                onClick={loadFromServer}
+                disabled={syncing}
+                className="rounded-xl bg-[hsl(var(--accent))] px-4 py-2 text-sm font-semibold text-[hsl(var(--accent-fg))] hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] disabled:opacity-60"
+              >
+                Charger depuis mon compte
+              </button>
+            </div>
+          )}
         </>
       )}
     </main>

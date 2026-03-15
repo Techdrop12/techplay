@@ -33,13 +33,20 @@ export default function ReviewList({ productId }: ReviewListProps) {
   const [sort, setSort] = useState('recent');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+
+  const retry = () => {
+    setError(null);
+    setRetryCount((c) => c + 1);
+  };
 
   useEffect(() => {
     if (!productId) return;
     setLoading(true);
     setError(null);
 
-    fetch(`/api/reviews/product/${productId}`)
+    const controller = new AbortController();
+    fetch(`/api/reviews/product/${productId}`, { signal: controller.signal })
       .then((res) => {
         if (!res.ok) throw new Error('Erreur réseau');
         return res.json();
@@ -51,9 +58,13 @@ export default function ReviewList({ productId }: ReviewListProps) {
         );
         setReviews(sorted);
       })
-      .catch(() => setError(t('error_loading')))
+      .catch((err) => {
+        if (err.name !== 'AbortError') setError(t('error_loading'));
+      })
       .finally(() => setLoading(false));
-  }, [productId, t]);
+
+    return () => controller.abort();
+  }, [productId, t, retryCount]);
 
   const filteredReviews = useMemo(() => {
     return reviews
@@ -71,8 +82,9 @@ export default function ReviewList({ productId }: ReviewListProps) {
       <div className="text-sm text-red-600 mt-4 text-center" role="alert">
         {error}{' '}
         <button
-          onClick={() => window.location.reload()}
-          className="underline focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+          type="button"
+          onClick={retry}
+          className="underline focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[hsl(var(--accent))] rounded"
         >
           {t('retry')}
         </button>

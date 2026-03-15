@@ -7,9 +7,9 @@ import Blog from '@/models/Blog'
 const DEFAULT_LIMIT = 12
 const DEFAULT_SORT = '-publishedAt -createdAt'
 const LIST_PROJECTION =
-  'title slug excerpt coverImage tags category published publishedAt createdAt updatedAt'
+  'title slug description image author published publishedAt createdAt updatedAt'
 const DETAIL_PROJECTION =
-  'title slug excerpt content coverImage tags category published publishedAt createdAt updatedAt seo'
+  'title slug description image author published publishedAt createdAt updatedAt'
 
 const CACHE_TTL = 60_000
 const cache = new Map<string, { data: unknown; exp: number }>()
@@ -175,7 +175,7 @@ export async function getRelatedPosts(
   await dbConnect()
   const post =
     typeof slugOrPost === 'string'
-      ? await Blog.findOne({ slug: slugOrPost }).select('tags category published').lean()
+      ? await Blog.findOne({ slug: slugOrPost }).select('slug published').lean()
       : slugOrPost
 
   if (!post || typeof post !== 'object') return []
@@ -184,12 +184,6 @@ export async function getRelatedPosts(
   const filter: Record<string, unknown> = {
     published: true,
     slug: { $ne: postObj.slug },
-    $or: [
-      ...(Array.isArray(postObj.tags) && postObj.tags.length
-        ? [{ tags: { $in: postObj.tags } }]
-        : []),
-      ...(postObj.category ? [{ category: postObj.category }] : []),
-    ],
   }
 
   return Blog.find(filter)

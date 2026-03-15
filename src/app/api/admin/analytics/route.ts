@@ -1,0 +1,41 @@
+import { NextResponse } from 'next/server'
+
+import { connectToDatabase } from '@/lib/db'
+import Order from '@/models/Order'
+import Product from '@/models/Product'
+import { requireAdmin } from '@/lib/requireAdmin'
+
+export async function GET() {
+  const err = await requireAdmin()
+  if (err) return err
+
+  try {
+    await connectToDatabase()
+
+    const [ordersCount, productsCount, ordersAgg] = await Promise.all([
+      Order.countDocuments().exec(),
+      Product.countDocuments().exec(),
+      Order.aggregate([
+        { $match: {} },
+        { $group: { _id: null, totalSales: { $sum: '$total' }, count: { $sum: 1 } } },
+      ]).exec(),
+    ])
+
+    const totalSales = ordersAgg[0]?.totalSales ?? 0
+    const averageBasket = ordersCount > 0 ? totalSales / ordersCount : 0
+
+    return NextResponse.json({
+      totalSales: Math.round(totalSales * 100) / 100,
+      orders: ordersCount,
+      products: productsCount,
+      averageBasket: Math.round(averageBasket * 100) / 100,
+      generatedAt: new Date().toISOString(),
+    })
+  } catch (e) {
+    console.error('[admin/analytics]', e)
+    return NextResponse.json(
+      { error: 'Erreur serveur' },
+      { status: 500 }
+    )
+  }
+}

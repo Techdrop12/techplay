@@ -12,6 +12,7 @@
     text-rendering: optimizeLegibility;
     -webkit-text-size-adjust: 100%;
     scroll-padding-top: calc(var(--header-offset, 4.5rem) + 0.5rem);
+    -webkit-tap-highlight-color: hsl(var(--accent) / 0.12);
 
     /* Scrollbar fallback natif */
     scrollbar-width: thin;
@@ -153,6 +154,7 @@
       0 0 0 var(--ring-offset) hsl(var(--surface)),
       0 0 0 calc(var(--ring-offset) + var(--ring-width, 2px)) hsl(var(--accent));
     border-radius: 0.5rem;
+    transition: box-shadow var(--dur-fast) ease;
   }
 
   input,
@@ -190,6 +192,21 @@
     color: hsl(var(--text) / 0.45);
   }
 
+  @media (max-width: 768px) {
+    input,
+    textarea,
+    select {
+      min-height: 2.75rem;
+      font-size: 16px;
+    }
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  a[href] {
+    cursor: pointer;
+  }
+
   ::selection {
     background: var(--selection-bg);
     color: var(--selection-fg);
@@ -202,31 +219,36 @@
     width: 100%;
     margin-inline: auto;
     max-width: var(--container-max);
-    padding-inline: clamp(1rem, 4vw, 1.5rem);
+    padding-inline: max(clamp(1rem, 4vw, 1.5rem), env(safe-area-inset-left)) max(clamp(1rem, 4vw, 1.5rem), env(safe-area-inset-right));
   }
 
   @media (max-width: 639px) {
     .container-app {
-      padding-inline: clamp(1rem, 5vw, 1.25rem);
+      padding-inline: max(clamp(1rem, 5vw, 1.25rem), env(safe-area-inset-left)) max(clamp(1rem, 5vw, 1.25rem), env(safe-area-inset-right));
     }
   }
 
   @media (min-width: 640px) {
     .container-app {
-      padding-inline: clamp(1.25rem, 5vw, 2rem);
+      padding-inline: max(clamp(1.25rem, 5vw, 2rem), env(safe-area-inset-left)) max(clamp(1.25rem, 5vw, 2rem), env(safe-area-inset-right));
     }
   }
 
   @media (min-width: 1024px) {
     .container-app {
-      padding-inline: clamp(1.5rem, 5vw, 2.5rem);
+      padding-inline: max(clamp(1.5rem, 5vw, 2.5rem), env(safe-area-inset-left)) max(clamp(1.5rem, 5vw, 2.5rem), env(safe-area-inset-right));
     }
   }
 
   @media (min-width: 1280px) {
     .container-app {
-      padding-inline: clamp(2rem, 6vw, 3rem);
+      padding-inline: max(clamp(2rem, 6vw, 3rem), env(safe-area-inset-left)) max(clamp(2rem, 6vw, 3rem), env(safe-area-inset-right));
     }
+  }
+
+  .content-readability {
+    max-width: 65ch;
+    line-height: 1.7;
   }
 
   .card {
@@ -416,7 +438,7 @@
   }
 
   .page-entrance {
-    animation: fadeInUpPage var(--dur-slow) var(--ease-out) forwards;
+    animation: fadeInUpPage var(--dur) var(--ease-out) forwards;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -652,6 +674,26 @@
     animation: modalIn 0.28s var(--ease-out) forwards;
   }
 
+  /** Apparition douce du bouton « Remonter » */
+  .scroll-top-entrance {
+    opacity: 0;
+    transform: scale(0.92);
+    animation: scrollTopIn 0.22s var(--ease-out) forwards;
+  }
+  @keyframes scrollTopIn {
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-top-entrance {
+      opacity: 1;
+      transform: none;
+      animation: none;
+    }
+  }
+
   /* Subtle entrance for inline elements (headings, CTAs) */
   .animate-in {
     opacity: 0;
@@ -879,4 +921,54 @@
   }
 }
 
+/** Barre de navigation : remplissage rapide 0 → 100% */
+@keyframes nav-progress-fill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.nav-progress-bar-inner {
+  animation: nav-progress-fill 0.28s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
 /* fadeInUp et slideUpStagger sont définis dans design-tokens.css */
+
+/* ===================== Impression ===================== */
+@media print {
+  body {
+    background: #fff;
+    background-image: none;
+    color: #111;
+  }
+
+  header[role="banner"],
+  header:not([role]),
+  nav[aria-label],
+  .fixed,
+  .sticky,
+  [data-print-hide],
+  footer,
+  .scroll-top-entrance,
+  aside[role="region"],
+  [class*="StickyCart"],
+  [class*="StickyFreeShipping"],
+  [class*="ConsentBanner"],
+  [class*="ScrollTop"],
+  [class*="CartIndicator"] {
+    display: none !important;
+  }
+
+  main {
+    padding-top: 0 !important;
+  }
+
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    color: #555;
+  }
+}

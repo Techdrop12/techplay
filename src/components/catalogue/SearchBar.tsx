@@ -174,7 +174,7 @@ export default function SearchBar({
       logEvent?.('search_submit', { query: value, count: results.length })
     } catch {}
 
-    router.push(`/products?q=${encodeURIComponent(value)}`)
+    router.push(`/search?q=${encodeURIComponent(value)}`)
     setOpen(false)
   }
 

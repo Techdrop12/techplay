@@ -1,6 +1,7 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import {
   useEffect,
   useId,
@@ -10,7 +11,7 @@ import {
   type KeyboardEventHandler,
   type SVGProps,
   type JSX,
-} from 'react';
+} from 'react'
 
 import { event as gaEvent, logEvent, pushDataLayer } from '@/lib/ga'
 import { cn } from '@/lib/utils'
@@ -102,6 +103,7 @@ export default function FilterPanel({
   id,
   className,
 }: Props) {
+  const t = useTranslations('common')
   const reduced = useReducedMotion()
   const generatedId = useId()
   const groupId = id ?? generatedId
@@ -259,12 +261,12 @@ export default function FilterPanel({
           <motion.button
             key="reset"
             type="button"
-            aria-label="Réinitialiser le filtre"
+            aria-label={t('reset_filters')}
             onClick={() => setSelected(null)}
             whileTap={reduced ? undefined : { scale: 0.97 }}
             className="shrink-0 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3.5 py-2.5 text-[12px] font-medium text-token-text/80 hover:border-[hsl(var(--accent)/.4)] hover:bg-[hsl(var(--surface-2))] hover:text-token-text focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
           >
-            Réinitialiser
+            {t('reset_filters')}
           </motion.button>
         )}
       </div>

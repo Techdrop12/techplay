@@ -1,6 +1,7 @@
 'use client'
 
 import Fuse from 'fuse.js'
+import { useTranslations } from 'next-intl'
 import { usePathname } from 'next/navigation'
 import { useDeferredValue, useMemo, useState } from 'react'
 
@@ -84,6 +85,7 @@ export default function ProductCatalogue({
 }: Props) {
   const pathname = usePathname() || '/'
   const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr'
+  const tCommon = useTranslations('common')
 
   const t =
     locale === 'en'
@@ -100,7 +102,6 @@ export default function ProductCatalogue({
           searchResults: 'Search results',
           noResults: 'No products found.',
           noResultsHint: 'Try another keyword, category, or sort option.',
-          clearFilters: 'Clear filters',
           allCategories: 'All categories',
           activeCategory: 'Selected category',
           activePrice: 'Active price filter',
@@ -118,7 +119,6 @@ export default function ProductCatalogue({
           searchResults: 'Résultats de recherche',
           noResults: 'Aucun produit trouvé.',
           noResultsHint: 'Essaie un autre mot-clé, une autre catégorie ou un autre tri.',
-          clearFilters: 'Réinitialiser les filtres',
           allCategories: 'Toutes les catégories',
           activeCategory: 'Catégorie sélectionnée',
           activePrice: 'Filtre prix actif',
@@ -303,7 +303,7 @@ export default function ProductCatalogue({
                       'hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2'
                     )}
                   >
-                    {t.clearFilters}
+                    {tCommon('reset_filters')}
                   </button>
                 ) : null}
               </div>

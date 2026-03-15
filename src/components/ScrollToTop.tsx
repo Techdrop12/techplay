@@ -50,12 +50,12 @@ export default function ScrollToTop({
 
   if (!visible) return null
 
-  const scrollTop = () => {
-    const prefersReduced =
-      typeof window !== 'undefined' &&
-      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  const prefersReducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
-    window.scrollTo({ top: 0, behavior: prefersReduced ? 'auto' : 'smooth' })
+  const scrollTop = () => {
+    window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' })
   }
 
   return (
@@ -64,6 +64,7 @@ export default function ScrollToTop({
       onClick={scrollTop}
       className={cn(
         'fixed z-50 inline-grid h-11 w-11 place-items-center rounded-full shadow-[var(--shadow-md)] outline-none transition',
+        'scroll-top-entrance',
         'focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2',
         highContrast
           ? 'bg-[hsl(var(--text))] text-[hsl(var(--bg))] hover:opacity-90 dark:bg-[hsl(var(--text))] dark:text-[hsl(var(--bg))]'

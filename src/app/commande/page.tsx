@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef } from 'react'
+import { useTranslations } from 'next-intl'
 
 import type { Product } from '@/types/product'
 
@@ -12,6 +13,7 @@ import Link from '@/components/LocalizedLink'
 import { useCart } from '@/hooks/useCart'
 import { detectCurrency } from '@/lib/currency'
 import { mapProductToGaItem, pushDataLayer, trackBeginCheckout } from '@/lib/ga'
+import { formatPrice } from '@/lib/utils'
 
 type CheckoutItem = Product & { quantity: number }
 
@@ -72,6 +74,7 @@ function normalizeCartItem(value: unknown): CheckoutItem | null {
 }
 
 export default function CheckoutPage() {
+  const t = useTranslations('checkout')
   const { cart } = useCart()
   const hasFiredRef = useRef(false)
 
@@ -148,7 +151,7 @@ export default function CheckoutPage() {
         <ol className="flex items-center gap-1.5">
           <li>
             <Link href="/" className="transition hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded" prefetch={false}>
-              Accueil
+              {t('breadcrumb_home')}
             </Link>
           </li>
           <li aria-hidden="true">/</li>
@@ -160,10 +163,10 @@ export default function CheckoutPage() {
         id="checkout-title"
         className="heading-page"
       >
-        Finaliser ma commande
+        {t('page_title')}
       </h1>
       <p className="mt-1 text-[13px] text-token-text/70">
-        {itemsCount} article{itemsCount > 1 ? 's' : ''} · Paiement sécurisé en 2 étapes
+        {t('items_step', { count: itemsCount })}
       </p>
 
       {!isEmpty && (
@@ -178,40 +181,40 @@ export default function CheckoutPage() {
           role="alert"
           aria-live="polite"
         >
-          <p className="mb-6 text-lg text-token-text/70">Votre panier est vide.</p>
+          <p className="mb-6 text-lg text-token-text/70">{t('cart_empty')}</p>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/products"
               className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] px-6 py-2.5 text-sm font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-lg)] transition hover:opacity-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)]"
             >
-              Parcourir les produits
+              {t('browse_products')}
             </Link>
 
             <Link
               href="/products/packs"
               className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-6 py-2.5 text-sm font-medium text-token-text transition hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
             >
-              Voir les packs
+              {t('view_packs')}
             </Link>
           </div>
         </section>
       ) : (
         <>
           <div className="mt-8 grid items-start gap-8 lg:grid-cols-[1fr,minmax(360px,420px)] lg:gap-10" aria-live="polite">
-            <section className="min-w-0 space-y-6 lg:col-span-1" aria-label="Articles du panier">
+            <section className="min-w-0 space-y-6 lg:col-span-1" aria-label={t('cart_aria')}>
               <CartList items={items} />
             </section>
 
             <aside
               id="paiement"
               className="sticky top-24 h-fit space-y-6 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-5 shadow-[var(--shadow-md)] sm:p-6 scroll-mt-28"
-              aria-label="Résumé et paiement"
+              aria-label={t('summary_aria')}
             >
               <CartSummary items={items} />
               <CheckoutForm />
               <p className="text-center text-[11px] text-token-text/60">
-                Paiement sécurisé Stripe · Livraison 48–72 h · Retours 30 jours
+                {t('secure_note')}
               </p>
             </aside>
           </div>
@@ -220,17 +223,17 @@ export default function CheckoutPage() {
             <div className="mx-4 mb-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-4 shadow-[var(--shadow-lg)]">
               <div className="flex items-center justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-[12px] text-token-text/70">Total</p>
+                  <p className="text-[12px] text-token-text/70">{t('total')}</p>
                   <p className="text-base font-bold tabular-nums text-[hsl(var(--text))] truncate">
-                    {new Intl.NumberFormat('fr-FR', { style: 'currency', currency }).format(subtotal)}
+                    {formatPrice(subtotal, { currency })}
                   </p>
                 </div>
                 <a
                   href="#paiement"
                   className="touch-target shrink-0 inline-flex min-h-[2.75rem] items-center justify-center rounded-xl bg-[hsl(var(--accent))] px-6 py-3 text-[15px] font-bold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-sm)] transition hover:opacity-95 active:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-                  aria-label="Aller au formulaire de paiement"
+                  aria-label={t('continue_to_payment_aria')}
                 >
-                  Continuer
+                  {t('continue_btn')}
                 </a>
               </div>
             </div>

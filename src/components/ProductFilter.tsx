@@ -1,8 +1,9 @@
-'use client';
+'use client'
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react'
+import { useTranslations } from 'next-intl'
 
-import type { Product } from '@/types/product';
+import type { Product } from '@/types/product'
 
 export type ProductFilterSort = 'new' | 'price_asc' | 'price_desc' | 'rating' | 'promo';
 
@@ -28,6 +29,7 @@ export default function ProductFilter({
   onFilter,
   initial = {},
 }: ProductFilterProps) {
+  const t = useTranslations('common')
   const [q, setQ] = useState(initial.q ?? '');
   const [selectedCategory, setSelectedCategory] = useState(initial.category ?? '');
   const [minPrice, setMinPrice] = useState(
@@ -282,9 +284,9 @@ export default function ProductFilter({
             type="button"
             onClick={reset}
             className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 text-[13px] font-medium transition hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-            aria-label="Réinitialiser tous les filtres"
+            aria-label={t('reset_filters')}
           >
-            Réinitialiser
+            {t('reset_filters')}
           </button>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 
 import BackToHomeLink from '@/components/BackToHomeLink'
+import Link from '@/components/LocalizedLink'
 import { getErrorMessage } from '@/lib/errors'
 
 export default function RootError({
@@ -45,6 +46,12 @@ export default function RootError({
             {tCommon('retry')}
           </button>
           <BackToHomeLink variant="outline" prefetch={false} className="focus-visible:ring-4" />
+          <Link
+            href="/contact"
+            className="btn-outline inline-flex min-h-[48px] items-center justify-center rounded-full px-6 py-2.5 text-[15px] font-semibold focus-visible:ring-4"
+          >
+            {t('contact_support')}
+          </Link>
         </div>
       </div>
     </main>

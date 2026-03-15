@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion, type Variants } from 'framer-motion'
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 import { usePathname } from 'next/navigation'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 
@@ -207,6 +208,7 @@ export default function PacksSection({
 }: Props) {
   const pathname = usePathname() || '/'
   const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr'
+  const tCommon = useTranslations('common')
 
   const t = useMemo(() => {
     if (locale === 'en') {
@@ -231,7 +233,6 @@ export default function PacksSection({
         sortPriceDesc: 'Price ↓',
         sortItems: 'Item count',
         noResults: 'No bundles match the selected filters.',
-        resetFilters: 'Reset filters',
         displayed: (visible: number, total: number) => `${visible} / ${total} bundles displayed`,
         seeMore: 'Show more',
         moreShown: (n: number) => `${n} additional bundles displayed.`,
@@ -565,7 +566,7 @@ export default function PacksSection({
             }}
             className="mt-4 inline-flex items-center gap-2 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[13px] font-semibold transition hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
           >
-            {t.resetFilters}
+            {tCommon('reset_filters')}
           </button>
         </div>
       ) : (

@@ -8,16 +8,24 @@
 
 import { NextResponse } from 'next/server'
 
-import { serverEnv } from '@/env.server'
+import { getSession } from '@/lib/auth'
 import {
   type Order,
   type OrderItem,
   formatInvoiceData,
   renderInvoicePDFStream,
 } from '@/lib/pdf'
+import { createRateLimiter, ipFromRequest } from '@/lib/rateLimit'
+import { serverEnv } from '@/env.server'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
+
+const invoiceLimiter = createRateLimiter({
+  id: 'invoice',
+  limit: 10,
+  intervalMs: 60_000,
+})
 
 type InvoiceBody = {
   order?: Record<string, unknown>
@@ -264,6 +272,20 @@ function buildOrderFromBody(body: unknown): Order {
 }
 
 export async function POST(req: Request) {
+  const key = ipFromRequest(req)
+  const rl = invoiceLimiter.check(key)
+  if (!rl.ok) {
+    return new NextResponse('Trop de requêtes. Réessayez plus tard.', {
+      status: 429,
+      headers: invoiceLimiter.headers(rl),
+    })
+  }
+
+  const session = await getSession()
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: 'Non autorisé. Connexion requise.' }, { status: 401 })
+  }
+
   let body: unknown = {}
 
   try {
@@ -277,6 +299,8 @@ export async function POST(req: Request) {
   if (!Array.isArray(order.items) || order.items.length === 0) {
     return NextResponse.json({ error: 'Aucun article dans la commande.' }, { status: 400 })
   }
+
+  const resHeaders = new Headers(invoiceLimiter.headers(rl))
 
   const data = formatInvoiceData(order, {
     defaultTaxRate: 0.2,
@@ -302,15 +326,13 @@ export async function POST(req: Request) {
     title: `Facture ${data.invoiceNumber}`,
   })
 
-  return new NextResponse(stream, {
-    headers: {
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="${filename}"`,
-      'Cache-Control': 'no-store, no-cache, must-revalidate',
-      Pragma: 'no-cache',
-      Expires: '0',
-    },
-  })
+  resHeaders.set('Content-Type', 'application/pdf')
+  resHeaders.set('Content-Disposition', `attachment; filename="${filename}"`)
+  resHeaders.set('Cache-Control', 'no-store, no-cache, must-revalidate')
+  resHeaders.set('Pragma', 'no-cache')
+  resHeaders.set('Expires', '0')
+
+  return new NextResponse(stream, { headers: resHeaders })
 }
 
 export async function OPTIONS() {

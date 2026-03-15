@@ -1,8 +1,9 @@
-'use client';
+'use client'
 
-import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
-import { toast } from 'react-hot-toast';
+import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { useState, useEffect } from 'react'
+import { toast } from 'react-hot-toast'
 
 interface EditProductFormProps {
   productId: string;
@@ -22,28 +23,30 @@ interface EditProductFormData {
 }
 
 export default function EditProductForm({ productId }: EditProductFormProps) {
-  const router = useRouter();
-  const [formData, setFormData] = useState<EditProductFormData | null>(null);
-  const [loading, setLoading] = useState(false);
+  const t = useTranslations('admin')
+  const tCommon = useTranslations('common')
+  const router = useRouter()
+  const [formData, setFormData] = useState<EditProductFormData | null>(null)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     async function fetchProduct() {
       try {
-        const res = await fetch(`/api/admin/products/${productId}`);
-        if (!res.ok) throw new Error('Produit non trouvé');
-        const data = await res.json();
+        const res = await fetch(`/api/admin/products/${productId}`)
+        if (!res.ok) throw new Error(t('product_not_found'))
+        const data = await res.json()
         setFormData({
           ...data,
           tags: data.tags?.join(', ') || '',
           images: data.images || [],
           stock: data.stock || 0,
-        });
-      } catch {
-        toast.error('Erreur chargement produit');
+        })
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : t('error_load_product'))
       }
     }
-    fetchProduct();
-  }, [productId]);
+    fetchProduct()
+  }, [productId, t])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -80,90 +83,132 @@ export default function EditProductForm({ productId }: EditProductFormProps) {
     }
   };
 
-  if (!formData) return <p>Chargement...</p>;
+  if (!formData) {
+    return (
+      <p className="text-token-text/60 animate-pulse p-4" role="status" aria-live="polite">
+        {tCommon('loading')}
+      </p>
+    )
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto p-4 bg-white rounded shadow">
-      <h2 className="text-xl font-bold">Modifier un produit</h2>
+    <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto p-4 bg-white dark:bg-[hsl(var(--surface))] rounded-xl shadow-[var(--shadow-sm)] border border-[hsl(var(--border))]" aria-labelledby="edit-product-heading">
+      <h2 id="edit-product-heading" className="text-xl font-bold text-[hsl(var(--text))]">{t('edit_product')}</h2>
 
-      <input
-        name="title"
-        value={String(formData.title ?? '')}
-        onChange={handleChange}
-        placeholder="Titre"
-        className="w-full border px-3 py-2 rounded"
-        required
-      />
-      <input
-        name="slug"
-        value={String(formData.slug ?? '')}
-        onChange={handleChange}
-        placeholder="Slug (URL)"
-        className="w-full border px-3 py-2 rounded"
-        required
-      />
-      <textarea
-        name="description"
-        value={formData.description}
-        onChange={handleChange}
-        placeholder="Description"
-        className="w-full border px-3 py-2 rounded"
-        required
-      />
-      <input
-        name="price"
-        type="number"
-        step="0.01"
-        value={formData.price}
-        onChange={handleChange}
-        placeholder="Prix (€)"
-        className="w-full border px-3 py-2 rounded"
-        required
-      />
-      <input
-        name="image"
-        value={formData.image}
-        onChange={handleChange}
-        placeholder="URL image principale"
-        className="w-full border px-3 py-2 rounded"
-        required
-      />
-      <input
-        name="images"
-        value={Array.isArray(formData.images) ? formData.images.join(', ') : formData.images}
-        onChange={handleChange}
-        placeholder="Images supplémentaires (séparées par virgules)"
-        className="w-full border px-3 py-2 rounded"
-      />
-      <input
-        name="category"
-        value={formData.category}
-        onChange={handleChange}
-        placeholder="Catégorie"
-        className="w-full border px-3 py-2 rounded"
-      />
-      <input
-        name="stock"
-        type="number"
-        value={formData.stock}
-        onChange={handleChange}
-        placeholder="Stock"
-        className="w-full border px-3 py-2 rounded"
-      />
-      <input
-        name="tags"
-        value={formData.tags}
-        onChange={handleChange}
-        placeholder="Tags (séparés par virgules)"
-        className="w-full border px-3 py-2 rounded"
-      />
+      <div>
+        <label htmlFor="edit-product-title" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">Titre</label>
+        <input
+          id="edit-product-title"
+          name="title"
+          value={String(formData.title ?? '')}
+          onChange={handleChange}
+          placeholder="Titre"
+          className="w-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-[hsl(var(--text))] px-3 py-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+          required
+        />
+      </div>
+      <div>
+        <label htmlFor="edit-product-slug" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">Slug (URL)</label>
+        <input
+          id="edit-product-slug"
+          name="slug"
+          value={String(formData.slug ?? '')}
+          onChange={handleChange}
+          placeholder="Slug (URL)"
+          className="w-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-[hsl(var(--text))] px-3 py-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+          required
+        />
+      </div>
+      <div>
+        <label htmlFor="edit-product-description" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">Description</label>
+        <textarea
+          id="edit-product-description"
+          name="description"
+          value={formData.description}
+          onChange={handleChange}
+          placeholder="Description"
+          className="w-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-[hsl(var(--text))] px-3 py-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+          required
+        />
+      </div>
+      <div>
+        <label htmlFor="edit-product-price" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">Prix (€)</label>
+        <input
+          id="edit-product-price"
+          name="price"
+          type="number"
+          step="0.01"
+          value={formData.price}
+          onChange={handleChange}
+          placeholder="Prix (€)"
+          className="w-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-[hsl(var(--text))] px-3 py-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+          required
+        />
+      </div>
+      <div>
+        <label htmlFor="edit-product-image" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">URL image principale</label>
+        <input
+          id="edit-product-image"
+          name="image"
+          value={formData.image}
+          onChange={handleChange}
+          placeholder="URL image principale"
+          className="w-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-[hsl(var(--text))] px-3 py-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+          required
+        />
+      </div>
+      <div>
+        <label htmlFor="edit-product-images" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">Images supplémentaires (séparées par virgules)</label>
+        <input
+          id="edit-product-images"
+          name="images"
+          value={Array.isArray(formData.images) ? formData.images.join(', ') : formData.images}
+          onChange={handleChange}
+          placeholder="Images supplémentaires (séparées par virgules)"
+          className="w-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-[hsl(var(--text))] px-3 py-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+        />
+      </div>
+      <div>
+        <label htmlFor="edit-product-category" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">Catégorie</label>
+        <input
+          id="edit-product-category"
+          name="category"
+          value={formData.category}
+          onChange={handleChange}
+          placeholder="Catégorie"
+          className="w-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-[hsl(var(--text))] px-3 py-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+        />
+      </div>
+      <div>
+        <label htmlFor="edit-product-stock" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">Stock</label>
+        <input
+          id="edit-product-stock"
+          name="stock"
+          type="number"
+          value={formData.stock}
+          onChange={handleChange}
+          placeholder="Stock"
+          className="w-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-[hsl(var(--text))] px-3 py-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+        />
+      </div>
+      <div>
+        <label htmlFor="edit-product-tags" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">Tags (séparés par virgules)</label>
+        <input
+          id="edit-product-tags"
+          name="tags"
+          value={formData.tags}
+          onChange={handleChange}
+          placeholder="Tags (séparés par virgules)"
+          className="w-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-[hsl(var(--text))] px-3 py-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+        />
+      </div>
 
       <button
         type="submit"
         disabled={loading}
-        className="bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] px-4 py-2 rounded hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] px-4 py-2 rounded-lg hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 transition"
       >
-        {loading ? 'Enregistrement...' : 'Enregistrer'}
+        {loading ? tCommon('saving') : tCommon('save')}
       </button>
     </form>
   );

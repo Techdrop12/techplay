@@ -1,4 +1,5 @@
 import { cookies, headers } from 'next/headers'
+import { getTranslations } from 'next-intl/server'
 
 import type { BlogPost } from '@/types/blog'
 import type { Metadata } from 'next'
@@ -83,6 +84,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
   const acceptLang = (await headers()).get('accept-language') || ''
   const locale: Locale = cookieLocale && isLocale(cookieLocale) ? cookieLocale : pickBestLocale(acceptLang)
 
+  const t = await getTranslations('common')
   const resolved = searchParams ? await searchParams : undefined
   const page = readPositiveInt(resolved, 'page', 1)
   const limit = readPositiveInt(resolved, 'limit', 12, 24)
@@ -168,7 +170,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
 
           {(q || tag || category) && (
             <Link href="/blog" className="text-sm text-token-text/70 hover:underline" prefetch={false}>
-              Réinitialiser
+              {t('reset_filters')}
             </Link>
           )}
         </div>

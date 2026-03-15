@@ -1,13 +1,18 @@
 // src/app/not-found.tsx
+import { getTranslations } from 'next-intl/server'
+
 import NotFoundPageContent from '@/components/NotFoundPageContent'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-export const metadata = {
-  title: 'Page introuvable – TechPlay',
-  description: 'La page demandée n\'existe pas ou a été déplacée.',
-  robots: { index: false, follow: true },
+export async function generateMetadata() {
+  const t = await getTranslations('seo_extra')
+  return {
+    title: t('not_found_page_title'),
+    description: t('not_found_page_description'),
+    robots: { index: false, follow: true },
+  }
 }
 
 export default function NotFoundPage() {

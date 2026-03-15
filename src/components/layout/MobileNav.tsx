@@ -216,7 +216,7 @@ export default function MobileNav() {
   const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr'
   const t = STR[locale]
   const L = (path: string) => localizePath(path, locale)
-  const searchAction = L('/products')
+  const searchAction = L('/search')
 
   const categories = useMemo(() => getCategories(locale), [locale])
   const reducedMotion = useReducedMotion()

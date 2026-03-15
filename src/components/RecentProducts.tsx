@@ -10,6 +10,9 @@ import Link from '@/components/LocalizedLink';
 import { getRecentlyViewed } from '@/lib/recentProducts';
 import { safeProductImageUrl } from '@/lib/safeProductImage';
 
+const BLUR_DATA_URL =
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+';
+
 export default function RecentProducts() {
   const [products, setProducts] = useState<Product[]>([]);
 
@@ -43,6 +46,8 @@ export default function RecentProducts() {
                   sizes="(max-width: 768px) 100vw, 33vw"
                   className="object-cover rounded"
                   loading="lazy"
+                  placeholder="blur"
+                  blurDataURL={BLUR_DATA_URL}
                 />
               </div>
               <p className="text-sm font-medium line-clamp-2">{p.title ?? ''}</p>
