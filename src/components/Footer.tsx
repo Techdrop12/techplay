@@ -491,15 +491,15 @@ export default function Footer({
           {t.footerHeading}
         </h2>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-12 md:items-start lg:gap-10">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-12 md:items-start lg:gap-12">
           {/* Bloc marque — présence éditoriale */}
-          <div className="space-y-5 md:col-span-5">
+          <div className="space-y-5 md:col-span-4 lg:col-span-4">
             <header className="border-b border-[hsl(var(--border))]/60 pb-4 md:pb-5">
-              <p className="text-lg font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-xl">
+              <p className="text-base font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-lg">
                 <span>{companyName}</span>
                 <span className="text-[hsl(var(--accent))]">.</span>
               </p>
-              <p className="mt-2 max-w-md text-[13px] leading-relaxed text-token-text/80 sm:text-sm">
+              <p className="mt-1.5 max-w-md text-[12px] leading-relaxed text-token-text/80 sm:text-[13px]">
                 {t.brandText}
               </p>
             </header>
@@ -610,20 +610,20 @@ export default function Footer({
           </div>
 
           <div
-            className="grid grid-cols-2 gap-x-4 gap-y-6 md:col-span-7 md:items-start lg:grid-cols-[repeat(4,minmax(0,1fr))] lg:gap-x-6 lg:border-l lg:border-[hsl(var(--border))] lg:pl-8 xl:gap-x-8"
+            className="grid grid-cols-2 gap-x-6 gap-y-6 md:col-span-8 md:items-start lg:grid-cols-[repeat(4,minmax(0,1fr))] lg:gap-x-10 lg:border-l lg:border-[hsl(var(--border))] lg:pl-10 xl:gap-x-12 xl:pl-12"
             style={{ minWidth: 0 }}
           >
             {navGroups.map((group) => (
               <nav
                 key={group.title}
                 aria-label={group.title}
-                className="min-w-0 space-y-3 overflow-hidden"
+                className="min-w-0 space-y-2.5 overflow-hidden"
               >
-                <h3 className="whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--text))]/80">
+                <h3 className="break-words text-[9px] font-semibold uppercase leading-tight tracking-[0.06em] text-[hsl(var(--text))]/80">
                   {group.title}
                 </h3>
 
-                <ul className="space-y-2">
+                <ul className="space-y-1.5">
                   {group.links.map(({ href, label, external }) => {
                     const finalHref = localizePath(href, locale);
                     const active =
@@ -637,7 +637,7 @@ export default function Footer({
                       group.title.toLowerCase().includes('legal');
 
                     const linkClass =
-                      'inline-flex min-w-0 items-center gap-2 rounded py-0.5 text-[12px] text-[hsl(var(--text))]/75 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]';
+                      'inline-flex min-w-0 items-center gap-1.5 rounded py-0.5 text-[11px] text-[hsl(var(--text))]/75 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]';
                     const content = (
                       <>
                         {isLegal ? <LegalIcon label={label} className="h-3.5 w-3.5 shrink-0" /> : null}

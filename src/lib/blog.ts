@@ -126,16 +126,21 @@ export async function getPostBySlug(
   { includeUnpublished = false }: { includeUnpublished?: boolean } = {}
 ): Promise<unknown> {
   await dbConnect();
-  if (!slug) return null;
+  const normalized = typeof slug === 'string' ? slug.trim().toLowerCase() : '';
+  if (!normalized) return null;
 
-  const key = cacheKey('getPostBySlug', { slug, includeUnpublished });
+  const key = cacheKey('getPostBySlug', { slug: normalized, includeUnpublished });
   const cached = cacheGet(key);
   if (cached) return cached;
 
-  const filter: Record<string, unknown> = { slug };
+  const filter: Record<string, unknown> = { slug: normalized };
   if (!includeUnpublished) filter.published = true;
 
-  const doc = await Blog.findOne(filter).select(DETAIL_PROJECTION).lean();
+  let doc = await Blog.findOne(filter).select(DETAIL_PROJECTION).lean();
+  if (!doc && /^[a-f0-9]{24}$/i.test(normalized)) {
+    doc = await Blog.findById(normalized).select(DETAIL_PROJECTION).lean();
+    if (doc && !includeUnpublished && (doc as Record<string, unknown>).published !== true) doc = null;
+  }
   cacheSet(key, doc);
   return doc;
 }
