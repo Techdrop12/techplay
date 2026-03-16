@@ -1,22 +1,22 @@
-'use client'
+'use client';
 
-import { signIn } from 'next-auth/react'
-import { useSearchParams } from 'next/navigation'
-import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { signIn } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 
 export default function LoginPage() {
-  const t = useTranslations('auth')
-  const tAccount = useTranslations('account')
-  const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get('callbackUrl') ?? '/'
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const t = useTranslations('auth');
+  const tAccount = useTranslations('account');
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') ?? '/';
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    await signIn('credentials', { email, password, callbackUrl })
-  }
+    e.preventDefault();
+    await signIn('credentials', { email, password, callbackUrl });
+  };
 
   return (
     <main className="mx-auto max-w-sm px-4 py-10" role="main" aria-labelledby="login-title">
@@ -66,5 +66,5 @@ export default function LoginPage() {
         </form>
       </div>
     </main>
-  )
+  );
 }

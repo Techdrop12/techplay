@@ -1,116 +1,141 @@
-'use client'
+'use client';
 
-import { motion, AnimatePresence } from 'framer-motion'
-import { useLocale, useTranslations } from 'next-intl'
-import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion';
+import { useLocale, useTranslations } from 'next-intl';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 
-import type { KeyboardEvent, RefCallback } from 'react'
+import type { KeyboardEvent, RefCallback } from 'react';
 
-import Link from '@/components/LocalizedLink'
-import { error as logError } from '@/lib/logger'
-import { cn } from '@/lib/utils'
+import Link from '@/components/LocalizedLink';
+import { error as logError } from '@/lib/logger';
+import { cn } from '@/lib/utils';
 
 interface FAQItem {
-  _id: string
-  question: string
-  answer: string
+  _id: string;
+  question: string;
+  answer: string;
 }
 
 const FALLBACK_FAQ_FR: FAQItem[] = [
-  { _id: '1', question: 'Quels sont les délais de livraison ?', answer: 'Livraison en 48 à 72 h ouvrées. Livraison offerte dès 49 € d’achat.' },
-  { _id: '2', question: 'Puis-je retourner un article ?', answer: 'Oui. Retours gratuits sous 30 jours : contactez-nous pour obtenir l’étiquette de retour.' },
-  { _id: '3', question: 'Le paiement est-il sécurisé ?', answer: 'Oui. Paiement par Stripe (CB, Apple Pay, Google Pay). Données cryptées.' },
-]
+  {
+    _id: '1',
+    question: 'Quels sont les délais de livraison ?',
+    answer: 'Livraison en 48 à 72 h ouvrées. Livraison offerte dès 49 € d’achat.',
+  },
+  {
+    _id: '2',
+    question: 'Puis-je retourner un article ?',
+    answer:
+      'Oui. Retours gratuits sous 30 jours : contactez-nous pour obtenir l’étiquette de retour.',
+  },
+  {
+    _id: '3',
+    question: 'Le paiement est-il sécurisé ?',
+    answer: 'Oui. Paiement par Stripe (CB, Apple Pay, Google Pay). Données cryptées.',
+  },
+];
 
 const FALLBACK_FAQ_EN: FAQItem[] = [
-  { _id: '1', question: 'What are the delivery times?', answer: 'Delivery within 48 to 72 business hours. Free shipping from €49.' },
-  { _id: '2', question: 'Can I return an item?', answer: 'Yes. Free returns within 30 days: contact us to get a return label.' },
-  { _id: '3', question: 'Is payment secure?', answer: 'Yes. Payment via Stripe (card, Apple Pay, Google Pay). Data encrypted.' },
-]
+  {
+    _id: '1',
+    question: 'What are the delivery times?',
+    answer: 'Delivery within 48 to 72 business hours. Free shipping from €49.',
+  },
+  {
+    _id: '2',
+    question: 'Can I return an item?',
+    answer: 'Yes. Free returns within 30 days: contact us to get a return label.',
+  },
+  {
+    _id: '3',
+    question: 'Is payment secure?',
+    answer: 'Yes. Payment via Stripe (card, Apple Pay, Google Pay). Data encrypted.',
+  },
+];
 
 interface FAQProps {
   /** When false, the section heading is not rendered (e.g. when the page already shows it). */
-  showSectionHeading?: boolean
+  showSectionHeading?: boolean;
 }
 
 export default function FAQ({ showSectionHeading = true }: FAQProps) {
-  const t = useTranslations('faq')
-  const locale = useLocale()
-  const [faqs, setFaqs] = useState<FAQItem[]>([])
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
-  const [openSet, setOpenSet] = useState<Set<number>>(new Set())
-  const headerRefs = useRef<Array<HTMLButtonElement | null>>([])
+  const t = useTranslations('faq');
+  const locale = useLocale();
+  const [faqs, setFaqs] = useState<FAQItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [openSet, setOpenSet] = useState<Set<number>>(new Set());
+  const headerRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   const fetchFAQs = useCallback(async () => {
     try {
-      setLoading(true)
-      const res = await fetch(`/api/faq?locale=${locale}`, { cache: 'no-store' })
-      if (!res.ok) throw new Error('API error')
-      const data = await res.json()
-      setFaqs(Array.isArray(data) ? data : [])
+      setLoading(true);
+      const res = await fetch(`/api/faq?locale=${locale}`, { cache: 'no-store' });
+      if (!res.ok) throw new Error('API error');
+      const data = await res.json();
+      setFaqs(Array.isArray(data) ? data : []);
     } catch (error) {
-      logError('Erreur de chargement des FAQs', error)
-      setFaqs(locale === 'en' ? FALLBACK_FAQ_EN : FALLBACK_FAQ_FR)
+      logError('Erreur de chargement des FAQs', error);
+      setFaqs(locale === 'en' ? FALLBACK_FAQ_EN : FALLBACK_FAQ_FR);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [locale])
+  }, [locale]);
 
   useEffect(() => {
-    fetchFAQs()
-  }, [fetchFAQs])
+    fetchFAQs();
+  }, [fetchFAQs]);
 
   const filteredFaqs = useMemo(() => {
-    const q = search.trim().toLowerCase()
-    if (!q) return faqs
+    const q = search.trim().toLowerCase();
+    if (!q) return faqs;
     return faqs.filter(
-      (f) =>
-        f.question.toLowerCase().includes(q) ||
-        f.answer.toLowerCase().includes(q)
-    )
-  }, [faqs, search])
+      (f) => f.question.toLowerCase().includes(q) || f.answer.toLowerCase().includes(q)
+    );
+  }, [faqs, search]);
 
   const toggleIndex = (index: number) => {
     setOpenSet((prev) => {
-      const next = new Set(prev)
-      if (next.has(index)) next.delete(index)
-      else next.add(index)
-      return next
-    })
-  }
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
+  };
 
-  const expandAll = () => setOpenSet(new Set(filteredFaqs.map((_, i) => i)))
-  const collapseAll = () => setOpenSet(new Set())
+  const expandAll = () => setOpenSet(new Set(filteredFaqs.map((_, i) => i)));
+  const collapseAll = () => setOpenSet(new Set());
 
   const onKeyNav = (e: KeyboardEvent, i: number) => {
-    const total = filteredFaqs.length
-    if (!total) return
+    const total = filteredFaqs.length;
+    if (!total) return;
     if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      headerRefs.current[(i + 1) % total]?.focus()
+      e.preventDefault();
+      headerRefs.current[(i + 1) % total]?.focus();
     } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      headerRefs.current[(i - 1 + total) % total]?.focus()
+      e.preventDefault();
+      headerRefs.current[(i - 1 + total) % total]?.focus();
     } else if (e.key === 'Home') {
-      e.preventDefault()
-      headerRefs.current[0]?.focus()
+      e.preventDefault();
+      headerRefs.current[0]?.focus();
     } else if (e.key === 'End') {
-      e.preventDefault()
-      headerRefs.current[total - 1]?.focus()
+      e.preventDefault();
+      headerRefs.current[total - 1]?.focus();
     } else if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      toggleIndex(i)
+      e.preventDefault();
+      toggleIndex(i);
     }
-  }
+  };
 
-  const setHeaderRef = (idx: number): RefCallback<HTMLButtonElement> => (el) => {
-    headerRefs.current[idx] = el
-  }
+  const setHeaderRef =
+    (idx: number): RefCallback<HTMLButtonElement> =>
+    (el) => {
+      headerRefs.current[idx] = el;
+    };
 
   // JSON-LD SEO (FAQPage)
   const faqJsonLd = useMemo(() => {
-    if (!filteredFaqs.length) return null
+    if (!filteredFaqs.length) return null;
     return {
       '@context': 'https://schema.org',
       '@type': 'FAQPage',
@@ -119,18 +144,21 @@ export default function FAQ({ showSectionHeading = true }: FAQProps) {
         name: f.question,
         acceptedAnswer: { '@type': 'Answer', text: f.answer },
       })),
-    }
-  }, [filteredFaqs])
+    };
+  }, [filteredFaqs]);
 
   const introContent = (
     <>
       {t('intro')}{' '}
-      <Link href="/contact" className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline">
+      <Link
+        href="/contact"
+        className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline"
+      >
         {t('contact_link')}
       </Link>
       .
     </>
-  )
+  );
 
   return (
     <section
@@ -185,7 +213,10 @@ export default function FAQ({ showSectionHeading = true }: FAQProps) {
       {loading && (
         <div className="space-y-3 sm:space-y-4" role="status" aria-live="polite" aria-busy="true">
           {[1, 2, 3, 4].map((k) => (
-            <div key={k} className="h-16 sm:h-[4.25rem] rounded-2xl bg-[hsl(var(--surface-2))] animate-pulse" />
+            <div
+              key={k}
+              className="h-16 sm:h-[4.25rem] rounded-2xl bg-[hsl(var(--surface-2))] animate-pulse"
+            />
           ))}
         </div>
       )}
@@ -193,7 +224,10 @@ export default function FAQ({ showSectionHeading = true }: FAQProps) {
       {!loading && filteredFaqs.length === 0 && (
         <p className="text-center text-token-text/60 text-[15px]" role="status">
           {t('no_results', { query: search })}{' '}
-          <Link href="/contact" className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline">
+          <Link
+            href="/contact"
+            className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline"
+          >
             {t('contact_link')}
           </Link>
           .
@@ -203,9 +237,9 @@ export default function FAQ({ showSectionHeading = true }: FAQProps) {
       {/* Liste FAQ */}
       <div role="list" aria-live="polite" className="space-y-3 sm:space-y-4">
         {filteredFaqs.map((faq, i) => {
-          const isOpen = openSet.has(i)
-          const headerId = `faq-header-${faq._id}-${i}`
-          const panelId = `faq-panel-${faq._id}-${i}`
+          const isOpen = openSet.has(i);
+          const headerId = `faq-header-${faq._id}-${i}`;
+          const panelId = `faq-panel-${faq._id}-${i}`;
 
           return (
             <div
@@ -252,7 +286,7 @@ export default function FAQ({ showSectionHeading = true }: FAQProps) {
                 )}
               </AnimatePresence>
             </div>
-          )
+          );
         })}
       </div>
 
@@ -263,5 +297,5 @@ export default function FAQ({ showSectionHeading = true }: FAQProps) {
         />
       )}
     </section>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-import mongoose, { Schema, InferSchemaType } from 'mongoose'
+import mongoose, { Schema, InferSchemaType } from 'mongoose';
 
 const NewsletterSubscriberSchema = new Schema(
   {
@@ -8,11 +8,11 @@ const NewsletterSubscriberSchema = new Schema(
     source: { type: String, default: 'footer', trim: true },
   },
   { timestamps: true }
-)
+);
 
-NewsletterSubscriberSchema.index({ email: 1 }, { unique: true })
+NewsletterSubscriberSchema.index({ email: 1 }, { unique: true });
 
-export type NewsletterSubscriberDoc = InferSchemaType<typeof NewsletterSubscriberSchema>
+export type NewsletterSubscriberDoc = InferSchemaType<typeof NewsletterSubscriberSchema>;
 
 export default mongoose.models.NewsletterSubscriber ??
-  mongoose.model<NewsletterSubscriberDoc>('NewsletterSubscriber', NewsletterSubscriberSchema)
+  mongoose.model<NewsletterSubscriberDoc>('NewsletterSubscriber', NewsletterSubscriberSchema);

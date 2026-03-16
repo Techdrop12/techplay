@@ -1,6 +1,6 @@
 # Gestion des erreurs et warnings non bloquants
 
-*Dernière mise à jour : mars 2025*
+_Dernière mise à jour : mars 2025_
 
 ## Actions réalisées
 

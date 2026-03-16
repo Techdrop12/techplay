@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
-import Link from '@/components/LocalizedLink'
+import { useTranslations } from 'next-intl';
+import Link from '@/components/LocalizedLink';
 
 export default function Error({ error }: { error: Error }) {
-  const t = useTranslations('cart')
+  const t = useTranslations('cart');
   return (
     <main className="mx-auto max-w-xl px-4 py-16" role="main" aria-labelledby="cart-error-title">
       <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-8 text-center shadow-[var(--shadow-md)]">
@@ -12,9 +12,7 @@ export default function Error({ error }: { error: Error }) {
           {t('error_title')}
         </h1>
         <p className="mt-2 text-[13px] text-token-text/80">{error?.message}</p>
-        <p className="mt-3 text-[13px] text-token-text/60">
-          {t('error_message_retry')}
-        </p>
+        <p className="mt-3 text-[13px] text-token-text/60">{t('error_message_retry')}</p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/cart"
@@ -31,5 +29,5 @@ export default function Error({ error }: { error: Error }) {
         </div>
       </div>
     </main>
-  )
+  );
 }

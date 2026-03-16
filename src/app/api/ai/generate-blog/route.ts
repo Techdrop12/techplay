@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  return new NextResponse(null, { status: 405, headers: { Allow: 'POST' } })
+  return new NextResponse(null, { status: 405, headers: { Allow: 'POST' } });
 }
 
 /**
@@ -14,5 +14,5 @@ export async function POST() {
   return NextResponse.json(
     { error: 'Not implemented', message: 'Génération d’article IA non configurée.' },
     { status: 501 }
-  )
+  );
 }

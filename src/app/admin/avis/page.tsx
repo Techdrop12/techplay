@@ -1,12 +1,12 @@
-import type { Metadata } from 'next'
+import type { Metadata } from 'next';
 
-import AdminReviewTable from '@/components/AdminReviewTable'
+import AdminReviewTable from '@/components/AdminReviewTable';
 
 export const metadata: Metadata = {
   title: 'Avis clients – Admin TechPlay',
   description: 'Consulter et modérer les avis laissés sur les produits.',
   robots: { index: false, follow: false },
-}
+};
 
 export default function AdminAvisPage() {
   return (
@@ -21,5 +21,5 @@ export default function AdminAvisPage() {
       </header>
       <AdminReviewTable />
     </div>
-  )
+  );
 }

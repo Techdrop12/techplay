@@ -17,7 +17,9 @@ export function cn(
   >
 ): string {
   const out = new Set<string>();
-  const push = (v?: string | null | false) => { if (v) out.add(v) };
+  const push = (v?: string | null | false) => {
+    if (v) out.add(v);
+  };
 
   for (const i of inputs) {
     if (!i) continue;
@@ -37,5 +39,4 @@ export function cn(
 export const round2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
 
 /** Clamp utilitaire */
-export const clamp = (n: number, min: number, max: number) =>
-  Math.max(min, Math.min(max, n));
+export const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));

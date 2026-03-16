@@ -88,7 +88,8 @@
     "vitest": "^4.1.0"
   },
   "overrides": {
-    "glob": "^13.0.0"
+    "glob": "^13.0.0",
+    "@tootallnate/once": "^3.0.1"
   },
   "engines": {
     "node": ">=20.9.0 <23",

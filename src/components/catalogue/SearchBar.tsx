@@ -1,62 +1,62 @@
 // src/components/catalogue/SearchBar.tsx
-'use client'
+'use client';
 
-import Fuse from 'fuse.js'
-import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import Fuse from 'fuse.js';
+import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
-import type { Product } from '@/types/product'
-import type { FuseResultMatch, FuseResult } from 'fuse.js'
+import type { Product } from '@/types/product';
+import type { FuseResultMatch, FuseResult } from 'fuse.js';
 
-import { event as gaEvent, logEvent } from '@/lib/ga'
-import { cn, formatPrice } from '@/lib/utils'
+import { event as gaEvent, logEvent } from '@/lib/ga';
+import { cn, formatPrice } from '@/lib/utils';
 
 interface Props {
-  products: Product[]
-  query: string
-  setQuery: (value: string) => void
-  id?: string
-  className?: string
-  locale?: string
-  currency?: string
-  limit?: number
+  products: Product[];
+  query: string;
+  setQuery: (value: string) => void;
+  id?: string;
+  className?: string;
+  locale?: string;
+  currency?: string;
+  limit?: number;
 }
 
-const RECENTS_KEY = 'tp:search:recents'
+const RECENTS_KEY = 'tp:search:recents';
 
 function highlight(text: string, matches?: ReadonlyArray<FuseResultMatch>) {
-  if (!matches?.length) return text
-  const m = matches.find((mm) => mm.key === 'title') ?? matches[0]
-  const indices = m.indices as Array<[number, number]> | undefined
-  if (!indices?.length) return text
+  if (!matches?.length) return text;
+  const m = matches.find((mm) => mm.key === 'title') ?? matches[0];
+  const indices = m.indices as Array<[number, number]> | undefined;
+  if (!indices?.length) return text;
 
-  const parts: React.ReactNode[] = []
-  let last = 0
+  const parts: React.ReactNode[] = [];
+  let last = 0;
 
   indices.forEach(([start, end], i) => {
-    if (start > last) parts.push(text.slice(last, start))
+    if (start > last) parts.push(text.slice(last, start));
     parts.push(
       <mark key={`hl-${i}`} className="bg-yellow-200/70 text-inherit rounded px-0.5">
         {text.slice(start, end + 1)}
       </mark>
-    )
-    last = end + 1
-  })
+    );
+    last = end + 1;
+  });
 
-  if (last < text.length) parts.push(text.slice(last))
-  return parts
+  if (last < text.length) parts.push(text.slice(last));
+  return parts;
 }
 
 function useDebounced<T>(value: T, delay = 180) {
-  const [debounced, setDebounced] = useState(value)
+  const [debounced, setDebounced] = useState(value);
 
   useEffect(() => {
-    const id = setTimeout(() => setDebounced(value), delay)
-    return () => clearTimeout(id)
-  }, [value, delay])
+    const id = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(id);
+  }, [value, delay]);
 
-  return debounced
+  return debounced;
 }
 
 export default function SearchBar({
@@ -69,15 +69,15 @@ export default function SearchBar({
   currency = 'EUR',
   limit = 8,
 }: Props) {
-  const tSearch = useTranslations('search')
-  const tMisc = useTranslations('misc')
-  const router = useRouter()
-  const inputRef = useRef<HTMLInputElement | null>(null)
-  const listboxId = `${id}-listbox`
-  const [open, setOpen] = useState(false)
-  const [highlighted, setHighlighted] = useState<number>(-1)
-  const [recents, setRecents] = useState<string[]>([])
-  const debouncedQuery = useDebounced(query, 180)
+  const tSearch = useTranslations('search');
+  const tMisc = useTranslations('misc');
+  const router = useRouter();
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const listboxId = `${id}-listbox`;
+  const [open, setOpen] = useState(false);
+  const [highlighted, setHighlighted] = useState<number>(-1);
+  const [recents, setRecents] = useState<string[]>([]);
+  const debouncedQuery = useDebounced(query, 180);
 
   const fuse = useMemo(
     () =>
@@ -89,127 +89,135 @@ export default function SearchBar({
         minMatchCharLength: 2,
       }),
     [products]
-  )
+  );
 
   const results: FuseResult<Product>[] = useMemo(() => {
-    const q = debouncedQuery.trim()
-    if (!q) return []
-    return fuse.search(q, { limit }) ?? []
-  }, [fuse, debouncedQuery, limit])
+    const q = debouncedQuery.trim();
+    if (!q) return [];
+    return fuse.search(q, { limit }) ?? [];
+  }, [fuse, debouncedQuery, limit]);
 
   useEffect(() => {
-    const has = results.length > 0
-    setOpen(Boolean(debouncedQuery.trim()) && has)
-    setHighlighted(has ? 0 : -1)
-  }, [debouncedQuery, results.length])
+    const has = results.length > 0;
+    setOpen(Boolean(debouncedQuery.trim()) && has);
+    setHighlighted(has ? 0 : -1);
+  }, [debouncedQuery, results.length]);
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(RECENTS_KEY)
+      const raw = localStorage.getItem(RECENTS_KEY);
       if (raw) {
-        const parsed = JSON.parse(raw)
+        const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
-          setRecents(parsed.filter((v): v is string => typeof v === 'string'))
+          setRecents(parsed.filter((v): v is string => typeof v === 'string'));
         }
       }
     } catch {}
-  }, [])
+  }, []);
 
   const saveRecent = (value: string) => {
     try {
-      const next = [value, ...recents.filter((q) => q.toLowerCase() !== value.toLowerCase())].slice(0, 8)
-      setRecents(next)
-      localStorage.setItem(RECENTS_KEY, JSON.stringify(next))
+      const next = [value, ...recents.filter((q) => q.toLowerCase() !== value.toLowerCase())].slice(
+        0,
+        8
+      );
+      setRecents(next);
+      localStorage.setItem(RECENTS_KEY, JSON.stringify(next));
     } catch {}
-  }
+  };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const isCmdK = e.key.toLowerCase() === 'k' && (e.ctrlKey || e.metaKey)
+      const isCmdK = e.key.toLowerCase() === 'k' && (e.ctrlKey || e.metaKey);
       if (e.key === '/' || isCmdK) {
-        e.preventDefault()
-        inputRef.current?.focus()
+        e.preventDefault();
+        inputRef.current?.focus();
       }
-      if (e.key === 'Escape') setOpen(false)
-    }
+      if (e.key === 'Escape') setOpen(false);
+    };
 
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [])
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   useEffect(() => {
     const onDown = (e: Event) => {
-      const target = e.target as Node | null
-      if (!inputRef.current || !target) return
-      const root = inputRef.current.closest('[data-search-root="true"]')
-      if (root && !root.contains(target)) setOpen(false)
-    }
+      const target = e.target as Node | null;
+      if (!inputRef.current || !target) return;
+      const root = inputRef.current.closest('[data-search-root="true"]');
+      if (root && !root.contains(target)) setOpen(false);
+    };
 
-    const passiveOptions: AddEventListenerOptions = { passive: true }
+    const passiveOptions: AddEventListenerOptions = { passive: true };
 
-    document.addEventListener('mousedown', onDown, passiveOptions)
-    document.addEventListener('touchstart', onDown, passiveOptions)
+    document.addEventListener('mousedown', onDown, passiveOptions);
+    document.addEventListener('touchstart', onDown, passiveOptions);
 
     return () => {
-      document.removeEventListener('mousedown', onDown)
-      document.removeEventListener('touchstart', onDown)
-    }
-  }, [])
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('touchstart', onDown);
+    };
+  }, []);
 
   const goToProduct = (slug: string, title?: string) => {
-    setOpen(false)
-    saveRecent(query)
+    setOpen(false);
+    saveRecent(query);
 
     try {
-      gaEvent?.({ action: 'search_select', category: 'search', label: title || slug, value: 1 })
-      logEvent?.('search_select', { query, slug })
+      gaEvent?.({ action: 'search_select', category: 'search', label: title || slug, value: 1 });
+      logEvent?.('search_select', { query, slug });
     } catch {}
 
-    router.push(`/products/${slug}`)
-  }
+    router.push(`/products/${slug}`);
+  };
 
   const submitToListing = (q: string) => {
-    const value = q.trim()
-    saveRecent(value)
+    const value = q.trim();
+    saveRecent(value);
 
     try {
-      gaEvent?.({ action: 'search_submit', category: 'search', label: value, value: results.length })
-      logEvent?.('search_submit', { query: value, count: results.length })
+      gaEvent?.({
+        action: 'search_submit',
+        category: 'search',
+        label: value,
+        value: results.length,
+      });
+      logEvent?.('search_submit', { query: value, count: results.length });
     } catch {}
 
-    router.push(`/search?q=${encodeURIComponent(value)}`)
-    setOpen(false)
-  }
+    router.push(`/search?q=${encodeURIComponent(value)}`);
+    setOpen(false);
+  };
 
   const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (results.length > 0) {
-      const index = highlighted >= 0 ? highlighted : 0
-      const p = results[index]?.item
-      if (p) return goToProduct(p.slug, p.title)
+      const index = highlighted >= 0 ? highlighted : 0;
+      const p = results[index]?.item;
+      if (p) return goToProduct(p.slug, p.title);
     }
 
-    submitToListing(query)
-  }
+    submitToListing(query);
+  };
 
   const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
-    if (!open && results.length) setOpen(true)
-    if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && results.length === 0) return
+    if (!open && results.length) setOpen(true);
+    if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && results.length === 0) return;
 
     if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      setHighlighted((h) => (h + 1) % results.length)
+      e.preventDefault();
+      setHighlighted((h) => (h + 1) % results.length);
     } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      setHighlighted((h) => (h - 1 + results.length) % results.length)
+      e.preventDefault();
+      setHighlighted((h) => (h - 1 + results.length) % results.length);
     } else if (e.key === 'Escape') {
-      setOpen(false)
+      setOpen(false);
     }
-  }
+  };
 
-  const showRecents = !query.trim() && recents.length > 0
-  const activeDescId = highlighted >= 0 ? `${listboxId}-opt-${highlighted}` : undefined
+  const showRecents = !query.trim() && recents.length > 0;
+  const activeDescId = highlighted >= 0 ? `${listboxId}-opt-${highlighted}` : undefined;
 
   return (
     <div
@@ -231,7 +239,7 @@ export default function SearchBar({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => {
-              if (results.length || showRecents) setOpen(true)
+              if (results.length || showRecents) setOpen(true);
             }}
             onKeyDown={onKeyDown}
             placeholder={tSearch('placeholder_shortcut')}
@@ -247,9 +255,9 @@ export default function SearchBar({
             <button
               type="button"
               onClick={() => {
-                setQuery('')
-                setOpen(showRecents)
-                inputRef.current?.focus()
+                setQuery('');
+                setOpen(showRecents);
+                inputRef.current?.focus();
               }}
               aria-label={tMisc('clear_search_aria')}
               className="absolute inset-y-0 right-2 my-1 px-2 rounded-lg text-token-text/60 hover:bg-[hsl(var(--surface-2))]"
@@ -265,8 +273,8 @@ export default function SearchBar({
           {results.length > 0 ? (
             <ul id={listboxId} role="listbox" className="max-h-80 overflow-auto py-1">
               {results.map((res, i) => {
-                const p = res.item
-                const active = i === highlighted
+                const p = res.item;
+                const active = i === highlighted;
 
                 return (
                   <li
@@ -276,7 +284,9 @@ export default function SearchBar({
                     aria-selected={active}
                     className={cn(
                       'cursor-pointer select-none px-3 py-2 text-sm flex items-center justify-between',
-                      active ? 'bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))]' : 'hover:bg-[hsl(var(--surface-2))]'
+                      active
+                        ? 'bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))]'
+                        : 'hover:bg-[hsl(var(--surface-2))]'
                     )}
                     onMouseEnter={() => setHighlighted(i)}
                     onMouseDown={(ev) => ev.preventDefault()}
@@ -289,7 +299,7 @@ export default function SearchBar({
                         : ''}
                     </span>
                   </li>
-                )
+                );
               })}
 
               <li className="border-t border-[hsl(var(--border))]">
@@ -311,9 +321,9 @@ export default function SearchBar({
                     key={q}
                     type="button"
                     onClick={() => {
-                      setQuery(q)
-                      inputRef.current?.focus()
-                      setOpen(true)
+                      setQuery(q);
+                      inputRef.current?.focus();
+                      setOpen(true);
                     }}
                     className="rounded-full border border-[hsl(var(--border))] px-2.5 py-1 text-xs hover:bg-[hsl(var(--surface-2))]"
                   >
@@ -325,8 +335,10 @@ export default function SearchBar({
                   <button
                     type="button"
                     onClick={() => {
-                      setRecents([])
-                      try { localStorage.removeItem(RECENTS_KEY) } catch {}
+                      setRecents([]);
+                      try {
+                        localStorage.removeItem(RECENTS_KEY);
+                      } catch {}
                     }}
                     className="ml-auto text-xs text-token-text/60 hover:underline"
                   >
@@ -341,5 +353,5 @@ export default function SearchBar({
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl';
 
 export default function SkipLink() {
-  const t = useTranslations('aria')
-  const label = t('skip_to_content')
+  const t = useTranslations('aria');
+  const label = t('skip_to_content');
 
   return (
     <a
@@ -13,5 +13,5 @@ export default function SkipLink() {
     >
       {label}
     </a>
-  )
+  );
 }

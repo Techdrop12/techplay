@@ -1,34 +1,38 @@
-import type { Metadata } from 'next'
-import Link from 'next/link'
-import { getTranslations } from 'next-intl/server'
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
-import AdminBlogTable from '@/components/AdminBlogTable'
-import AdminReviewTable from '@/components/AdminReviewTable'
-import AdminStatsBlock from '@/components/AdminStatsBlock'
-import OrderTable from '@/components/OrderTable'
-import ProductTable from '@/components/ProductTable'
+import AdminBlogTable from '@/components/AdminBlogTable';
+import AdminReviewTable from '@/components/AdminReviewTable';
+import AdminStatsBlock from '@/components/AdminStatsBlock';
+import OrderTable from '@/components/OrderTable';
+import ProductTable from '@/components/ProductTable';
 
 export const metadata: Metadata = {
   title: 'Dashboard – Admin TechPlay',
-  description: 'Vue d\'ensemble des ventes, avis, commandes et contenus.',
+  description: "Vue d'ensemble des ventes, avis, commandes et contenus.",
   robots: { index: false, follow: false },
-}
+};
 
 export default async function AdminDashboardPage() {
-  const t = await getTranslations('admin')
+  const t = await getTranslations('admin');
   return (
     <div className="space-y-8">
       <header>
         <h1 id="admin-dashboard-title" className="heading-page mb-2">
           {t('dashboard_title')}
         </h1>
-        <p className="text-[15px] text-token-text/70">
-          {t('dashboard_subtitle')}
-        </p>
+        <p className="text-[15px] text-token-text/70">{t('dashboard_subtitle')}</p>
       </header>
 
-      <section aria-labelledby="admin-quick-actions-heading" className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-4 shadow-[var(--shadow-sm)]">
-        <h2 id="admin-quick-actions-heading" className="text-sm font-semibold uppercase tracking-wider text-token-text/60 mb-3">
+      <section
+        aria-labelledby="admin-quick-actions-heading"
+        className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-4 shadow-[var(--shadow-sm)]"
+      >
+        <h2
+          id="admin-quick-actions-heading"
+          className="text-sm font-semibold uppercase tracking-wider text-token-text/60 mb-3"
+        >
           {t('quick_actions')}
         </h2>
         <div className="flex flex-wrap gap-2">
@@ -148,5 +152,5 @@ export default async function AdminDashboardPage() {
         </div>
       </section>
     </div>
-  )
+  );
 }

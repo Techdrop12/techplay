@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import {
   FileText,
@@ -9,13 +9,13 @@ import {
   ShoppingCart,
   Sparkles,
   Upload,
-} from 'lucide-react'
-import { usePathname } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+} from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
-import type { ReactNode } from 'react'
+import type { ReactNode } from 'react';
 
-import Link from '@/components/LocalizedLink'
+import Link from '@/components/LocalizedLink';
 
 const linkKeys: { href: string; labelKey: string; icon: ReactNode }[] = [
   { href: '/admin/dashboard', labelKey: 'nav_dashboard', icon: <LayoutDashboard size={18} /> },
@@ -30,18 +30,19 @@ const linkKeys: { href: string; labelKey: string; icon: ReactNode }[] = [
   { href: '/admin/commandes', labelKey: 'nav_orders', icon: <ShoppingCart size={18} /> },
   { href: '/admin/import', labelKey: 'nav_import', icon: <Upload size={18} /> },
   { href: '/admin/generate-blog', labelKey: 'nav_generate_blog', icon: <Sparkles size={18} /> },
-]
+];
 
 export default function AdminSidebar() {
-  const pathname = usePathname()
-  const t = useTranslations('admin')
+  const pathname = usePathname();
+  const t = useTranslations('admin');
 
   return (
     <aside className="hidden md:flex flex-col w-64 border-r border-[hsl(var(--border))] bg-[hsl(var(--surface))] min-h-screen px-4 py-6 shadow-[var(--shadow-sm)]">
       <h2 className="text-lg font-bold text-[hsl(var(--text))] mb-6 px-2">🛠 {t('admin_space')}</h2>
       <nav className="space-y-1" aria-label={t('admin_nav_aria')}>
         {linkKeys.map(({ href, labelKey, icon }) => {
-          const active = pathname === href || (href !== '/admin/dashboard' && pathname?.startsWith(href))
+          const active =
+            pathname === href || (href !== '/admin/dashboard' && pathname?.startsWith(href));
           return (
             <Link
               key={href}
@@ -56,9 +57,9 @@ export default function AdminSidebar() {
               {icon}
               {t(labelKey)}
             </Link>
-          )
+          );
         })}
       </nav>
     </aside>
-  )
+  );
 }

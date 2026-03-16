@@ -1,8 +1,8 @@
-import type { Metadata } from 'next'
-import { getTranslations } from 'next-intl/server'
-import BackToHomeLink from '@/components/BackToHomeLink'
-import Link from '@/components/LocalizedLink'
-import { generateMeta } from '@/lib/seo'
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+import BackToHomeLink from '@/components/BackToHomeLink';
+import Link from '@/components/LocalizedLink';
+import { generateMeta } from '@/lib/seo';
 
 const SECTIONS = [
   'editeur',
@@ -15,27 +15,27 @@ const SECTIONS = [
   'mediateur',
   'droit',
   'credits',
-] as const
+] as const;
 
 function splitParagraphs(text: string): string[] {
   return text
     .split(/\n\n+/)
     .map((p) => p.trim())
-    .filter(Boolean)
+    .filter(Boolean);
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('mentions_legales')
+  const t = await getTranslations('mentions_legales');
   return generateMeta({
     title: t('page_title'),
     description: t('meta_description'),
     url: '/mentions-legales',
     image: '/og-image.jpg',
-  })
+  });
 }
 
 export default async function MentionsLegalesPage() {
-  const t = await getTranslations('mentions_legales')
+  const t = await getTranslations('mentions_legales');
 
   return (
     <main
@@ -58,7 +58,7 @@ export default async function MentionsLegalesPage() {
           </h2>
           <ul className="flex flex-col gap-1.5 text-[14px]">
             {SECTIONS.map((key) => {
-              const title = t(`section_${key}_title`)
+              const title = t(`section_${key}_title`);
               return (
                 <li key={key}>
                   <a
@@ -68,22 +68,18 @@ export default async function MentionsLegalesPage() {
                     {title}
                   </a>
                 </li>
-              )
+              );
             })}
           </ul>
         </nav>
 
         <div className="content-readability space-y-10 text-[15px] text-token-text/85">
           {SECTIONS.map((key) => {
-            const title = t(`section_${key}_title`)
-            const content = t(`section_${key}_content`)
-            const paragraphs = splitParagraphs(content)
+            const title = t(`section_${key}_title`);
+            const content = t(`section_${key}_content`);
+            const paragraphs = splitParagraphs(content);
             return (
-              <section
-                key={key}
-                id={`section-${key}`}
-                className="scroll-mt-24 space-y-3"
-              >
+              <section key={key} id={`section-${key}`} className="scroll-mt-24 space-y-3">
                 <h2 className="heading-subsection text-[1.1rem] font-semibold text-[hsl(var(--text))]">
                   {title}
                 </h2>
@@ -115,7 +111,7 @@ export default async function MentionsLegalesPage() {
                   </p>
                 )}
               </section>
-            )
+            );
           })}
         </div>
 
@@ -131,5 +127,5 @@ export default async function MentionsLegalesPage() {
         </div>
       </div>
     </main>
-  )
+  );
 }

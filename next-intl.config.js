@@ -7,6 +7,6 @@ export default {
   localeDetection: false,
   domains: [
     { domain: 'techplay.fr', defaultLocale: 'fr' },
-    { domain: 'en.techplay.fr', defaultLocale: 'en' }
-  ]
-}
+    { domain: 'en.techplay.fr', defaultLocale: 'en' },
+  ],
+};

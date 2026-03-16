@@ -1,5 +1,5 @@
-'use client'
+'use client';
 
 export default function RegisterSW() {
-  return null
+  return null;
 }

@@ -1,6 +1,6 @@
 # Recommandations de déploiement
 
-*À appliquer dans les paramètres de déploiement (ex. Vercel, Netlify, etc.) si pertinent.*
+_À appliquer dans les paramètres de déploiement (ex. Vercel, Netlify, etc.) si pertinent._
 
 ## Recommandations générales
 

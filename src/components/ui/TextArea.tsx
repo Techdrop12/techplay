@@ -1,150 +1,151 @@
 // src/components/ui/TextArea.tsx
-'use client'
+'use client';
 
-import * as React from 'react'
+import * as React from 'react';
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
 
-type Size = 'sm' | 'md' | 'lg'
-type Variant = 'solid' | 'outline' | 'ghost'
+type Size = 'sm' | 'md' | 'lg';
+type Variant = 'solid' | 'outline' | 'ghost';
 
-export interface TextAreaProps
-  extends Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'size'> {
-  label?: React.ReactNode
-  help?: React.ReactNode
-  error?: React.ReactNode
-  size?: Size
-  variant?: Variant
-  fullWidth?: boolean
+export interface TextAreaProps extends Omit<
+  React.TextareaHTMLAttributes<HTMLTextAreaElement>,
+  'size'
+> {
+  label?: React.ReactNode;
+  help?: React.ReactNode;
+  error?: React.ReactNode;
+  size?: Size;
+  variant?: Variant;
+  fullWidth?: boolean;
   /** Auto-redimensionnement selon le contenu */
-  autoGrow?: boolean
+  autoGrow?: boolean;
   /** Affiche le compteur si maxLength est défini */
-  showCount?: boolean
-  containerClassName?: string
-  textareaClassName?: string
+  showCount?: boolean;
+  containerClassName?: string;
+  textareaClassName?: string;
 }
 
 const sizeClasses: Record<Size, string> = {
   sm: 'min-h-[2.5rem] px-3 py-2 text-sm rounded-lg',
   md: 'min-h-[3rem] px-3.5 py-2.5 text-base rounded-xl',
   lg: 'min-h-[3.5rem] px-4 py-3 text-lg rounded-xl',
-}
+};
 
 const variantClasses: Record<Variant, string> = {
   solid:
     'bg-[hsl(var(--surface))] border border-[hsl(var(--border))] focus:bg-[hsl(var(--surface))]',
-  outline:
-    'bg-transparent border border-[hsl(var(--border))]',
-  ghost:
-    'bg-transparent border border-transparent',
-}
+  outline: 'bg-transparent border border-[hsl(var(--border))]',
+  ghost: 'bg-transparent border border-transparent',
+};
 
-const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
-  function TextArea(
-    {
-      id,
-      label,
-      help,
-      error,
-      size = 'md',
-      variant = 'outline',
-      fullWidth = true,
-      className,
-      containerClassName,
-      textareaClassName,
-      autoGrow = true,
-      showCount = true,
-      maxLength,
-      required,
-      ...props
-    },
-    ref
-  ) {
-    const autoId = React.useId()
-    const textareaId = id ?? `ta-${autoId}`
-    const helpId = help ? `${textareaId}-help` : undefined
-    const errorId = error ? `${textareaId}-error` : undefined
-    const describedBy = [errorId, helpId].filter(Boolean).join(' ') || undefined
+const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(function TextArea(
+  {
+    id,
+    label,
+    help,
+    error,
+    size = 'md',
+    variant = 'outline',
+    fullWidth = true,
+    className,
+    containerClassName,
+    textareaClassName,
+    autoGrow = true,
+    showCount = true,
+    maxLength,
+    required,
+    ...props
+  },
+  ref
+) {
+  const autoId = React.useId();
+  const textareaId = id ?? `ta-${autoId}`;
+  const helpId = help ? `${textareaId}-help` : undefined;
+  const errorId = error ? `${textareaId}-error` : undefined;
+  const describedBy = [errorId, helpId].filter(Boolean).join(' ') || undefined;
 
-    const innerRef = React.useRef<HTMLTextAreaElement>(null)
-    React.useImperativeHandle(ref, () => innerRef.current as HTMLTextAreaElement)
+  const innerRef = React.useRef<HTMLTextAreaElement>(null);
+  React.useImperativeHandle(ref, () => innerRef.current as HTMLTextAreaElement);
 
-    const resize = React.useCallback(() => {
-      const el = innerRef.current
-      if (!el || !autoGrow) return
-      el.style.height = 'auto'
-      el.style.height = `${el.scrollHeight}px`
-    }, [autoGrow])
+  const resize = React.useCallback(() => {
+    const el = innerRef.current;
+    if (!el || !autoGrow) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, [autoGrow]);
 
-    React.useEffect(() => {
-      resize()
-    }, [resize, props.value])
+  React.useEffect(() => {
+    resize();
+  }, [resize, props.value]);
 
-    return (
-      <div className={cn('w-full', fullWidth && 'block', containerClassName)}>
-        {label && (
-          <label
-            htmlFor={textareaId}
-            className="mb-1.5 block text-sm font-medium text-[hsl(var(--text))]"
-          >
-            {label}
-            {required ? (
-              <>
-                <span aria-hidden="true" className="text-red-600"> *</span>
-                <span className="sr-only"> (obligatoire)</span>
-              </>
-            ) : null}
-          </label>
-        )}
-
-        <div className="relative">
-          <textarea
-            id={textareaId}
-            ref={innerRef}
-            aria-invalid={Boolean(error) || undefined}
-            aria-describedby={describedBy}
-            aria-errormessage={error ? errorId : undefined}
-            required={required}
-            onInput={(e) => {
-              props.onInput?.(e)
-              if (autoGrow) resize()
-            }}
-            className={cn(
-              'w-full text-[hsl(var(--text))] placeholder:text-token-text/50',
-              'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent',
-              'disabled:opacity-60 disabled:cursor-not-allowed',
-              'resize-y', // Tailwind: redimension vertical par l’utilisateur
-              sizeClasses[size],
-              variantClasses[variant],
-              error ? 'border-red-500 focus-visible:ring-red-500' : undefined,
-              textareaClassName,
-              className
-            )}
-            {...props}
-          />
-
-          {maxLength && showCount ? (
-            <div
-              aria-live="polite"
-              className="pointer-events-none absolute bottom-1.5 right-2 text-xs text-token-text/60"
-            >
-              {String(props.value ?? '').length}/{maxLength}
-            </div>
+  return (
+    <div className={cn('w-full', fullWidth && 'block', containerClassName)}>
+      {label && (
+        <label
+          htmlFor={textareaId}
+          className="mb-1.5 block text-sm font-medium text-[hsl(var(--text))]"
+        >
+          {label}
+          {required ? (
+            <>
+              <span aria-hidden="true" className="text-red-600">
+                {' '}
+                *
+              </span>
+              <span className="sr-only"> (obligatoire)</span>
+            </>
           ) : null}
-        </div>
+        </label>
+      )}
 
-        {error ? (
-          <p id={errorId} role="alert" aria-live="polite" className="mt-1.5 text-sm text-red-600">
-            {error}
-          </p>
-        ) : help ? (
-          <p id={helpId} className="mt-1.5 text-sm text-token-text/60">
-            {help}
-          </p>
+      <div className="relative">
+        <textarea
+          id={textareaId}
+          ref={innerRef}
+          aria-invalid={Boolean(error) || undefined}
+          aria-describedby={describedBy}
+          aria-errormessage={error ? errorId : undefined}
+          required={required}
+          onInput={(e) => {
+            props.onInput?.(e);
+            if (autoGrow) resize();
+          }}
+          className={cn(
+            'w-full text-[hsl(var(--text))] placeholder:text-token-text/50',
+            'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+            'disabled:opacity-60 disabled:cursor-not-allowed',
+            'resize-y', // Tailwind: redimension vertical par l’utilisateur
+            sizeClasses[size],
+            variantClasses[variant],
+            error ? 'border-red-500 focus-visible:ring-red-500' : undefined,
+            textareaClassName,
+            className
+          )}
+          {...props}
+        />
+
+        {maxLength && showCount ? (
+          <div
+            aria-live="polite"
+            className="pointer-events-none absolute bottom-1.5 right-2 text-xs text-token-text/60"
+          >
+            {String(props.value ?? '').length}/{maxLength}
+          </div>
         ) : null}
       </div>
-    )
-  }
-)
 
-export default TextArea
+      {error ? (
+        <p id={errorId} role="alert" aria-live="polite" className="mt-1.5 text-sm text-red-600">
+          {error}
+        </p>
+      ) : help ? (
+        <p id={helpId} className="mt-1.5 text-sm text-token-text/60">
+          {help}
+        </p>
+      ) : null}
+    </div>
+  );
+});
+
+export default TextArea;

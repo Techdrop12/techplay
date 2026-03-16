@@ -1,4 +1,4 @@
-import mongoose, { Schema, InferSchemaType } from 'mongoose'
+import mongoose, { Schema, InferSchemaType } from 'mongoose';
 
 const WishlistSchema = new Schema(
   {
@@ -6,8 +6,8 @@ const WishlistSchema = new Schema(
     productIds: [{ type: Schema.Types.ObjectId, ref: 'Product' }],
   },
   { timestamps: true }
-)
+);
 
-export type WishlistDoc = InferSchemaType<typeof WishlistSchema>
+export type WishlistDoc = InferSchemaType<typeof WishlistSchema>;
 
-export default mongoose.models.Wishlist ?? mongoose.model('Wishlist', WishlistSchema)
+export default mongoose.models.Wishlist ?? mongoose.model('Wishlist', WishlistSchema);

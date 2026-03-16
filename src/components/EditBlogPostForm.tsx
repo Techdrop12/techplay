@@ -1,19 +1,19 @@
-'use client'
+'use client';
 
-import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
-import { useState, useEffect } from 'react'
-import { toast } from 'react-hot-toast'
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 
 interface EditBlogPostFormProps {
-  postId: string
+  postId: string;
 }
 
 export default function EditBlogPostForm({ postId }: EditBlogPostFormProps) {
-  const t = useTranslations('admin')
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
-  const [fetching, setFetching] = useState(true)
+  const t = useTranslations('admin');
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
   const [form, setForm] = useState({
     title: '',
     slug: '',
@@ -21,17 +21,17 @@ export default function EditBlogPostForm({ postId }: EditBlogPostFormProps) {
     image: '',
     author: '',
     published: false,
-  })
-  const [apiError, setApiError] = useState<string | null>(null)
-  const [fieldErrors, setFieldErrors] = useState<Partial<Record<string, string>>>({})
+  });
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<string, string>>>({});
 
   useEffect(() => {
-    let cancelled = false
+    let cancelled = false;
     fetch(`/api/blog/${postId}`)
       .then((res) => res.json())
       .then((data) => {
-        if (cancelled) return
-        if (data?.error) throw new Error(data.error)
+        if (cancelled) return;
+        if (data?.error) throw new Error(data.error);
         setForm({
           title: data.title ?? '',
           slug: data.slug ?? '',
@@ -39,36 +39,38 @@ export default function EditBlogPostForm({ postId }: EditBlogPostFormProps) {
           image: data.image ?? '',
           author: data.author ?? '',
           published: Boolean(data.published),
-        })
+        });
       })
       .catch((e) => {
-        if (!cancelled) toast.error(e?.message || t('loading_error'))
+        if (!cancelled) toast.error(e?.message || t('loading_error'));
       })
       .finally(() => {
-        if (!cancelled) setFetching(false)
-      })
-    return () => { cancelled = true }
-  }, [postId, t])
+        if (!cancelled) setFetching(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [postId, t]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    const { name, value, type } = e.target
+    const { name, value, type } = e.target;
     setForm((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
-    }))
-  }
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setApiError(null)
-    setFieldErrors({})
+    e.preventDefault();
+    setApiError(null);
+    setFieldErrors({});
     if (!form.title.trim()) {
-      setFieldErrors({ title: t('title_required') })
-      return
+      setFieldErrors({ title: t('title_required') });
+      return;
     }
-    setLoading(true)
+    setLoading(true);
     try {
       const res = await fetch(`/api/blog/${postId}`, {
         method: 'PUT',
@@ -81,43 +83,60 @@ export default function EditBlogPostForm({ postId }: EditBlogPostFormProps) {
           author: form.author.trim() || undefined,
           published: form.published,
         }),
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (!res.ok) {
-        setApiError(data?.error || 'Erreur')
-        return
+        setApiError(data?.error || 'Erreur');
+        return;
       }
-      toast.success(t('article_updated'))
-      router.push('/admin/blog')
-      router.refresh()
+      toast.success(t('article_updated'));
+      router.push('/admin/blog');
+      router.refresh();
     } catch (e) {
-      setApiError(e instanceof Error ? e.message : t('update_error'))
+      setApiError(e instanceof Error ? e.message : t('update_error'));
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   if (fetching) {
     return (
-      <div className="max-w-xl animate-pulse space-y-4" role="status" aria-label={t('loading_article_aria')}>
+      <div
+        className="max-w-xl animate-pulse space-y-4"
+        role="status"
+        aria-label={t('loading_article_aria')}
+      >
         <div className="h-10 rounded-lg bg-[hsl(var(--border))]" />
         <div className="h-10 rounded-lg bg-[hsl(var(--border))]" />
         <div className="h-24 rounded-lg bg-[hsl(var(--border))]" />
       </div>
-    )
+    );
   }
 
-  const inputErrorClass = 'border-red-500 dark:border-red-400 focus-visible:ring-red-500'
+  const inputErrorClass = 'border-red-500 dark:border-red-400 focus-visible:ring-red-500';
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-xl" noValidate aria-labelledby="edit-blog-heading">
-      <h2 id="edit-blog-heading" className="sr-only">{t('edit_article_sr')}</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 max-w-xl"
+      noValidate
+      aria-labelledby="edit-blog-heading"
+    >
+      <h2 id="edit-blog-heading" className="sr-only">
+        {t('edit_article_sr')}
+      </h2>
       {apiError && (
-        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-200">
+        <div
+          role="alert"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-200"
+        >
           {apiError}
         </div>
       )}
       <div>
-        <label htmlFor="edit-blog-title" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">
+        <label
+          htmlFor="edit-blog-title"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
           Titre *
         </label>
         <input
@@ -133,11 +152,20 @@ export default function EditBlogPostForm({ postId }: EditBlogPostFormProps) {
           aria-describedby={fieldErrors.title ? 'edit-blog-title-error' : undefined}
         />
         {fieldErrors.title && (
-          <p id="edit-blog-title-error" role="alert" className="mt-1 text-sm text-red-600 dark:text-red-400">{fieldErrors.title}</p>
+          <p
+            id="edit-blog-title-error"
+            role="alert"
+            className="mt-1 text-sm text-red-600 dark:text-red-400"
+          >
+            {fieldErrors.title}
+          </p>
         )}
       </div>
       <div>
-        <label htmlFor="edit-blog-slug" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">
+        <label
+          htmlFor="edit-blog-slug"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
           Slug
         </label>
         <input
@@ -151,7 +179,10 @@ export default function EditBlogPostForm({ postId }: EditBlogPostFormProps) {
         />
       </div>
       <div>
-        <label htmlFor="edit-blog-description" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">
+        <label
+          htmlFor="edit-blog-description"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
           Description / extrait
         </label>
         <textarea
@@ -164,7 +195,10 @@ export default function EditBlogPostForm({ postId }: EditBlogPostFormProps) {
         />
       </div>
       <div>
-        <label htmlFor="edit-blog-image" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">
+        <label
+          htmlFor="edit-blog-image"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
           URL image
         </label>
         <input
@@ -177,7 +211,10 @@ export default function EditBlogPostForm({ postId }: EditBlogPostFormProps) {
         />
       </div>
       <div>
-        <label htmlFor="edit-blog-author" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">
+        <label
+          htmlFor="edit-blog-author"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
           Auteur
         </label>
         <input
@@ -220,5 +257,5 @@ export default function EditBlogPostForm({ postId }: EditBlogPostFormProps) {
         </button>
       </div>
     </form>
-  )
+  );
 }

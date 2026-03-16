@@ -1,18 +1,18 @@
 // src/app/not-found.tsx
-import { getTranslations } from 'next-intl/server'
+import { getTranslations } from 'next-intl/server';
 
-import NotFoundPageContent from '@/components/NotFoundPageContent'
+import NotFoundPageContent from '@/components/NotFoundPageContent';
 
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function generateMetadata() {
-  const t = await getTranslations('seo_extra')
+  const t = await getTranslations('seo_extra');
   return {
     title: t('not_found_page_title'),
     description: t('not_found_page_description'),
     robots: { index: false, follow: true },
-  }
+  };
 }
 
 export default function NotFoundPage() {
@@ -27,5 +27,5 @@ export default function NotFoundPage() {
         <NotFoundPageContent />
       </div>
     </main>
-  )
+  );
 }

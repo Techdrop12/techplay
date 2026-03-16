@@ -20,7 +20,10 @@ export async function generateProductSummary(text: string, locale = 'fr'): Promi
   const completion = await openai!.chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
-      { role: 'system', content: `Résume ce texte produit en 3 phrases (${locale}). Style clair, vendeur.` },
+      {
+        role: 'system',
+        content: `Résume ce texte produit en 3 phrases (${locale}). Style clair, vendeur.`,
+      },
       { role: 'user', content: text },
     ],
     temperature: 0.5,
@@ -41,7 +44,10 @@ export async function suggestProductIdeas(theme: string, locale = 'fr'): Promise
   const completion = await openai!.chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
-      { role: 'system', content: `Génère 10 idées de produits e-commerce (${locale}). Format: liste markdown.` },
+      {
+        role: 'system',
+        content: `Génère 10 idées de produits e-commerce (${locale}). Format: liste markdown.`,
+      },
       { role: 'user', content: theme },
     ],
     temperature: 0.8,

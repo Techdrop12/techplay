@@ -1,24 +1,20 @@
-import type { Metadata } from 'next'
-import { getTranslations } from 'next-intl/server'
-import Link from 'next/link'
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+import Link from 'next/link';
 
-import EditBlogPostForm from '@/components/EditBlogPostForm'
+import EditBlogPostForm from '@/components/EditBlogPostForm';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('admin')
+  const t = await getTranslations('admin');
   return {
     title: `${t('edit_article_heading')} – Admin TechPlay`,
     robots: { index: false, follow: false },
-  }
+  };
 }
 
-export default async function AdminEditBlogPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const t = await getTranslations('admin')
-  const { id } = await params
+export default async function AdminEditBlogPage({ params }: { params: Promise<{ id: string }> }) {
+  const t = await getTranslations('admin');
+  const { id } = await params;
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <header className="flex items-center gap-4">
@@ -34,5 +30,5 @@ export default async function AdminEditBlogPage({
       </h1>
       <EditBlogPostForm postId={id} />
     </div>
-  )
+  );
 }

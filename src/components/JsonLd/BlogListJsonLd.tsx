@@ -1,16 +1,16 @@
 // src/components/JsonLd/BlogListJsonLd.tsx
-'use client'
+'use client';
 
-import Head from 'next/head'
+import Head from 'next/head';
 
-import type { BlogPost } from '@/types/blog'
+import type { BlogPost } from '@/types/blog';
 
-import { BRAND } from '@/lib/constants'
+import { BRAND } from '@/lib/constants';
 
 interface BlogListJsonLdProps {
-  posts: BlogPost[]
-  locale?: 'fr' | 'en'
-  siteUrl?: string
+  posts: BlogPost[];
+  locale?: 'fr' | 'en';
+  siteUrl?: string;
 }
 
 export default function BlogListJsonLd({
@@ -18,7 +18,7 @@ export default function BlogListJsonLd({
   locale = 'fr',
   siteUrl = BRAND.URL,
 }: BlogListJsonLdProps) {
-  if (!Array.isArray(posts) || posts.length === 0) return null
+  if (!Array.isArray(posts) || posts.length === 0) return null;
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -28,11 +28,14 @@ export default function BlogListJsonLd({
       position: index + 1,
       url: new URL(`/${locale}/blog/${post.slug}`, siteUrl).toString(),
     })),
-  }
+  };
 
   return (
     <Head>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
     </Head>
-  )
+  );
 }

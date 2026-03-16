@@ -1,14 +1,14 @@
-import mongoose, { Schema, Types, type InferSchemaType } from 'mongoose'
+import mongoose, { Schema, Types, type InferSchemaType } from 'mongoose';
 
-const Money = { type: Number, min: 0 } as const
+const Money = { type: Number, min: 0 } as const;
 
 type JsonRecord = Record<string, unknown> & {
-  _id?: Types.ObjectId | { toString(): string }
-  __v?: number
-  id?: string
-  images?: string[]
-  gallery?: string[]
-}
+  _id?: Types.ObjectId | { toString(): string };
+  __v?: number;
+  id?: string;
+  images?: string[];
+  gallery?: string[];
+};
 
 const ProductSchema = new Schema(
   {
@@ -46,25 +46,25 @@ const ProductSchema = new Schema(
       virtuals: true,
       versionKey: false,
       transform: (_doc, ret: JsonRecord) => {
-        ret.id = ret._id?.toString?.() ?? String(ret._id ?? '')
-        if (!ret.images && Array.isArray(ret.gallery)) ret.images = ret.gallery
-        const { _id, __v, ...rest } = ret
-        return rest
+        ret.id = ret._id?.toString?.() ?? String(ret._id ?? '');
+        if (!ret.images && Array.isArray(ret.gallery)) ret.images = ret.gallery;
+        const { _id, __v, ...rest } = ret;
+        return rest;
       },
     },
   }
-)
+);
 
 ProductSchema.virtual('id').get(function (this: { _id: Types.ObjectId }) {
-  return this._id.toString()
-})
+  return this._id.toString();
+});
 
-ProductSchema.index({ title: 'text', description: 'text', brand: 'text', category: 'text' })
+ProductSchema.index({ title: 'text', description: 'text', brand: 'text', category: 'text' });
 
-export type Product = InferSchemaType<typeof ProductSchema>
+export type Product = InferSchemaType<typeof ProductSchema>;
 
 const ProductModel =
   (mongoose.models.Product as mongoose.Model<Product>) ||
-  mongoose.model<Product>('Product', ProductSchema)
+  mongoose.model<Product>('Product', ProductSchema);
 
-export default ProductModel
+export default ProductModel;

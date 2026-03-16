@@ -1,9 +1,9 @@
 // src/components/ProductSkeletonGrid.tsx
-import ProductCardSkeleton from '@/components/ProductCardSkeleton'
+import ProductCardSkeleton from '@/components/ProductCardSkeleton';
 
 type Props = {
-  count?: number
-}
+  count?: number;
+};
 
 export default function ProductSkeletonGrid({ count = 6 }: Props) {
   return (
@@ -12,5 +12,5 @@ export default function ProductSkeletonGrid({ count = 6 }: Props) {
         <ProductCardSkeleton key={i} />
       ))}
     </div>
-  )
+  );
 }

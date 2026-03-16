@@ -1,25 +1,28 @@
 /**
  * @deprecated Non importé. Utiliser @/lib/email ou @/lib/email/sendBrevo pour l'envoi d'emails.
  */
-import { BRAND } from './constants'
-import sendBrevoEmail from './email/sendBrevo'
+import { BRAND } from './constants';
+import sendBrevoEmail from './email/sendBrevo';
 
 export interface SendConfirmationEmailParams {
-  to: string
+  to: string;
   order: {
-    _id?: string | number
-    total?: number
-    shippingMethod?: string
-  }
+    _id?: string | number;
+    total?: number;
+    shippingMethod?: string;
+  };
 }
 
-export async function sendConfirmationEmail({ to, order }: SendConfirmationEmailParams): Promise<void> {
-  const id = order?._id ?? ''
-  const total = Number(order?.total ?? 0).toFixed(2)
-  const shipping = order?.shippingMethod ?? 'Standard'
-  const siteUrl = BRAND?.URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? '#'
+export async function sendConfirmationEmail({
+  to,
+  order,
+}: SendConfirmationEmailParams): Promise<void> {
+  const id = order?._id ?? '';
+  const total = Number(order?.total ?? 0).toFixed(2);
+  const shipping = order?.shippingMethod ?? 'Standard';
+  const siteUrl = BRAND?.URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? '#';
 
-  const subject = `Confirmation de votre commande TechPlay ${id ? `#${id}` : ''}`
+  const subject = `Confirmation de votre commande TechPlay ${id ? `#${id}` : ''}`;
 
   const html = `<!doctype html>
 <html lang="fr">
@@ -51,7 +54,7 @@ ${id ? `<p class="muted">Commande <strong>#${id}</strong></p>` : ''}
 <p class="muted" style="margin-top:16px">Si vous n'êtes pas à l'origine de cette commande, ignorez cet e‑mail.</p>
 </div>
 </body>
-</html>`
+</html>`;
 
   const text = [
     'Merci pour votre commande TechPlay',
@@ -60,9 +63,11 @@ ${id ? `<p class="muted">Commande <strong>#${id}</strong></p>` : ''}
     `Livraison: ${shipping}`,
     '',
     `Suivi: ${siteUrl}`,
-  ].filter(Boolean).join('\n')
+  ]
+    .filter(Boolean)
+    .join('\n');
 
-  await sendBrevoEmail({ to, subject, html, text, tags: ['order', 'confirmation'] })
+  await sendBrevoEmail({ to, subject, html, text, tags: ['order', 'confirmation'] });
 }
 
-export default sendConfirmationEmail
+export default sendConfirmationEmail;

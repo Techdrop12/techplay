@@ -1,29 +1,29 @@
-'use client'
+'use client';
 
-import { useId } from 'react'
-import { useTranslations } from 'next-intl'
+import { useId } from 'react';
+import { useTranslations } from 'next-intl';
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
 
-type SortValue = 'asc' | 'desc' | 'alpha'
+type SortValue = 'asc' | 'desc' | 'alpha';
 
 type Props = {
-  sort: SortValue
-  setSort: (value: SortValue) => void
+  sort: SortValue;
+  setSort: (value: SortValue) => void;
   /** @deprecated Locale is read from next-intl; prop kept for backward compatibility */
-  locale?: 'fr' | 'en'
-  className?: string
-}
+  locale?: 'fr' | 'en';
+  className?: string;
+};
 
 const OPTIONS: { value: SortValue; key: string }[] = [
   { value: 'alpha', key: 'popularity' },
   { value: 'asc', key: 'price_asc' },
   { value: 'desc', key: 'price_desc' },
-]
+];
 
 export default function SortDropdown({ sort, setSort, locale: _locale, className }: Props) {
-  const groupId = useId()
-  const t = useTranslations('sort')
+  const groupId = useId();
+  const t = useTranslations('sort');
 
   return (
     <div
@@ -46,8 +46,8 @@ export default function SortDropdown({ sort, setSort, locale: _locale, className
         className="flex flex-wrap gap-2 sm:gap-2.5"
       >
         {OPTIONS.map(({ value, key }) => {
-          const active = sort === value
-          const label = t(key)
+          const active = sort === value;
+          const label = t(key);
 
           return (
             <button
@@ -67,9 +67,9 @@ export default function SortDropdown({ sort, setSort, locale: _locale, className
             >
               {label}
             </button>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }

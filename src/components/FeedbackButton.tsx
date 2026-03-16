@@ -1,22 +1,22 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 export default function FeedbackButton() {
-  const t = useTranslations('feedback')
-  const [open, setOpen] = useState(false)
-  const [sent, setSent] = useState(false)
-  const [feedback, setFeedback] = useState('')
+  const t = useTranslations('feedback');
+  const [open, setOpen] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [feedback, setFeedback] = useState('');
 
   async function handleSend() {
     await fetch('/api/feedback', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ feedback }),
-    })
-    setSent(true)
-    setTimeout(() => setOpen(false), 2000)
+    });
+    setSent(true);
+    setTimeout(() => setOpen(false), 2000);
   }
 
   return (
@@ -48,10 +48,7 @@ export default function FeedbackButton() {
                 >
                   {t('send')}
                 </button>
-                <button
-                  onClick={() => setOpen(false)}
-                  className="ml-3 text-token-text/70"
-                >
+                <button onClick={() => setOpen(false)} className="ml-3 text-token-text/70">
                   {t('cancel')}
                 </button>
               </>
@@ -60,5 +57,5 @@ export default function FeedbackButton() {
         </div>
       )}
     </>
-  )
+  );
 }

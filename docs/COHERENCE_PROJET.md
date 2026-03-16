@@ -6,13 +6,13 @@ Vérification globale des dossiers et fichiers (structure, imports, i18n, config
 
 ## 1. Structure et config
 
-| Élément | Statut |
-|--------|--------|
-| **tsconfig.json** | `baseUrl: "."`, `paths: { "@/*": ["src/*"] }` — tous les imports `@/` résolvent vers `src/` |
-| **next.config.mjs** | Plugin next-intl pointe vers `./src/i18n/config.ts` |
-| **next-intl.config.js** | `locales: ['fr', 'en']`, `defaultLocale: 'fr'`, aligné avec `src/lib/language.ts` |
-| **tailwind.config.ts** | `content: ['./src/**/*.{js,ts,jsx,tsx,mdx}']` — couvre tout le code source |
-| **i18n** | `src/i18n/config.ts` utilise `LOCALE_COOKIE` et `loadMessages` ; `src/lib/language.ts` = source de vérité pour `Locale`, `DEFAULT_LOCALE`, etc. |
+| Élément                 | Statut                                                                                                                                          |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **tsconfig.json**       | `baseUrl: "."`, `paths: { "@/*": ["src/*"] }` — tous les imports `@/` résolvent vers `src/`                                                     |
+| **next.config.mjs**     | Plugin next-intl pointe vers `./src/i18n/config.ts`                                                                                             |
+| **next-intl.config.js** | `locales: ['fr', 'en']`, `defaultLocale: 'fr'`, aligné avec `src/lib/language.ts`                                                               |
+| **tailwind.config.ts**  | `content: ['./src/**/*.{js,ts,jsx,tsx,mdx}']` — couvre tout le code source                                                                      |
+| **i18n**                | `src/i18n/config.ts` utilise `LOCALE_COOKIE` et `loadMessages` ; `src/lib/language.ts` = source de vérité pour `Locale`, `DEFAULT_LOCALE`, etc. |
 
 ---
 

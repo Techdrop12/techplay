@@ -1,21 +1,21 @@
 // src/components/ConfirmationDialog.tsx
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
-import * as React from 'react'
+import { useTranslations } from 'next-intl';
+import * as React from 'react';
 
-import Button from '@/components/Button'
-import Modal from '@/components/Modal'
+import Button from '@/components/Button';
+import Modal from '@/components/Modal';
 
 export interface ConfirmationDialogProps {
-  open: boolean
-  onClose: () => void
-  onConfirm: () => void
-  title?: React.ReactNode
-  message?: React.ReactNode
-  confirmLabel?: string
-  cancelLabel?: string
-  danger?: boolean
+  open: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title?: React.ReactNode;
+  message?: React.ReactNode;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  danger?: boolean;
 }
 
 export default function ConfirmationDialog({
@@ -28,11 +28,11 @@ export default function ConfirmationDialog({
   cancelLabel,
   danger,
 }: ConfirmationDialogProps) {
-  const t = useTranslations('common')
-  const defaultTitle = title ?? t('confirm')
-  const defaultMessage = message ?? t('confirm_default_message')
-  const defaultConfirm = confirmLabel ?? t('confirm')
-  const defaultCancel = cancelLabel ?? t('cancel')
+  const t = useTranslations('common');
+  const defaultTitle = title ?? t('confirm');
+  const defaultMessage = message ?? t('confirm_default_message');
+  const defaultConfirm = confirmLabel ?? t('confirm');
+  const defaultCancel = cancelLabel ?? t('cancel');
   return (
     <Modal isOpen={open} onClose={onClose} title={defaultTitle} size="sm" closeOnOverlay>
       <Modal.Body>
@@ -49,5 +49,5 @@ export default function ConfirmationDialog({
         </div>
       </Modal.Footer>
     </Modal>
-  )
+  );
 }

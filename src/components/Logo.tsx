@@ -1,24 +1,24 @@
-'use client'
+'use client';
 
-import NextLink from 'next/link'
-import { useId } from 'react'
+import NextLink from 'next/link';
+import { useId } from 'react';
 
-import LocalizedLink from '@/components/LocalizedLink'
-import { type Locale } from '@/lib/i18n-routing'
-import { cn } from '@/lib/utils'
+import LocalizedLink from '@/components/LocalizedLink';
+import { type Locale } from '@/lib/i18n-routing';
+import { cn } from '@/lib/utils';
 
 interface LogoProps {
-  className?: string
-  withText?: boolean
-  textClassName?: string
-  ariaLabel?: string
-  href?: string
-  localized?: boolean
-  locale?: Locale
-  srcLight?: string
-  srcDark?: string
-  forceInline?: boolean
-  priority?: boolean
+  className?: string;
+  withText?: boolean;
+  textClassName?: string;
+  ariaLabel?: string;
+  href?: string;
+  localized?: boolean;
+  locale?: Locale;
+  srcLight?: string;
+  srcDark?: string;
+  forceInline?: boolean;
+  priority?: boolean;
 }
 
 export default function Logo({
@@ -34,8 +34,8 @@ export default function Logo({
   forceInline = false,
   priority = true,
 }: LogoProps) {
-  const uid = useId().replace(/[:]/g, '')
-  const gradId = `tp_g_${uid}`
+  const uid = useId().replace(/[:]/g, '');
+  const gradId = `tp_g_${uid}`;
 
   const InlineMark = () => (
     <svg
@@ -60,16 +60,16 @@ export default function Logo({
       />
       <path d="M28 18.5 34.5 22 28 25.5v-7Z" fill="#fff" opacity=".9" />
     </svg>
-  )
+  );
 
   const ImageMark = () => {
     if (forceInline || !srcLight) {
-      return <InlineMark />
+      return <InlineMark />;
     }
 
-    const darkSource = srcDark || srcLight
+    const darkSource = srcDark || srcLight;
 
-    const imgAlt = withText ? '' : ariaLabel
+    const imgAlt = withText ? '' : ariaLabel;
     return (
       <span className="relative inline-flex h-full w-auto items-center">
         <img
@@ -91,22 +91,22 @@ export default function Logo({
           className="hidden h-full w-auto select-none transition-transform duration-200 group-hover:scale-[1.02] dark:block"
         />
       </span>
-    )
-  }
+    );
+  };
 
   const content = (
     <span className={cn('inline-flex items-center gap-2', className)}>
       <ImageMark />
       {withText ? <span className={textClassName}>TechPlay</span> : null}
     </span>
-  )
+  );
 
   if (!href) {
     return (
       <span className="inline-flex items-center" role="img" aria-label={ariaLabel}>
         {content}
       </span>
-    )
+    );
   }
 
   if (localized) {
@@ -120,7 +120,7 @@ export default function Logo({
       >
         {content}
       </LocalizedLink>
-    )
+    );
   }
 
   return (
@@ -132,5 +132,5 @@ export default function Logo({
     >
       {content}
     </NextLink>
-  )
+  );
 }

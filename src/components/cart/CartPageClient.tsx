@@ -1,88 +1,91 @@
 // src/components/cart/CartPageClient.tsx
-'use client'
+'use client';
 
-import { motion, useReducedMotion } from 'framer-motion'
-import { useLocale, useTranslations } from 'next-intl'
-import { useEffect, useMemo, useRef } from 'react'
+import { motion, useReducedMotion } from 'framer-motion';
+import { useLocale, useTranslations } from 'next-intl';
+import { useEffect, useMemo, useRef } from 'react';
 
-import type { Product } from '@/types/product'
+import type { Product } from '@/types/product';
 
-import CartList from '@/components/cart/CartList'
-import CartSummary from '@/components/cart/CartSummary'
-import EmptyCart from '@/components/cart/EmptyCart'
-import Link from '@/components/LocalizedLink'
-import { useCart } from '@/hooks/useCart'
-import { event as gaEvent, mapProductToGaItem, trackViewCart } from '@/lib/ga'
+import CartList from '@/components/cart/CartList';
+import CartSummary from '@/components/cart/CartSummary';
+import EmptyCart from '@/components/cart/EmptyCart';
+import Link from '@/components/LocalizedLink';
+import { useCart } from '@/hooks/useCart';
+import { event as gaEvent, mapProductToGaItem, trackViewCart } from '@/lib/ga';
 
-type CartProduct = Product & { quantity: number }
+type CartProduct = Product & { quantity: number };
 
-const CART_REASSURANCE = { fr: 'Livraison 48–72h · Paiement sécurisé · Retours gratuits 30 jours', en: 'Delivery 48–72h · Secure payment · 30-day free returns' } as const
+const CART_REASSURANCE = {
+  fr: 'Livraison 48–72h · Paiement sécurisé · Retours gratuits 30 jours',
+  en: 'Delivery 48–72h · Secure payment · 30-day free returns',
+} as const;
 
 export default function CartPageClient() {
-  const t = useTranslations('cart')
-  const tNav = useTranslations('nav')
-  const locale = useLocale() as 'fr' | 'en'
-  const { cart } = useCart()
-  const prefersReduced = useReducedMotion()
-  const srRef = useRef<HTMLParagraphElement | null>(null)
+  const t = useTranslations('cart');
+  const tNav = useTranslations('nav');
+  const locale = useLocale() as 'fr' | 'en';
+  const { cart } = useCart();
+  const prefersReduced = useReducedMotion();
+  const srRef = useRef<HTMLParagraphElement | null>(null);
 
   const safeCart = useMemo<CartProduct[]>(() => {
-    return Array.isArray(cart) ? (cart as CartProduct[]) : []
-  }, [cart])
+    return Array.isArray(cart) ? (cart as CartProduct[]) : [];
+  }, [cart]);
 
-  const isEmpty = safeCart.length === 0
+  const isEmpty = safeCart.length === 0;
 
   const count = useMemo(
     () => safeCart.reduce((s, it) => s + (Number(it.quantity) || 0), 0),
     [safeCart]
-  )
+  );
 
   const cartTotal = useMemo(
     () => safeCart.reduce((s, it) => s + (Number(it.price) || 0) * (Number(it.quantity) || 1), 0),
     [safeCart]
-  )
+  );
 
-  const prevCountRef = useRef<number>(0)
+  const prevCountRef = useRef<number>(0);
 
   useEffect(() => {
-    if (!srRef.current) return
+    if (!srRef.current) return;
 
-    const prev = prevCountRef.current
-    let text = ''
+    const prev = prevCountRef.current;
+    let text = '';
 
-    if (count === 0) text = t('cart_empty_sr')
-    else if (prev === 0) text = t('items_in_cart_sr', { count })
+    if (count === 0) text = t('cart_empty_sr');
+    else if (prev === 0) text = t('items_in_cart_sr', { count });
     else if (count > prev) {
-      const diff = count - prev
-      text = t('items_added_sr', { diff, count })
+      const diff = count - prev;
+      text = t('items_added_sr', { diff, count });
     } else if (count < prev) {
-      const diff = prev - count
-      text = t('items_removed_sr', { diff, count })
+      const diff = prev - count;
+      text = t('items_removed_sr', { diff, count });
     } else {
-      text = t('items_in_cart_sr', { count })
+      text = t('items_in_cart_sr', { count });
     }
 
-    srRef.current.textContent = text
-    prevCountRef.current = count
-  }, [count, t])
+    srRef.current.textContent = text;
+    prevCountRef.current = count;
+  }, [count, t]);
 
   useEffect(() => {
-    if (isEmpty) return
+    if (isEmpty) return;
     try {
-      const value = Math.round(cartTotal * 100) / 100
+      const value = Math.round(cartTotal * 100) / 100;
       gaEvent?.({
         action: 'view_cart',
         category: 'ecommerce',
         label: 'cart_page',
         value,
-      })
+      });
       const items = safeCart.map((p) => ({
         ...mapProductToGaItem(p),
         quantity: Number(p.quantity) || 1,
-      }))
-      trackViewCart({ currency: 'EUR', value, items })
+      }));
+      trackViewCart({ currency: 'EUR', value, items });
     } catch {}
-  }, [isEmpty, cartTotal, safeCart])
+  }, [isEmpty, cartTotal, safeCart]);
 
   return (
     <main
@@ -93,12 +96,19 @@ export default function CartPageClient() {
       <nav aria-label={t('breadcrumb_aria')} className="mb-8 text-[13px] text-token-text/60">
         <ol className="flex items-center gap-1.5">
           <li>
-            <Link href="/" className="transition hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded">
+            <Link
+              href="/"
+              className="transition hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded"
+            >
               {tNav('home')}
             </Link>
           </li>
-          <li aria-hidden="true" className="text-token-text/40">/</li>
-          <li aria-current="page" className="text-token-text/90">{tNav('cart')}</li>
+          <li aria-hidden="true" className="text-token-text/40">
+            /
+          </li>
+          <li aria-current="page" className="text-token-text/90">
+            {tNav('cart')}
+          </li>
         </ol>
       </nav>
 
@@ -111,7 +121,8 @@ export default function CartPageClient() {
         animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
         transition={{ duration: 0.25 }}
       >
-        {t('page_title')}{count > 0 ? ` · ${t('items_count', { count })}` : ''}
+        {t('page_title')}
+        {count > 0 ? ` · ${t('items_count', { count })}` : ''}
       </motion.h1>
 
       {!isEmpty ? (
@@ -160,5 +171,5 @@ export default function CartPageClient() {
         </motion.section>
       )}
     </main>
-  )
+  );
 }

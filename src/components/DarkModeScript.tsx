@@ -16,6 +16,6 @@ export default function DarkModeScript() {
       root.setAttribute('data-theme', mode);
       root.style.colorScheme = isDark ? 'dark' : 'light';
     } catch (e) {}
-  })();`
-  return <script dangerouslySetInnerHTML={{ __html: code }} />
+  })();`;
+  return <script dangerouslySetInnerHTML={{ __html: code }} />;
 }

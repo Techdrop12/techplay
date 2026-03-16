@@ -1,59 +1,59 @@
-'use client'
+'use client';
 
-import { useEffect, useMemo, useRef } from 'react'
-import { useTranslations } from 'next-intl'
+import { useEffect, useMemo, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 
-import type { Product } from '@/types/product'
+import type { Product } from '@/types/product';
 
-import CartList from '@/components/cart/CartList'
-import CartSummary from '@/components/cart/CartSummary'
-import CheckoutForm from '@/components/checkout/CheckoutForm'
-import FreeShippingBadge from '@/components/FreeShippingBadge'
-import Link from '@/components/LocalizedLink'
-import { useCart } from '@/hooks/useCart'
-import { detectCurrency } from '@/lib/currency'
-import { mapProductToGaItem, pushDataLayer, trackBeginCheckout } from '@/lib/ga'
-import { formatPrice } from '@/lib/utils'
+import CartList from '@/components/cart/CartList';
+import CartSummary from '@/components/cart/CartSummary';
+import CheckoutForm from '@/components/checkout/CheckoutForm';
+import FreeShippingBadge from '@/components/FreeShippingBadge';
+import Link from '@/components/LocalizedLink';
+import { useCart } from '@/hooks/useCart';
+import { detectCurrency } from '@/lib/currency';
+import { mapProductToGaItem, pushDataLayer, trackBeginCheckout } from '@/lib/ga';
+import { formatPrice } from '@/lib/utils';
 
-type CheckoutItem = Product & { quantity: number }
+type CheckoutItem = Product & { quantity: number };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
+  return typeof value === 'object' && value !== null;
 }
 
 function readString(record: Record<string, unknown>, keys: readonly string[]): string | undefined {
   for (const key of keys) {
-    const value = record[key]
-    if (typeof value === 'string' && value.trim()) return value.trim()
-    if (typeof value === 'number' && Number.isFinite(value)) return String(value)
+    const value = record[key];
+    if (typeof value === 'string' && value.trim()) return value.trim();
+    if (typeof value === 'number' && Number.isFinite(value)) return String(value);
   }
-  return undefined
+  return undefined;
 }
 
 function readNumber(record: Record<string, unknown>, keys: readonly string[]): number | undefined {
   for (const key of keys) {
-    const value = record[key]
+    const value = record[key];
     const parsed =
       typeof value === 'number'
         ? value
         : typeof value === 'string' && value.trim()
           ? Number(value)
-          : NaN
+          : NaN;
 
-    if (Number.isFinite(parsed)) return parsed
+    if (Number.isFinite(parsed)) return parsed;
   }
-  return undefined
+  return undefined;
 }
 
 function normalizeCartItem(value: unknown): CheckoutItem | null {
-  if (!isRecord(value)) return null
+  if (!isRecord(value)) return null;
 
-  const slug = readString(value, ['slug']) ?? readString(value, ['_id', 'id'])
-  const id = readString(value, ['_id', 'id', 'slug']) ?? slug
-  const price = readNumber(value, ['price'])
-  const quantity = Math.max(1, readNumber(value, ['quantity', 'qty']) ?? 1)
+  const slug = readString(value, ['slug']) ?? readString(value, ['_id', 'id']);
+  const id = readString(value, ['_id', 'id', 'slug']) ?? slug;
+  const price = readNumber(value, ['price']);
+  const quantity = Math.max(1, readNumber(value, ['quantity', 'qty']) ?? 1);
 
-  if (!slug || !id || typeof price !== 'number') return null
+  if (!slug || !id || typeof price !== 'number') return null;
 
   return {
     _id: id,
@@ -70,22 +70,25 @@ function normalizeCartItem(value: unknown): CheckoutItem | null {
     rating: readNumber(value, ['rating']),
     reviewsCount: readNumber(value, ['reviewsCount']),
     oldPrice: readNumber(value, ['oldPrice', 'compareAtPrice']),
-  }
+  };
 }
 
 export default function CheckoutPage() {
-  const t = useTranslations('checkout')
-  const tMisc = useTranslations('misc')
-  const { cart } = useCart()
-  const hasFiredRef = useRef(false)
+  const t = useTranslations('checkout');
+  const tMisc = useTranslations('misc');
+  const { cart } = useCart();
+  const hasFiredRef = useRef(false);
 
   const { items, itemsCount, subtotal, gaItems, currency } = useMemo(() => {
     const normalizedItems = (Array.isArray(cart) ? cart : [])
       .map(normalizeCartItem)
-      .filter((item): item is CheckoutItem => item !== null)
+      .filter((item): item is CheckoutItem => item !== null);
 
-    const totalItems = normalizedItems.reduce((sum, item) => sum + item.quantity, 0)
-    const totalSubtotal = normalizedItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    const totalItems = normalizedItems.reduce((sum, item) => sum + item.quantity, 0);
+    const totalSubtotal = normalizedItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
 
     const analyticsItems = normalizedItems.map((item) => {
       const source: Record<string, unknown> = {
@@ -98,10 +101,10 @@ export default function CheckoutPage() {
         brand: item.brand,
         sku: item.sku,
         quantity: item.quantity,
-      }
+      };
 
-      return mapProductToGaItem(source)
-    })
+      return mapProductToGaItem(source);
+    });
 
     return {
       items: normalizedItems,
@@ -109,21 +112,21 @@ export default function CheckoutPage() {
       subtotal: totalSubtotal,
       gaItems: analyticsItems,
       currency: detectCurrency(),
-    }
-  }, [cart])
+    };
+  }, [cart]);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    if (items.length === 0 || hasFiredRef.current) return
-    hasFiredRef.current = true
+    if (items.length === 0 || hasFiredRef.current) return;
+    hasFiredRef.current = true;
 
     try {
       trackBeginCheckout({
         currency,
         value: subtotal,
         items: gaItems,
-      })
+      });
     } catch {}
 
     try {
@@ -136,11 +139,11 @@ export default function CheckoutPage() {
           value: subtotal,
           items: gaItems,
         },
-      })
+      });
     } catch {}
-  }, [items.length, subtotal, currency, gaItems])
+  }, [items.length, subtotal, currency, gaItems]);
 
-  const isEmpty = items.length === 0
+  const isEmpty = items.length === 0;
 
   return (
     <main
@@ -151,19 +154,21 @@ export default function CheckoutPage() {
       <nav aria-label={tMisc('breadcrumb_aria')} className="mb-6 text-[12px] text-token-text/60">
         <ol className="flex items-center gap-1.5">
           <li>
-            <Link href="/" className="transition hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded">
+            <Link
+              href="/"
+              className="transition hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] rounded"
+            >
               {t('breadcrumb_home')}
             </Link>
           </li>
           <li aria-hidden="true">/</li>
-          <li aria-current="page" className="text-token-text/90">{t('breadcrumb_order')}</li>
+          <li aria-current="page" className="text-token-text/90">
+            {t('breadcrumb_order')}
+          </li>
         </ol>
       </nav>
 
-      <h1
-        id="checkout-title"
-        className="heading-page"
-      >
+      <h1 id="checkout-title" className="heading-page">
         {t('page_title')}
       </h1>
       <p className="mt-1 text-[13px] text-token-text/70">
@@ -202,7 +207,10 @@ export default function CheckoutPage() {
         </section>
       ) : (
         <>
-          <div className="mt-8 grid items-start gap-8 lg:grid-cols-[1fr,minmax(360px,420px)] lg:gap-10" aria-live="polite">
+          <div
+            className="mt-8 grid items-start gap-8 lg:grid-cols-[1fr,minmax(360px,420px)] lg:gap-10"
+            aria-live="polite"
+          >
             <section className="min-w-0 space-y-6 lg:col-span-1" aria-label={t('cart_aria')}>
               <CartList items={items} />
             </section>
@@ -214,9 +222,7 @@ export default function CheckoutPage() {
             >
               <CartSummary items={items} />
               <CheckoutForm />
-              <p className="text-center text-[11px] text-token-text/60">
-                {t('secure_note')}
-              </p>
+              <p className="text-center text-[11px] text-token-text/60">{t('secure_note')}</p>
             </aside>
           </div>
 
@@ -243,5 +249,5 @@ export default function CheckoutPage() {
         </>
       )}
     </main>
-  )
+  );
 }

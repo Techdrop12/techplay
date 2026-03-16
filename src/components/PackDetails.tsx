@@ -1,25 +1,24 @@
-'use client'
+'use client';
 
-import { motion } from 'framer-motion'
-import Image from 'next/image'
-import { useTranslations } from 'next-intl'
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
-import type { Pack } from '@/types/product'
+import type { Pack } from '@/types/product';
 
-import AddToCartButton from '@/components/AddToCartButton'
-import ProductTags from '@/components/ProductTags'
-import StarsRating from '@/components/StarsRating'
-import WishlistButton from '@/components/WishlistButton'
-import { safeProductImageUrl } from '@/lib/safeProductImage'
-import { formatPrice } from '@/lib/utils'
-
+import AddToCartButton from '@/components/AddToCartButton';
+import ProductTags from '@/components/ProductTags';
+import StarsRating from '@/components/StarsRating';
+import WishlistButton from '@/components/WishlistButton';
+import { safeProductImageUrl } from '@/lib/safeProductImage';
+import { formatPrice } from '@/lib/utils';
 
 interface Props {
-  pack: Pack
+  pack: Pack;
 }
 
 export default function PackDetails({ pack }: Props) {
-  const t = useTranslations('pack')
+  const t = useTranslations('pack');
   const {
     _id,
     title = 'Pack',
@@ -30,7 +29,7 @@ export default function PackDetails({ pack }: Props) {
     slug,
     description = '',
     tags = [],
-  } = pack ?? {}
+  } = pack ?? {};
 
   return (
     <motion.section
@@ -57,10 +56,7 @@ export default function PackDetails({ pack }: Props) {
 
       {/* Détails */}
       <div className="flex flex-col justify-center space-y-6">
-        <h1
-          id="pack-title"
-          className="text-4xl font-bold text-[hsl(var(--text))] tracking-tight"
-        >
+        <h1 id="pack-title" className="text-4xl font-bold text-[hsl(var(--text))] tracking-tight">
           {title}
         </h1>
 
@@ -70,16 +66,12 @@ export default function PackDetails({ pack }: Props) {
             {formatPrice(price)}
           </span>
           {oldPrice && (
-            <span className="line-through text-token-text/60 text-lg">
-              {formatPrice(oldPrice)}
-            </span>
+            <span className="line-through text-token-text/60 text-lg">{formatPrice(oldPrice)}</span>
           )}
         </div>
 
         {/* Étoiles */}
-        {rating > 0 && (
-          <StarsRating rating={rating} aria-label={t('rating_aria', { rating })} />
-        )}
+        {rating > 0 && <StarsRating rating={rating} aria-label={t('rating_aria', { rating })} />}
 
         {/* Wishlist */}
         <WishlistButton
@@ -117,5 +109,5 @@ export default function PackDetails({ pack }: Props) {
         {tags.length > 0 && <ProductTags tags={tags} />}
       </div>
     </motion.section>
-  )
+  );
 }

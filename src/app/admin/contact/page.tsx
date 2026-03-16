@@ -1,11 +1,11 @@
-import type { Metadata } from 'next'
+import type { Metadata } from 'next';
 
-import ContactSubmissionsTable from '@/components/ContactSubmissionsTable'
+import ContactSubmissionsTable from '@/components/ContactSubmissionsTable';
 
 export const metadata: Metadata = {
   title: 'Messages contact – Admin TechPlay',
   robots: { index: false, follow: false },
-}
+};
 
 export default function AdminContactPage() {
   return (
@@ -22,5 +22,5 @@ export default function AdminContactPage() {
         <ContactSubmissionsTable />
       </div>
     </div>
-  )
+  );
 }

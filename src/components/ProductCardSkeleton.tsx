@@ -1,9 +1,9 @@
 // src/components/ProductCardSkeleton.tsx
-import Skeleton from '@/components/ui/Skeleton'
+import Skeleton from '@/components/ui/Skeleton';
 
 type Props = {
-  imageHeight?: number
-}
+  imageHeight?: number;
+};
 
 export default function ProductCardSkeleton({ imageHeight = 160 }: Props) {
   return (
@@ -12,5 +12,5 @@ export default function ProductCardSkeleton({ imageHeight = 160 }: Props) {
       <Skeleton variant="text" lines={2} />
       <Skeleton variant="rect" height={32} radiusClass="rounded-lg" className="w-1/2" />
     </div>
-  )
+  );
 }

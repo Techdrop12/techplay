@@ -1,42 +1,42 @@
-import type { Metadata } from 'next'
+import type { Metadata } from 'next';
 
-import ProductCatalogue from '@/components/ProductCatalogue'
-import { getAllProducts } from '@/lib/data'
+import ProductCatalogue from '@/components/ProductCatalogue';
+import { getAllProducts } from '@/lib/data';
 import {
   resolveSearchParams,
   normalizeProductsSearchParams,
   mapProductsSortToCatalogue,
   buildProductsPageMetaStrings,
   type ProductsCatalogueQuery,
-} from '@/lib/products-catalogue-params'
-import { generateMeta, absoluteUrl } from '@/lib/seo'
+} from '@/lib/products-catalogue-params';
+import { generateMeta, absoluteUrl } from '@/lib/seo';
 
-export const revalidate = 300
+export const revalidate = 300;
 
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams?: Promise<ProductsCatalogueQuery> | ProductsCatalogueQuery
+  searchParams?: Promise<ProductsCatalogueQuery> | ProductsCatalogueQuery;
 }): Promise<Metadata> {
-  const sp = await resolveSearchParams(searchParams)
-  const query = normalizeProductsSearchParams(sp)
-  const { title, description } = buildProductsPageMetaStrings(query)
+  const sp = await resolveSearchParams(searchParams);
+  const query = normalizeProductsSearchParams(sp);
+  const { title, description } = buildProductsPageMetaStrings(query);
   return generateMeta({
     title,
     description,
     url: '/products',
     image: '/og-products.jpg',
-  })
+  });
 }
 
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams?: Promise<ProductsCatalogueQuery> | ProductsCatalogueQuery
+  searchParams?: Promise<ProductsCatalogueQuery> | ProductsCatalogueQuery;
 }) {
-  const products = await getAllProducts()
-  const sp = await resolveSearchParams(searchParams)
-  const query = normalizeProductsSearchParams(sp)
+  const products = await getAllProducts();
+  const sp = await resolveSearchParams(searchParams);
+  const query = normalizeProductsSearchParams(sp);
 
   return (
     <>
@@ -61,5 +61,5 @@ export default async function ProductsPage({
         }}
       />
     </>
-  )
+  );
 }

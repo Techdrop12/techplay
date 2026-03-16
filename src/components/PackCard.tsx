@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { motion, useReducedMotion } from 'framer-motion'
-import Image from 'next/image'
-import { usePathname } from 'next/navigation'
+import { motion, useReducedMotion } from 'framer-motion';
+import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import {
   useCallback,
   useEffect,
@@ -12,29 +12,29 @@ import {
   useState,
   type CSSProperties,
   type MouseEvent,
-} from 'react'
+} from 'react';
 
-import type { Pack } from '@/types/product'
+import type { Pack } from '@/types/product';
 
-import FreeShippingBadge from '@/components/FreeShippingBadge'
-import Link from '@/components/LocalizedLink'
-import { BRAND } from '@/lib/constants'
-import { pushDataLayer } from '@/lib/ga'
-import { getCurrentLocale } from '@/lib/i18n-routing'
-import { logEvent } from '@/lib/logEvent'
-import { safeProductImageUrl } from '@/lib/safeProductImage'
-import { cn, formatPrice } from '@/lib/utils'
+import FreeShippingBadge from '@/components/FreeShippingBadge';
+import Link from '@/components/LocalizedLink';
+import { BRAND } from '@/lib/constants';
+import { pushDataLayer } from '@/lib/ga';
+import { getCurrentLocale } from '@/lib/i18n-routing';
+import { logEvent } from '@/lib/logEvent';
+import { safeProductImageUrl } from '@/lib/safeProductImage';
+import { cn, formatPrice } from '@/lib/utils';
 
 interface PackCardProps {
-  pack: Pack
-  priority?: boolean
-  className?: string
+  pack: Pack;
+  priority?: boolean;
+  className?: string;
 }
 
-type UnknownRecord = Record<string, unknown>
+type UnknownRecord = Record<string, unknown>;
 
 const BLUR_DATA_URL =
-  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+'
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+';
 
 const STR = {
   fr: {
@@ -65,162 +65,155 @@ const STR = {
     savings: (v: number) => `${v}% savings`,
     previewItems: 'Preview of included items',
   },
-} as const
+} as const;
 
-const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
+const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
 
 const isRecord = (value: unknown): value is UnknownRecord =>
-  typeof value === 'object' && value !== null
+  typeof value === 'object' && value !== null;
 
 const getFirstValue = (record: UnknownRecord, keys: readonly string[]): unknown => {
   for (const key of keys) {
-    const value = record[key]
-    if (value !== undefined && value !== null) return value
+    const value = record[key];
+    if (value !== undefined && value !== null) return value;
   }
-  return undefined
-}
+  return undefined;
+};
 
 const toFiniteNumber = (value: unknown): number | undefined => {
-  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
   if (typeof value === 'string' && value.trim()) {
-    const parsed = Number(value)
-    if (Number.isFinite(parsed)) return parsed
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return parsed;
   }
-  return undefined
-}
+  return undefined;
+};
 
 const readString = (record: UnknownRecord, keys: readonly string[]): string | undefined => {
-  const value = getFirstValue(record, keys)
-  return typeof value === 'string' && value.trim() ? value.trim() : undefined
-}
+  const value = getFirstValue(record, keys);
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined;
+};
 
 const readNumber = (record: UnknownRecord, keys: readonly string[]): number | undefined => {
-  return toFiniteNumber(getFirstValue(record, keys))
-}
+  return toFiniteNumber(getFirstValue(record, keys));
+};
 
 const readBoolean = (record: UnknownRecord, keys: readonly string[]): boolean | undefined => {
-  const value = getFirstValue(record, keys)
+  const value = getFirstValue(record, keys);
 
-  if (typeof value === 'boolean') return value
+  if (typeof value === 'boolean') return value;
 
   if (typeof value === 'string') {
-    const normalized = value.trim().toLowerCase()
-    if (normalized === 'true' || normalized === '1') return true
-    if (normalized === 'false' || normalized === '0') return false
+    const normalized = value.trim().toLowerCase();
+    if (normalized === 'true' || normalized === '1') return true;
+    if (normalized === 'false' || normalized === '0') return false;
   }
 
-  return undefined
-}
+  return undefined;
+};
 
 const readArray = (record: UnknownRecord, keys: readonly string[]): unknown[] | undefined => {
-  const value = getFirstValue(record, keys)
-  return Array.isArray(value) ? value : undefined
-}
+  const value = getFirstValue(record, keys);
+  return Array.isArray(value) ? value : undefined;
+};
 
 const normalizeImageSrc = (value: unknown): string | undefined => {
-  if (typeof value === 'string' && value.trim()) return value.trim()
-  if (isRecord(value)) return readString(value, ['url', 'src', 'image', 'path'])
-  return undefined
-}
+  if (typeof value === 'string' && value.trim()) return value.trim();
+  if (isRecord(value)) return readString(value, ['url', 'src', 'image', 'path']);
+  return undefined;
+};
 
 const readImageList = (record: UnknownRecord, keys: readonly string[]): string[] | undefined => {
-  const value = getFirstValue(record, keys)
-  if (!Array.isArray(value)) return undefined
+  const value = getFirstValue(record, keys);
+  if (!Array.isArray(value)) return undefined;
 
   const images = value
     .map((entry) => normalizeImageSrc(entry))
-    .filter((entry): entry is string => Boolean(entry))
+    .filter((entry): entry is string => Boolean(entry));
 
-  return images.length ? images : undefined
-}
+  return images.length ? images : undefined;
+};
 
 const readIdString = (record: UnknownRecord, keys: readonly string[]): string | undefined => {
-  const value = getFirstValue(record, keys)
-  if (typeof value === 'string' && value.trim()) return value.trim()
-  if (typeof value === 'number' && Number.isFinite(value)) return String(value)
-  return undefined
-}
+  const value = getFirstValue(record, keys);
+  if (typeof value === 'string' && value.trim()) return value.trim();
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+  return undefined;
+};
 
 const readItemPrice = (item: unknown): number | undefined => {
-  if (!isRecord(item)) return undefined
-  return readNumber(item, ['price', 'prix', 'amount', 'value'])
-}
+  if (!isRecord(item)) return undefined;
+  return readNumber(item, ['price', 'prix', 'amount', 'value']);
+};
 
 const readItemLabel = (item: unknown): string | undefined => {
-  if (!isRecord(item)) return undefined
-  return readString(item, ['title', 'name', 'label'])
-}
+  if (!isRecord(item)) return undefined;
+  return readString(item, ['title', 'name', 'label']);
+};
 
-const SITE_URL = BRAND.URL
+const SITE_URL = BRAND.URL;
 
 const toAbs = (value?: string) => {
-  if (!value) return ''
-  if (value.startsWith('http')) return value
-  if (SITE_URL) return `${SITE_URL}${value.startsWith('/') ? value : `/${value}`}`
-  if (typeof window !== 'undefined') return window.location.origin + value
-  return value
-}
+  if (!value) return '';
+  if (value.startsWith('http')) return value;
+  if (SITE_URL) return `${SITE_URL}${value.startsWith('/') ? value : `/${value}`}`;
+  if (typeof window !== 'undefined') return window.location.origin + value;
+  return value;
+};
 
 export default function PackCard({ pack, priority = false, className }: PackCardProps) {
-  const pathname = usePathname() || '/'
-  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr'
-  const t = STR[locale]
-  const prefersReducedMotion = useReducedMotion()
+  const pathname = usePathname() || '/';
+  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr';
+  const t = STR[locale];
+  const prefersReducedMotion = useReducedMotion();
 
-  const {
-    slug,
-    title = 'Pack',
-    description,
-    image,
-    price = 0,
-    oldPrice,
-  } = pack
+  const { slug, title = 'Pack', description, image, price = 0, oldPrice } = pack;
 
-  const packRecord: UnknownRecord = isRecord(pack) ? pack : {}
+  const packRecord: UnknownRecord = isRecord(pack) ? pack : {};
 
-  const images = readImageList(packRecord, ['images'])
+  const images = readImageList(packRecord, ['images']);
   const compareAtPrice = readNumber(packRecord, [
     'compareAtPrice',
     'compare_at_price',
     'referencePrice',
     'reference_price',
-  ])
+  ]);
 
-  const isNew = readBoolean(packRecord, ['isNew', 'new'])
-  const isBestSeller = readBoolean(packRecord, ['isBestSeller', 'bestSeller', 'bestseller'])
-  const stock = readNumber(packRecord, ['stock'])
+  const isNew = readBoolean(packRecord, ['isNew', 'new']);
+  const isBestSeller = readBoolean(packRecord, ['isBestSeller', 'bestSeller', 'bestseller']);
+  const stock = readNumber(packRecord, ['stock']);
   // eslint-disable-next-line react-hooks/exhaustive-deps -- items from readArray, used in useMemos below
-  const items = readArray(packRecord, ['items', 'contents']) ?? []
-  const rating = readNumber(packRecord, ['rating'])
-  const reviewsCount = readNumber(packRecord, ['reviewsCount', 'reviews'])
-  const sku = readString(packRecord, ['sku']) ?? readIdString(packRecord, ['id'])
-  const brand = readString(packRecord, ['brand'])
+  const items = readArray(packRecord, ['items', 'contents']) ?? [];
+  const rating = readNumber(packRecord, ['rating']);
+  const reviewsCount = readNumber(packRecord, ['reviewsCount', 'reviews']);
+  const sku = readString(packRecord, ['sku']) ?? readIdString(packRecord, ['id']);
+  const brand = readString(packRecord, ['brand']);
 
-  const [imageLoaded, setImageLoaded] = useState(false)
-  const [imageError, setImageError] = useState(false)
-  const [tilt, setTilt] = useState({ rx: 0, ry: 0 })
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [tilt, setTilt] = useState({ rx: 0, ry: 0 });
 
-  const cardRef = useRef<HTMLDivElement | null>(null)
-  const viewedRef = useRef(false)
-  const tickingRef = useRef(false)
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const viewedRef = useRef(false);
+  const tickingRef = useRef(false);
 
   const mainImage = useMemo(() => {
-    const first = images?.[0] ?? normalizeImageSrc(image)
-    const raw = imageError ? '/og-image.jpg' : first || '/og-image.jpg'
-    return safeProductImageUrl(raw)
-  }, [image, imageError, images])
+    const first = images?.[0] ?? normalizeImageSrc(image);
+    const raw = imageError ? '/og-image.jpg' : first || '/og-image.jpg';
+    return safeProductImageUrl(raw);
+  }, [image, imageError, images]);
 
   const itemsValue = useMemo(() => {
-    if (!items.length) return undefined
+    if (!items.length) return undefined;
 
-    let sum = 0
+    let sum = 0;
     for (const item of items) {
-      const value = readItemPrice(item)
-      if (typeof value === 'number') sum += value
+      const value = readItemPrice(item);
+      if (typeof value === 'number') sum += value;
     }
 
-    return sum > 0 ? sum : undefined
-  }, [items])
+    return sum > 0 ? sum : undefined;
+  }, [items]);
 
   const referencePrice =
     typeof oldPrice === 'number' && oldPrice > price
@@ -229,57 +222,57 @@ export default function PackCard({ pack, priority = false, className }: PackCard
         ? compareAtPrice
         : typeof itemsValue === 'number' && itemsValue > price
           ? itemsValue
-          : undefined
+          : undefined;
 
   const discountPercent = useMemo(() => {
     return typeof referencePrice === 'number' && referencePrice > price
       ? Math.round(((referencePrice - price) / referencePrice) * 100)
-      : null
-  }, [price, referencePrice])
+      : null;
+  }, [price, referencePrice]);
 
   const savingsEuro = useMemo(() => {
     return typeof referencePrice === 'number' && referencePrice > price
       ? Math.max(0, referencePrice - price)
-      : null
-  }, [price, referencePrice])
+      : null;
+  }, [price, referencePrice]);
 
-  const urlPath = slug ? `/products/packs/${slug}` : '/products/packs'
+  const urlPath = slug ? `/products/packs/${slug}` : '/products/packs';
 
-  const lowStock = typeof stock === 'number' && stock > 0 && stock <= 5
-  const outOfStock = typeof stock === 'number' && stock <= 0
-  const hasRating = typeof rating === 'number' && !Number.isNaN(rating)
-  const formattedRating = hasRating ? rating.toFixed(1) : null
+  const lowStock = typeof stock === 'number' && stock > 0 && stock <= 5;
+  const outOfStock = typeof stock === 'number' && stock <= 0;
+  const hasRating = typeof rating === 'number' && !Number.isNaN(rating);
+  const formattedRating = hasRating ? rating.toFixed(1) : null;
 
   const itemChips = useMemo(() => {
-    if (!items.length) return []
+    if (!items.length) return [];
 
-    const labels: string[] = []
+    const labels: string[] = [];
     for (const item of items) {
-      const label = readItemLabel(item)
-      if (label) labels.push(label)
-      if (labels.length >= 3) break
+      const label = readItemLabel(item);
+      if (label) labels.push(label);
+      if (labels.length >= 3) break;
     }
-    return labels
-  }, [items])
+    return labels;
+  }, [items]);
 
-  const srId = useId()
-  const srMessages: string[] = []
+  const srId = useId();
+  const srMessages: string[] = [];
 
-  if (typeof discountPercent === 'number') srMessages.push(t.savings(discountPercent))
-  if (lowStock) srMessages.push(t.lowStock)
-  if (outOfStock) srMessages.push(t.outOfStock)
+  if (typeof discountPercent === 'number') srMessages.push(t.savings(discountPercent));
+  if (lowStock) srMessages.push(t.lowStock);
+  if (outOfStock) srMessages.push(t.outOfStock);
 
-  const ariaDescribedBy = srMessages.length ? srId : undefined
+  const ariaDescribedBy = srMessages.length ? srId : undefined;
 
   useEffect(() => {
-    if (!cardRef.current || viewedRef.current) return
+    if (!cardRef.current || viewedRef.current) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (!entry.isIntersecting || viewedRef.current) continue
+          if (!entry.isIntersecting || viewedRef.current) continue;
 
-          viewedRef.current = true
+          viewedRef.current = true;
 
           try {
             logEvent({
@@ -287,7 +280,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
               category: 'engagement',
               label: title,
               value: price,
-            })
+            });
           } catch {
             // no-op
           }
@@ -296,18 +289,18 @@ export default function PackCard({ pack, priority = false, className }: PackCard
             pushDataLayer({
               event: 'view_pack_card',
               items: [{ item_id: slug, item_name: title, price }],
-            })
+            });
           } catch {
             // no-op
           }
         }
       },
       { threshold: 0.35 }
-    )
+    );
 
-    observer.observe(cardRef.current)
-    return () => observer.disconnect()
-  }, [price, slug, title])
+    observer.observe(cardRef.current);
+    return () => observer.disconnect();
+  }, [price, slug, title]);
 
   const handleClick = useCallback(() => {
     try {
@@ -316,7 +309,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
         category: 'engagement',
         label: title,
         value: price,
-      })
+      });
     } catch {
       // no-op
     }
@@ -325,47 +318,47 @@ export default function PackCard({ pack, priority = false, className }: PackCard
       pushDataLayer({
         event: 'select_pack',
         items: [{ item_id: slug, item_name: title, price }],
-      })
+      });
     } catch {
       // no-op
     }
-  }, [price, slug, title])
+  }, [price, slug, title]);
 
   const handleMouseMove = (event: MouseEvent<HTMLDivElement>) => {
-    if (prefersReducedMotion) return
+    if (prefersReducedMotion) return;
 
     try {
-      if (window.matchMedia && !window.matchMedia('(hover:hover)').matches) return
+      if (window.matchMedia && !window.matchMedia('(hover:hover)').matches) return;
     } catch {
       // no-op
     }
 
-    const rect = event.currentTarget.getBoundingClientRect()
-    const centerX = rect.left + rect.width / 2
-    const centerY = rect.top + rect.height / 2
-    const dx = event.clientX - centerX
-    const dy = event.clientY - centerY
-    const ry = clamp((dx / (rect.width / 2)) * 6, -8, 8)
-    const rx = clamp((-dy / (rect.height / 2)) * 6, -8, 8)
+    const rect = event.currentTarget.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const dx = event.clientX - centerX;
+    const dy = event.clientY - centerY;
+    const ry = clamp((dx / (rect.width / 2)) * 6, -8, 8);
+    const rx = clamp((-dy / (rect.height / 2)) * 6, -8, 8);
 
-    if (tickingRef.current) return
+    if (tickingRef.current) return;
 
-    tickingRef.current = true
+    tickingRef.current = true;
     requestAnimationFrame(() => {
-      setTilt({ rx, ry })
-      tickingRef.current = false
-    })
-  }
+      setTilt({ rx, ry });
+      tickingRef.current = false;
+    });
+  };
 
-  const resetTilt = () => setTilt({ rx: 0, ry: 0 })
+  const resetTilt = () => setTilt({ rx: 0, ry: 0 });
 
   const articleStyle = useMemo<CSSProperties>(() => {
     return {
       perspective: 1000,
       background:
         'linear-gradient(145deg, hsl(var(--accent) / 0.12) 0%, rgba(255,255,255,0.06) 35%, transparent 60%)',
-    }
-  }, [])
+    };
+  }, []);
 
   return (
     <motion.article
@@ -469,7 +462,17 @@ export default function PackCard({ pack, priority = false, className }: PackCard
 
             <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-wrap gap-1.5 sm:left-4 sm:top-4">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--accent)/0.35)] bg-[hsl(var(--surface))]/95 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--accent))] shadow-sm backdrop-blur-sm dark:bg-[hsl(var(--surface))]/90">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <svg
+                  width="11"
+                  height="11"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
                   <path d="M20 7h-3.17a3 3 0 1 0-5.66-2 3 3 0 1 0-5.66 2H2v4h2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9h2V7h-2Z" />
                 </svg>
                 {t.packLabel}
@@ -493,8 +496,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
                   className="inline-flex items-center gap-1.5 rounded-full bg-red-500/95 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-red-50 shadow-[0_12px_35px_rgba(127,29,29,0.7)] ring-1 ring-red-900/40"
                   aria-label={t.savings(discountPercent)}
                 >
-                  <span className="h-1.5 w-1.5 rounded-full bg-red-200" />
-                  -{discountPercent}%
+                  <span className="h-1.5 w-1.5 rounded-full bg-red-200" />-{discountPercent}%
                 </span>
               ) : null}
 
@@ -511,7 +513,8 @@ export default function PackCard({ pack, priority = false, className }: PackCard
                 className="absolute right-3 top-3 rounded-full border border-white/20 bg-black/50 px-2.5 py-1.5 text-[11px] shadow-[0_14px_40px_rgba(15,23,42,0.8)] backdrop-blur-xl text-amber-50 sm:right-4 sm:top-4"
                 aria-label={t.avgRating(formattedRating)}
               >
-                <span className="drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]">★</span> {formattedRating}
+                <span className="drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]">★</span>{' '}
+                {formattedRating}
               </div>
             ) : null}
 
@@ -559,9 +562,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
             ) : null}
 
             {description ? (
-              <p className="mt-2 line-clamp-2 text-[12px] text-token-text/65">
-                {description}
-              </p>
+              <p className="mt-2 line-clamp-2 text-[12px] text-token-text/65">{description}</p>
             ) : null}
 
             {/* 2. Prix — bloc dédié */}
@@ -603,7 +604,9 @@ export default function PackCard({ pack, priority = false, className }: PackCard
               <p className="mt-2 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
                 {t.save} {formatPrice(savingsEuro)}
                 {typeof itemsValue === 'number' ? (
-                  <span className="ml-1 font-normal text-token-text/60">({t.itemValue} {formatPrice(itemsValue)})</span>
+                  <span className="ml-1 font-normal text-token-text/60">
+                    ({t.itemValue} {formatPrice(itemsValue)})
+                  </span>
                 ) : null}
               </p>
             ) : null}
@@ -612,8 +615,17 @@ export default function PackCard({ pack, priority = false, className }: PackCard
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 sm:mt-5">
               <span className="inline-flex min-h-[2.75rem] items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-4 py-2.5 text-[13px] font-bold text-[hsl(var(--accent-foreground))] transition-opacity group-hover:opacity-95">
                 {t.readPack}
-                <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" className="shrink-0">
-                  <path fill="currentColor" d="M13.172 12L8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z" />
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  className="shrink-0"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M13.172 12L8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"
+                  />
                 </svg>
               </span>
               <FreeShippingBadge price={price} minimal className="mt-0" />
@@ -628,5 +640,5 @@ export default function PackCard({ pack, priority = false, className }: PackCard
         </p>
       ) : null}
     </motion.article>
-  )
+  );
 }

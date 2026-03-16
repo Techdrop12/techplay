@@ -1,12 +1,12 @@
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl';
 
-import BackToHomeLink from '@/components/BackToHomeLink'
-import Link from '@/components/LocalizedLink'
+import BackToHomeLink from '@/components/BackToHomeLink';
+import Link from '@/components/LocalizedLink';
 
 export default function ContactBottomLinks() {
-  const t = useTranslations('common')
+  const t = useTranslations('common');
 
   return (
     <div className="mt-4 flex flex-wrap gap-3">
@@ -19,5 +19,5 @@ export default function ContactBottomLinks() {
       </Link>
       <BackToHomeLink variant="outline" prefetch={false} className="!min-h-0 py-2 text-[13px]" />
     </div>
-  )
+  );
 }

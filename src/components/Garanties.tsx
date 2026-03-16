@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
 // Alias rétrocompatible : utilise le composant premium unique
-import TrustBadges from './TrustBadges'
+import TrustBadges from './TrustBadges';
 
 export default function Garanties() {
-  return <TrustBadges variant="premium" />
+  return <TrustBadges variant="premium" />;
 }

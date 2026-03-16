@@ -37,9 +37,7 @@ export default function UpsellProducts() {
 
   return (
     <section className="card rhythm-content card-padding rounded-2xl">
-      <h2 className="heading-subsection mb-4">
-        🎯 Vous pourriez aussi aimer
-      </h2>
+      <h2 className="heading-subsection mb-4">🎯 Vous pourriez aussi aimer</h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         {recommendations.map((product) => (
           <ProductCard key={product._id} product={product} />

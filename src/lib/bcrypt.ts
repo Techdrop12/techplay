@@ -1,7 +1,7 @@
 // src/lib/bcrypt.ts
 // ✅ Enveloppe bcryptjs : coût configurable, helpers rehash & constant-time.
 
-import bcrypt from "bcryptjs";
+import bcrypt from 'bcryptjs';
 
 const ROUNDS = Number(process.env.BCRYPT_ROUNDS || 10);
 

@@ -1,13 +1,13 @@
-'use client'
+'use client';
 
-import Head from 'next/head'
+import Head from 'next/head';
 
-import { BRAND } from '@/lib/constants'
+import { BRAND } from '@/lib/constants';
 
 interface Props {
-  siteName?: string
-  siteUrl?: string
-  searchPath?: string // ex: '/search?q={search_term_string}'
+  siteName?: string;
+  siteUrl?: string;
+  searchPath?: string; // ex: '/search?q={search_term_string}'
 }
 
 export default function WebSiteJsonLd({
@@ -25,11 +25,14 @@ export default function WebSiteJsonLd({
       target: new URL(searchPath, siteUrl).toString(),
       'query-input': 'required name=search_term_string',
     },
-  }
+  };
 
   return (
     <Head>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
     </Head>
-  )
+  );
 }

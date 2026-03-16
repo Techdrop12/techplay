@@ -1,27 +1,27 @@
-'use client'
+'use client';
 
-import { useEffect } from 'react'
-import { useTranslations } from 'next-intl'
+import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 
-import BackToHomeLink from '@/components/BackToHomeLink'
-import Link from '@/components/LocalizedLink'
-import { getErrorMessage } from '@/lib/errors'
+import BackToHomeLink from '@/components/BackToHomeLink';
+import Link from '@/components/LocalizedLink';
+import { getErrorMessage } from '@/lib/errors';
 
 export default function ProductsError({
   error,
   reset,
 }: {
-  error: Error & { digest?: string }
-  reset: () => void
+  error: Error & { digest?: string };
+  reset: () => void;
 }) {
-  const t = useTranslations('error_page')
-  const tCommon = useTranslations('common')
+  const t = useTranslations('error_page');
+  const tCommon = useTranslations('common');
 
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') console.error('[ProductsError]', error)
-  }, [error])
+    if (process.env.NODE_ENV === 'development') console.error('[ProductsError]', error);
+  }, [error]);
 
-  const message = getErrorMessage(error)
+  const message = getErrorMessage(error);
 
   return (
     <main
@@ -31,7 +31,10 @@ export default function ProductsError({
       aria-labelledby="error-title"
     >
       <div className="card p-8 shadow-[var(--shadow-lg)]">
-        <h1 id="error-title" className="text-xl font-bold text-token-text sm:text-2xl [letter-spacing:var(--heading-tracking)]">
+        <h1
+          id="error-title"
+          className="text-xl font-bold text-token-text sm:text-2xl [letter-spacing:var(--heading-tracking)]"
+        >
           {t('title')}
         </h1>
         <p className="mt-2 text-[13px] text-token-text/70">{message}</p>
@@ -53,5 +56,5 @@ export default function ProductsError({
         </div>
       </div>
     </main>
-  )
+  );
 }

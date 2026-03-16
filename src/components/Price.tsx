@@ -1,50 +1,50 @@
 // src/components/Price.tsx — composant unique, typé, i18n, a11y, SEO-friendly
-'use client'
+'use client';
 
-import * as React from 'react'
+import * as React from 'react';
 
-import type { HTMLAttributes, ReactNode } from 'react'
+import type { HTMLAttributes, ReactNode } from 'react';
 
-import { formatPrice } from '@/lib/utils'
+import { formatPrice } from '@/lib/utils';
 
-type Numeric = number | string
+type Numeric = number | string;
 
 export type PriceProps = {
   /** Montant TTC (number ou string convertible) */
-  amount: Numeric
+  amount: Numeric;
   /** Devise ISO 4217 (ex: "EUR") */
-  currency?: string
+  currency?: string;
   /** Locale BCP 47 (ex: "fr-FR", "en-GB") */
-  locale?: string
+  locale?: string;
   /** Affiche un prix d’origine barré (ex: pour promos) */
-  original?: Numeric
+  original?: Numeric;
   /** Notation compacte (ex: 1,2 k €) */
-  compact?: boolean
+  compact?: boolean;
   /** Supprimer .00 inutiles selon la locale */
-  stripZeros?: boolean
+  stripZeros?: boolean;
   /** Personnalisation */
-  className?: string
-  prefix?: ReactNode
-  suffix?: ReactNode
+  className?: string;
+  prefix?: ReactNode;
+  suffix?: ReactNode;
   /** Contrôle des décimales */
-  minimumFractionDigits?: number
-  maximumFractionDigits?: number
+  minimumFractionDigits?: number;
+  maximumFractionDigits?: number;
   /** A11y (étiquette explicite si besoin) */
-  ariaLabel?: string
+  ariaLabel?: string;
   /** Micro-données schema.org (si parent itemScope itemType=Offer/Product) */
-  microdata?: boolean
-} & Omit<HTMLAttributes<HTMLSpanElement>, 'children'>
+  microdata?: boolean;
+} & Omit<HTMLAttributes<HTMLSpanElement>, 'children'>;
 
 function toNumber(value: Numeric | undefined | null): number | null {
-  if (value == null) return null
-  if (typeof value === 'number') return Number.isFinite(value) ? value : null
+  if (value == null) return null;
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
   if (typeof value === 'string') {
     // Supporte "1 234,56" / "1 234,56" / "1234.56"
-    const normalized = value.trim().replace(/\s| /g, '').replace(',', '.')
-    const n = Number(normalized)
-    return Number.isFinite(n) ? n : null
+    const normalized = value.trim().replace(/\s| /g, '').replace(',', '.');
+    const n = Number(normalized);
+    return Number.isFinite(n) ? n : null;
   }
-  return null
+  return null;
 }
 
 export default function Price({
@@ -63,7 +63,7 @@ export default function Price({
   microdata = false,
   ...rest
 }: PriceProps) {
-  const numeric = toNumber(amount)
+  const numeric = toNumber(amount);
   if (numeric === null) {
     // Fallback robuste si montant invalide
     return (
@@ -74,10 +74,10 @@ export default function Price({
       >
         —
       </span>
-    )
+    );
   }
 
-  const origNumber = toNumber(original)
+  const origNumber = toNumber(original);
 
   // Formatage unifié via lib/formatPrice (SSR/CSR-safe + cache Intl)
   const formatted = formatPrice(numeric, {
@@ -87,7 +87,7 @@ export default function Price({
     minimumFractionDigits,
     maximumFractionDigits,
     stripZeros,
-  })
+  });
   const formattedOriginal =
     origNumber !== null
       ? formatPrice(origNumber, {
@@ -98,25 +98,25 @@ export default function Price({
           maximumFractionDigits,
           stripZeros,
         })
-      : null
+      : null;
 
   // a11y: annonce claire du prix, et de l’ancien si présent
   const defaultAria = formattedOriginal
     ? `Prix : ${formatted} (au lieu de ${formattedOriginal})`
-    : `Prix : ${formatted}`
-  const label = ariaLabel ?? defaultAria
+    : `Prix : ${formatted}`;
+  const label = ariaLabel ?? defaultAria;
 
   // Microdata: le contenu doit être un nombre en notation anglaise (point)
   const microPriceDigits =
     typeof maximumFractionDigits === 'number'
       ? maximumFractionDigits
       : typeof minimumFractionDigits === 'number'
-      ? minimumFractionDigits
-      : compact
-      ? 1
-      : 2
-  const microPrice = numeric.toFixed(Math.max(0, Math.min(4, microPriceDigits)))
-  const microCurrency = currency ?? undefined // si non fourni: laissé au parent/locale
+        ? minimumFractionDigits
+        : compact
+          ? 1
+          : 2;
+  const microPrice = numeric.toFixed(Math.max(0, Math.min(4, microPriceDigits)));
+  const microCurrency = currency ?? undefined; // si non fourni: laissé au parent/locale
 
   return (
     <span
@@ -148,5 +148,5 @@ export default function Price({
 
       {suffix ? <span aria-hidden="true">{suffix}</span> : null}
     </span>
-  )
+  );
 }

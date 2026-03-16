@@ -1,29 +1,33 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
-import { generateBlog } from '@/lib/openai'
+import { generateBlog } from '@/lib/openai';
 
 export default function GenerateBlogPage() {
-  const t = useTranslations('admin')
-  const [prompt, setPrompt] = useState('')
-  const [output, setOutput] = useState('')
-  const [loading, setLoading] = useState(false)
+  const t = useTranslations('admin');
+  const [prompt, setPrompt] = useState('');
+  const [output, setOutput] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
     try {
-      const content = await generateBlog(prompt)
-      setOutput(content || '')
+      const content = await generateBlog(prompt);
+      setOutput(content || '');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10" role="main" aria-labelledby="generate-blog-title">
+    <main
+      className="mx-auto max-w-3xl px-4 py-10"
+      role="main"
+      aria-labelledby="generate-blog-title"
+    >
       <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6 shadow-[var(--shadow-md)] sm:p-8">
         <h1 id="generate-blog-title" className="heading-page mb-6">
           {t('generate_blog_title')}
@@ -63,5 +67,5 @@ export default function GenerateBlogPage() {
         )}
       </div>
     </main>
-  )
+  );
 }

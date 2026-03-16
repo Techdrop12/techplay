@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { motion, useReducedMotion } from 'framer-motion'
-import { useTranslations } from 'next-intl'
+import { motion, useReducedMotion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import {
   useCallback,
   useEffect,
@@ -13,30 +13,31 @@ import {
   type WheelEvent,
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
-} from 'react'
+} from 'react';
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
 
 interface QuantitySelectorProps {
-  value?: number
-  defaultValue?: number
-  onChange?: (val: number) => void
-  onCommit?: (val: number) => void
-  min?: number
-  max?: number
-  step?: number
-  snapToStep?: boolean
-  className?: string
-  id?: string
-  name?: string
-  disabled?: boolean
-  readOnly?: boolean
-  'aria-describedby'?: string
-  fastMultiplier?: number
+  value?: number;
+  defaultValue?: number;
+  onChange?: (val: number) => void;
+  onCommit?: (val: number) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+  snapToStep?: boolean;
+  className?: string;
+  id?: string;
+  name?: string;
+  disabled?: boolean;
+  readOnly?: boolean;
+  'aria-describedby'?: string;
+  fastMultiplier?: number;
 }
 
-const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
-const alignToStep = (n: number, min: number, step: number) => min + Math.round((n - min) / step) * step
+const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
+const alignToStep = (n: number, min: number, step: number) =>
+  min + Math.round((n - min) / step) * step;
 
 export default function QuantitySelector({
   value,
@@ -55,131 +56,134 @@ export default function QuantitySelector({
   'aria-describedby': ariaDescribedBy,
   fastMultiplier = 10,
 }: QuantitySelectorProps) {
-  const prefersReducedMotion = useReducedMotion()
-  const isControlled = typeof value === 'number'
+  const prefersReducedMotion = useReducedMotion();
+  const isControlled = typeof value === 'number';
 
   const [internal, setInternal] = useState<number>(() => {
-    const base = typeof defaultValue === 'number' ? defaultValue : typeof value === 'number' ? value : min
-    const aligned = snapToStep ? alignToStep(base, min, step) : base
-    return clamp(aligned, min, max)
-  })
+    const base =
+      typeof defaultValue === 'number' ? defaultValue : typeof value === 'number' ? value : min;
+    const aligned = snapToStep ? alignToStep(base, min, step) : base;
+    return clamp(aligned, min, max);
+  });
 
-  const qty = isControlled ? clamp(snapToStep ? alignToStep(value!, min, step) : value!, min, max) : internal
+  const qty = isControlled
+    ? clamp(snapToStep ? alignToStep(value!, min, step) : value!, min, max)
+    : internal;
 
   useEffect(() => {
     if (!isControlled) {
-      setInternal((v) => clamp(snapToStep ? alignToStep(v, min, step) : v, min, max))
+      setInternal((v) => clamp(snapToStep ? alignToStep(v, min, step) : v, min, max));
     }
-  }, [min, max, step, snapToStep, isControlled])
+  }, [min, max, step, snapToStep, isControlled]);
 
   useEffect(() => {
-    if (isControlled) setInternal(qty)
-  }, [value, qty, isControlled])
+    if (isControlled) setInternal(qty);
+  }, [value, qty, isControlled]);
 
   const emit = useCallback(
     (n: number, commit = false) => {
-      const base = snapToStep ? alignToStep(n, min, step) : n
-      const next = clamp(base, min, max)
-      if (!isControlled) setInternal(next)
-      onChange?.(next)
-      if (commit) onCommit?.(next)
+      const base = snapToStep ? alignToStep(n, min, step) : n;
+      const next = clamp(base, min, max);
+      if (!isControlled) setInternal(next);
+      onChange?.(next);
+      if (commit) onCommit?.(next);
     },
     [isControlled, min, max, step, snapToStep, onChange, onCommit]
-  )
+  );
 
-  const changeBy = useCallback((delta: number) => emit((qty ?? min) + delta), [emit, qty, min])
+  const changeBy = useCallback((delta: number) => emit((qty ?? min) + delta), [emit, qty, min]);
 
-  const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const pressInterval = useRef<ReturnType<typeof setInterval> | null>(null)
+  const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pressInterval = useRef<ReturnType<typeof setInterval> | null>(null);
   const repeatStop = () => {
-    if (pressTimer.current) clearTimeout(pressTimer.current)
-    if (pressInterval.current) clearInterval(pressInterval.current)
-    pressTimer.current = null
-    pressInterval.current = null
-  }
-  useEffect(() => repeatStop, [])
+    if (pressTimer.current) clearTimeout(pressTimer.current);
+    if (pressInterval.current) clearInterval(pressInterval.current);
+    pressTimer.current = null;
+    pressInterval.current = null;
+  };
+  useEffect(() => repeatStop, []);
 
   const repeatStart =
     (delta: number) =>
     (e: ReactMouseEvent | ReactPointerEvent): void => {
-      e.preventDefault()
-      if (disabled || readOnly) return
-      changeBy(delta)
-      repeatStop()
-      let speed = 120
-      let count = 0
+      e.preventDefault();
+      if (disabled || readOnly) return;
+      changeBy(delta);
+      repeatStop();
+      let speed = 120;
+      let count = 0;
       pressTimer.current = setTimeout(() => {
         pressInterval.current = setInterval(() => {
-          changeBy(delta)
-          count++
-          if (count % 6 === 0) speed = Math.max(40, speed - 10)
-        }, speed)
-      }, 350)
+          changeBy(delta);
+          count++;
+          if (count % 6 === 0) speed = Math.max(40, speed - 10);
+        }, speed);
+      }, 350);
 
-      const once = { once: true } as AddEventListenerOptions
-      window.addEventListener('pointerup', repeatStop, once)
-      window.addEventListener('mouseup', repeatStop, once)
-      window.addEventListener('touchend', repeatStop, once)
-      window.addEventListener('pointercancel', repeatStop, once)
+      const once = { once: true } as AddEventListenerOptions;
+      window.addEventListener('pointerup', repeatStop, once);
+      window.addEventListener('mouseup', repeatStop, once);
+      window.addEventListener('touchend', repeatStop, once);
+      window.addEventListener('pointercancel', repeatStop, once);
       window.addEventListener(
         'visibilitychange',
         () => {
-          if (document.visibilityState !== 'visible') repeatStop()
+          if (document.visibilityState !== 'visible') repeatStop();
         },
         once
-      )
-    }
+      );
+    };
 
   const onInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value.trim()
+    const raw = e.target.value.trim();
     if (raw === '') {
-      if (!isControlled) setInternal(min)
-      return
+      if (!isControlled) setInternal(min);
+      return;
     }
-    const n = Number(raw)
-    if (Number.isNaN(n)) return
-    emit(n)
-  }
+    const n = Number(raw);
+    if (Number.isNaN(n)) return;
+    emit(n);
+  };
 
-  const onInputBlur = () => emit(qty, true)
+  const onInputBlur = () => emit(qty, true);
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    const fast = e.shiftKey ? fastMultiplier : 1
+    const fast = e.shiftKey ? fastMultiplier : 1;
     if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      changeBy(step * fast)
+      e.preventDefault();
+      changeBy(step * fast);
     } else if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      changeBy(-step * fast)
+      e.preventDefault();
+      changeBy(-step * fast);
     } else if (e.key === 'PageUp') {
-      e.preventDefault()
-      changeBy(step * fastMultiplier)
+      e.preventDefault();
+      changeBy(step * fastMultiplier);
     } else if (e.key === 'PageDown') {
-      e.preventDefault()
-      changeBy(-step * fastMultiplier)
+      e.preventDefault();
+      changeBy(-step * fastMultiplier);
     } else if (e.key === 'Home') {
-      e.preventDefault()
-      emit(min)
+      e.preventDefault();
+      emit(min);
     } else if (e.key === 'End') {
-      e.preventDefault()
-      emit(max)
+      e.preventDefault();
+      emit(max);
     } else if (e.key === 'Enter') {
-      e.preventDefault()
-      emit(qty, true)
+      e.preventDefault();
+      emit(qty, true);
     }
-  }
+  };
 
   const onWheel = (e: WheelEvent<HTMLInputElement>) => {
-    if (document.activeElement !== e.currentTarget) return
-    e.preventDefault()
-    const delta = e.deltaY > 0 ? -step : step
-    changeBy(delta)
-  }
+    if (document.activeElement !== e.currentTarget) return;
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -step : step;
+    changeBy(delta);
+  };
 
-  const minusDisabled = disabled || readOnly || qty <= min
-  const plusDisabled = disabled || readOnly || qty >= max
-  const t = useTranslations('common')
-  const srText = useMemo(() => t('quantity_value', { value: qty }), [qty, t])
+  const minusDisabled = disabled || readOnly || qty <= min;
+  const plusDisabled = disabled || readOnly || qty >= max;
+  const t = useTranslations('common');
+  const srText = useMemo(() => t('quantity_value', { value: qty }), [qty, t]);
 
   return (
     <div className={cn('inline-flex items-center gap-3 select-none', className)}>
@@ -255,5 +259,5 @@ export default function QuantitySelector({
         +
       </motion.button>
     </div>
-  )
+  );
 }

@@ -1,15 +1,15 @@
 // src/components/ScrollProgress.tsx
-'use client'
+'use client';
 
-import * as React from 'react'
+import * as React from 'react';
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
 
 export interface ScrollProgressProps extends React.HTMLAttributes<HTMLDivElement> {
-  position?: 'top' | 'bottom'
-  height?: number
-  barClassName?: string
-  containerClassName?: string
+  position?: 'top' | 'bottom';
+  height?: number;
+  barClassName?: string;
+  containerClassName?: string;
 }
 
 export default function ScrollProgress({
@@ -20,35 +20,35 @@ export default function ScrollProgress({
   className,
   ...rest
 }: ScrollProgressProps) {
-  const [pct, setPct] = React.useState(0)
-  const rafRef = React.useRef<number | null>(null)
+  const [pct, setPct] = React.useState(0);
+  const rafRef = React.useRef<number | null>(null);
 
   React.useEffect(() => {
     const onScroll = () => {
-      if (rafRef.current != null) return
+      if (rafRef.current != null) return;
 
       rafRef.current = window.requestAnimationFrame(() => {
-        const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
-        const y = Math.min(max, window.scrollY)
-        setPct((y / max) * 100)
+        const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+        const y = Math.min(max, window.scrollY);
+        setPct((y / max) * 100);
 
         if (rafRef.current != null) {
-          window.cancelAnimationFrame(rafRef.current)
+          window.cancelAnimationFrame(rafRef.current);
         }
-        rafRef.current = null
-      })
-    }
+        rafRef.current = null;
+      });
+    };
 
-    window.addEventListener('scroll', onScroll, { passive: true })
-    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
 
     return () => {
-      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('scroll', onScroll);
       if (rafRef.current != null) {
-        window.cancelAnimationFrame(rafRef.current)
+        window.cancelAnimationFrame(rafRef.current);
       }
-    }
-  }, [])
+    };
+  }, []);
 
   return (
     <div
@@ -70,5 +70,5 @@ export default function ScrollProgress({
         Progression du défilement : {Math.round(pct)} %
       </span>
     </div>
-  )
+  );
 }

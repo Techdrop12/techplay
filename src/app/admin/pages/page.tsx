@@ -1,17 +1,17 @@
-import type { Metadata } from 'next'
+import type { Metadata } from 'next';
 
-import SitePagesEditor from '@/components/SitePagesEditor'
+import SitePagesEditor from '@/components/SitePagesEditor';
 
 export const metadata: Metadata = {
   title: 'Pages légales – Admin TechPlay',
   robots: { index: false, follow: false },
-}
+};
 
 const LEGAL_SLUGS = [
   { slug: 'cgv', label: 'Conditions générales de vente' },
   { slug: 'mentions-legales', label: 'Mentions légales' },
   { slug: 'confidentialite', label: 'Politique de confidentialité' },
-] as const
+] as const;
 
 export default function AdminPagesPage() {
   return (
@@ -26,5 +26,5 @@ export default function AdminPagesPage() {
       </header>
       <SitePagesEditor slugs={LEGAL_SLUGS} />
     </div>
-  )
+  );
 }

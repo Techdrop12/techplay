@@ -1,4 +1,4 @@
-import mongoose, { Schema, InferSchemaType } from 'mongoose'
+import mongoose, { Schema, InferSchemaType } from 'mongoose';
 
 const SitePageSchema = new Schema(
   {
@@ -7,8 +7,8 @@ const SitePageSchema = new Schema(
     content: { type: String, default: '' },
   },
   { timestamps: true }
-)
+);
 
-export type SitePageDoc = InferSchemaType<typeof SitePageSchema>
+export type SitePageDoc = InferSchemaType<typeof SitePageSchema>;
 
-export default mongoose.models.SitePage ?? mongoose.model<SitePageDoc>('SitePage', SitePageSchema)
+export default mongoose.models.SitePage ?? mongoose.model<SitePageDoc>('SitePage', SitePageSchema);

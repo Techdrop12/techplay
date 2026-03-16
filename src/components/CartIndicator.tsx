@@ -13,7 +13,10 @@ export default function CartIndicator() {
   const { animating } = useContext(CartAnimationContext);
   const router = useRouter();
 
-  const totalItems = cart.reduce((sum: number, item: { quantity?: number }) => sum + (item.quantity || 0), 0);
+  const totalItems = cart.reduce(
+    (sum: number, item: { quantity?: number }) => sum + (item.quantity || 0),
+    0
+  );
 
   if (totalItems === 0) return null;
 
@@ -25,9 +28,7 @@ export default function CartIndicator() {
         className="fixed bottom-6 right-5 z-50 flex items-center justify-center w-12 h-12 bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] rounded-full shadow-[var(--shadow-md)] hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[hsl(var(--accent))]"
         initial={{ scale: 1 }}
         animate={
-          animating
-            ? { scale: [1, 1.2, 1], rotate: [0, 15, -15, 0] }
-            : { scale: 1, rotate: 0 }
+          animating ? { scale: [1, 1.2, 1], rotate: [0, 15, -15, 0] } : { scale: 1, rotate: 0 }
         }
         transition={{ duration: 0.5, ease: 'easeInOut' }}
         onClick={() => router.push('/cart')}

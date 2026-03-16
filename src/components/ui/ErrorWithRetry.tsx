@@ -1,22 +1,17 @@
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl';
 
 type Props = {
-  message: string
-  onRetry: () => void
-  retryLabel?: string
-  className?: string
-}
+  message: string;
+  onRetry: () => void;
+  retryLabel?: string;
+  className?: string;
+};
 
-export default function ErrorWithRetry({
-  message,
-  onRetry,
-  retryLabel,
-  className = '',
-}: Props) {
-  const t = useTranslations('common')
-  const label = retryLabel ?? t('retry')
+export default function ErrorWithRetry({ message, onRetry, retryLabel, className = '' }: Props) {
+  const t = useTranslations('common');
+  const label = retryLabel ?? t('retry');
 
   return (
     <div
@@ -33,5 +28,5 @@ export default function ErrorWithRetry({
         {label}
       </button>
     </div>
-  )
+  );
 }

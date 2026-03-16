@@ -1,4 +1,4 @@
-import { defineConfig, devices } from '@playwright/test'
+import { defineConfig, devices } from '@playwright/test';
 
 /**
  * E2E Playwright – parcours critique e-commerce.
@@ -31,4 +31,4 @@ export default defineConfig({
           reuseExistingServer: true,
           timeout: 90_000,
         },
-})
+});

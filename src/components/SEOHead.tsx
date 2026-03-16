@@ -1,56 +1,56 @@
 // src/components/SEOHead.tsx
-'use client'
+'use client';
 
 // NOTE: À n’utiliser que sur les rares pages qui n’emploient pas l’API Metadata.
 // Avec l’App Router, privilégie `export const metadata` par page/layout.
 
-import Head from 'next/head'
+import Head from 'next/head';
 
-type OgType = 'website' | 'article' | 'product'
-type Locale = 'fr' | 'en'
+type OgType = 'website' | 'article' | 'product';
+type Locale = 'fr' | 'en';
 
 interface Props {
-  title?: string
-  description?: string
-  image?: string | string[]
-  url?: string
-  type?: OgType
-  locale?: Locale
-  noindex?: boolean
-  nofollow?: boolean
-  publishedTime?: string
-  modifiedTime?: string
-  prevUrl?: string
-  nextUrl?: string
-  imageAlt?: string
+  title?: string;
+  description?: string;
+  image?: string | string[];
+  url?: string;
+  type?: OgType;
+  locale?: Locale;
+  noindex?: boolean;
+  nofollow?: boolean;
+  publishedTime?: string;
+  modifiedTime?: string;
+  prevUrl?: string;
+  nextUrl?: string;
+  imageAlt?: string;
 }
 
-import { BRAND, TWITTER_HANDLE } from '@/lib/constants'
+import { BRAND, TWITTER_HANDLE } from '@/lib/constants';
 
-const ORIGIN = BRAND.URL
-const SITE_NAME = BRAND.NAME
+const ORIGIN = BRAND.URL;
+const SITE_NAME = BRAND.NAME;
 
 /** Convertit en URL absolue basée sur ORIGIN si relative */
 function absUrl(input?: string): string | undefined {
-  if (!input) return undefined
+  if (!input) return undefined;
   try {
-    return new URL(input).toString()
+    return new URL(input).toString();
   } catch {
     try {
-      const path = input.startsWith('/') ? input : `/${input}`
-      return new URL(path, ORIGIN).toString()
+      const path = input.startsWith('/') ? input : `/${input}`;
+      return new URL(path, ORIGIN).toString();
     } catch {
-      return undefined
+      return undefined;
     }
   }
 }
 
 function currentUrl(): URL | null {
-  if (typeof window === 'undefined') return null
+  if (typeof window === 'undefined') return null;
   try {
-    return new URL(window.location.href)
+    return new URL(window.location.href);
   } catch {
-    return null
+    return null;
   }
 }
 
@@ -68,20 +68,20 @@ function stripTrackingParams(u: URL): URL {
     'mc_eid',
     'igshid',
     'ref',
-  ])
-  const clean = new URL(u.toString())
+  ]);
+  const clean = new URL(u.toString());
   for (const k of Array.from(clean.searchParams.keys())) {
-    if (drop.has(k)) clean.searchParams.delete(k)
+    if (drop.has(k)) clean.searchParams.delete(k);
   }
-  return clean
+  return clean;
 }
 
 function stripLocalePrefix(pathname: string): string {
-  return pathname.replace(/^\/(fr|en)(?=\/|$)/, '')
+  return pathname.replace(/^\/(fr|en)(?=\/|$)/, '');
 }
 
 function detectLocaleFromPath(pathname: string): Locale {
-  return /^\/en(\/|$)/.test(pathname) ? 'en' : 'fr'
+  return /^\/en(\/|$)/.test(pathname) ? 'en' : 'fr';
 }
 
 export default function SEOHead({
@@ -99,32 +99,30 @@ export default function SEOHead({
   nextUrl,
   imageAlt = `${SITE_NAME} – Boutique high-tech`,
 }: Props) {
-  const cur = currentUrl()
-  const fromUrl = url ? absUrl(url) : cur ? stripTrackingParams(cur).toString() : `${ORIGIN}/`
-  const canonicalAbs = fromUrl || `${ORIGIN}/`
+  const cur = currentUrl();
+  const fromUrl = url ? absUrl(url) : cur ? stripTrackingParams(cur).toString() : `${ORIGIN}/`;
+  const canonicalAbs = fromUrl || `${ORIGIN}/`;
 
   // Pathname pour hreflang
-  let pathname = '/'
+  let pathname = '/';
   try {
-    pathname = new URL(canonicalAbs).pathname + (new URL(canonicalAbs).search || '')
+    pathname = new URL(canonicalAbs).pathname + (new URL(canonicalAbs).search || '');
   } catch {
-    pathname = cur ? cur.pathname + cur.search : '/'
+    pathname = cur ? cur.pathname + cur.search : '/';
   }
 
-  const loc: Locale = locale ?? detectLocaleFromPath(pathname)
-  const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`
+  const loc: Locale = locale ?? detectLocaleFromPath(pathname);
+  const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
 
   // Hreflang FR/EN + x-default
-  const pathNoLocale = stripLocalePrefix((pathname || '/').split('?')[0] || '/')
-  const hrefFr = new URL(`/fr${pathNoLocale}`, ORIGIN).toString()
-  const hrefEn = new URL(pathNoLocale === '/' ? '/en' : `/en${pathNoLocale}`, ORIGIN).toString()
-  const hrefDefault = new URL('/', ORIGIN).toString()
+  const pathNoLocale = stripLocalePrefix((pathname || '/').split('?')[0] || '/');
+  const hrefFr = new URL(`/fr${pathNoLocale}`, ORIGIN).toString();
+  const hrefEn = new URL(pathNoLocale === '/' ? '/en' : `/en${pathNoLocale}`, ORIGIN).toString();
+  const hrefDefault = new URL('/', ORIGIN).toString();
 
   // Images OG (accepte string | string[])
-  const images = Array.isArray(image) ? image : [image]
-  const ogImages = images
-    .map((img) => absUrl(img))
-    .filter(Boolean) as string[]
+  const images = Array.isArray(image) ? image : [image];
+  const ogImages = images.map((img) => absUrl(img)).filter(Boolean) as string[];
 
   const robots = [
     noindex ? 'noindex' : 'index',
@@ -132,10 +130,10 @@ export default function SEOHead({
     'max-snippet:-1',
     'max-image-preview:large',
     'max-video-preview:-1',
-  ].join(', ')
+  ].join(', ');
 
-  const ogLocale = loc === 'en' ? 'en_US' : 'fr_FR'
-  const ogAltLocales = ['fr_FR', 'en_US'].filter((l) => l !== ogLocale)
+  const ogLocale = loc === 'en' ? 'en_US' : 'fr_FR';
+  const ogAltLocales = ['fr_FR', 'en_US'].filter((l) => l !== ogLocale);
 
   return (
     <Head>
@@ -154,7 +152,11 @@ export default function SEOHead({
       <meta key="desc" name="description" content={description} />
       <meta key="robots" name="robots" content={robots} />
       <meta key="googlebot" name="googlebot" content={robots} />
-      <meta key="format-detection" name="format-detection" content="telephone=no,address=no,email=no" />
+      <meta
+        key="format-detection"
+        name="format-detection"
+        content="telephone=no,address=no,email=no"
+      />
 
       {/* Open Graph */}
       <meta key="og:title" property="og:title" content={fullTitle} />
@@ -173,7 +175,11 @@ export default function SEOHead({
 
       {/* Article meta si pertinent */}
       {type === 'article' && publishedTime && (
-        <meta key="article:published_time" property="article:published_time" content={publishedTime} />
+        <meta
+          key="article:published_time"
+          property="article:published_time"
+          content={publishedTime}
+        />
       )}
       {type === 'article' && modifiedTime && (
         <meta key="article:modified_time" property="article:modified_time" content={modifiedTime} />
@@ -187,5 +193,5 @@ export default function SEOHead({
       {imageAlt && <meta key="tw:image:alt" name="twitter:image:alt" content={imageAlt} />}
       <meta key="tw:site" name="twitter:site" content={TWITTER_HANDLE} />
     </Head>
-  )
+  );
 }

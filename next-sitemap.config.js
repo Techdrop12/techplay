@@ -6,18 +6,12 @@ module.exports = {
   sitemapSize: 5000,
   changefreq: 'weekly',
   priority: 0.7,
-  exclude: [
-    '/admin/*',
-    '/maintenance',
-    '/fr/maintenance',
-    '/en/maintenance',
-    '/api/*'
-  ],
+  exclude: ['/admin/*', '/maintenance', '/fr/maintenance', '/en/maintenance', '/api/*'],
   robotsTxtOptions: {
     policies: [
       {
         userAgent: '*',
-        allow: '/'
+        allow: '/',
       },
       {
         userAgent: '*',
@@ -28,9 +22,9 @@ module.exports = {
           '/fr/maintenance',
           '/en/maintenance',
           '/api',
-          '/api/*'
-        ]
-      }
-    ]
-  }
-}
+          '/api/*',
+        ],
+      },
+    ],
+  },
+};

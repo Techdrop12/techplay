@@ -23,11 +23,16 @@ export default function UpsellBlock({ productId, category }: UpsellBlockProps) {
   if (!upsell.length) return null;
 
   return (
-    <section className="rhythm-content rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 card-padding dark:bg-[hsl(var(--surface))]/40" aria-labelledby="upsell-title">
+    <section
+      className="rhythm-content rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 card-padding dark:bg-[hsl(var(--surface))]/40"
+      aria-labelledby="upsell-title"
+    >
       <h2 id="upsell-title" className="mb-1 text-xl font-bold text-[hsl(var(--text))]">
         Les clients ont aussi aimé
       </h2>
-      <p className="mb-4 text-[13px] text-token-text/70">Complétez votre panier avec ces produits populaires</p>
+      <p className="mb-4 text-[13px] text-token-text/70">
+        Complétez votre panier avec ces produits populaires
+      </p>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         {upsell.map((item) => (
           <ProductCard key={item._id} product={item} />

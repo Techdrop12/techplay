@@ -16,9 +16,19 @@ export type PriceOptions = {
 };
 
 const CURRENCY_FALLBACK_BY_LOCALE: Record<string, string> = {
-  'fr': 'EUR', 'fr-fr': 'EUR', 'fr-be': 'EUR', 'fr-ca': 'CAD',
-  'en': 'USD', 'en-us': 'USD', 'en-gb': 'GBP', 'en-ca': 'CAD', 'en-au': 'AUD',
-  'de': 'EUR', 'de-de': 'EUR', 'es': 'EUR', 'it': 'EUR',
+  fr: 'EUR',
+  'fr-fr': 'EUR',
+  'fr-be': 'EUR',
+  'fr-ca': 'CAD',
+  en: 'USD',
+  'en-us': 'USD',
+  'en-gb': 'GBP',
+  'en-ca': 'CAD',
+  'en-au': 'AUD',
+  de: 'EUR',
+  'de-de': 'EUR',
+  es: 'EUR',
+  it: 'EUR',
 };
 
 function resolveLocale(input?: string): string {
@@ -31,12 +41,18 @@ function resolveLocale(input?: string): string {
 function resolveCurrency(locale: string, input?: string): string {
   if (input) return input;
   const key = locale.toLowerCase();
-  return CURRENCY_FALLBACK_BY_LOCALE[key] || CURRENCY_FALLBACK_BY_LOCALE[key.split('-')[0]] || 'EUR';
+  return (
+    CURRENCY_FALLBACK_BY_LOCALE[key] || CURRENCY_FALLBACK_BY_LOCALE[key.split('-')[0]] || 'EUR'
+  );
 }
 
 // Cache des formateurs pour perf
 const nfCache = new Map<string, Intl.NumberFormat>();
-function getFormatter(locale: string, currency: string, opts: Omit<PriceOptions, 'locale' | 'currency' | 'stripZeros'>) {
+function getFormatter(
+  locale: string,
+  currency: string,
+  opts: Omit<PriceOptions, 'locale' | 'currency' | 'stripZeros'>
+) {
   const key = JSON.stringify({ l: locale, c: currency, o: opts });
   let nf = nfCache.get(key);
   if (!nf) {
@@ -56,10 +72,7 @@ function getFormatter(locale: string, currency: string, opts: Omit<PriceOptions,
  *  - handle NaN/Inf → '—'
  *  - auto locale/devise si non fournies
  *  - compact, stripZeros… */
-export function formatPrice(
-  price: number,
-  options: PriceOptions = {}
-): string {
+export function formatPrice(price: number, options: PriceOptions = {}): string {
   if (!Number.isFinite(price)) return '—';
 
   const locale = resolveLocale(options.locale);

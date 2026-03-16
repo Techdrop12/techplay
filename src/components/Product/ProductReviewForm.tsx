@@ -1,49 +1,49 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
+import { useState } from 'react';
 
-import RatingStars from '@/components/ui/RatingStars'
+import RatingStars from '@/components/ui/RatingStars';
 
 type Props = {
-  productId: string
-}
+  productId: string;
+};
 
 export default function ProductReviewForm({ productId }: Props) {
-  const [rating, setRating] = useState(0)
-  const [comment, setComment] = useState('')
-  const [email, setEmail] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const resetMessages = () => {
-    if (success) setSuccess(null)
-    if (error) setError(null)
-  }
+    if (success) setSuccess(null);
+    if (error) setError(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    resetMessages()
+    e.preventDefault();
+    resetMessages();
 
-    const cleanComment = comment.trim()
-    const cleanEmail = email.trim()
+    const cleanComment = comment.trim();
+    const cleanEmail = email.trim();
 
     if (!productId) {
-      setError('Produit introuvable.')
-      return
+      setError('Produit introuvable.');
+      return;
     }
 
     if (rating < 1 || rating > 5) {
-      setError('Veuillez sélectionner une note entre 1 et 5.')
-      return
+      setError('Veuillez sélectionner une note entre 1 et 5.');
+      return;
     }
 
     if (cleanComment.length < 3) {
-      setError('Votre avis doit contenir au moins 3 caractères.')
-      return
+      setError('Votre avis doit contenir au moins 3 caractères.');
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
 
     try {
       const res = await fetch('/api/review', {
@@ -56,34 +56,32 @@ export default function ProductReviewForm({ productId }: Props) {
           ...(cleanEmail ? { email: cleanEmail } : {}),
           hp: '',
         }),
-      })
+      });
 
-      const data: unknown = await res.json().catch(() => ({}))
+      const data: unknown = await res.json().catch(() => ({}));
       const payload =
-        typeof data === 'object' && data !== null ? (data as Record<string, unknown>) : {}
+        typeof data === 'object' && data !== null ? (data as Record<string, unknown>) : {};
 
       if (!res.ok) {
         const message =
-          typeof payload.error === 'string'
-            ? payload.error
-            : "Impossible d'envoyer votre avis."
-        throw new Error(message)
+          typeof payload.error === 'string' ? payload.error : "Impossible d'envoyer votre avis.";
+        throw new Error(message);
       }
 
       setSuccess(
         typeof payload.message === 'string'
           ? payload.message
           : 'Merci, votre avis a bien été envoyé.'
-      )
-      setRating(0)
-      setComment('')
-      setEmail('')
+      );
+      setRating(0);
+      setComment('');
+      setEmail('');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Une erreur est survenue.")
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="mt-6 space-y-3">
@@ -106,8 +104,8 @@ export default function ProductReviewForm({ productId }: Props) {
         placeholder="Votre email (optionnel)"
         value={email}
         onChange={(e) => {
-          resetMessages()
-          setEmail(e.target.value)
+          resetMessages();
+          setEmail(e.target.value);
         }}
       />
 
@@ -116,8 +114,8 @@ export default function ProductReviewForm({ productId }: Props) {
         placeholder="Votre avis"
         value={comment}
         onChange={(e) => {
-          resetMessages()
-          setComment(e.target.value)
+          resetMessages();
+          setComment(e.target.value);
         }}
         rows={5}
       />
@@ -142,5 +140,5 @@ export default function ProductReviewForm({ productId }: Props) {
         {loading ? 'Envoi…' : 'Envoyer'}
       </button>
     </form>
-  )
+  );
 }

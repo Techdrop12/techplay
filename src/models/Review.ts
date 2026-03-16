@@ -1,11 +1,11 @@
-import mongoose, { InferSchemaType, Schema, Types } from 'mongoose'
+import mongoose, { InferSchemaType, Schema, Types } from 'mongoose';
 
 type SerializedReview = {
-  _id?: Types.ObjectId | string
-  __v?: unknown
-  id?: string
-  [key: string]: unknown
-}
+  _id?: Types.ObjectId | string;
+  __v?: unknown;
+  id?: string;
+  [key: string]: unknown;
+};
 
 const ReviewSchema = new Schema(
   {
@@ -31,25 +31,25 @@ const ReviewSchema = new Schema(
       virtuals: true,
       versionKey: false,
       transform: (_doc, ret) => {
-        const serialized = ret as SerializedReview
-        if (serialized._id != null) serialized.id = String(serialized._id)
-        const { _id, __v, ...rest } = serialized
-        return rest
+        const serialized = ret as SerializedReview;
+        if (serialized._id != null) serialized.id = String(serialized._id);
+        const { _id, __v, ...rest } = serialized;
+        return rest;
       },
     },
   }
-)
+);
 
 ReviewSchema.virtual('id').get(function (this: { _id: Types.ObjectId }) {
-  return this._id.toString()
-})
+  return this._id.toString();
+});
 
-ReviewSchema.index({ product: 1, createdAt: -1 })
+ReviewSchema.index({ product: 1, createdAt: -1 });
 
-export type Review = InferSchemaType<typeof ReviewSchema> & { product: Types.ObjectId }
+export type Review = InferSchemaType<typeof ReviewSchema> & { product: Types.ObjectId };
 
 const ReviewModel =
   (mongoose.models.Review as mongoose.Model<Review> | undefined) ||
-  mongoose.model<Review>('Review', ReviewSchema)
+  mongoose.model<Review>('Review', ReviewSchema);
 
-export default ReviewModel
+export default ReviewModel;

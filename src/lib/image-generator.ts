@@ -50,7 +50,7 @@ export async function generateOgImage({
       const lw = 140;
       const lh = (img.height / img.width) * lw;
       ctx.globalAlpha = 0.9;
-      ctx.drawImage((img as unknown) as CanvasImageSource, 48, 40, lw, lh);
+      ctx.drawImage(img as unknown as CanvasImageSource, 48, 40, lw, lh);
       ctx.globalAlpha = 1;
     } catch {}
   }

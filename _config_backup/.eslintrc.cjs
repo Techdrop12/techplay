@@ -12,13 +12,7 @@ module.exports = {
     node: true,
     es2022: true,
   },
-  plugins: [
-    '@typescript-eslint',
-    'react',
-    'react-hooks',
-    'jsx-a11y',
-    'import',
-  ],
+  plugins: ['@typescript-eslint', 'react', 'react-hooks', 'jsx-a11y', 'import'],
   extends: [
     'next/core-web-vitals',
     'plugin:react/recommended',
@@ -35,17 +29,23 @@ module.exports = {
 
     // TEMP pour passer au vert (on resserrera ensuite)
     '@typescript-eslint/no-explicit-any': 'warn',
-    '@typescript-eslint/no-unused-vars': ['warn', { 'argsIgnorePattern': '^_', 'varsIgnorePattern': '^_' }],
-    'no-empty': ['warn', { 'allowEmptyCatch': true }],
+    '@typescript-eslint/no-unused-vars': [
+      'warn',
+      { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+    ],
+    'no-empty': ['warn', { allowEmptyCatch: true }],
     'no-extra-semi': 'warn',
     '@typescript-eslint/no-unused-expressions': 'warn',
 
     // Import/ordre : utile mais en "warn" pour l’instant
-    'import/order': ['warn', {
-      'groups': ['builtin','external','internal','parent','sibling','index','object','type'],
-      'newlines-between': 'always',
-      'alphabetize': { 'order': 'asc', 'caseInsensitive': true }
-    }],
+    'import/order': [
+      'warn',
+      {
+        groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type'],
+        'newlines-between': 'always',
+        alphabetize: { order: 'asc', caseInsensitive: true },
+      },
+    ],
   },
   overrides: [
     {
@@ -53,7 +53,7 @@ module.exports = {
       rules: {
         // si besoin d’assouplir sur fichiers server actions/routes :
         // '@typescript-eslint/ban-ts-comment': 'off',
-      }
-    }
-  ]
+      },
+    },
+  ],
 };

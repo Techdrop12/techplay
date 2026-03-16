@@ -5,16 +5,10 @@
       "name": "@google-cloud/firestore",
       "severity": "low",
       "isDirect": false,
-      "via": [
-        "google-gax"
-      ],
-      "effects": [
-        "firebase-admin"
-      ],
+      "via": ["google-gax"],
+      "effects": ["firebase-admin"],
       "range": "7.5.0-pre.0 || >=7.6.0",
-      "nodes": [
-        "node_modules/@google-cloud/firestore"
-      ],
+      "nodes": ["node_modules/@google-cloud/firestore"],
       "fixAvailable": {
         "name": "firebase-admin",
         "version": "10.3.0",
@@ -25,17 +19,10 @@
       "name": "@google-cloud/storage",
       "severity": "low",
       "isDirect": false,
-      "via": [
-        "retry-request",
-        "teeny-request"
-      ],
-      "effects": [
-        "firebase-admin"
-      ],
+      "via": ["retry-request", "teeny-request"],
+      "effects": ["firebase-admin"],
       "range": ">=5.19.0",
-      "nodes": [
-        "node_modules/@google-cloud/storage"
-      ],
+      "nodes": ["node_modules/@google-cloud/storage"],
       "fixAvailable": {
         "name": "firebase-admin",
         "version": "10.3.0",
@@ -54,9 +41,7 @@
           "title": "@tootallnate/once vulnerable to Incorrect Control Flow Scoping",
           "url": "https://github.com/advisories/GHSA-vpq2-c234-7xj6",
           "severity": "low",
-          "cwe": [
-            "CWE-705"
-          ],
+          "cwe": ["CWE-705"],
           "cvss": {
             "score": 3.3,
             "vectorString": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:L"
@@ -64,13 +49,9 @@
           "range": "<3.0.1"
         }
       ],
-      "effects": [
-        "http-proxy-agent"
-      ],
+      "effects": ["http-proxy-agent"],
       "range": "<3.0.1",
-      "nodes": [
-        "node_modules/@tootallnate/once"
-      ],
+      "nodes": ["node_modules/@tootallnate/once"],
       "fixAvailable": {
         "name": "firebase-admin",
         "version": "10.3.0",
@@ -89,10 +70,7 @@
           "title": "ajv has ReDoS when using `$data` option",
           "url": "https://github.com/advisories/GHSA-2g4f-4pwh-qvx6",
           "severity": "moderate",
-          "cwe": [
-            "CWE-400",
-            "CWE-1333"
-          ],
+          "cwe": ["CWE-400", "CWE-1333"],
           "cvss": {
             "score": 0,
             "vectorString": null
@@ -121,9 +99,7 @@
           "title": "bn.js affected by an infinite loop",
           "url": "https://github.com/advisories/GHSA-378v-28hj-76wf",
           "severity": "moderate",
-          "cwe": [
-            "CWE-835"
-          ],
+          "cwe": ["CWE-835"],
           "cvss": {
             "score": 5.3,
             "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
@@ -133,9 +109,7 @@
       ],
       "effects": [],
       "range": "<4.12.3",
-      "nodes": [
-        "node_modules/bn.js"
-      ],
+      "nodes": ["node_modules/bn.js"],
       "fixAvailable": true
     },
     "diff": {
@@ -150,10 +124,7 @@
           "title": "jsdiff has a Denial of Service vulnerability in parsePatch and applyPatch",
           "url": "https://github.com/advisories/GHSA-73rr-hh4g-fpgx",
           "severity": "low",
-          "cwe": [
-            "CWE-400",
-            "CWE-1333"
-          ],
+          "cwe": ["CWE-400", "CWE-1333"],
           "cvss": {
             "score": 0,
             "vectorString": null
@@ -163,24 +134,17 @@
       ],
       "effects": [],
       "range": "4.0.0 - 4.0.3",
-      "nodes": [
-        "node_modules/diff"
-      ],
+      "nodes": ["node_modules/diff"],
       "fixAvailable": true
     },
     "firebase-admin": {
       "name": "firebase-admin",
       "severity": "low",
       "isDirect": true,
-      "via": [
-        "@google-cloud/firestore",
-        "@google-cloud/storage"
-      ],
+      "via": ["@google-cloud/firestore", "@google-cloud/storage"],
       "effects": [],
       "range": ">=11.0.0",
-      "nodes": [
-        "node_modules/firebase-admin"
-      ],
+      "nodes": ["node_modules/firebase-admin"],
       "fixAvailable": {
         "name": "firebase-admin",
         "version": "10.3.0",
@@ -199,9 +163,7 @@
           "title": "glob CLI: Command injection via -c/--cmd executes matches with shell:true",
           "url": "https://github.com/advisories/GHSA-5j98-mcp5-4vw2",
           "severity": "high",
-          "cwe": [
-            "CWE-78"
-          ],
+          "cwe": ["CWE-78"],
           "cvss": {
             "score": 7.5,
             "vectorString": "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H"
@@ -211,26 +173,17 @@
       ],
       "effects": [],
       "range": "10.2.0 - 10.4.5",
-      "nodes": [
-        "node_modules/rimraf/node_modules/glob",
-        "node_modules/sucrase/node_modules/glob"
-      ],
+      "nodes": ["node_modules/rimraf/node_modules/glob", "node_modules/sucrase/node_modules/glob"],
       "fixAvailable": true
     },
     "google-gax": {
       "name": "google-gax",
       "severity": "low",
       "isDirect": false,
-      "via": [
-        "retry-request"
-      ],
-      "effects": [
-        "@google-cloud/firestore"
-      ],
+      "via": ["retry-request"],
+      "effects": ["@google-cloud/firestore"],
       "range": ">=4.0.5-experimental",
-      "nodes": [
-        "node_modules/google-gax"
-      ],
+      "nodes": ["node_modules/google-gax"],
       "fixAvailable": {
         "name": "firebase-admin",
         "version": "10.3.0",
@@ -241,16 +194,10 @@
       "name": "http-proxy-agent",
       "severity": "low",
       "isDirect": false,
-      "via": [
-        "@tootallnate/once"
-      ],
-      "effects": [
-        "teeny-request"
-      ],
+      "via": ["@tootallnate/once"],
+      "effects": ["teeny-request"],
       "range": "4.0.1 - 5.0.0",
-      "nodes": [
-        "node_modules/http-proxy-agent"
-      ],
+      "nodes": ["node_modules/http-proxy-agent"],
       "fixAvailable": {
         "name": "firebase-admin",
         "version": "10.3.0",
@@ -269,9 +216,7 @@
           "title": "Lodash has Prototype Pollution Vulnerability in `_.unset` and `_.omit` functions",
           "url": "https://github.com/advisories/GHSA-xxjr-mmjv-4gpg",
           "severity": "moderate",
-          "cwe": [
-            "CWE-1321"
-          ],
+          "cwe": ["CWE-1321"],
           "cvss": {
             "score": 6.5,
             "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:L"
@@ -281,9 +226,7 @@
       ],
       "effects": [],
       "range": "4.0.0 - 4.17.21",
-      "nodes": [
-        "node_modules/lodash"
-      ],
+      "nodes": ["node_modules/lodash"],
       "fixAvailable": true
     },
     "minimatch": {
@@ -298,9 +241,7 @@
           "title": "minimatch has a ReDoS via repeated wildcards with non-matching literal in pattern",
           "url": "https://github.com/advisories/GHSA-3ppc-4f35-3m26",
           "severity": "high",
-          "cwe": [
-            "CWE-1333"
-          ],
+          "cwe": ["CWE-1333"],
           "cvss": {
             "score": 0,
             "vectorString": null
@@ -314,9 +255,7 @@
           "title": "minimatch has a ReDoS via repeated wildcards with non-matching literal in pattern",
           "url": "https://github.com/advisories/GHSA-3ppc-4f35-3m26",
           "severity": "high",
-          "cwe": [
-            "CWE-1333"
-          ],
+          "cwe": ["CWE-1333"],
           "cvss": {
             "score": 0,
             "vectorString": null
@@ -330,9 +269,7 @@
           "title": "minimatch has a ReDoS via repeated wildcards with non-matching literal in pattern",
           "url": "https://github.com/advisories/GHSA-3ppc-4f35-3m26",
           "severity": "high",
-          "cwe": [
-            "CWE-1333"
-          ],
+          "cwe": ["CWE-1333"],
           "cvss": {
             "score": 0,
             "vectorString": null
@@ -346,9 +283,7 @@
           "title": "minimatch has ReDoS: matchOne() combinatorial backtracking via multiple non-adjacent GLOBSTAR segments",
           "url": "https://github.com/advisories/GHSA-7r86-cg39-jmmj",
           "severity": "high",
-          "cwe": [
-            "CWE-407"
-          ],
+          "cwe": ["CWE-407"],
           "cvss": {
             "score": 7.5,
             "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
@@ -362,9 +297,7 @@
           "title": "minimatch has ReDoS: matchOne() combinatorial backtracking via multiple non-adjacent GLOBSTAR segments",
           "url": "https://github.com/advisories/GHSA-7r86-cg39-jmmj",
           "severity": "high",
-          "cwe": [
-            "CWE-407"
-          ],
+          "cwe": ["CWE-407"],
           "cvss": {
             "score": 7.5,
             "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
@@ -378,9 +311,7 @@
           "title": "minimatch has ReDoS: matchOne() combinatorial backtracking via multiple non-adjacent GLOBSTAR segments",
           "url": "https://github.com/advisories/GHSA-7r86-cg39-jmmj",
           "severity": "high",
-          "cwe": [
-            "CWE-407"
-          ],
+          "cwe": ["CWE-407"],
           "cvss": {
             "score": 7.5,
             "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
@@ -394,9 +325,7 @@
           "title": "minimatch ReDoS: nested *() extglobs generate catastrophically backtracking regular expressions",
           "url": "https://github.com/advisories/GHSA-23c5-xmqv-rm74",
           "severity": "high",
-          "cwe": [
-            "CWE-1333"
-          ],
+          "cwe": ["CWE-1333"],
           "cvss": {
             "score": 7.5,
             "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
@@ -410,9 +339,7 @@
           "title": "minimatch ReDoS: nested *() extglobs generate catastrophically backtracking regular expressions",
           "url": "https://github.com/advisories/GHSA-23c5-xmqv-rm74",
           "severity": "high",
-          "cwe": [
-            "CWE-1333"
-          ],
+          "cwe": ["CWE-1333"],
           "cvss": {
             "score": 7.5,
             "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
@@ -426,9 +353,7 @@
           "title": "minimatch ReDoS: nested *() extglobs generate catastrophically backtracking regular expressions",
           "url": "https://github.com/advisories/GHSA-23c5-xmqv-rm74",
           "severity": "high",
-          "cwe": [
-            "CWE-1333"
-          ],
+          "cwe": ["CWE-1333"],
           "cvss": {
             "score": 7.5,
             "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
@@ -450,14 +375,10 @@
       "name": "next-pwa",
       "severity": "high",
       "isDirect": true,
-      "via": [
-        "workbox-webpack-plugin"
-      ],
+      "via": ["workbox-webpack-plugin"],
       "effects": [],
       "range": ">=2.1.0",
-      "nodes": [
-        "node_modules/next-pwa"
-      ],
+      "nodes": ["node_modules/next-pwa"],
       "fixAvailable": {
         "name": "next-pwa",
         "version": "2.0.2",
@@ -476,9 +397,7 @@
           "title": "node-forge has ASN.1 Unbounded Recursion",
           "url": "https://github.com/advisories/GHSA-554w-wpv2-vw27",
           "severity": "high",
-          "cwe": [
-            "CWE-674"
-          ],
+          "cwe": ["CWE-674"],
           "cvss": {
             "score": 0,
             "vectorString": null
@@ -492,9 +411,7 @@
           "title": "node-forge has an Interpretation Conflict vulnerability via its ASN.1 Validator Desynchronization",
           "url": "https://github.com/advisories/GHSA-5gfm-wpxj-wjgq",
           "severity": "high",
-          "cwe": [
-            "CWE-436"
-          ],
+          "cwe": ["CWE-436"],
           "cvss": {
             "score": 8.6,
             "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:N/I:H/A:N"
@@ -508,9 +425,7 @@
           "title": "node-forge is vulnerable to ASN.1 OID Integer Truncation",
           "url": "https://github.com/advisories/GHSA-65ch-62r8-g69g",
           "severity": "moderate",
-          "cwe": [
-            "CWE-190"
-          ],
+          "cwe": ["CWE-190"],
           "cvss": {
             "score": 0,
             "vectorString": null
@@ -520,9 +435,7 @@
       ],
       "effects": [],
       "range": "<=1.3.1",
-      "nodes": [
-        "node_modules/node-forge"
-      ],
+      "nodes": ["node_modules/node-forge"],
       "fixAvailable": true
     },
     "nodemailer": {
@@ -537,10 +450,7 @@
           "title": "Nodemailer: Email to an unintended domain can occur due to Interpretation Conflict",
           "url": "https://github.com/advisories/GHSA-mm7p-fcc7-pg87",
           "severity": "moderate",
-          "cwe": [
-            "CWE-20",
-            "CWE-436"
-          ],
+          "cwe": ["CWE-20", "CWE-436"],
           "cvss": {
             "score": 0,
             "vectorString": null
@@ -554,9 +464,7 @@
           "title": "NodemailerÔÇÖs addressparser is vulnerable to DoS caused by recursive calls",
           "url": "https://github.com/advisories/GHSA-rcmh-qjqh-p98v",
           "severity": "high",
-          "cwe": [
-            "CWE-703"
-          ],
+          "cwe": ["CWE-703"],
           "cvss": {
             "score": 7.5,
             "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
@@ -566,9 +474,7 @@
       ],
       "effects": [],
       "range": "<=7.0.10",
-      "nodes": [
-        "node_modules/nodemailer"
-      ],
+      "nodes": ["node_modules/nodemailer"],
       "fixAvailable": {
         "name": "nodemailer",
         "version": "8.0.2",
@@ -587,9 +493,7 @@
           "title": "qs's arrayLimit bypass in comma parsing allows denial of service",
           "url": "https://github.com/advisories/GHSA-w7fw-mjwx-w883",
           "severity": "low",
-          "cwe": [
-            "CWE-20"
-          ],
+          "cwe": ["CWE-20"],
           "cvss": {
             "score": 3.7,
             "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L"
@@ -603,9 +507,7 @@
           "title": "qs's arrayLimit bypass in its bracket notation allows DoS via memory exhaustion",
           "url": "https://github.com/advisories/GHSA-6rw7-vpxm-498p",
           "severity": "moderate",
-          "cwe": [
-            "CWE-20"
-          ],
+          "cwe": ["CWE-20"],
           "cvss": {
             "score": 3.7,
             "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L"
@@ -615,26 +517,17 @@
       ],
       "effects": [],
       "range": "<=6.14.1",
-      "nodes": [
-        "node_modules/qs"
-      ],
+      "nodes": ["node_modules/qs"],
       "fixAvailable": true
     },
     "retry-request": {
       "name": "retry-request",
       "severity": "low",
       "isDirect": false,
-      "via": [
-        "teeny-request"
-      ],
-      "effects": [
-        "@google-cloud/storage",
-        "google-gax"
-      ],
+      "via": ["teeny-request"],
+      "effects": ["@google-cloud/storage", "google-gax"],
       "range": ">=7.0.0",
-      "nodes": [
-        "node_modules/retry-request"
-      ],
+      "nodes": ["node_modules/retry-request"],
       "fixAvailable": {
         "name": "firebase-admin",
         "version": "10.3.0",
@@ -653,9 +546,7 @@
           "title": "Rollup 4 has Arbitrary File Write via Path Traversal",
           "url": "https://github.com/advisories/GHSA-mw96-cpmx-2vgc",
           "severity": "high",
-          "cwe": [
-            "CWE-22"
-          ],
+          "cwe": ["CWE-22"],
           "cvss": {
             "score": 0,
             "vectorString": null
@@ -669,9 +560,7 @@
           "title": "Rollup 4 has Arbitrary File Write via Path Traversal",
           "url": "https://github.com/advisories/GHSA-mw96-cpmx-2vgc",
           "severity": "high",
-          "cwe": [
-            "CWE-22"
-          ],
+          "cwe": ["CWE-22"],
           "cvss": {
             "score": 0,
             "vectorString": null
@@ -681,26 +570,17 @@
       ],
       "effects": [],
       "range": ">=4.0.0 <4.59.0 || <2.80.0",
-      "nodes": [
-        "node_modules/@sentry/nextjs/node_modules/rollup",
-        "node_modules/rollup"
-      ],
+      "nodes": ["node_modules/@sentry/nextjs/node_modules/rollup", "node_modules/rollup"],
       "fixAvailable": true
     },
     "rollup-plugin-terser": {
       "name": "rollup-plugin-terser",
       "severity": "high",
       "isDirect": false,
-      "via": [
-        "serialize-javascript"
-      ],
-      "effects": [
-        "workbox-build"
-      ],
+      "via": ["serialize-javascript"],
+      "effects": ["workbox-build"],
       "range": "3.0.0 || >=4.0.4",
-      "nodes": [
-        "node_modules/rollup-plugin-terser"
-      ],
+      "nodes": ["node_modules/rollup-plugin-terser"],
       "fixAvailable": {
         "name": "next-pwa",
         "version": "2.0.2",
@@ -719,9 +599,7 @@
           "title": "Serialize JavaScript is Vulnerable to RCE via RegExp.flags and Date.prototype.toISOString()",
           "url": "https://github.com/advisories/GHSA-5c6j-r48x-rmvq",
           "severity": "high",
-          "cwe": [
-            "CWE-96"
-          ],
+          "cwe": ["CWE-96"],
           "cvss": {
             "score": 8.1,
             "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H"
@@ -729,10 +607,7 @@
           "range": "<=7.0.2"
         }
       ],
-      "effects": [
-        "rollup-plugin-terser",
-        "terser-webpack-plugin"
-      ],
+      "effects": ["rollup-plugin-terser", "terser-webpack-plugin"],
       "range": "<=7.0.2",
       "nodes": [
         "node_modules/rollup-plugin-terser/node_modules/serialize-javascript",
@@ -748,17 +623,10 @@
       "name": "teeny-request",
       "severity": "low",
       "isDirect": false,
-      "via": [
-        "http-proxy-agent"
-      ],
-      "effects": [
-        "@google-cloud/storage",
-        "retry-request"
-      ],
+      "via": ["http-proxy-agent"],
+      "effects": ["@google-cloud/storage", "retry-request"],
       "range": ">=7.1.3",
-      "nodes": [
-        "node_modules/teeny-request"
-      ],
+      "nodes": ["node_modules/teeny-request"],
       "fixAvailable": {
         "name": "firebase-admin",
         "version": "10.3.0",
@@ -769,30 +637,20 @@
       "name": "terser-webpack-plugin",
       "severity": "high",
       "isDirect": false,
-      "via": [
-        "serialize-javascript"
-      ],
+      "via": ["serialize-javascript"],
       "effects": [],
       "range": "<=5.3.16",
-      "nodes": [
-        "node_modules/terser-webpack-plugin"
-      ],
+      "nodes": ["node_modules/terser-webpack-plugin"],
       "fixAvailable": true
     },
     "workbox-build": {
       "name": "workbox-build",
       "severity": "high",
       "isDirect": false,
-      "via": [
-        "rollup-plugin-terser"
-      ],
-      "effects": [
-        "workbox-webpack-plugin"
-      ],
+      "via": ["rollup-plugin-terser"],
+      "effects": ["workbox-webpack-plugin"],
       "range": "5.0.0-alpha.0 - 7.0.0",
-      "nodes": [
-        "node_modules/workbox-build"
-      ],
+      "nodes": ["node_modules/workbox-build"],
       "fixAvailable": {
         "name": "next-pwa",
         "version": "2.0.2",
@@ -803,16 +661,10 @@
       "name": "workbox-webpack-plugin",
       "severity": "high",
       "isDirect": false,
-      "via": [
-        "workbox-build"
-      ],
-      "effects": [
-        "next-pwa"
-      ],
+      "via": ["workbox-build"],
+      "effects": ["next-pwa"],
       "range": "5.0.0-alpha.0 - 7.0.0",
-      "nodes": [
-        "node_modules/workbox-webpack-plugin"
-      ],
+      "nodes": ["node_modules/workbox-webpack-plugin"],
       "fixAvailable": {
         "name": "next-pwa",
         "version": "2.0.2",

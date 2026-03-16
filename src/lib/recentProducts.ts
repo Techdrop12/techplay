@@ -18,7 +18,9 @@ export function getRecentlyViewed({ max = DEFAULT_MAX }: { max?: number } = {}):
   try {
     const raw = ls.getItem(KEY);
     if (!raw) return [];
-    const { items = [] } = JSON.parse(raw) as { items?: Array<{ expires?: number; data: unknown }> };
+    const { items = [] } = JSON.parse(raw) as {
+      items?: Array<{ expires?: number; data: unknown }>;
+    };
     const now = Date.now();
     return items
       .filter((x) => !x.expires || x.expires > now)
@@ -31,7 +33,11 @@ export function getRecentlyViewed({ max = DEFAULT_MAX }: { max?: number } = {}):
 
 export function addRecentlyViewed(
   product: Record<string, unknown>,
-  { idKey = '_id', max = DEFAULT_MAX, ttlMs = DEFAULT_TTL_MS }: { idKey?: string; max?: number; ttlMs?: number } = {}
+  {
+    idKey = '_id',
+    max = DEFAULT_MAX,
+    ttlMs = DEFAULT_TTL_MS,
+  }: { idKey?: string; max?: number; ttlMs?: number } = {}
 ): void {
   const ls = safeLS();
   if (!ls || !product) return;

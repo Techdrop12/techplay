@@ -1,38 +1,38 @@
 // src/components/LoadingOverlay.tsx
-'use client'
+'use client';
 
-import * as React from 'react'
-import * as ReactDOM from 'react-dom'
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 
-import Spinner from './Spinner'
+import Spinner from './Spinner';
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
 
 export interface LoadingOverlayProps {
   /** Affiche/masque l’overlay */
-  show?: boolean
+  show?: boolean;
   /** Alias rétro-compat */
-  isLoading?: boolean
+  isLoading?: boolean;
   /** Fullscreen (true) sinon se cale sur un parent en position relative */
-  fullscreen?: boolean
+  fullscreen?: boolean;
   /** Applique un blur sur le backdrop */
-  blur?: boolean
+  blur?: boolean;
   /** Couleur du backdrop */
-  backdrop?: 'dark' | 'light' | 'transparent'
+  backdrop?: 'dark' | 'light' | 'transparent';
   /** z-index util (ex: z-[100]) */
-  zIndexClassName?: string
+  zIndexClassName?: string;
   /** Contenu custom (sinon Spinner centré) */
-  children?: React.ReactNode
+  children?: React.ReactNode;
   /** Props passés au Spinner par défaut */
-  spinnerProps?: import('./Spinner').SpinnerProps
+  spinnerProps?: import('./Spinner').SpinnerProps;
   /** Portail container (sinon body) */
-  container?: HTMLElement | null
+  container?: HTMLElement | null;
   /** Classes supplémentaires sur l’overlay */
-  className?: string
+  className?: string;
   /** Bloque le scroll body quand visible */
-  lockScroll?: boolean
+  lockScroll?: boolean;
   /** Callback clic sur le backdrop */
-  onBackdropClick?: () => void
+  onBackdropClick?: () => void;
 }
 
 export default function LoadingOverlay({
@@ -49,22 +49,22 @@ export default function LoadingOverlay({
   lockScroll = true,
   onBackdropClick,
 }: LoadingOverlayProps) {
-  const visible = show ?? isLoading
-  const [mounted, setMounted] = React.useState(false)
+  const visible = show ?? isLoading;
+  const [mounted, setMounted] = React.useState(false);
 
-  React.useEffect(() => setMounted(true), [])
+  React.useEffect(() => setMounted(true), []);
 
   // Lock scroll body
   React.useEffect(() => {
-    if (!mounted || !visible || !lockScroll) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    if (!mounted || !visible || !lockScroll) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     return () => {
-      document.body.style.overflow = prev
-    }
-  }, [mounted, visible, lockScroll])
+      document.body.style.overflow = prev;
+    };
+  }, [mounted, visible, lockScroll]);
 
-  if (!visible || !mounted) return null
+  if (!visible || !mounted) return null;
 
   const node = (
     <div
@@ -75,8 +75,8 @@ export default function LoadingOverlay({
         backdrop === 'transparent'
           ? 'bg-transparent'
           : backdrop === 'dark'
-          ? 'bg-black/50'
-          : 'bg-white/75',
+            ? 'bg-black/50'
+            : 'bg-white/75',
         blur && 'backdrop-blur-sm',
         'motion-safe:transition-opacity motion-safe:duration-200',
         className
@@ -89,7 +89,7 @@ export default function LoadingOverlay({
         {children ?? <Spinner center {...spinnerProps} />}
       </div>
     </div>
-  )
+  );
 
-  return ReactDOM.createPortal(node, container ?? document.body)
+  return ReactDOM.createPortal(node, container ?? document.body);
 }

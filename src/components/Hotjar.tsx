@@ -1,91 +1,97 @@
 // src/components/Hotjar.tsx
-'use client'
+'use client';
 
-import { usePathname } from 'next/navigation'
-import Script from 'next/script'
-import { useEffect, useRef, useState } from 'react'
+import { usePathname } from 'next/navigation';
+import Script from 'next/script';
+import { useEffect, useRef, useState } from 'react';
 
-import { eligibleHotjar, hjStateChange } from '@/lib/hotjar'
+import { eligibleHotjar, hjStateChange } from '@/lib/hotjar';
 
-const HOTJAR_ID = Number(process.env.NEXT_PUBLIC_HOTJAR_ID ?? 0)
-const HOTJAR_SV = Number(process.env.NEXT_PUBLIC_HOTJAR_SV ?? 6)
-const ENABLE_IN_DEV = (process.env.NEXT_PUBLIC_HOTJAR_IN_DEV || '').toLowerCase() === 'true'
-const STRICT_RELOAD = (process.env.NEXT_PUBLIC_HOTJAR_STRICT_RELOAD || '').toLowerCase() === '1'
+const HOTJAR_ID = Number(process.env.NEXT_PUBLIC_HOTJAR_ID ?? 0);
+const HOTJAR_SV = Number(process.env.NEXT_PUBLIC_HOTJAR_SV ?? 6);
+const ENABLE_IN_DEV = (process.env.NEXT_PUBLIC_HOTJAR_IN_DEV || '').toLowerCase() === 'true';
+const STRICT_RELOAD = (process.env.NEXT_PUBLIC_HOTJAR_STRICT_RELOAD || '').toLowerCase() === '1';
 
 function hasAnalyticsConsent(): boolean {
   try {
-    const s = window.__consentState || {}
-    const ok = s.analytics_storage !== 'denied'
-    const ls = localStorage.getItem('consent:analytics') === '1'
-    return ok || ls
+    const s = window.__consentState || {};
+    const ok = s.analytics_storage !== 'denied';
+    const ls = localStorage.getItem('consent:analytics') === '1';
+    return ok || ls;
   } catch {
-    return false
+    return false;
   }
 }
 
 function eligibleNow(): boolean {
-  if (!HOTJAR_ID) return false
-  if (typeof window === 'undefined') return false
+  if (!HOTJAR_ID) return false;
+  if (typeof window === 'undefined') return false;
 
   const dnt =
-    navigator.doNotTrack === '1' ||
-    window.doNotTrack === '1' ||
-    navigator.msDoNotTrack === '1'
+    navigator.doNotTrack === '1' || window.doNotTrack === '1' || navigator.msDoNotTrack === '1';
 
-  let optedOut = false
+  let optedOut = false;
   try {
     optedOut =
       localStorage.getItem('hotjar:disabled') === '1' ||
-      localStorage.getItem('analytics:disabled') === '1'
+      localStorage.getItem('analytics:disabled') === '1';
   } catch {}
 
-  if (dnt || optedOut) return false
-  if (process.env.NODE_ENV !== 'production' && !ENABLE_IN_DEV) return false
-  if (!hasAnalyticsConsent()) return false
+  if (dnt || optedOut) return false;
+  if (process.env.NODE_ENV !== 'production' && !ENABLE_IN_DEV) return false;
+  if (!hasAnalyticsConsent()) return false;
 
-  return true
+  return true;
 }
 
 export default function Hotjar() {
-  const pathname = usePathname() || '/'
-  const [shouldLoad, setShouldLoad] = useState(false)
-  const loadedRef = useRef(false)
+  const pathname = usePathname() || '/';
+  const [shouldLoad, setShouldLoad] = useState(false);
+  const loadedRef = useRef(false);
 
   useEffect(() => {
     const ok =
       (process.env.NODE_ENV === 'production' || ENABLE_IN_DEV) &&
       eligibleHotjar(HOTJAR_ID) &&
-      eligibleNow()
+      eligibleNow();
 
-    setShouldLoad(ok)
-  }, [])
+    setShouldLoad(ok);
+  }, []);
 
   useEffect(() => {
     const recheck = () => {
-      const ok = eligibleNow()
+      const ok = eligibleNow();
       if (ok) {
-        setShouldLoad(true)
+        setShouldLoad(true);
       } else {
-        setShouldLoad(false)
+        setShouldLoad(false);
         if (loadedRef.current && STRICT_RELOAD) {
-          try { location.reload() } catch {}
+          try {
+            location.reload();
+          } catch {}
         }
       }
-    }
+    };
 
-    window.addEventListener('tp:consent', recheck as EventListener)
-    return () => window.removeEventListener('tp:consent', recheck as EventListener)
-  }, [])
+    window.addEventListener('tp:consent', recheck as EventListener);
+    return () => window.removeEventListener('tp:consent', recheck as EventListener);
+  }, []);
 
   useEffect(() => {
-    if (!shouldLoad || !loadedRef.current) return
-    hjStateChange(pathname)
-  }, [pathname, shouldLoad])
+    if (!shouldLoad || !loadedRef.current) return;
+    hjStateChange(pathname);
+  }, [pathname, shouldLoad]);
 
-  if (!shouldLoad) return null
+  if (!shouldLoad) return null;
 
   return (
-    <Script id="hotjar-init" strategy="afterInteractive" onLoad={() => { loadedRef.current = true }}>
+    <Script
+      id="hotjar-init"
+      strategy="afterInteractive"
+      onLoad={() => {
+        loadedRef.current = true;
+      }}
+    >
       {`
         (function(h,o,t,j,a,r){
           if (h.hj) return;
@@ -98,5 +104,5 @@ export default function Hotjar() {
         })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
       `}
     </Script>
-  )
+  );
 }

@@ -1,6 +1,12 @@
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
 
-export default function GradientText({ children, className }: { children: React.ReactNode; className?: string }) {
+export default function GradientText({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <span
       className={cn(
@@ -10,5 +16,5 @@ export default function GradientText({ children, className }: { children: React.
     >
       {children}
     </span>
-  )
+  );
 }

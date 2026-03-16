@@ -1,28 +1,28 @@
 // src/components/Spinner.tsx
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
-import * as React from 'react'
+import { useTranslations } from 'next-intl';
+import * as React from 'react';
 
-import type { HTMLAttributes } from 'react'
+import type { HTMLAttributes } from 'react';
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
 
-type SizeToken = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+type SizeToken = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 export interface SpinnerProps extends HTMLAttributes<HTMLDivElement> {
   /** Taille en px ou token ('md' par défaut) */
-  size?: number | SizeToken
+  size?: number | SizeToken;
   /** Épaisseur du trait (auto si token) */
-  thickness?: number
+  thickness?: number;
   /** Libellé a11y (screen readers) */
-  label?: string
+  label?: string;
   /** Centre le spinner dans un conteneur flex (avec padding) */
-  center?: boolean
+  center?: boolean;
 }
 
-const SIZE_PX: Record<SizeToken, number> = { xs: 16, sm: 20, md: 28, lg: 36, xl: 48 }
-const SIZE_STROKE: Record<SizeToken, number> = { xs: 2, sm: 2, md: 3, lg: 4, xl: 5 }
+const SIZE_PX: Record<SizeToken, number> = { xs: 16, sm: 20, md: 28, lg: 36, xl: 48 };
+const SIZE_STROKE: Record<SizeToken, number> = { xs: 2, sm: 2, md: 3, lg: 4, xl: 5 };
 
 export default function Spinner({
   size = 'md',
@@ -32,12 +32,11 @@ export default function Spinner({
   className,
   ...rest
 }: SpinnerProps) {
-  const t = useTranslations('common')
-  const a11yLabel = label ?? t('loading')
-  const px = typeof size === 'number' ? Math.max(12, size) : SIZE_PX[size]
+  const t = useTranslations('common');
+  const a11yLabel = label ?? t('loading');
+  const px = typeof size === 'number' ? Math.max(12, size) : SIZE_PX[size];
   const stroke =
-    thickness ??
-    (typeof size === 'number' ? Math.max(2, Math.round(px / 12)) : SIZE_STROKE[size])
+    thickness ?? (typeof size === 'number' ? Math.max(2, Math.round(px / 12)) : SIZE_STROKE[size]);
 
   return (
     <div
@@ -77,5 +76,5 @@ export default function Spinner({
       </svg>
       <span className="sr-only">{a11yLabel}</span>
     </div>
-  )
+  );
 }

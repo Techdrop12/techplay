@@ -1,122 +1,151 @@
 // src/components/ReviewForm.tsx — Premium UX/a11y + DX safe (cooldown, drafts, JSON-LD correct)
-'use client'
+'use client';
 
-import { motion, useReducedMotion } from 'framer-motion'
-import { useTranslations } from 'next-intl'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { toast } from 'react-hot-toast'
+import { motion, useReducedMotion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
-import RatingStars from '@/components/RatingStars'
-import { event as gaEvent } from '@/lib/ga'
+import RatingStars from '@/components/RatingStars';
+import { event as gaEvent } from '@/lib/ga';
 
 interface ReviewFormProps {
-  productId: string
+  productId: string;
 }
 
-const MIN_LEN = 20
-const MAX_LEN = 600
-const COOLDOWN_SEC = 60
+const MIN_LEN = 20;
+const MAX_LEN = 600;
+const COOLDOWN_SEC = 60;
 
 export default function ReviewForm({ productId }: ReviewFormProps) {
-  const t = useTranslations('reviews')
+  const t = useTranslations('reviews');
   const tr = (key: string, fallback: string) => {
-    try { const v = t(key); return typeof v === 'string' ? v : fallback } catch { return fallback }
-  }
+    try {
+      const v = t(key);
+      return typeof v === 'string' ? v : fallback;
+    } catch {
+      return fallback;
+    }
+  };
 
-  const prefersReducedMotion = useReducedMotion()
+  const prefersReducedMotion = useReducedMotion();
 
   // Champs
-  const [name, setName] = useState('')
-  const [comment, setComment] = useState('')
-  const [rating, setRating] = useState<number>(5)
-  const [sending, setSending] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
-  const [submittedData, setSubmittedData] = useState<{ rating: number; body: string; author: string } | null>(null)
-  const [hp, setHp] = useState('') // honeypot
+  const [name, setName] = useState('');
+  const [comment, setComment] = useState('');
+  const [rating, setRating] = useState<number>(5);
+  const [sending, setSending] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [submittedData, setSubmittedData] = useState<{
+    rating: number;
+    body: string;
+    author: string;
+  } | null>(null);
+  const [hp, setHp] = useState(''); // honeypot
 
   // Cooldown & drafts
-  const cooldownKey = useMemo(() => `tp_review_cd:${productId}`, [productId])
-  const lastBodyKey = useMemo(() => `tp_review_body:${productId}`, [productId])
-  const draftKey = useMemo(() => `tp_review_draft:${productId}`, [productId])
+  const cooldownKey = useMemo(() => `tp_review_cd:${productId}`, [productId]);
+  const lastBodyKey = useMemo(() => `tp_review_body:${productId}`, [productId]);
+  const draftKey = useMemo(() => `tp_review_draft:${productId}`, [productId]);
 
-  const [cooldownLeft, setCooldownLeft] = useState(0)
-  const timerRef = useRef<number | null>(null)
+  const [cooldownLeft, setCooldownLeft] = useState(0);
+  const timerRef = useRef<number | null>(null);
 
   // Restore draft on mount
   useEffect(() => {
     try {
-      const draft = localStorage.getItem(draftKey)
-      if (draft) setComment(draft.slice(0, MAX_LEN))
+      const draft = localStorage.getItem(draftKey);
+      if (draft) setComment(draft.slice(0, MAX_LEN));
     } catch {}
-  }, [draftKey])
+  }, [draftKey]);
 
   // Autosave draft
   useEffect(() => {
     try {
-      if (comment.trim()) localStorage.setItem(draftKey, comment)
-      else localStorage.removeItem(draftKey)
+      if (comment.trim()) localStorage.setItem(draftKey, comment);
+      else localStorage.removeItem(draftKey);
     } catch {}
-  }, [comment, draftKey])
+  }, [comment, draftKey]);
 
   // Cooldown tick
   useEffect(() => {
-    const endAt = Number(localStorage.getItem(cooldownKey) || 0)
-    const update = () => setCooldownLeft(Math.max(0, Math.ceil((endAt - Date.now()) / 1000)))
-    update()
+    const endAt = Number(localStorage.getItem(cooldownKey) || 0);
+    const update = () => setCooldownLeft(Math.max(0, Math.ceil((endAt - Date.now()) / 1000)));
+    update();
     if (endAt > Date.now()) {
-      timerRef.current = window.setInterval(update, 300) as unknown as number
+      timerRef.current = window.setInterval(update, 300) as unknown as number;
     }
-    return () => { if (timerRef.current) window.clearInterval(timerRef.current) }
-  }, [cooldownKey])
+    return () => {
+      if (timerRef.current) window.clearInterval(timerRef.current);
+    };
+  }, [cooldownKey]);
 
   // Submit via Ctrl/⌘+Enter
   const onTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'enter') {
-      e.preventDefault()
-      ;(e.currentTarget.form as HTMLFormElement | null)?.requestSubmit()
+      e.preventDefault();
+      (e.currentTarget.form as HTMLFormElement | null)?.requestSubmit();
     }
-  }
+  };
 
-  const remaining = Math.max(0, MAX_LEN - comment.length)
-  const tooShort = comment.trim().length > 0 && comment.trim().length < MIN_LEN
-  const disabled = sending || cooldownLeft > 0
+  const remaining = Math.max(0, MAX_LEN - comment.length);
+  const tooShort = comment.trim().length > 0 && comment.trim().length < MIN_LEN;
+  const disabled = sending || cooldownLeft > 0;
 
-  const track = (payload: { action: string; category?: string; label?: string; value?: number }) => {
-    try { gaEvent?.({ category: 'engagement', ...payload }) } catch {}
-  }
+  const track = (payload: {
+    action: string;
+    category?: string;
+    label?: string;
+    value?: number;
+  }) => {
+    try {
+      gaEvent?.({ category: 'engagement', ...payload });
+    } catch {}
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (disabled) return
+    e.preventDefault();
+    if (disabled) return;
 
     // Honeypot -> bot probable
-    if (hp) { toast.success(tr('thank_you', 'Merci pour votre avis !')); return }
-
-    const bodyTrim = comment.trim()
-    if (!bodyTrim) { toast.error(tr('empty_error', 'Votre message est vide.')); return }
-    if (bodyTrim.length < MIN_LEN) {
-      toast.error(tr('minlen_error', `Votre message doit contenir au moins ${MIN_LEN} caractères.`))
-      return
+    if (hp) {
+      toast.success(tr('thank_you', 'Merci pour votre avis !'));
+      return;
     }
-    if (rating < 1 || rating > 5) { toast.error(tr('rating_error', 'Veuillez sélectionner une note valide.')); return }
+
+    const bodyTrim = comment.trim();
+    if (!bodyTrim) {
+      toast.error(tr('empty_error', 'Votre message est vide.'));
+      return;
+    }
+    if (bodyTrim.length < MIN_LEN) {
+      toast.error(
+        tr('minlen_error', `Votre message doit contenir au moins ${MIN_LEN} caractères.`)
+      );
+      return;
+    }
+    if (rating < 1 || rating > 5) {
+      toast.error(tr('rating_error', 'Veuillez sélectionner une note valide.'));
+      return;
+    }
 
     // anti-duplication (même contenu posté récemment)
-    const lastBody = localStorage.getItem(lastBodyKey)
+    const lastBody = localStorage.getItem(lastBodyKey);
     if (lastBody && lastBody === bodyTrim) {
-      toast.error(tr('duplicate_error', 'Vous avez déjà envoyé cet avis récemment.'))
-      return
+      toast.error(tr('duplicate_error', 'Vous avez déjà envoyé cet avis récemment.'));
+      return;
     }
 
-    setSending(true)
+    setSending(true);
     try {
-      const author = name.trim() || 'Client TechPlay'
+      const author = name.trim() || 'Client TechPlay';
 
       // Endpoint principal (garde ton chemin actuel)
       let res = await fetch(`/api/reviews/product/${productId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId, rating, comment: bodyTrim, name: author }),
-      })
+      });
 
       // Fallback possible si l’API réelle est /api/review
       if (!res.ok && res.status === 404) {
@@ -125,49 +154,51 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ productId, rating, comment: bodyTrim, name: author }),
-          })
+          });
         } catch {}
       }
 
-      if (!res.ok) throw new Error('HTTP ' + res.status)
+      if (!res.ok) throw new Error('HTTP ' + res.status);
 
       // GA4
-      track({ action: 'submit_review', label: 'Avis client', value: rating })
+      track({ action: 'submit_review', label: 'Avis client', value: rating });
 
       // Optimiste + persist anti-dup & clear draft
-      setSubmitted(true)
-      setSubmittedData({ rating, body: bodyTrim, author })
-      localStorage.setItem(lastBodyKey, bodyTrim)
-      try { localStorage.removeItem(draftKey) } catch {}
+      setSubmitted(true);
+      setSubmittedData({ rating, body: bodyTrim, author });
+      localStorage.setItem(lastBodyKey, bodyTrim);
+      try {
+        localStorage.removeItem(draftKey);
+      } catch {}
 
       // reset champs
-      setComment('')
-      setName('')
-      setRating(5)
+      setComment('');
+      setName('');
+      setRating(5);
 
-      startCooldown()
-      toast.success(tr('thank_you', 'Merci pour votre avis !'))
+      startCooldown();
+      toast.success(tr('thank_you', 'Merci pour votre avis !'));
     } catch {
-      toast.error(tr('submit_error', 'Une erreur est survenue, merci de réessayer.'))
+      toast.error(tr('submit_error', 'Une erreur est survenue, merci de réessayer.'));
     } finally {
-      setSending(false)
+      setSending(false);
     }
-  }
+  };
 
   const startCooldown = () => {
-    const endAt = Date.now() + COOLDOWN_SEC * 1000
-    localStorage.setItem(cooldownKey, String(endAt))
-    setCooldownLeft(COOLDOWN_SEC)
-    if (timerRef.current) window.clearInterval(timerRef.current)
+    const endAt = Date.now() + COOLDOWN_SEC * 1000;
+    localStorage.setItem(cooldownKey, String(endAt));
+    setCooldownLeft(COOLDOWN_SEC);
+    if (timerRef.current) window.clearInterval(timerRef.current);
     timerRef.current = window.setInterval(() => {
-      const left = Math.max(0, Math.ceil((endAt - Date.now()) / 1000))
-      setCooldownLeft(left)
+      const left = Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
+      setCooldownLeft(left);
       if (left <= 0 && timerRef.current) {
-        window.clearInterval(timerRef.current)
-        timerRef.current = null
+        window.clearInterval(timerRef.current);
+        timerRef.current = null;
       }
-    }, 300) as unknown as number
-  }
+    }, 300) as unknown as number;
+  };
 
   // JSON-LD après succès (basé sur submittedData)
   const jsonLd =
@@ -176,11 +207,16 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
           '@context': 'https://schema.org',
           '@type': 'Review',
           itemReviewed: { '@type': 'Product', sku: productId },
-          reviewRating: { '@type': 'Rating', ratingValue: submittedData.rating, bestRating: 5, worstRating: 1 },
+          reviewRating: {
+            '@type': 'Rating',
+            ratingValue: submittedData.rating,
+            bestRating: 5,
+            worstRating: 1,
+          },
           reviewBody: submittedData.body,
           author: { '@type': 'Person', name: submittedData.author },
         }
-      : null
+      : null;
 
   if (submitted) {
     return (
@@ -197,12 +233,11 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
         {jsonLd && (
           <script
             type="application/ld+json"
-             
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
           />
         )}
       </>
-    )
+    );
   }
 
   return (
@@ -309,9 +344,9 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
         {sending
           ? tr('sending', 'Envoi en cours…')
           : cooldownLeft > 0
-          ? tr('cooldown', `Patientez ${cooldownLeft}s…`)
-          : tr('submit', 'Envoyer l’avis')}
+            ? tr('cooldown', `Patientez ${cooldownLeft}s…`)
+            : tr('submit', 'Envoyer l’avis')}
       </motion.button>
     </form>
-  )
+  );
 }

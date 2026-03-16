@@ -1,14 +1,14 @@
-'use client'
-import { useState } from 'react'
+'use client';
+import { useState } from 'react';
 
 export default function ProductTabs({
   description,
   specs,
 }: {
-  description: string
-  specs: string[]
+  description: string;
+  specs: string[];
 }) {
-  const [tab, setTab] = useState<'description' | 'specs'>('description')
+  const [tab, setTab] = useState<'description' | 'specs'>('description');
 
   return (
     <div className="mt-8">
@@ -35,5 +35,5 @@ export default function ProductTabs({
         </ul>
       )}
     </div>
-  )
+  );
 }

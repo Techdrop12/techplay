@@ -1,54 +1,53 @@
 // src/app/layout.tsx
 
-import './globals.css'
+import './globals.css';
 
-import { SpeedInsights } from '@vercel/speed-insights/next'
-import { Inter, Sora } from 'next/font/google'
-import Script from 'next/script'
-import { NextIntlClientProvider } from 'next-intl'
-import { getLocale, getMessages } from 'next-intl/server'
-import { Suspense } from 'react'
-import { Toaster } from 'react-hot-toast'
+import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Inter, Sora } from 'next/font/google';
+import Script from 'next/script';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages } from 'next-intl/server';
+import { Suspense } from 'react';
+import { Toaster } from 'react-hot-toast';
 
-import type { Metadata, Viewport } from 'next'
-import type React from 'react'
+import type { Metadata, Viewport } from 'next';
+import type React from 'react';
 
-import AfterIdleClient from '@/components/AfterIdleClient'
-import AppInstallPrompt from '@/components/AppInstallPrompt'
-import ConsentBanner from '@/components/ConsentBanner'
-import OfflineBanner from '@/components/OfflineBanner'
-import DarkModeScript from '@/components/DarkModeScript'
-import Layout from '@/components/layout/Layout'
-import RootLayoutClient from '@/components/RootLayoutClient'
-import SkipLink from '@/components/SkipLink'
-import StickyCartSummary from '@/components/StickyCartSummary'
-import Tracking from '@/components/Tracking'
-import StickyFreeShippingBar from '@/components/ui/StickyFreeShippingBar'
-import ThemeProvider from '@/context/themeContext'
-import loadMessages from '@/i18n/loadMessages'
-import { BRAND } from '@/lib/constants'
-import { DEFAULT_LOCALE, toLangTag, toOgLocale } from '@/lib/language'
+import AfterIdleClient from '@/components/AfterIdleClient';
+import AppInstallPrompt from '@/components/AppInstallPrompt';
+import ConsentBanner from '@/components/ConsentBanner';
+import OfflineBanner from '@/components/OfflineBanner';
+import DarkModeScript from '@/components/DarkModeScript';
+import Layout from '@/components/layout/Layout';
+import RootLayoutClient from '@/components/RootLayoutClient';
+import SkipLink from '@/components/SkipLink';
+import StickyCartSummary from '@/components/StickyCartSummary';
+import Tracking from '@/components/Tracking';
+import StickyFreeShippingBar from '@/components/ui/StickyFreeShippingBar';
+import ThemeProvider from '@/context/themeContext';
+import loadMessages from '@/i18n/loadMessages';
+import { BRAND } from '@/lib/constants';
+import { DEFAULT_LOCALE, toLangTag, toOgLocale } from '@/lib/language';
 
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-inter',
   adjustFontFallback: true,
-})
+});
 
 const sora = Sora({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-sora',
-})
+});
 
-const SITE_URL = BRAND.URL
-const SITE_NAME = BRAND.NAME
-const DEFAULT_OG = '/og-image.jpg'
-const IS_PREVIEW =
-  process.env.VERCEL_ENV === 'preview' || process.env.NEXT_PUBLIC_NOINDEX === '1'
-const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID?.trim()
-const GTM_SERVER = (process.env.NEXT_PUBLIC_GTM_SERVER || '').replace(/\/+$/, '')
+const SITE_URL = BRAND.URL;
+const SITE_NAME = BRAND.NAME;
+const DEFAULT_OG = '/og-image.jpg';
+const IS_PREVIEW = process.env.VERCEL_ENV === 'preview' || process.env.NEXT_PUBLIC_NOINDEX === '1';
+const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID?.trim();
+const GTM_SERVER = (process.env.NEXT_PUBLIC_GTM_SERVER || '').replace(/\/+$/, '');
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -129,7 +128,7 @@ export async function generateMetadata(): Promise<Metadata> {
       },
     },
     referrer: 'strict-origin-when-cross-origin',
-  }
+  };
 }
 
 export const viewport: Viewport = {
@@ -141,17 +140,14 @@ export const viewport: Viewport = {
   initialScale: 1,
   colorScheme: 'light dark',
   viewportFit: 'cover',
-}
+};
 
-export default async function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const locale = await getLocale()
-  const messages = await getMessages()
-  const resolvedMessages = messages && typeof messages === 'object' ? messages : await loadMessages(DEFAULT_LOCALE)
-  const resolvedLocale = locale && (locale === 'fr' || locale === 'en') ? locale : DEFAULT_LOCALE
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+  const resolvedMessages =
+    messages && typeof messages === 'object' ? messages : await loadMessages(DEFAULT_LOCALE);
+  const resolvedLocale = locale && (locale === 'fr' || locale === 'en') ? locale : DEFAULT_LOCALE;
   return (
     <html
       lang={toLangTag(resolvedLocale)}
@@ -253,72 +249,72 @@ export default async function RootLayout({
 
       <body className="min-h-screen bg-[hsl(var(--bg))] text-token-text antialiased dark:[color-scheme:dark]">
         <NextIntlClientProvider locale={resolvedLocale} messages={resolvedMessages}>
-        <SkipLink />
-        {GTM_ID ? (
-          <noscript
-            dangerouslySetInnerHTML={{
-              __html: `<iframe src="https://www.googletagmanager.com/ns.html?id=${GTM_ID}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`,
-            }}
-          />
-        ) : null}
+          <SkipLink />
+          {GTM_ID ? (
+            <noscript
+              dangerouslySetInnerHTML={{
+                __html: `<iframe src="https://www.googletagmanager.com/ns.html?id=${GTM_ID}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`,
+              }}
+            />
+          ) : null}
 
-        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
-          <div className="absolute left-1/2 top-[-120px] h-[420px] w-[620px] -translate-x-1/2 rounded-full bg-accent/25 blur-3xl dark:bg-accent/30" />
-          <div className="absolute bottom-[-140px] right-[-120px] h-[360px] w-[360px] rounded-full bg-brand/10 blur-3xl dark:bg-brand/20" />
-          <div
-            className="absolute inset-0 opacity-[0.08] dark:opacity-[0.11]"
-            style={{
-              backgroundImage: 'radial-gradient(currentColor 1px, transparent 1px)',
-              backgroundSize: '22px 22px',
-              color: 'rgba(0,0,0,.65)',
-              maskImage:
-                'linear-gradient(180deg, transparent 0%, black 20%, black 80%, transparent 100%)',
-              WebkitMaskImage:
-                'linear-gradient(180deg, transparent 0%, black 20%, black 80%, transparent 100%)',
-            }}
-          />
-        </div>
+          <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
+            <div className="absolute left-1/2 top-[-120px] h-[420px] w-[620px] -translate-x-1/2 rounded-full bg-accent/25 blur-3xl dark:bg-accent/30" />
+            <div className="absolute bottom-[-140px] right-[-120px] h-[360px] w-[360px] rounded-full bg-brand/10 blur-3xl dark:bg-brand/20" />
+            <div
+              className="absolute inset-0 opacity-[0.08] dark:opacity-[0.11]"
+              style={{
+                backgroundImage: 'radial-gradient(currentColor 1px, transparent 1px)',
+                backgroundSize: '22px 22px',
+                color: 'rgba(0,0,0,.65)',
+                maskImage:
+                  'linear-gradient(180deg, transparent 0%, black 20%, black 80%, transparent 100%)',
+                WebkitMaskImage:
+                  'linear-gradient(180deg, transparent 0%, black 20%, black 80%, transparent 100%)',
+              }}
+            />
+          </div>
 
-        <div id="focus-sentinel" tabIndex={-1} />
+          <div id="focus-sentinel" tabIndex={-1} />
 
-        <ThemeProvider>
-          <RootLayoutClient>
-            <AfterIdleClient>
-              <Suspense fallback={null}>
-                <Tracking />
-              </Suspense>
+          <ThemeProvider>
+            <RootLayoutClient>
+              <AfterIdleClient>
+                <Suspense fallback={null}>
+                  <Tracking />
+                </Suspense>
 
-              <AppInstallPrompt />
-              <StickyFreeShippingBar />
-              <StickyCartSummary />
-              <ConsentBanner />
-              <OfflineBanner />
+                <AppInstallPrompt />
+                <StickyFreeShippingBar />
+                <StickyCartSummary />
+                <ConsentBanner />
+                <OfflineBanner />
 
-              <Toaster
-                position="top-right"
-                gutter={12}
-                containerClassName="toast-container"
-                toastOptions={{
-                  duration: 3500,
-                  className: 'toast-item',
-                  style: {
-                    borderRadius: 'var(--radius-lg)',
-                    padding: '14px 18px',
-                    fontSize: '0.9375rem',
-                    fontWeight: 500,
-                    boxShadow: 'var(--shadow-lg)',
-                    border: '1px solid hsl(var(--border))',
-                    background: 'hsl(var(--surface))',
-                    color: 'hsl(var(--text))',
-                  },
-                }}
-              />
-            </AfterIdleClient>
+                <Toaster
+                  position="top-right"
+                  gutter={12}
+                  containerClassName="toast-container"
+                  toastOptions={{
+                    duration: 3500,
+                    className: 'toast-item',
+                    style: {
+                      borderRadius: 'var(--radius-lg)',
+                      padding: '14px 18px',
+                      fontSize: '0.9375rem',
+                      fontWeight: 500,
+                      boxShadow: 'var(--shadow-lg)',
+                      border: '1px solid hsl(var(--border))',
+                      background: 'hsl(var(--surface))',
+                      color: 'hsl(var(--text))',
+                    },
+                  }}
+                />
+              </AfterIdleClient>
 
-            <Layout>{children}</Layout>
-            <SpeedInsights />
-          </RootLayoutClient>
-        </ThemeProvider>
+              <Layout>{children}</Layout>
+              <SpeedInsights />
+            </RootLayoutClient>
+          </ThemeProvider>
         </NextIntlClientProvider>
 
         {GTM_ID ? (
@@ -379,5 +375,5 @@ export default async function RootLayout({
         <div className="pb-[env(safe-area-inset-bottom)]" aria-hidden />
       </body>
     </html>
-  )
+  );
 }

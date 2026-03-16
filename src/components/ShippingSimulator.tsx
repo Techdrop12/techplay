@@ -116,8 +116,12 @@ export default function ShippingSimulator({
 
     const storage =
       persist === 'session'
-        ? (typeof window !== 'undefined' ? window.sessionStorage : undefined)
-        : (typeof window !== 'undefined' ? window.localStorage : undefined);
+        ? typeof window !== 'undefined'
+          ? window.sessionStorage
+          : undefined
+        : typeof window !== 'undefined'
+          ? window.localStorage
+          : undefined;
 
     let persisted: { daysBaseMin?: number; daysBaseMax?: number; exp?: number } | undefined;
     try {
@@ -183,7 +187,7 @@ export default function ShippingSimulator({
         srRef.current.textContent = txt;
       }
     } catch {}
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- addDays/fmtDate/isHoliday are stable
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- addDays/fmtDate/isHoliday are stable
   }, [
     productKey,
     minDays,

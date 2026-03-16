@@ -10,5 +10,5 @@ export default function SuccessLoading() {
         <div className="skeleton h-12 w-40 rounded-xl" />
       </div>
     </div>
-  )
+  );
 }

@@ -1,20 +1,20 @@
 // src/components/LoadingDots.tsx
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
-import * as React from 'react'
+import { useTranslations } from 'next-intl';
+import * as React from 'react';
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
 
 export interface LoadingDotsProps extends React.HTMLAttributes<HTMLSpanElement> {
   /** Libellé a11y (screen readers) */
-  label?: string
+  label?: string;
   /** Nombre de points (2–5 recommandé) */
-  count?: number
+  count?: number;
   /** Décalage entre les points (ms) */
-  delayStepMs?: number
+  delayStepMs?: number;
   /** Classe appliquée à chaque point */
-  dotClassName?: string
+  dotClassName?: string;
 }
 
 export default function LoadingDots({
@@ -25,9 +25,9 @@ export default function LoadingDots({
   dotClassName,
   ...rest
 }: LoadingDotsProps) {
-  const t = useTranslations('common')
-  const a11yLabel = label ?? t('loading')
-  const dots = Array.from({ length: Math.max(2, Math.min(5, count)) })
+  const t = useTranslations('common');
+  const a11yLabel = label ?? t('loading');
+  const dots = Array.from({ length: Math.max(2, Math.min(5, count)) });
   return (
     <span
       className={cn('inline-flex items-baseline space-x-1 align-middle', className)}
@@ -47,5 +47,5 @@ export default function LoadingDots({
       ))}
       <span className="sr-only">{a11yLabel}</span>
     </span>
-  )
+  );
 }

@@ -14,14 +14,22 @@ interface SlideOverPanelProps {
   ariaLabel?: string;
 }
 
-export default function SlideOverPanel({ open, onClose, children, ariaLabel }: SlideOverPanelProps) {
+export default function SlideOverPanel({
+  open,
+  onClose,
+  children,
+  ariaLabel,
+}: SlideOverPanelProps) {
   const t = useTranslations('aria');
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!open) return;
-    const target = closeRef.current ?? panelRef.current?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR) ?? panelRef.current;
+    const target =
+      closeRef.current ??
+      panelRef.current?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR) ??
+      panelRef.current;
     target?.focus?.();
   }, [open]);
 

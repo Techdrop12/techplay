@@ -1,44 +1,44 @@
-'use client'
+'use client';
 
-import { motion, useReducedMotion, type Variants } from 'framer-motion'
-import Image from 'next/image'
-import { useTranslations } from 'next-intl'
-import { usePathname } from 'next/navigation'
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { motion, useReducedMotion, type Variants } from 'framer-motion';
+import Image from 'next/image';
+import { useTranslations } from 'next-intl';
+import { usePathname } from 'next/navigation';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 
-import type { Pack } from '@/types/product'
+import type { Pack } from '@/types/product';
 
-import Link from '@/components/LocalizedLink'
-import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
-import { safeProductImageUrl } from '@/lib/safeProductImage'
-import { cn, formatPrice } from '@/lib/utils'
+import Link from '@/components/LocalizedLink';
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing';
+import { safeProductImageUrl } from '@/lib/safeProductImage';
+import { cn, formatPrice } from '@/lib/utils';
 
 interface Props {
-  packs: Pack[]
-  className?: string
-  showHeader?: boolean
-  limit?: number
-  showControls?: boolean
-  initialSort?: 'savings' | 'priceAsc' | 'priceDesc' | 'items'
-  autoLoadOnIntersect?: boolean
+  packs: Pack[];
+  className?: string;
+  showHeader?: boolean;
+  limit?: number;
+  showControls?: boolean;
+  initialSort?: 'savings' | 'priceAsc' | 'priceDesc' | 'items';
+  autoLoadOnIntersect?: boolean;
   /** Optional copy for empty state (overrides locale-aware defaults) */
-  emptyTitle?: string
-  emptyDescription?: string
-  emptyCtaLabel?: string
-  emptyCtaHref?: string
+  emptyTitle?: string;
+  emptyDescription?: string;
+  emptyCtaLabel?: string;
+  emptyCtaHref?: string;
 }
 
-type PackRecord = Record<string, unknown>
+type PackRecord = Record<string, unknown>;
 
 const BLUR_DATA_URL =
-  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+'
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+';
 
 function DuotoneGift({
   size = 18,
   className = 'text-[hsl(var(--accent))]',
 }: {
-  size?: number
-  className?: string
+  size?: number;
+  className?: string;
 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className={className}>
@@ -53,7 +53,7 @@ function DuotoneGift({
         className="opacity-25 blur-[1px]"
       />
     </svg>
-  )
+  );
 }
 
 const containerVariants: Variants = {
@@ -68,7 +68,7 @@ const containerVariants: Variants = {
       staggerChildren: 0.06,
     },
   },
-}
+};
 
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 18 },
@@ -77,120 +77,121 @@ const itemVariants: Variants = {
     y: 0,
     transition: { duration: 0.35, ease: 'easeOut' },
   },
-}
+};
 
 function isRecord(value: unknown): value is PackRecord {
-  return typeof value === 'object' && value !== null
+  return typeof value === 'object' && value !== null;
 }
 
 function toRecord(value: unknown): PackRecord {
-  return isRecord(value) ? value : {}
+  return isRecord(value) ? value : {};
 }
 
 function readString(record: PackRecord, keys: readonly string[]): string | undefined {
   for (const key of keys) {
-    const value = record[key]
-    if (typeof value === 'string' && value.trim()) return value.trim()
+    const value = record[key];
+    if (typeof value === 'string' && value.trim()) return value.trim();
   }
-  return undefined
+  return undefined;
 }
 
 function readNumber(record: PackRecord, keys: readonly string[]): number | undefined {
   for (const key of keys) {
-    const value = record[key]
-    const parsed = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : NaN
-    if (Number.isFinite(parsed)) return parsed
+    const value = record[key];
+    const parsed =
+      typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : NaN;
+    if (Number.isFinite(parsed)) return parsed;
   }
-  return undefined
+  return undefined;
 }
 
 function readBoolean(record: PackRecord, keys: readonly string[]): boolean | undefined {
   for (const key of keys) {
-    const value = record[key]
-    if (typeof value === 'boolean') return value
+    const value = record[key];
+    if (typeof value === 'boolean') return value;
   }
-  return undefined
+  return undefined;
 }
 
 function pushDL(event: string, payload?: Record<string, unknown>) {
   try {
-    if (!Array.isArray(window.dataLayer)) window.dataLayer = []
-    window.dataLayer.push({ event, ...(payload ?? {}) })
+    if (!Array.isArray(window.dataLayer)) window.dataLayer = [];
+    window.dataLayer.push({ event, ...(payload ?? {}) });
   } catch {}
 }
 
 function getPackPrice(pack: Pack): number | undefined {
-  const record = toRecord(pack)
-  return readNumber(record, ['price', 'prix', 'amount', 'totalPrice'])
+  const record = toRecord(pack);
+  return readNumber(record, ['price', 'prix', 'amount', 'totalPrice']);
 }
 
 function getPackTitle(pack: Pack): string {
-  const record = toRecord(pack)
-  return readString(record, ['title', 'name', 'label']) ?? 'Pack'
+  const record = toRecord(pack);
+  return readString(record, ['title', 'name', 'label']) ?? 'Pack';
 }
 
 function getPackSlug(pack: Pack): string | undefined {
-  const record = toRecord(pack)
-  const slug = readString(record, ['slug'])
-  if (slug) return slug
-  const id = record._id ?? record.id
-  if (typeof id === 'string') return id
-  if (typeof id === 'number') return String(id)
-  return undefined
+  const record = toRecord(pack);
+  const slug = readString(record, ['slug']);
+  if (slug) return slug;
+  const id = record._id ?? record.id;
+  if (typeof id === 'string') return id;
+  if (typeof id === 'number') return String(id);
+  return undefined;
 }
 
 function getPackImage(pack: Pack): string {
-  const record = toRecord(pack)
-  const single = readString(record, ['image', 'img', 'cover'])
-  if (single) return safeProductImageUrl(single)
-  const raw = record.images ?? record.gallery
+  const record = toRecord(pack);
+  const single = readString(record, ['image', 'img', 'cover']);
+  if (single) return safeProductImageUrl(single);
+  const raw = record.images ?? record.gallery;
   if (Array.isArray(raw) && typeof raw[0] === 'string' && raw[0].trim())
-    return safeProductImageUrl(raw[0])
-  return '/og-image.jpg'
+    return safeProductImageUrl(raw[0]);
+  return '/og-image.jpg';
 }
 
 function getItems(pack: Pack): PackRecord[] {
-  const record = toRecord(pack)
-  const raw = record.items ?? record.products ?? record.contents
-  return Array.isArray(raw) ? raw.map((item) => toRecord(item)) : []
+  const record = toRecord(pack);
+  const raw = record.items ?? record.products ?? record.contents;
+  return Array.isArray(raw) ? raw.map((item) => toRecord(item)) : [];
 }
 
 function getItemPrice(item: PackRecord): number {
-  return readNumber(item, ['price', 'prix', 'amount']) ?? 0
+  return readNumber(item, ['price', 'prix', 'amount']) ?? 0;
 }
 
 function getItemLabel(item: PackRecord): string | undefined {
-  return readString(item, ['title', 'name', 'label'])
+  return readString(item, ['title', 'name', 'label']);
 }
 
 function getSumItems(pack: Pack): number {
-  return getItems(pack).reduce((acc, item) => acc + getItemPrice(item), 0)
+  return getItems(pack).reduce((acc, item) => acc + getItemPrice(item), 0);
 }
 
 function getSavingsPercent(pack: Pack): number {
-  const packPrice = getPackPrice(pack)
-  const sum = getSumItems(pack)
-  if (!packPrice || !Number.isFinite(sum) || sum <= 0) return 0
-  const raw = ((sum - packPrice) / sum) * 100
-  return Math.max(0, Math.min(100, Math.round(raw)))
+  const packPrice = getPackPrice(pack);
+  const sum = getSumItems(pack);
+  if (!packPrice || !Number.isFinite(sum) || sum <= 0) return 0;
+  const raw = ((sum - packPrice) / sum) * 100;
+  return Math.max(0, Math.min(100, Math.round(raw)));
 }
 
 function getItemsCount(pack: Pack): number {
-  return getItems(pack).length
+  return getItems(pack).length;
 }
 
 function isInStock(pack: Pack): boolean {
-  const record = toRecord(pack)
-  const stock = readNumber(record, ['stock', 'quantity', 'qty'])
-  const available = readBoolean(record, ['available'])
+  const record = toRecord(pack);
+  const stock = readNumber(record, ['stock', 'quantity', 'qty']);
+  const available = readBoolean(record, ['available']);
 
-  if (typeof stock === 'number') return stock > 0
-  if (typeof available === 'boolean') return available
-  return true
+  if (typeof stock === 'number') return stock > 0;
+  if (typeof available === 'boolean') return available;
+  return true;
 }
 
 function isPromo(pack: Pack): boolean {
-  return getSavingsPercent(pack) > 0
+  return getSavingsPercent(pack) > 0;
 }
 
 export default function PacksSection({
@@ -206,9 +207,9 @@ export default function PacksSection({
   emptyCtaLabel,
   emptyCtaHref,
 }: Props) {
-  const pathname = usePathname() || '/'
-  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr'
-  const tCommon = useTranslations('common')
+  const pathname = usePathname() || '/';
+  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr';
+  const tCommon = useTranslations('common');
 
   const t = useMemo(() => {
     if (locale === 'en') {
@@ -244,7 +245,7 @@ export default function PacksSection({
         viewPack: 'View bundle',
         savePercent: (x: number) => `Save ${x}%`,
         included: (n: number) => `${n} item${n > 1 ? 's' : ''} included`,
-      }
+      };
     }
     return {
       heading: 'Recommandés',
@@ -279,86 +280,86 @@ export default function PacksSection({
       viewPack: 'Voir le pack',
       savePercent: (x: number) => `Économisez ${x}%`,
       included: (n: number) => `${n} article${n > 1 ? 's' : ''} inclus`,
-    }
-  }, [locale])
+    };
+  }, [locale]);
 
-  const headingId = useId()
-  const subId = `${headingId}-sub`
-  const gridId = `${headingId}-grid`
-  const liveId = `${headingId}-live`
-  const sortId = `${headingId}-sort`
+  const headingId = useId();
+  const subId = `${headingId}-sub`;
+  const gridId = `${headingId}-grid`;
+  const liveId = `${headingId}-live`;
+  const sortId = `${headingId}-sort`;
 
-  const reduceMotion = useReducedMotion()
-  const sentinelRef = useRef<HTMLDivElement | null>(null)
+  const reduceMotion = useReducedMotion();
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
-  const [expanded, setExpanded] = useState(false)
-  const [announce, setAnnounce] = useState('')
-  const [sortBy, setSortBy] = useState<'savings' | 'priceAsc' | 'priceDesc' | 'items'>(initialSort)
-  const [filterPromo, setFilterPromo] = useState(false)
-  const [filterStock, setFilterStock] = useState(false)
+  const [expanded, setExpanded] = useState(false);
+  const [announce, setAnnounce] = useState('');
+  const [sortBy, setSortBy] = useState<'savings' | 'priceAsc' | 'priceDesc' | 'items'>(initialSort);
+  const [filterPromo, setFilterPromo] = useState(false);
+  const [filterStock, setFilterStock] = useState(false);
 
   const filteredSorted = useMemo(() => {
-    let arr = packs.filter(Boolean)
-    if (filterPromo) arr = arr.filter(isPromo)
-    if (filterStock) arr = arr.filter(isInStock)
-    const copy = [...arr]
+    let arr = packs.filter(Boolean);
+    if (filterPromo) arr = arr.filter(isPromo);
+    if (filterStock) arr = arr.filter(isInStock);
+    const copy = [...arr];
     copy.sort((a, b) => {
-      const priceA = getPackPrice(a) ?? Infinity
-      const priceB = getPackPrice(b) ?? Infinity
-      const savingsA = getSavingsPercent(a)
-      const savingsB = getSavingsPercent(b)
-      const itemsA = getItemsCount(a)
-      const itemsB = getItemsCount(b)
+      const priceA = getPackPrice(a) ?? Infinity;
+      const priceB = getPackPrice(b) ?? Infinity;
+      const savingsA = getSavingsPercent(a);
+      const savingsB = getSavingsPercent(b);
+      const itemsA = getItemsCount(a);
+      const itemsB = getItemsCount(b);
       switch (sortBy) {
         case 'priceAsc':
-          return priceA - priceB
+          return priceA - priceB;
         case 'priceDesc':
-          return priceB - priceA
+          return priceB - priceA;
         case 'items':
-          return itemsB - itemsA
+          return itemsB - itemsA;
         case 'savings':
         default:
-          return savingsB - savingsA
+          return savingsB - savingsA;
       }
-    })
-    return copy
-  }, [packs, filterPromo, filterStock, sortBy])
+    });
+    return copy;
+  }, [packs, filterPromo, filterStock, sortBy]);
 
   const list = useMemo(() => {
-    if (!limit || expanded) return filteredSorted
-    return filteredSorted.slice(0, limit)
-  }, [filteredSorted, limit, expanded])
+    if (!limit || expanded) return filteredSorted;
+    return filteredSorted.slice(0, limit);
+  }, [filteredSorted, limit, expanded]);
 
   useEffect(() => {
-    if (!expanded) return
-    const remaining = Math.max(0, filteredSorted.length - (limit || 0))
-    if (remaining > 0) setAnnounce(t.moreShown(remaining))
-  }, [expanded, filteredSorted.length, limit, t])
+    if (!expanded) return;
+    const remaining = Math.max(0, filteredSorted.length - (limit || 0));
+    if (remaining > 0) setAnnounce(t.moreShown(remaining));
+  }, [expanded, filteredSorted.length, limit, t]);
 
   useEffect(() => {
-    if (!autoLoadOnIntersect || expanded) return
-    const el = sentinelRef.current
-    if (!el) return
+    if (!autoLoadOnIntersect || expanded) return;
+    const el = sentinelRef.current;
+    if (!el) return;
     const io = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) {
-          setExpanded(true)
-          pushDL('packs_autoload')
+          setExpanded(true);
+          pushDL('packs_autoload');
         }
       },
       { threshold: 0.3 }
-    )
-    io.observe(el)
-    return () => io.disconnect()
-  }, [autoLoadOnIntersect, expanded])
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [autoLoadOnIntersect, expanded]);
 
-  const isEmpty = !Array.isArray(packs) || packs.length === 0
+  const isEmpty = !Array.isArray(packs) || packs.length === 0;
 
   if (isEmpty) {
-    const title = emptyTitle ?? t.emptyTitle
-    const description = emptyDescription ?? t.emptyDescription
-    const ctaLabel = emptyCtaLabel ?? t.emptyCtaLabel
-    const ctaHref = emptyCtaHref ?? '/products'
+    const title = emptyTitle ?? t.emptyTitle;
+    const description = emptyDescription ?? t.emptyDescription;
+    const ctaLabel = emptyCtaLabel ?? t.emptyCtaLabel;
+    const ctaHref = emptyCtaHref ?? '/products';
 
     return (
       <section
@@ -407,21 +408,30 @@ export default function PacksSection({
               onClick={() => pushDL('packs_empty_cta')}
             >
               {ctaLabel}
-              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" className="opacity-90">
-                <path fill="currentColor" d="M13.172 12L8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z" />
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                className="opacity-90"
+              >
+                <path
+                  fill="currentColor"
+                  d="M13.172 12L8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"
+                />
               </svg>
             </Link>
           </div>
         </div>
       </section>
-    )
+    );
   }
 
-  const totalCount = filteredSorted.length
-  const visibleCount = list.length
-  const hasPacks = totalCount > 0
-  const filterActive = filterPromo || filterStock
-  const noResultsAfterFilter = hasPacks && filterActive && visibleCount === 0
+  const totalCount = filteredSorted.length;
+  const visibleCount = list.length;
+  const hasPacks = totalCount > 0;
+  const filterActive = filterPromo || filterStock;
+  const noResultsAfterFilter = hasPacks && filterActive && visibleCount === 0;
 
   return (
     <section
@@ -456,8 +466,17 @@ export default function PacksSection({
               onClick={() => pushDL('packs_see_all')}
             >
               {t.seeAll}
-              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" className="opacity-90">
-                <path fill="currentColor" d="M13.172 12L8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z" />
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                className="opacity-90"
+              >
+                <path
+                  fill="currentColor"
+                  d="M13.172 12L8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"
+                />
               </svg>
             </Link>
           </div>
@@ -465,7 +484,10 @@ export default function PacksSection({
           {hasPacks && (
             <div className="mb-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-1.5 text-[13px] text-[hsl(var(--text))]/65 sm:justify-start">
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))]" aria-hidden="true" />
+                <span
+                  className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))]"
+                  aria-hidden="true"
+                />
                 {t.bulletExpert}
               </span>
               <span className="inline-flex items-center gap-1.5">
@@ -494,9 +516,9 @@ export default function PacksSection({
             <button
               type="button"
               onClick={() => {
-                const next = !filterPromo
-                setFilterPromo(next)
-                pushDL('packs_filter', { promo: next })
+                const next = !filterPromo;
+                setFilterPromo(next);
+                pushDL('packs_filter', { promo: next });
               }}
               className={cn(
                 'rounded-full border px-3 py-1.5 text-xs font-semibold transition',
@@ -513,9 +535,9 @@ export default function PacksSection({
             <button
               type="button"
               onClick={() => {
-                const next = !filterStock
-                setFilterStock(next)
-                pushDL('packs_filter', { stock: next })
+                const next = !filterStock;
+                setFilterStock(next);
+                pushDL('packs_filter', { stock: next });
               }}
               className={cn(
                 'rounded-full border px-3 py-1.5 text-xs font-semibold transition',
@@ -537,9 +559,9 @@ export default function PacksSection({
               className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-[12px] font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/0.3)]"
               value={sortBy}
               onChange={(e) => {
-                const next = (e.target.value as Props['initialSort']) || 'savings'
-                setSortBy(next)
-                pushDL('packs_sort', { sort: next })
+                const next = (e.target.value as Props['initialSort']) || 'savings';
+                setSortBy(next);
+                pushDL('packs_sort', { sort: next });
               }}
               aria-label={t.sortLabel}
             >
@@ -558,9 +580,9 @@ export default function PacksSection({
           <button
             type="button"
             onClick={() => {
-              setFilterPromo(false)
-              setFilterStock(false)
-              pushDL('packs_filter_clear')
+              setFilterPromo(false);
+              setFilterStock(false);
+              pushDL('packs_filter_clear');
             }}
             className="mt-4 inline-flex items-center gap-2 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[13px] font-semibold transition hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
           >
@@ -569,7 +591,9 @@ export default function PacksSection({
         </div>
       ) : (
         <motion.ul
-          {...(!reduceMotion ? { variants: containerVariants, initial: 'hidden', whileInView: 'show' } : {})}
+          {...(!reduceMotion
+            ? { variants: containerVariants, initial: 'hidden', whileInView: 'show' }
+            : {})}
           viewport={{ once: true, amount: 0.2 }}
           className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3 lg:gap-8"
           role="list"
@@ -577,17 +601,17 @@ export default function PacksSection({
           id={gridId}
         >
           {list.map((pack, i) => {
-            const record = toRecord(pack)
-            const key = readString(record, ['slug', '_id', 'id']) ?? `pk-${i}`
-            const slug = getPackSlug(pack)
-            const packHref = slug ? `/products/packs/${slug}` : '/products/packs'
-            const title = getPackTitle(pack)
-            const packPrice = getPackPrice(pack) ?? 0
-            const sumBefore = getSumItems(pack)
-            const savingsPct = getSavingsPercent(pack)
-            const items = getItems(pack)
-            const itemLabels = items.slice(0, 4).map(getItemLabel).filter(Boolean) as string[]
-            const packImage = getPackImage(pack)
+            const record = toRecord(pack);
+            const key = readString(record, ['slug', '_id', 'id']) ?? `pk-${i}`;
+            const slug = getPackSlug(pack);
+            const packHref = slug ? `/products/packs/${slug}` : '/products/packs';
+            const title = getPackTitle(pack);
+            const packPrice = getPackPrice(pack) ?? 0;
+            const sumBefore = getSumItems(pack);
+            const savingsPct = getSavingsPercent(pack);
+            const items = getItems(pack);
+            const itemLabels = items.slice(0, 4).map(getItemLabel).filter(Boolean) as string[];
+            const packImage = getPackImage(pack);
 
             return (
               <motion.li
@@ -693,7 +717,10 @@ export default function PacksSection({
                         >
                           {t.viewPack}
                           <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                            <path fill="currentColor" d="M13.172 12L8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z" />
+                            <path
+                              fill="currentColor"
+                              d="M13.172 12L8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"
+                            />
                           </svg>
                         </span>
                       </div>
@@ -701,7 +728,7 @@ export default function PacksSection({
                   </div>
                 </div>
               </motion.li>
-            )
+            );
           })}
         </motion.ul>
       )}
@@ -715,7 +742,9 @@ export default function PacksSection({
             <span>{t.seeAll}</span>
             <span aria-hidden>↗</span>
           </Link>
-          <p className="text-xs text-[hsl(var(--text))]/60">{t.displayed(visibleCount, totalCount)}</p>
+          <p className="text-xs text-[hsl(var(--text))]/60">
+            {t.displayed(visibleCount, totalCount)}
+          </p>
         </div>
       )}
 
@@ -724,15 +753,21 @@ export default function PacksSection({
           <button
             type="button"
             onClick={() => {
-              setExpanded(true)
-              pushDL('packs_see_more_click')
+              setExpanded(true);
+              pushDL('packs_see_more_click');
             }}
             className="inline-flex items-center gap-2 rounded-xl border-2 border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-5 py-3 text-[13px] font-semibold shadow-sm transition-all hover:shadow focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/0.4)]"
             aria-controls={gridId}
             aria-expanded={expanded}
           >
             {t.seeMore}
-            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" className="opacity-80">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              className="opacity-80"
+            >
               <path fill="currentColor" d="M7 10l5 5 5-5z" />
             </svg>
           </button>
@@ -750,5 +785,5 @@ export default function PacksSection({
         </p>
       </noscript>
     </section>
-  )
+  );
 }

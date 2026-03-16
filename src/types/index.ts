@@ -13,17 +13,11 @@ export type {
   AggregateRating,
   Promo,
   ProductAttributeValue,
-} from './product'
+} from './product';
 
-export type {
-  BlogPost,
-  BlogPostDb,
-  ArticleJsonLd,
-  ID,
-  ISODateString,
-} from './blog'
+export type { BlogPost, BlogPostDb, ArticleJsonLd, ID, ISODateString } from './blog';
 
-export type { GAParams, GAEvent, FBQEvent } from './analytics'
+export type { GAParams, GAEvent, FBQEvent } from './analytics';
 
 export type {
   Money,
@@ -35,4 +29,4 @@ export type {
   InvoiceShippingLine,
   InvoiceDiscount,
   InvoiceBrandInfo,
-} from './order'
+} from './order';

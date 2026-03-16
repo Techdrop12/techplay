@@ -1,25 +1,25 @@
-'use client'
+'use client';
 
-import { usePathname } from 'next/navigation'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { usePathname } from 'next/navigation';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
-import Link from '@/components/LocalizedLink'
-import { useFocusTrap } from '@/lib/useFocusTrap'
+import Link from '@/components/LocalizedLink';
+import { useFocusTrap } from '@/lib/useFocusTrap';
 
 type Props = {
-  delayMs?: number
-  ttlDays?: number
-  dismissKey?: string
-  hideOnRoutes?: string[]
-  className?: string
-}
+  delayMs?: number;
+  ttlDays?: number;
+  dismissKey?: string;
+  hideOnRoutes?: string[];
+  className?: string;
+};
 
 type WelcomeResponse = {
-  error?: string
-}
+  error?: string;
+};
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
 
 export default function PopupEmailCapture({
   delayMs = 15_000,
@@ -28,99 +28,99 @@ export default function PopupEmailCapture({
   hideOnRoutes = ['/checkout', '/commande', '/success'],
   className,
 }: Props) {
-  const pathname = usePathname() || ''
-  const t = useTranslations('email_popup')
-  const [open, setOpen] = useState(false)
-  const [email, setEmail] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [status, setStatus] = useState('')
+  const pathname = usePathname() || '';
+  const t = useTranslations('email_popup');
+  const [open, setOpen] = useState(false);
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState('');
 
-  const inputRef = useRef<HTMLInputElement | null>(null)
-  const srRef = useRef<HTMLParagraphElement | null>(null)
-  const dialogRef = useRef<HTMLDivElement | null>(null)
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const srRef = useRef<HTMLParagraphElement | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
 
-  useFocusTrap(open, dialogRef, { initialFocusRef: inputRef, restoreFocus: true })
+  useFocusTrap(open, dialogRef, { initialFocusRef: inputRef, restoreFocus: true });
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('checkout_email')
-      if (saved && EMAIL_RE.test(saved)) setEmail(saved)
+      const saved = localStorage.getItem('checkout_email');
+      if (saved && EMAIL_RE.test(saved)) setEmail(saved);
     } catch {}
-  }, [])
+  }, []);
 
   const hiddenByRoute = useMemo(
     () => hideOnRoutes.some((route) => pathname.startsWith(route)),
     [hideOnRoutes, pathname]
-  )
+  );
 
   const isDismissed = () => {
     try {
-      const raw = localStorage.getItem(dismissKey)
-      const until = raw ? parseInt(raw, 10) : 0
-      return Date.now() < until
+      const raw = localStorage.getItem(dismissKey);
+      const until = raw ? parseInt(raw, 10) : 0;
+      return Date.now() < until;
     } catch {
-      return false
+      return false;
     }
-  }
+  };
 
   const persistDismiss = () => {
     try {
-      const until = Date.now() + ttlDays * 24 * 60 * 60 * 1000
-      localStorage.setItem(dismissKey, String(until))
+      const until = Date.now() + ttlDays * 24 * 60 * 60 * 1000;
+      localStorage.setItem(dismissKey, String(until));
     } catch {}
-  }
+  };
 
   useEffect(() => {
-    if (hiddenByRoute || isDismissed()) return
+    if (hiddenByRoute || isDismissed()) return;
 
-    const timer = window.setTimeout(() => setOpen(true), delayMs)
-    return () => clearTimeout(timer)
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- isDismissed read in body only
-  }, [hiddenByRoute, delayMs])
+    const timer = window.setTimeout(() => setOpen(true), delayMs);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- isDismissed read in body only
+  }, [hiddenByRoute, delayMs]);
 
   useEffect(() => {
-    if (!open) return
+    if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        e.preventDefault()
-        close()
+        e.preventDefault();
+        close();
       }
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- close stable
-  }, [open])
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- close stable
+  }, [open]);
 
   const announce = (msg: string) => {
-    setStatus(msg)
-    if (srRef.current) srRef.current.textContent = msg
-  }
+    setStatus(msg);
+    if (srRef.current) srRef.current.textContent = msg;
+  };
 
   const close = () => {
-    setOpen(false)
-    persistDismiss()
-    announce(t('closed_announce'))
-  }
+    setOpen(false);
+    persistDismiss();
+    announce(t('closed_announce'));
+  };
 
   const onBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) close()
-  }
+    if (e.target === e.currentTarget) close();
+  };
 
   const submit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (loading) return
+    e.preventDefault();
+    if (loading) return;
 
-    const value = email.trim()
+    const value = email.trim();
     if (!EMAIL_RE.test(value)) {
-      setError(t('invalid_email'))
-      inputRef.current?.focus()
-      return
+      setError(t('invalid_email'));
+      inputRef.current?.focus();
+      return;
     }
 
-    setLoading(true)
-    setError(null)
-    announce(t('sending_announce'))
+    setLoading(true);
+    setError(null);
+    announce(t('sending_announce'));
 
     try {
       const res = await fetch('/api/email/welcome', {
@@ -129,30 +129,30 @@ export default function PopupEmailCapture({
         body: JSON.stringify({ email: value }),
         cache: 'no-store',
         keepalive: true,
-      })
+      });
 
       if (!res.ok) {
-        const body = await safeJson(res)
-        throw new Error(body.error || `Erreur ${res.status}`)
+        const body = await safeJson(res);
+        throw new Error(body.error || `Erreur ${res.status}`);
       }
 
       try {
-        window.dataLayer?.push({ event: 'email_capture_success' })
+        window.dataLayer?.push({ event: 'email_capture_success' });
       } catch {}
 
-      announce(t('success_announce'))
-      persistDismiss()
-      setOpen(false)
+      announce(t('success_announce'));
+      persistDismiss();
+      setOpen(false);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : t('error_fallback')
-      setError(message)
-      announce(t('fail_announce'))
+      const message = err instanceof Error ? err.message : t('error_fallback');
+      setError(message);
+      announce(t('fail_announce'));
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  if (!open) return null
+  if (!open) return null;
 
   return (
     <div
@@ -210,8 +210,8 @@ export default function PopupEmailCapture({
             placeholder={t('placeholder')}
             value={email}
             onChange={(e) => {
-              setEmail(e.target.value)
-              if (error) setError(null)
+              setEmail(e.target.value);
+              if (error) setError(null);
             }}
             aria-invalid={Boolean(error)}
             aria-describedby={error ? 'email-popup-error' : undefined}
@@ -251,14 +251,14 @@ export default function PopupEmailCapture({
         </form>
       </div>
     </div>
-  )
+  );
 }
 
 async function safeJson(res: Response): Promise<WelcomeResponse> {
   try {
-    const data: unknown = await res.json()
-    return typeof data === 'object' && data !== null ? (data as WelcomeResponse) : {}
+    const data: unknown = await res.json();
+    return typeof data === 'object' && data !== null ? (data as WelcomeResponse) : {};
   } catch {
-    return {}
+    return {};
   }
 }

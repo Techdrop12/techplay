@@ -17,14 +17,18 @@ export default function DropdownMenu({ label, items = [] }: DropdownMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handler = (e: MouseEvent) => ref.current && !ref.current.contains(e.target as Node) && setOpen(false);
+    const handler = (e: MouseEvent) =>
+      ref.current && !ref.current.contains(e.target as Node) && setOpen(false);
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
   return (
     <div className="relative" ref={ref}>
-      <button onClick={() => setOpen(!open)} className="px-3 py-2 bg-[hsl(var(--surface-2))] rounded hover:opacity-90">
+      <button
+        onClick={() => setOpen(!open)}
+        className="px-3 py-2 bg-[hsl(var(--surface-2))] rounded hover:opacity-90"
+      >
         {label}
       </button>
       {open && (

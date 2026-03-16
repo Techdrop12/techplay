@@ -3,7 +3,7 @@
 // zip-aware, facteur aléatoire stable, labels FR.
 
 export type DeliveryEstimate = {
-  label: string;           // "Livraison estimée : 3–5 jours"
+  label: string; // "Livraison estimée : 3–5 jours"
   shipMin: Date;
   shipMax: Date;
   minDays: number;
@@ -13,17 +13,23 @@ export type DeliveryEstimate = {
 export type DeliveryOptions = {
   zipCode?: string;
   now?: Date;
-  minDays?: number;             // avant application weekend/jours fériés
+  minDays?: number; // avant application weekend/jours fériés
   maxDays?: number;
-  businessDaysOnly?: boolean;   // défaut true
-  cutoffHourLocal?: number;     // 0..23 - défaut 15h
-  holidays?: string[];          // ["2025-12-25", "2026-01-01"]
+  businessDaysOnly?: boolean; // défaut true
+  cutoffHourLocal?: number; // 0..23 - défaut 15h
+  holidays?: string[]; // ["2025-12-25", "2026-01-01"]
 };
 
 const DEFAULT_HOLIDAYS = [
   // principaux jours fériés FR (ajuste si besoin)
-  "2025-01-01", "2025-05-01", "2025-05-08", "2025-07-14", "2025-08-15",
-  "2025-11-01", "2025-11-11", "2025-12-25",
+  '2025-01-01',
+  '2025-05-01',
+  '2025-05-08',
+  '2025-07-14',
+  '2025-08-15',
+  '2025-11-01',
+  '2025-11-11',
+  '2025-12-25',
 ];
 
 function isHoliday(d: Date, holidays: Set<string>) {
@@ -81,7 +87,7 @@ export function estimateDelivery(opts: DeliveryOptions = {}): DeliveryEstimate {
 
   const label =
     min === max
-      ? `Livraison estimée : ${min} jour${min > 1 ? "s" : ""}`
+      ? `Livraison estimée : ${min} jour${min > 1 ? 's' : ''}`
       : `Livraison estimée : ${min}–${max} jours`;
 
   return { label, shipMin, shipMax, minDays: min, maxDays: max };

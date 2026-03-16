@@ -483,7 +483,14 @@
     "redirecting": "Redirection…",
     "payment_error": "Erreur de paiement",
     "error_loading_products": "Erreur lors du chargement des produits.",
-    "no_products_available": "Aucun produit disponible."
+    "no_products_available": "Aucun produit disponible.",
+    "hero_tagline_title": "TechPlay – accessoires & packs sélectionnés pour la performance, le style et la fiabilité.",
+    "hero_tagline_subtitle": "Commande en quelques clics, livraison rapide et support basé en France.",
+    "products_section_title": "Notre sélection pour vous",
+    "products_section_subtitle": "Parcourez les produits TechPlay les plus populaires du moment.",
+    "reassurance_payment": "Paiement sécurisé (Stripe, Visa, Mastercard, PayPal)",
+    "reassurance_delivery": "Livraison 48–72 h depuis la France",
+    "reassurance_support": "Support client réactif, réponse sous 24–48 h"
   },
   "search": {
     "title": "Recherche",

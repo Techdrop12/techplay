@@ -1,48 +1,48 @@
 // src/components/ui/StickyFreeShippingBar.tsx
-'use client'
+'use client';
 
-import { usePathname } from 'next/navigation'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { usePathname } from 'next/navigation';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
-import FreeShippingBadge from '@/components/FreeShippingBadge'
-import Link from '@/components/LocalizedLink'
-import { useCart } from '@/hooks/useCart'
-import { UI } from '@/lib/constants'
-import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
-import { cn } from '@/lib/utils'
+import FreeShippingBadge from '@/components/FreeShippingBadge';
+import Link from '@/components/LocalizedLink';
+import { useCart } from '@/hooks/useCart';
+import { UI } from '@/lib/constants';
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing';
+import { cn } from '@/lib/utils';
 
-type Position = 'bottom' | 'top'
+type Position = 'bottom' | 'top';
 
 type Props = {
-  threshold?: number
-  autoShowDelayMs?: number
-  minScrollY?: number
-  dismissKey?: string
-  hideOnRoutes?: string[]
-  position?: Position
-  showOnEmptyCart?: boolean
-  showWhenReached?: boolean
-  ctaHref?: string
-  ctaLabel?: string
-  policyHref?: string
-  className?: string
-}
+  threshold?: number;
+  autoShowDelayMs?: number;
+  minScrollY?: number;
+  dismissKey?: string;
+  hideOnRoutes?: string[];
+  position?: Position;
+  showOnEmptyCart?: boolean;
+  showWhenReached?: boolean;
+  ctaHref?: string;
+  ctaLabel?: string;
+  policyHref?: string;
+  className?: string;
+};
 
 type CartLikeItem = {
-  price?: number
-  unitPrice?: number
-  quantity?: number
-  qty?: number
+  price?: number;
+  unitPrice?: number;
+  quantity?: number;
+  qty?: number;
   product?: {
-    price?: number
-  }
-}
+    price?: number;
+  };
+};
 
 function pushDL(event: string, extra?: Record<string, unknown>) {
   try {
-    window.dataLayer = window.dataLayer ?? []
-    window.dataLayer.push({ event, ...(extra ?? {}) })
+    window.dataLayer = window.dataLayer ?? [];
+    window.dataLayer.push({ event, ...(extra ?? {}) });
   } catch {}
 }
 
@@ -60,95 +60,95 @@ export default function StickyFreeShippingBar({
   policyHref,
   className,
 }: Props) {
-  const pathname = usePathname() || '/'
-  const locale = getCurrentLocale(pathname)
-  const t = useTranslations('misc')
-  const { cart } = useCart()
+  const pathname = usePathname() || '/';
+  const locale = getCurrentLocale(pathname);
+  const t = useTranslations('misc');
+  const { cart } = useCart();
 
-  const [visible, setVisible] = useState(false)
-  const [dismissed, setDismissed] = useState(false)
+  const [visible, setVisible] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
 
-  const shownOnceRef = useRef(false)
-  const ticking = useRef(false)
+  const shownOnceRef = useRef(false);
+  const ticking = useRef(false);
 
   useEffect(() => {
     try {
-      if (localStorage.getItem(dismissKey) === '1') setDismissed(true)
+      if (localStorage.getItem(dismissKey) === '1') setDismissed(true);
     } catch {}
-  }, [dismissKey])
+  }, [dismissKey]);
 
   const onClose = () => {
     try {
-      localStorage.setItem(dismissKey, '1')
-      pushDL('free_shipping_bar_close')
+      localStorage.setItem(dismissKey, '1');
+      pushDL('free_shipping_bar_close');
     } catch {}
-    setVisible(false)
-    setDismissed(true)
-  }
+    setVisible(false);
+    setDismissed(true);
+  };
 
   const hiddenByRoute = useMemo(
     () => hideOnRoutes.some((route) => pathname.startsWith(localizePath(route, locale))),
     [pathname, hideOnRoutes, locale]
-  )
+  );
 
   const subtotal = useMemo(() => {
-    if (!Array.isArray(cart)) return 0
+    if (!Array.isArray(cart)) return 0;
 
     return cart.reduce((sum: number, item: CartLikeItem) => {
-      const price = Number(item.price ?? item.unitPrice ?? item.product?.price ?? 0)
-      const qty = Number(item.quantity ?? item.qty ?? 1)
+      const price = Number(item.price ?? item.unitPrice ?? item.product?.price ?? 0);
+      const qty = Number(item.quantity ?? item.qty ?? 1);
 
-      const safePrice = Number.isFinite(price) ? price : 0
-      const safeQty = Number.isFinite(qty) ? qty : 1
+      const safePrice = Number.isFinite(price) ? price : 0;
+      const safeQty = Number.isFinite(qty) ? qty : 1;
 
-      return sum + safePrice * safeQty
-    }, 0)
-  }, [cart])
+      return sum + safePrice * safeQty;
+    }, 0);
+  }, [cart]);
 
-  const remaining = Math.max(threshold - subtotal, 0)
-  const reached = remaining === 0
+  const remaining = Math.max(threshold - subtotal, 0);
+  const reached = remaining === 0;
 
   useEffect(() => {
-    if (hiddenByRoute || dismissed) return
+    if (hiddenByRoute || dismissed) return;
 
     const check = () => {
-      const y = window.scrollY
-      setVisible((prev) => prev || y > minScrollY)
-      ticking.current = false
-    }
+      const y = window.scrollY;
+      setVisible((prev) => prev || y > minScrollY);
+      ticking.current = false;
+    };
 
     const onScroll = () => {
-      if (ticking.current) return
-      ticking.current = true
-      window.requestAnimationFrame(check)
-    }
+      if (ticking.current) return;
+      ticking.current = true;
+      window.requestAnimationFrame(check);
+    };
 
-    const timer = window.setTimeout(() => setVisible(true), autoShowDelayMs)
+    const timer = window.setTimeout(() => setVisible(true), autoShowDelayMs);
 
-    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('scroll', onScroll, { passive: true });
 
     return () => {
-      window.clearTimeout(timer)
-      window.removeEventListener('scroll', onScroll)
-    }
-  }, [autoShowDelayMs, minScrollY, hiddenByRoute, dismissed])
+      window.clearTimeout(timer);
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, [autoShowDelayMs, minScrollY, hiddenByRoute, dismissed]);
 
   useEffect(() => {
-    if (!visible || shownOnceRef.current) return
-    shownOnceRef.current = true
-    pushDL('free_shipping_bar_show', { reached, subtotal, threshold })
-  }, [visible, reached, subtotal, threshold])
+    if (!visible || shownOnceRef.current) return;
+    shownOnceRef.current = true;
+    pushDL('free_shipping_bar_show', { reached, subtotal, threshold });
+  }, [visible, reached, subtotal, threshold]);
 
-  const labelCart = ctaLabel ?? t('view_cart')
+  const labelCart = ctaLabel ?? t('view_cart');
 
-  if (dismissed || hiddenByRoute || !visible) return null
-  if (!showOnEmptyCart && subtotal <= 0) return null
-  if (!showWhenReached && reached) return null
+  if (dismissed || hiddenByRoute || !visible) return null;
+  if (!showOnEmptyCart && subtotal <= 0) return null;
+  if (!showWhenReached && reached) return null;
 
   const sideClasses =
     position === 'bottom'
       ? 'left-0 right-0 bottom-0 pb-[calc(env(safe-area-inset-bottom,0)+8px)] pt-2'
-      : 'left-0 right-0 top-0 pt-[calc(env(safe-area-inset-top,0)+8px)] pb-2'
+      : 'left-0 right-0 top-0 pt-[calc(env(safe-area-inset-top,0)+8px)] pb-2';
 
   return (
     <div
@@ -202,5 +202,5 @@ export default function StickyFreeShippingBar({
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
-import { usePathname } from 'next/navigation'
-import { useMemo } from 'react'
+import { usePathname } from 'next/navigation';
+import { useMemo } from 'react';
 
-export type Locale = 'fr' | 'en'
-export type BreadcrumbSegment = { label: string; href: string }
+export type Locale = 'fr' | 'en';
+export type BreadcrumbSegment = { label: string; href: string };
 
 const LABELS: Record<Locale, Record<string, string>> = {
   fr: {
@@ -37,16 +37,16 @@ const LABELS: Record<Locale, Record<string, string>> = {
     dashboard: 'Dashboard',
     categorie: 'Category',
   },
-}
+};
 
 function detectLocaleFromPath(pathname: string): Locale {
-  return /^\/en(\/|$)/.test(pathname) ? 'en' : 'fr'
+  return /^\/en(\/|$)/.test(pathname) ? 'en' : 'fr';
 }
 
 /** Humanise un segment (slug → Label Joli) si pas dans le dictionnaire. */
 function prettify(seg: string): string {
-  const s = decodeURIComponent(seg).replace(/-/g, ' ')
-  return s.replace(/\b\w/g, (c) => c.toUpperCase())
+  const s = decodeURIComponent(seg).replace(/-/g, ' ');
+  return s.replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 /**
@@ -56,28 +56,28 @@ function prettify(seg: string): string {
  * - Traduit quelques segments courants (FR/EN), sinon prettify
  */
 export default function useBreadcrumbSegments(): BreadcrumbSegment[] {
-  const pathname = usePathname() || '/'
+  const pathname = usePathname() || '/';
 
   return useMemo(() => {
-    const locale: Locale = detectLocaleFromPath(pathname)
-    const parts = pathname.split('/').filter(Boolean)
+    const locale: Locale = detectLocaleFromPath(pathname);
+    const parts = pathname.split('/').filter(Boolean);
 
     // Base href garde la locale si présente
-    const first = parts[0]
-    const hasLocale = first === 'fr' || first === 'en'
-    const baseParts = hasLocale ? [first] : []
+    const first = parts[0];
+    const hasLocale = first === 'fr' || first === 'en';
+    const baseParts = hasLocale ? [first] : [];
 
-    let acc: string[] = [...baseParts]
-    const uiParts = hasLocale ? parts.slice(1) : parts
+    let acc: string[] = [...baseParts];
+    const uiParts = hasLocale ? parts.slice(1) : parts;
 
     const out: BreadcrumbSegment[] = uiParts.map((seg) => {
-      acc.push(seg)
-      const href = '/' + acc.join('/')
-      const dict = LABELS[locale]
-      const label = dict[seg] || prettify(seg)
-      return { label, href }
-    })
+      acc.push(seg);
+      const href = '/' + acc.join('/');
+      const dict = LABELS[locale];
+      const label = dict[seg] || prettify(seg);
+      return { label, href };
+    });
 
-    return out
-  }, [pathname])
+    return out;
+  }, [pathname]);
 }

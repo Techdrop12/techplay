@@ -1,16 +1,16 @@
 // src/components/ScrollToTop.tsx
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
-import * as React from 'react'
+import { useTranslations } from 'next-intl';
+import * as React from 'react';
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
 
 export interface ScrollToTopProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  threshold?: number
-  positionClassName?: string
-  ariaLabel?: string
-  highContrast?: boolean
+  threshold?: number;
+  positionClassName?: string;
+  ariaLabel?: string;
+  highContrast?: boolean;
 }
 
 export default function ScrollToTop({
@@ -21,44 +21,44 @@ export default function ScrollToTop({
   className,
   ...props
 }: ScrollToTopProps) {
-  const tAria = useTranslations('aria')
-  const [visible, setVisible] = React.useState(false)
-  const rafRef = React.useRef<number | null>(null)
+  const tAria = useTranslations('aria');
+  const [visible, setVisible] = React.useState(false);
+  const rafRef = React.useRef<number | null>(null);
 
   React.useEffect(() => {
     const onScroll = () => {
-      if (rafRef.current != null) return
+      if (rafRef.current != null) return;
 
       rafRef.current = window.requestAnimationFrame(() => {
-        setVisible(window.scrollY > threshold)
+        setVisible(window.scrollY > threshold);
 
         if (rafRef.current != null) {
-          window.cancelAnimationFrame(rafRef.current)
+          window.cancelAnimationFrame(rafRef.current);
         }
-        rafRef.current = null
-      })
-    }
+        rafRef.current = null;
+      });
+    };
 
-    window.addEventListener('scroll', onScroll, { passive: true })
-    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
 
     return () => {
-      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('scroll', onScroll);
       if (rafRef.current != null) {
-        window.cancelAnimationFrame(rafRef.current)
+        window.cancelAnimationFrame(rafRef.current);
       }
-    }
-  }, [threshold])
+    };
+  }, [threshold]);
 
-  if (!visible) return null
+  if (!visible) return null;
 
   const prefersReducedMotion =
     typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
   const scrollTop = () => {
-    window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' })
-  }
+    window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+  };
 
   return (
     <button
@@ -82,5 +82,5 @@ export default function ScrollToTop({
         <path d="M12 5l7 7-1.4 1.4L13 8.8V20h-2V8.8L6.4 13.4 5 12z" fill="currentColor" />
       </svg>
     </button>
-  )
+  );
 }

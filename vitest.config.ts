@@ -1,5 +1,5 @@
-import { defineConfig } from 'vitest/config'
-import path from 'node:path'
+import { defineConfig } from 'vitest/config';
+import path from 'node:path';
 
 export default defineConfig({
   test: {
@@ -10,12 +10,19 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcov'],
       include: ['src/**/*.{ts,tsx}'],
-      exclude: ['node_modules/', '.next/', '**/*.d.ts', '**/*.config.*', '**/*.test.*', '**/*.spec.*']
-    }
+      exclude: [
+        'node_modules/',
+        '.next/',
+        '**/*.d.ts',
+        '**/*.config.*',
+        '**/*.test.*',
+        '**/*.spec.*',
+      ],
+    },
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src')
-    }
-  }
-})
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+});

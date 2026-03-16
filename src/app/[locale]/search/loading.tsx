@@ -1,9 +1,14 @@
-import { getTranslations } from 'next-intl/server'
+import { getTranslations } from 'next-intl/server';
 
 export default async function SearchLoading() {
-  const t = await getTranslations('search')
+  const t = await getTranslations('search');
   return (
-    <div className="container-app mx-auto max-w-4xl py-8" role="status" aria-live="polite" aria-label={t('loading_aria')}>
+    <div
+      className="container-app mx-auto max-w-4xl py-8"
+      role="status"
+      aria-live="polite"
+      aria-label={t('loading_aria')}
+    >
       <div className="animate-pulse space-y-6">
         <div className="h-8 w-2/3 rounded-lg bg-[hsl(var(--border))]" />
         <div className="grid gap-4 sm:grid-cols-2">
@@ -19,5 +24,5 @@ export default async function SearchLoading() {
         </div>
       </div>
     </div>
-  )
+  );
 }

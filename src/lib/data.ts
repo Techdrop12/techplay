@@ -1,18 +1,18 @@
-import { connectToDatabase } from './db'
+import { connectToDatabase } from './db';
 
-import type { BlogPost } from '@/types/blog'
-import type { Pack as PackType, Product as ProductType } from '@/types/product'
-import type { PipelineStage } from 'mongoose'
+import type { BlogPost } from '@/types/blog';
+import type { Pack as PackType, Product as ProductType } from '@/types/product';
+import type { PipelineStage } from 'mongoose';
 
-import Blog from '@/models/Blog'
-import Pack from '@/models/Pack'
-import Product from '@/models/Product'
+import Blog from '@/models/Blog';
+import Pack from '@/models/Pack';
+import Product from '@/models/Product';
 
 function toPlain<T>(value: unknown): T {
-  return JSON.parse(JSON.stringify(value)) as T
+  return JSON.parse(JSON.stringify(value)) as T;
 }
 
-const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const PRODUCT_LIST_FIELDS = [
   '_id',
@@ -37,7 +37,7 @@ const PRODUCT_LIST_FIELDS = [
   'featured',
   'tags',
   'createdAt',
-].join(' ')
+].join(' ');
 
 const PACK_LIST_FIELDS = [
   '_id',
@@ -58,38 +58,38 @@ const PACK_LIST_FIELDS = [
   'recommended',
   'items',
   'createdAt',
-].join(' ')
+].join(' ');
 
 export async function getBestProducts(): Promise<ProductType[]> {
-  await connectToDatabase()
+  await connectToDatabase();
 
   const docs = await Product.find({ featured: true })
     .sort({ createdAt: -1 })
     .limit(8)
     .select(PRODUCT_LIST_FIELDS)
     .lean()
-    .exec()
+    .exec();
 
-  return toPlain<ProductType[]>(docs)
+  return toPlain<ProductType[]>(docs);
 }
 
 export async function getAllProducts(): Promise<ProductType[]> {
-  await connectToDatabase()
+  await connectToDatabase();
 
   const docs = await Product.find({})
     .sort({ createdAt: -1 })
     .select(PRODUCT_LIST_FIELDS)
     .lean()
-    .exec()
+    .exec();
 
-  return toPlain<ProductType[]>(docs)
+  return toPlain<ProductType[]>(docs);
 }
 
 export async function getProductBySlug(slug: string): Promise<ProductType | null> {
-  await connectToDatabase()
+  await connectToDatabase();
 
-  const product = await Product.findOne({ slug }).lean().exec()
-  return product ? toPlain<ProductType>(product) : null
+  const product = await Product.findOne({ slug }).lean().exec();
+  return product ? toPlain<ProductType>(product) : null;
 }
 
 export async function getRelatedProducts(
@@ -97,77 +97,73 @@ export async function getRelatedProducts(
   category: string | null | undefined,
   limit = 4
 ): Promise<ProductType[]> {
-  await connectToDatabase()
-  const filter: Record<string, unknown> = { slug: { $ne: currentSlug } }
+  await connectToDatabase();
+  const filter: Record<string, unknown> = { slug: { $ne: currentSlug } };
   if (category && String(category).trim()) {
-    filter.category = { $regex: new RegExp(`^${escapeRegex(String(category).trim())}$`, 'i') }
+    filter.category = { $regex: new RegExp(`^${escapeRegex(String(category).trim())}$`, 'i') };
   }
   const docs = await Product.find(filter)
     .sort({ createdAt: -1 })
     .limit(limit)
     .select(PRODUCT_LIST_FIELDS)
     .lean()
-    .exec()
-  return toPlain<ProductType[]>(docs)
+    .exec();
+  return toPlain<ProductType[]>(docs);
 }
 
 export async function getRecommendedPacks(): Promise<PackType[]> {
-  await connectToDatabase()
+  await connectToDatabase();
 
   const docs = await Pack.find({ recommended: true })
     .sort({ createdAt: -1 })
     .limit(6)
     .select(PACK_LIST_FIELDS)
     .lean()
-    .exec()
+    .exec();
 
-  return toPlain<PackType[]>(docs)
+  return toPlain<PackType[]>(docs);
 }
 
 export async function getPackBySlug(slug: string): Promise<PackType | null> {
-  await connectToDatabase()
+  await connectToDatabase();
 
-  const pack = await Pack.findOne({ slug }).lean().exec()
-  return pack ? toPlain<PackType>(pack) : null
+  const pack = await Pack.findOne({ slug }).lean().exec();
+  return pack ? toPlain<PackType>(pack) : null;
 }
 
 export async function getLatestBlogPosts(): Promise<BlogPost[]> {
-  await connectToDatabase()
+  await connectToDatabase();
 
-  const docs = await Blog.find({})
-    .sort({ createdAt: -1 })
-    .limit(10)
-    .lean()
-    .exec()
+  const docs = await Blog.find({}).sort({ createdAt: -1 }).limit(10).lean().exec();
 
-  return toPlain<BlogPost[]>(docs)
+  return toPlain<BlogPost[]>(docs);
 }
 
 export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
-  await connectToDatabase()
+  await connectToDatabase();
 
-  const post = await Blog.findOne({ slug }).lean().exec()
-  return post ? toPlain<BlogPost>(post) : null
+  const post = await Blog.findOne({ slug }).lean().exec();
+  return post ? toPlain<BlogPost>(post) : null;
 }
 
-type SortKey = 'price_asc' | 'price_desc' | 'rating' | 'new' | 'promo'
+type SortKey = 'price_asc' | 'price_desc' | 'rating' | 'new' | 'promo';
 
 type GetProductsPageInput = {
-  q?: string
-  min?: number
-  max?: number
-  sort?: SortKey
-  page?: number
-  pageSize?: number
-  category?: string | null
-}
+  q?: string;
+  min?: number;
+  max?: number;
+  sort?: SortKey;
+  page?: number;
+  pageSize?: number;
+  category?: string | null;
+};
 
 type ProductPageFacet = {
-  items: ProductType[]
-  total: Array<{ value: number }>
-  categoryCounts: Array<{ _id: string | null; count: number }>
-  stats: Array<{ _id: null; min: number; max: number }>
-}
+  items: ProductType[];
+  total: Array<{ value: number }>;
+  categoryCounts: Array<{ _id: string | null; count: number }>;
+  stats: Array<{ _id: null; min: number; max: number }>;
+};
 
 const CATEGORY_ALIASES: Record<string, string[]> = {
   casques: ['casques', 'casque', 'headphones', 'headset', 'écouteurs', 'earbuds', 'audio headset'],
@@ -176,18 +172,28 @@ const CATEGORY_ALIASES: Record<string, string[]> = {
   webcams: ['webcam', 'webcams', 'camera', 'pc camera'],
   batteries: ['batteries', 'battery', 'power bank', 'chargeur', 'charger', 'usb-c charger', 'hub'],
   audio: ['audio', 'speakers', 'speaker', 'enceinte', 'dac', 'soundbar'],
-  stockage: ['stockage', 'storage', 'ssd', 'carte', 'memory card', 'sd card', 'usb', 'hdd', 'disque'],
+  stockage: [
+    'stockage',
+    'storage',
+    'ssd',
+    'carte',
+    'memory card',
+    'sd card',
+    'usb',
+    'hdd',
+    'disque',
+  ],
   ecrans: ['ecrans', 'écrans', 'monitor', 'monitors', 'screen', 'display'],
-}
+};
 
 function buildCategoryRegex(input?: string | null): RegExp | null {
-  if (!input) return null
+  if (!input) return null;
 
-  const key = String(input).trim().toLowerCase()
-  const list = CATEGORY_ALIASES[key] || [key]
-  const alts = Array.from(new Set(list.filter(Boolean).map((s) => s.trim())))
+  const key = String(input).trim().toLowerCase();
+  const list = CATEGORY_ALIASES[key] || [key];
+  const alts = Array.from(new Set(list.filter(Boolean).map((s) => s.trim())));
 
-  return alts.length ? new RegExp(`^(${alts.map(escapeRegex).join('|')})$`, 'i') : null
+  return alts.length ? new RegExp(`^(${alts.map(escapeRegex).join('|')})$`, 'i') : null;
 }
 
 export async function getProductsPage({
@@ -199,24 +205,24 @@ export async function getProductsPage({
   pageSize = 24,
   category = null,
 }: GetProductsPageInput) {
-  await connectToDatabase()
+  await connectToDatabase();
 
-  const safePage = Math.max(1, Number(page) || 1)
-  const safeSize = Math.min(96, Math.max(1, Number(pageSize) || 24))
-  const skip = (safePage - 1) * safeSize
+  const safePage = Math.max(1, Number(page) || 1);
+  const safeSize = Math.min(96, Math.max(1, Number(pageSize) || 24));
+  const skip = (safePage - 1) * safeSize;
 
-  const textMatch: Record<string, unknown> = {}
+  const textMatch: Record<string, unknown> = {};
   if (q && q.trim()) {
-    const rx = new RegExp(escapeRegex(q.trim()), 'i')
-    textMatch.$or = [{ title: rx }, { description: rx }, { brand: rx }, { category: rx }]
+    const rx = new RegExp(escapeRegex(q.trim()), 'i');
+    textMatch.$or = [{ title: rx }, { description: rx }, { brand: rx }, { category: rx }];
   }
 
-  const catRegex = buildCategoryRegex(category || undefined)
+  const catRegex = buildCategoryRegex(category || undefined);
   const categoryStage: PipelineStage.Match | null = catRegex
     ? { $match: { category: { $regex: catRegex } } }
-    : null
+    : null;
 
-  const now = new Date()
+  const now = new Date();
 
   const promoAddFields: PipelineStage[] = [
     {
@@ -258,10 +264,10 @@ export async function getProductsPage({
         },
       },
     },
-  ]
+  ];
 
-  const hasMin = typeof min === 'number' && Number.isFinite(min)
-  const hasMax = typeof max === 'number' && Number.isFinite(max)
+  const hasMin = typeof min === 'number' && Number.isFinite(min);
+  const hasMax = typeof max === 'number' && Number.isFinite(max);
 
   const priceStage: PipelineStage.Match | null =
     hasMin || hasMax
@@ -273,7 +279,7 @@ export async function getProductsPage({
             },
           },
         }
-      : null
+      : null;
 
   const itemsSort: PipelineStage.Sort[] =
     sort === 'promo'
@@ -284,7 +290,7 @@ export async function getProductsPage({
           ? [{ $sort: { currentPrice: -1, createdAt: -1 } }]
           : sort === 'rating'
             ? [{ $sort: { 'aggregateRating.average': -1, rating: -1, createdAt: -1 } }]
-            : [{ $sort: { createdAt: -1 } }]
+            : [{ $sort: { createdAt: -1 } }];
 
   const itemsPipeline = [
     ...(categoryStage ? [categoryStage] : []),
@@ -318,14 +324,14 @@ export async function getProductsPage({
         createdAt: 1,
       },
     },
-  ] as unknown as PipelineStage[]
+  ] as unknown as PipelineStage[];
 
   const totalPipeline = [
     ...(categoryStage ? [categoryStage] : []),
     ...promoAddFields,
     ...(priceStage ? [priceStage] : []),
     { $count: 'value' },
-  ] as unknown as PipelineStage[]
+  ] as unknown as PipelineStage[];
 
   const categoryCountsPipeline = [
     ...promoAddFields,
@@ -337,7 +343,7 @@ export async function getProductsPage({
       },
     },
     { $sort: { count: -1, _id: 1 } },
-  ] as unknown as PipelineStage[]
+  ] as unknown as PipelineStage[];
 
   const statsPipeline = [
     ...promoAddFields,
@@ -349,7 +355,7 @@ export async function getProductsPage({
         max: { $max: '$currentPrice' },
       },
     },
-  ] as unknown as PipelineStage[]
+  ] as unknown as PipelineStage[];
 
   const facetStage = {
     $facet: {
@@ -358,33 +364,33 @@ export async function getProductsPage({
       categoryCounts: categoryCountsPipeline,
       stats: statsPipeline,
     },
-  } as unknown as PipelineStage
+  } as unknown as PipelineStage;
 
-  const pipeline: PipelineStage[] = [{ $match: textMatch }, facetStage]
+  const pipeline: PipelineStage[] = [{ $match: textMatch }, facetStage];
 
-  const [facet] = await Product.aggregate<ProductPageFacet>(pipeline)
+  const [facet] = await Product.aggregate<ProductPageFacet>(pipeline);
 
   const safeFacet: ProductPageFacet = facet ?? {
     items: [],
     total: [],
     categoryCounts: [],
     stats: [],
-  }
+  };
 
-  const items = Array.isArray(safeFacet.items) ? safeFacet.items : []
-  const total = Number(safeFacet.total?.[0]?.value || 0)
-  const pageCount = Math.max(1, Math.ceil(total / safeSize))
+  const items = Array.isArray(safeFacet.items) ? safeFacet.items : [];
+  const total = Number(safeFacet.total?.[0]?.value || 0);
+  const pageCount = Math.max(1, Math.ceil(total / safeSize));
 
-  const counts: Record<string, number> = {}
+  const counts: Record<string, number> = {};
   for (const row of safeFacet.categoryCounts || []) {
-    if (row?._id != null) counts[String(row._id)] = Number(row.count || 0)
+    if (row?._id != null) counts[String(row._id)] = Number(row.count || 0);
   }
 
-  const firstStat = safeFacet.stats?.[0]
+  const firstStat = safeFacet.stats?.[0];
   const priceRange =
     firstStat && Number.isFinite(firstStat.min) && Number.isFinite(firstStat.max)
       ? { min: Number(firstStat.min), max: Number(firstStat.max) }
-      : undefined
+      : undefined;
 
   return {
     items: toPlain<ProductType[]>(items),
@@ -394,5 +400,5 @@ export async function getProductsPage({
     pageCount,
     categoryCounts: counts,
     priceRange,
-  }
+  };
 }

@@ -1,9 +1,6 @@
-import type { Pack } from '@/types/product'
+import type { Pack } from '@/types/product';
 
-export type PackLite = Pick<
-  Pack,
-  '_id' | 'slug' | 'title' | 'description' | 'image' | 'price'
->
+export type PackLite = Pick<Pack, '_id' | 'slug' | 'title' | 'description' | 'image' | 'price'>;
 
 export const packs: Pack[] = [
   {
@@ -26,7 +23,7 @@ export const packs: Pack[] = [
     price: 59.99,
     items: [],
   },
-]
+];
 
 export const getPackBySlug = (slug: string): Pack | undefined =>
-  packs.find((pack) => pack.slug === slug)
+  packs.find((pack) => pack.slug === slug);

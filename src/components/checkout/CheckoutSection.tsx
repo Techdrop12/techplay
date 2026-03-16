@@ -1,5 +1,5 @@
-import CheckoutForm from './CheckoutForm'
-import OrderSummary from './OrderSummary'
+import CheckoutForm from './CheckoutForm';
+import OrderSummary from './OrderSummary';
 
 export default function CheckoutSection({ total }: { total: number }) {
   return (
@@ -7,5 +7,5 @@ export default function CheckoutSection({ total }: { total: number }) {
       <CheckoutForm />
       <OrderSummary total={total} />
     </div>
-  )
+  );
 }

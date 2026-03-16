@@ -1,46 +1,46 @@
 // src/components/Breadcrumbs.tsx
 // Fil d'Ariane accessible + SEO (JSON-LD optionnel), TS strict, design propre.
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
-import type { ReactNode, HTMLAttributes } from 'react'
+import { useTranslations } from 'next-intl';
+import type { ReactNode, HTMLAttributes } from 'react';
 
-import Link from '@/components/LocalizedLink'
-import { BRAND } from '@/lib/constants'
-import useBreadcrumbSegments from '@/lib/useBreadcrumbSegments'
+import Link from '@/components/LocalizedLink';
+import { BRAND } from '@/lib/constants';
+import useBreadcrumbSegments from '@/lib/useBreadcrumbSegments';
 
 type Crumb = {
-  href?: string
-  label: string
-}
+  href?: string;
+  label: string;
+};
 
 type HomeCrumb = {
-  href: string
-  label: string
-}
+  href: string;
+  label: string;
+};
 
 type BreadcrumbsProps = {
   /** Liste ordonnée du fil d’Ariane (le dernier est la page courante et n’est pas cliquable) */
-  links: Crumb[]
+  links: Crumb[];
   /** Crumb "Accueil" automatique (false pour désactiver). */
-  home?: HomeCrumb | false
+  home?: HomeCrumb | false;
   /** Séparateur visuel entre les crumbs. */
-  separator?: ReactNode
+  separator?: ReactNode;
   /** Ajoute un script JSON-LD https://schema.org/BreadcrumbList */
-  jsonLd?: boolean
+  jsonLd?: boolean;
   /** Base URL absolue (ex: https://techplay.fr) pour JSON-LD. Si omis, on laisse les URLs telles quelles. */
-  baseUrl?: string
+  baseUrl?: string;
   /** Troncature douce des labels trop longs. */
-  truncateLabels?: boolean
+  truncateLabels?: boolean;
   /** Classes supplémentaires sur le <nav>. */
-  className?: string
-} & Omit<HTMLAttributes<HTMLElement>, 'children'>
+  className?: string;
+} & Omit<HTMLAttributes<HTMLElement>, 'children'>;
 
 function joinUrl(base: string | undefined, path?: string) {
-  if (!path) return undefined
-  if (/^https?:\/\//i.test(path)) return path
-  if (!base) return path
-  return `${base.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`
+  if (!path) return undefined;
+  if (/^https?:\/\//i.test(path)) return path;
+  if (!base) return path;
+  return `${base.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
 }
 
 export default function Breadcrumbs({
@@ -53,12 +53,12 @@ export default function Breadcrumbs({
   className = '',
   ...rest
 }: BreadcrumbsProps) {
-  const t = useTranslations('nav')
-  const tMisc = useTranslations('misc')
-  const defaultHome: HomeCrumb = { href: '/', label: t('home') }
-  const home = homeProp ?? defaultHome
+  const t = useTranslations('nav');
+  const tMisc = useTranslations('misc');
+  const defaultHome: HomeCrumb = { href: '/', label: t('home') };
+  const home = homeProp ?? defaultHome;
 
-  if (!Array.isArray(links) || links.length === 0) return null
+  if (!Array.isArray(links) || links.length === 0) return null;
 
   const needsHome =
     home !== false &&
@@ -66,12 +66,11 @@ export default function Breadcrumbs({
       links[0]?.href === '/' ||
       links[0]?.label.toLowerCase() ===
         (typeof home === 'object' ? home.label.toLowerCase() : t('home').toLowerCase())
-    )
+    );
 
-  const fullCrumbs: Crumb[] =
-    home !== false && needsHome ? [home as HomeCrumb, ...links] : links
+  const fullCrumbs: Crumb[] = home !== false && needsHome ? [home as HomeCrumb, ...links] : links;
 
-  const lastIndex = fullCrumbs.length - 1
+  const lastIndex = fullCrumbs.length - 1;
 
   const jsonLdData =
     jsonLd && fullCrumbs.length > 0
@@ -85,7 +84,7 @@ export default function Breadcrumbs({
             ...(c.href ? { item: joinUrl(baseUrl, c.href) } : {}),
           })),
         }
-      : null
+      : null;
 
   return (
     <nav
@@ -95,8 +94,8 @@ export default function Breadcrumbs({
     >
       <ol className="flex flex-wrap items-center gap-1">
         {fullCrumbs.map((crumb, i) => {
-          const isLast = i === lastIndex
-          const label = crumb.label
+          const isLast = i === lastIndex;
+          const label = crumb.label;
 
           const labelEl = (
             <span
@@ -105,7 +104,7 @@ export default function Breadcrumbs({
             >
               {label}
             </span>
-          )
+          );
 
           return (
             <li key={`${i}-${label}`} className="inline-flex items-center">
@@ -131,34 +130,33 @@ export default function Breadcrumbs({
                 </span>
               )}
             </li>
-          )
+          );
         })}
       </ol>
 
       {jsonLdData && (
         <script
           type="application/ld+json"
-           
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }}
         />
       )}
     </nav>
-  )
+  );
 }
 
 /* --------------------------- AutoBreadcrumbs --------------------------- */
 /** Variante auto qui se base sur l’URL courante via le hook unifié. */
 export function AutoBreadcrumbs(props: Omit<BreadcrumbsProps, 'links'>) {
-  const links = useBreadcrumbSegments()
-  const t = useTranslations('common')
-  const locale = links[0]?.href?.startsWith('/en') ? 'en' : 'fr'
+  const links = useBreadcrumbSegments();
+  const t = useTranslations('common');
+  const locale = links[0]?.href?.startsWith('/en') ? 'en' : 'fr';
   const home =
     props.home === false
       ? false
       : {
           href: locale === 'en' ? '/en' : '/fr',
           label: t('home'),
-        }
+        };
 
   return (
     <Breadcrumbs
@@ -167,5 +165,5 @@ export function AutoBreadcrumbs(props: Omit<BreadcrumbsProps, 'links'>) {
       home={home as HomeCrumb}
       baseUrl={props.baseUrl ?? BRAND.URL}
     />
-  )
+  );
 }

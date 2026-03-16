@@ -85,7 +85,10 @@ export default function LoginForm() {
       >
         {loading ? (
           <>
-            <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden />
+            <span
+              className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent"
+              aria-hidden
+            />
             {t('login_loading')}
           </>
         ) : (
@@ -93,5 +96,5 @@ export default function LoginForm() {
         )}
       </button>
     </form>
-  )
+  );
 }

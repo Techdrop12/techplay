@@ -1,13 +1,13 @@
 /// <reference lib="webworker" />
 
-declare const self: ServiceWorkerGlobalScope
+declare const self: ServiceWorkerGlobalScope;
 
 self.addEventListener('install', () => {
-  self.skipWaiting()
-})
+  self.skipWaiting();
+});
 
 self.addEventListener('activate', (event: ExtendableEvent) => {
-  event.waitUntil(self.clients.claim())
-})
+  event.waitUntil(self.clients.claim());
+});
 
-export {}
+export {};

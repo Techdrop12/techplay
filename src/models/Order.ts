@@ -1,4 +1,4 @@
-import mongoose, { type InferSchemaType } from 'mongoose'
+import mongoose, { type InferSchemaType } from 'mongoose';
 
 const OrderSchema = new mongoose.Schema(
   {
@@ -28,8 +28,8 @@ const OrderSchema = new mongoose.Schema(
     deliveredAt: Date,
   },
   { timestamps: true }
-)
+);
 
-export type OrderDoc = InferSchemaType<typeof OrderSchema>
+export type OrderDoc = InferSchemaType<typeof OrderSchema>;
 
-export default mongoose.models.Order ?? mongoose.model('Order', OrderSchema)
+export default mongoose.models.Order ?? mongoose.model('Order', OrderSchema);

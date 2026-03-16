@@ -1,5 +1,5 @@
-"use client";
-import { useState } from "react";
+'use client';
+import { useState } from 'react';
 
 export default function ImageWithZoom({ src, alt }: { src: string; alt: string }) {
   const [zoomed, setZoomed] = useState(false);
@@ -11,7 +11,7 @@ export default function ImageWithZoom({ src, alt }: { src: string; alt: string }
         alt={alt}
         loading="lazy"
         decoding="async"
-        className={`transition-transform duration-300 ${zoomed ? "scale-150" : "scale-100"}`}
+        className={`transition-transform duration-300 ${zoomed ? 'scale-150' : 'scale-100'}`}
       />
     </div>
   );

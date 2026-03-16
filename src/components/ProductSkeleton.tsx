@@ -3,21 +3,21 @@
 // - Emplacements pour badges, note, prix, tags & CTA flottants
 // - A11y: pure déco → aria-hidden; possibilité d’annoncer via prop
 
-'use client'
+'use client';
 
-import React from 'react'
-import { useTranslations } from 'next-intl'
+import React from 'react';
+import { useTranslations } from 'next-intl';
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
 
 type Props = {
-  className?: string
+  className?: string;
   /** Si true, ajoute un <p role="status"> lisible par les lecteurs d’écran */
-  announce?: boolean
-}
+  announce?: boolean;
+};
 
 export default function ProductSkeleton({ className, announce = false }: Props) {
-  const t = useTranslations('skeleton')
+  const t = useTranslations('skeleton');
   return (
     <article
       aria-hidden={announce ? undefined : true}
@@ -27,13 +27,13 @@ export default function ProductSkeleton({ className, announce = false }: Props) 
       )}
     >
       {/* Conteneur interne identique à ProductCard */}
-        <div
-          className={cn(
-            'relative overflow-hidden rounded-[inherit]',
-            'bg-[hsl(var(--surface))]/90 supports-[backdrop-filter]:backdrop-blur',
-            'border border-[hsl(var(--border))]'
-          )}
-        >
+      <div
+        className={cn(
+          'relative overflow-hidden rounded-[inherit]',
+          'bg-[hsl(var(--surface))]/90 supports-[backdrop-filter]:backdrop-blur',
+          'border border-[hsl(var(--border))]'
+        )}
+      >
         {/* Media (même ratio 4/3) */}
         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[inherit]">
           {/* Fond shimmer */}
@@ -93,5 +93,5 @@ export default function ProductSkeleton({ className, announce = false }: Props) 
         </p>
       )}
     </article>
-  )
+  );
 }

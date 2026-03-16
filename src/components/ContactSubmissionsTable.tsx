@@ -1,45 +1,41 @@
-'use client'
+'use client';
 
-import { useLocale, useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
-import { toast } from 'react-hot-toast'
+import { useLocale, useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
-import TableSkeleton from '@/components/admin/TableSkeleton'
+import TableSkeleton from '@/components/admin/TableSkeleton';
 
 interface Submission {
-  _id: string
-  name?: string
-  email: string
-  message: string
-  consent?: boolean
-  createdAt?: string
+  _id: string;
+  name?: string;
+  email: string;
+  message: string;
+  consent?: boolean;
+  createdAt?: string;
 }
 
 export default function ContactSubmissionsTable() {
-  const t = useTranslations('admin')
-  const locale = useLocale()
-  const [list, setList] = useState<Submission[]>([])
-  const [loading, setLoading] = useState(true)
-  const dateLocale = locale === 'fr' ? 'fr-FR' : 'en-GB'
+  const t = useTranslations('admin');
+  const locale = useLocale();
+  const [list, setList] = useState<Submission[]>([]);
+  const [loading, setLoading] = useState(true);
+  const dateLocale = locale === 'fr' ? 'fr-FR' : 'en-GB';
 
   useEffect(() => {
     fetch('/api/admin/contact-submissions')
       .then((res) => res.json())
       .then((data: unknown) => setList(Array.isArray(data) ? data : []))
       .catch(() => toast.error(t('error_load_contact')))
-      .finally(() => setLoading(false))
-  }, [t])
+      .finally(() => setLoading(false));
+  }, [t]);
 
   if (loading) {
-    return <TableSkeleton rows={6} cols={4} ariaLabel={t('loading_contact')} />
+    return <TableSkeleton rows={6} cols={4} ariaLabel={t('loading_contact')} />;
   }
 
   if (list.length === 0) {
-    return (
-      <p className="p-6 text-token-text/60">
-        {t('no_contact')}
-      </p>
-    )
+    return <p className="p-6 text-token-text/60">{t('no_contact')}</p>;
   }
 
   return (
@@ -50,7 +46,9 @@ export default function ContactSubmissionsTable() {
             <th className="px-4 py-2 border-b border-[hsl(var(--border))]">{t('contact_date')}</th>
             <th className="px-4 py-2 border-b border-[hsl(var(--border))]">{t('contact_name')}</th>
             <th className="px-4 py-2 border-b border-[hsl(var(--border))]">{t('contact_email')}</th>
-            <th className="px-4 py-2 border-b border-[hsl(var(--border))]">{t('contact_message')}</th>
+            <th className="px-4 py-2 border-b border-[hsl(var(--border))]">
+              {t('contact_message')}
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -79,5 +77,5 @@ export default function ContactSubmissionsTable() {
         </tbody>
       </table>
     </div>
-  )
+  );
 }

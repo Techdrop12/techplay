@@ -17,8 +17,8 @@ export interface BlogPostDb {
   description?: string;
   createdAt?: ISODateString | Date;
   updatedAt?: ISODateString | Date;
-  image?: string;     // absolute or /relative
-  author?: string;    // display name
+  image?: string; // absolute or /relative
+  author?: string; // display name
   tags?: string[];
 }
 
@@ -31,7 +31,7 @@ export interface BlogPost {
   description: string;
   createdAt: ISODateString; // normalized ISO string
   updatedAt?: ISODateString;
-  image: string;            // guaranteed usable
+  image: string; // guaranteed usable
   author: string;
   tags: string[];
 }

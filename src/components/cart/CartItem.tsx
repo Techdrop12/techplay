@@ -1,76 +1,76 @@
 // src/components/cart/CartItem.tsx
-'use client'
+'use client';
 
-import { motion, useReducedMotion } from 'framer-motion'
-import { Minus, Plus, Trash2 } from 'lucide-react'
-import Image from 'next/image'
-import { useTranslations } from 'next-intl'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { motion, useReducedMotion } from 'framer-motion';
+import { Minus, Plus, Trash2 } from 'lucide-react';
+import Image from 'next/image';
+import { useTranslations } from 'next-intl';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import Link from '@/components/LocalizedLink'
-import { useCart } from '@/hooks/useCart'
-import { safeProductImageUrl } from '@/lib/safeProductImage'
-import { formatPrice } from '@/lib/utils'
+import Link from '@/components/LocalizedLink';
+import { useCart } from '@/hooks/useCart';
+import { safeProductImageUrl } from '@/lib/safeProductImage';
+import { formatPrice } from '@/lib/utils';
 
 interface CartItemProps {
   item: {
-    _id: string
-    slug: string
-    title: string
-    image: string
-    price: number
-    quantity: number
-  }
+    _id: string;
+    slug: string;
+    title: string;
+    image: string;
+    price: number;
+    quantity: number;
+  };
 }
 
-const MIN_QTY = 1
-const MAX_QTY = 99
+const MIN_QTY = 1;
+const MAX_QTY = 99;
 
-const clamp = (n: number) => Math.max(MIN_QTY, Math.min(MAX_QTY, Math.trunc(n || 0)))
+const clamp = (n: number) => Math.max(MIN_QTY, Math.min(MAX_QTY, Math.trunc(n || 0)));
 
 export default function CartItem({ item }: CartItemProps) {
-  const t = useTranslations('cart')
-  const prefersReduced = useReducedMotion()
-  const { removeFromCart, increment, decrement, updateQuantity } = useCart()
+  const t = useTranslations('cart');
+  const prefersReduced = useReducedMotion();
+  const { removeFromCart, increment, decrement, updateQuantity } = useCart();
 
-  const [qty, setQty] = useState<number>(item.quantity)
-  const srRef = useRef<HTMLSpanElement | null>(null)
+  const [qty, setQty] = useState<number>(item.quantity);
+  const srRef = useRef<HTMLSpanElement | null>(null);
 
   useEffect(() => {
-    setQty(item.quantity)
-  }, [item.quantity])
+    setQty(item.quantity);
+  }, [item.quantity]);
 
-  const lineTotal = useMemo(() => item.price * item.quantity, [item.price, item.quantity])
+  const lineTotal = useMemo(() => item.price * item.quantity, [item.price, item.quantity]);
 
   const announce = (message: string) => {
     if (srRef.current) {
-      srRef.current.textContent = message
+      srRef.current.textContent = message;
     }
-  }
+  };
 
   const handleRemove = () => {
-    removeFromCart(item._id)
-    announce(`${item.title} retiré du panier`)
-  }
+    removeFromCart(item._id);
+    announce(`${item.title} retiré du panier`);
+  };
 
   const commitQty = (n: number) => {
-    const q = clamp(n)
+    const q = clamp(n);
 
     if (q !== item.quantity) {
-      updateQuantity(item._id, q)
-      announce(`Quantité de ${item.title} mise à ${q}`)
+      updateQuantity(item._id, q);
+      announce(`Quantité de ${item.title} mise à ${q}`);
     }
 
-    setQty(q)
-  }
+    setQty(q);
+  };
 
   const dec = () => {
-    decrement(item._id, 1)
-  }
+    decrement(item._id, 1);
+  };
 
   const inc = () => {
-    increment(item._id, 1)
-  }
+    increment(item._id, 1);
+  };
 
   return (
     <motion.li
@@ -106,7 +106,9 @@ export default function CartItem({ item }: CartItemProps) {
         >
           {item.title}
         </Link>
-        <p className="text-[12px] text-token-text/60">{formatPrice(item.price)}/{t('unit_label')}</p>
+        <p className="text-[12px] text-token-text/60">
+          {formatPrice(item.price)}/{t('unit_label')}
+        </p>
         <div className="inline-flex items-center gap-0 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-0.5 py-1 sm:px-1 sm:py-0.5">
           <button
             type="button"
@@ -124,7 +126,7 @@ export default function CartItem({ item }: CartItemProps) {
             onChange={(e) => setQty(clamp(Number(e.target.value)))}
             onBlur={() => commitQty(qty)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') e.currentTarget.blur()
+              if (e.key === 'Enter') e.currentTarget.blur();
             }}
             aria-label={t('quantity_for_aria', { title: item.title })}
             className="w-8 bg-transparent text-center text-[13px] font-medium outline-none tabular-nums"
@@ -159,5 +161,5 @@ export default function CartItem({ item }: CartItemProps) {
         </button>
       </div>
     </motion.li>
-  )
+  );
 }

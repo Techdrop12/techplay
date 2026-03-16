@@ -1,25 +1,25 @@
 // src/app/products/packs/page.tsx
-import { Suspense } from 'react'
-import { getTranslations } from 'next-intl/server'
+import { Suspense } from 'react';
+import { getTranslations } from 'next-intl/server';
 
-import type { Pack } from '@/types/product'
-import type { Metadata } from 'next'
+import type { Pack } from '@/types/product';
+import type { Metadata } from 'next';
 
-import Link from '@/components/LocalizedLink'
-import PackCard from '@/components/PackCard'
-import SectionTitle from '@/components/SectionTitle'
-import SectionWrapper from '@/components/SectionWrapper'
-import { BRAND } from '@/lib/constants'
-import { getRecommendedPacks } from '@/lib/data'
+import Link from '@/components/LocalizedLink';
+import PackCard from '@/components/PackCard';
+import SectionTitle from '@/components/SectionTitle';
+import SectionWrapper from '@/components/SectionWrapper';
+import { BRAND } from '@/lib/constants';
+import { getRecommendedPacks } from '@/lib/data';
 
-export const revalidate = 900
+export const revalidate = 900;
 
-const SITE = BRAND.URL
+const SITE = BRAND.URL;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('packs')
-  const title = t('page_title')
-  const description = t('page_description')
+  const t = await getTranslations('packs');
+  const title = t('page_title');
+  const description = t('page_description');
   return {
     title,
     description,
@@ -30,12 +30,12 @@ export async function generateMetadata(): Promise<Metadata> {
       type: 'website',
       url: `${SITE}/products/packs`,
     },
-  }
+  };
 }
 
 export default async function PacksPage() {
-  const packs: Pack[] = await getRecommendedPacks()
-  const t = await getTranslations('packs')
+  const packs: Pack[] = await getRecommendedPacks();
+  const t = await getTranslations('packs');
 
   return (
     <SectionWrapper>
@@ -75,7 +75,11 @@ export default async function PacksPage() {
           fallback={
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="h-64 animate-pulse rounded-2xl bg-[hsl(var(--surface-2))]" aria-hidden />
+                <div
+                  key={i}
+                  className="h-64 animate-pulse rounded-2xl bg-[hsl(var(--surface-2))]"
+                  aria-hidden
+                />
               ))}
             </div>
           }
@@ -88,5 +92,5 @@ export default async function PacksPage() {
         </Suspense>
       )}
     </SectionWrapper>
-  )
+  );
 }

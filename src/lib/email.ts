@@ -117,9 +117,7 @@ export async function sendEmailRaw({
 
   const messageId =
     headers?.['Message-ID'] ||
-    (idempotencyKey
-      ? `<${sanitizeMessageIdPart(idempotencyKey)}@techplay>`
-      : undefined);
+    (idempotencyKey ? `<${sanitizeMessageIdPart(idempotencyKey)}@techplay>` : undefined);
 
   const finalHeaders: Record<string, string> = {
     ...(idempotencyKey ? { 'X-Entity-Ref-ID': idempotencyKey } : {}),
@@ -152,9 +150,7 @@ export async function sendTemplate<K extends Parameters<typeof renderTemplate>[0
   const rendered: RenderedEmail = renderTemplate(templateKey, { ...vars, to });
 
   // Unsubscribe header (les webmails l’affichent joliment)
-  const unsubscribeUrl = BRAND.URL
-    ? `<${BRAND.URL}/unsubscribe>`
-    : undefined;
+  const unsubscribeUrl = BRAND.URL ? `<${BRAND.URL}/unsubscribe>` : undefined;
 
   return sendEmailRaw({
     to,
@@ -166,11 +162,7 @@ export async function sendTemplate<K extends Parameters<typeof renderTemplate>[0
 }
 
 // Exemples prêts à l’emploi
-export async function sendOrderConfirmation(
-  to: string,
-  name: string,
-  orderId?: string
-) {
+export async function sendOrderConfirmation(to: string, name: string, orderId?: string) {
   return sendTemplate('confirmation', to, { name, orderId });
 }
 

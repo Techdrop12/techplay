@@ -1,11 +1,11 @@
-import mongoose, { InferSchemaType, Schema, Types } from 'mongoose'
+import mongoose, { InferSchemaType, Schema, Types } from 'mongoose';
 
 type SerializedTrackingEvent = {
-  _id?: Types.ObjectId | string
-  __v?: unknown
-  id?: string
-  [key: string]: unknown
-}
+  _id?: Types.ObjectId | string;
+  __v?: unknown;
+  id?: string;
+  [key: string]: unknown;
+};
 
 const TrackingEventSchema = new Schema(
   {
@@ -20,25 +20,25 @@ const TrackingEventSchema = new Schema(
       virtuals: true,
       versionKey: false,
       transform: (_doc, ret) => {
-        const serialized = ret as SerializedTrackingEvent
-        if (serialized._id != null) serialized.id = String(serialized._id)
-        const { _id, __v, ...rest } = serialized
-        return rest
+        const serialized = ret as SerializedTrackingEvent;
+        if (serialized._id != null) serialized.id = String(serialized._id);
+        const { _id, __v, ...rest } = serialized;
+        return rest;
       },
     },
   }
-)
+);
 
 TrackingEventSchema.virtual('id').get(function (this: { _id: Types.ObjectId }) {
-  return this._id.toString()
-})
+  return this._id.toString();
+});
 
-TrackingEventSchema.index({ event: 1, email: 1, createdAt: -1 })
+TrackingEventSchema.index({ event: 1, email: 1, createdAt: -1 });
 
-export type TrackingEvent = InferSchemaType<typeof TrackingEventSchema>
+export type TrackingEvent = InferSchemaType<typeof TrackingEventSchema>;
 
 const TrackingEventModel =
   (mongoose.models.TrackingEvent as mongoose.Model<TrackingEvent> | undefined) ||
-  mongoose.model<TrackingEvent>('TrackingEvent', TrackingEventSchema)
+  mongoose.model<TrackingEvent>('TrackingEvent', TrackingEventSchema);
 
-export default TrackingEventModel
+export default TrackingEventModel;

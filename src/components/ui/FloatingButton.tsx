@@ -1,12 +1,12 @@
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 
 export default function FloatingButton({ href = '/', label }: { href?: string; label?: string }) {
-  const router = useRouter()
-  const t = useTranslations('common')
-  const displayLabel = label ?? `⬅ ${t('back_to_home')}`
+  const router = useRouter();
+  const t = useTranslations('common');
+  const displayLabel = label ?? `⬅ ${t('back_to_home')}`;
   return (
     <button
       onClick={() => router.push(href)}
@@ -14,5 +14,5 @@ export default function FloatingButton({ href = '/', label }: { href?: string; l
     >
       {displayLabel}
     </button>
-  )
+  );
 }

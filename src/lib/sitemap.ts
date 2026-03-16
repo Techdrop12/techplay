@@ -1,15 +1,15 @@
 // src/lib/sitemap.ts — i18n-ready (FR default, EN prefix/domain) — FINAL
 
-import { BRAND } from './constants'
+import { BRAND } from './constants';
 
-export type ChangeFreq = 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never'
+export type ChangeFreq = 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
 
 export type SitemapEntry = {
-  url: string
-  lastmod?: string
-  changefreq?: ChangeFreq
-  priority?: number
-}
+  url: string;
+  lastmod?: string;
+  changefreq?: ChangeFreq;
+  priority?: number;
+};
 
 const ROUTES = [
   '/',
@@ -22,7 +22,7 @@ const ROUTES = [
   '/mentions-legales',
   '/cgv',
   '/categorie',
-] as const
+] as const;
 
 const CATEGORY_SLUGS = [
   'casques',
@@ -33,46 +33,45 @@ const CATEGORY_SLUGS = [
   'audio',
   'stockage',
   'ecrans',
-] as const
-export type StaticRoute = (typeof ROUTES)[number]
+] as const;
+export type StaticRoute = (typeof ROUTES)[number];
 
-export const SITE_URL = BRAND.URL
+export const SITE_URL = BRAND.URL;
 
-export const SITE_URL_EN =
-  process.env.NEXT_PUBLIC_SITE_URL_EN?.replace(/\/+$/, '') || ''
+export const SITE_URL_EN = process.env.NEXT_PUBLIC_SITE_URL_EN?.replace(/\/+$/, '') || '';
 
-const LOCALES = ['fr', 'en'] as const
-type Locale = (typeof LOCALES)[number]
+const LOCALES = ['fr', 'en'] as const;
+type Locale = (typeof LOCALES)[number];
 
 // '/products' -> '/products' (fr), '/en/products' (en) si pas de domaine EN dédié
 function pathForLocale(path: string, locale: Locale): string {
-  const p = path.startsWith('/') ? path : `/${path}`
-  if (locale === 'fr') return p
+  const p = path.startsWith('/') ? path : `/${path}`;
+  if (locale === 'fr') return p;
   // EN :
-  if (SITE_URL_EN) return p // domaine séparé -> pas de prefix /en
-  return p === '/' ? '/en' : `/en${p}`
+  if (SITE_URL_EN) return p; // domaine séparé -> pas de prefix /en
+  return p === '/' ? '/en' : `/en${p}`;
 }
 
 // URL absolue pour un path + locale
 export function withBaseLocale(path: string, locale: Locale): string {
-  const base = locale === 'en' && SITE_URL_EN ? SITE_URL_EN : SITE_URL
-  const localizedPath = pathForLocale(path, locale)
-  return `${base}${localizedPath}`
+  const base = locale === 'en' && SITE_URL_EN ? SITE_URL_EN : SITE_URL;
+  const localizedPath = pathForLocale(path, locale);
+  return `${base}${localizedPath}`;
 }
 
 export function buildStaticSitemap(): SitemapEntry[] {
-  const now = new Date().toISOString()
-  const entries: SitemapEntry[] = []
+  const now = new Date().toISOString();
+  const entries: SitemapEntry[] = [];
 
   for (const locale of LOCALES) {
     for (const p of ROUTES) {
-      const isHome = p === '/'
+      const isHome = p === '/';
       entries.push({
         url: withBaseLocale(p, locale),
         lastmod: now,
         changefreq: isHome ? 'daily' : 'weekly',
         priority: isHome ? 1.0 : 0.7,
-      })
+      });
     }
     for (const slug of CATEGORY_SLUGS) {
       entries.push({
@@ -80,29 +79,29 @@ export function buildStaticSitemap(): SitemapEntry[] {
         lastmod: now,
         changefreq: 'weekly',
         priority: 0.8,
-      })
+      });
     }
   }
 
-  return entries
+  return entries;
 }
 
 /** Convertit des entrées en XML sitemap (urlset). */
 export function entriesToXml(entries: SitemapEntry[]): string {
   const urls = entries
     .map((e) => {
-      const lastmod = e.lastmod ? `<lastmod>${e.lastmod}</lastmod>` : ''
-      const changefreq = e.changefreq ? `<changefreq>${e.changefreq}</changefreq>` : ''
+      const lastmod = e.lastmod ? `<lastmod>${e.lastmod}</lastmod>` : '';
+      const changefreq = e.changefreq ? `<changefreq>${e.changefreq}</changefreq>` : '';
       const priority =
-        typeof e.priority === 'number' ? `<priority>${e.priority.toFixed(1)}</priority>` : ''
-      return `<url><loc>${escapeXml(e.url)}</loc>${lastmod}${changefreq}${priority}</url>`
+        typeof e.priority === 'number' ? `<priority>${e.priority.toFixed(1)}</priority>` : '';
+      return `<url><loc>${escapeXml(e.url)}</loc>${lastmod}${changefreq}${priority}</url>`;
     })
-    .join('\n')
+    .join('\n');
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls}
-</urlset>`
+</urlset>`;
 }
 
 function escapeXml(s: string) {
@@ -111,5 +110,5 @@ function escapeXml(s: string) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;')
+    .replace(/'/g, '&apos;');
 }

@@ -1,54 +1,54 @@
-import { notFound } from 'next/navigation'
-import { NextIntlClientProvider } from 'next-intl'
-import { setRequestLocale } from 'next-intl/server'
+import { notFound } from 'next/navigation';
+import { NextIntlClientProvider } from 'next-intl';
+import { setRequestLocale } from 'next-intl/server';
 
-import type { Metadata } from 'next'
-import type { ReactNode } from 'react'
+import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 
-import loadMessages from '@/i18n/loadMessages'
-import { isLocale, toOgLocale, type Locale } from '@/lib/language'
+import loadMessages from '@/i18n/loadMessages';
+import { isLocale, toOgLocale, type Locale } from '@/lib/language';
 
 export function generateStaticParams(): { locale: Locale }[] {
-  return (['fr', 'en'] as const).map((locale) => ({ locale }))
+  return (['fr', 'en'] as const).map((locale) => ({ locale }));
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ locale: string }>
+  params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-  const { locale } = await params
+  const { locale } = await params;
 
   if (!isLocale(locale)) {
-    notFound()
+    notFound();
   }
 
   return {
     openGraph: {
       locale: toOgLocale(locale),
     },
-  }
+  };
 }
 
 export default async function LocaleLayout({
   children,
   params,
 }: {
-  children: ReactNode
-  params: Promise<{ locale: string }>
+  children: ReactNode;
+  params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params
+  const { locale } = await params;
 
   if (!isLocale(locale)) {
-    notFound()
+    notFound();
   }
 
-  setRequestLocale(locale)
-  const messages = await loadMessages(locale)
+  setRequestLocale(locale);
+  const messages = await loadMessages(locale);
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
       {children}
     </NextIntlClientProvider>
-  )
+  );
 }

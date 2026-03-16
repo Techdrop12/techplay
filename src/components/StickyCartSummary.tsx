@@ -1,28 +1,28 @@
-'use client'
+'use client';
 
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { usePathname } from 'next/navigation'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { usePathname } from 'next/navigation';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
-import Link from '@/components/LocalizedLink'
-import { useCart } from '@/hooks/useCart'
-import { UI } from '@/lib/constants'
-import { event } from '@/lib/ga'
-import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
-import { logEvent } from '@/lib/logEvent'
-import { formatPrice } from '@/lib/utils'
-import { cn } from '@/lib/utils'
+import Link from '@/components/LocalizedLink';
+import { useCart } from '@/hooks/useCart';
+import { UI } from '@/lib/constants';
+import { event } from '@/lib/ga';
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing';
+import { logEvent } from '@/lib/logEvent';
+import { formatPrice } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
-type AppLocale = 'fr' | 'en'
+type AppLocale = 'fr' | 'en';
 
 type Props = {
-  locale?: AppLocale
-  cartHref?: string
-  checkoutHref?: string
-  excludePaths?: string[]
-  freeShippingThreshold?: number
-  className?: string
-}
+  locale?: AppLocale;
+  cartHref?: string;
+  checkoutHref?: string;
+  excludePaths?: string[];
+  freeShippingThreshold?: number;
+  className?: string;
+};
 
 type MessageKey =
   | 'mobile_summary'
@@ -44,7 +44,7 @@ type MessageKey =
   | 'discount'
   | 'vat'
   | 'shipping'
-  | 'offered'
+  | 'offered';
 
 const MESSAGES: Record<AppLocale, Record<MessageKey, string>> = {
   fr: {
@@ -91,14 +91,11 @@ const MESSAGES: Record<AppLocale, Record<MessageKey, string>> = {
     shipping: 'Shipping',
     offered: 'Free',
   },
-}
+};
 
-function formatMessage(
-  template: string,
-  values?: Record<string, string | number>
-): string {
-  if (!values) return template
-  return template.replace(/\{(\w+)\}/g, (_, key: string) => String(values[key] ?? ''))
+function formatMessage(template: string, values?: Record<string, string | number>): string {
+  if (!values) return template;
+  return template.replace(/\{(\w+)\}/g, (_, key: string) => String(values[key] ?? ''));
 }
 
 function IconLock({ size = 14, className = '' }: { size?: number; className?: string }) {
@@ -109,7 +106,7 @@ function IconLock({ size = 14, className = '' }: { size?: number; className?: st
         d="M17 9h-1V7a4 4 0 1 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-8-2a3 3 0 1 1 6 0v2H9V7Zm9 12H6v-8h10v8Zm-5-3a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z"
       />
     </svg>
-  )
+  );
 }
 
 function IconRocket({ size = 14, className = '' }: { size?: number; className?: string }) {
@@ -120,7 +117,7 @@ function IconRocket({ size = 14, className = '' }: { size?: number; className?: 
         d="M14 3c3.31 0 6 2.69 6 6c0 1.66-.67 3.16-1.76 4.24l-.8.8l-2.12-2.12l.8-.8A3.98 3.98 0 0 0 18 9a4 4 0 0 0-4-4c-1.1 0-2.1.45-2.83 1.17l-.8.8L8.24 4.83l.8-.8A5.96 5.96 0 0 1 14 3ZM5.41 6.59 9 10.17L7.59 11.6l-2.83-.71l-.71-2.83l1.36-1.47Zm12.72 12.72L16.83 18L15.4 19.41l.71 2.83l2.83.71l1.47-1.36ZM10.17 15 6.59 18.59l-1.47 1.36l2.83.71l.71 2.83l1.36-1.47L14 13.83L10.17 15Zm6.54-9.71a1.5 1.5 0 1 1-2.12 2.12a1.5 1.5 0 0 1 2.12-2.12Z"
       />
     </svg>
-  )
+  );
 }
 
 function IconHeadset({ size = 14, className = '' }: { size?: number; className?: string }) {
@@ -131,7 +128,7 @@ function IconHeadset({ size = 14, className = '' }: { size?: number; className?:
         d="M12 3a8 8 0 0 0-8 8v2a2 2 0 0 0 2 2h1v-5a5 5 0 1 1 10 0v5h1a2 2 0 0 0 2-2v-2a8 8 0 0 0-8-8ZM8 15H6a1 1 0 0 1-1-1v-1h3v2Zm11-2v1a1 1 0 0 1-1 1h-2v-2h3Zm-5 4h-2v1a2 2 0 0 1-2 2h-1v2h1a4 4 0 0 0 4-4v-1Z"
       />
     </svg>
-  )
+  );
 }
 
 export default function StickyCartSummary({
@@ -142,14 +139,14 @@ export default function StickyCartSummary({
   freeShippingThreshold,
   className,
 }: Props) {
-  const pathname = usePathname() || ''
-  const detectedLocale = getCurrentLocale(pathname) as AppLocale
-  const loc: AppLocale = locale ?? detectedLocale
-  const prefersReduced = useReducedMotion()
+  const pathname = usePathname() || '';
+  const detectedLocale = getCurrentLocale(pathname) as AppLocale;
+  const loc: AppLocale = locale ?? detectedLocale;
+  const prefersReduced = useReducedMotion();
 
-  const messages = MESSAGES[loc] ?? MESSAGES.fr
+  const messages = MESSAGES[loc] ?? MESSAGES.fr;
   const tx = (key: MessageKey, values?: Record<string, string | number>) =>
-    formatMessage(messages[key], values)
+    formatMessage(messages[key], values);
 
   const {
     cart,
@@ -162,13 +159,14 @@ export default function StickyCartSummary({
     amountToFreeShipping,
     progressToFreeShipping,
     freeShippingThreshold: ctxThreshold,
-  } = useCart()
+  } = useCart();
 
   const FREE_SHIP = useMemo(() => {
-    if (typeof freeShippingThreshold === 'number' && freeShippingThreshold > 0) return freeShippingThreshold
-    if (typeof ctxThreshold === 'number' && ctxThreshold > 0) return ctxThreshold
-    return UI.FREE_SHIPPING_THRESHOLD
-  }, [freeShippingThreshold, ctxThreshold])
+    if (typeof freeShippingThreshold === 'number' && freeShippingThreshold > 0)
+      return freeShippingThreshold;
+    if (typeof ctxThreshold === 'number' && ctxThreshold > 0) return ctxThreshold;
+    return UI.FREE_SHIPPING_THRESHOLD;
+  }, [freeShippingThreshold, ctxThreshold]);
 
   const subtotal = useMemo(
     () =>
@@ -176,7 +174,7 @@ export default function StickyCartSummary({
         ? total
         : (cart ?? []).reduce((s, it) => s + (it.price || 0) * (it.quantity || 1), 0),
     [total, cart]
-  )
+  );
 
   const remaining = useMemo(
     () =>
@@ -184,7 +182,7 @@ export default function StickyCartSummary({
         ? amountToFreeShipping
         : Math.max(0, FREE_SHIP - subtotal),
     [amountToFreeShipping, FREE_SHIP, subtotal]
-  )
+  );
 
   const progress = useMemo(
     () =>
@@ -192,7 +190,7 @@ export default function StickyCartSummary({
         ? progressToFreeShipping
         : Math.min(100, Math.round((subtotal / FREE_SHIP) * 100)),
     [progressToFreeShipping, subtotal, FREE_SHIP]
-  )
+  );
 
   const payable = useMemo(
     () =>
@@ -200,37 +198,37 @@ export default function StickyCartSummary({
         ? grandTotal
         : subtotal + (Number.isFinite(shipping) ? shipping : 0) + (Number.isFinite(tax) ? tax : 0),
     [grandTotal, subtotal, shipping, tax]
-  )
+  );
 
-  const [mounted, setMounted] = useState(false)
-  const [collapsed, setCollapsed] = useState(false)
+  const [mounted, setMounted] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
-    setMounted(true)
+    setMounted(true);
     try {
-      const saved = localStorage.getItem('tp_cart_sticky_collapsed')
-      if (saved === '1') setCollapsed(true)
+      const saved = localStorage.getItem('tp_cart_sticky_collapsed');
+      if (saved === '1') setCollapsed(true);
     } catch {
       // no-op
     }
-  }, [])
+  }, []);
 
   const setCollapsedPersist = (value: boolean) => {
-    setCollapsed(value)
+    setCollapsed(value);
     try {
-      localStorage.setItem('tp_cart_sticky_collapsed', value ? '1' : '0')
+      localStorage.setItem('tp_cart_sticky_collapsed', value ? '1' : '0');
     } catch {
       // no-op
     }
-  }
+  };
 
   useEffect(() => {
     const onAdded = () => {
-      setCollapsedPersist(false)
+      setCollapsedPersist(false);
 
       if (!prefersReduced) {
         try {
-          const el = document.querySelector('[data-visible="true"]') as HTMLElement | null
+          const el = document.querySelector('[data-visible="true"]') as HTMLElement | null;
           el?.animate?.(
             [
               { boxShadow: '0 0 0 0 rgba(16,185,129,0.0)' },
@@ -238,40 +236,40 @@ export default function StickyCartSummary({
               { boxShadow: '0 0 0 0 rgba(16,185,129,0.0)' },
             ],
             { duration: 800, easing: 'ease-out' }
-          )
+          );
         } catch {
           // no-op
         }
       }
-    }
+    };
 
-    window.addEventListener('cart-added', onAdded as EventListener)
-    return () => window.removeEventListener('cart-added', onAdded as EventListener)
-  }, [prefersReduced])
+    window.addEventListener('cart-added', onAdded as EventListener);
+    return () => window.removeEventListener('cart-added', onAdded as EventListener);
+  }, [prefersReduced]);
 
-  const visible = mounted && count > 0
+  const visible = mounted && count > 0;
 
   const isExcluded = useMemo(
     () => excludePaths.some((p) => pathname.startsWith(localizePath(p, loc))),
     [excludePaths, pathname, loc]
-  )
+  );
 
-  const trackedRef = useRef(false)
+  const trackedRef = useRef(false);
   useEffect(() => {
     if (visible && !trackedRef.current) {
-      trackedRef.current = true
+      trackedRef.current = true;
       try {
         event?.({
           action: 'sticky_cart_visible',
           category: 'engagement',
           label: 'sticky_cart',
           value: count,
-        })
+        });
       } catch {
         // no-op
       }
     }
-  }, [visible, count])
+  }, [visible, count]);
 
   const onCta = (label: string) => {
     try {
@@ -280,7 +278,7 @@ export default function StickyCartSummary({
         category: 'engagement',
         label,
         value: subtotal,
-      })
+      });
     } catch {
       // no-op
     }
@@ -291,20 +289,19 @@ export default function StickyCartSummary({
         category: 'engagement',
         label: `${label}:${pathname}`,
         value: Math.round(subtotal),
-      })
+      });
     } catch {
       // no-op
     }
-  }
+  };
 
-  if (!visible || isExcluded) return null
+  if (!visible || isExcluded) return null;
 
-  const shippingDisplay =
-    Number.isFinite(shipping)
-      ? shipping === 0
-        ? tx('offered')
-        : formatPrice(shipping)
-      : '—'
+  const shippingDisplay = Number.isFinite(shipping)
+    ? shipping === 0
+      ? tx('offered')
+      : formatPrice(shipping)
+    : '—';
 
   return (
     <AnimatePresence mode="wait">
@@ -313,7 +310,9 @@ export default function StickyCartSummary({
         initial={prefersReduced ? { y: 0, opacity: 1 } : { y: 72, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={prefersReduced ? { y: 0, opacity: 0 } : { y: 72, opacity: 0 }}
-        transition={prefersReduced ? { duration: 0.15 } : { type: 'spring', stiffness: 320, damping: 26 }}
+        transition={
+          prefersReduced ? { duration: 0.15 } : { type: 'spring', stiffness: 320, damping: 26 }
+        }
         className={cn(
           'md:hidden fixed bottom-0 left-0 right-0 z-[60]',
           'backdrop-blur supports-[backdrop-filter]:bg-white/85 dark:supports-[backdrop-filter]:bg-zinc-900/85',
@@ -396,7 +395,9 @@ export default function StickyCartSummary({
 
                 <div className="space-y-1 px-4 pt-2 text-[13px] text-token-text/80">
                   <Line label={tx('subtotal')} value={formatPrice(subtotal)} />
-                  {discount > 0 && <Line label={tx('discount')} value={`- ${formatPrice(discount)}`} accent />}
+                  {discount > 0 && (
+                    <Line label={tx('discount')} value={`- ${formatPrice(discount)}`} accent />
+                  )}
                   <Line
                     label={tx('vat')}
                     value={Number.isFinite(tax) && tax > 0 ? formatPrice(tax) : '—'}
@@ -448,7 +449,7 @@ export default function StickyCartSummary({
         </div>
       </motion.aside>
     </AnimatePresence>
-  )
+  );
 }
 
 function Line({
@@ -457,10 +458,10 @@ function Line({
   bold = false,
   accent = false,
 }: {
-  label: string
-  value: string
-  bold?: boolean
-  accent?: boolean
+  label: string;
+  value: string;
+  bold?: boolean;
+  accent?: boolean;
 }) {
   return (
     <div className="flex items-center justify-between">
@@ -476,5 +477,5 @@ function Line({
         {value}
       </span>
     </div>
-  )
+  );
 }

@@ -1,39 +1,39 @@
-'use client'
+'use client';
 
-import { motion, useReducedMotion } from 'framer-motion'
-import { AlertTriangle, Heart, HeartCrack } from 'lucide-react'
-import { usePathname } from 'next/navigation'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { toast } from 'react-hot-toast'
+import { motion, useReducedMotion } from 'framer-motion';
+import { AlertTriangle, Heart, HeartCrack } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
-import { useWishlist, type WishlistItemBase } from '@/hooks/useWishlist'
-import { UI } from '@/lib/constants'
-import { trackAddToWishlist } from '@/lib/ga'
-import { getCurrentLocale } from '@/lib/i18n-routing'
-import { logEvent } from '@/lib/logEvent'
-import { cn } from '@/lib/utils'
+import { useWishlist, type WishlistItemBase } from '@/hooks/useWishlist';
+import { UI } from '@/lib/constants';
+import { trackAddToWishlist } from '@/lib/ga';
+import { getCurrentLocale } from '@/lib/i18n-routing';
+import { logEvent } from '@/lib/logEvent';
+import { cn } from '@/lib/utils';
 
 interface WishlistProduct {
-  _id?: string
-  id?: string
-  slug?: string
-  title?: string
-  price?: number
-  image?: string
-  [k: string]: unknown
+  _id?: string;
+  id?: string;
+  slug?: string;
+  title?: string;
+  price?: number;
+  image?: string;
+  [k: string]: unknown;
 }
 
 interface WishlistButtonProps {
-  product: WishlistProduct
-  floating?: boolean
-  className?: string
-  disabled?: boolean
-  stopPropagation?: boolean
-  size?: 'sm' | 'md' | 'lg'
-  withLabel?: boolean
+  product: WishlistProduct;
+  floating?: boolean;
+  className?: string;
+  disabled?: boolean;
+  stopPropagation?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+  withLabel?: boolean;
 }
 
-const WISHLIST_LIMIT = UI.WISHLIST_LIMIT
+const WISHLIST_LIMIT = UI.WISHLIST_LIMIT;
 
 const TEXT = {
   fr: {
@@ -58,14 +58,14 @@ const TEXT = {
     limitReached: 'Wishlist limit reached',
     fallbackProduct: 'Product',
   },
-} as const
+} as const;
 
 function toCanonicalWishlistProduct(
   product: WishlistProduct
 ): (WishlistItemBase & WishlistProduct) | null {
-  const id = String(product?._id ?? product?.id ?? product?.slug ?? '').trim()
-  if (!id) return null
-  return { ...product, id }
+  const id = String(product?._id ?? product?.id ?? product?.slug ?? '').trim();
+  if (!id) return null;
+  return { ...product, id };
 }
 
 export default function WishlistButton({
@@ -77,61 +77,61 @@ export default function WishlistButton({
   size = 'md',
   withLabel = false,
 }: WishlistButtonProps) {
-  const pathname = usePathname() || '/'
-  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr'
-  const t = TEXT[locale]
+  const pathname = usePathname() || '/';
+  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr';
+  const t = TEXT[locale];
 
-  const prefersReduced = useReducedMotion()
-  const btnRef = useRef<HTMLButtonElement | null>(null)
-  const [rippler, setRippler] = useState(0)
-  const [shake, setShake] = useState(false)
-  const [sr, setSr] = useState('')
+  const prefersReduced = useReducedMotion();
+  const btnRef = useRef<HTMLButtonElement | null>(null);
+  const [rippler, setRippler] = useState(0);
+  const [shake, setShake] = useState(false);
+  const [sr, setSr] = useState('');
 
-  const { has, add, remove, count } = useWishlist<WishlistItemBase & WishlistProduct>()
+  const { has, add, remove, count } = useWishlist<WishlistItemBase & WishlistProduct>();
 
-  const canonical = useMemo(() => toCanonicalWishlistProduct(product), [product])
-  const pid = canonical?.id ?? ''
-  const valid = pid.length > 0
-  const isWishlisted = valid ? has(pid) : false
+  const canonical = useMemo(() => toCanonicalWishlistProduct(product), [product]);
+  const pid = canonical?.id ?? '';
+  const valid = pid.length > 0;
+  const isWishlisted = valid ? has(pid) : false;
 
-  const dim = size === 'sm' ? 28 : size === 'lg' ? 40 : 32
-  const iconSize = size === 'sm' ? 18 : size === 'lg' ? 22 : 20
+  const dim = size === 'sm' ? 28 : size === 'lg' ? 40 : 32;
+  const iconSize = size === 'sm' ? 18 : size === 'lg' ? 22 : 20;
 
   const baseFloating =
     'absolute top-2 right-2 rounded-full bg-white/90 dark:bg-zinc-800/90 hover:bg-white dark:hover:bg-zinc-700 shadow ' +
     'focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 ' +
-    'focus-visible:ring-offset-white dark:focus-visible:ring-offset-black'
+    'focus-visible:ring-offset-white dark:focus-visible:ring-offset-black';
 
   const baseInline =
     'inline-flex items-center justify-center rounded-full text-red-600 hover:text-red-700 transition ' +
-    'focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent))]'
+    'focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent))]';
 
   useEffect(() => {
-    if (!sr) return
-    const id = window.setTimeout(() => setSr(''), 1600)
-    return () => window.clearTimeout(id)
-  }, [sr])
+    if (!sr) return;
+    const id = window.setTimeout(() => setSr(''), 1600);
+    return () => window.clearTimeout(id);
+  }, [sr]);
 
   const onToggle = () => {
-    if (!valid || disabled || !canonical) return
+    if (!valid || disabled || !canonical) return;
 
     try {
-      navigator.vibrate?.(8)
+      navigator.vibrate?.(8);
     } catch {
       // no-op
     }
 
-    const title = String(canonical.title ?? t.fallbackProduct)
-    const price = Number(canonical.price) || 0
+    const title = String(canonical.title ?? t.fallbackProduct);
+    const price = Number(canonical.price) || 0;
 
     if (isWishlisted) {
-      remove(pid)
-      setSr(t.removed)
+      remove(pid);
+      setSr(t.removed);
 
       toast(t.removedFromWishlist, {
         icon: <HeartCrack size={18} className="text-token-text/60" />,
         style: { borderRadius: '10px', background: '#111827', color: '#fff' },
-      })
+      });
 
       try {
         logEvent({
@@ -139,35 +139,35 @@ export default function WishlistButton({
           category: 'wishlist',
           label: `product_${pid}`,
           value: 1,
-        })
+        });
       } catch {
         // no-op
       }
 
-      return
+      return;
     }
 
     if (count >= WISHLIST_LIMIT) {
-      setShake(true)
-      window.setTimeout(() => setShake(false), 420)
-      setSr(t.limitReached)
+      setShake(true);
+      window.setTimeout(() => setShake(false), 420);
+      setSr(t.limitReached);
 
       toast.error(t.limitReached, {
         icon: <AlertTriangle size={18} className="text-amber-500" />,
-      })
+      });
 
-      return
+      return;
     }
 
-    add(canonical)
-    setSr(t.added)
+    add(canonical);
+    setSr(t.added);
 
     toast.success(t.addedToWishlist, {
       icon: <Heart size={18} className="text-red-500" />,
       style: { borderRadius: '10px', background: '#111827', color: '#fff' },
-    })
+    });
 
-    setRippler((k) => k + 1)
+    setRippler((k) => k + 1);
 
     try {
       logEvent({
@@ -175,7 +175,7 @@ export default function WishlistButton({
         category: 'wishlist',
         label: `product_${pid}`,
         value: 1,
-      })
+      });
     } catch {
       // no-op
     }
@@ -185,13 +185,13 @@ export default function WishlistButton({
         currency: 'EUR',
         value: price,
         items: [{ item_id: pid, item_name: title, price, quantity: 1 }],
-      })
+      });
     } catch {
       // no-op
     }
-  }
+  };
 
-  const ariaLabel = isWishlisted ? t.removeFromWishlist : t.addToWishlist
+  const ariaLabel = isWishlisted ? t.removeFromWishlist : t.addToWishlist;
 
   return (
     <>
@@ -204,15 +204,19 @@ export default function WishlistButton({
         type="button"
         onClick={(e) => {
           if (stopPropagation) {
-            e.preventDefault()
-            e.stopPropagation()
+            e.preventDefault();
+            e.stopPropagation();
           }
-          onToggle()
+          onToggle();
         }}
         whileTap={prefersReduced ? undefined : { scale: 0.92 }}
         animate={shake ? { x: [-3, 3, -2, 2, 0] } : undefined}
         transition={{ duration: 0.42 }}
-        className={cn(floating ? baseFloating : baseInline, 'relative transition-colors', className)}
+        className={cn(
+          floating ? baseFloating : baseInline,
+          'relative transition-colors',
+          className
+        )}
         style={{ width: dim, height: dim }}
         aria-label={ariaLabel}
         aria-pressed={isWishlisted}
@@ -252,5 +256,5 @@ export default function WishlistButton({
         ) : null}
       </motion.button>
     </>
-  )
+  );
 }

@@ -25,7 +25,9 @@ export async function translate(text: string, target = 'fr'): Promise<string> {
   });
 
   if (!res.ok) throw new Error(`Translate API error: ${res.status}`);
-  const data = (await res.json()) as { data?: { translations?: Array<{ translatedText?: string }> } };
+  const data = (await res.json()) as {
+    data?: { translations?: Array<{ translatedText?: string }> };
+  };
   const translated = data?.data?.translations?.[0]?.translatedText ?? text;
 
   _cache.set(key, { value: translated, expires: Date.now() + 1000 * 60 * 60 });
@@ -47,6 +49,8 @@ export async function translateBatch(texts: string[], target = 'fr'): Promise<st
     body: JSON.stringify({ q: texts, target, format: 'text' }),
   });
   if (!res.ok) throw new Error(`Translate API error: ${res.status}`);
-  const data = (await res.json()) as { data?: { translations?: Array<{ translatedText?: string }> } };
+  const data = (await res.json()) as {
+    data?: { translations?: Array<{ translatedText?: string }> };
+  };
   return data?.data?.translations?.map((t) => t.translatedText ?? '') ?? texts;
 }

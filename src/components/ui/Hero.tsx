@@ -1,12 +1,12 @@
-'use client'
+'use client';
 
-import Image from 'next/image'
-import { useTranslations } from 'next-intl'
-import Link from '@/components/LocalizedLink'
+import Image from 'next/image';
+import { useTranslations } from 'next-intl';
+import Link from '@/components/LocalizedLink';
 
 export default function Hero() {
-  const t = useTranslations('hero')
-  const tConsent = useTranslations('consent')
+  const t = useTranslations('hero');
+  const tConsent = useTranslations('consent');
   return (
     <section className="relative bg-[hsl(var(--surface-2))]">
       <div className="max-w-7xl mx-auto py-20 px-6 flex flex-col md:flex-row items-center gap-12">

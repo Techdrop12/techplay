@@ -1,22 +1,22 @@
-'use client'
+'use client';
 
-import Head from 'next/head'
+import Head from 'next/head';
 
-import { BRAND } from '@/lib/constants'
+import { BRAND } from '@/lib/constants';
 
 type ContactPoint = {
-  telephone: string
-  contactType: string
-  areaServed?: string | string[]
-  availableLanguage?: string | string[]
-}
+  telephone: string;
+  contactType: string;
+  areaServed?: string | string[];
+  availableLanguage?: string | string[];
+};
 
 interface OrgProps {
-  name?: string
-  siteUrl?: string
-  logoPath?: string
-  sameAs?: string[]
-  contacts?: ContactPoint[]
+  name?: string;
+  siteUrl?: string;
+  logoPath?: string;
+  sameAs?: string[];
+  contacts?: ContactPoint[];
 }
 
 export default function OrganizationJsonLd({
@@ -45,7 +45,7 @@ export default function OrganizationJsonLd({
     logo: new URL(logoPath, siteUrl).toString(),
     sameAs,
     contactPoint: contacts.map((c) => ({ '@type': 'ContactPoint', ...c })),
-  }
+  };
 
   return (
     <Head>
@@ -54,5 +54,5 @@ export default function OrganizationJsonLd({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
     </Head>
-  )
+  );
 }

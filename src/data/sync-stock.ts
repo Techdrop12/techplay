@@ -14,7 +14,9 @@ export interface SyncResult {
   upserted: number;
 }
 
-export default async function syncStock(data: SupplierStockItem[] = supplierStock as SupplierStockItem[]) {
+export default async function syncStock(
+  data: SupplierStockItem[] = supplierStock as SupplierStockItem[]
+) {
   await dbConnect();
 
   const valid = data.filter((it) => it && typeof it.stock === 'number' && it.stock >= 0 && it.sku);
@@ -27,7 +29,14 @@ export default async function syncStock(data: SupplierStockItem[] = supplierStoc
   }));
 
   if (ops.length === 0) {
-    return { processed: data.length, valid: 0, invalid: data.length, matched: 0, modified: 0, upserted: 0 };
+    return {
+      processed: data.length,
+      valid: 0,
+      invalid: data.length,
+      matched: 0,
+      modified: 0,
+      upserted: 0,
+    };
   }
 
   const res = await Product.bulkWrite(ops, { ordered: false });

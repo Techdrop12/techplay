@@ -1,11 +1,11 @@
-import type { Metadata } from 'next'
+import type { Metadata } from 'next';
 
-import NewsletterSubscribersTable from '@/components/NewsletterSubscribersTable'
+import NewsletterSubscribersTable from '@/components/NewsletterSubscribersTable';
 
 export const metadata: Metadata = {
   title: 'Newsletter – Admin TechPlay',
   robots: { index: false, follow: false },
-}
+};
 
 export default function AdminNewsletterPage() {
   return (
@@ -22,5 +22,5 @@ export default function AdminNewsletterPage() {
         <NewsletterSubscribersTable />
       </div>
     </div>
-  )
+  );
 }

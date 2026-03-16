@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { usePathname } from 'next/navigation'
+import { usePathname } from 'next/navigation';
 import {
   useId,
   useMemo,
@@ -8,8 +8,8 @@ import {
   type FormEvent,
   type MouseEvent as ReactMouseEvent,
   type ReactNode,
-} from 'react'
-import { toast } from 'react-hot-toast'
+} from 'react';
+import { toast } from 'react-hot-toast';
 import {
   FaCcMastercard,
   FaCcPaypal,
@@ -22,55 +22,55 @@ import {
   FaShieldAlt,
   FaTruck,
   FaTwitter,
-} from 'react-icons/fa'
-import { SiStripe } from 'react-icons/si'
+} from 'react-icons/fa';
+import { SiStripe } from 'react-icons/si';
 
-import Link from '@/components/LocalizedLink'
-import { useTranslations } from 'next-intl'
-import { BRAND } from '@/lib/constants'
-import { cn } from '@/lib/utils'
-import { getErrorMessageWithFallback } from '@/lib/errors'
-import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
+import Link from '@/components/LocalizedLink';
+import { useTranslations } from 'next-intl';
+import { BRAND } from '@/lib/constants';
+import { cn } from '@/lib/utils';
+import { getErrorMessageWithFallback } from '@/lib/errors';
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing';
 
 type FooterLink = {
-  label: string
-  href: string
-  external?: boolean
-}
+  label: string;
+  href: string;
+  external?: boolean;
+};
 
 type NavGroup = {
-  title: string
-  links: FooterLink[]
-}
+  title: string;
+  links: FooterLink[];
+};
 
 interface FooterProps {
-  groups?: NavGroup[]
-  links?: FooterLink[]
-  companyName?: string
-  compact?: boolean
-  children?: ReactNode
-  subscribeEndpoint?: string
-  siteUrl?: string
+  groups?: NavGroup[];
+  links?: FooterLink[];
+  companyName?: string;
+  compact?: boolean;
+  children?: ReactNode;
+  subscribeEndpoint?: string;
+  siteUrl?: string;
   contact?: {
-    email?: string
-    phone?: string
+    email?: string;
+    phone?: string;
     address?: {
-      streetAddress?: string
-      postalCode?: string
-      addressLocality?: string
-      addressCountry?: string
-    }
-  }
+      streetAddress?: string;
+      postalCode?: string;
+      addressLocality?: string;
+      addressCountry?: string;
+    };
+  };
 }
 
 type FooterWindow = Window & {
-  tpOpenConsent?: () => void
-  dataLayer?: Array<Record<string, unknown>>
-}
+  tpOpenConsent?: () => void;
+  dataLayer?: Array<Record<string, unknown>>;
+};
 
 type SubscribeResponse = {
-  message?: string
-}
+  message?: string;
+};
 
 const T = {
   fr: {
@@ -93,9 +93,9 @@ const T = {
       {
         title: 'Aide & contact',
         links: [
+          { label: 'Suivi de commande', href: '/commande' },
           { label: 'FAQ', href: '/#faq' },
           { label: 'Nous contacter', href: '/contact' },
-          { label: 'Suivi de commande', href: '/commande' },
           { label: 'Blog', href: '/blog' },
         ],
       },
@@ -150,8 +150,7 @@ const T = {
   en: {
     ariaFooter: 'Footer',
     footerHeading: 'Information and secondary navigation',
-    brandText:
-      'Accessories and bundles selected for performance, innovation and style.',
+    brandText: 'Accessories and bundles selected for performance, innovation and style.',
     legalTitle: 'Legal',
     defaultGroups: [
       {
@@ -167,9 +166,9 @@ const T = {
       {
         title: 'Help & contact',
         links: [
+          { label: 'Order tracking', href: '/commande' },
           { label: 'FAQ', href: '/#faq' },
           { label: 'Contact us', href: '/contact' },
-          { label: 'Order tracking', href: '/commande' },
           { label: 'Blog', href: '/blog' },
         ],
       },
@@ -221,57 +220,56 @@ const T = {
       instagram: 'Instagram',
     },
   },
-} as const
+} as const;
 
 function normalizeHref(href: string): string {
-  if (!href || !href.startsWith('/')) return href
+  if (!href || !href.startsWith('/')) return href;
 
   return href
     .replace(/^\/produit(?!s)/, '/products')
     .replace(/^\/pack(?!s)/, '/products/packs')
     .replace(/^\/promo$/, '/products?promo=1')
     .replace(/^\/#?categories$/i, '/#categories')
-    .replace(/^\/#?faq$/i, '/#faq')
+    .replace(/^\/#?faq$/i, '/#faq');
 }
 
 function isValidEmail(value: string): boolean {
-  return /^\S+@\S+\.\S+$/.test(String(value || '').trim())
+  return /^\S+@\S+\.\S+$/.test(String(value || '').trim());
 }
 
 function getSafeWindow(): FooterWindow | null {
-  if (typeof window === 'undefined') return null
-  return window as FooterWindow
+  if (typeof window === 'undefined') return null;
+  return window as FooterWindow;
 }
 
 function pushDataLayer(eventName: string, payload: Record<string, unknown> = {}): void {
   try {
-    const w = getSafeWindow()
-    if (!w) return
-    if (!Array.isArray(w.dataLayer)) w.dataLayer = []
-    w.dataLayer.push({ event: eventName, ...payload })
+    const w = getSafeWindow();
+    if (!w) return;
+    if (!Array.isArray(w.dataLayer)) w.dataLayer = [];
+    w.dataLayer.push({ event: eventName, ...payload });
   } catch {
     // no-op
   }
 }
 
-
 function LegalIcon({ label, className }: { label: string; className?: string }) {
-  const lower = label.toLowerCase()
-  const base = cn('shrink-0 text-[hsl(var(--accent))]', className)
+  const lower = label.toLowerCase();
+  const base = cn('shrink-0 text-[hsl(var(--accent))]', className);
 
   if (lower.includes('mention') || lower.includes('legal')) {
-    return <FaFileAlt className={base} aria-hidden="true" />
+    return <FaFileAlt className={base} aria-hidden="true" />;
   }
 
   if (lower.includes('confidential') || lower.includes('privacy')) {
-    return <FaLock className={base} aria-hidden="true" />
+    return <FaLock className={base} aria-hidden="true" />;
   }
 
   if (lower.includes('cgv') || lower.includes('terms')) {
-    return <FaFileAlt className={base} aria-hidden="true" />
+    return <FaFileAlt className={base} aria-hidden="true" />;
   }
 
-  return null
+  return null;
 }
 
 export default function Footer({
@@ -293,14 +291,14 @@ export default function Footer({
     },
   },
 }: FooterProps) {
-  const pathname = usePathname() || '/'
-  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr'
-  const tFooter = useTranslations('footer')
-  const t = T[locale]
-  const origin = String(siteUrl || '').replace(/\/$/, '')
+  const pathname = usePathname() || '/';
+  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr';
+  const tFooter = useTranslations('footer');
+  const t = T[locale];
+  const origin = String(siteUrl || '').replace(/\/$/, '');
 
   const baseGroups = useMemo<NavGroup[]>(() => {
-    const source = groups ?? t.defaultGroups
+    const source = groups ?? t.defaultGroups;
 
     return source.map((group) => ({
       title: group.title,
@@ -308,137 +306,137 @@ export default function Footer({
         ...link,
         href: normalizeHref(link.href),
       })),
-    }))
-  }, [groups, t.defaultGroups])
+    }));
+  }, [groups, t.defaultGroups]);
 
   const navGroups = useMemo<NavGroup[]>(() => {
-    if (!links) return baseGroups
+    if (!links) return baseGroups;
 
     const normalizedLegal = links.map((link) => ({
       ...link,
       href: normalizeHref(link.href),
-    }))
+    }));
 
-    const clone = [...baseGroups]
+    const clone = [...baseGroups];
     const index = clone.findIndex((group) => {
-      const value = group.title.toLowerCase()
-      return value.includes('légal') || value.includes('legal')
-    })
+      const value = group.title.toLowerCase();
+      return value.includes('légal') || value.includes('legal');
+    });
 
     if (index >= 0) {
       clone[index] = {
         title: clone[index].title,
         links: normalizedLegal,
-      }
+      };
     } else {
       clone.push({
         title: t.legalTitle,
         links: normalizedLegal,
-      })
+      });
     }
 
-    return clone
-  }, [baseGroups, links, t.legalTitle])
+    return clone;
+  }, [baseGroups, links, t.legalTitle]);
 
-  const currentYear = useMemo(() => new Date().getFullYear(), [])
-  const emailId = useId()
-  const messageId = useId()
-  const consentId = useId()
+  const currentYear = useMemo(() => new Date().getFullYear(), []);
+  const emailId = useId();
+  const messageId = useId();
+  const consentId = useId();
 
-  const [email, setEmail] = useState('')
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-  const [message, setMessage] = useState('')
-  const [website, setWebsite] = useState('')
-  const [consent, setConsent] = useState(true)
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [message, setMessage] = useState('');
+  const [website, setWebsite] = useState('');
+  const [consent, setConsent] = useState(true);
 
   const openConsentManager = (
     e?: Pick<ReactMouseEvent<HTMLElement>, 'preventDefault'> | { preventDefault?: () => void }
   ) => {
-    e?.preventDefault?.()
+    e?.preventDefault?.();
 
     try {
-      const w = getSafeWindow()
-      w?.tpOpenConsent?.()
+      const w = getSafeWindow();
+      w?.tpOpenConsent?.();
     } catch {
       // no-op
     }
 
     try {
-      window.dispatchEvent(new CustomEvent('open-consent-manager'))
+      window.dispatchEvent(new CustomEvent('open-consent-manager'));
     } catch {
       // no-op
     }
 
-    pushDataLayer('open_consent_manager', { location: 'footer' })
-  }
+    pushDataLayer('open_consent_manager', { location: 'footer' });
+  };
 
   const onSubscribe = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (status === 'loading') return
-    if (website) return
+    if (status === 'loading') return;
+    if (website) return;
 
     if (!isValidEmail(email)) {
-      setStatus('error')
-      setMessage(t.invalidEmail)
-      return
+      setStatus('error');
+      setMessage(t.invalidEmail);
+      return;
     }
 
     if (!consent) {
-      setStatus('error')
-      setMessage(t.consentRequired)
-      return
+      setStatus('error');
+      setMessage(t.consentRequired);
+      return;
     }
 
-    setStatus('loading')
-    setMessage('')
+    setStatus('loading');
+    setMessage('');
 
     try {
       const res = await fetch(subscribeEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, locale, pathname }),
-      })
+      });
 
       if (!res.ok) {
-        const maybe = (await res.json().catch(() => null)) as SubscribeResponse | null
-        throw new Error(maybe?.message || t.genericError)
+        const maybe = (await res.json().catch(() => null)) as SubscribeResponse | null;
+        throw new Error(maybe?.message || t.genericError);
       }
 
       pushDataLayer('newsletter_subscribe', {
         location: 'footer',
         locale,
         pathname,
-      })
+      });
 
-      setStatus('success')
-      setMessage(t.newsletterSuccess)
-      setEmail('')
+      setStatus('success');
+      setMessage(t.newsletterSuccess);
+      setEmail('');
 
       try {
-        toast.success(t.newsletterToastSuccess)
+        toast.success(t.newsletterToastSuccess);
       } catch {
         // no-op
       }
     } catch (error: unknown) {
-      setStatus('error')
-      setMessage(getErrorMessageWithFallback(error, t.genericError))
+      setStatus('error');
+      setMessage(getErrorMessageWithFallback(error, t.genericError));
 
       try {
-        toast.error(t.newsletterToastError)
+        toast.error(t.newsletterToastError);
       } catch {
         // no-op
       }
     }
-  }
+  };
 
   const onSocialClick = (network: 'facebook' | 'twitter' | 'instagram') => {
     pushDataLayer('social_click', {
       network,
       location: 'footer',
       pathname,
-    })
-  }
+    });
+  };
 
   const onNavClick = (
     groupTitle: string,
@@ -447,8 +445,8 @@ export default function Footer({
     e?: ReactMouseEvent<HTMLElement>
   ) => {
     if (label.toLowerCase().includes('cookie')) {
-      openConsentManager(e)
-      return
+      openConsentManager(e);
+      return;
     }
 
     pushDataLayer('footer_nav_click', {
@@ -456,8 +454,8 @@ export default function Footer({
       label,
       href,
       from: pathname,
-    })
-  }
+    });
+  };
 
   const schemaLinks = navGroups.flatMap((group) =>
     group.links
@@ -475,7 +473,7 @@ export default function Footer({
               url: `${origin}${localizePath(link.href, locale)}`,
             }
       )
-  )
+  );
 
   return (
     <footer
@@ -508,25 +506,34 @@ export default function Footer({
 
             {!compact ? (
               <>
-                <div className="rounded-2xl border-2 border-[hsl(var(--border))] bg-[hsl(var(--surface))]/90 p-5 dark:bg-[hsl(var(--surface))]/50" aria-label={t.badgesAria}>
+                <div
+                  className="rounded-2xl border-2 border-[hsl(var(--border))] bg-[hsl(var(--surface))]/90 p-5 dark:bg-[hsl(var(--surface))]/50"
+                  aria-label={t.badgesAria}
+                >
                   <ul className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3" role="list">
                     <li className="flex items-center gap-3">
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                         <FaShieldAlt className="text-[15px]" aria-hidden="true" />
                       </span>
-                      <span className="text-[13px] font-medium text-[hsl(var(--text))]">{t.badges.secure}</span>
+                      <span className="text-[13px] font-medium text-[hsl(var(--text))]">
+                        {t.badges.secure}
+                      </span>
                     </li>
                     <li className="flex items-center gap-3">
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))]">
                         <FaTruck className="text-[15px]" aria-hidden="true" />
                       </span>
-                      <span className="text-[13px] font-medium text-[hsl(var(--text))]">{t.badges.shipping}</span>
+                      <span className="text-[13px] font-medium text-[hsl(var(--text))]">
+                        {t.badges.shipping}
+                      </span>
                     </li>
                     <li className="flex items-center gap-3">
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
                         <FaHeadset className="text-[15px]" aria-hidden="true" />
                       </span>
-                      <span className="text-[13px] font-medium text-[hsl(var(--text))]">{t.badges.support}</span>
+                      <span className="text-[13px] font-medium text-[hsl(var(--text))]">
+                        {t.badges.support}
+                      </span>
                     </li>
                   </ul>
                 </div>
@@ -534,24 +541,36 @@ export default function Footer({
                 <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--text))]/70">
                   {tFooter('we_accept')}
                 </p>
-                <div className="mt-2 flex flex-wrap items-center gap-4" aria-hidden="true">
-                  <span className="flex h-9 w-12 items-center justify-center rounded-lg border border-[hsl(var(--border))]/80 bg-white/80 px-1.5 text-[hsl(var(--text))]/70 transition-colors hover:text-[hsl(var(--text))]" title="Visa">
+                <div className="mt-2 flex flex-wrap items-center gap-3 sm:gap-4" aria-hidden="true">
+                  <span
+                    className="flex h-9 w-12 items-center justify-center rounded-lg border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface-2))] px-1.5 text-[hsl(var(--text))] shadow-sm dark:bg-white/10 dark:text-white"
+                    title="Visa"
+                  >
                     <FaCcVisa className="text-2xl" />
                   </span>
-                  <span className="flex h-9 w-12 items-center justify-center rounded-lg border border-[hsl(var(--border))]/80 bg-white/80 px-1.5 text-[hsl(var(--text))]/70 transition-colors hover:text-[hsl(var(--text))]" title="Mastercard">
+                  <span
+                    className="flex h-9 w-12 items-center justify-center rounded-lg border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface-2))] px-1.5 text-[hsl(var(--text))] shadow-sm dark:bg-white/10 dark:text-white"
+                    title="Mastercard"
+                  >
                     <FaCcMastercard className="text-2xl" />
                   </span>
-                  <span className="flex h-9 w-12 items-center justify-center rounded-lg border border-[hsl(var(--border))]/80 bg-white/80 px-1.5 text-[hsl(var(--text))]/70 transition-colors hover:text-[hsl(var(--text))]" title="PayPal">
+                  <span
+                    className="flex h-9 w-12 items-center justify-center rounded-lg border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface-2))] px-1.5 text-[hsl(var(--text))] shadow-sm dark:bg-white/10 dark:text-white"
+                    title="PayPal"
+                  >
                     <FaCcPaypal className="text-xl" />
                   </span>
-                  <span className="flex h-9 w-12 items-center justify-center rounded-lg border border-[hsl(var(--border))]/80 bg-white/80 px-1.5 text-[hsl(var(--text))]/70 transition-colors hover:text-[hsl(var(--text))]" title="Stripe">
+                  <span
+                    className="flex h-9 w-12 items-center justify-center rounded-lg border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface-2))] px-1.5 text-[hsl(var(--text))] shadow-sm dark:bg-white/10 dark:text-white"
+                    title="Stripe"
+                  >
                     <SiStripe className="text-xl" />
                   </span>
                 </div>
               </>
             ) : null}
 
-            {(contact?.email || contact?.phone || contact?.address?.streetAddress) ? (
+            {contact?.email || contact?.phone || contact?.address?.streetAddress ? (
               <>
                 <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--text))]">
                   {tFooter('get_in_touch')}
@@ -606,27 +625,25 @@ export default function Footer({
 
                 <ul className="space-y-3.5">
                   {group.links.map(({ href, label, external }) => {
-                    const finalHref = localizePath(href, locale)
+                    const finalHref = localizePath(href, locale);
                     const active =
                       href === '/'
                         ? pathname === finalHref || pathname === '/'
-                        : pathname === finalHref || pathname.startsWith(`${finalHref}/`)
+                        : pathname === finalHref || pathname.startsWith(`${finalHref}/`);
 
-                    const isCookie = label.toLowerCase().includes('cookie')
+                    const isCookie = label.toLowerCase().includes('cookie');
                     const isLegal =
                       group.title.toLowerCase().includes('légal') ||
-                      group.title.toLowerCase().includes('legal')
+                      group.title.toLowerCase().includes('legal');
 
                     const linkClass =
-                      'inline-flex min-h-[2.5rem] min-w-0 items-center gap-2.5 rounded-md py-2 text-[14px] text-[hsl(var(--text))]/85 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] sm:min-h-0 sm:py-1'
+                      'inline-flex min-h-[2.5rem] min-w-0 items-center gap-2.5 rounded-md py-2 text-[14px] text-[hsl(var(--text))]/85 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] sm:min-h-0 sm:py-1';
                     const content = (
                       <>
-                        {isLegal ? (
-                          <LegalIcon label={label} className="h-5 w-5" />
-                        ) : null}
+                        {isLegal ? <LegalIcon label={label} className="h-5 w-5" /> : null}
                         <span className="min-w-0 break-words">{label}</span>
                       </>
-                    )
+                    );
 
                     return (
                       <li key={`${group.title}-${href}-${label}`}>
@@ -664,7 +681,7 @@ export default function Footer({
                           </Link>
                         )}
                       </li>
-                    )
+                    );
                   })}
                 </ul>
               </nav>
@@ -708,9 +725,7 @@ export default function Footer({
                       aria-label={t.newsletterButtonIdle}
                       data-gtm="footer_newsletter_submit"
                     >
-                      {status === 'loading'
-                        ? t.newsletterButtonLoading
-                        : t.newsletterButtonIdle}
+                      {status === 'loading' ? t.newsletterButtonLoading : t.newsletterButtonIdle}
                     </button>
                   </div>
 
@@ -752,7 +767,9 @@ export default function Footer({
                   {message ? (
                     <p
                       id={messageId}
-                      className={status === 'error' ? 'text-xs text-red-600' : 'text-xs text-emerald-600'}
+                      className={
+                        status === 'error' ? 'text-xs text-red-600' : 'text-xs text-emerald-600'
+                      }
                       role="status"
                       aria-live="polite"
                     >
@@ -761,7 +778,9 @@ export default function Footer({
                   ) : null}
                 </form>
 
-                <p className="text-[13px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--text))]/80">{tFooter('follow_us')}</p>
+                <p className="text-[13px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--text))]/80">
+                  {tFooter('follow_us')}
+                </p>
                 <div className="flex items-center gap-3 text-xl text-[hsl(var(--text))]/60">
                   <a
                     href="https://facebook.com/techplay"
@@ -824,9 +843,13 @@ export default function Footer({
                 <FaCcPaypal className="text-base" title="PayPal" />
               </span>
             </li>
-            <li className="hidden sm:inline text-[hsl(var(--text))]/45" aria-hidden="true">·</li>
+            <li className="hidden sm:inline text-[hsl(var(--text))]/45" aria-hidden="true">
+              ·
+            </li>
             <li>{t.recentLocale}</li>
-            <li className="hidden sm:inline text-[hsl(var(--text))]/45" aria-hidden="true">·</li>
+            <li className="hidden sm:inline text-[hsl(var(--text))]/45" aria-hidden="true">
+              ·
+            </li>
             <li>
               <a
                 href="#cookies"
@@ -855,5 +878,5 @@ export default function Footer({
         }}
       />
     </footer>
-  )
+  );
 }

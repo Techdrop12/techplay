@@ -1,35 +1,28 @@
-'use client'
+'use client';
 
-import { motion, useReducedMotion, type Variants } from 'framer-motion'
-import { useTranslations } from 'next-intl'
-import { usePathname } from 'next/navigation'
-import {
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-} from 'react'
+import { motion, useReducedMotion, type Variants } from 'framer-motion';
+import { useTranslations } from 'next-intl';
+import { usePathname } from 'next/navigation';
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from 'react';
 
-import type { Product } from '@/types/product'
+import type { Product } from '@/types/product';
 
-import ProductCard from '@/components/ProductCard'
-import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
-import { cn } from '@/lib/utils'
+import ProductCard from '@/components/ProductCard';
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing';
+import { cn } from '@/lib/utils';
 
-type SortKey = 'popular' | 'priceAsc' | 'priceDesc' | 'rating'
-type ProductRecord = Record<string, unknown>
+type SortKey = 'popular' | 'priceAsc' | 'priceDesc' | 'rating';
+type ProductRecord = Record<string, unknown>;
 
 interface BestProductsProps {
-  products: Product[]
-  showTitle?: boolean
-  title?: string
-  limit?: number
-  className?: string
-  showControls?: boolean
-  initialSort?: SortKey
-  autoLoadOnIntersect?: boolean
+  products: Product[];
+  showTitle?: boolean;
+  title?: string;
+  limit?: number;
+  className?: string;
+  showControls?: boolean;
+  initialSort?: SortKey;
+  autoLoadOnIntersect?: boolean;
 }
 
 const containerVariants: Variants = {
@@ -44,7 +37,7 @@ const containerVariants: Variants = {
       staggerChildren: 0.05,
     },
   },
-}
+};
 
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 12 },
@@ -53,145 +46,149 @@ const itemVariants: Variants = {
     y: 0,
     transition: { duration: 0.3, ease: 'easeOut' },
   },
-}
+};
 
 const sectionStyle: CSSProperties = {
   contentVisibility: 'auto',
   containIntrinsicSize: '900px',
-}
+};
 
 function isRecord(value: unknown): value is ProductRecord {
-  return typeof value === 'object' && value !== null
+  return typeof value === 'object' && value !== null;
 }
 
 function toRecord(value: unknown): ProductRecord {
-  return isRecord(value) ? value : {}
+  return isRecord(value) ? value : {};
 }
 
 function readString(record: ProductRecord, keys: readonly string[]): string | undefined {
   for (const key of keys) {
-    const value = record[key]
-    if (typeof value === 'string' && value.trim()) return value.trim()
+    const value = record[key];
+    if (typeof value === 'string' && value.trim()) return value.trim();
   }
-  return undefined
+  return undefined;
 }
 
 function readNumber(record: ProductRecord, keys: readonly string[]): number | undefined {
   for (const key of keys) {
-    const value = record[key]
+    const value = record[key];
     const parsed =
       typeof value === 'number'
         ? value
         : typeof value === 'string' && value.trim()
           ? Number(value)
-          : NaN
+          : NaN;
 
-    if (Number.isFinite(parsed)) return parsed
+    if (Number.isFinite(parsed)) return parsed;
   }
-  return undefined
+  return undefined;
 }
 
 function readBoolean(record: ProductRecord, keys: readonly string[]): boolean | undefined {
   for (const key of keys) {
-    const value = record[key]
-    if (typeof value === 'boolean') return value
+    const value = record[key];
+    if (typeof value === 'boolean') return value;
   }
-  return undefined
+  return undefined;
 }
 
 function readFirstImage(record: ProductRecord): string | undefined {
-  const direct = readString(record, ['image'])
-  if (direct) return direct
+  const direct = readString(record, ['image']);
+  if (direct) return direct;
 
-  const images = record.images
+  const images = record.images;
   if (Array.isArray(images)) {
-    const first = images.find((item): item is string => typeof item === 'string' && item.trim().length > 0)
-    if (first) return first
+    const first = images.find(
+      (item): item is string => typeof item === 'string' && item.trim().length > 0
+    );
+    if (first) return first;
   }
 
-  const gallery = record.gallery
+  const gallery = record.gallery;
   if (Array.isArray(gallery)) {
-    const first = gallery.find((item): item is string => typeof item === 'string' && item.trim().length > 0)
-    if (first) return first
+    const first = gallery.find(
+      (item): item is string => typeof item === 'string' && item.trim().length > 0
+    );
+    if (first) return first;
   }
 
-  return undefined
+  return undefined;
 }
 
 function pushDL(event: string, payload?: Record<string, unknown>) {
   try {
-    if (!Array.isArray(window.dataLayer)) window.dataLayer = []
-    window.dataLayer.push({ event, ...(payload ?? {}) })
+    if (!Array.isArray(window.dataLayer)) window.dataLayer = [];
+    window.dataLayer.push({ event, ...(payload ?? {}) });
   } catch {
     // no-op
   }
 }
 
 function getPrice(product: Product): number {
-  return typeof product.price === 'number' && Number.isFinite(product.price) ? product.price : 0
+  return typeof product.price === 'number' && Number.isFinite(product.price) ? product.price : 0;
 }
 
 function getCompareAt(product: Product): number | undefined {
-  const record = toRecord(product)
-  return readNumber(record, ['compareAtPrice', 'oldPrice', 'referencePrice', 'originalPrice'])
+  const record = toRecord(product);
+  return readNumber(record, ['compareAtPrice', 'oldPrice', 'referencePrice', 'originalPrice']);
 }
 
 function getRating(product: Product): number {
   if (product.aggregateRating && typeof product.aggregateRating.average === 'number') {
-    return Math.max(0, Math.min(5, product.aggregateRating.average))
+    return Math.max(0, Math.min(5, product.aggregateRating.average));
   }
 
   if (typeof product.rating === 'number' && Number.isFinite(product.rating)) {
-    return Math.max(0, Math.min(5, product.rating))
+    return Math.max(0, Math.min(5, product.rating));
   }
 
-  return 0
+  return 0;
 }
 
 function getPopularity(product: Product): number {
-  const record = toRecord(product)
-  const explicitSales = readNumber(record, ['sales', 'sold', 'ordersCount'])
-  if (typeof explicitSales === 'number') return explicitSales
+  const record = toRecord(product);
+  const explicitSales = readNumber(record, ['sales', 'sold', 'ordersCount']);
+  if (typeof explicitSales === 'number') return explicitSales;
 
   const reviews =
     typeof product.reviewsCount === 'number'
       ? product.reviewsCount
-      : product.aggregateRating?.total ?? 0
+      : (product.aggregateRating?.total ?? 0);
 
-  const ratingBoost = getRating(product) * 10
-  const featuredBoost = readBoolean(record, ['featured', 'isBestSeller']) ? 50 : 0
+  const ratingBoost = getRating(product) * 10;
+  const featuredBoost = readBoolean(record, ['featured', 'isBestSeller']) ? 50 : 0;
 
-  return reviews + ratingBoost + featuredBoost
+  return reviews + ratingBoost + featuredBoost;
 }
 
 function isPromo(product: Product): boolean {
-  const current = getPrice(product)
-  const compareAt = getCompareAt(product)
+  const current = getPrice(product);
+  const compareAt = getCompareAt(product);
 
-  return typeof compareAt === 'number' && compareAt > current
+  return typeof compareAt === 'number' && compareAt > current;
 }
 
 function isInStock(product: Product): boolean {
-  if (typeof product.stock === 'number') return product.stock > 0
+  if (typeof product.stock === 'number') return product.stock > 0;
 
-  const record = toRecord(product)
-  const stock = readNumber(record, ['quantity', 'qty'])
-  const available = readBoolean(record, ['available'])
+  const record = toRecord(product);
+  const stock = readNumber(record, ['quantity', 'qty']);
+  const available = readBoolean(record, ['available']);
 
-  if (typeof stock === 'number') return stock > 0
-  if (typeof available === 'boolean') return available
+  if (typeof stock === 'number') return stock > 0;
+  if (typeof available === 'boolean') return available;
 
-  return true
+  return true;
 }
 
 function normalizeProduct(product: Product): Product {
-  const record = toRecord(product)
+  const record = toRecord(product);
 
   return {
     ...product,
     title: product.title?.trim() || readString(record, ['name']) || 'Produit',
     image: readFirstImage(record) || '/og-image.jpg',
-  }
+  };
 }
 
 export default function BestProducts({
@@ -204,11 +201,11 @@ export default function BestProducts({
   initialSort = 'popular',
   autoLoadOnIntersect = true,
 }: BestProductsProps) {
-  const pathname = usePathname() || '/'
-  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr'
-  const reduceMotion = useReducedMotion()
-  const tProductList = useTranslations('product_list')
-  const tCommon = useTranslations('common')
+  const pathname = usePathname() || '/';
+  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr';
+  const reduceMotion = useReducedMotion();
+  const tProductList = useTranslations('product_list');
+  const tCommon = useTranslations('common');
 
   const t = useMemo(() => {
     if (locale === 'en') {
@@ -247,7 +244,7 @@ export default function BestProducts({
         moreShown: (n: number) => `${n} additional products displayed.`,
         loading: 'Loading best sellers…',
         noscript: 'See all products',
-      }
+      };
     }
 
     return {
@@ -285,87 +282,87 @@ export default function BestProducts({
       moreShown: (n: number) => `${n} produits supplémentaires affichés.`,
       loading: 'Chargement des meilleures ventes…',
       noscript: 'Voir tous les produits',
-    }
-  }, [locale])
+    };
+  }, [locale]);
 
-  const headingId = useId()
-  const subId = `${headingId}-sub`
-  const gridId = `${headingId}-grid`
-  const liveId = `${headingId}-live`
+  const headingId = useId();
+  const subId = `${headingId}-sub`;
+  const gridId = `${headingId}-grid`;
+  const liveId = `${headingId}-live`;
 
-  const [expanded, setExpanded] = useState(false)
-  const [announce, setAnnounce] = useState('')
-  const [sortBy, setSortBy] = useState<SortKey>(initialSort)
-  const [filterPromo, setFilterPromo] = useState(false)
-  const [filterStock, setFilterStock] = useState(false)
+  const [expanded, setExpanded] = useState(false);
+  const [announce, setAnnounce] = useState('');
+  const [sortBy, setSortBy] = useState<SortKey>(initialSort);
+  const [filterPromo, setFilterPromo] = useState(false);
+  const [filterStock, setFilterStock] = useState(false);
 
-  const sentinelRef = useRef<HTMLDivElement | null>(null)
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   const safeProducts = useMemo(
     () => (Array.isArray(products) ? products.filter(Boolean).map(normalizeProduct) : []),
     [products]
-  )
+  );
 
   const filteredSorted = useMemo(() => {
-    let arr = [...safeProducts]
+    let arr = [...safeProducts];
 
-    if (filterPromo) arr = arr.filter(isPromo)
-    if (filterStock) arr = arr.filter(isInStock)
+    if (filterPromo) arr = arr.filter(isPromo);
+    if (filterStock) arr = arr.filter(isInStock);
 
     arr.sort((a, b) => {
-      const priceA = getPrice(a)
-      const priceB = getPrice(b)
-      const ratingA = getRating(a)
-      const ratingB = getRating(b)
-      const popA = getPopularity(a)
-      const popB = getPopularity(b)
+      const priceA = getPrice(a);
+      const priceB = getPrice(b);
+      const ratingA = getRating(a);
+      const ratingB = getRating(b);
+      const popA = getPopularity(a);
+      const popB = getPopularity(b);
 
       switch (sortBy) {
         case 'priceAsc':
-          return priceA - priceB
+          return priceA - priceB;
         case 'priceDesc':
-          return priceB - priceA
+          return priceB - priceA;
         case 'rating':
-          return ratingB - ratingA || popB - popA
+          return ratingB - ratingA || popB - popA;
         case 'popular':
         default:
-          return popB - popA || ratingB - ratingA
+          return popB - popA || ratingB - ratingA;
       }
-    })
+    });
 
-    return arr
-  }, [safeProducts, sortBy, filterPromo, filterStock])
+    return arr;
+  }, [safeProducts, sortBy, filterPromo, filterStock]);
 
   const list = useMemo(() => {
-    if (!limit || expanded) return filteredSorted
-    return filteredSorted.slice(0, limit)
-  }, [filteredSorted, limit, expanded])
+    if (!limit || expanded) return filteredSorted;
+    return filteredSorted.slice(0, limit);
+  }, [filteredSorted, limit, expanded]);
 
   useEffect(() => {
-    if (!expanded) return
-    const remaining = Math.max(0, filteredSorted.length - (limit || 0))
-    if (remaining > 0) setAnnounce(t.moreShown(remaining))
-  }, [expanded, filteredSorted.length, limit, t])
+    if (!expanded) return;
+    const remaining = Math.max(0, filteredSorted.length - (limit || 0));
+    if (remaining > 0) setAnnounce(t.moreShown(remaining));
+  }, [expanded, filteredSorted.length, limit, t]);
 
   useEffect(() => {
-    if (!autoLoadOnIntersect || expanded) return
+    if (!autoLoadOnIntersect || expanded) return;
 
-    const el = sentinelRef.current
-    if (!el) return
+    const el = sentinelRef.current;
+    if (!el) return;
 
     const io = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) {
-          setExpanded(true)
-          pushDL('best_products_autoload')
+          setExpanded(true);
+          pushDL('best_products_autoload');
         }
       },
       { threshold: 0.25, rootMargin: '120px' }
-    )
+    );
 
-    io.observe(el)
-    return () => io.disconnect()
-  }, [autoLoadOnIntersect, expanded])
+    io.observe(el);
+    return () => io.disconnect();
+  }, [autoLoadOnIntersect, expanded]);
 
   if (safeProducts.length === 0) {
     return (
@@ -380,12 +377,12 @@ export default function BestProducts({
           {tProductList('loading_products')}
         </p>
       </section>
-    )
+    );
   }
 
-  const totalCount = filteredSorted.length
-  const visibleCount = list.length
-  const activeFilters = filterPromo || filterStock
+  const totalCount = filteredSorted.length;
+  const visibleCount = list.length;
+  const activeFilters = filterPromo || filterStock;
 
   return (
     <section
@@ -396,10 +393,7 @@ export default function BestProducts({
     >
       {showTitle && (
         <>
-          <h2
-            id={headingId}
-            className="mb-2 text-center heading-section"
-          >
+          <h2 id={headingId} className="mb-2 text-center heading-section">
             {title || t.titleFallback}
           </h2>
 
@@ -412,7 +406,8 @@ export default function BestProducts({
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/70 p-3">
         <div className="text-xs text-token-text/70" aria-live="polite">
-          {t.display} <span className="font-semibold">{visibleCount}</span> / <span>{totalCount}</span>
+          {t.display} <span className="font-semibold">{visibleCount}</span> /{' '}
+          <span>{totalCount}</span>
         </div>
 
         {showControls && (
@@ -421,11 +416,11 @@ export default function BestProducts({
               type="button"
               onClick={() => {
                 setFilterPromo((current) => {
-                  const next = !current
-                  setAnnounce(t.filterPromoAnnounce(next))
-                  pushDL('best_products_filter', { promo: next })
-                  return next
-                })
+                  const next = !current;
+                  setAnnounce(t.filterPromoAnnounce(next));
+                  pushDL('best_products_filter', { promo: next });
+                  return next;
+                });
               }}
               className={cn(
                 'rounded-full border px-3 py-1.5 text-xs font-semibold transition',
@@ -444,11 +439,11 @@ export default function BestProducts({
               type="button"
               onClick={() => {
                 setFilterStock((current) => {
-                  const next = !current
-                  setAnnounce(t.filterStockAnnounce(next))
-                  pushDL('best_products_filter', { stock: next })
-                  return next
-                })
+                  const next = !current;
+                  setAnnounce(t.filterStockAnnounce(next));
+                  pushDL('best_products_filter', { stock: next });
+                  return next;
+                });
               }}
               className={cn(
                 'rounded-full border px-3 py-1.5 text-xs font-semibold transition',
@@ -472,10 +467,10 @@ export default function BestProducts({
               className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-[12px] font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
               value={sortBy}
               onChange={(e) => {
-                const next = (e.currentTarget.value as SortKey) || 'popular'
-                setSortBy(next)
-                setAnnounce(t.sortAnnounce(next))
-                pushDL('best_products_sort', { sort: next })
+                const next = (e.currentTarget.value as SortKey) || 'popular';
+                setSortBy(next);
+                setAnnounce(t.sortAnnounce(next));
+                pushDL('best_products_sort', { sort: next });
               }}
               aria-label={t.sortLabel}
               aria-controls={gridId}
@@ -490,10 +485,10 @@ export default function BestProducts({
               <button
                 type="button"
                 onClick={() => {
-                  setFilterPromo(false)
-                  setFilterStock(false)
-                  setAnnounce(t.resetAnnounce)
-                  pushDL('best_products_reset_filters')
+                  setFilterPromo(false);
+                  setFilterStock(false);
+                  setAnnounce(t.resetAnnounce);
+                  pushDL('best_products_reset_filters');
                 }}
                 className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-xs font-semibold transition hover:shadow"
               >
@@ -510,7 +505,9 @@ export default function BestProducts({
         </div>
       ) : (
         <motion.ul
-          {...(!reduceMotion ? { variants: containerVariants, initial: 'hidden', whileInView: 'show' } : {})}
+          {...(!reduceMotion
+            ? { variants: containerVariants, initial: 'hidden', whileInView: 'show' }
+            : {})}
           viewport={{ once: true, amount: 0.15 }}
           className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4"
           role="list"
@@ -518,8 +515,8 @@ export default function BestProducts({
           id={gridId}
         >
           {list.map((product, i) => {
-            const record = toRecord(product)
-            const key = readString(record, ['_id', 'slug', 'id']) ?? `bp-${i}`
+            const record = toRecord(product);
+            const key = readString(record, ['_id', 'slug', 'id']) ?? `bp-${i}`;
 
             return (
               <motion.li
@@ -531,7 +528,7 @@ export default function BestProducts({
               >
                 <ProductCard product={product} priority={i < 2} />
               </motion.li>
-            )
+            );
           })}
         </motion.ul>
       )}
@@ -541,16 +538,22 @@ export default function BestProducts({
           <button
             type="button"
             onClick={() => {
-              setExpanded(true)
-              setAnnounce(t.allShown)
-              pushDL('best_products_see_more_click')
+              setExpanded(true);
+              setAnnounce(t.allShown);
+              pushDL('best_products_see_more_click');
             }}
             className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-5 py-2.5 text-[13px] font-semibold shadow-sm transition hover:shadow focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
             aria-controls={gridId}
             aria-expanded={expanded ? 'true' : 'false'}
           >
             {t.seeMore}
-            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" className="opacity-80">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              className="opacity-80"
+            >
               <path fill="currentColor" d="M7 10l5 5 5-5z" />
             </svg>
           </button>
@@ -571,5 +574,5 @@ export default function BestProducts({
         </p>
       </noscript>
     </section>
-  )
+  );
 }

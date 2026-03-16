@@ -1,170 +1,180 @@
-'use client'
+'use client';
 
-import { motion, useReducedMotion } from 'framer-motion'
-import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
-import { useCallback, useId, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
-import { toast } from 'react-hot-toast'
+import { motion, useReducedMotion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import {
+  useCallback,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+} from 'react';
+import { toast } from 'react-hot-toast';
 
-import type { Product } from '@/types/product'
+import type { Product } from '@/types/product';
 
-import Button from '@/components/Button'
-import { useCart } from '@/hooks/useCart'
-import { detectCurrency } from '@/lib/currency'
-import { trackAddToCart as rawTrackAddToCart } from '@/lib/ga'
-import { logEvent as rawLogEvent } from '@/lib/logEvent'
+import Button from '@/components/Button';
+import { useCart } from '@/hooks/useCart';
+import { detectCurrency } from '@/lib/currency';
+import { trackAddToCart as rawTrackAddToCart } from '@/lib/ga';
+import { logEvent as rawLogEvent } from '@/lib/logEvent';
 import {
   pixelAddToCart as rawPixelAddToCart,
   pixelInitiateCheckout as rawPixelInitiateCheckout,
-} from '@/lib/meta-pixel'
+} from '@/lib/meta-pixel';
 
-type MinimalProduct = Pick<Product, '_id' | 'slug' | 'title' | 'image' | 'price'>
+type MinimalProduct = Pick<Product, '_id' | 'slug' | 'title' | 'image' | 'price'>;
 
 interface Props {
-  product: MinimalProduct & { quantity?: number }
-  onAdd?: () => void
-  onError?: (err: unknown) => void
+  product: MinimalProduct & { quantity?: number };
+  onAdd?: () => void;
+  onError?: (err: unknown) => void;
 
-  size?: 'sm' | 'md' | 'lg'
-  variant?: 'solid' | 'outline' | 'glass'
-  withIcon?: boolean
-  fullWidth?: boolean
-  className?: string
-  disabled?: boolean
-  stopPropagation?: boolean
+  size?: 'sm' | 'md' | 'lg';
+  variant?: 'solid' | 'outline' | 'glass';
+  withIcon?: boolean;
+  fullWidth?: boolean;
+  className?: string;
+  disabled?: boolean;
+  stopPropagation?: boolean;
 
-  haptic?: boolean
-  ripple?: boolean
-  flyToCart?: boolean
-  flyToCartSelector?: string
-  scrollToStickyOnMobile?: boolean
-  afterAddFocus?: 'none' | 'cart' | 'button'
+  haptic?: boolean;
+  ripple?: boolean;
+  flyToCart?: boolean;
+  flyToCartSelector?: string;
+  scrollToStickyOnMobile?: boolean;
+  afterAddFocus?: 'none' | 'cart' | 'button';
 
-  pendingText?: string
-  successText?: string
-  idleText?: string
-  debounceMs?: number
-  ariaLabel?: string
+  pendingText?: string;
+  successText?: string;
+  idleText?: string;
+  debounceMs?: number;
+  ariaLabel?: string;
 
-  disableDataLayer?: boolean
-  gtmExtra?: Record<string, unknown>
+  disableDataLayer?: boolean;
+  gtmExtra?: Record<string, unknown>;
 
-  instantCheckout?: boolean
-  locale?: string
+  instantCheckout?: boolean;
+  locale?: string;
 }
 
-type AnyFn = (...args: unknown[]) => unknown
+type AnyFn = (...args: unknown[]) => unknown;
 type CartAddPayload = {
-  _id: string
-  slug: string
-  title: string
-  image: string
-  price: number
-  quantity: number
-}
+  _id: string;
+  slug: string;
+  title: string;
+  image: string;
+  price: number;
+  quantity: number;
+};
 
 type CartHookLike = {
-  addToCart?: unknown
-}
+  addToCart?: unknown;
+};
 
 type WindowWithDataLayer = Window & {
-  dataLayer?: Array<Record<string, unknown>>
-}
+  dataLayer?: Array<Record<string, unknown>>;
+};
 
 function canUseDOM(): boolean {
-  return typeof window !== 'undefined'
+  return typeof window !== 'undefined';
 }
 
 function isFunction(value: unknown): value is AnyFn {
-  return typeof value === 'function'
+  return typeof value === 'function';
 }
 
 function clamp(n: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, n))
+  return Math.max(min, Math.min(max, n));
 }
 
 function getDataLayer(): Array<Record<string, unknown>> | null {
-  if (!canUseDOM()) return null
-  const w = window as WindowWithDataLayer
-  if (!Array.isArray(w.dataLayer)) w.dataLayer = []
-  return w.dataLayer
+  if (!canUseDOM()) return null;
+  const w = window as WindowWithDataLayer;
+  if (!Array.isArray(w.dataLayer)) w.dataLayer = [];
+  return w.dataLayer;
 }
 
 function pushToDataLayer(payload: Record<string, unknown>): void {
   try {
-    const dl = getDataLayer()
-    dl?.push(payload)
+    const dl = getDataLayer();
+    dl?.push(payload);
   } catch {}
 }
 
 function safeCall(fn: unknown, ...args: unknown[]): unknown {
-  if (!isFunction(fn)) return undefined
+  if (!isFunction(fn)) return undefined;
   try {
-    return fn(...args)
+    return fn(...args);
   } catch {
-    return undefined
+    return undefined;
   }
 }
 
 function spawnRipple(e: ReactMouseEvent<HTMLElement>) {
-  if (!canUseDOM()) return
+  if (!canUseDOM()) return;
 
-  const target = e.currentTarget as HTMLElement
-  const rect = target.getBoundingClientRect()
-  const x = e.clientX - rect.left
-  const y = e.clientY - rect.top
-  const size = Math.max(rect.width, rect.height)
+  const target = e.currentTarget as HTMLElement;
+  const rect = target.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  const size = Math.max(rect.width, rect.height);
 
-  const span = document.createElement('span')
-  span.style.position = 'absolute'
-  span.style.left = `${x - size / 2}px`
-  span.style.top = `${y - size / 2}px`
-  span.style.width = `${size}px`
-  span.style.height = `${size}px`
-  span.style.borderRadius = '9999px'
-  span.style.pointerEvents = 'none'
-  span.style.background = 'rgba(255,255,255,0.35)'
-  span.style.mixBlendMode = 'overlay'
+  const span = document.createElement('span');
+  span.style.position = 'absolute';
+  span.style.left = `${x - size / 2}px`;
+  span.style.top = `${y - size / 2}px`;
+  span.style.width = `${size}px`;
+  span.style.height = `${size}px`;
+  span.style.borderRadius = '9999px';
+  span.style.pointerEvents = 'none';
+  span.style.background = 'rgba(255,255,255,0.35)';
+  span.style.mixBlendMode = 'overlay';
 
-  if (!target.style.position) target.style.position = 'relative'
-  target.appendChild(span)
+  if (!target.style.position) target.style.position = 'relative';
+  target.appendChild(span);
 
   const anim = span.animate(
-    [{ transform: 'scale(0.6)', opacity: 0.35 }, { transform: 'scale(1.3)', opacity: 0 }],
+    [
+      { transform: 'scale(0.6)', opacity: 0.35 },
+      { transform: 'scale(1.3)', opacity: 0 },
+    ],
     { duration: 520, easing: 'ease-out' }
-  )
+  );
 
-  anim.onfinish = () => span.remove()
+  anim.onfinish = () => span.remove();
 }
 
 function flyTo(source: HTMLElement, target: HTMLElement, prefersReduced: boolean) {
-  if (!canUseDOM()) return
+  if (!canUseDOM()) return;
 
-  const dot = document.createElement('div')
-  const from = source.getBoundingClientRect()
-  const to = target.getBoundingClientRect()
+  const dot = document.createElement('div');
+  const from = source.getBoundingClientRect();
+  const to = target.getBoundingClientRect();
 
-  const startX = from.left + from.width / 2
-  const startY = from.top + from.height / 2
-  const endX = to.left + to.width / 2
-  const endY = to.top + to.height / 2
+  const startX = from.left + from.width / 2;
+  const startY = from.top + from.height / 2;
+  const endX = to.left + to.width / 2;
+  const endY = to.top + to.height / 2;
 
-  dot.style.position = 'fixed'
-  dot.style.left = `${startX}px`
-  dot.style.top = `${startY}px`
-  dot.style.width = '10px'
-  dot.style.height = '10px'
-  dot.style.borderRadius = '9999px'
-  dot.style.background = 'hsl(var(--accent))'
-  dot.style.boxShadow = '0 0 0 6px rgba(20,184,166,0.15)'
-  dot.style.zIndex = '999999'
-  dot.style.pointerEvents = 'none'
+  dot.style.position = 'fixed';
+  dot.style.left = `${startX}px`;
+  dot.style.top = `${startY}px`;
+  dot.style.width = '10px';
+  dot.style.height = '10px';
+  dot.style.borderRadius = '9999px';
+  dot.style.background = 'hsl(var(--accent))';
+  dot.style.boxShadow = '0 0 0 6px rgba(20,184,166,0.15)';
+  dot.style.zIndex = '999999';
+  dot.style.pointerEvents = 'none';
 
-  document.body.appendChild(dot)
+  document.body.appendChild(dot);
 
-  const duration = prefersReduced ? 200 : 650
-  const curveX = startX + (endX - startX) * 0.6
-  const curveY = Math.min(startY, endY) - 120
+  const duration = prefersReduced ? 200 : 650;
+  const curveX = startX + (endX - startX) * 0.6;
+  const curveY = Math.min(startY, endY) - 120;
 
   const keyframes: Keyframe[] = [
     { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0 },
@@ -178,22 +188,34 @@ function flyTo(source: HTMLElement, target: HTMLElement, prefersReduced: boolean
       opacity: 0,
       offset: 1,
     },
-  ]
+  ];
 
-  dot
-    .animate(keyframes, {
-      duration,
-      easing: prefersReduced ? 'linear' : 'cubic-bezier(.2,.8,.2,1)',
-    })
-    .onfinish = () => dot.remove()
+  dot.animate(keyframes, {
+    duration,
+    easing: prefersReduced ? 'linear' : 'cubic-bezier(.2,.8,.2,1)',
+  }).onfinish = () => dot.remove();
 }
 
 const Spinner = () => (
   <svg className="mr-2 -ml-0.5 h-4 w-4 animate-spin" viewBox="0 0 24 24" aria-hidden="true">
-    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.25" strokeWidth="4" fill="none" />
-    <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" fill="none" />
+    <circle
+      cx="12"
+      cy="12"
+      r="10"
+      stroke="currentColor"
+      strokeOpacity="0.25"
+      strokeWidth="4"
+      fill="none"
+    />
+    <path
+      d="M22 12a10 10 0 0 1-10 10"
+      stroke="currentColor"
+      strokeWidth="4"
+      strokeLinecap="round"
+      fill="none"
+    />
   </svg>
-)
+);
 
 const CartIcon = ({ className = '' }: { className?: string }) => (
   <svg className={className} width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
@@ -202,13 +224,13 @@ const CartIcon = ({ className = '' }: { className?: string }) => (
       d="M7 18a2 2 0 1 0 0 4a2 2 0 0 0 0-4M6.2 6l.63 3H20a1 1 0 0 1 .98 1.2l-1.2 6A2 2 0 0 1 17.83 16H9a2 2 0 0 1-1.96-1.6L5 4H3a1 1 0 0 1 0-2h2.72a1 1 0 0 1 .98.8L7 6z"
     />
   </svg>
-)
+);
 
 const CheckIcon = ({ className = '' }: { className?: string }) => (
   <svg className={className} width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
     <path fill="currentColor" d="M9.55 16.6L5.3 12.35l1.4-1.4l2.85 2.85L17.3 6.95l1.4 1.4z" />
   </svg>
-)
+);
 
 export default function AddToCartButton({
   product,
@@ -242,47 +264,47 @@ export default function AddToCartButton({
   instantCheckout = false,
   locale = 'fr',
 }: Props) {
-  const tCart = useTranslations('cart')
-  const router = useRouter()
-  const cartApi = useCart() as CartHookLike
-  const addToCartFn = isFunction(cartApi?.addToCart) ? cartApi.addToCart : null
+  const tCart = useTranslations('cart');
+  const router = useRouter();
+  const cartApi = useCart() as CartHookLike;
+  const addToCartFn = isFunction(cartApi?.addToCart) ? cartApi.addToCart : null;
 
-  const [loading, setLoading] = useState(false)
-  const [added, setAdded] = useState(false)
-  const [srMessage, setSrMessage] = useState('')
+  const [loading, setLoading] = useState(false);
+  const [added, setAdded] = useState(false);
+  const [srMessage, setSrMessage] = useState('');
 
-  const prefersReduced = useReducedMotion()
-  const lastClickRef = useRef<number>(0)
-  const labelId = useId()
-  const wrapperRef = useRef<HTMLDivElement | null>(null)
-  const currency = useMemo(() => detectCurrency(), [])
+  const prefersReduced = useReducedMotion();
+  const lastClickRef = useRef<number>(0);
+  const labelId = useId();
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const currency = useMemo(() => detectCurrency(), []);
 
   const sizeClasses = useMemo(() => {
-    if (size === 'sm') return 'px-3 py-2 text-sm rounded-lg'
-    if (size === 'lg') return 'px-6 py-5 text-lg rounded-2xl'
-    return 'px-4 py-4 text-base rounded-xl'
-  }, [size])
+    if (size === 'sm') return 'px-3 py-2 text-sm rounded-lg';
+    if (size === 'lg') return 'px-6 py-5 text-lg rounded-2xl';
+    return 'px-4 py-4 text-base rounded-xl';
+  }, [size]);
 
   const variantClasses = useMemo(() => {
     if (variant === 'outline') {
-      return 'bg-transparent text-[hsl(var(--accent))] border border-[hsl(var(--accent)/.4)] hover:bg-[hsl(var(--accent)/.08)]'
+      return 'bg-transparent text-[hsl(var(--accent))] border border-[hsl(var(--accent)/.4)] hover:bg-[hsl(var(--accent)/.08)]';
     }
     if (variant === 'glass') {
-      return 'bg-white/15 text-white border border-white/20 backdrop-blur-md hover:bg-white/20 dark:bg-zinc-900/30 dark:border-white/10'
+      return 'bg-white/15 text-white border border-white/20 backdrop-blur-md hover:bg-white/20 dark:bg-zinc-900/30 dark:border-white/10';
     }
-    return 'bg-[hsl(var(--accent))] text-white hover:bg-[hsl(var(--accent)/.90)]'
-  }, [variant])
+    return 'bg-[hsl(var(--accent))] text-white hover:bg-[hsl(var(--accent)/.90)]';
+  }, [variant]);
 
   const doDataLayerPush = useCallback(
     (detail: {
-      id: string
-      title: string
-      price: number
-      quantity: number
-      value: number
-      slug: string
+      id: string;
+      title: string;
+      price: number;
+      quantity: number;
+      value: number;
+      slug: string;
     }) => {
-      if (disableDataLayer) return
+      if (disableDataLayer) return;
 
       pushToDataLayer({
         event: 'add_to_cart',
@@ -300,54 +322,54 @@ export default function AddToCartButton({
           ],
         },
         ...(gtmExtra ?? {}),
-      })
+      });
     },
     [disableDataLayer, gtmExtra, currency]
-  )
+  );
 
   const focusCartIcon = useCallback(() => {
-    if (!canUseDOM()) return
+    if (!canUseDOM()) return;
     try {
-      const target = document.querySelector<HTMLElement>(flyToCartSelector)
-      target?.focus?.()
+      const target = document.querySelector<HTMLElement>(flyToCartSelector);
+      target?.focus?.();
     } catch {}
-  }, [flyToCartSelector])
+  }, [flyToCartSelector]);
 
   const handleClick = useCallback(
     async (e?: ReactMouseEvent) => {
       if (stopPropagation && e) {
-        e.preventDefault()
-        e.stopPropagation()
+        e.preventDefault();
+        e.stopPropagation();
       }
 
-      if (loading || disabled) return
+      if (loading || disabled) return;
 
-      const now = Date.now()
-      if (now - lastClickRef.current < Math.max(0, debounceMs)) return
-      lastClickRef.current = now
+      const now = Date.now();
+      if (now - lastClickRef.current < Math.max(0, debounceMs)) return;
+      lastClickRef.current = now;
 
-      const id = String(product?._id ?? '')
-      const slug = String(product?.slug ?? '')
-      const title = String(product?.title ?? 'Produit')
-      const image = String(product?.image ?? '/placeholder.png')
-      const price = Number(product?.price ?? 0)
-      const quantity = clamp(Math.trunc(Number(product?.quantity ?? 1)), 1, 99)
+      const id = String(product?._id ?? '');
+      const slug = String(product?.slug ?? '');
+      const title = String(product?.title ?? 'Produit');
+      const image = String(product?.image ?? '/placeholder.png');
+      const price = Number(product?.price ?? 0);
+      const quantity = clamp(Math.trunc(Number(product?.quantity ?? 1)), 1, 99);
 
       if (!id) {
-        const err = new Error("Produit invalide — impossible d'ajouter au panier")
-        toast.error(err.message)
-        onError?.(err)
-        return
+        const err = new Error("Produit invalide — impossible d'ajouter au panier");
+        toast.error(err.message);
+        onError?.(err);
+        return;
       }
 
       if (!addToCartFn) {
-        const err = new Error('Fonction panier indisponible')
-        toast.error(err.message)
-        onError?.(err)
-        return
+        const err = new Error('Fonction panier indisponible');
+        toast.error(err.message);
+        onError?.(err);
+        return;
       }
 
-      setLoading(true)
+      setLoading(true);
 
       try {
         const payload: CartAddPayload = {
@@ -357,16 +379,16 @@ export default function AddToCartButton({
           image,
           price,
           quantity,
-        }
+        };
 
-        await Promise.resolve(addToCartFn(payload))
+        await Promise.resolve(addToCartFn(payload));
 
         safeCall(rawLogEvent, {
           action: 'add_to_cart',
           category: 'ecommerce',
           label: title,
           value: price * quantity,
-        })
+        });
 
         safeCall(rawTrackAddToCart, {
           currency,
@@ -375,13 +397,13 @@ export default function AddToCartButton({
           ...(gtmExtra?.ab_name && gtmExtra?.ab_variant
             ? { ab_experiment: String(gtmExtra.ab_name), ab_variant: String(gtmExtra.ab_variant) }
             : {}),
-        })
+        });
 
         safeCall(rawPixelAddToCart, {
           value: price * quantity,
           currency,
           contents: [{ id, quantity, item_price: price }],
-        })
+        });
 
         doDataLayerPush({
           id,
@@ -390,32 +412,32 @@ export default function AddToCartButton({
           quantity,
           value: price * quantity,
           slug,
-        })
+        });
 
         if (haptic && typeof navigator !== 'undefined' && 'vibrate' in navigator) {
           try {
-            navigator.vibrate(prefersReduced ? 10 : [8, 12, 8])
+            navigator.vibrate(prefersReduced ? 10 : [8, 12, 8]);
           } catch {}
         }
 
         if (flyToCart && canUseDOM() && wrapperRef.current) {
-          const target = document.querySelector<HTMLElement>(flyToCartSelector)
-          if (target) flyTo(wrapperRef.current, target, !!prefersReduced)
+          const target = document.querySelector<HTMLElement>(flyToCartSelector);
+          if (target) flyTo(wrapperRef.current, target, !!prefersReduced);
         }
 
         toast.success(successText, {
           duration: 2400,
           position: 'top-right',
-        })
+        });
 
-        setSrMessage(`${title} ajouté au panier`)
-        setAdded(true)
+        setSrMessage(`${title} ajouté au panier`);
+        setAdded(true);
 
         if (scrollToStickyOnMobile && canUseDOM() && window.innerWidth < 768) {
           const sticky =
             document.querySelector<HTMLElement>('aside[role="region"][data-visible="true"]') ??
-            document.querySelector<HTMLElement>('aside[role="region"]')
-          sticky?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+            document.querySelector<HTMLElement>('aside[role="region"]');
+          sticky?.scrollIntoView({ behavior: 'smooth', block: 'end' });
         }
 
         if (canUseDOM()) {
@@ -424,27 +446,27 @@ export default function AddToCartButton({
               new CustomEvent('cart-added', {
                 detail: { id, title, price, quantity, slug },
               })
-            )
+            );
           } catch {}
         }
 
-        if (afterAddFocus === 'cart') focusCartIcon()
-        if (afterAddFocus === 'button') wrapperRef.current?.focus?.()
+        if (afterAddFocus === 'cart') focusCartIcon();
+        if (afterAddFocus === 'button') wrapperRef.current?.focus?.();
 
-        onAdd?.()
+        onAdd?.();
 
         if (instantCheckout) {
           safeCall(rawLogEvent, {
             action: 'buy_now_click',
             category: 'ecommerce',
             label: title,
-          })
+          });
 
           if (!disableDataLayer) {
             pushToDataLayer({
               event: 'buy_now_click',
               ...(gtmExtra ?? {}),
-            })
+            });
           }
 
           safeCall(rawPixelInitiateCheckout, {
@@ -452,24 +474,24 @@ export default function AddToCartButton({
             currency,
             num_items: 1,
             contents: [{ id, quantity, item_price: price }],
-          })
+          });
 
-          const normalizedLocale = locale || 'fr'
-          const path = `/${normalizedLocale}/commande`
+          const normalizedLocale = locale || 'fr';
+          const path = `/${normalizedLocale}/commande`;
 
           try {
-            router.push(path)
+            router.push(path);
           } catch {
-            if (canUseDOM()) window.location.href = path
+            if (canUseDOM()) window.location.href = path;
           }
         }
       } catch (err: unknown) {
-        toast.error(tCart('add_to_cart_error'))
-        onError?.(err)
+        toast.error(tCart('add_to_cart_error'));
+        onError?.(err);
       } finally {
-        window.setTimeout(() => setLoading(false), 420)
-        window.setTimeout(() => setSrMessage(''), 1800)
-        window.setTimeout(() => setAdded(false), 1200)
+        window.setTimeout(() => setLoading(false), 420);
+        window.setTimeout(() => setSrMessage(''), 1800);
+        window.setTimeout(() => setAdded(false), 1200);
       }
     },
     [
@@ -498,9 +520,9 @@ export default function AddToCartButton({
       focusCartIcon,
       tCart,
     ]
-  )
+  );
 
-  const idleLabel = idleText ?? 'Ajouter au panier'
+  const idleLabel = idleText ?? 'Ajouter au panier';
 
   return (
     <>
@@ -517,7 +539,7 @@ export default function AddToCartButton({
         <Button
           type="button"
           onMouseDown={(e) => {
-            if (!prefersReduced && ripple && canUseDOM()) spawnRipple(e)
+            if (!prefersReduced && ripple && canUseDOM()) spawnRipple(e);
           }}
           onClick={handleClick}
           {...(ariaLabel ? { 'aria-label': ariaLabel } : { 'aria-labelledby': labelId })}
@@ -549,5 +571,5 @@ export default function AddToCartButton({
         </Button>
       </motion.div>
     </>
-  )
+  );
 }

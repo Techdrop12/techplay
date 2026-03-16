@@ -1,20 +1,20 @@
-import type { Metadata } from 'next'
-import { getTranslations } from 'next-intl/server'
-import Link from 'next/link'
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+import Link from 'next/link';
 
-import AdminBlogTable from '@/components/AdminBlogTable'
+import AdminBlogTable from '@/components/AdminBlogTable';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('admin')
+  const t = await getTranslations('admin');
   return {
     title: 'Blog – Admin TechPlay',
     description: t('blog_description'),
     robots: { index: false, follow: false },
-  }
+  };
 }
 
 export default async function AdminBlogPage() {
-  const t = await getTranslations('admin')
+  const t = await getTranslations('admin');
   return (
     <div className="space-y-6">
       <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -22,9 +22,7 @@ export default async function AdminBlogPage() {
           <h1 id="admin-blog-title" className="heading-page">
             {t('blog_section_title')}
           </h1>
-          <p className="mt-1 text-[15px] text-token-text/70">
-            {t('blog_description')}
-          </p>
+          <p className="mt-1 text-[15px] text-token-text/70">{t('blog_description')}</p>
         </div>
         <Link
           href="/admin/blog/nouveau"
@@ -37,5 +35,5 @@ export default async function AdminBlogPage() {
         <AdminBlogTable />
       </div>
     </div>
-  )
+  );
 }

@@ -6,130 +6,124 @@
 // - Debug JSON via ?debug=json
 // - Zéro récursion cassée, zéro any
 
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
 
-import { getSession } from '@/lib/auth'
-import { apiError, apiSuccess } from '@/lib/apiResponse'
-import {
-  type Order,
-  type OrderItem,
-  formatInvoiceData,
-  renderInvoicePDFStream,
-} from '@/lib/pdf'
-import { createRateLimiter, ipFromRequest } from '@/lib/rateLimit'
-import { serverEnv } from '@/env.server'
+import { getSession } from '@/lib/auth';
+import { apiError, apiSuccess } from '@/lib/apiResponse';
+import { type Order, type OrderItem, formatInvoiceData, renderInvoicePDFStream } from '@/lib/pdf';
+import { createRateLimiter, ipFromRequest } from '@/lib/rateLimit';
+import { serverEnv } from '@/env.server';
 
-export const runtime = 'nodejs'
-export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 const invoiceLimiter = createRateLimiter({
   id: 'invoice',
   limit: 10,
   intervalMs: 60_000,
-})
+});
 
 type InvoiceBody = {
-  order?: Record<string, unknown>
-  orderId?: string
-  id?: string
-  createdAt?: string | number | Date
-  currency?: string
-  customerName?: string
-  email?: string
-  items?: unknown[]
-  shipping?: unknown
-  shippingPrice?: number
-  shippingTaxRate?: number
-  taxRateDefault?: number
-  discount?: unknown
-  discountAmount?: number
-  coupon?: unknown
-  promoCode?: string
-  promotionCode?: string
-  discountCode?: string
-  customer?: unknown
-}
+  order?: Record<string, unknown>;
+  orderId?: string;
+  id?: string;
+  createdAt?: string | number | Date;
+  currency?: string;
+  customerName?: string;
+  email?: string;
+  items?: unknown[];
+  shipping?: unknown;
+  shippingPrice?: number;
+  shippingTaxRate?: number;
+  taxRateDefault?: number;
+  discount?: unknown;
+  discountAmount?: number;
+  coupon?: unknown;
+  promoCode?: string;
+  promotionCode?: string;
+  discountCode?: string;
+  customer?: unknown;
+};
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
+  return typeof value === 'object' && value !== null;
 }
 
 function getRecord(value: unknown): Record<string, unknown> {
-  return isRecord(value) ? value : {}
+  return isRecord(value) ? value : {};
 }
 
 function getNonEmptyString(value: unknown, fallback = ''): string {
-  return typeof value === 'string' && value.trim() ? value.trim() : fallback
+  return typeof value === 'string' && value.trim() ? value.trim() : fallback;
 }
 
 function getNumber(value: unknown, fallback = 0): number {
-  const n = Number(value)
-  return Number.isFinite(n) ? n : fallback
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
 }
 
 function getOptionalNumber(value: unknown): number | undefined {
-  const n = Number(value)
-  return Number.isFinite(n) ? n : undefined
+  const n = Number(value);
+  return Number.isFinite(n) ? n : undefined;
 }
 
 function getDate(value: unknown, fallback = Date.now()): Date {
   if (value instanceof Date && Number.isFinite(value.getTime())) {
-    return value
+    return value;
   }
 
   if (typeof value === 'number' && Number.isFinite(value)) {
-    return new Date(value)
+    return new Date(value);
   }
 
   if (typeof value === 'string' && value.trim()) {
-    const ts = Date.parse(value)
-    if (!Number.isNaN(ts)) return new Date(ts)
+    const ts = Date.parse(value);
+    if (!Number.isNaN(ts)) return new Date(ts);
   }
 
-  return new Date(fallback)
+  return new Date(fallback);
 }
 
 function getArray(value: unknown): unknown[] {
-  return Array.isArray(value) ? value : []
+  return Array.isArray(value) ? value : [];
 }
 
 function readRoot(body: unknown): Record<string, unknown> {
-  const root = getRecord(body)
-  const nestedOrder = root.order
-  return isRecord(nestedOrder) ? nestedOrder : root
+  const root = getRecord(body);
+  const nestedOrder = root.order;
+  return isRecord(nestedOrder) ? nestedOrder : root;
 }
 
 function readId(root: Record<string, unknown>): string {
-  const candidates = [root.orderId, root.id, root._id, root.invoiceId]
+  const candidates = [root.orderId, root.id, root._id, root.invoiceId];
 
   for (const candidate of candidates) {
     if (typeof candidate === 'string' && candidate.trim()) {
-      return candidate.trim()
+      return candidate.trim();
     }
     if (typeof candidate === 'number' && Number.isFinite(candidate)) {
-      return String(candidate)
+      return String(candidate);
     }
   }
 
-  return `order-${Date.now()}`
+  return `order-${Date.now()}`;
 }
 
 function readCurrency(root: Record<string, unknown>, fallback = 'EUR'): string {
-  const value = getNonEmptyString(root.currency, fallback).toUpperCase()
-  return value || fallback
+  const value = getNonEmptyString(root.currency, fallback).toUpperCase();
+  return value || fallback;
 }
 
 function readCustomer(root: Record<string, unknown>): Record<string, unknown> {
-  return getRecord(root.customer)
+  return getRecord(root.customer);
 }
 
 function readCustomerName(root: Record<string, unknown>): string {
-  const customer = readCustomer(root)
+  const customer = readCustomer(root);
 
-  const firstName = getNonEmptyString(customer.firstName)
-  const lastName = getNonEmptyString(customer.lastName)
-  const fullNameFromParts =
-    firstName || lastName ? `${firstName} ${lastName}`.trim() : ''
+  const firstName = getNonEmptyString(customer.firstName);
+  const lastName = getNonEmptyString(customer.lastName);
+  const fullNameFromParts = firstName || lastName ? `${firstName} ${lastName}`.trim() : '';
 
   return (
     getNonEmptyString(root.customerName) ||
@@ -137,43 +131,39 @@ function readCustomerName(root: Record<string, unknown>): string {
     getNonEmptyString(customer.fullName) ||
     fullNameFromParts ||
     ''
-  )
+  );
 }
 
-function readCustomerField(
-  root: Record<string, unknown>,
-  key: string,
-  fallback = ''
-): string {
-  const customer = readCustomer(root)
-  return getNonEmptyString(customer[key], fallback)
+function readCustomerField(root: Record<string, unknown>, key: string, fallback = ''): string {
+  const customer = readCustomer(root);
+  return getNonEmptyString(customer[key], fallback);
 }
 
 function readEmail(root: Record<string, unknown>, fallback = ''): string {
-  return getNonEmptyString(root.email) || getNonEmptyString(readCustomer(root).email) || fallback
+  return getNonEmptyString(root.email) || getNonEmptyString(readCustomer(root).email) || fallback;
 }
 
 function readShipping(root: Record<string, unknown>): Record<string, unknown> {
-  return getRecord(root.shipping)
+  return getRecord(root.shipping);
 }
 
 function readShippingPrice(root: Record<string, unknown>): number | undefined {
-  const shipping = readShipping(root)
-  return getOptionalNumber(shipping.price) ?? getOptionalNumber(root.shippingPrice)
+  const shipping = readShipping(root);
+  return getOptionalNumber(shipping.price) ?? getOptionalNumber(root.shippingPrice);
 }
 
 function readShippingTaxRate(root: Record<string, unknown>): number | undefined {
-  const shipping = readShipping(root)
+  const shipping = readShipping(root);
   return (
     getOptionalNumber(shipping.taxRate) ??
     getOptionalNumber(root.shippingTaxRate) ??
     getOptionalNumber(root.taxRateDefault)
-  )
+  );
 }
 
 function readCouponCode(root: Record<string, unknown>): string {
-  const discount = getRecord(root.discount)
-  const coupon = getRecord(root.coupon)
+  const discount = getRecord(root.discount);
+  const coupon = getRecord(root.coupon);
 
   return (
     getNonEmptyString(discount.code) ||
@@ -182,57 +172,55 @@ function readCouponCode(root: Record<string, unknown>): string {
     getNonEmptyString(root.promotionCode) ||
     getNonEmptyString(root.discountCode) ||
     ''
-  )
+  );
 }
 
 function readDiscountAmount(root: Record<string, unknown>): number | undefined {
-  const discount = root.discount
+  const discount = root.discount;
 
   if (typeof discount === 'number' && Number.isFinite(discount)) {
-    return discount
+    return discount;
   }
 
   if (isRecord(discount)) {
-    return getOptionalNumber(discount.amount)
+    return getOptionalNumber(discount.amount);
   }
 
-  return getOptionalNumber(root.discountAmount)
+  return getOptionalNumber(root.discountAmount);
 }
 
 function readItems(root: Record<string, unknown>): OrderItem[] {
   return getArray(root.items)
     .map((item): OrderItem | null => {
-      const it = getRecord(item)
+      const it = getRecord(item);
 
-      const name = getNonEmptyString(it.name) || getNonEmptyString(it.title) || 'Article'
-      const price = Math.max(0, getNumber(it.price, 0))
-      const quantity = Math.max(1, Math.floor(getNumber(it.quantity ?? it.qty, 1)))
+      const name = getNonEmptyString(it.name) || getNonEmptyString(it.title) || 'Article';
+      const price = Math.max(0, getNumber(it.price, 0));
+      const quantity = Math.max(1, Math.floor(getNumber(it.quantity ?? it.qty, 1)));
       const taxRate =
-        getOptionalNumber(it.taxRate) ??
-        getOptionalNumber(it.vatRate) ??
-        getOptionalNumber(it.tva)
+        getOptionalNumber(it.taxRate) ?? getOptionalNumber(it.vatRate) ?? getOptionalNumber(it.tva);
 
-      if (!name || quantity <= 0) return null
+      if (!name || quantity <= 0) return null;
 
       return {
         name,
         price,
         quantity,
         ...(typeof taxRate === 'number' ? { taxRate } : {}),
-      }
+      };
     })
-    .filter((item): item is OrderItem => item !== null)
+    .filter((item): item is OrderItem => item !== null);
 }
 
 function buildOrderFromBody(body: unknown): Order {
-  const root = readRoot(body)
-  const shipping = readShipping(root)
+  const root = readRoot(body);
+  const shipping = readShipping(root);
 
-  const shippingPrice = readShippingPrice(root)
-  const shippingTaxRate = readShippingTaxRate(root)
-  const discountAmount = readDiscountAmount(root)
-  const discountCode = readCouponCode(root)
-  const taxRateDefault = getOptionalNumber(root.taxRateDefault)
+  const shippingPrice = readShippingPrice(root);
+  const shippingTaxRate = readShippingTaxRate(root);
+  const discountAmount = readDiscountAmount(root);
+  const discountCode = readCouponCode(root);
+  const taxRateDefault = getOptionalNumber(root.taxRateDefault);
 
   return {
     id: readId(root),
@@ -269,48 +257,48 @@ function buildOrderFromBody(body: unknown): Order {
       : {}),
     currency: readCurrency(root, 'EUR'),
     ...(typeof taxRateDefault === 'number' ? { taxRateDefault } : {}),
-  }
+  };
 }
 
 export async function POST(req: Request) {
-  const key = ipFromRequest(req)
-  const rl = invoiceLimiter.check(key)
+  const key = ipFromRequest(req);
+  const rl = invoiceLimiter.check(key);
   if (!rl.ok) {
     return new NextResponse('Trop de requêtes. Réessayez plus tard.', {
       status: 429,
       headers: invoiceLimiter.headers(rl),
-    })
+    });
   }
 
-  const session = await getSession()
+  const session = await getSession();
   if (!session?.user?.email) {
-    return apiError('Non autorisé. Connexion requise.', 401)
+    return apiError('Non autorisé. Connexion requise.', 401);
   }
 
-  let body: unknown = {}
+  let body: unknown = {};
 
   try {
-    body = (await req.json()) as InvoiceBody
+    body = (await req.json()) as InvoiceBody;
   } catch {
-    body = {}
+    body = {};
   }
 
-  const order = buildOrderFromBody(body)
+  const order = buildOrderFromBody(body);
 
   if (!Array.isArray(order.items) || order.items.length === 0) {
-    return apiError('Aucun article dans la commande.', 400)
+    return apiError('Aucun article dans la commande.', 400);
   }
 
-  const resHeaders = new Headers(invoiceLimiter.headers(rl))
+  const resHeaders = new Headers(invoiceLimiter.headers(rl));
 
   const data = formatInvoiceData(order, {
     defaultTaxRate: 0.2,
     discountAffectsTaxBase: false,
-  })
+  });
 
-  const url = new URL(req.url)
+  const url = new URL(req.url);
   if (url.searchParams.get('debug') === 'json') {
-    return apiSuccess(data as unknown as Record<string, unknown>)
+    return apiSuccess(data as unknown as Record<string, unknown>);
   }
 
   const { stream, filename } = await renderInvoicePDFStream(data, {
@@ -325,20 +313,20 @@ export async function POST(req: Request) {
     },
     locale: 'fr-FR',
     title: `Facture ${data.invoiceNumber}`,
-  })
+  });
 
-  resHeaders.set('Content-Type', 'application/pdf')
-  resHeaders.set('Content-Disposition', `attachment; filename="${filename}"`)
-  resHeaders.set('Cache-Control', 'no-store, no-cache, must-revalidate')
-  resHeaders.set('Pragma', 'no-cache')
-  resHeaders.set('Expires', '0')
+  resHeaders.set('Content-Type', 'application/pdf');
+  resHeaders.set('Content-Disposition', `attachment; filename="${filename}"`);
+  resHeaders.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+  resHeaders.set('Pragma', 'no-cache');
+  resHeaders.set('Expires', '0');
 
-  return new NextResponse(stream, { headers: resHeaders })
+  return new NextResponse(stream, { headers: resHeaders });
 }
 
 export async function OPTIONS() {
-  const { BRAND } = await import('@/lib/constants')
-  const origin = BRAND.URL
+  const { BRAND } = await import('@/lib/constants');
+  const origin = BRAND.URL;
 
   return new NextResponse(null, {
     status: 204,
@@ -347,5 +335,5 @@ export async function OPTIONS() {
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     },
-  })
+  });
 }

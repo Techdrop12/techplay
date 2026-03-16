@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { motion, useReducedMotion } from 'framer-motion'
-import Image from 'next/image'
+import { motion, useReducedMotion } from 'framer-motion';
+import Image from 'next/image';
 import {
   useCallback,
   useEffect,
@@ -10,57 +10,57 @@ import {
   useState,
   type KeyboardEventHandler,
   type PointerEventHandler,
-} from 'react'
-import { toast } from 'react-hot-toast'
-import { FaCcMastercard, FaCcPaypal, FaCcVisa } from 'react-icons/fa'
+} from 'react';
+import { toast } from 'react-hot-toast';
+import { FaCcMastercard, FaCcPaypal, FaCcVisa } from 'react-icons/fa';
 
-import type { AggregateRating, Product, Review } from '@/types/product'
+import type { AggregateRating, Product, Review } from '@/types/product';
 
-import AddToCartButtonAB from '@/components/AddToCartButtonAB'
-import FreeShippingBadge from '@/components/FreeShippingBadge'
-import PricingBadge from '@/components/PricingBadge'
-import ProductReviews from '@/components/Product/ProductReviews'
-import ProductTags from '@/components/ProductTags'
-import QuantitySelector from '@/components/QuantitySelector'
-import RatingStars from '@/components/RatingStars'
-import RatingSummary from '@/components/RatingSummary'
-import ReviewForm from '@/components/ReviewForm'
-import ShippingSimulator from '@/components/ShippingSimulator'
-import DeliveryEstimate from '@/components/ui/DeliveryEstimate'
-import WishlistButton from '@/components/WishlistButton'
-import { detectCurrency } from '@/lib/currency'
+import AddToCartButtonAB from '@/components/AddToCartButtonAB';
+import FreeShippingBadge from '@/components/FreeShippingBadge';
+import PricingBadge from '@/components/PricingBadge';
+import ProductReviews from '@/components/Product/ProductReviews';
+import ProductTags from '@/components/ProductTags';
+import QuantitySelector from '@/components/QuantitySelector';
+import RatingStars from '@/components/RatingStars';
+import RatingSummary from '@/components/RatingSummary';
+import ReviewForm from '@/components/ReviewForm';
+import ShippingSimulator from '@/components/ShippingSimulator';
+import DeliveryEstimate from '@/components/ui/DeliveryEstimate';
+import WishlistButton from '@/components/WishlistButton';
+import { detectCurrency } from '@/lib/currency';
 import {
   mapProductToGaItem,
   trackAddToCart,
   trackAddToWishlist,
   trackSelectItem,
   trackViewItem,
-} from '@/lib/ga'
-import { DEFAULT_LOCALE, isLocale, type AppLocale } from '@/lib/language'
-import { logEvent } from '@/lib/logEvent'
-import { pixelViewContent } from '@/lib/meta-pixel'
-import { safeProductImageUrl } from '@/lib/safeProductImage'
-import { cn, formatPrice } from '@/lib/utils'
+} from '@/lib/ga';
+import { DEFAULT_LOCALE, isLocale, type AppLocale } from '@/lib/language';
+import { logEvent } from '@/lib/logEvent';
+import { pixelViewContent } from '@/lib/meta-pixel';
+import { safeProductImageUrl } from '@/lib/safeProductImage';
+import { cn, formatPrice } from '@/lib/utils';
 
 interface Props {
-  product: Product
-  locale?: string
+  product: Product;
+  locale?: string;
 }
 
 type RecentProduct = {
-  _id: string
-  slug: string
-  title: string
-  price: number
-  image: string
-}
+  _id: string;
+  slug: string;
+  title: string;
+  price: number;
+  image: string;
+};
 
-type ProductLike = Product & Record<string, unknown>
+type ProductLike = Product & Record<string, unknown>;
 
 const BLUR_DATA_URL =
-  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+'
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+';
 
-const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n))
+const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
 
 function toNum(value: unknown): number | undefined {
   const parsed =
@@ -68,13 +68,13 @@ function toNum(value: unknown): number | undefined {
       ? value
       : typeof value === 'string' && value.trim()
         ? Number(value)
-        : NaN
+        : NaN;
 
-  return Number.isFinite(parsed) ? parsed : undefined
+  return Number.isFinite(parsed) ? parsed : undefined;
 }
 
 function readString(value: unknown): string | undefined {
-  return typeof value === 'string' && value.trim() ? value.trim() : undefined
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined;
 }
 
 function buildGallery(product: ProductLike): string[] {
@@ -82,12 +82,14 @@ function buildGallery(product: ProductLike): string[] {
     product.image,
     ...(Array.isArray(product.images) ? product.images : []),
     ...(Array.isArray(product.gallery) ? product.gallery : []),
-  ]
+  ];
 
   const urls = Array.from(
-    new Set(pool.filter((item): item is string => typeof item === 'string' && item.trim().length > 0))
-  ).slice(0, 8)
-  return urls.map((url) => safeProductImageUrl(url))
+    new Set(
+      pool.filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+    )
+  ).slice(0, 8);
+  return urls.map((url) => safeProductImageUrl(url));
 }
 
 function computeAggregate(
@@ -96,11 +98,11 @@ function computeAggregate(
   aggregate?: AggregateRating
 ): AggregateRating {
   if (aggregate?.total && typeof aggregate.average === 'number') {
-    return aggregate
+    return aggregate;
   }
 
-  const list = Array.isArray(reviews) ? reviews : []
-  const total = list.length
+  const list = Array.isArray(reviews) ? reviews : [];
+  const total = list.length;
 
   if (total > 0) {
     const breakdown: Partial<Record<1 | 2 | 3 | 4 | 5, number>> = {
@@ -109,26 +111,26 @@ function computeAggregate(
       3: 0,
       4: 0,
       5: 0,
-    }
+    };
 
-    let sum = 0
-    let counted = 0
+    let sum = 0;
+    let counted = 0;
 
     for (const review of list) {
-      const value = toNum(review?.rating)
+      const value = toNum(review?.rating);
       if (value && value >= 1 && value <= 5) {
-        const safeRating = value as 1 | 2 | 3 | 4 | 5
-        breakdown[safeRating] = (breakdown[safeRating] || 0) + 1
-        sum += safeRating
-        counted += 1
+        const safeRating = value as 1 | 2 | 3 | 4 | 5;
+        breakdown[safeRating] = (breakdown[safeRating] || 0) + 1;
+        sum += safeRating;
+        counted += 1;
       }
     }
 
     return {
-      average: counted ? Math.max(0, Math.min(5, sum / counted)) : ratingFromProduct ?? 0,
+      average: counted ? Math.max(0, Math.min(5, sum / counted)) : (ratingFromProduct ?? 0),
       total,
       breakdownCount: breakdown,
-    }
+    };
   }
 
   return {
@@ -136,11 +138,11 @@ function computeAggregate(
       typeof ratingFromProduct === 'number' ? Math.max(0, Math.min(5, ratingFromProduct)) : 0,
     total: aggregate?.total ?? 0,
     breakdownCount: aggregate?.breakdownCount,
-  }
+  };
 }
 
 function toGaSource(product: Product): Record<string, unknown> {
-  return product as Record<string, unknown>
+  return product as Record<string, unknown>;
 }
 
 function IconShare({ size = 18, className = '' }: { size?: number; className?: string }) {
@@ -151,17 +153,17 @@ function IconShare({ size = 18, className = '' }: { size?: number; className?: s
         d="M14 3l7 7-7 7v-4h-1.5A7.5 7.5 0 0 1 5 5.5V4a1 1 0 0 1 1-1h1.5A7.5 7.5 0 0 0 12.5 10H14V3zM6 20h12v2H6z"
       />
     </svg>
-  )
+  );
 }
 
 export default function ProductDetail({ product, locale = 'fr' }: Props) {
-  const prefersReducedMotion = useReducedMotion()
-  const sectionRef = useRef<HTMLElement | null>(null)
-  const mediaRef = useRef<HTMLDivElement | null>(null)
-  const viewedRef = useRef(false)
+  const prefersReducedMotion = useReducedMotion();
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const mediaRef = useRef<HTMLDivElement | null>(null);
+  const viewedRef = useRef(false);
 
-  const safeLocale: AppLocale = isLocale(locale) ? locale : DEFAULT_LOCALE
-  const currency = detectCurrency(safeLocale === 'en' ? 'en' : undefined)
+  const safeLocale: AppLocale = isLocale(locale) ? locale : DEFAULT_LOCALE;
+  const currency = detectCurrency(safeLocale === 'en' ? 'en' : undefined);
 
   const t =
     safeLocale === 'en'
@@ -232,79 +234,78 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           galleryLabel: 'Miniatures du produit',
           save: 'Économisez',
           reviewsSectionAria: 'Avis clients',
-        }
+        };
 
-  const source = product as ProductLike
+  const source = product as ProductLike;
 
-  const _id = String(product._id || '')
-  const slug = readString(product.slug) || ''
-  const title = readString(product.title) || 'Produit'
-  const description = readString(product.description) || ''
-  const brand = readString(product.brand)
-  const category = readString(product.category)
-  const sku = readString(source.sku)
-  const image = safeProductImageUrl(readString(product.image)) || '/og-image.jpg'
-  const price = Math.max(0, toNum(product.price) ?? 0)
-  const oldPrice = toNum(product.oldPrice)
-  const rating = toNum(product.rating)
+  const _id = String(product._id || '');
+  const slug = readString(product.slug) || '';
+  const title = readString(product.title) || 'Produit';
+  const description = readString(product.description) || '';
+  const brand = readString(product.brand);
+  const category = readString(product.category);
+  const sku = readString(source.sku);
+  const image = safeProductImageUrl(readString(product.image)) || '/og-image.jpg';
+  const price = Math.max(0, toNum(product.price) ?? 0);
+  const oldPrice = toNum(product.oldPrice);
+  const rating = toNum(product.rating);
   // eslint-disable-next-line react-hooks/exhaustive-deps -- reviews/safeGallery from product, used in useMemo/useEffect
-  const reviews = Array.isArray(product.reviews) ? product.reviews : []
-  const reviewsCount = toNum(product.reviewsCount)
-  const isNew = Boolean(product.isNew)
-  const isBestSeller = Boolean(product.isBestSeller)
-  const stock = toNum(product.stock)
+  const reviews = Array.isArray(product.reviews) ? product.reviews : [];
+  const reviewsCount = toNum(product.reviewsCount);
+  const isNew = Boolean(product.isNew);
+  const isBestSeller = Boolean(product.isBestSeller);
+  const stock = toNum(product.stock);
   const tags = Array.isArray(source.tags)
     ? source.tags.filter((tag): tag is string => typeof tag === 'string' && tag.trim().length > 0)
-    : []
+    : [];
 
-  const gallery = useMemo(() => buildGallery(source), [source])
+  const gallery = useMemo(() => buildGallery(source), [source]);
   // eslint-disable-next-line react-hooks/exhaustive-deps -- safeGallery derived from gallery
-  const safeGallery = gallery.length > 0 ? gallery : [image]
+  const safeGallery = gallery.length > 0 ? gallery : [image];
 
-  const [quantity, setQuantity] = useState(1)
-  const [imgLoaded, setImgLoaded] = useState(false)
-  const [activeIdx, setActiveIdx] = useState(0)
-  const [zoomed, setZoomed] = useState(false)
-  const [origin, setOrigin] = useState({ x: 50, y: 50 })
+  const [quantity, setQuantity] = useState(1);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [zoomed, setZoomed] = useState(false);
+  const [origin, setOrigin] = useState({ x: 50, y: 50 });
 
-  const activeImage = safeGallery[activeIdx] || image
-  const total = useMemo(() => price * quantity, [price, quantity])
+  const activeImage = safeGallery[activeIdx] || image;
+  const total = useMemo(() => price * quantity, [price, quantity]);
 
   const aggregate = useMemo(
     () => computeAggregate(rating, reviews, product.aggregateRating),
     [rating, reviews, product.aggregateRating]
-  )
+  );
 
-  const totalReviews = aggregate.total || reviewsCount || 0
+  const totalReviews = aggregate.total || reviewsCount || 0;
   const discount =
     typeof oldPrice === 'number' && oldPrice > price
       ? Math.round(((oldPrice - price) / oldPrice) * 100)
-      : null
+      : null;
 
-  const amountSaved =
-    typeof oldPrice === 'number' && oldPrice > price ? oldPrice - price : null
+  const amountSaved = typeof oldPrice === 'number' && oldPrice > price ? oldPrice - price : null;
 
   const availability =
     typeof stock === 'number'
       ? stock > 0
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock'
-      : 'https://schema.org/InStock'
+      : 'https://schema.org/InStock';
 
-  const lowStock = typeof stock === 'number' && stock > 0 && stock <= 5
-  const outOfStock = typeof stock === 'number' && stock <= 0
-  const priceStr = price.toFixed(2)
+  const lowStock = typeof stock === 'number' && stock > 0 && stock <= 5;
+  const outOfStock = typeof stock === 'number' && stock <= 0;
+  const priceStr = price.toFixed(2);
 
   useEffect(() => {
-    if (!sectionRef.current || viewedRef.current) return
+    if (!sectionRef.current || viewedRef.current) return;
 
-    const el = sectionRef.current
+    const el = sectionRef.current;
     const observer = new IntersectionObserver(
       (entries) => {
-        const visible = entries.some((entry) => entry.isIntersecting)
-        if (!visible || viewedRef.current) return
+        const visible = entries.some((entry) => entry.isIntersecting);
+        if (!visible || viewedRef.current) return;
 
-        viewedRef.current = true
+        viewedRef.current = true;
 
         try {
           logEvent({
@@ -312,7 +313,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             category: 'engagement',
             label: title,
             value: price,
-          })
+          });
         } catch {
           // no-op
         }
@@ -322,7 +323,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             currency,
             value: price,
             items: [{ ...mapProductToGaItem(toGaSource(product)), quantity: 1 }],
-          })
+          });
         } catch {
           // no-op
         }
@@ -341,60 +342,60 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
                 item_price: price,
               },
             ],
-          })
+          });
         } catch {
           // no-op
         }
 
         try {
-          const key = 'recent:products'
-          const prev = JSON.parse(localStorage.getItem(key) || '[]') as RecentProduct[]
+          const key = 'recent:products';
+          const prev = JSON.parse(localStorage.getItem(key) || '[]') as RecentProduct[];
           const next = [
             { _id, slug, title, price, image: safeGallery[0] ?? image },
             ...prev.filter((item) => item._id !== _id),
-          ].slice(0, 16)
-          localStorage.setItem(key, JSON.stringify(next))
+          ].slice(0, 16);
+          localStorage.setItem(key, JSON.stringify(next));
         } catch {
           // no-op
         }
       },
       { threshold: 0.35 }
-    )
+    );
 
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [_id, currency, image, price, product, safeGallery, slug, title])
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [_id, currency, image, price, product, safeGallery, slug, title]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement | null
-      const tag = target?.tagName
-      const editable = tag === 'INPUT' || tag === 'TEXTAREA' || target?.isContentEditable
+      const target = event.target as HTMLElement | null;
+      const tag = target?.tagName;
+      const editable = tag === 'INPUT' || tag === 'TEXTAREA' || target?.isContentEditable;
 
-      if (editable) return
+      if (editable) return;
 
-      if (event.key === '+') setQuantity((q) => clamp(q + 1, 1, 99))
-      if (event.key === '-') setQuantity((q) => clamp(q - 1, 1, 99))
-      if (event.key === 'ArrowLeft') setActiveIdx((i) => Math.max(0, i - 1))
-      if (event.key === 'ArrowRight') setActiveIdx((i) => Math.min(safeGallery.length - 1, i + 1))
-    }
+      if (event.key === '+') setQuantity((q) => clamp(q + 1, 1, 99));
+      if (event.key === '-') setQuantity((q) => clamp(q - 1, 1, 99));
+      if (event.key === 'ArrowLeft') setActiveIdx((i) => Math.max(0, i - 1));
+      if (event.key === 'ArrowRight') setActiveIdx((i) => Math.min(safeGallery.length - 1, i + 1));
+    };
 
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [safeGallery.length])
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [safeGallery.length]);
 
   useEffect(() => {
-    if (typeof window === 'undefined' || safeGallery.length <= 1) return
+    if (typeof window === 'undefined' || safeGallery.length <= 1) return;
 
-    const nextIndex = (activeIdx + 1) % safeGallery.length
-    const prevIndex = (activeIdx - 1 + safeGallery.length) % safeGallery.length
+    const nextIndex = (activeIdx + 1) % safeGallery.length;
+    const prevIndex = (activeIdx - 1 + safeGallery.length) % safeGallery.length;
 
     for (const src of [safeGallery[nextIndex], safeGallery[prevIndex]]) {
-      if (!src) continue
-      const img = new window.Image()
-      img.src = src
+      if (!src) continue;
+      const img = new window.Image();
+      img.src = src;
     }
-  }, [activeIdx, safeGallery])
+  }, [activeIdx, safeGallery]);
 
   const onAddToCart = useCallback(() => {
     try {
@@ -403,7 +404,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         category: 'ecommerce',
         label: title,
         value: total,
-      })
+      });
     } catch {
       // no-op
     }
@@ -413,11 +414,11 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         currency,
         value: total,
         items: [{ ...mapProductToGaItem(toGaSource(product)), quantity }],
-      })
+      });
     } catch {
       // no-op
     }
-  }, [currency, product, quantity, title, total])
+  }, [currency, product, quantity, title, total]);
 
   const onAddWishlist = useCallback(() => {
     try {
@@ -426,7 +427,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         category: 'ecommerce',
         label: title,
         value: price,
-      })
+      });
     } catch {
       // no-op
     }
@@ -436,14 +437,14 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         currency,
         value: price,
         items: [{ ...mapProductToGaItem(toGaSource(product)), quantity: 1 }],
-      })
+      });
     } catch {
       // no-op
     }
-  }, [currency, price, product, title])
+  }, [currency, price, product, title]);
 
   const onThumbSelect = (idx: number) => {
-    setActiveIdx(idx)
+    setActiveIdx(idx);
 
     try {
       trackSelectItem({
@@ -451,66 +452,66 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         value: price,
         items: [{ ...mapProductToGaItem(toGaSource(product)), quantity: 1 }],
         item_list_name: 'product_gallery',
-      })
+      });
     } catch {
       // no-op
     }
-  }
+  };
 
   const share = async () => {
     try {
-      const url = typeof window !== 'undefined' ? window.location.href : ''
+      const url = typeof window !== 'undefined' ? window.location.href : '';
 
       if (
         typeof navigator !== 'undefined' &&
         'share' in navigator &&
         typeof navigator.share === 'function'
       ) {
-        await navigator.share({ title, text: title, url })
-        return
+        await navigator.share({ title, text: title, url });
+        return;
       }
 
       if (navigator.clipboard) {
-        await navigator.clipboard.writeText(url)
-        toast.success(t.copied)
+        await navigator.clipboard.writeText(url);
+        toast.success(t.copied);
       }
     } catch {
       // no-op
     }
-  }
+  };
 
   const onPointerMove: PointerEventHandler<HTMLDivElement> = (event) => {
-    if (!mediaRef.current || !zoomed) return
+    if (!mediaRef.current || !zoomed) return;
 
-    const rect = mediaRef.current.getBoundingClientRect()
-    const x = ((event.clientX - rect.left) / rect.width) * 100
-    const y = ((event.clientY - rect.top) / rect.height) * 100
+    const rect = mediaRef.current.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
 
     setOrigin({
       x: clamp(x, 0, 100),
       y: clamp(y, 0, 100),
-    })
-  }
+    });
+  };
 
   const toggleZoom = () => {
-    if (prefersReducedMotion) return
-    setZoomed((value) => !value)
-  }
+    if (prefersReducedMotion) return;
+    setZoomed((value) => !value);
+  };
 
   const onMediaKeyDown: KeyboardEventHandler<HTMLDivElement> = (event) => {
     if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault()
-      toggleZoom()
+      event.preventDefault();
+      toggleZoom();
     }
 
     if (event.key === 'ArrowLeft') {
-      setActiveIdx((i) => Math.max(0, i - 1))
+      setActiveIdx((i) => Math.max(0, i - 1));
     }
 
     if (event.key === 'ArrowRight') {
-      setActiveIdx((i) => Math.min(safeGallery.length - 1, i + 1))
+      setActiveIdx((i) => Math.min(safeGallery.length - 1, i + 1));
     }
-  }
+  };
 
   return (
     <motion.section
@@ -546,72 +547,71 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             aria-busy={!imgLoaded}
             tabIndex={0}
           >
-          <Image
-            key={activeImage}
-            src={activeImage}
-            alt={`${t.imageLabel} ${activeIdx + 1} ${t.of} ${safeGallery.length} - ${title}`}
-            fill
-            sizes="(min-width: 1024px) 50vw, 100vw"
-            priority
-            placeholder="blur"
-            blurDataURL={BLUR_DATA_URL}
-            className={cn(
-              'object-cover transition-transform duration-700 will-change-transform',
-              zoomed ? 'scale-125 cursor-zoom-out' : 'cursor-zoom-in hover:scale-[1.03]'
-            )}
-            style={{ transformOrigin: `${origin.x}% ${origin.y}%` }}
-            onLoad={() => setImgLoaded(true)}
-            itemProp="image"
-            draggable={false}
-          />
-
-          {!imgLoaded && (
-            <div
-              className="absolute inset-0 animate-pulse bg-gradient-to-br from-[hsl(var(--surface-2))] via-[hsl(var(--surface))] to-[hsl(var(--surface-2))]"
-              aria-hidden="true"
+            <Image
+              key={activeImage}
+              src={activeImage}
+              alt={`${t.imageLabel} ${activeIdx + 1} ${t.of} ${safeGallery.length} - ${title}`}
+              fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              priority
+              placeholder="blur"
+              blurDataURL={BLUR_DATA_URL}
+              className={cn(
+                'object-cover transition-transform duration-700 will-change-transform',
+                zoomed ? 'scale-125 cursor-zoom-out' : 'cursor-zoom-in hover:scale-[1.03]'
+              )}
+              style={{ transformOrigin: `${origin.x}% ${origin.y}%` }}
+              onLoad={() => setImgLoaded(true)}
+              itemProp="image"
+              draggable={false}
             />
-          )}
 
-          <div className="pointer-events-none absolute left-4 top-4 z-10 flex flex-col gap-1.5 sm:left-5 sm:top-5">
-            {isNew ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/95 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-950 shadow-[0_12px_35px_rgba(4,120,87,0.7)] ring-1 ring-emerald-900/40">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-900/90" />
-                {t.newLabel}
-              </span>
-            ) : null}
+            {!imgLoaded && (
+              <div
+                className="absolute inset-0 animate-pulse bg-gradient-to-br from-[hsl(var(--surface-2))] via-[hsl(var(--surface))] to-[hsl(var(--surface-2))]"
+                aria-hidden="true"
+              />
+            )}
 
-            {isBestSeller ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-300/95 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-950 shadow-[0_12px_35px_rgba(120,53,15,0.55)] ring-1 ring-amber-900/35">
-                <span className="h-1.5 w-1.5 rounded-full bg-amber-700" />
-                {t.bestSeller}
-              </span>
-            ) : null}
+            <div className="pointer-events-none absolute left-4 top-4 z-10 flex flex-col gap-1.5 sm:left-5 sm:top-5">
+              {isNew ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/95 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-950 shadow-[0_12px_35px_rgba(4,120,87,0.7)] ring-1 ring-emerald-900/40">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-900/90" />
+                  {t.newLabel}
+                </span>
+              ) : null}
 
-            {discount ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/95 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-red-50 shadow-[0_12px_35px_rgba(127,29,29,0.7)] ring-1 ring-red-900/40">
-                <span className="h-1.5 w-1.5 rounded-full bg-red-200" />
-                -{discount}%
-              </span>
-            ) : null}
-          </div>
+              {isBestSeller ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-300/95 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-950 shadow-[0_12px_35px_rgba(120,53,15,0.55)] ring-1 ring-amber-900/35">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-700" />
+                  {t.bestSeller}
+                </span>
+              ) : null}
 
-          <div className="absolute bottom-4 right-4 z-10">
-            <PricingBadge price={price} oldPrice={oldPrice} showDiscountLabel showOldPrice />
-          </div>
+              {discount ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/95 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-red-50 shadow-[0_12px_35px_rgba(127,29,29,0.7)] ring-1 ring-red-900/40">
+                  <span className="h-1.5 w-1.5 rounded-full bg-red-200" />-{discount}%
+                </span>
+              ) : null}
+            </div>
 
-          <div className="absolute right-4 top-4 z-10 flex gap-2 sm:right-5 sm:top-5">
-            <button
-              type="button"
-              onClick={share}
-              className="rounded-full border border-white/20 bg-black/40 px-3.5 py-2.5 text-white shadow-[0_12px_35px_rgba(15,23,42,0.7)] backdrop-blur-xl transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
-              aria-label={t.share}
-              title={t.share}
-            >
-              <IconShare size={18} />
-            </button>
-          </div>
+            <div className="absolute bottom-4 right-4 z-10">
+              <PricingBadge price={price} oldPrice={oldPrice} showDiscountLabel showOldPrice />
+            </div>
 
-          <p className="sr-only">{zoomed ? t.imageHelpOut : t.imageHelp}</p>
+            <div className="absolute right-4 top-4 z-10 flex gap-2 sm:right-5 sm:top-5">
+              <button
+                type="button"
+                onClick={share}
+                className="rounded-full border border-white/20 bg-black/40 px-3.5 py-2.5 text-white shadow-[0_12px_35px_rgba(15,23,42,0.7)] backdrop-blur-xl transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+                aria-label={t.share}
+                title={t.share}
+              >
+                <IconShare size={18} />
+              </button>
+            </div>
+
+            <p className="sr-only">{zoomed ? t.imageHelpOut : t.imageHelp}</p>
           </div>
         </div>
 
@@ -622,7 +622,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
               className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 sm:gap-4 sm:flex-wrap sm:overflow-visible sm:pb-0"
             >
               {safeGallery.map((src, idx) => {
-                const active = idx === activeIdx
+                const active = idx === activeIdx;
 
                 return (
                   <li key={`${src}-${idx}`} className="shrink-0 snap-start sm:shrink-0">
@@ -651,7 +651,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
                       />
                     </button>
                   </li>
-                )
+                );
               })}
             </ul>
           </nav>
@@ -671,7 +671,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           </h1>
           {_id || sku ? <meta itemProp="sku" content={String(_id || sku)} /> : null}
           {brand ? <meta itemProp="brand" content={brand} /> : null}
-          {(brand || category) ? (
+          {brand || category ? (
             <p className="mt-2 text-[13px] font-medium uppercase tracking-[0.12em] text-token-text/55">
               {[brand, category].filter(Boolean).join(' · ')}
             </p>
@@ -696,7 +696,11 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             <meta itemProp="availability" content={availability} />
             <span
               className="text-[2rem] font-extrabold tabular-nums tracking-tight text-[hsl(var(--accent))] sm:text-3xl"
-              aria-label={safeLocale === 'en' ? `Price: ${formatPrice(price, { currency })}` : `Prix : ${formatPrice(price, { currency })}`}
+              aria-label={
+                safeLocale === 'en'
+                  ? `Price: ${formatPrice(price, { currency })}`
+                  : `Prix : ${formatPrice(price, { currency })}`
+              }
             >
               {formatPrice(price, { currency })}
             </span>
@@ -712,7 +716,10 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             ) : null}
             {quantity > 1 ? (
               <span className="w-full text-[13px] text-token-text/70 sm:w-auto">
-                Total ({quantity}×)&nbsp;: <span className="font-semibold text-[hsl(var(--text))]">{formatPrice(total, { currency })}</span>
+                Total ({quantity}×)&nbsp;:{' '}
+                <span className="font-semibold text-[hsl(var(--text))]">
+                  {formatPrice(total, { currency })}
+                </span>
               </span>
             ) : null}
           </div>
@@ -720,15 +727,30 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           {/* Réassurance — au-dessus du CTA */}
           <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg bg-[hsl(var(--surface-2))]/50 px-3 py-2.5 text-[12px] sm:gap-x-5">
             <span className="inline-flex items-center gap-1.5 text-token-text/80">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400" aria-hidden="true">✓</span>
+              <span
+                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400"
+                aria-hidden="true"
+              >
+                ✓
+              </span>
               {t.shipping}
             </span>
             <span className="inline-flex items-center gap-1.5 text-token-text/80">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-600 dark:bg-sky-900/50 dark:text-sky-400" aria-hidden="true">🔒</span>
+              <span
+                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-600 dark:bg-sky-900/50 dark:text-sky-400"
+                aria-hidden="true"
+              >
+                🔒
+              </span>
               {t.returns}
             </span>
             <span className="inline-flex items-center gap-1.5 text-token-text/80">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400" aria-hidden="true">⚡</span>
+              <span
+                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400"
+                aria-hidden="true"
+              >
+                ⚡
+              </span>
               {t.secured}
             </span>
           </div>
@@ -736,7 +758,10 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           {/* Quantité + CTA */}
           <div className="mt-5 space-y-4">
             <div className="flex min-h-[44px] flex-col justify-center gap-3 xs:flex-row xs:items-center xs:gap-4">
-              <label htmlFor="quantity" className="text-sm font-semibold text-[hsl(var(--text))] sm:text-sm">
+              <label
+                htmlFor="quantity"
+                className="text-sm font-semibold text-[hsl(var(--text))] sm:text-sm"
+              >
                 {t.quantity}
               </label>
               <QuantitySelector
@@ -776,7 +801,9 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
                   aria-label={`${t.addToCart} ${title}`}
                 />
                 <p className="text-center text-[12px] text-token-text/60" role="status">
-                  {safeLocale === 'en' ? 'Secure checkout · Free returns' : 'Paiement sécurisé · Retours gratuits'}
+                  {safeLocale === 'en'
+                    ? 'Secure checkout · Free returns'
+                    : 'Paiement sécurisé · Retours gratuits'}
                 </p>
               </div>
             ) : (
@@ -811,7 +838,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
                       action: 'jump_to_reviews',
                       category: 'engagement',
                       label: slug || title,
-                    })
+                    });
                   } catch {
                     // no-op
                   }
@@ -853,7 +880,9 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
                   style={{ width: `${Math.min(100, ((stock || 0) / 5) * 100)}%` }}
                 />
               </div>
-              <p className="mt-1 text-[11px] font-medium text-amber-700 dark:text-amber-300">{t.hurry}</p>
+              <p className="mt-1 text-[11px] font-medium text-amber-700 dark:text-amber-300">
+                {t.hurry}
+              </p>
             </div>
           ) : null}
           <DeliveryEstimate />
@@ -873,77 +902,93 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-            <div className="inline-flex min-h-[44px] items-center sm:min-h-0" onClick={onAddWishlist}>
-              <WishlistButton
-                product={{
-                  _id,
-                  slug,
-                  title,
-                  price,
-                  image: safeGallery[0] ?? image,
-                }}
-                floating={false}
-                className="mt-0 sm:mt-2"
-              />
-            </div>
-
-            <button
-              type="button"
-              onClick={share}
-              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-[13px] font-medium transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 dark:bg-black/20 dark:hover:bg-black/30 sm:min-h-0 sm:min-w-0 sm:py-2.5"
-              aria-label={t.share}
-              title={t.share}
-            >
-              <IconShare size={18} />
-              <span>{t.share}</span>
-            </button>
-
-            <div className="ml-auto mt-2 flex items-center gap-3 text-xl text-token-text/50">
-              <span className="mr-1 text-[11px] font-medium uppercase tracking-wider text-token-text/60">{t.payments}</span>
-              <FaCcVisa aria-hidden="true" title="Visa" className="transition-opacity hover:opacity-80" />
-              <FaCcMastercard aria-hidden="true" title="Mastercard" className="transition-opacity hover:opacity-80" />
-              <FaCcPaypal aria-hidden="true" title="PayPal" className="transition-opacity hover:opacity-80" />
-              <span className="sr-only">{t.acceptedPayments}</span>
-            </div>
+          <div className="inline-flex min-h-[44px] items-center sm:min-h-0" onClick={onAddWishlist}>
+            <WishlistButton
+              product={{
+                _id,
+                slug,
+                title,
+                price,
+                image: safeGallery[0] ?? image,
+              }}
+              floating={false}
+              className="mt-0 sm:mt-2"
+            />
           </div>
 
-          <div className="mt-2">
-            <ShippingSimulator minDays={2} maxDays={3} businessDaysOnly />
-          </div>
+          <button
+            type="button"
+            onClick={share}
+            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-[13px] font-medium transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 dark:bg-black/20 dark:hover:bg-black/30 sm:min-h-0 sm:min-w-0 sm:py-2.5"
+            aria-label={t.share}
+            title={t.share}
+          >
+            <IconShare size={18} />
+            <span>{t.share}</span>
+          </button>
 
-          <div className="mt-2 grid gap-2">
-            <details className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface-2))]/50 p-3.5">
-              <summary className="flex min-h-[44px] cursor-pointer list-none items-center text-[13px] font-semibold text-token-text [&::-webkit-details-marker]:hidden">{t.deliveryReturns}</summary>
-              <ul className="mt-2 list-disc space-y-1 pl-5 text-[13px] text-token-text/70">
-                <li>
-                  {safeLocale === 'en'
-                    ? 'Delivery within 48–72h in mainland France'
-                    : 'Livraison 48–72h en France métropolitaine'}
-                </li>
-                <li>
-                  {safeLocale === 'en'
-                    ? 'Free return within 30 days'
-                    : 'Retour gratuit sous 30 jours'}
-                </li>
-                <li>
-                  {safeLocale === 'en' ? 'Real-time order tracking' : 'Suivi colis temps réel'}
-                </li>
-              </ul>
-            </details>
-
-            <details className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface-2))]/50 p-3.5">
-              <summary className="flex min-h-[44px] cursor-pointer list-none items-center text-[13px] font-semibold text-token-text [&::-webkit-details-marker]:hidden">{t.specs}</summary>
-              <p className="mt-2 text-[13px] text-token-text/70">
-                {brand ? (
-                  <>
-                    {t.brand}&nbsp;: <strong>{brand}</strong>
-                  </>
-                ) : (
-                  t.detailedSpecs
-                )}
-              </p>
-            </details>
+          <div className="ml-auto mt-2 flex items-center gap-3 text-xl text-token-text/50">
+            <span className="mr-1 text-[11px] font-medium uppercase tracking-wider text-token-text/60">
+              {t.payments}
+            </span>
+            <FaCcVisa
+              aria-hidden="true"
+              title="Visa"
+              className="transition-opacity hover:opacity-80"
+            />
+            <FaCcMastercard
+              aria-hidden="true"
+              title="Mastercard"
+              className="transition-opacity hover:opacity-80"
+            />
+            <FaCcPaypal
+              aria-hidden="true"
+              title="PayPal"
+              className="transition-opacity hover:opacity-80"
+            />
+            <span className="sr-only">{t.acceptedPayments}</span>
           </div>
+        </div>
+
+        <div className="mt-2">
+          <ShippingSimulator minDays={2} maxDays={3} businessDaysOnly />
+        </div>
+
+        <div className="mt-2 grid gap-2">
+          <details className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface-2))]/50 p-3.5">
+            <summary className="flex min-h-[44px] cursor-pointer list-none items-center text-[13px] font-semibold text-token-text [&::-webkit-details-marker]:hidden">
+              {t.deliveryReturns}
+            </summary>
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-[13px] text-token-text/70">
+              <li>
+                {safeLocale === 'en'
+                  ? 'Delivery within 48–72h in mainland France'
+                  : 'Livraison 48–72h en France métropolitaine'}
+              </li>
+              <li>
+                {safeLocale === 'en'
+                  ? 'Free return within 30 days'
+                  : 'Retour gratuit sous 30 jours'}
+              </li>
+              <li>{safeLocale === 'en' ? 'Real-time order tracking' : 'Suivi colis temps réel'}</li>
+            </ul>
+          </details>
+
+          <details className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface-2))]/50 p-3.5">
+            <summary className="flex min-h-[44px] cursor-pointer list-none items-center text-[13px] font-semibold text-token-text [&::-webkit-details-marker]:hidden">
+              {t.specs}
+            </summary>
+            <p className="mt-2 text-[13px] text-token-text/70">
+              {brand ? (
+                <>
+                  {t.brand}&nbsp;: <strong>{brand}</strong>
+                </>
+              ) : (
+                t.detailedSpecs
+              )}
+            </p>
+          </details>
+        </div>
       </div>
 
       <div className="mt-12 lg:col-span-2" id="reviews" aria-label={t.reviewsSectionAria}>
@@ -965,5 +1010,5 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
         <ReviewForm productId={_id} />
       </div>
     </motion.section>
-  )
+  );
 }

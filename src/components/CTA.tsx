@@ -1,10 +1,10 @@
-import Link from '@/components/LocalizedLink'
+import Link from '@/components/LocalizedLink';
 
 interface CTAProps {
-  title: string
-  description: string
-  href: string
-  buttonLabel: string
+  title: string;
+  description: string;
+  href: string;
+  buttonLabel: string;
 }
 
 export default function CTA({ title, description, href, buttonLabel }: CTAProps) {
@@ -19,5 +19,5 @@ export default function CTA({ title, description, href, buttonLabel }: CTAProps)
         {buttonLabel}
       </Link>
     </div>
-  )
+  );
 }

@@ -4,5 +4,5 @@ export default function AccountLoading() {
       <div className="skeleton mb-8 h-10 w-48 rounded-xl" />
       <div className="skeleton h-64 rounded-2xl" />
     </div>
-  )
+  );
 }

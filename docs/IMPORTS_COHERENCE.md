@@ -1,6 +1,6 @@
 # Vérification des imports et cohérence
 
-*Vérification effectuée sur l’ensemble du projet.*
+_Vérification effectuée sur l’ensemble du projet._
 
 ## 1. Résolution des imports (TypeScript)
 
@@ -27,14 +27,14 @@
 
 ## 4. Conventions recommandées
 
-| Ressource        | Import à utiliser                          | Remarque |
-|------------------|--------------------------------------------|----------|
-| Panier (hook)    | `import { useCart } from '@/hooks/useCart'` | Point d’entrée unique pour les composants. |
-| CartProvider     | `import { CartProvider } from '@/context/cartContext'` | Uniquement pour envelopper l’app. |
-| logEvent         | `import { logEvent } from '@/lib/logEvent'` | Named export. |
+| Ressource        | Import à utiliser                                                                     | Remarque                                                 |
+| ---------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Panier (hook)    | `import { useCart } from '@/hooks/useCart'`                                           | Point d’entrée unique pour les composants.               |
+| CartProvider     | `import { CartProvider } from '@/context/cartContext'`                                | Uniquement pour envelopper l’app.                        |
+| logEvent         | `import { logEvent } from '@/lib/logEvent'`                                           | Named export.                                            |
 | RatingStars      | `import RatingStars from '@/components/RatingStars'` ou `@/components/ui/RatingStars` | Les deux marchent (ui réexporte le composant principal). |
-| Utils (cn, etc.) | `import { cn, formatPrice } from '@/lib/utils'` | Depuis `@/lib/utils`. |
-| SectionWrapper   | `import SectionWrapper from '@/components/SectionWrapper'` | Un seul fichier (plus de doublon dans ui). |
+| Utils (cn, etc.) | `import { cn, formatPrice } from '@/lib/utils'`                                       | Depuis `@/lib/utils`.                                    |
+| SectionWrapper   | `import SectionWrapper from '@/components/SectionWrapper'`                            | Un seul fichier (plus de doublon dans ui).               |
 
 ## 5. Barrels (index) vérifiés
 

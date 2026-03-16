@@ -1,50 +1,52 @@
-'use client'
+'use client';
 
-import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
-import { useState } from 'react'
-import { toast } from 'react-hot-toast'
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 interface AccountProfileFormProps {
-  defaultName: string
-  defaultEmail: string
+  defaultName: string;
+  defaultEmail: string;
 }
 
-export default function AccountProfileForm({
-  defaultName,
-  defaultEmail,
-}: AccountProfileFormProps) {
-  const t = useTranslations('account')
-  const tCommon = useTranslations('common')
-  const router = useRouter()
-  const [name, setName] = useState(defaultName)
-  const [loading, setLoading] = useState(false)
+export default function AccountProfileForm({ defaultName, defaultEmail }: AccountProfileFormProps) {
+  const t = useTranslations('account');
+  const tCommon = useTranslations('common');
+  const router = useRouter();
+  const [name, setName] = useState(defaultName);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
     try {
       const res = await fetch('/api/account/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: name.trim() }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data?.error || 'Erreur')
-      toast.success(t('profile_updated'))
-      router.refresh()
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'Erreur');
+      toast.success(t('profile_updated'));
+      router.refresh();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Erreur')
+      toast.error(e instanceof Error ? e.message : 'Erreur');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5" aria-labelledby="profile-form-heading">
-      <h2 id="profile-form-heading" className="sr-only">{t('profile')}</h2>
+      <h2 id="profile-form-heading" className="sr-only">
+        {t('profile')}
+      </h2>
       <div>
-        <label htmlFor="profil-email" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">
+        <label
+          htmlFor="profil-email"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
           {t('profile_email_label')}
         </label>
         <input
@@ -60,7 +62,10 @@ export default function AccountProfileForm({
         </p>
       </div>
       <div>
-        <label htmlFor="profil-name" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">
+        <label
+          htmlFor="profil-name"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
           {t('profile_display_name')}
         </label>
         <input
@@ -82,5 +87,5 @@ export default function AccountProfileForm({
         {loading ? tCommon('saving') : tCommon('save')}
       </button>
     </form>
-  )
+  );
 }

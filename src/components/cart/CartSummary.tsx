@@ -1,19 +1,19 @@
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
-import type { Product } from '@/types/product'
+import type { Product } from '@/types/product';
 
-import FreeShippingBadge from '@/components/FreeShippingBadge'
-import Link from '@/components/LocalizedLink'
-import { UI } from '@/lib/constants'
-import { cn, formatPrice } from '@/lib/utils'
+import FreeShippingBadge from '@/components/FreeShippingBadge';
+import Link from '@/components/LocalizedLink';
+import { UI } from '@/lib/constants';
+import { cn, formatPrice } from '@/lib/utils';
 
 type CouponSpec =
   | { type: 'percent'; value: number } // ex: 10 = -10%
-  | { type: 'amount'; value: number }  // ex: 5  = -5 €
-  | { type: 'freeship' };              // livraison offerte
+  | { type: 'amount'; value: number } // ex: 5  = -5 €
+  | { type: 'freeship' }; // livraison offerte
 
 interface CartSummaryProps {
   items: (Product & { quantity: number })[];
@@ -51,7 +51,7 @@ export default function CartSummary({
   onCouponRemoved,
   className = '',
 }: CartSummaryProps) {
-  const t = useTranslations('cart')
+  const t = useTranslations('cart');
   const [code, setCode] = useState('');
   const [applied, setApplied] = useState('');
   const [msg, setMsg] = useState('');
@@ -74,10 +74,7 @@ export default function CartSummary({
     [items]
   );
 
-  const itemsCount = useMemo(
-    () => safeItems.reduce((s, it) => s + it.quantity, 0),
-    [safeItems]
-  );
+  const itemsCount = useMemo(() => safeItems.reduce((s, it) => s + it.quantity, 0), [safeItems]);
 
   const subtotal = useMemo(
     () => round2(safeItems.reduce((s, it) => s + it.price * it.quantity, 0)),
@@ -150,7 +147,10 @@ export default function CartSummary({
       {/* Live region pour lecteurs d’écran */}
       <p ref={srRef} className="sr-only" role="status" aria-live="polite" />
 
-      <h2 id="cart-summary-title" className="text-lg font-bold tracking-tight text-[hsl(var(--text))] border-b border-[hsl(var(--border))] pb-3">
+      <h2
+        id="cart-summary-title"
+        className="text-lg font-bold tracking-tight text-[hsl(var(--text))] border-b border-[hsl(var(--border))] pb-3"
+      >
         {t('summary_title')}
       </h2>
 
@@ -172,12 +172,18 @@ export default function CartSummary({
           />
         )}
         <Row label={t('vat_est')} value={taxRate > 0 ? formatPrice(tax) : '—'} />
-        <Row label={t('shipping')} value={shipping === 0 ? t('shipping_free') : formatPrice(shipping)} />
+        <Row
+          label={t('shipping')}
+          value={shipping === 0 ? t('shipping_free') : formatPrice(shipping)}
+        />
       </div>
       <hr className="border-[hsl(var(--border))]" />
       <div className="flex items-baseline justify-between gap-4 py-1">
         <span className="text-base font-bold text-[hsl(var(--text))]">Total</span>
-        <span className="text-xl font-extrabold tabular-nums text-[hsl(var(--text))]" aria-label={t('total')}>
+        <span
+          className="text-xl font-extrabold tabular-nums text-[hsl(var(--text))]"
+          aria-label={t('total')}
+        >
           {formatPrice(total)}
         </span>
       </div>
@@ -185,7 +191,8 @@ export default function CartSummary({
       {/* Économies totales */}
       {savings > 0 && (
         <p className="text-[12px] text-emerald-600 dark:text-emerald-400">
-          {t('you_save', { amount: formatPrice(savings) })}{applied ? ` (${applied})` : ''}
+          {t('you_save', { amount: formatPrice(savings) })}
+          {applied ? ` (${applied})` : ''}
         </p>
       )}
 
@@ -205,7 +212,9 @@ export default function CartSummary({
       <div className="space-y-2 border-t border-[hsl(var(--border))] pt-4">
         {applied ? (
           <div className="flex items-center justify-between rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-3 py-2 text-[12px]">
-            <span className="text-token-text/80">{t('code_label')} {applied}</span>
+            <span className="text-token-text/80">
+              {t('code_label')} {applied}
+            </span>
             <button
               type="button"
               onClick={removeCoupon}
@@ -218,7 +227,10 @@ export default function CartSummary({
         ) : (
           <form
             className="flex gap-2"
-            onSubmit={(e) => { e.preventDefault(); applyCoupon(code); }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              applyCoupon(code);
+            }}
             aria-label={t('coupon_aria')}
           >
             <input
@@ -233,16 +245,20 @@ export default function CartSummary({
             <button
               type="submit"
               disabled={!code.trim()}
-              className={cn('shrink-0 rounded-lg border border-[hsl(var(--border))] px-3 py-2 text-[12px] font-medium transition hover:bg-[hsl(var(--surface))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]', !code.trim() && 'cursor-not-allowed opacity-50')}
+              className={cn(
+                'shrink-0 rounded-lg border border-[hsl(var(--border))] px-3 py-2 text-[12px] font-medium transition hover:bg-[hsl(var(--surface))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]',
+                !code.trim() && 'cursor-not-allowed opacity-50'
+              )}
               aria-label={t('apply_code')}
             >
               OK
             </button>
           </form>
         )}
-        <p id="coupon-help" className="text-[11px] text-token-text/60" role="status">{msg}</p>
+        <p id="coupon-help" className="text-[11px] text-token-text/60" role="status">
+          {msg}
+        </p>
       </div>
-
     </section>
   );
 }

@@ -17,17 +17,17 @@ cp .env.example .env.local
 
 ## Scripts et quality gates
 
-| Script | Rôle |
-|--------|------|
-| `npm run dev` | Serveur de développement |
-| `npm run build` | Build production |
-| `npm run start` | Démarrer le build (port 3000) |
-| `npm run typecheck` | Vérification TypeScript |
-| `npm run lint` | ESLint (max-warnings=0) |
-| `npm run test` | Tests Vitest |
-| **`npm run ci`** | **Typecheck + lint + test + build** (même enchaînement que la CI) |
-| `npm run test:e2e` | Tests E2E Playwright (parcours critique). Démarrer le serveur avant ou laisser le config le lancer en dev. |
-| `npm run test:e2e:ui` | Mode UI Playwright pour déboguer les E2E. |
+| Script                | Rôle                                                                                                       |
+| --------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `npm run dev`         | Serveur de développement                                                                                   |
+| `npm run build`       | Build production                                                                                           |
+| `npm run start`       | Démarrer le build (port 3000)                                                                              |
+| `npm run typecheck`   | Vérification TypeScript                                                                                    |
+| `npm run lint`        | ESLint (max-warnings=0)                                                                                    |
+| `npm run test`        | Tests Vitest                                                                                               |
+| **`npm run ci`**      | **Typecheck + lint + test + build** (même enchaînement que la CI)                                          |
+| `npm run test:e2e`    | Tests E2E Playwright (parcours critique). Démarrer le serveur avant ou laisser le config le lancer en dev. |
+| `npm run test:e2e:ui` | Mode UI Playwright pour déboguer les E2E.                                                                  |
 
 Avant de pousser ou d’ouvrir une PR, exécuter au minimum :
 

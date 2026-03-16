@@ -1,10 +1,19 @@
-'use client'
+'use client';
 import {
-  Headphones, Keyboard, Mouse, Camera, BatteryCharging, Gift,
-  ShoppingCart, Heart, Search, User, Sparkles
-} from 'lucide-react'
+  Headphones,
+  Keyboard,
+  Mouse,
+  Camera,
+  BatteryCharging,
+  Gift,
+  ShoppingCart,
+  Heart,
+  Search,
+  User,
+  Sparkles,
+} from 'lucide-react';
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
 
 const MAP = {
   headphones: Headphones,
@@ -18,12 +27,12 @@ const MAP = {
   search: Search,
   user: User,
   sparkles: Sparkles,
-} as const
+} as const;
 
-export type IconName = keyof typeof MAP
-type Props = { name: IconName; size?: number; className?: string }
+export type IconName = keyof typeof MAP;
+type Props = { name: IconName; size?: number; className?: string };
 
 export default function Icon({ name, size = 20, className }: Props) {
-  const C = MAP[name]
-  return <C aria-hidden="true" size={size} className={cn('shrink-0', className)} />
+  const C = MAP[name];
+  return <C aria-hidden="true" size={size} className={cn('shrink-0', className)} />;
 }

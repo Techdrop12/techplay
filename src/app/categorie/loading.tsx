@@ -8,5 +8,5 @@ export default function CategorieLoading() {
         ))}
       </div>
     </div>
-  )
+  );
 }

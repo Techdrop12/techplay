@@ -1,13 +1,13 @@
-'use client'
+'use client';
 
-import { motion } from 'framer-motion'
-import { Star } from 'lucide-react'
-import { useLocale, useTranslations } from 'next-intl'
-import { useEffect, useMemo, useState } from 'react'
+import { motion } from 'framer-motion';
+import { Star } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import { useEffect, useMemo, useState } from 'react';
 
-import type { Review } from '@/types/product'
+import type { Review } from '@/types/product';
 
-import { timeAgo, type TimeAgoLabels } from '@/lib/formatDate'
+import { timeAgo, type TimeAgoLabels } from '@/lib/formatDate';
 
 /** Review avec champs optionnels API (helpful, verified) */
 type ReviewWithExtras = Review & { helpful?: number; verified?: boolean };
@@ -27,9 +27,9 @@ interface ReviewListProps {
 }
 
 export default function ReviewList({ productId }: ReviewListProps) {
-  const locale = useLocale() as 'fr' | 'en'
-  const t = useTranslations('reviews')
-  const tDate = useTranslations('date')
+  const locale = useLocale() as 'fr' | 'en';
+  const t = useTranslations('reviews');
+  const tDate = useTranslations('date');
   const timeAgoLabels: TimeAgoLabels = useMemo(
     () => ({
       justNow: tDate('time_ago_just_now'),
@@ -38,7 +38,7 @@ export default function ReviewList({ productId }: ReviewListProps) {
       d: (n) => tDate('time_ago_d', { n }),
     }),
     [tDate]
-  )
+  );
   const [reviews, setReviews] = useState<ReviewWithExtras[]>([]);
   const [filter, setFilter] = useState<number | null>(null);
   const [sort, setSort] = useState('recent');
@@ -64,8 +64,7 @@ export default function ReviewList({ productId }: ReviewListProps) {
       })
       .then((data: Review[]) => {
         const sorted = data.sort(
-          (a, b) =>
-            new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
+          (a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
         );
         setReviews(sorted);
       })
@@ -122,7 +121,9 @@ export default function ReviewList({ productId }: ReviewListProps) {
               key={s}
               onClick={() => setFilter(s === filter ? null : s)}
               className={`text-xs px-2 py-1 rounded border transition focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-black ${
-                s === filter ? 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))]' : 'text-token-text/80 hover:bg-[hsl(var(--surface-2))]'
+                s === filter
+                  ? 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))]'
+                  : 'text-token-text/80 hover:bg-[hsl(var(--surface-2))]'
               }`}
               aria-pressed={s === filter}
               aria-label={t('filter_stars', { count: s })}

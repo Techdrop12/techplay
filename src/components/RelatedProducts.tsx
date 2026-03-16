@@ -18,7 +18,10 @@ export default function RelatedProducts({ currentCategory, currentId }: RelatedP
       const data = await res.json();
 
       const filtered = data
-        .filter((p: import('@/types/product').Product) => p.category === currentCategory && p._id !== currentId)
+        .filter(
+          (p: import('@/types/product').Product) =>
+            p.category === currentCategory && p._id !== currentId
+        )
         .slice(0, 4);
 
       setRelated(filtered);

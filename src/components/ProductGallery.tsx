@@ -1,12 +1,12 @@
 // src/components/ProductGallery.tsx
-'use client'
+'use client';
 
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import Image from 'next/image'
-import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import Image from 'next/image';
+import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { safeProductImageUrl } from '@/lib/safeProductImage'
+import { safeProductImageUrl } from '@/lib/safeProductImage';
 
 const BLUR = 'data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=';
 const PLACEHOLDER = '/default.jpg';
@@ -34,9 +34,9 @@ export default function ProductGallery({
   edgeFade = true,
   showIndex = true,
 }: ProductGalleryProps) {
-  const t = useTranslations('common')
-  const tProduct = useTranslations('product')
-  const prefersReducedMotion = useReducedMotion()
+  const t = useTranslations('common');
+  const tProduct = useTranslations('product');
+  const prefersReducedMotion = useReducedMotion();
 
   /** Normalisation des médias (string -> {src, kind:'image'}) + fallback pour URLs cassées (ex. fakestoreapi) */
   const media = useMemo(() => {
@@ -44,17 +44,19 @@ export default function ProductGallery({
     return arr
       .filter(Boolean)
       .map((it) => {
-        const src = typeof it === 'string' ? it : it?.src
-        const safeSrc = typeof src === 'string' && src.length > 0 ? safeProductImageUrl(src) : ''
+        const src = typeof it === 'string' ? it : it?.src;
+        const safeSrc = typeof src === 'string' && src.length > 0 ? safeProductImageUrl(src) : '';
         return typeof it === 'string'
           ? { src: safeSrc, kind: 'image' as const }
-          : { src: safeSrc, kind: it?.kind === 'video' ? 'video' : 'image', poster: it?.poster }
+          : { src: safeSrc, kind: it?.kind === 'video' ? 'video' : 'image', poster: it?.poster };
       })
       .filter((m) => m.src.length > 0);
   }, [images]);
 
   const [index, setIndex] = useState(
-    Number.isFinite(startIndex) ? Math.max(0, Math.min(startIndex, Math.max(0, media.length - 1))) : 0
+    Number.isFinite(startIndex)
+      ? Math.max(0, Math.min(startIndex, Math.max(0, media.length - 1)))
+      : 0
   );
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
@@ -160,13 +162,26 @@ export default function ProductGallery({
   useEffect(() => {
     if (!lightboxOpen) return;
     const onKey = (e: globalThis.KeyboardEvent) => {
-      if (e.key === 'ArrowRight') { e.preventDefault(); goNext(); }
-      else if (e.key === 'ArrowLeft') { e.preventDefault(); goPrev(); }
-      else if (e.key === 'Escape') { e.preventDefault(); setLightboxOpen(false); }
-      else if ((e.key === '+' || e.key === '=') && isImage) { e.preventDefault(); setZoom((z) => Math.min(3, z + 0.2)); }
-      else if ((e.key === '-' || e.key === '_') && isImage) { e.preventDefault(); setZoom((z) => Math.max(1, z - 0.2)); }
-      else if (e.key === '0' && isImage) { e.preventDefault(); setZoom(1); panRef.current = { x: 0, y: 0 }; }
-      else if (e.key === 'Tab') {
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        goNext();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        goPrev();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        setLightboxOpen(false);
+      } else if ((e.key === '+' || e.key === '=') && isImage) {
+        e.preventDefault();
+        setZoom((z) => Math.min(3, z + 0.2));
+      } else if ((e.key === '-' || e.key === '_') && isImage) {
+        e.preventDefault();
+        setZoom((z) => Math.max(1, z - 0.2));
+      } else if (e.key === '0' && isImage) {
+        e.preventDefault();
+        setZoom(1);
+        panRef.current = { x: 0, y: 0 };
+      } else if (e.key === 'Tab') {
         const root = lightboxRef.current;
         if (!root) return;
         const focusables = root.querySelectorAll('button,[href],[tabindex]:not([tabindex="-1"])');
@@ -174,13 +189,18 @@ export default function ProductGallery({
         const first = focusables[0];
         const last = focusables[focusables.length - 1];
         const active = document.activeElement;
-        if (e.shiftKey && active === first) { e.preventDefault(); (last as HTMLElement).focus(); }
-        else if (!e.shiftKey && active === last) { e.preventDefault(); (first as HTMLElement).focus(); }
+        if (e.shiftKey && active === first) {
+          e.preventDefault();
+          (last as HTMLElement).focus();
+        } else if (!e.shiftKey && active === last) {
+          e.preventDefault();
+          (first as HTMLElement).focus();
+        }
       }
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- goNext/goPrev stable, lightbox key handler
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- goNext/goPrev stable, lightbox key handler
   }, [lightboxOpen, isImage]);
 
   // Navigation
@@ -207,7 +227,8 @@ export default function ProductGallery({
     if (!['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(e.key)) return;
     e.preventDefault();
     let next = index;
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = Math.min(media.length - 1, index + 1);
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown')
+      next = Math.min(media.length - 1, index + 1);
     if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = Math.max(0, index - 1);
     if (e.key === 'Home') next = 0;
     if (e.key === 'End') next = media.length - 1;
@@ -221,9 +242,11 @@ export default function ProductGallery({
       e.preventDefault();
       setLightboxOpen(true);
     } else if (e.key === 'ArrowRight') {
-      e.preventDefault(); goNext();
+      e.preventDefault();
+      goNext();
     } else if (e.key === 'ArrowLeft') {
-      e.preventDefault(); goPrev();
+      e.preventDefault();
+      goPrev();
     }
   };
 
@@ -319,7 +342,9 @@ export default function ProductGallery({
           return (
             <button
               key={(src || PLACEHOLDER) + i}
-              ref={(el) => { thumbBtnsRef.current[i] = el; }}
+              ref={(el) => {
+                thumbBtnsRef.current[i] = el;
+              }}
               onClick={() => handleThumbClick(i)}
               type="button"
               className={[
@@ -531,7 +556,8 @@ export default function ProductGallery({
               )}
 
               <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-white/90">
-                {index + 1}/{media.length}{isImage && ` — zoom ${Math.round(zoom * 100)}%`}
+                {index + 1}/{media.length}
+                {isImage && ` — zoom ${Math.round(zoom * 100)}%`}
               </div>
 
               {/* Boutons zoom (images) */}
@@ -555,7 +581,10 @@ export default function ProductGallery({
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setZoom(1); panRef.current = { x: 0, y: 0 }; }}
+                    onClick={() => {
+                      setZoom(1);
+                      panRef.current = { x: 0, y: 0 };
+                    }}
                     aria-label={t('reset_zoom')}
                     className="h-10 px-3 rounded-full bg-white/20 text-white text-sm backdrop-blur hover:bg-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                   >

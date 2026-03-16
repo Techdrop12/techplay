@@ -12,5 +12,5 @@ export default function CommandeLoading() {
         </div>
       </div>
     </div>
-  )
+  );
 }

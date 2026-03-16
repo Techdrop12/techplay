@@ -1,9 +1,9 @@
-'use client'
+'use client';
 
-import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
-import { useState, useEffect } from 'react'
-import { toast } from 'react-hot-toast'
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 
 interface EditProductFormProps {
   productId: string;
@@ -23,30 +23,30 @@ interface EditProductFormData {
 }
 
 export default function EditProductForm({ productId }: EditProductFormProps) {
-  const t = useTranslations('admin')
-  const tCommon = useTranslations('common')
-  const router = useRouter()
-  const [formData, setFormData] = useState<EditProductFormData | null>(null)
-  const [loading, setLoading] = useState(false)
+  const t = useTranslations('admin');
+  const tCommon = useTranslations('common');
+  const router = useRouter();
+  const [formData, setFormData] = useState<EditProductFormData | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function fetchProduct() {
       try {
-        const res = await fetch(`/api/admin/products/${productId}`)
-        if (!res.ok) throw new Error(t('product_not_found'))
-        const data = await res.json()
+        const res = await fetch(`/api/admin/products/${productId}`);
+        if (!res.ok) throw new Error(t('product_not_found'));
+        const data = await res.json();
         setFormData({
           ...data,
           tags: data.tags?.join(', ') || '',
           images: data.images || [],
           stock: data.stock || 0,
-        })
+        });
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : t('error_load_product'))
+        toast.error(e instanceof Error ? e.message : t('error_load_product'));
       }
     }
-    fetchProduct()
-  }, [productId, t])
+    fetchProduct();
+  }, [productId, t]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -65,7 +65,9 @@ export default function EditProductForm({ productId }: EditProductFormProps) {
           ...formData,
           price: parseFloat(String(formData.price ?? 0)),
           stock: parseInt(String(formData.stock ?? 0), 10),
-          tags: (typeof formData.tags === 'string' ? formData.tags : '').split(',').map((t: string) => t.trim()),
+          tags: (typeof formData.tags === 'string' ? formData.tags : '')
+            .split(',')
+            .map((t: string) => t.trim()),
           images:
             typeof formData.images === 'string'
               ? formData.images.split(',').map((i: string) => i.trim())
@@ -88,15 +90,26 @@ export default function EditProductForm({ productId }: EditProductFormProps) {
       <p className="text-token-text/60 animate-pulse p-4" role="status" aria-live="polite">
         {tCommon('loading')}
       </p>
-    )
+    );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto p-4 bg-white dark:bg-[hsl(var(--surface))] rounded-xl shadow-[var(--shadow-sm)] border border-[hsl(var(--border))]" aria-labelledby="edit-product-heading">
-      <h2 id="edit-product-heading" className="text-xl font-bold text-[hsl(var(--text))]">{t('edit_product')}</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 max-w-xl mx-auto p-4 bg-white dark:bg-[hsl(var(--surface))] rounded-xl shadow-[var(--shadow-sm)] border border-[hsl(var(--border))]"
+      aria-labelledby="edit-product-heading"
+    >
+      <h2 id="edit-product-heading" className="text-xl font-bold text-[hsl(var(--text))]">
+        {t('edit_product')}
+      </h2>
 
       <div>
-        <label htmlFor="edit-product-title" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">{t('edit_product_title_label')}</label>
+        <label
+          htmlFor="edit-product-title"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
+          {t('edit_product_title_label')}
+        </label>
         <input
           id="edit-product-title"
           name="title"
@@ -108,7 +121,12 @@ export default function EditProductForm({ productId }: EditProductFormProps) {
         />
       </div>
       <div>
-        <label htmlFor="edit-product-slug" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">{t('edit_product_slug_label')}</label>
+        <label
+          htmlFor="edit-product-slug"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
+          {t('edit_product_slug_label')}
+        </label>
         <input
           id="edit-product-slug"
           name="slug"
@@ -120,7 +138,12 @@ export default function EditProductForm({ productId }: EditProductFormProps) {
         />
       </div>
       <div>
-        <label htmlFor="edit-product-description" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">{t('edit_product_description_label')}</label>
+        <label
+          htmlFor="edit-product-description"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
+          {t('edit_product_description_label')}
+        </label>
         <textarea
           id="edit-product-description"
           name="description"
@@ -132,7 +155,12 @@ export default function EditProductForm({ productId }: EditProductFormProps) {
         />
       </div>
       <div>
-        <label htmlFor="edit-product-price" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">{t('edit_product_price_label')}</label>
+        <label
+          htmlFor="edit-product-price"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
+          {t('edit_product_price_label')}
+        </label>
         <input
           id="edit-product-price"
           name="price"
@@ -146,7 +174,12 @@ export default function EditProductForm({ productId }: EditProductFormProps) {
         />
       </div>
       <div>
-        <label htmlFor="edit-product-image" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">{t('edit_product_image_label')}</label>
+        <label
+          htmlFor="edit-product-image"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
+          {t('edit_product_image_label')}
+        </label>
         <input
           id="edit-product-image"
           name="image"
@@ -158,7 +191,12 @@ export default function EditProductForm({ productId }: EditProductFormProps) {
         />
       </div>
       <div>
-        <label htmlFor="edit-product-images" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">{t('edit_product_images_label')}</label>
+        <label
+          htmlFor="edit-product-images"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
+          {t('edit_product_images_label')}
+        </label>
         <input
           id="edit-product-images"
           name="images"
@@ -169,7 +207,12 @@ export default function EditProductForm({ productId }: EditProductFormProps) {
         />
       </div>
       <div>
-        <label htmlFor="edit-product-category" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">{t('edit_product_category_label')}</label>
+        <label
+          htmlFor="edit-product-category"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
+          {t('edit_product_category_label')}
+        </label>
         <input
           id="edit-product-category"
           name="category"
@@ -180,7 +223,12 @@ export default function EditProductForm({ productId }: EditProductFormProps) {
         />
       </div>
       <div>
-        <label htmlFor="edit-product-stock" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">{t('edit_product_stock_label')}</label>
+        <label
+          htmlFor="edit-product-stock"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
+          {t('edit_product_stock_label')}
+        </label>
         <input
           id="edit-product-stock"
           name="stock"
@@ -192,7 +240,12 @@ export default function EditProductForm({ productId }: EditProductFormProps) {
         />
       </div>
       <div>
-        <label htmlFor="edit-product-tags" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">{t('edit_product_tags_label')}</label>
+        <label
+          htmlFor="edit-product-tags"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
+          {t('edit_product_tags_label')}
+        </label>
         <input
           id="edit-product-tags"
           name="tags"

@@ -1,50 +1,50 @@
-import dynamic from 'next/dynamic'
-import { notFound } from 'next/navigation'
-import { Suspense, type CSSProperties } from 'react'
+import dynamic from 'next/dynamic';
+import { notFound } from 'next/navigation';
+import { Suspense, type CSSProperties } from 'react';
 
-import type { Pack, Product } from '@/types/product'
-import type { Metadata } from 'next'
+import type { Pack, Product } from '@/types/product';
+import type { Metadata } from 'next';
 
-import ClientTrackingScript from '@/components/ClientTrackingScript'
-import Link from '@/components/LocalizedLink'
-import LoadingSectionSkeleton from '@/components/LoadingSectionSkeleton'
-import SectionHeader from '@/components/SectionHeader'
-import TrustBadges from '@/components/TrustBadges'
-import { getPosts } from '@/lib/blog'
-import { BRAND } from '@/lib/constants'
-import { getBestProducts, getRecommendedPacks } from '@/lib/data'
-import { localizePath } from '@/lib/i18n-routing'
-import { isLocale } from '@/lib/language'
-import { getTranslations, setRequestLocale } from 'next-intl/server'
+import ClientTrackingScript from '@/components/ClientTrackingScript';
+import Link from '@/components/LocalizedLink';
+import LoadingSectionSkeleton from '@/components/LoadingSectionSkeleton';
+import SectionHeader from '@/components/SectionHeader';
+import TrustBadges from '@/components/TrustBadges';
+import { getPosts } from '@/lib/blog';
+import { BRAND } from '@/lib/constants';
+import { getBestProducts, getRecommendedPacks } from '@/lib/data';
+import { localizePath } from '@/lib/i18n-routing';
+import { isLocale } from '@/lib/language';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 
-const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'))
+const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'));
 const BestProducts = dynamic(() => import('@/components/BestProducts'), {
   loading: () => <LoadingSectionSkeleton />,
-})
+});
 const PacksSection = dynamic(() => import('@/components/PacksSection'), {
   loading: () => <LoadingSectionSkeleton />,
-})
+});
 const FAQ = dynamic(() => import('@/components/FAQ'), {
   loading: () => <LoadingSectionSkeleton />,
-})
+});
 const BlogCard = dynamic(() => import('@/components/blog/BlogCard').then((m) => m.default), {
   loading: () => <div className="skeleton aspect-[16/10] rounded-2xl" />,
-})
+});
 
-const SITE_URL = BRAND.URL
+const SITE_URL = BRAND.URL;
 
 const lazySectionStyle600: CSSProperties = {
   contentVisibility: 'auto',
   containIntrinsicSize: '600px',
-}
+};
 const lazySectionStyle500: CSSProperties = {
   contentVisibility: 'auto',
   containIntrinsicSize: '500px',
-}
+};
 const lazySectionStyle300: CSSProperties = {
   contentVisibility: 'auto',
   containIntrinsicSize: '300px',
-}
+};
 
 const STR = {
   fr: {
@@ -66,7 +66,8 @@ const STR = {
     bestSub: 'Les favoris de la communauté, choisis pour leur fiabilité et leur impact.',
     packsKicker: 'Bundles',
     packsTitle: 'Packs recommandés',
-    packsSub: 'Sélections expertes : plusieurs produits ensemble à prix pack. Économisez plus, livraison offerte.',
+    packsSub:
+      'Sélections expertes : plusieurs produits ensemble à prix pack. Économisez plus, livraison offerte.',
     faqTitle: 'Questions fréquentes',
     faqKicker: 'FAQ',
     ctaTitle: 'Appel à l’action',
@@ -81,7 +82,8 @@ const STR = {
     packsSectionLabel: 'Sélection de packs recommandés',
     blogKicker: 'Guides & SEO',
     blogTitle: 'Blog gaming & setup',
-    blogSub: 'Meilleurs claviers 2026, guides setup, astuces FPS — pour ramener du trafic et convertir.',
+    blogSub:
+      'Meilleurs claviers 2026, guides setup, astuces FPS — pour ramener du trafic et convertir.',
     blogCta: 'Voir tout le blog',
     blogSectionLabel: 'Derniers articles du blog',
   },
@@ -119,19 +121,20 @@ const STR = {
     packsSectionLabel: 'Recommended bundles selection',
     blogKicker: 'Guides & SEO',
     blogTitle: 'Gaming blog & guides',
-    blogSub: 'Best gaming keyboards 2026, setup guides, how to improve aim in FPS — drive Google traffic and convert.',
+    blogSub:
+      'Best gaming keyboards 2026, setup guides, how to improve aim in FPS — drive Google traffic and convert.',
     blogCta: 'View all articles',
     blogSectionLabel: 'Latest blog posts',
   },
-} as const
+} as const;
 
-type HomeLocale = keyof typeof STR
+type HomeLocale = keyof typeof STR;
 
-export const revalidate = 300
+export const revalidate = 300;
 
 function buildHomeMetadata(locale: HomeLocale): Metadata {
-  const t = STR[locale]
-  const pathPrefix = locale === 'en' ? '/en' : '/fr'
+  const t = STR[locale];
+  const pathPrefix = locale === 'en' ? '/en' : '/fr';
   return {
     title: t.metaTitle,
     description: t.metaDescription,
@@ -156,15 +159,15 @@ function buildHomeMetadata(locale: HomeLocale): Metadata {
       description: t.metaDescription,
       images: ['/og-image.jpg'],
     },
-  }
+  };
 }
 
 function getProductUrl(product: Product): string {
-  return product.slug ? `${SITE_URL}/products/${product.slug}` : `${SITE_URL}/products`
+  return product.slug ? `${SITE_URL}/products/${product.slug}` : `${SITE_URL}/products`;
 }
 
 function getProductName(product: Product): string {
-  return product.title?.trim() || 'Produit'
+  return product.title?.trim() || 'Produit';
 }
 
 function SectionSkeleton({ title }: { title: string }) {
@@ -177,11 +180,11 @@ function SectionSkeleton({ title }: { title: string }) {
         ))}
       </div>
     </section>
-  )
+  );
 }
 
 function SplitCTA({ locale }: { locale: HomeLocale }) {
-  const t = STR[locale]
+  const t = STR[locale];
   return (
     <section
       aria-label={t.ctaTitle}
@@ -199,7 +202,9 @@ function SplitCTA({ locale }: { locale: HomeLocale }) {
             {t.ctaHeadline}
             <span className="text-[hsl(var(--accent))]">{t.ctaSpan}</span>
           </h3>
-          <p className="mt-5 max-w-lg text-[var(--step-0)] leading-relaxed text-token-text/75">{t.ctaText}</p>
+          <p className="mt-5 max-w-lg text-[var(--step-0)] leading-relaxed text-token-text/75">
+            {t.ctaText}
+          </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link
               href="/products/packs"
@@ -223,34 +228,45 @@ function SplitCTA({ locale }: { locale: HomeLocale }) {
         />
       </div>
     </section>
-  )
+  );
 }
 
 async function HomePageView({ locale }: { locale: HomeLocale }) {
-  setRequestLocale(locale)
-  const t = STR[locale]
-  const tHome = await getTranslations('home')
+  setRequestLocale(locale);
+  const t = STR[locale];
+  const tHome = await getTranslations('home');
   const [bestProductsResult, recommendedPacksResult, blogResult] = await Promise.allSettled([
     getBestProducts(),
     getRecommendedPacks(),
     getPosts({ limit: 3, sort: 'newest', publishedOnly: true }),
-  ])
-  const bestProducts: Product[] = bestProductsResult.status === 'fulfilled' ? bestProductsResult.value : []
-  const recommendedPacks: Pack[] = recommendedPacksResult.status === 'fulfilled' ? recommendedPacksResult.value : []
-  const blogData = blogResult.status === 'fulfilled' ? blogResult.value : null
-  const blogItems = blogData?.items ?? []
-  const blogPostsForCards = (blogItems as Record<string, unknown>[]).slice(0, 3).map((item: Record<string, unknown>) => ({
-    _id: String(item._id ?? item.id ?? ''),
-    slug: String(item.slug ?? ''),
-    title: String(item.title ?? ''),
-    content: '',
-    description: String(item.description ?? item.excerpt ?? ''),
-    createdAt: item.createdAt instanceof Date ? item.createdAt.toISOString() : String(item.createdAt ?? new Date().toISOString()),
-    updatedAt: item.updatedAt ? (item.updatedAt instanceof Date ? item.updatedAt.toISOString() : String(item.updatedAt)) : undefined,
-    image: String(item.image ?? item.coverImage ?? '/og-image.jpg'),
-    author: String(item.author ?? 'TechPlay'),
-    tags: Array.isArray(item.tags) ? item.tags : [],
-  }))
+  ]);
+  const bestProducts: Product[] =
+    bestProductsResult.status === 'fulfilled' ? bestProductsResult.value : [];
+  const recommendedPacks: Pack[] =
+    recommendedPacksResult.status === 'fulfilled' ? recommendedPacksResult.value : [];
+  const blogData = blogResult.status === 'fulfilled' ? blogResult.value : null;
+  const blogItems = blogData?.items ?? [];
+  const blogPostsForCards = (blogItems as Record<string, unknown>[])
+    .slice(0, 3)
+    .map((item: Record<string, unknown>) => ({
+      _id: String(item._id ?? item.id ?? ''),
+      slug: String(item.slug ?? ''),
+      title: String(item.title ?? ''),
+      content: '',
+      description: String(item.description ?? item.excerpt ?? ''),
+      createdAt:
+        item.createdAt instanceof Date
+          ? item.createdAt.toISOString()
+          : String(item.createdAt ?? new Date().toISOString()),
+      updatedAt: item.updatedAt
+        ? item.updatedAt instanceof Date
+          ? item.updatedAt.toISOString()
+          : String(item.updatedAt)
+        : undefined,
+      image: String(item.image ?? item.coverImage ?? '/og-image.jpg'),
+      author: String(item.author ?? 'TechPlay'),
+      tags: Array.isArray(item.tags) ? item.tags : [],
+    }));
 
   const itemListJsonLd =
     bestProducts.length > 0
@@ -265,9 +281,9 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
             name: getProductName(product),
           })),
         }
-      : null
+      : null;
 
-  const pathPrefix = locale === 'en' ? '/en' : '/fr'
+  const pathPrefix = locale === 'en' ? '/en' : '/fr';
   const webPageJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
@@ -275,7 +291,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
     description: t.metaDescription,
     url: `${SITE_URL}${pathPrefix}`,
     inLanguage: locale === 'en' ? 'en-US' : 'fr-FR',
-  }
+  };
 
   return (
     <>
@@ -343,7 +359,10 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
                   <HeroCarousel overlayOpacity={0.25} />
                   <noscript>
                     <p className="px-4 py-3 text-sm text-token-text/80">
-                      <a href={localizePath('/products', locale)} className="underline underline-offset-4">
+                      <a
+                        href={localizePath('/products', locale)}
+                        className="underline underline-offset-4"
+                      >
                         {t.noscriptProducts}
                       </a>
                     </p>
@@ -355,96 +374,98 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
         </section>
 
         <div className="container-app mx-auto max-w-screen-xl rhythm-sections py-6 sm:py-10">
-        <section
-          id="best-products"
-          aria-label={t.productsSectionLabel}
-          className="motion-section motion-section-delay-1 section-spacing-sm"
-          style={lazySectionStyle600}
-        >
-          <SectionHeader kicker={t.bestKicker} title={t.bestTitle} sub={t.bestSub} />
-          <div className="rhythm-content">
-            <Suspense fallback={<SectionSkeleton title={t.bestTitle} />}>
-              <BestProducts products={bestProducts} showTitle={false} />
-            </Suspense>
-          </div>
-        </section>
-        <section
-          id="packs"
-          aria-label={t.packsSectionLabel}
-          className="motion-section motion-section-delay-2 section-spacing-sm"
-          style={lazySectionStyle600}
-        >
-          <SectionHeader kicker={t.packsKicker} title={t.packsTitle} sub={t.packsSub} />
-          <div className="rhythm-content overflow-hidden rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/50 shadow-sm">
-            <Suspense fallback={<SectionSkeleton title={t.packsTitle} />}>
-              <PacksSection packs={recommendedPacks} showHeader={false} />
-            </Suspense>
-          </div>
-        </section>
-        <TrustBadges variant="premium" />
-        {blogPostsForCards.length > 0 && (
           <section
-            id="blog"
-            aria-label={t.blogSectionLabel}
-            className="motion-section motion-section-delay-2 section-spacing-sm"
-            style={lazySectionStyle500}
+            id="best-products"
+            aria-label={t.productsSectionLabel}
+            className="motion-section motion-section-delay-1 section-spacing-sm"
+            style={lazySectionStyle600}
           >
-            <SectionHeader kicker={t.blogKicker} title={t.blogTitle} sub={t.blogSub} />
-            <div className="rhythm-content grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {blogPostsForCards.map((post) => (
-                <BlogCard key={post._id} article={post} />
-              ))}
-            </div>
-            <div className="mt-6 text-center">
-              <Link
-                href="/blog"
-                className="btn btn-outline inline-flex items-center gap-2 rounded-full border-[hsl(var(--border))] px-6 py-2.5 text-[14px] font-semibold hover:bg-[hsl(var(--surface-2))] focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
-              >
-                {t.blogCta}
-              </Link>
+            <SectionHeader kicker={t.bestKicker} title={t.bestTitle} sub={t.bestSub} />
+            <div className="rhythm-content">
+              <Suspense fallback={<SectionSkeleton title={t.bestTitle} />}>
+                <BestProducts products={bestProducts} showTitle={false} />
+              </Suspense>
             </div>
           </section>
-        )}
-        <section
-          id="faq"
-          aria-label={t.faqTitle}
-          className="motion-section motion-section-delay-3 section-spacing-sm"
-          style={lazySectionStyle500}
-        >
-          <SectionHeader kicker={t.faqKicker} title={t.faqTitle} />
-          <div className="rhythm-content">
-            <Suspense fallback={<SectionSkeleton title={t.faqTitle} />}>
-              <FAQ showSectionHeading={false} />
-            </Suspense>
-          </div>
-        </section>
-        <SplitCTA locale={locale} />
+          <section
+            id="packs"
+            aria-label={t.packsSectionLabel}
+            className="motion-section motion-section-delay-2 section-spacing-sm"
+            style={lazySectionStyle600}
+          >
+            <SectionHeader kicker={t.packsKicker} title={t.packsTitle} sub={t.packsSub} />
+            <div className="rhythm-content overflow-hidden rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/50 shadow-sm">
+              <Suspense fallback={<SectionSkeleton title={t.packsTitle} />}>
+                <PacksSection packs={recommendedPacks} showHeader={false} />
+              </Suspense>
+            </div>
+          </section>
+          <TrustBadges variant="premium" />
+          {blogPostsForCards.length > 0 && (
+            <section
+              id="blog"
+              aria-label={t.blogSectionLabel}
+              className="motion-section motion-section-delay-2 section-spacing-sm"
+              style={lazySectionStyle500}
+            >
+              <SectionHeader kicker={t.blogKicker} title={t.blogTitle} sub={t.blogSub} />
+              <div className="rhythm-content grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {blogPostsForCards.map((post) => (
+                  <BlogCard key={post._id} article={post} />
+                ))}
+              </div>
+              <div className="mt-6 text-center">
+                <Link
+                  href="/blog"
+                  className="btn btn-outline inline-flex items-center gap-2 rounded-full border-[hsl(var(--border))] px-6 py-2.5 text-[14px] font-semibold hover:bg-[hsl(var(--surface-2))] focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+                >
+                  {t.blogCta}
+                </Link>
+              </div>
+            </section>
+          )}
+          <section
+            id="faq"
+            aria-label={t.faqTitle}
+            className="motion-section motion-section-delay-3 section-spacing-sm"
+            style={lazySectionStyle500}
+          >
+            <SectionHeader kicker={t.faqKicker} title={t.faqTitle} />
+            <div className="rhythm-content">
+              <Suspense fallback={<SectionSkeleton title={t.faqTitle} />}>
+                <FAQ showSectionHeading={false} />
+              </Suspense>
+            </div>
+          </section>
+          <SplitCTA locale={locale} />
         </div>
       </div>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }}
+      />
       {itemListJsonLd ? (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+        />
       ) : null}
     </>
-  )
+  );
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ locale: string }>
+  params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-  const { locale } = await params
-  if (!isLocale(locale)) return buildHomeMetadata('fr')
-  return buildHomeMetadata(locale as HomeLocale)
+  const { locale } = await params;
+  if (!isLocale(locale)) return buildHomeMetadata('fr');
+  return buildHomeMetadata(locale as HomeLocale);
 }
 
-export default async function LocaleHomePage({
-  params,
-}: {
-  params: Promise<{ locale: string }>
-}) {
-  const { locale } = await params
-  if (!isLocale(locale)) notFound()
-  return <HomePageView locale={locale as HomeLocale} />
+export default async function LocaleHomePage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  if (!isLocale(locale)) notFound();
+  return <HomePageView locale={locale as HomeLocale} />;
 }

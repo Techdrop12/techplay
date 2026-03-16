@@ -1,29 +1,29 @@
-import 'server-only'
+import 'server-only';
 
-import dbConnect from './dbConnect'
+import dbConnect from './dbConnect';
 
-import Blog from '@/models/Blog'
+import Blog from '@/models/Blog';
 
-const DEFAULT_LIMIT = 12
-const DEFAULT_SORT = '-publishedAt -createdAt'
+const DEFAULT_LIMIT = 12;
+const DEFAULT_SORT = '-publishedAt -createdAt';
 const LIST_PROJECTION =
-  'title slug description image author published publishedAt createdAt updatedAt'
+  'title slug description image author published publishedAt createdAt updatedAt';
 const DETAIL_PROJECTION =
-  'title slug description image author published publishedAt createdAt updatedAt'
+  'title slug description image author published publishedAt createdAt updatedAt';
 
-const CACHE_TTL = 60_000
-const cache = new Map<string, { data: unknown; exp: number }>()
-const now = () => Date.now()
-const cacheKey = (name: string, args: Record<string, unknown>) => `${name}:${JSON.stringify(args)}`
+const CACHE_TTL = 60_000;
+const cache = new Map<string, { data: unknown; exp: number }>();
+const now = () => Date.now();
+const cacheKey = (name: string, args: Record<string, unknown>) => `${name}:${JSON.stringify(args)}`;
 const cacheGet = (key: string): unknown => {
-  const it = cache.get(key)
-  if (!it || it.exp < now()) return null
-  return it.data
-}
+  const it = cache.get(key);
+  if (!it || it.exp < now()) return null;
+  return it.data;
+};
 const cacheSet = (key: string, data: unknown, ttl = CACHE_TTL) => {
-  cache.set(key, { data, exp: now() + ttl })
-}
-export const invalidateBlogCache = () => cache.clear()
+  cache.set(key, { data, exp: now() + ttl });
+};
+export const invalidateBlogCache = () => cache.clear();
 
 const SORTS: Record<string, string> = {
   newest: '-publishedAt -createdAt',
@@ -31,52 +31,52 @@ const SORTS: Record<string, string> = {
   az: 'title',
   za: '-title',
   popular: '-views -publishedAt',
-}
+};
 
-const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-let TEXT_INDEX_OK: boolean | null = null
+let TEXT_INDEX_OK: boolean | null = null;
 async function ensureTextStrategy(): Promise<boolean> {
-  if (TEXT_INDEX_OK != null) return TEXT_INDEX_OK
-  const idx = await Blog.collection.indexes().catch(() => [])
+  if (TEXT_INDEX_OK != null) return TEXT_INDEX_OK;
+  const idx = await Blog.collection.indexes().catch(() => []);
   TEXT_INDEX_OK = idx.some(
     (i: { key?: Record<string, unknown> }) =>
       i.key && Object.values(i.key).some((v) => v === 'text')
-  )
-  return TEXT_INDEX_OK
+  );
+  return TEXT_INDEX_OK;
 }
 
 async function buildSearchFilter(q: string | undefined): Promise<Record<string, unknown>> {
-  if (!q || !q.trim()) return {}
-  const hasText = await ensureTextStrategy()
-  if (hasText) return { $text: { $search: q.trim() } }
-  const rx = new RegExp(escapeRegex(q.trim()), 'i')
-  return { $or: [{ title: rx }, { excerpt: rx }, { content: rx }] }
+  if (!q || !q.trim()) return {};
+  const hasText = await ensureTextStrategy();
+  if (hasText) return { $text: { $search: q.trim() } };
+  const rx = new RegExp(escapeRegex(q.trim()), 'i');
+  return { $or: [{ title: rx }, { excerpt: rx }, { content: rx }] };
 }
 
 export interface GetPostsOptions {
-  page?: number
-  limit?: number
-  publishedOnly?: boolean
-  tag?: string
-  category?: string
-  q?: string
-  sort?: string
+  page?: number;
+  limit?: number;
+  publishedOnly?: boolean;
+  tag?: string;
+  category?: string;
+  q?: string;
+  sort?: string;
 }
 
 export interface GetPostsResult {
-  items: unknown[]
+  items: unknown[];
   pagination: {
-    page: number
-    limit: number
-    total: number
-    pages: number
-    hasMore: boolean
-  }
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+    hasMore: boolean;
+  };
 }
 
 export async function getPosts(opts: GetPostsOptions = {}): Promise<GetPostsResult> {
-  await dbConnect()
+  await dbConnect();
   const {
     page = 1,
     limit = DEFAULT_LIMIT,
@@ -85,31 +85,26 @@ export async function getPosts(opts: GetPostsOptions = {}): Promise<GetPostsResu
     category,
     q,
     sort = DEFAULT_SORT,
-  } = opts
+  } = opts;
 
-  const key = cacheKey('getPosts', { page, limit, publishedOnly, tag, category, q, sort })
-  const cached = cacheGet(key) as GetPostsResult | null
-  if (cached) return cached
+  const key = cacheKey('getPosts', { page, limit, publishedOnly, tag, category, q, sort });
+  const cached = cacheGet(key) as GetPostsResult | null;
+  if (cached) return cached;
 
-  const filter: Record<string, unknown> = {}
-  if (publishedOnly) filter.published = true
-  if (tag) filter.tags = { $in: [tag] }
-  if (category) filter.category = category
+  const filter: Record<string, unknown> = {};
+  if (publishedOnly) filter.published = true;
+  if (tag) filter.tags = { $in: [tag] };
+  if (category) filter.category = category;
 
-  Object.assign(filter, await buildSearchFilter(q))
+  Object.assign(filter, await buildSearchFilter(q));
 
-  const sortStr = (sort && SORTS[sort]) || sort || DEFAULT_SORT
-  const skip = Math.max(0, (Number(page) - 1) * Number(limit))
+  const sortStr = (sort && SORTS[sort]) || sort || DEFAULT_SORT;
+  const skip = Math.max(0, (Number(page) - 1) * Number(limit));
 
   const [items, total] = await Promise.all([
-    Blog.find(filter)
-      .select(LIST_PROJECTION)
-      .sort(sortStr)
-      .skip(skip)
-      .limit(Number(limit))
-      .lean(),
+    Blog.find(filter).select(LIST_PROJECTION).sort(sortStr).skip(skip).limit(Number(limit)).lean(),
     Blog.countDocuments(filter),
-  ])
+  ]);
 
   const result: GetPostsResult = {
     items,
@@ -120,88 +115,88 @@ export async function getPosts(opts: GetPostsOptions = {}): Promise<GetPostsResu
       pages: Math.max(1, Math.ceil(total / Number(limit))),
       hasMore: skip + items.length < total,
     },
-  }
+  };
 
-  cacheSet(key, result)
-  return result
+  cacheSet(key, result);
+  return result;
 }
 
 export async function getPostBySlug(
   slug: string,
   { includeUnpublished = false }: { includeUnpublished?: boolean } = {}
 ): Promise<unknown> {
-  await dbConnect()
-  if (!slug) return null
+  await dbConnect();
+  if (!slug) return null;
 
-  const key = cacheKey('getPostBySlug', { slug, includeUnpublished })
-  const cached = cacheGet(key)
-  if (cached) return cached
+  const key = cacheKey('getPostBySlug', { slug, includeUnpublished });
+  const cached = cacheGet(key);
+  if (cached) return cached;
 
-  const filter: Record<string, unknown> = { slug }
-  if (!includeUnpublished) filter.published = true
+  const filter: Record<string, unknown> = { slug };
+  if (!includeUnpublished) filter.published = true;
 
-  const doc = await Blog.findOne(filter).select(DETAIL_PROJECTION).lean()
-  cacheSet(key, doc)
-  return doc
+  const doc = await Blog.findOne(filter).select(DETAIL_PROJECTION).lean();
+  cacheSet(key, doc);
+  return doc;
 }
 
 export async function searchPosts(
   keyword: string | undefined,
   { limit = 8, publishedOnly = true }: { limit?: number; publishedOnly?: boolean } = {}
 ): Promise<unknown[]> {
-  await dbConnect()
-  const key = cacheKey('searchPosts', { keyword, limit, publishedOnly })
-  const cached = cacheGet(key) as unknown[] | null
-  if (cached) return cached
+  await dbConnect();
+  const key = cacheKey('searchPosts', { keyword, limit, publishedOnly });
+  const cached = cacheGet(key) as unknown[] | null;
+  if (cached) return cached;
 
-  const filter: Record<string, unknown> = {}
-  if (publishedOnly) filter.published = true
-  Object.assign(filter, await buildSearchFilter(keyword))
+  const filter: Record<string, unknown> = {};
+  if (publishedOnly) filter.published = true;
+  Object.assign(filter, await buildSearchFilter(keyword));
 
   const items = await Blog.find(filter)
     .select(LIST_PROJECTION)
     .sort('-publishedAt -createdAt')
     .limit(Number(limit))
-    .lean()
+    .lean();
 
-  cacheSet(key, items, 20_000)
-  return items
+  cacheSet(key, items, 20_000);
+  return items;
 }
 
 export async function getRelatedPosts(
   slugOrPost: string | Record<string, unknown>,
   { limit = 4 }: { limit?: number } = {}
 ): Promise<unknown[]> {
-  await dbConnect()
+  await dbConnect();
   const post =
     typeof slugOrPost === 'string'
       ? await Blog.findOne({ slug: slugOrPost }).select('slug published').lean()
-      : slugOrPost
+      : slugOrPost;
 
-  if (!post || typeof post !== 'object') return []
+  if (!post || typeof post !== 'object') return [];
 
-  const postObj = post as Record<string, unknown>
+  const postObj = post as Record<string, unknown>;
   const filter: Record<string, unknown> = {
     published: true,
     slug: { $ne: postObj.slug },
-  }
+  };
 
   return Blog.find(filter)
     .select(LIST_PROJECTION)
     .sort('-publishedAt -createdAt')
     .limit(Number(limit))
-    .lean()
+    .lean();
 }
 
 export async function getAllSlugs({
   publishedOnly = true,
 }: { publishedOnly?: boolean } = {}): Promise<unknown[]> {
-  await dbConnect()
-  const filter = publishedOnly ? { published: true } : {}
-  return Blog.find(filter).select('slug updatedAt').lean()
+  await dbConnect();
+  const filter = publishedOnly ? { published: true } : {};
+  return Blog.find(filter).select('slug updatedAt').lean();
 }
 
 export async function countPosts(filter: Record<string, unknown> = {}): Promise<number> {
-  await dbConnect()
-  return Blog.countDocuments(filter)
+  await dbConnect();
+  return Blog.countDocuments(filter);
 }

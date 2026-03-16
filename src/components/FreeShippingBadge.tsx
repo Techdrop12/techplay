@@ -1,26 +1,26 @@
-'use client'
+'use client';
 
-import { motion, useReducedMotion } from 'framer-motion'
-import { useTranslations } from 'next-intl'
-import { useEffect, useRef, useState } from 'react'
+import { motion, useReducedMotion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
+import { useEffect, useRef, useState } from 'react';
 
-import { UI } from '@/lib/constants'
-import { cn, formatPrice } from '@/lib/utils'
+import { UI } from '@/lib/constants';
+import { cn, formatPrice } from '@/lib/utils';
 
 interface FreeShippingBadgeProps {
-  price: number
-  threshold?: number
-  className?: string
-  minimal?: boolean
-  withProgress?: boolean
-  locale?: string
-  variant?: 'bar' | 'ring'
-  size?: 'sm' | 'md'
-  celebrate?: boolean
-  onReach?: () => void
-  persistKey?: string
-  policyHref?: string
-  ringMode?: 'conic' | 'svg'
+  price: number;
+  threshold?: number;
+  className?: string;
+  minimal?: boolean;
+  withProgress?: boolean;
+  locale?: string;
+  variant?: 'bar' | 'ring';
+  size?: 'sm' | 'md';
+  celebrate?: boolean;
+  onReach?: () => void;
+  persistKey?: string;
+  policyHref?: string;
+  ringMode?: 'conic' | 'svg';
 }
 
 function IconCheckCircle({ size = 16, className }: { size?: number; className?: string }) {
@@ -31,7 +31,7 @@ function IconCheckCircle({ size = 16, className }: { size?: number; className?: 
         d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2Zm-1.1 13.3-3.2-3.2 1.4-1.4 1.8 1.8 4.8-4.8 1.4 1.4-6.2 6.2Z"
       />
     </svg>
-  )
+  );
 }
 
 function IconTruck({ size = 16, className }: { size?: number; className?: string }) {
@@ -42,7 +42,7 @@ function IconTruck({ size = 16, className }: { size?: number; className?: string
         d="M3 6h11a1 1 0 0 1 1 1v3h3.8c.4 0 .76.24.92.62l1.28 3.02c.06.15.1.31.1.47V18a2 2 0 0 1-2 2h-1a2.5 2.5 0 1 1-5 0H9.5a2.5 2.5 0 1 1-5 0H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Zm12 4V8H4v10h.51a2.5 2.5 0 0 1 4.98 0H15v-5h3.67l-.8-1.9H15Zm2.5 8a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM7 19.5A1.5 1.5 0 1 0 7 16a1.5 1.5 0 0 0 0 3.5Z"
       />
     </svg>
-  )
+  );
 }
 
 function ConfettiSVG() {
@@ -68,7 +68,15 @@ function ConfettiSVG() {
         viewBox="0 0 10 10"
         className="absolute -top-1 left-3"
       >
-        <rect x="1.5" y="1.5" width="7" height="7" rx="1.5" fill="currentColor" className="opacity-70" />
+        <rect
+          x="1.5"
+          y="1.5"
+          width="7"
+          height="7"
+          rx="1.5"
+          fill="currentColor"
+          className="opacity-70"
+        />
       </motion.svg>
       <motion.svg
         initial={{ y: 4, opacity: 0, rotate: 0 }}
@@ -82,7 +90,7 @@ function ConfettiSVG() {
         <path d="M5 0l5 10H0L5 0Z" fill="currentColor" className="opacity-60" />
       </motion.svg>
     </div>
-  )
+  );
 }
 
 export default function FreeShippingBadge({
@@ -100,10 +108,10 @@ export default function FreeShippingBadge({
   policyHref,
   ringMode = 'conic',
 }: FreeShippingBadgeProps) {
-  const prefersReduced = useReducedMotion()
-  const [reachedPersisted, setReachedPersisted] = useState(false)
-  const reachedOnce = useRef(false)
-  const t = useTranslations('free_shipping')
+  const prefersReduced = useReducedMotion();
+  const [reachedPersisted, setReachedPersisted] = useState(false);
+  const reachedOnce = useRef(false);
+  const t = useTranslations('free_shipping');
 
   const T = {
     eligibleShort: t('eligible_short'),
@@ -115,66 +123,66 @@ export default function FreeShippingBadge({
     progressLabel: t('progress_label'),
     policy: t('policy'),
     aria100: t('aria_100_reached'),
-  }
+  };
 
-  const remaining = Math.max(0, threshold - price)
-  const isEligible = remaining <= 0
-  const progress = Math.min(100, Math.round((price / threshold) * 100))
+  const remaining = Math.max(0, threshold - price);
+  const isEligible = remaining <= 0;
+  const progress = Math.min(100, Math.round((price / threshold) * 100));
 
   useEffect(() => {
-    if (!persistKey) return
+    if (!persistKey) return;
     try {
-      setReachedPersisted(sessionStorage.getItem(persistKey) === '1')
+      setReachedPersisted(sessionStorage.getItem(persistKey) === '1');
     } catch {}
-  }, [persistKey])
+  }, [persistKey]);
 
   useEffect(() => {
     if (isEligible) {
       if (!reachedOnce.current) {
-        reachedOnce.current = true
+        reachedOnce.current = true;
         try {
-          onReach?.()
+          onReach?.();
         } catch {}
         try {
-          window.dataLayer?.push({ event: 'free_shipping_reached', threshold })
+          window.dataLayer?.push({ event: 'free_shipping_reached', threshold });
         } catch {}
         if (persistKey) {
           try {
-            sessionStorage.setItem(persistKey, '1')
+            sessionStorage.setItem(persistKey, '1');
           } catch {}
         }
       }
     } else {
-      reachedOnce.current = false
+      reachedOnce.current = false;
     }
-  }, [isEligible, onReach, persistKey, threshold])
+  }, [isEligible, onReach, persistKey, threshold]);
 
-  if (!Number.isFinite(price) || price < 0) return null
-  if (!Number.isFinite(threshold) || threshold <= 0) return null
+  if (!Number.isFinite(price) || price < 0) return null;
+  if (!Number.isFinite(threshold) || threshold <= 0) return null;
 
   const Confetti = () =>
-    celebrate && isEligible && !prefersReduced && !reachedPersisted ? <ConfettiSVG /> : null
+    celebrate && isEligible && !prefersReduced && !reachedPersisted ? <ConfettiSVG /> : null;
 
-  const ringDim = size === 'sm' ? 36 : 44
-  const ringStroke = size === 'sm' ? 4 : 5
+  const ringDim = size === 'sm' ? 36 : 44;
+  const ringStroke = size === 'sm' ? 4 : 5;
 
   const baseChip =
-    'inline-flex items-center gap-2 px-2.5 py-1 text-xs font-medium rounded-lg transition shadow-sm border'
+    'inline-flex items-center gap-2 px-2.5 py-1 text-xs font-medium rounded-lg transition shadow-sm border';
   const okChip =
-    'bg-green-100 text-green-800 dark:bg-green-800/20 dark:text-green-300 border-green-200/70 dark:border-green-700/40'
+    'bg-green-100 text-green-800 dark:bg-green-800/20 dark:text-green-300 border-green-200/70 dark:border-green-700/40';
   const warnChip =
-    'bg-yellow-50 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border-yellow-200/60 dark:border-yellow-700/40'
+    'bg-yellow-50 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border-yellow-200/60 dark:border-yellow-700/40';
 
-  const showProgress = withProgress && !minimal
+  const showProgress = withProgress && !minimal;
 
   if (variant === 'ring' && showProgress) {
-    const pct = Math.max(0, progress)
+    const pct = Math.max(0, progress);
 
     if (ringMode === 'svg') {
-      const r = (ringDim - ringStroke) / 2
-      const c = 2 * Math.PI * r
-      const filled = (pct / 100) * c
-      const offset = c - filled
+      const r = (ringDim - ringStroke) / 2;
+      const c = 2 * Math.PI * r;
+      const filled = (pct / 100) * c;
+      const offset = c - filled;
 
       return (
         <div
@@ -192,7 +200,12 @@ export default function FreeShippingBadge({
             aria-valuetext={isEligible ? T.aria100 : `${pct}%`}
             style={{ width: ringDim, height: ringDim }}
           >
-            <svg width={ringDim} height={ringDim} viewBox={`0 0 ${ringDim} ${ringDim}`} className="rotate-[-90deg]">
+            <svg
+              width={ringDim}
+              height={ringDim}
+              viewBox={`0 0 ${ringDim} ${ringDim}`}
+              className="rotate-[-90deg]"
+            >
               <circle
                 cx={ringDim / 2}
                 cy={ringDim / 2}
@@ -218,7 +231,10 @@ export default function FreeShippingBadge({
               />
             </svg>
 
-            <div className="absolute inset-1 grid place-items-center rounded-full bg-white dark:bg-zinc-900" aria-hidden>
+            <div
+              className="absolute inset-1 grid place-items-center rounded-full bg-white dark:bg-zinc-900"
+              aria-hidden
+            >
               {isEligible ? (
                 <IconCheckCircle className="text-green-600 dark:text-green-400" />
               ) : (
@@ -227,7 +243,10 @@ export default function FreeShippingBadge({
             </div>
 
             {isEligible && (
-              <span className="absolute inset-0 rounded-full shadow-glow-accent pointer-events-none" aria-hidden />
+              <span
+                className="absolute inset-0 rounded-full shadow-glow-accent pointer-events-none"
+                aria-hidden
+              />
             )}
           </div>
 
@@ -238,14 +257,16 @@ export default function FreeShippingBadge({
               aria-live="polite"
             >
               <Confetti />
-              <span>{isEligible ? (minimal ? T.eligibleShort : T.eligibleLong) : T.missing(remaining)}</span>
+              <span>
+                {isEligible ? (minimal ? T.eligibleShort : T.eligibleLong) : T.missing(remaining)}
+              </span>
               {policyHref && (
                 <a
                   href={policyHref}
                   className="ml-2 underline decoration-dotted underline-offset-2"
                   onClick={() => {
                     try {
-                      window.dataLayer?.push({ event: 'free_shipping_policy_click' })
+                      window.dataLayer?.push({ event: 'free_shipping_policy_click' });
                     } catch {}
                   }}
                 >
@@ -259,10 +280,10 @@ export default function FreeShippingBadge({
             {isEligible ? T.srEligible(threshold) : T.srMissing(remaining, threshold)}
           </span>
         </div>
-      )
+      );
     }
 
-    const ringBg = `conic-gradient(hsl(var(--accent)) ${pct}%, hsl(var(--accent)/.15) ${pct}% 100%)`
+    const ringBg = `conic-gradient(hsl(var(--accent)) ${pct}%, hsl(var(--accent)/.15) ${pct}% 100%)`;
 
     return (
       <div
@@ -293,7 +314,10 @@ export default function FreeShippingBadge({
           </div>
 
           {isEligible && (
-            <span className="absolute inset-0 rounded-full shadow-glow-accent pointer-events-none" aria-hidden />
+            <span
+              className="absolute inset-0 rounded-full shadow-glow-accent pointer-events-none"
+              aria-hidden
+            />
           )}
         </div>
 
@@ -304,14 +328,16 @@ export default function FreeShippingBadge({
             aria-live="polite"
           >
             <Confetti />
-            <span>{isEligible ? (minimal ? T.eligibleShort : T.eligibleLong) : T.missing(remaining)}</span>
+            <span>
+              {isEligible ? (minimal ? T.eligibleShort : T.eligibleLong) : T.missing(remaining)}
+            </span>
             {policyHref && (
               <a
                 href={policyHref}
                 className="ml-2 underline decoration-dotted underline-offset-2"
                 onClick={() => {
                   try {
-                    window.dataLayer?.push({ event: 'free_shipping_policy_click' })
+                    window.dataLayer?.push({ event: 'free_shipping_policy_click' });
                   } catch {}
                 }}
               >
@@ -325,10 +351,10 @@ export default function FreeShippingBadge({
           {isEligible ? T.srEligible(threshold) : T.srMissing(remaining, threshold)}
         </span>
       </div>
-    )
+    );
   }
 
-  const text = isEligible ? (minimal ? T.eligibleShort : T.eligibleLong) : T.missing(remaining)
+  const text = isEligible ? (minimal ? T.eligibleShort : T.eligibleLong) : T.missing(remaining);
 
   return (
     <div
@@ -359,7 +385,7 @@ export default function FreeShippingBadge({
             className="ml-2 underline decoration-dotted underline-offset-2"
             onClick={() => {
               try {
-                window.dataLayer?.push({ event: 'free_shipping_policy_click' })
+                window.dataLayer?.push({ event: 'free_shipping_policy_click' });
               } catch {}
             }}
           >
@@ -396,5 +422,5 @@ export default function FreeShippingBadge({
         {isEligible ? T.srEligible(threshold) : T.srMissing(remaining, threshold)}
       </span>
     </div>
-  )
+  );
 }

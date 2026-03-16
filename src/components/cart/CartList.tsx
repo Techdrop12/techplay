@@ -1,29 +1,29 @@
 // src/components/cart/CartList.tsx
-'use client'
+'use client';
 
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { useTranslations } from 'next-intl'
-import { useEffect, useMemo, useRef } from 'react'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
+import { useEffect, useMemo, useRef } from 'react';
 
-import type { Product } from '@/types/product'
+import type { Product } from '@/types/product';
 
-import CartItem from '@/components/cart/CartItem'
-import { useCart } from '@/hooks/useCart'
+import CartItem from '@/components/cart/CartItem';
+import { useCart } from '@/hooks/useCart';
 
 type CartListItem = Product & {
-  quantity: number
-  _id?: string
-  slug?: string
-  title?: string
-  image?: string
-  price?: number
-}
+  quantity: number;
+  _id?: string;
+  slug?: string;
+  title?: string;
+  image?: string;
+  price?: number;
+};
 
 interface CartListProps {
-  items: CartListItem[]
-  showControls?: boolean
-  onClear?: () => void | Promise<void>
-  className?: string
+  items: CartListItem[];
+  showControls?: boolean;
+  onClear?: () => void | Promise<void>;
+  className?: string;
 }
 
 export default function CartList({
@@ -32,11 +32,11 @@ export default function CartList({
   onClear,
   className = '',
 }: CartListProps) {
-  const t = useTranslations('cart')
-  const prefersReducedMotion = useReducedMotion()
-  const srRef = useRef<HTMLSpanElement | null>(null)
-  const prevCountRef = useRef<number>(0)
-  const { clearCart } = useCart()
+  const t = useTranslations('cart');
+  const prefersReducedMotion = useReducedMotion();
+  const srRef = useRef<HTMLSpanElement | null>(null);
+  const prevCountRef = useRef<number>(0);
+  const { clearCart } = useCart();
 
   const safeItems = useMemo(
     () =>
@@ -49,36 +49,33 @@ export default function CartList({
         quantity: Math.max(1, Number(it.quantity || 1)),
       })),
     [items, t]
-  )
+  );
 
-  const isEmpty = safeItems.length === 0
+  const isEmpty = safeItems.length === 0;
 
-  const itemsCount = useMemo(
-    () => safeItems.reduce((s, it) => s + it.quantity, 0),
-    [safeItems]
-  )
+  const itemsCount = useMemo(() => safeItems.reduce((s, it) => s + it.quantity, 0), [safeItems]);
 
   useEffect(() => {
-    if (!srRef.current) return
+    if (!srRef.current) return;
 
-    const prev = prevCountRef.current
-    let text: string
+    const prev = prevCountRef.current;
+    let text: string;
 
-    if (isEmpty) text = t('sr_empty')
-    else if (prev === 0) text = t('sr_count_in_cart', { count: itemsCount })
+    if (isEmpty) text = t('sr_empty');
+    else if (prev === 0) text = t('sr_count_in_cart', { count: itemsCount });
     else if (itemsCount > prev) {
-      const diff = itemsCount - prev
-      text = t('sr_added', { diff, count: itemsCount })
+      const diff = itemsCount - prev;
+      text = t('sr_added', { diff, count: itemsCount });
     } else if (itemsCount < prev) {
-      const diff = prev - itemsCount
-      text = t('sr_removed', { diff, count: itemsCount })
+      const diff = prev - itemsCount;
+      text = t('sr_removed', { diff, count: itemsCount });
     } else {
-      text = t('sr_count_in_cart', { count: itemsCount })
+      text = t('sr_count_in_cart', { count: itemsCount });
     }
 
-    srRef.current.textContent = text
-    prevCountRef.current = itemsCount
-  }, [isEmpty, itemsCount, t])
+    srRef.current.textContent = text;
+    prevCountRef.current = itemsCount;
+  }, [isEmpty, itemsCount, t]);
 
   if (isEmpty) {
     return (
@@ -93,18 +90,18 @@ export default function CartList({
       >
         {t('no_items')}
       </motion.p>
-    )
+    );
   }
 
   const handleClear = async () => {
     if (onClear) {
-      await Promise.resolve(onClear())
+      await Promise.resolve(onClear());
     } else {
       try {
-        clearCart()
+        clearCart();
       } catch {}
     }
-  }
+  };
 
   return (
     <section aria-label={t('cart_items_aria')} className={className}>
@@ -155,5 +152,5 @@ export default function CartList({
         </AnimatePresence>
       </ul>
     </section>
-  )
+  );
 }

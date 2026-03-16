@@ -1,63 +1,63 @@
-'use client'
+'use client';
 
-import Fuse from 'fuse.js'
-import { useTranslations } from 'next-intl'
-import { usePathname } from 'next/navigation'
-import { useDeferredValue, useMemo, useState } from 'react'
+import Fuse from 'fuse.js';
+import { useTranslations } from 'next-intl';
+import { usePathname } from 'next/navigation';
+import { useDeferredValue, useMemo, useState } from 'react';
 
-import type { Product } from '@/types/product'
+import type { Product } from '@/types/product';
 
-import Analytics from '@/components/Analytics'
-import FilterPanel from '@/components/catalogue/FilterPanel'
-import SearchBar from '@/components/catalogue/SearchBar'
-import SortDropdown from '@/components/catalogue/SortDropdown'
-import MetaPixel from '@/components/MetaPixel'
-import ProductGrid from '@/components/ProductGrid'
-import ScrollToTop from '@/components/ScrollToTop'
-import SectionWrapper from '@/components/SectionWrapper'
-import { LIST_NAMES } from '@/lib/analytics-events'
-import { getCurrentLocale } from '@/lib/i18n-routing'
-import { cn } from '@/lib/utils'
+import Analytics from '@/components/Analytics';
+import FilterPanel from '@/components/catalogue/FilterPanel';
+import SearchBar from '@/components/catalogue/SearchBar';
+import SortDropdown from '@/components/catalogue/SortDropdown';
+import MetaPixel from '@/components/MetaPixel';
+import ProductGrid from '@/components/ProductGrid';
+import ScrollToTop from '@/components/ScrollToTop';
+import SectionWrapper from '@/components/SectionWrapper';
+import { LIST_NAMES } from '@/lib/analytics-events';
+import { getCurrentLocale } from '@/lib/i18n-routing';
+import { cn } from '@/lib/utils';
 
-export type CatalogueSort = 'asc' | 'desc' | 'alpha'
+export type CatalogueSort = 'asc' | 'desc' | 'alpha';
 
 type Props = {
-  products: Product[]
-  initialQuery?: string
-  initialCategory?: string | null
-  initialSort?: CatalogueSort
-  initialMin?: number
-  initialMax?: number
-}
+  products: Product[];
+  initialQuery?: string;
+  initialCategory?: string | null;
+  initialSort?: CatalogueSort;
+  initialMin?: number;
+  initialMax?: number;
+};
 
 type SearchDoc = {
-  product: Product
-  title: string
-  category: string
-  brand: string
-  tags: string
-}
+  product: Product;
+  title: string;
+  category: string;
+  brand: string;
+  tags: string;
+};
 
 function normalizeText(value: string): string {
   return value
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .trim()
-    .toLowerCase()
+    .toLowerCase();
 }
 
 function getTags(product: Product): string[] {
-  const raw = (product as Record<string, unknown>).tags
+  const raw = (product as Record<string, unknown>).tags;
 
   if (Array.isArray(raw)) {
-    return raw.filter((tag): tag is string => typeof tag === 'string' && tag.trim().length > 0)
+    return raw.filter((tag): tag is string => typeof tag === 'string' && tag.trim().length > 0);
   }
 
   if (typeof raw === 'string' && raw.trim()) {
-    return [raw.trim()]
+    return [raw.trim()];
   }
 
-  return []
+  return [];
 }
 
 function getCategoryLabel(product: Product, locale: 'fr' | 'en'): string {
@@ -66,13 +66,13 @@ function getCategoryLabel(product: Product, locale: 'fr' | 'en'): string {
       ? product.category.trim()
       : locale === 'en'
         ? 'Other'
-        : 'Autre'
+        : 'Autre';
 
-  return category
+  return category;
 }
 
 function getPrice(product: Product): number {
-  return typeof product.price === 'number' && Number.isFinite(product.price) ? product.price : 0
+  return typeof product.price === 'number' && Number.isFinite(product.price) ? product.price : 0;
 }
 
 export default function ProductCatalogue({
@@ -83,9 +83,9 @@ export default function ProductCatalogue({
   initialMin,
   initialMax,
 }: Props) {
-  const pathname = usePathname() || '/'
-  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr'
-  const tCommon = useTranslations('common')
+  const pathname = usePathname() || '/';
+  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr';
+  const tCommon = useTranslations('common');
 
   const t =
     locale === 'en'
@@ -122,18 +122,18 @@ export default function ProductCatalogue({
           allCategories: 'Toutes les catégories',
           activeCategory: 'Catégorie sélectionnée',
           activePrice: 'Filtre prix actif',
-        }
+        };
 
   const safeProducts = useMemo(
     () => (Array.isArray(products) ? products.filter(Boolean) : []),
     [products]
-  )
+  );
 
-  const [query, setQuery] = useState(initialQuery)
-  const [selectedCategory, setCategory] = useState<string | null>(initialCategory)
-  const [sortOption, setSortOption] = useState<CatalogueSort>(initialSort)
+  const [query, setQuery] = useState(initialQuery);
+  const [selectedCategory, setCategory] = useState<string | null>(initialCategory);
+  const [sortOption, setSortOption] = useState<CatalogueSort>(initialSort);
 
-  const deferredQuery = useDeferredValue(query)
+  const deferredQuery = useDeferredValue(query);
 
   const searchableDocs = useMemo<SearchDoc[]>(
     () =>
@@ -145,7 +145,7 @@ export default function ProductCatalogue({
         tags: getTags(product).join(' '),
       })),
     [safeProducts, locale]
-  )
+  );
 
   const fuse = useMemo(
     () =>
@@ -156,66 +156,78 @@ export default function ProductCatalogue({
         minMatchCharLength: 2,
       }),
     [searchableDocs]
-  )
+  );
 
   const categories = useMemo(() => {
-    const map = new Map<string, string>()
+    const map = new Map<string, string>();
 
     for (const product of safeProducts) {
-      const label = getCategoryLabel(product, locale)
-      const normalized = normalizeText(label)
+      const label = getCategoryLabel(product, locale);
+      const normalized = normalizeText(label);
 
       if (!map.has(normalized)) {
-        map.set(normalized, label)
+        map.set(normalized, label);
       }
     }
 
     return Array.from(map.values()).sort((a, b) =>
       a.localeCompare(b, locale === 'en' ? 'en' : 'fr', { sensitivity: 'base' })
-    )
-  }, [safeProducts, locale])
+    );
+  }, [safeProducts, locale]);
 
   const filteredProducts = useMemo(() => {
     const searched = deferredQuery.trim()
       ? fuse.search(deferredQuery.trim()).map((result) => result.item.product)
-      : safeProducts
+      : safeProducts;
 
     const deduped = Array.from(
       new Map(
-        searched.map((product, index) => [String(product._id || product.slug || `idx-${index}`), product])
+        searched.map((product, index) => [
+          String(product._id || product.slug || `idx-${index}`),
+          product,
+        ])
       ).values()
-    )
+    );
 
     const categoryFiltered = selectedCategory
       ? deduped.filter(
           (product) =>
             normalizeText(getCategoryLabel(product, locale)) === normalizeText(selectedCategory)
         )
-      : deduped
+      : deduped;
 
     const priceFiltered = categoryFiltered.filter((product) => {
-      const price = getPrice(product)
-      if (typeof initialMin === 'number' && price < initialMin) return false
-      if (typeof initialMax === 'number' && price > initialMax) return false
-      return true
-    })
+      const price = getPrice(product);
+      if (typeof initialMin === 'number' && price < initialMin) return false;
+      if (typeof initialMax === 'number' && price > initialMax) return false;
+      return true;
+    });
 
     const sorted = [...priceFiltered].sort((a, b) => {
-      if (sortOption === 'asc') return getPrice(a) - getPrice(b)
-      if (sortOption === 'desc') return getPrice(b) - getPrice(a)
+      if (sortOption === 'asc') return getPrice(a) - getPrice(b);
+      if (sortOption === 'desc') return getPrice(b) - getPrice(a);
       return (a.title ?? '').localeCompare(b.title ?? '', locale === 'en' ? 'en' : 'fr', {
         sensitivity: 'base',
-      })
-    })
+      });
+    });
 
-    return sorted
-  }, [deferredQuery, fuse, initialMax, initialMin, locale, safeProducts, selectedCategory, sortOption])
+    return sorted;
+  }, [
+    deferredQuery,
+    fuse,
+    initialMax,
+    initialMin,
+    locale,
+    safeProducts,
+    selectedCategory,
+    sortOption,
+  ]);
 
   const hasActiveFilters =
     query.trim().length > 0 ||
     !!selectedCategory ||
     typeof initialMin === 'number' ||
-    typeof initialMax === 'number'
+    typeof initialMax === 'number';
 
   return (
     <>
@@ -226,17 +238,11 @@ export default function ProductCatalogue({
       <section className="min-h-screen bg-[hsl(var(--surface))] text-[hsl(var(--text))] transition-colors">
         <SectionWrapper>
           <header className="mx-auto max-w-3xl border-b border-[hsl(var(--border))]/60 pb-10 text-center sm:pb-12">
-            {t.kicker ? (
-              <p className="heading-kicker">
-                {t.kicker}
-              </p>
-            ) : null}
+            {t.kicker ? <p className="heading-kicker">{t.kicker}</p> : null}
             <h1 className="heading-page mt-3 sm:[font-size:var(--step-4)] md:text-[2.25rem]">
               {t.title}
             </h1>
-            <p className="mt-4 heading-section-sub font-medium">
-              {t.subtitle}
-            </p>
+            <p className="mt-4 heading-section-sub font-medium">{t.subtitle}</p>
           </header>
 
           <section
@@ -294,8 +300,8 @@ export default function ProductCatalogue({
                   <button
                     type="button"
                     onClick={() => {
-                      setQuery('')
-                      setCategory(null)
+                      setQuery('');
+                      setCategory(null);
                     }}
                     className={cn(
                       'shrink-0 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]',
@@ -312,12 +318,12 @@ export default function ProductCatalogue({
               <div className="sr-only" aria-live="polite">
                 <p>
                   {query.trim() ? `${t.searchResults} : “${query.trim()}”` : t.allCategories}
-                {selectedCategory ? ` · ${t.activeCategory} : ${selectedCategory}` : ''}
-                {typeof initialMin === 'number' || typeof initialMax === 'number'
-                  ? ` · ${t.activePrice} : ${typeof initialMin === 'number' ? `${initialMin}€` : '0€'} - ${
-                      typeof initialMax === 'number' ? `${initialMax}€` : '∞'
-                    }`
-                  : ''}
+                  {selectedCategory ? ` · ${t.activeCategory} : ${selectedCategory}` : ''}
+                  {typeof initialMin === 'number' || typeof initialMax === 'number'
+                    ? ` · ${t.activePrice} : ${typeof initialMin === 'number' ? `${initialMin}€` : '0€'} - ${
+                        typeof initialMax === 'number' ? `${initialMax}€` : '∞'
+                      }`
+                    : ''}
                 </p>
               </div>
             </div>
@@ -325,7 +331,9 @@ export default function ProductCatalogue({
             {filteredProducts.length === 0 ? (
               <div className="px-5 py-16 text-center sm:px-6 sm:py-20">
                 <p className="text-lg font-semibold text-[hsl(var(--text))]">{t.noResults}</p>
-                <p className="mt-2 text-[13px] leading-relaxed text-token-text/70">{t.noResultsHint}</p>
+                <p className="mt-2 text-[13px] leading-relaxed text-token-text/70">
+                  {t.noResultsHint}
+                </p>
               </div>
             ) : (
               <div className="px-5 pb-8 pt-6 sm:px-6 sm:pb-10 sm:pt-8">
@@ -341,5 +349,5 @@ export default function ProductCatalogue({
         </SectionWrapper>
       </section>
     </>
-  )
+  );
 }

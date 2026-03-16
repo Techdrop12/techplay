@@ -1,41 +1,41 @@
-'use client'
+'use client';
 
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { useTranslations } from 'next-intl'
-import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 
-import Link from '@/components/LocalizedLink'
-import { cn } from '@/lib/utils'
+import Link from '@/components/LocalizedLink';
+import { cn } from '@/lib/utils';
 
 type Promo = {
-  text: string
-  url?: string
+  text: string;
+  url?: string;
   /** Tailwind classes (bg-* ou gradient) */
-  bg?: string
+  bg?: string;
   /** Affichage conditionnel (ex: créneau horaire, stock, campagne) */
-  condition?: () => boolean
-}
+  condition?: () => boolean;
+};
 
 interface BannerPromoProps {
   /** Message simple si tu ne veux pas de rotation */
-  message?: string
+  message?: string;
   /** Styles prêts à l’emploi */
-  variant?: 'brand' | 'yellow' | 'gray' | 'gradient'
+  variant?: 'brand' | 'yellow' | 'gray' | 'gradient';
   /** Persistance du “Fermer” (clé + TTL) */
-  dismissKey?: string
-  dismissTTLms?: number
-  showCloseButton?: boolean
+  dismissKey?: string;
+  dismissTTLms?: number;
+  showCloseButton?: boolean;
   /** Auto-hide de la bannière entière (en ms) */
-  autoHideAfterMs?: number
-  className?: string
+  autoHideAfterMs?: number;
+  className?: string;
   /** Collant sous le header */
-  sticky?: boolean
+  sticky?: boolean;
   /** Liste d’offres rotatives (si fourni, prioritaire sur message) */
-  promos?: Promo[]
+  promos?: Promo[];
   /** Intervalle de rotation (ms) */
-  rotateMs?: number
+  rotateMs?: number;
   /** Met en pause la rotation au survol */
-  pauseOnHover?: boolean
+  pauseOnHover?: boolean;
 }
 
 /** Offres par défaut – safe sans /fr dans l’URL */
@@ -45,8 +45,8 @@ const defaultPromos: Promo[] = [
     url: '/products',
     bg: 'bg-gradient-to-r from-brand via-brand/90 to-accent',
     condition: () => {
-      const h = new Date().getHours()
-      return h >= 18 && h <= 23
+      const h = new Date().getHours();
+      return h >= 18 && h <= 23;
     },
   },
   {
@@ -59,21 +59,21 @@ const defaultPromos: Promo[] = [
     url: '/products/packs',
     bg: 'bg-gradient-to-r from-brand/90 to-accent',
   },
-]
+];
 
 /** Lecture de la fermeture persistée (localStorage) */
 function isDismissed(key: string, ttl: number) {
   try {
-    const raw = localStorage.getItem(key)
-    if (!raw) return false
-    const { ts } = JSON.parse(raw)
-    return Date.now() - (Number(ts) || 0) < ttl
+    const raw = localStorage.getItem(key);
+    if (!raw) return false;
+    const { ts } = JSON.parse(raw);
+    return Date.now() - (Number(ts) || 0) < ttl;
   } catch {
     // compat ancienne version (sessionStorage sans TTL)
     try {
-      return sessionStorage.getItem(key) != null
+      return sessionStorage.getItem(key) != null;
     } catch {
-      return false
+      return false;
     }
   }
 }
@@ -91,95 +91,91 @@ export default function BannerPromo({
   rotateMs = 6000,
   pauseOnHover = true,
 }: BannerPromoProps) {
-  const t = useTranslations('common')
-  const tMisc = useTranslations('misc')
-  const prefersReducedMotion = useReducedMotion()
-  const [visible, setVisible] = useState(true)
-  const [idx, setIdx] = useState(0)
-  const pausedRef = useRef(false)
+  const t = useTranslations('common');
+  const tMisc = useTranslations('misc');
+  const prefersReducedMotion = useReducedMotion();
+  const [visible, setVisible] = useState(true);
+  const [idx, setIdx] = useState(0);
+  const pausedRef = useRef(false);
 
   /** Sélection des promos éligibles ou fallback message simple */
   const pool = useMemo<Promo[]>(() => {
-    const base = promos && promos.length ? promos : defaultPromos
+    const base = promos && promos.length ? promos : defaultPromos;
     const eligible = base.filter((p) => {
       try {
-        return !p.condition || p.condition()
+        return !p.condition || p.condition();
       } catch {
-        return true
+        return true;
       }
-    })
+    });
     if (eligible.length === 0) {
-      return [{ text: message }]
+      return [{ text: message }];
     }
-    return eligible
-  }, [promos, message])
+    return eligible;
+  }, [promos, message]);
 
   /** Styles */
   const variantStyles: Record<NonNullable<BannerPromoProps['variant']>, string> = {
-    brand:
-      'bg-brand text-white dark:bg-zinc-900 dark:text-white',
-    yellow:
-      'bg-yellow-100 text-yellow-900 dark:bg-yellow-200 dark:text-yellow-900',
-    gray:
-      'bg-[hsl(var(--surface-2))] text-[hsl(var(--text))]',
+    brand: 'bg-brand text-white dark:bg-zinc-900 dark:text-white',
+    yellow: 'bg-yellow-100 text-yellow-900 dark:bg-yellow-200 dark:text-yellow-900',
+    gray: 'bg-[hsl(var(--surface-2))] text-[hsl(var(--text))]',
     gradient:
       'bg-gradient-to-r from-brand via-brand/90 to-accent text-white dark:from-zinc-900 dark:via-zinc-900 dark:to-brand',
-  }
+  };
 
   /** Init visibilité (fermeture persistée) */
   useEffect(() => {
-    if (isDismissed(dismissKey, dismissTTLms)) setVisible(false)
-  }, [dismissKey, dismissTTLms])
+    if (isDismissed(dismissKey, dismissTTLms)) setVisible(false);
+  }, [dismissKey, dismissTTLms]);
 
   /** Auto-hide global */
   useEffect(() => {
-    if (!autoHideAfterMs) return
-    const t = setTimeout(() => setVisible(false), autoHideAfterMs)
-    return () => clearTimeout(t)
-  }, [autoHideAfterMs])
+    if (!autoHideAfterMs) return;
+    const t = setTimeout(() => setVisible(false), autoHideAfterMs);
+    return () => clearTimeout(t);
+  }, [autoHideAfterMs]);
 
   /** Rotation des messages */
   useEffect(() => {
-    if (pool.length <= 1) return
-    if (prefersReducedMotion) return
+    if (pool.length <= 1) return;
+    if (prefersReducedMotion) return;
     const t = setInterval(() => {
-      if (pauseOnHover && pausedRef.current) return
-      setIdx((i) => (i + 1) % pool.length)
-    }, rotateMs)
-    return () => clearInterval(t)
-  }, [pool.length, rotateMs, prefersReducedMotion, pauseOnHover])
+      if (pauseOnHover && pausedRef.current) return;
+      setIdx((i) => (i + 1) % pool.length);
+    }, rotateMs);
+    return () => clearInterval(t);
+  }, [pool.length, rotateMs, prefersReducedMotion, pauseOnHover]);
 
   /** Fermer + persister */
   const handleClose = useCallback(() => {
     try {
-      localStorage.setItem(dismissKey, JSON.stringify({ ts: Date.now() }))
+      localStorage.setItem(dismissKey, JSON.stringify({ ts: Date.now() }));
     } catch {}
     try {
-      sessionStorage.setItem(dismissKey, '1') // compat ancienne version
+      sessionStorage.setItem(dismissKey, '1'); // compat ancienne version
     } catch {}
-    setVisible(false)
-  }, [dismissKey])
+    setVisible(false);
+  }, [dismissKey]);
 
   /** ESC pour fermer */
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && handleClose()
-    if (visible) window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [visible, handleClose])
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && handleClose();
+    if (visible) window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [visible, handleClose]);
 
-  if (!visible) return null
+  if (!visible) return null;
 
-  const current = pool[idx]
+  const current = pool[idx];
   const bgClass =
-    current?.bg ??
-    (variant === 'gradient' ? variantStyles.gradient : variantStyles[variant])
+    current?.bg ?? (variant === 'gradient' ? variantStyles.gradient : variantStyles[variant]);
 
   return (
     <div
       className={cn(
         // conteneur plein écran, verre dépoli + ombres douces
         'w-full z-[65]',
-        sticky && 'sticky top-0',
+        sticky && 'sticky top-0'
       )}
       role="region"
       aria-label={tMisc('promo_aria')}
@@ -191,7 +187,7 @@ export default function BannerPromo({
           'px-3 sm:px-4 py-2',
           'backdrop-blur supports-[backdrop-filter]:bg-white/5',
           bgClass,
-          className,
+          className
         )}
       >
         <div className="max-w-screen-xl mx-auto flex items-center justify-center gap-4">
@@ -208,7 +204,10 @@ export default function BannerPromo({
               aria-atomic="true"
             >
               {current?.url ? (
-                <Link href={current.url} className="underline-offset-2 hover:underline focus:outline-none">
+                <Link
+                  href={current.url}
+                  className="underline-offset-2 hover:underline focus:outline-none"
+                >
                   {current.text}
                 </Link>
               ) : (
@@ -229,5 +228,5 @@ export default function BannerPromo({
         </div>
       </div>
     </div>
-  )
+  );
 }

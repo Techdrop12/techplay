@@ -1,10 +1,10 @@
-import mongoose, { Schema, InferSchemaType, Types } from 'mongoose'
+import mongoose, { Schema, InferSchemaType, Types } from 'mongoose';
 
 type JsonTransformRet = Record<string, unknown> & {
-  _id?: unknown
-  __v?: unknown
-  id?: string
-}
+  _id?: unknown;
+  __v?: unknown;
+  id?: string;
+};
 
 const EmailSchema = new Schema(
   {
@@ -32,20 +32,20 @@ const EmailSchema = new Schema(
       virtuals: true,
       versionKey: false,
       transform: (_doc, ret: JsonTransformRet) => {
-        if (ret._id != null) ret.id = String(ret._id)
-        delete ret._id
-        delete ret.__v
-        return ret
+        if (ret._id != null) ret.id = String(ret._id);
+        delete ret._id;
+        delete ret.__v;
+        return ret;
       },
     },
   }
-)
+);
 
 EmailSchema.virtual('id').get(function (this: { _id: Types.ObjectId }) {
-  return this._id.toString()
-})
+  return this._id.toString();
+});
 
-export type Email = InferSchemaType<typeof EmailSchema>
+export type Email = InferSchemaType<typeof EmailSchema>;
 
 export default (mongoose.models.Email as mongoose.Model<Email>) ||
-  mongoose.model<Email>('Email', EmailSchema)
+  mongoose.model<Email>('Email', EmailSchema);

@@ -1,146 +1,146 @@
-'use client'
+'use client';
 
-import dynamic from 'next/dynamic'
-import { useTranslations } from 'next-intl'
-import { usePathname, useRouter } from 'next/navigation'
-import { Suspense, type ReactNode, useEffect, useRef, useState } from 'react'
+import dynamic from 'next/dynamic';
+import { useTranslations } from 'next-intl';
+import { usePathname, useRouter } from 'next/navigation';
+import { Suspense, type ReactNode, useEffect, useRef, useState } from 'react';
 
-import Header from './Header'
+import Header from './Header';
 
-const LiveChatLazy = dynamic(() => import('../LiveChat'), { ssr: false })
+const LiveChatLazy = dynamic(() => import('../LiveChat'), { ssr: false });
 
-import { useTheme } from '@/context/themeContext'
-import { pageview } from '@/lib/ga'
-import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
+import { useTheme } from '@/context/themeContext';
+import { pageview } from '@/lib/ga';
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing';
 
-const NAV_START_EVENT = 'nextjs:nav-start'
-const ScrollTopButton = dynamic(() => import('../ui/ScrollTopButton'), { ssr: false })
+const NAV_START_EVENT = 'nextjs:nav-start';
+const ScrollTopButton = dynamic(() => import('../ui/ScrollTopButton'), { ssr: false });
 const FooterLazy = dynamic(() => import('@/components/Footer'), {
   ssr: true,
   loading: () => null,
-})
+});
 
 interface LayoutProps {
-  children: ReactNode
-  analytics?: boolean
-  chat?: boolean
+  children: ReactNode;
+  analytics?: boolean;
+  chat?: boolean;
 }
 
 type RequestIdle = (
   callback: (deadline: IdleDeadline) => void,
   options?: { timeout?: number }
-) => number
+) => number;
 
 export default function Layout({ children, analytics = true, chat = false }: LayoutProps) {
-  const pathname = usePathname() || '/'
-  const router = useRouter()
-  const { theme } = useTheme()
-  const locale = getCurrentLocale(pathname)
+  const pathname = usePathname() || '/';
+  const router = useRouter();
+  const { theme } = useTheme();
+  const locale = getCurrentLocale(pathname);
 
-  const [isNavigating, setIsNavigating] = useState(false)
-  const [routeAnnouncement, setRouteAnnouncement] = useState('')
-  const mountedRef = useRef(false)
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [routeAnnouncement, setRouteAnnouncement] = useState('');
+  const mountedRef = useRef(false);
 
   useEffect(() => {
-    if (!analytics || !pathname) return
+    if (!analytics || !pathname) return;
     try {
-      pageview(pathname)
+      pageview(pathname);
     } catch {
       // no-op
     }
-  }, [analytics, pathname])
+  }, [analytics, pathname]);
 
   useEffect(() => {
     if (!mountedRef.current) {
-      mountedRef.current = true
-      return
+      mountedRef.current = true;
+      return;
     }
 
     requestAnimationFrame(() => {
-      document.getElementById('main')?.focus()
-    })
-  }, [pathname])
+      document.getElementById('main')?.focus();
+    });
+  }, [pathname]);
 
   // Show progress bar on navigation start (link click) and when pathname changes
   useEffect(() => {
-    const onNavStart = () => setIsNavigating(true)
-    window.addEventListener(NAV_START_EVENT, onNavStart)
-    return () => window.removeEventListener(NAV_START_EVENT, onNavStart)
-  }, [])
+    const onNavStart = () => setIsNavigating(true);
+    window.addEventListener(NAV_START_EVENT, onNavStart);
+    return () => window.removeEventListener(NAV_START_EVENT, onNavStart);
+  }, []);
 
   useEffect(() => {
-    if (!mountedRef.current) return
+    if (!mountedRef.current) return;
 
-    setIsNavigating(true)
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+    setIsNavigating(true);
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     // Garder la barre visible plus longtemps pour que le contenu ait le temps de s'afficher
-    const timeout = window.setTimeout(() => setIsNavigating(false), 520)
+    const timeout = window.setTimeout(() => setIsNavigating(false), 520);
 
-    return () => window.clearTimeout(timeout)
-  }, [pathname])
+    return () => window.clearTimeout(timeout);
+  }, [pathname]);
 
-  const tCommon = useTranslations('common')
-  const tAria = useTranslations('aria')
+  const tCommon = useTranslations('common');
+  const tAria = useTranslations('aria');
 
   useEffect(() => {
-    const fallback = tCommon('loading_page', { path: pathname })
+    const fallback = tCommon('loading_page', { path: pathname });
 
     const id = window.setTimeout(() => {
-      const label = document.title?.trim() || fallback
-      setRouteAnnouncement(label)
-    }, 60)
+      const label = document.title?.trim() || fallback;
+      setRouteAnnouncement(label);
+    }, 60);
 
-    return () => window.clearTimeout(id)
-  }, [pathname, tCommon])
+    return () => window.clearTimeout(id);
+  }, [pathname, tCommon]);
 
   useEffect(() => {
     const header =
       (document.querySelector('header[role="banner"]') as HTMLElement | null) ||
-      (document.querySelector('header') as HTMLElement | null)
+      (document.querySelector('header') as HTMLElement | null);
 
-    if (!header) return
+    if (!header) return;
 
     const setHeaderOffset = () => {
-      const height = Math.max(header.offsetHeight, 72)
-      document.documentElement.style.setProperty('--header-offset', `${height}px`)
-    }
+      const height = Math.max(header.offsetHeight, 72);
+      document.documentElement.style.setProperty('--header-offset', `${height}px`);
+    };
 
-    setHeaderOffset()
+    setHeaderOffset();
 
     if (typeof ResizeObserver === 'undefined') {
-      window.addEventListener('resize', setHeaderOffset)
-      return () => window.removeEventListener('resize', setHeaderOffset)
+      window.addEventListener('resize', setHeaderOffset);
+      return () => window.removeEventListener('resize', setHeaderOffset);
     }
 
-    const observer = new ResizeObserver(() => setHeaderOffset())
-    observer.observe(header)
+    const observer = new ResizeObserver(() => setHeaderOffset());
+    observer.observe(header);
 
-    return () => observer.disconnect()
-  }, [])
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const ensureMeta = (): HTMLMetaElement => {
-      const selector = 'meta[name="theme-color"][data-runtime-theme-color="true"]'
-      const existing = document.querySelector(selector) as HTMLMetaElement | null
-      if (existing) return existing
+      const selector = 'meta[name="theme-color"][data-runtime-theme-color="true"]';
+      const existing = document.querySelector(selector) as HTMLMetaElement | null;
+      if (existing) return existing;
 
-      const el = document.createElement('meta')
-      el.setAttribute('name', 'theme-color')
-      el.setAttribute('data-runtime-theme-color', 'true')
-      document.head.appendChild(el)
-      return el
-    }
+      const el = document.createElement('meta');
+      el.setAttribute('name', 'theme-color');
+      el.setAttribute('data-runtime-theme-color', 'true');
+      document.head.appendChild(el);
+      return el;
+    };
 
-    const meta = ensureMeta()
-    const rootStyle = getComputedStyle(document.documentElement)
-    const bg = rootStyle.getPropertyValue('--bg').trim()
-    const surface = rootStyle.getPropertyValue('--surface').trim()
-    const value = bg || surface
+    const meta = ensureMeta();
+    const rootStyle = getComputedStyle(document.documentElement);
+    const bg = rootStyle.getPropertyValue('--bg').trim();
+    const surface = rootStyle.getPropertyValue('--surface').trim();
+    const value = bg || surface;
 
     if (value) {
-      meta.setAttribute('content', `hsl(${value})`)
+      meta.setAttribute('content', `hsl(${value})`);
     }
-  }, [pathname, theme])
+  }, [pathname, theme]);
 
   useEffect(() => {
     const ric: RequestIdle =
@@ -153,39 +153,39 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
               timeRemaining: () => 0,
             }),
           options?.timeout ?? 350
-        ))
+        ));
 
     const clearRic: (id: number) => void =
-      window.cancelIdleCallback?.bind(window) ?? ((id) => window.clearTimeout(id))
+      window.cancelIdleCallback?.bind(window) ?? ((id) => window.clearTimeout(id));
 
     const canPrefetch = () => {
-      const conn = navigator.connection
-      return !conn || (!conn.saveData && (!conn.effectiveType || conn.effectiveType === '4g'))
-    }
+      const conn = navigator.connection;
+      return !conn || (!conn.saveData && (!conn.effectiveType || conn.effectiveType === '4g'));
+    };
 
     const id = ric(
       () => {
-        if (!canPrefetch()) return
+        if (!canPrefetch()) return;
 
         try {
-          router.prefetch(localizePath('/products', locale))
-          router.prefetch(localizePath('/products/packs', locale))
-          router.prefetch(localizePath('/wishlist', locale))
-          router.prefetch(localizePath('/blog', locale))
-          router.prefetch(localizePath('/contact', locale))
-          router.prefetch(localizePath('/account', locale))
-          router.prefetch(localizePath('/commande', locale))
+          router.prefetch(localizePath('/products', locale));
+          router.prefetch(localizePath('/products/packs', locale));
+          router.prefetch(localizePath('/wishlist', locale));
+          router.prefetch(localizePath('/blog', locale));
+          router.prefetch(localizePath('/contact', locale));
+          router.prefetch(localizePath('/account', locale));
+          router.prefetch(localizePath('/commande', locale));
         } catch {
           // no-op
         }
       },
       { timeout: 800 }
-    )
+    );
 
-    return () => clearRic(id)
-  }, [locale, router])
+    return () => clearRic(id);
+  }, [locale, router]);
 
-  const loadingFallback = tCommon('loading')
+  const loadingFallback = tCommon('loading');
 
   return (
     <>
@@ -231,9 +231,16 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
       >
         <Suspense
           fallback={
-            <div className="flex min-h-[40vh] items-center justify-center px-4 py-12" role="status" aria-live="polite">
+            <div
+              className="flex min-h-[40vh] items-center justify-center px-4 py-12"
+              role="status"
+              aria-live="polite"
+            >
               <span className="inline-flex items-center gap-2 text-sm text-token-text/70">
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-[hsl(var(--accent))]/30 border-t-[hsl(var(--accent))]" aria-hidden />
+                <span
+                  className="h-4 w-4 animate-spin rounded-full border-2 border-[hsl(var(--accent))]/30 border-t-[hsl(var(--accent))]"
+                  aria-hidden
+                />
                 {loadingFallback}
               </span>
             </div>
@@ -247,5 +254,5 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
       {chat ? <LiveChatLazy /> : null}
       <FooterLazy />
     </>
-  )
+  );
 }

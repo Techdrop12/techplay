@@ -1,101 +1,102 @@
-'use client'
+'use client';
 
-import { motion, useReducedMotion } from 'framer-motion'
-import Image from 'next/image'
-import { useTranslations } from 'next-intl'
-import { memo, useMemo, useState } from 'react'
+import { motion, useReducedMotion } from 'framer-motion';
+import Image from 'next/image';
+import { useTranslations } from 'next-intl';
+import { memo, useMemo, useState } from 'react';
 
-import type { Product } from '@/types/product'
+import type { Product } from '@/types/product';
 
-import AddToCartButton from '@/components/AddToCartButton'
-import FreeShippingBadge from '@/components/FreeShippingBadge'
-import Link from '@/components/LocalizedLink'
-import RatingStars from '@/components/RatingStars'
-import WishlistButton from '@/components/WishlistButton'
-import { pushDataLayer } from '@/lib/ga'
-import { logEvent } from '@/lib/logEvent'
-import { getProductImage, getProductSecondImage } from '@/lib/productImage'
-import { cn, formatPrice } from '@/lib/utils'
+import AddToCartButton from '@/components/AddToCartButton';
+import FreeShippingBadge from '@/components/FreeShippingBadge';
+import Link from '@/components/LocalizedLink';
+import RatingStars from '@/components/RatingStars';
+import WishlistButton from '@/components/WishlistButton';
+import { pushDataLayer } from '@/lib/ga';
+import { logEvent } from '@/lib/logEvent';
+import { getProductImage, getProductSecondImage } from '@/lib/productImage';
+import { cn, formatPrice } from '@/lib/utils';
 
 interface ProductCardProps {
-  product: Product
-  className?: string
-  priority?: boolean
+  product: Product;
+  className?: string;
+  priority?: boolean;
 }
 
 const BLUR_DATA_URL =
-  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+'
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+';
 
 function getTitle(product: Product): string {
-  return product.title?.trim() || 'Produit'
+  return product.title?.trim() || 'Produit';
 }
 
 function getDescription(product: Product): string | undefined {
   return typeof product.description === 'string' && product.description.trim()
     ? product.description.trim()
-    : undefined
+    : undefined;
 }
 
 function getOldPrice(product: Product): number | undefined {
   return typeof product.oldPrice === 'number' && product.oldPrice > product.price
     ? product.oldPrice
-    : undefined
+    : undefined;
 }
 
 function getRatingValue(product: Product): number {
   if (product.aggregateRating && typeof product.aggregateRating.average === 'number') {
-    return Math.max(0, Math.min(5, product.aggregateRating.average))
+    return Math.max(0, Math.min(5, product.aggregateRating.average));
   }
 
   if (typeof product.rating === 'number') {
-    return Math.max(0, Math.min(5, product.rating))
+    return Math.max(0, Math.min(5, product.rating));
   }
 
-  return 0
+  return 0;
 }
 
 function getReviewsCount(product: Product): number {
   if (product.aggregateRating && typeof product.aggregateRating.total === 'number') {
-    return Math.max(0, product.aggregateRating.total)
+    return Math.max(0, product.aggregateRating.total);
   }
 
   if (typeof product.reviewsCount === 'number') {
-    return Math.max(0, product.reviewsCount)
+    return Math.max(0, product.reviewsCount);
   }
 
   if (Array.isArray(product.reviews)) {
-    return product.reviews.length
+    return product.reviews.length;
   }
 
-  return 0
+  return 0;
 }
 
-function ProductCard({
-  product,
-  className,
-  priority = false,
-}: ProductCardProps) {
-  const prefersReducedMotion = useReducedMotion()
-  const t = useTranslations('product_card')
+function ProductCard({ product, className, priority = false }: ProductCardProps) {
+  const prefersReducedMotion = useReducedMotion();
+  const t = useTranslations('product_card');
 
-  const [imgLoaded, setImgLoaded] = useState(false)
-  const [imgError, setImgError] = useState(false)
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
-  const title = useMemo(() => getTitle(product), [product])
-  const _description = useMemo(() => getDescription(product), [product])
-  const image = useMemo(() => (imgError ? '/og-image.jpg' : getProductImage(product)), [product, imgError])
-  const secondImage = useMemo(() => getProductSecondImage(product), [product])
-  const oldPrice = useMemo(() => getOldPrice(product), [product])
-  const ratingValue = useMemo(() => getRatingValue(product), [product])
-  const reviewsCount = useMemo(() => getReviewsCount(product), [product])
+  const title = useMemo(() => getTitle(product), [product]);
+  const _description = useMemo(() => getDescription(product), [product]);
+  const image = useMemo(
+    () => (imgError ? '/og-image.jpg' : getProductImage(product)),
+    [product, imgError]
+  );
+  const secondImage = useMemo(() => getProductSecondImage(product), [product]);
+  const oldPrice = useMemo(() => getOldPrice(product), [product]);
+  const ratingValue = useMemo(() => getRatingValue(product), [product]);
+  const reviewsCount = useMemo(() => getReviewsCount(product), [product]);
 
-  const href = product.slug ? `/products/${product.slug}` : '/products'
-  const productId = String(product._id || product.slug || '')
-  const hasDiscount = typeof oldPrice === 'number' && oldPrice > product.price
-  const discountPct = hasDiscount ? Math.round(((oldPrice - product.price) / oldPrice) * 100) : null
+  const href = product.slug ? `/products/${product.slug}` : '/products';
+  const productId = String(product._id || product.slug || '');
+  const hasDiscount = typeof oldPrice === 'number' && oldPrice > product.price;
+  const discountPct = hasDiscount
+    ? Math.round(((oldPrice - product.price) / oldPrice) * 100)
+    : null;
 
-  const outOfStock = typeof product.stock === 'number' && product.stock <= 0
-  const lowStock = typeof product.stock === 'number' && product.stock > 0 && product.stock <= 5
+  const outOfStock = typeof product.stock === 'number' && product.stock <= 0;
+  const lowStock = typeof product.stock === 'number' && product.stock > 0 && product.stock <= 5;
 
   const handleClick = () => {
     try {
@@ -104,7 +105,7 @@ function ProductCard({
         category: 'engagement',
         label: product.slug || product._id,
         value: product.price,
-      })
+      });
     } catch {
       // no-op
     }
@@ -122,11 +123,11 @@ function ProductCard({
             item_brand: product.brand,
           },
         ],
-      })
+      });
     } catch {
       // no-op
     }
-  }
+  };
 
   return (
     <motion.article
@@ -255,10 +256,18 @@ function ProductCard({
             </div>
 
             {/* Rating overlay when available */}
-            {(ratingValue > 0 || reviewsCount > 0) ? (
+            {ratingValue > 0 || reviewsCount > 0 ? (
               <div className="absolute right-3 top-3 flex items-center gap-1.5 rounded-lg border border-white/20 bg-black/50 px-2.5 py-1.5 text-[11px] shadow-lg backdrop-blur-xl sm:right-4 sm:top-4">
-                <RatingStars value={ratingValue} size="xs" editable={false} filledClassName="text-amber-400" emptyClassName="text-white/40" />
-                <span className="font-semibold tabular-nums text-white">{ratingValue > 0 ? ratingValue.toFixed(1) : '—'}</span>
+                <RatingStars
+                  value={ratingValue}
+                  size="xs"
+                  editable={false}
+                  filledClassName="text-amber-400"
+                  emptyClassName="text-white/40"
+                />
+                <span className="font-semibold tabular-nums text-white">
+                  {ratingValue > 0 ? ratingValue.toFixed(1) : '—'}
+                </span>
                 {reviewsCount > 0 ? <span className="text-white/80">({reviewsCount})</span> : null}
               </div>
             ) : null}
@@ -322,11 +331,21 @@ function ProductCard({
 
             {/* 3. Réassurance — une ligne : note, stock, livraison */}
             <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] sm:mt-4">
-              {(ratingValue > 0 || reviewsCount > 0) ? (
+              {ratingValue > 0 || reviewsCount > 0 ? (
                 <span className="flex items-center gap-1 text-[hsl(var(--text))]/70">
-                  <RatingStars value={ratingValue} size="xs" editable={false} filledClassName="text-amber-500" emptyClassName="text-[hsl(var(--border))]" />
-                  <span className="font-semibold tabular-nums">{ratingValue > 0 ? ratingValue.toFixed(1) : '—'}</span>
-                  {reviewsCount > 0 ? <span className="text-[hsl(var(--text))]/55">({reviewsCount})</span> : null}
+                  <RatingStars
+                    value={ratingValue}
+                    size="xs"
+                    editable={false}
+                    filledClassName="text-amber-500"
+                    emptyClassName="text-[hsl(var(--border))]"
+                  />
+                  <span className="font-semibold tabular-nums">
+                    {ratingValue > 0 ? ratingValue.toFixed(1) : '—'}
+                  </span>
+                  {reviewsCount > 0 ? (
+                    <span className="text-[hsl(var(--text))]/55">({reviewsCount})</span>
+                  ) : null}
                 </span>
               ) : null}
               <span
@@ -348,7 +367,13 @@ function ProductCard({
             {/* 4. Action principale — CTA plein, bloc unique */}
             <div className="mt-4 sm:mt-5">
               <AddToCartButton
-                product={{ _id: product._id, slug: product.slug, title, image, price: product.price }}
+                product={{
+                  _id: product._id,
+                  slug: product.slug,
+                  title,
+                  image,
+                  price: product.price,
+                }}
                 stopPropagation
                 size="sm"
                 variant="solid"
@@ -368,7 +393,7 @@ function ProductCard({
         </Link>
       </div>
     </motion.article>
-  )
+  );
 }
 
-export default memo(ProductCard)
+export default memo(ProductCard);

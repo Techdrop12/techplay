@@ -1,21 +1,21 @@
 // src/components/checkout/OrderSummary.tsx — FINAL+ (locale/currency-friendly)
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl';
 
-import { cn, formatPrice } from '@/lib/utils'
+import { cn, formatPrice } from '@/lib/utils';
 
 type Props = {
-  subtotal?: number
-  shipping?: number
-  tax?: number
-  discount?: number
+  subtotal?: number;
+  shipping?: number;
+  tax?: number;
+  discount?: number;
   /** total (si fourni, affichage direct). Sinon: subtotal + shipping + tax - discount */
-  total?: number
-  currency?: string
-  locale?: string
-  className?: string
-}
+  total?: number;
+  currency?: string;
+  locale?: string;
+  className?: string;
+};
 
 export default function OrderSummary({
   subtotal,
@@ -27,21 +27,21 @@ export default function OrderSummary({
   locale,
   className,
 }: Props) {
-  const t = useTranslations('checkout')
-  const tCart = useTranslations('cart')
+  const t = useTranslations('checkout');
+  const tCart = useTranslations('cart');
 
   const computed =
     typeof total === 'number'
       ? total
-      : Math.max(0, (subtotal ?? 0) + (shipping ?? 0) + (tax ?? 0) - (discount ?? 0))
+      : Math.max(0, (subtotal ?? 0) + (shipping ?? 0) + (tax ?? 0) - (discount ?? 0));
 
   const showBreakdown =
     typeof subtotal === 'number' ||
     typeof shipping === 'number' ||
     typeof tax === 'number' ||
-    typeof discount === 'number'
+    typeof discount === 'number';
 
-  const fmt = (v: number) => formatPrice(v, { currency, locale })
+  const fmt = (v: number) => formatPrice(v, { currency, locale });
 
   return (
     <section
@@ -71,7 +71,9 @@ export default function OrderSummary({
           {typeof shipping === 'number' && (
             <div className="flex justify-between items-center">
               <dt className="text-token-text/80">{tCart('shipping')}</dt>
-              <dd className="font-medium tabular-nums text-[hsl(var(--text))]">{shipping === 0 ? tCart('shipping_free') : fmt(shipping)}</dd>
+              <dd className="font-medium tabular-nums text-[hsl(var(--text))]">
+                {shipping === 0 ? tCart('shipping_free') : fmt(shipping)}
+              </dd>
             </div>
           )}
           {typeof tax === 'number' && (
@@ -83,7 +85,9 @@ export default function OrderSummary({
           {typeof discount === 'number' && discount > 0 && (
             <div className="flex justify-between items-center">
               <dt className="text-token-text/80">{tCart('discount_label')}</dt>
-              <dd className="font-medium tabular-nums text-emerald-600 dark:text-emerald-400">- {fmt(discount)}</dd>
+              <dd className="font-medium tabular-nums text-emerald-600 dark:text-emerald-400">
+                - {fmt(discount)}
+              </dd>
             </div>
           )}
         </dl>
@@ -100,9 +104,7 @@ export default function OrderSummary({
         </p>
       </div>
 
-      <p className="mt-4 text-[11px] text-token-text/60">
-        {t('pay_secure')}
-      </p>
+      <p className="mt-4 text-[11px] text-token-text/60">{t('pay_secure')}</p>
     </section>
-  )
+  );
 }

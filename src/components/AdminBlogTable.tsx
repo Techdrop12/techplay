@@ -1,71 +1,72 @@
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
-import { toast } from 'react-hot-toast'
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
-import Link from '@/components/LocalizedLink'
+import Link from '@/components/LocalizedLink';
 
 interface BlogPost {
-  _id: string
-  title: string
-  slug: string
-  published: boolean
-  createdAt: string | Date
+  _id: string;
+  title: string;
+  slug: string;
+  published: boolean;
+  createdAt: string | Date;
 }
 
-type StatusFilter = 'all' | 'published' | 'draft'
+type StatusFilter = 'all' | 'published' | 'draft';
 
 export default function AdminBlogTable() {
-  const t = useTranslations('admin')
-  const [posts, setPosts] = useState<BlogPost[]>([])
-  const [loading, setLoading] = useState(true)
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+  const t = useTranslations('admin');
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
-  const filteredPosts = statusFilter === 'all'
-    ? posts
-    : statusFilter === 'published'
-      ? posts.filter((p) => p.published)
-      : posts.filter((p) => !p.published)
+  const filteredPosts =
+    statusFilter === 'all'
+      ? posts
+      : statusFilter === 'published'
+        ? posts.filter((p) => p.published)
+        : posts.filter((p) => !p.published);
 
   useEffect(() => {
     fetch('/api/blog/all')
       .then((res) => res.json())
-      .then((data: unknown) => setPosts(Array.isArray(data) ? data as BlogPost[] : []))
+      .then((data: unknown) => setPosts(Array.isArray(data) ? (data as BlogPost[]) : []))
       .catch(() => {
-        toast.error(t('error_load_articles'))
-        setPosts([])
+        toast.error(t('error_load_articles'));
+        setPosts([]);
       })
-      .finally(() => setLoading(false))
-  }, [t])
+      .finally(() => setLoading(false));
+  }, [t]);
 
   const togglePublish = async (id: string) => {
-    const res = await fetch(`/api/blog/toggle-publish?id=${id}`, { method: 'POST' })
+    const res = await fetch(`/api/blog/toggle-publish?id=${id}`, { method: 'POST' });
     if (res.ok) {
-      setPosts((prev) => prev.map((p) => (p._id === id ? { ...p, published: !p.published } : p)))
-      toast.success(t('status_updated'))
+      setPosts((prev) => prev.map((p) => (p._id === id ? { ...p, published: !p.published } : p)));
+      toast.success(t('status_updated'));
     } else {
-      toast.error(t('error_publish'))
+      toast.error(t('error_publish'));
     }
-  }
+  };
 
   const deletePost = async (id: string) => {
-    if (!confirm(t('confirm_delete_article'))) return
-    const res = await fetch(`/api/blog/delete?id=${id}`, { method: 'DELETE' })
+    if (!confirm(t('confirm_delete_article'))) return;
+    const res = await fetch(`/api/blog/delete?id=${id}`, { method: 'DELETE' });
     if (res.ok) {
-      setPosts((prev) => prev.filter((p) => p._id !== id))
-      toast.success(t('article_deleted'))
+      setPosts((prev) => prev.filter((p) => p._id !== id));
+      toast.success(t('article_deleted'));
     } else {
-      toast.error(t('error_delete_article'))
+      toast.error(t('error_delete_article'));
     }
-  }
+  };
 
   if (loading) {
     return (
       <p className="text-token-text/60 animate-pulse p-4" role="status" aria-live="polite">
         {t('loading_articles')}
       </p>
-    )
+    );
   }
 
   return (
@@ -149,5 +150,5 @@ export default function AdminBlogTable() {
         </table>
       </div>
     </div>
-  )
+  );
 }

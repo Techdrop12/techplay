@@ -1,12 +1,19 @@
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
-import { toast } from 'react-hot-toast'
+import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
-import TableSkeleton from '@/components/admin/TableSkeleton'
+import TableSkeleton from '@/components/admin/TableSkeleton';
 
-const STATUS_OPTIONS = ['en cours', 'en préparation', 'payée', 'expédiée', 'livrée', 'annulée'] as const;
+const STATUS_OPTIONS = [
+  'en cours',
+  'en préparation',
+  'payée',
+  'expédiée',
+  'livrée',
+  'annulée',
+] as const;
 const PAGE_SIZE = 25;
 
 interface OrderItem {
@@ -24,7 +31,7 @@ interface OrderRow {
 }
 
 export default function OrderTable() {
-  const t = useTranslations('admin')
+  const t = useTranslations('admin');
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [page, setPage] = useState(1);
@@ -62,9 +69,7 @@ export default function OrderTable() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.error || t('update_error'));
       }
-      setOrders((prev) =>
-        prev.map((o) => (o._id === orderId ? { ...o, status: newStatus } : o))
-      );
+      setOrders((prev) => prev.map((o) => (o._id === orderId ? { ...o, status: newStatus } : o)));
       toast.success(t('status_updated'));
       fetchOrders();
     } catch (e) {
@@ -84,7 +89,9 @@ export default function OrderTable() {
       String(o.total ?? 0),
       (o.status ?? '').replace(/"/g, '""'),
     ]);
-    const csv = [headers.join(','), ...rows.map((r) => r.map((c) => `"${c}"`).join(','))].join('\r\n');
+    const csv = [headers.join(','), ...rows.map((r) => r.map((c) => `"${c}"`).join(','))].join(
+      '\r\n'
+    );
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -106,13 +113,18 @@ export default function OrderTable() {
         <h2 className="text-2xl font-bold text-[hsl(var(--text))]">{t('orders_title')}</h2>
         <select
           value={statusFilter}
-          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+          onChange={(e) => {
+            setStatusFilter(e.target.value);
+            setPage(1);
+          }}
           className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
           aria-label={t('filter_status')}
         >
           <option value="">{t('all_statuses')}</option>
           {STATUS_OPTIONS.map((s) => (
-            <option key={s} value={s}>{s}</option>
+            <option key={s} value={s}>
+              {s}
+            </option>
           ))}
         </select>
         <span className="text-sm text-token-text/70">
@@ -170,17 +182,23 @@ export default function OrderTable() {
                   aria-label={t('change_order_status_aria', { id: o._id })}
                 >
                   {STATUS_OPTIONS.map((s) => (
-                    <option key={s} value={s}>{s}</option>
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
                   ))}
                 </select>
               </td>
-              <td className="p-2">{o.createdAt ? new Date(o.createdAt).toLocaleDateString() : '—'}</td>
+              <td className="p-2">
+                {o.createdAt ? new Date(o.createdAt).toLocaleDateString() : '—'}
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
       {filteredOrders.length === 0 && !loading && (
-        <p className="text-token-text/60 p-4">{statusFilter ? t('no_orders_filter') : t('no_orders')}</p>
+        <p className="text-token-text/60 p-4">
+          {statusFilter ? t('no_orders_filter') : t('no_orders')}
+        </p>
       )}
     </div>
   );

@@ -2,61 +2,57 @@
 
 /* ============================= SSR helpers ============================= */
 
-const isBrowser = (): boolean =>
-  typeof window !== 'undefined' && typeof document !== 'undefined'
+const isBrowser = (): boolean => typeof window !== 'undefined' && typeof document !== 'undefined';
 
 /* ====================== Motion / behavior preferences ====================== */
 
 export function prefersReducedMotion(): boolean {
-  if (!isBrowser()) return false
-  if (!('matchMedia' in window)) return false
+  if (!isBrowser()) return false;
+  if (!('matchMedia' in window)) return false;
 
   try {
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   } catch {
-    return false
+    return false;
   }
 }
 
 function resolveBehavior(custom?: ScrollBehavior): ScrollBehavior {
-  return prefersReducedMotion() ? 'auto' : custom || 'smooth'
+  return prefersReducedMotion() ? 'auto' : custom || 'smooth';
 }
 
 /* ============================ Basic scrolling ============================ */
 
 export function scrollToTop(options: { behavior?: ScrollBehavior } = {}): void {
-  if (!isBrowser()) return
-  const behavior = resolveBehavior(options.behavior)
-  window.scrollTo({ top: 0, behavior })
+  if (!isBrowser()) return;
+  const behavior = resolveBehavior(options.behavior);
+  window.scrollTo({ top: 0, behavior });
 }
 
-export function scrollToY(
-  y: number,
-  options: { behavior?: ScrollBehavior } = {}
-): void {
-  if (!isBrowser()) return
-  const behavior = resolveBehavior(options.behavior)
-  window.scrollTo({ top: Math.max(0, y || 0), behavior })
+export function scrollToY(y: number, options: { behavior?: ScrollBehavior } = {}): void {
+  if (!isBrowser()) return;
+  const behavior = resolveBehavior(options.behavior);
+  window.scrollTo({ top: Math.max(0, y || 0), behavior });
 }
 
 /* ============================ Persist position ============================ */
 
 export function saveScrollPosition(key = 'scroll'): void {
-  if (!isBrowser()) return
+  if (!isBrowser()) return;
 
   try {
-    sessionStorage.setItem(key, String(window.scrollY || 0))
+    sessionStorage.setItem(key, String(window.scrollY || 0));
   } catch {}
 }
 
 export function restoreScrollPosition(key = 'scroll', fallback = 0): void {
-  if (!isBrowser()) return
+  if (!isBrowser()) return;
 
   try {
-    const y = Number(sessionStorage.getItem(key) ?? fallback)
-    scrollToY(y)
+    const y = Number(sessionStorage.getItem(key) ?? fallback);
+    scrollToY(y);
   } catch {
-    scrollToY(fallback)
+    scrollToY(fallback);
   }
 }
 
@@ -64,47 +60,44 @@ export function restoreScrollPosition(key = 'scroll', fallback = 0): void {
 
 export type ScrollToSnapOptions = {
   /** Décalage px (ex. hauteur du header sticky) */
-  offset?: number
+  offset?: number;
   /** Comportement du scroll */
-  behavior?: ScrollBehavior
+  behavior?: ScrollBehavior;
   /** Alignement vertical/horizontal pour scrollIntoView */
-  block?: ScrollLogicalPosition
-  inline?: ScrollLogicalPosition
+  block?: ScrollLogicalPosition;
+  inline?: ScrollLogicalPosition;
   /** Met le focus sur la cible après scroll (a11y) */
-  focus?: boolean
+  focus?: boolean;
   /** Conteneur scrollable custom (sélecteur CSS ou Element) */
-  container?: string | Element
+  container?: string | Element;
   /** Ajoute un highlight éphémère sur la cible */
-  highlight?: boolean
-}
+  highlight?: boolean;
+};
 
 function getElement(target: string | Element): Element | null {
-  if (!isBrowser()) return null
+  if (!isBrowser()) return null;
 
   if (typeof target === 'string') {
-    const id = target.startsWith('#') ? target.slice(1) : target
+    const id = target.startsWith('#') ? target.slice(1) : target;
 
-    return document.getElementById(id) || document.querySelector(target) || null
+    return document.getElementById(id) || document.querySelector(target) || null;
   }
 
-  return target ?? null
+  return target ?? null;
 }
 
 function getScrollableContainer(container?: string | Element): HTMLElement | null {
-  if (!isBrowser() || !container) return null
+  if (!isBrowser() || !container) return null;
 
   if (typeof container === 'string') {
-    return document.querySelector<HTMLElement>(container)
+    return document.querySelector<HTMLElement>(container);
   }
 
-  return container instanceof HTMLElement ? container : null
+  return container instanceof HTMLElement ? container : null;
 }
 
-export function scrollToSnap(
-  target: string | Element,
-  opts: ScrollToSnapOptions = {}
-): boolean {
-  if (!isBrowser()) return false
+export function scrollToSnap(target: string | Element, opts: ScrollToSnapOptions = {}): boolean {
+  if (!isBrowser()) return false;
 
   const {
     offset = 0,
@@ -114,39 +107,39 @@ export function scrollToSnap(
     focus = false,
     container,
     highlight = false,
-  } = opts
+  } = opts;
 
-  const el = getElement(target)
-  if (!el) return false
+  const el = getElement(target);
+  if (!el) return false;
 
-  const resolvedBehavior = resolveBehavior(behavior)
-  const root = getScrollableContainer(container)
+  const resolvedBehavior = resolveBehavior(behavior);
+  const root = getScrollableContainer(container);
 
   if (root) {
-    const rect = el.getBoundingClientRect()
-    const rootRect = root.getBoundingClientRect()
-    const top = root.scrollTop + (rect.top - rootRect.top) - offset
-    root.scrollTo({ top, behavior: resolvedBehavior })
+    const rect = el.getBoundingClientRect();
+    const rootRect = root.getBoundingClientRect();
+    const top = root.scrollTop + (rect.top - rootRect.top) - offset;
+    root.scrollTo({ top, behavior: resolvedBehavior });
   } else if (offset) {
-    const y = (window.scrollY || 0) + el.getBoundingClientRect().top - offset
-    window.scrollTo({ top: y, behavior: resolvedBehavior })
+    const y = (window.scrollY || 0) + el.getBoundingClientRect().top - offset;
+    window.scrollTo({ top: y, behavior: resolvedBehavior });
   } else {
-    el.scrollIntoView({ behavior: resolvedBehavior, block, inline })
+    el.scrollIntoView({ behavior: resolvedBehavior, block, inline });
   }
 
   if (focus && el instanceof HTMLElement) {
-    const prevTabIndex = el.getAttribute('tabindex')
+    const prevTabIndex = el.getAttribute('tabindex');
 
     if (prevTabIndex === null) {
-      el.setAttribute('tabindex', '-1')
+      el.setAttribute('tabindex', '-1');
     }
 
     try {
-      el.focus({ preventScroll: true })
+      el.focus({ preventScroll: true });
     } catch {}
 
     if (prevTabIndex === null) {
-      el.removeAttribute('tabindex')
+      el.removeAttribute('tabindex');
     }
   }
 
@@ -159,86 +152,83 @@ export function scrollToSnap(
           { boxShadow: '0 0 0 0px rgba(99,102,241,0)' },
         ],
         { duration: 1000 }
-      )
+      );
     } catch {}
   }
 
-  return true
+  return true;
 }
 
 /* ============================ Direction / helpers ============================ */
 
 export function isScrollingDown(lastY: number, currentY: number): boolean {
-  return currentY > lastY
+  return currentY > lastY;
 }
 
-export type ScrollDirection = 'up' | 'down' | 'none'
+export type ScrollDirection = 'up' | 'down' | 'none';
 
 export function getScrollDirection(
   lastY: number,
   currentY: number,
   threshold = 2
 ): ScrollDirection {
-  const delta = currentY - lastY
-  if (Math.abs(delta) <= threshold) return 'none'
-  return delta > 0 ? 'down' : 'up'
+  const delta = currentY - lastY;
+  if (Math.abs(delta) <= threshold) return 'none';
+  return delta > 0 ? 'down' : 'up';
 }
 
 export function isNearBottom(offset = 300): boolean {
-  if (!isBrowser()) return false
+  if (!isBrowser()) return false;
 
-  const { scrollY, innerHeight } = window
-  const { scrollHeight } = document.documentElement
+  const { scrollY, innerHeight } = window;
+  const { scrollHeight } = document.documentElement;
 
-  return scrollY + innerHeight >= scrollHeight - Math.max(0, offset)
+  return scrollY + innerHeight >= scrollHeight - Math.max(0, offset);
 }
 
 /* ============================ Body lock (modals) ============================ */
 
 export function lockBodyScroll(): void {
-  if (!isBrowser()) return
+  if (!isBrowser()) return;
 
-  const scrollBar = window.innerWidth - document.documentElement.clientWidth
-  document.body.style.overflow = 'hidden'
+  const scrollBar = window.innerWidth - document.documentElement.clientWidth;
+  document.body.style.overflow = 'hidden';
 
   if (scrollBar) {
-    document.body.style.paddingRight = `${scrollBar}px`
+    document.body.style.paddingRight = `${scrollBar}px`;
   }
 }
 
 export function unlockBodyScroll(): void {
-  if (!isBrowser()) return
+  if (!isBrowser()) return;
 
-  document.body.style.overflow = ''
-  document.body.style.paddingRight = ''
+  document.body.style.overflow = '';
+  document.body.style.paddingRight = '';
 }
 
 /* ============================ Throttle util ============================ */
 
-export function throttle<T extends (...args: Parameters<T>) => ReturnType<T>>(
-  fn: T,
-  wait = 100
-) {
-  let last = 0
-  let timeout: ReturnType<typeof setTimeout> | null = null
+export function throttle<T extends (...args: Parameters<T>) => ReturnType<T>>(fn: T, wait = 100) {
+  let last = 0;
+  let timeout: ReturnType<typeof setTimeout> | null = null;
 
   return (...args: Parameters<T>) => {
-    const now = Date.now()
-    const remaining = wait - (now - last)
+    const now = Date.now();
+    const remaining = wait - (now - last);
 
     if (remaining <= 0) {
-      last = now
-      fn(...args)
-      return
+      last = now;
+      fn(...args);
+      return;
     }
 
     if (timeout) {
-      clearTimeout(timeout)
+      clearTimeout(timeout);
     }
 
     timeout = setTimeout(() => {
-      last = Date.now()
-      fn(...args)
-    }, remaining)
-  }
+      last = Date.now();
+      fn(...args);
+    }, remaining);
+  };
 }

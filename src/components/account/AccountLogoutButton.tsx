@@ -1,15 +1,15 @@
-'use client'
+'use client';
 
-import { signOut } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
+import { signOut } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
 
 type Props = {
-  className?: string
-  children?: React.ReactNode
-}
+  className?: string;
+  children?: React.ReactNode;
+};
 
 export default function AccountLogoutButton({ className = '', children }: Props) {
-  const t = useTranslations('admin')
+  const t = useTranslations('admin');
   return (
     <button
       type="button"
@@ -19,5 +19,5 @@ export default function AccountLogoutButton({ className = '', children }: Props)
     >
       {children ?? t('logout_aria')}
     </button>
-  )
+  );
 }

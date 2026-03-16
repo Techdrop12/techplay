@@ -1,5 +1,5 @@
 // ✅ src/lib/seo/seoMonitor.ts
-import { warn } from '@/lib/logger'
+import { warn } from '@/lib/logger';
 
 /**
  * Envoie un événement de page SEO au dataLayer (GTM)
@@ -38,4 +38,3 @@ export function reportSEOIssue(message: string, context: Record<string, unknown>
     // fetch('/api/log-seo', { method: 'POST', body: JSON.stringify({ message, ...context }) })
   }
 }
-

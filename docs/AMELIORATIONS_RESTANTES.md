@@ -31,7 +31,7 @@ Liste non exhaustive de ce qui peut encore être amélioré ou complété sur le
 
 ### 3. Page Catégories
 
-- **Fait** : `generateMetadata()` et breadcrumb/JSON-LD utilisent `getTranslations('category')` et `nav.home`.  
+- **Fait** : `generateMetadata()` et breadcrumb/JSON-LD utilisent `getTranslations('category')` et `nav.home`.
 
 ### 4. Nettoyage optionnel
 

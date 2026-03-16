@@ -1,10 +1,10 @@
 // tailwind.config.ts — Ultra Premium FINAL
-import type { Config } from 'tailwindcss'
-import plugin from 'tailwindcss/plugin'
-import forms from '@tailwindcss/forms'
-import typography from '@tailwindcss/typography'
-import scrollbar from 'tailwind-scrollbar'
-import type { PluginAPI } from 'tailwindcss/types/config'
+import type { Config } from 'tailwindcss';
+import plugin from 'tailwindcss/plugin';
+import forms from '@tailwindcss/forms';
+import typography from '@tailwindcss/typography';
+import scrollbar from 'tailwind-scrollbar';
+import type { PluginAPI } from 'tailwindcss/types/config';
 
 const config: Config = {
   darkMode: 'class',
@@ -121,16 +121,34 @@ const config: Config = {
           '25%,75%': { transform: 'translateX(-5px)' },
           '50%': { transform: 'translateX(5px)' },
         },
-        bounce: { '0%,100%': { transform: 'translateY(-5%)' }, '50%': { transform: 'translateY(0)' } },
+        bounce: {
+          '0%,100%': { transform: 'translateY(-5%)' },
+          '50%': { transform: 'translateY(0)' },
+        },
         fadeUp: {
           '0%': { transform: 'translateY(8px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
-        scaleIn: { '0%': { transform: 'scale(0.98)', opacity: '0' }, '100%': { transform: 'scale(1)', opacity: '1' } },
-        accordionDown: { from: { height: '0' }, to: { height: 'var(--radix-accordion-content-height)' } },
-        accordionUp: { from: { height: 'var(--radix-accordion-content-height)' }, to: { height: '0' } },
-        shimmer: { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } },
-        float: { '0%,100%': { transform: 'translate3d(0,0,0)' }, '50%': { transform: 'translate3d(0,-6px,0)' } },
+        scaleIn: {
+          '0%': { transform: 'scale(0.98)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        accordionDown: {
+          from: { height: '0' },
+          to: { height: 'var(--radix-accordion-content-height)' },
+        },
+        accordionUp: {
+          from: { height: 'var(--radix-accordion-content-height)' },
+          to: { height: '0' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+        float: {
+          '0%,100%': { transform: 'translate3d(0,0,0)' },
+          '50%': { transform: 'translate3d(0,-6px,0)' },
+        },
         tilt: { '0%,100%': { transform: 'rotate(-.3deg)' }, '50%': { transform: 'rotate(.3deg)' } },
         marquee: { from: { transform: 'translateX(0)' }, to: { transform: 'translateX(-50%)' } },
       },
@@ -192,16 +210,16 @@ const config: Config = {
     scrollbar({ nocompatible: true }),
 
     plugin((api: PluginAPI) => {
-      const { addUtilities, addComponents, addVariant } = api
+      const { addUtilities, addComponents, addVariant } = api;
 
       // Variantes premium (utilisées partout dans ton UI)
-      addVariant('hocus', '&:where(:hover, :focus-visible)')
-      addVariant('group-hocus', ':merge(.group):where(:hover, :focus-within) &')
-      addVariant('aria-expanded', '&[aria-expanded="true"]')
-      addVariant('aria-pressed', '&[aria-pressed="true"]')
-      addVariant('data-open', '&[data-state="open"]')
-      addVariant('data-closed', '&[data-state="closed"]')
-      addVariant('disabled', '&:disabled')
+      addVariant('hocus', '&:where(:hover, :focus-visible)');
+      addVariant('group-hocus', ':merge(.group):where(:hover, :focus-within) &');
+      addVariant('aria-expanded', '&[aria-expanded="true"]');
+      addVariant('aria-pressed', '&[aria-pressed="true"]');
+      addVariant('data-open', '&[data-state="open"]');
+      addVariant('data-closed', '&[data-state="closed"]');
+      addVariant('disabled', '&:disabled');
 
       // Utils (sans doublonner ce qui est déjà dans globals.css)
       addUtilities({
@@ -213,7 +231,7 @@ const config: Config = {
         '.backface-hidden': { backfaceVisibility: 'hidden' },
         '.perspective-1000': { perspective: '1000px' },
         '.will-change-transform': { willChange: 'transform' },
-      })
+      });
 
       // Composants (on conserve seulement pressable qui n’existe pas en CSS)
       addComponents({
@@ -227,7 +245,7 @@ const config: Config = {
         },
         '.card-pressable:hover': { transform: 'translateY(-2px) scale(1.01)' },
         '.card-pressable:active': { transform: 'translateY(0) scale(0.985)' },
-      })
+      });
     }),
   ],
 
@@ -248,6 +266,6 @@ const config: Config = {
     'text-token-text/60',
     'text-token-text/70',
   ],
-}
+};
 
-export default config
+export default config;

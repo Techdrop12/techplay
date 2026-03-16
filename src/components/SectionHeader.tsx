@@ -1,21 +1,21 @@
-'use client'
+'use client';
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
 
 export interface SectionHeaderProps {
   /** Optional small label above the title (e.g. "FAQ", "Packs") */
-  kicker?: string
+  kicker?: string;
   /** Main section title */
-  title: string
+  title: string;
   /** Optional short description below the title */
-  sub?: string
+  sub?: string;
   /** Center align (default true) */
-  center?: boolean
+  center?: boolean;
   /** Semantic level */
-  as?: 'h1' | 'h2' | 'h3'
+  as?: 'h1' | 'h2' | 'h3';
   /** Element id for aria-labelledby / anchor */
-  id?: string
-  className?: string
+  id?: string;
+  className?: string;
 }
 
 export default function SectionHeader({
@@ -28,30 +28,14 @@ export default function SectionHeader({
   className,
 }: SectionHeaderProps) {
   return (
-    <header
-      className={cn(
-        center && 'mx-auto max-w-3xl text-center',
-        className
-      )}
-    >
-      {kicker ? (
-        <p className="heading-kicker">{kicker}</p>
-      ) : null}
-      <Tag
-        id={id}
-        className={cn(
-          'heading-section',
-          kicker ? 'mt-3' : '',
-          sub ? 'mb-0' : ''
-        )}
-      >
+    <header className={cn(center && 'mx-auto max-w-3xl text-center', className)}>
+      {kicker ? <p className="heading-kicker">{kicker}</p> : null}
+      <Tag id={id} className={cn('heading-section', kicker ? 'mt-3' : '', sub ? 'mb-0' : '')}>
         {title}
       </Tag>
       {sub ? (
-        <p className={cn('heading-section-sub mt-4 max-w-2xl', center && 'mx-auto')}>
-          {sub}
-        </p>
+        <p className={cn('heading-section-sub mt-4 max-w-2xl', center && 'mx-auto')}>{sub}</p>
       ) : null}
     </header>
-  )
+  );
 }

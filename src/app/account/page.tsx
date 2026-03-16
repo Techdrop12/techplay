@@ -1,73 +1,119 @@
-import type { Metadata } from 'next'
-import { getTranslations } from 'next-intl/server'
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 
-import AccountLogoutButton from '@/components/account/AccountLogoutButton'
-import Link from '@/components/LocalizedLink'
-import { getSession } from '@/lib/auth'
-import { getUserOrders } from '@/lib/db/orders'
-import { formatDateTime } from '@/lib/formatDate'
-import { formatPrice } from '@/lib/utils'
-import { generateMeta } from '@/lib/seo'
+import AccountLogoutButton from '@/components/account/AccountLogoutButton';
+import Link from '@/components/LocalizedLink';
+import { getSession } from '@/lib/auth';
+import { getUserOrders } from '@/lib/db/orders';
+import { formatDateTime } from '@/lib/formatDate';
+import { formatPrice } from '@/lib/utils';
+import { generateMeta } from '@/lib/seo';
 
 type OrderSummary = {
-  id: string
-  date?: string | number | Date
-  total?: number
-  itemsCount?: number
-  status?: string
-}
+  id: string;
+  date?: string | number | Date;
+  total?: number;
+  itemsCount?: number;
+  status?: string;
+};
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('seo')
+  const t = await getTranslations('seo');
   return generateMeta({
     title: t('account_title'),
     description: t('account_description'),
     url: '/account',
     noindex: true,
-  })
+  });
 }
 
-type OrderDoc = { _id?: { toString: () => string }; createdAt?: unknown; total?: number; items?: unknown[]; status?: string }
+type OrderDoc = {
+  _id?: { toString: () => string };
+  createdAt?: unknown;
+  total?: number;
+  items?: unknown[];
+  status?: string;
+};
 
 function firstName(name: string | null | undefined): string {
-  if (!name || typeof name !== 'string') return ''
-  const part = name.trim().split(/\s+/)[0]
-  return part || ''
+  if (!name || typeof name !== 'string') return '';
+  const part = name.trim().split(/\s+/)[0];
+  return part || '';
 }
 
 const ICONS = {
   profile: (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden="true"
+    >
       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
       <circle cx="12" cy="7" r="4" />
     </svg>
   ),
   orders: (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden="true"
+    >
       <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
       <line x1="3" y1="6" x2="21" y2="6" />
       <path d="M16 10a4 4 0 0 1-8 0" />
     </svg>
   ),
   contact: (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden="true"
+    >
       <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
       <path d="m22 6-10 7L2 6" />
     </svg>
   ),
   shop: (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden="true"
+    >
       <circle cx="9" cy="21" r="1" />
       <circle cx="20" cy="21" r="1" />
       <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
     </svg>
   ),
   wishlist: (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden="true"
+    >
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
     </svg>
   ),
-}
+};
 
 const STATUS_STYLE: Record<string, string> = {
   pending: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
@@ -75,16 +121,16 @@ const STATUS_STYLE: Record<string, string> = {
   shipped: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300',
   delivered: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
   canceled: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
-}
+};
 
 export default async function AccountPage() {
-  const t = await getTranslations('account')
-  const session = await getSession()
-  const isLoggedIn = Boolean(session?.user?.email?.trim())
-  const email = session?.user?.email?.trim() ?? ''
-  const userName = session?.user?.name ?? null
-  const userImage = session?.user?.image ?? null
-  const displayName = firstName(userName) || 'Client'
+  const t = await getTranslations('account');
+  const session = await getSession();
+  const isLoggedIn = Boolean(session?.user?.email?.trim());
+  const email = session?.user?.email?.trim() ?? '';
+  const userName = session?.user?.name ?? null;
+  const userImage = session?.user?.image ?? null;
+  const displayName = firstName(userName) || 'Client';
 
   const STATUS_LABEL: Record<string, string> = {
     pending: t('status_pending'),
@@ -92,36 +138,61 @@ export default async function AccountPage() {
     shipped: t('status_shipped'),
     delivered: t('status_delivered'),
     canceled: t('status_canceled'),
-  }
+  };
 
   const QUICK_LINKS = [
-    { href: '/account/profil', titleKey: 'link_my_profile' as const, descKey: 'link_my_profile_desc' as const, icon: ICONS.profile },
-    { href: '/account/mes-commandes', titleKey: 'link_my_orders' as const, descKey: 'link_my_orders_desc' as const, icon: ICONS.orders },
-    { href: '/contact', titleKey: 'link_contact' as const, descKey: 'link_contact_desc' as const, icon: ICONS.contact },
-    { href: '/products', titleKey: 'link_shop' as const, descKey: 'link_shop_desc' as const, icon: ICONS.shop },
-    { href: '/wishlist', titleKey: 'link_wishlist' as const, descKey: 'link_wishlist_desc' as const, icon: ICONS.wishlist },
-  ]
+    {
+      href: '/account/profil',
+      titleKey: 'link_my_profile' as const,
+      descKey: 'link_my_profile_desc' as const,
+      icon: ICONS.profile,
+    },
+    {
+      href: '/account/mes-commandes',
+      titleKey: 'link_my_orders' as const,
+      descKey: 'link_my_orders_desc' as const,
+      icon: ICONS.orders,
+    },
+    {
+      href: '/contact',
+      titleKey: 'link_contact' as const,
+      descKey: 'link_contact_desc' as const,
+      icon: ICONS.contact,
+    },
+    {
+      href: '/products',
+      titleKey: 'link_shop' as const,
+      descKey: 'link_shop_desc' as const,
+      icon: ICONS.shop,
+    },
+    {
+      href: '/wishlist',
+      titleKey: 'link_wishlist' as const,
+      descKey: 'link_wishlist_desc' as const,
+      icon: ICONS.wishlist,
+    },
+  ];
 
-  let orders: OrderSummary[] = []
-  let totalSpent = 0
-  let lastOrderDate: string | null = null
+  let orders: OrderSummary[] = [];
+  let totalSpent = 0;
+  let lastOrderDate: string | null = null;
 
   if (isLoggedIn && email) {
-    const raw = await getUserOrders(email) as OrderDoc[]
+    const raw = (await getUserOrders(email)) as OrderDoc[];
     orders = raw.map((o: OrderDoc) => ({
       id: o._id?.toString() ?? '',
       date: o.createdAt as string | number | Date | undefined,
       total: o.total ?? undefined,
       itemsCount: Array.isArray(o.items) ? o.items.length : 0,
       status: o.status ?? undefined,
-    }))
-    totalSpent = orders.reduce((sum, o) => sum + (typeof o.total === 'number' ? o.total : 0), 0)
+    }));
+    totalSpent = orders.reduce((sum, o) => sum + (typeof o.total === 'number' ? o.total : 0), 0);
     if (orders.length > 0 && orders[0].date) {
-      lastOrderDate = formatDateTime(orders[0].date, 'fr-FR')
+      lastOrderDate = formatDateTime(orders[0].date, 'fr-FR');
     }
   }
 
-  const recentOrders = orders.slice(0, 3)
+  const recentOrders = orders.slice(0, 3);
 
   if (!isLoggedIn) {
     return (
@@ -152,7 +223,15 @@ export default async function AccountPage() {
           <ul className="mb-8 space-y-4 text-left" aria-label={t('benefits_aria')}>
             <li className="flex items-center gap-3 text-[15px] text-token-text/85">
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))]">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                >
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </span>
@@ -160,7 +239,15 @@ export default async function AccountPage() {
             </li>
             <li className="flex items-center gap-3 text-[15px] text-token-text/85">
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))]">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                >
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </span>
@@ -168,7 +255,15 @@ export default async function AccountPage() {
             </li>
             <li className="flex items-center gap-3 text-[15px] text-token-text/85">
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))]">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                >
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </span>
@@ -182,13 +277,11 @@ export default async function AccountPage() {
             >
               {t('sign_in')}
             </Link>
-            <p className="mt-4 text-[13px] text-token-text/60">
-              {t('guest_note')}
-            </p>
+            <p className="mt-4 text-[13px] text-token-text/60">{t('guest_note')}</p>
           </div>
         </section>
       </main>
-    )
+    );
   }
 
   return (
@@ -229,18 +322,26 @@ export default async function AccountPage() {
       <section aria-label={t('activity_summary')} className="mb-10">
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-5 shadow-sm">
-            <p className="text-[12px] font-semibold uppercase tracking-wider text-token-text/60">Commandes</p>
-            <p className="mt-1 text-2xl font-bold tabular-nums text-[hsl(var(--text))]">{orders.length}</p>
+            <p className="text-[12px] font-semibold uppercase tracking-wider text-token-text/60">
+              Commandes
+            </p>
+            <p className="mt-1 text-2xl font-bold tabular-nums text-[hsl(var(--text))]">
+              {orders.length}
+            </p>
             <p className="mt-0.5 text-[13px] text-token-text/60">passées sur TechPlay</p>
           </div>
           <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-5 shadow-sm">
-            <p className="text-[12px] font-semibold uppercase tracking-wider text-token-text/60">Dernière commande</p>
+            <p className="text-[12px] font-semibold uppercase tracking-wider text-token-text/60">
+              Dernière commande
+            </p>
             <p className="mt-1 text-lg font-semibold text-[hsl(var(--text))]">
               {lastOrderDate ?? '—'}
             </p>
           </div>
           <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-5 shadow-sm">
-            <p className="text-[12px] font-semibold uppercase tracking-wider text-token-text/60">Total commandé</p>
+            <p className="text-[12px] font-semibold uppercase tracking-wider text-token-text/60">
+              Total commandé
+            </p>
             <p className="mt-1 text-2xl font-bold tabular-nums text-[hsl(var(--accent))]">
               {formatPrice(totalSpent)}
             </p>
@@ -264,9 +365,10 @@ export default async function AccountPage() {
           </div>
           <ul className="space-y-3" role="list">
             {recentOrders.map((order) => {
-              const statusKey = (order.status ?? '').toLowerCase()
-              const statusLabel = (STATUS_LABEL[statusKey] || order.status) ?? '—'
-              const badgeClass = STATUS_STYLE[statusKey] ?? 'bg-[hsl(var(--surface-2))] text-[hsl(var(--text))]'
+              const statusKey = (order.status ?? '').toLowerCase();
+              const statusLabel = (STATUS_LABEL[statusKey] || order.status) ?? '—';
+              const badgeClass =
+                STATUS_STYLE[statusKey] ?? 'bg-[hsl(var(--surface-2))] text-[hsl(var(--text))]';
               return (
                 <li key={order.id}>
                   <Link
@@ -289,7 +391,7 @@ export default async function AccountPage() {
                     </span>
                   </Link>
                 </li>
-              )
+              );
             })}
           </ul>
         </section>
@@ -325,21 +427,31 @@ export default async function AccountPage() {
         className="rounded-2xl border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface))]/50 px-5 py-5 sm:px-6"
         aria-labelledby="help-heading"
       >
-        <h2 id="help-heading" className="text-sm font-semibold uppercase tracking-wider text-token-text/60">
+        <h2
+          id="help-heading"
+          className="text-sm font-semibold uppercase tracking-wider text-token-text/60"
+        >
           {t('help_heading')}
         </h2>
         <p className="mt-2 text-[14px] text-token-text/75">
           {t('help_intro')}{' '}
-          <Link href="/contact" className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline">
+          <Link
+            href="/contact"
+            className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline"
+          >
             {t('contact_support')}
-          </Link>
-          {' '}{t('help_mid')}{' '}
-          <Link href="/#faq" className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline" prefetch={false}>
+          </Link>{' '}
+          {t('help_mid')}{' '}
+          <Link
+            href="/#faq"
+            className="font-medium text-[hsl(var(--accent))] underline-offset-2 hover:underline"
+            prefetch={false}
+          >
             {t('faq_link')}
           </Link>
           {t('help_end')}
         </p>
       </section>
     </main>
-  )
+  );
 }

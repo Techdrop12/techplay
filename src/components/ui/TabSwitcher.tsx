@@ -24,7 +24,9 @@ export default function TabSwitcher({ tabs = [] }: TabSwitcherProps) {
             key={i}
             onClick={() => setActive(i)}
             className={`px-4 py-2 text-sm ${
-              i === active ? 'border-b-2 border-[hsl(var(--accent))] font-semibold' : 'text-token-text/60'
+              i === active
+                ? 'border-b-2 border-[hsl(var(--accent))] font-semibold'
+                : 'text-token-text/60'
             }`}
           >
             {tab.label}

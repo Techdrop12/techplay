@@ -1,34 +1,30 @@
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl';
 
-import type { Product } from '@/types/product'
+import type { Product } from '@/types/product';
 
-import Link from '@/components/LocalizedLink'
-import ProductGrid from '@/components/ProductGrid'
-import { LIST_NAMES } from '@/lib/analytics-events'
+import Link from '@/components/LocalizedLink';
+import ProductGrid from '@/components/ProductGrid';
+import { LIST_NAMES } from '@/lib/analytics-events';
 
 export interface SearchBlogItem {
-  _id?: string
-  id?: string
-  slug?: string
-  title?: string
+  _id?: string;
+  id?: string;
+  slug?: string;
+  title?: string;
 }
 
 interface SearchPageContentProps {
-  query: string
-  products: Product[]
-  blogItems: SearchBlogItem[]
+  query: string;
+  products: Product[];
+  blogItems: SearchBlogItem[];
 }
 
-export default function SearchPageContent({
-  query,
-  products,
-  blogItems,
-}: SearchPageContentProps) {
-  const t = useTranslations('search')
-  const titleText = query ? t('title_with_query', { query }) : t('title')
-  const exampleHref = '/search?q=clavier'
+export default function SearchPageContent({ query, products, blogItems }: SearchPageContentProps) {
+  const t = useTranslations('search');
+  const titleText = query ? t('title_with_query', { query }) : t('title');
+  const exampleHref = '/search?q=clavier';
 
   return (
     <main
@@ -52,10 +48,7 @@ export default function SearchPageContent({
         </p>
       ) : (
         <>
-          <section
-            className="mb-12"
-            aria-labelledby="search-products-heading"
-          >
+          <section className="mb-12" aria-labelledby="search-products-heading">
             <h2
               id="search-products-heading"
               className="text-xl font-bold text-[hsl(var(--text))] mb-4"
@@ -75,10 +68,7 @@ export default function SearchPageContent({
           </section>
 
           <section aria-labelledby="search-blog-heading">
-            <h2
-              id="search-blog-heading"
-              className="text-xl font-bold text-[hsl(var(--text))] mb-4"
-            >
+            <h2 id="search-blog-heading" className="text-xl font-bold text-[hsl(var(--text))] mb-4">
               {t('blog_heading')} ({blogItems.length})
             </h2>
             {blogItems.length === 0 ? (
@@ -101,5 +91,5 @@ export default function SearchPageContent({
         </>
       )}
     </main>
-  )
+  );
 }

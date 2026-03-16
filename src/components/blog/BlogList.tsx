@@ -1,18 +1,18 @@
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl';
 
-import BlogCard from './BlogCard'
+import BlogCard from './BlogCard';
 
-import type { BlogPost } from '@/types/blog'
+import type { BlogPost } from '@/types/blog';
 
 interface BlogListProps {
-  articles: BlogPost[]
+  articles: BlogPost[];
 }
 
 export default function BlogList({ articles }: BlogListProps) {
-  const t = useTranslations('blog')
-  if (!articles?.length) return null
+  const t = useTranslations('blog');
+  if (!articles?.length) return null;
 
   return (
     <section
@@ -23,5 +23,5 @@ export default function BlogList({ articles }: BlogListProps) {
         <BlogCard key={article._id ?? article.slug} article={article} />
       ))}
     </section>
-  )
+  );
 }

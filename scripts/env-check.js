@@ -11,7 +11,7 @@ const required = [
   'ADMIN_PASSWORD',
   'BREVO_API_KEY',
   'NEXT_PUBLIC_GOOGLE_ANALYTICS_ID',
-  'NEXT_PUBLIC_META_PIXEL_ID'
+  'NEXT_PUBLIC_META_PIXEL_ID',
 ];
 
 const missing = required.filter((key) => !process.env[key]);

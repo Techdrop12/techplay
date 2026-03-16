@@ -1,41 +1,46 @@
-import { NextResponse } from 'next/server'
-import { z } from 'zod'
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
 
-import { error as logError } from '@/lib/logger'
-import { connectToDatabase } from '@/lib/db'
-import NewsletterSubscriber from '@/models/NewsletterSubscriber'
-import { createRateLimiter, withRateLimit } from '@/lib/rateLimit'
+import { error as logError } from '@/lib/logger';
+import { connectToDatabase } from '@/lib/db';
+import NewsletterSubscriber from '@/models/NewsletterSubscriber';
+import { createRateLimiter, withRateLimit } from '@/lib/rateLimit';
 
-const SubscribeSchema = z.object({
-  email: z.string().email().optional(),
-  locale: z.string().optional(),
-  pathname: z.string().optional(),
-  endpoint: z.string().url().optional(),
-  keys: z.record(z.string(), z.unknown()).optional(),
-  expirationTime: z.number().nullable().optional(),
-}).passthrough()
+const SubscribeSchema = z
+  .object({
+    email: z.string().email().optional(),
+    locale: z.string().optional(),
+    pathname: z.string().optional(),
+    endpoint: z.string().url().optional(),
+    keys: z.record(z.string(), z.unknown()).optional(),
+    expirationTime: z.number().nullable().optional(),
+  })
+  .passthrough();
 
-const limiter = createRateLimiter({ id: 'notifications-subscribe', limit: 20, intervalMs: 60_000 })
+const limiter = createRateLimiter({ id: 'notifications-subscribe', limit: 20, intervalMs: 60_000 });
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 async function handler(req: Request) {
-  let body: unknown
+  let body: unknown;
   try {
-    body = await req.json()
+    body = await req.json();
   } catch {
-    return NextResponse.json({ success: false, message: 'Payload invalide' }, { status: 400 })
+    return NextResponse.json({ success: false, message: 'Payload invalide' }, { status: 400 });
   }
 
-  const parsed = SubscribeSchema.safeParse(body)
+  const parsed = SubscribeSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ success: false, message: 'Payload invalide' }, { status: 400 })
+    return NextResponse.json({ success: false, message: 'Payload invalide' }, { status: 400 });
   }
 
-  const email = parsed.data?.email && typeof parsed.data.email === 'string' ? parsed.data.email.trim().toLowerCase() : null
+  const email =
+    parsed.data?.email && typeof parsed.data.email === 'string'
+      ? parsed.data.email.trim().toLowerCase()
+      : null;
   if (email) {
     try {
-      await connectToDatabase()
+      await connectToDatabase();
       await NewsletterSubscriber.findOneAndUpdate(
         { email },
         {
@@ -47,13 +52,13 @@ async function handler(req: Request) {
           },
         },
         { upsert: true, new: true }
-      )
+      );
     } catch (e) {
-      logError('[notifications/subscribe] newsletter save', e)
+      logError('[notifications/subscribe] newsletter save', e);
     }
   }
 
-  return NextResponse.json({ success: true })
+  return NextResponse.json({ success: true });
 }
 
-export const POST = withRateLimit(handler, limiter)
+export const POST = withRateLimit(handler, limiter);

@@ -1,22 +1,22 @@
-'use client'
+'use client';
 
-import { motion } from 'framer-motion'
-import { useTranslations } from 'next-intl'
+import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
 
 interface PromoBadgeProps {
-  discount?: number
-  text?: string
-  className?: string
+  discount?: number;
+  text?: string;
+  className?: string;
 }
 
 export default function PromoBadge({ discount, text = 'Promo', className }: PromoBadgeProps) {
-  const t = useTranslations('misc')
+  const t = useTranslations('misc');
   // Ne rien afficher si pas de discount et pas de texte personnalisé
-  if (!discount && !text) return null
+  if (!discount && !text) return null;
 
-  const content = discount && discount > 0 ? `−${discount}%` : `🔥 ${text}`
+  const content = discount && discount > 0 ? `−${discount}%` : `🔥 ${text}`;
 
   return (
     <motion.div
@@ -31,5 +31,5 @@ export default function PromoBadge({ discount, text = 'Promo', className }: Prom
     >
       {content}
     </motion.div>
-  )
+  );
 }

@@ -1,46 +1,40 @@
-import type { Metadata } from 'next'
-import { getTranslations } from 'next-intl/server'
-import BackToHomeLink from '@/components/BackToHomeLink'
-import Link from '@/components/LocalizedLink'
-import { generateMeta } from '@/lib/seo'
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+import BackToHomeLink from '@/components/BackToHomeLink';
+import Link from '@/components/LocalizedLink';
+import { generateMeta } from '@/lib/seo';
 
-const ARTICLES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] as const
+const ARTICLES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] as const;
 
 function splitParagraphs(text: string): string[] {
   return text
     .split(/\n\n+/)
     .map((p) => p.trim())
-    .filter(Boolean)
+    .filter(Boolean);
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('cgv')
+  const t = await getTranslations('cgv');
   return generateMeta({
     title: t('title'),
     description: t('meta_description'),
     url: '/cgv',
     image: '/og-image.jpg',
-  })
+  });
 }
 
 export default async function CGVPage() {
-  const t = await getTranslations('cgv')
+  const t = await getTranslations('cgv');
 
   return (
-    <main
-      className="container-app mx-auto max-w-3xl py-10"
-      role="main"
-      aria-labelledby="cgv-title"
-    >
+    <main className="container-app mx-auto max-w-3xl py-10" role="main" aria-labelledby="cgv-title">
       <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[var(--shadow-md)]">
         <h1 id="cgv-title" className="heading-page mb-2">
           {t('title')}
         </h1>
         <p className="mb-6 text-[13px] text-token-text/60">{t('last_updated')}</p>
 
-        <p className="mb-8 leading-relaxed text-[15px] text-token-text/85">
-          {t('intro')}
-        </p>
+        <p className="mb-8 leading-relaxed text-[15px] text-token-text/85">{t('intro')}</p>
 
         <nav
           aria-label={t('toc_title')}
@@ -51,7 +45,7 @@ export default async function CGVPage() {
           </h2>
           <ul className="grid grid-cols-1 gap-1.5 text-[14px] sm:grid-cols-2">
             {ARTICLES.map((n) => {
-              const title = t(`art${n}_title`)
+              const title = t(`art${n}_title`);
               return (
                 <li key={n}>
                   <a
@@ -61,22 +55,18 @@ export default async function CGVPage() {
                     {title}
                   </a>
                 </li>
-              )
+              );
             })}
           </ul>
         </nav>
 
         <div className="content-readability space-y-10 text-[15px] text-token-text/85">
           {ARTICLES.map((n) => {
-            const title = t(`art${n}_title`)
-            const content = t(`art${n}_content`)
-            const paragraphs = splitParagraphs(content)
+            const title = t(`art${n}_title`);
+            const content = t(`art${n}_content`);
+            const paragraphs = splitParagraphs(content);
             return (
-              <section
-                key={n}
-                id={`article-${n}`}
-                className="scroll-mt-24 space-y-3"
-              >
+              <section key={n} id={`article-${n}`} className="scroll-mt-24 space-y-3">
                 <h2 className="heading-subsection text-[1.1rem] font-semibold text-[hsl(var(--text))]">
                   {title}
                 </h2>
@@ -108,7 +98,7 @@ export default async function CGVPage() {
                   </p>
                 )}
               </section>
-            )
+            );
           })}
         </div>
 
@@ -131,5 +121,5 @@ export default async function CGVPage() {
         </div>
       </div>
     </main>
-  )
+  );
 }

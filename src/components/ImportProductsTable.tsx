@@ -1,47 +1,50 @@
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 
-import type { ChangeEvent } from 'react'
+import type { ChangeEvent } from 'react';
 
 interface ImportResult {
-  success?: boolean
-  count?: number
-  error?: string
+  success?: boolean;
+  count?: number;
+  error?: string;
 }
 
 export default function ImportProductsTable() {
-  const t = useTranslations('admin')
-  const [file, setFile] = useState<File | null>(null)
-  const [importing, setImporting] = useState(false)
-  const [result, setResult] = useState<ImportResult | null>(null)
+  const t = useTranslations('admin');
+  const [file, setFile] = useState<File | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [result, setResult] = useState<ImportResult | null>(null);
 
   const handleFile = (e: ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0]
-    setFile(f ?? null)
-    setResult(null)
-  }
+    const f = e.target.files?.[0];
+    setFile(f ?? null);
+    setResult(null);
+  };
 
   const handleImport = async () => {
-    if (!file) return
-    setImporting(true)
-    setResult(null)
-    const formData = new FormData()
-    formData.append('file', file)
+    if (!file) return;
+    setImporting(true);
+    setResult(null);
+    const formData = new FormData();
+    formData.append('file', file);
     const res = await fetch('/api/admin/import-products', {
       method: 'POST',
       body: formData,
-    })
-    const data = (await res.json()) as ImportResult
-    setResult(data)
-    setImporting(false)
-  }
+    });
+    const data = (await res.json()) as ImportResult;
+    setResult(data);
+    setImporting(false);
+  };
 
   return (
     <div className="my-8">
       <h2 className="text-xl font-bold mb-2 text-[hsl(var(--text))]">{t('import_title')}</h2>
-      <label htmlFor="import-file" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">
+      <label
+        htmlFor="import-file"
+        className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+      >
         {t('import_file_label')}
       </label>
       <input
@@ -64,12 +67,17 @@ export default function ImportProductsTable() {
       </button>
       {result && (
         <div id="import-result" className="mt-3 text-sm" role="status">
-          {result.success
-            ? <span className="text-green-600 dark:text-green-400">{t('import_success', { count: result.count ?? 0 })}</span>
-            : <span className="text-red-600 dark:text-red-400">{t('import_error', { error: result.error ?? '' })}</span>
-          }
+          {result.success ? (
+            <span className="text-green-600 dark:text-green-400">
+              {t('import_success', { count: result.count ?? 0 })}
+            </span>
+          ) : (
+            <span className="text-red-600 dark:text-red-400">
+              {t('import_error', { error: result.error ?? '' })}
+            </span>
+          )}
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -1,22 +1,22 @@
-'use client'
+'use client';
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react';
 
-import { getABVariant } from '@/lib/ab-test'
-import { logEvent, pushDataLayer } from '@/lib/ga'
+import { getABVariant } from '@/lib/ab-test';
+import { logEvent, pushDataLayer } from '@/lib/ga';
 
 type Props = {
   /** nom du test (clé de persistance / tracking) */
-  name?: string
+  name?: string;
   /** liste des variants possibles */
-  variants?: string[]
+  variants?: string[];
   /** TTL en jours pour l’assignation */
-  ttlDays?: number
+  ttlDays?: number;
   /** libellés à afficher par variant (sinon le nom du variant) */
-  labels?: Record<string, string>
+  labels?: Record<string, string>;
   /** classes CSS supplémentaires */
-  className?: string
-}
+  className?: string;
+};
 
 export default function ABTestBanner({
   name = 'banner',
@@ -25,27 +25,27 @@ export default function ABTestBanner({
   labels,
   className,
 }: Props) {
-  const [variant, setVariant] = useState<string | null>(null)
+  const [variant, setVariant] = useState<string | null>(null);
 
   // Choix du variant côté client (persisté)
   useEffect(() => {
-    const v = getABVariant(name, variants, { ttlDays })
-    setVariant(v)
+    const v = getABVariant(name, variants, { ttlDays });
+    setVariant(v);
 
     // Tracking (une seule fois à l'assignation)
     try {
-      pushDataLayer({ event: 'ab_assign', ab_name: name, ab_variant: v })
-      logEvent('ab_assign', { ab_name: name, ab_variant: v })
+      pushDataLayer({ event: 'ab_assign', ab_name: name, ab_variant: v });
+      logEvent('ab_assign', { ab_name: name, ab_variant: v });
     } catch {}
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- run once for AB assignment
-  }, [name])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once for AB assignment
+  }, [name]);
 
   const label = useMemo(() => {
-    if (!variant) return ''
-    return labels?.[variant] ?? variant
-  }, [labels, variant])
+    if (!variant) return '';
+    return labels?.[variant] ?? variant;
+  }, [labels, variant]);
 
-  if (!variant) return null
+  if (!variant) return null;
 
   return (
     <div
@@ -60,5 +60,5 @@ export default function ABTestBanner({
     >
       {label}
     </div>
-  )
+  );
 }

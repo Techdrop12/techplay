@@ -4,5 +4,5 @@ export default function AdminLoading() {
       <div className="skeleton mb-8 h-10 w-52 rounded-xl" />
       <div className="skeleton h-48 rounded-2xl" />
     </div>
-  )
+  );
 }

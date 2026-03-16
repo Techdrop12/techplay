@@ -1,37 +1,31 @@
-'use client'
+'use client';
 
-import { useMemo, useState } from 'react'
-import { useLocale, useTranslations } from 'next-intl'
+import { useMemo, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 
-import InvoiceButton from './InvoiceButton'
+import InvoiceButton from './InvoiceButton';
 
-import Link from '@/components/LocalizedLink'
-import { formatDateTime } from '@/lib/formatDate'
-import { cn, formatPrice } from '@/lib/utils'
+import Link from '@/components/LocalizedLink';
+import { formatDateTime } from '@/lib/formatDate';
+import { cn, formatPrice } from '@/lib/utils';
 
-type OrderStatus = 'pending' | 'paid' | 'shipped' | 'delivered' | 'canceled' | string
-type SortOption = 'recent' | 'old' | 'amountAsc' | 'amountDesc'
+type OrderStatus = 'pending' | 'paid' | 'shipped' | 'delivered' | 'canceled' | string;
+type SortOption = 'recent' | 'old' | 'amountAsc' | 'amountDesc';
 
 export type OrderSummary = {
-  id: string
-  date?: string | number | Date
-  total?: number
-  itemsCount?: number
-  status?: OrderStatus
-}
+  id: string;
+  date?: string | number | Date;
+  total?: number;
+  itemsCount?: number;
+  status?: OrderStatus;
+};
 
 interface Props {
-  orders: OrderSummary[]
-  className?: string
+  orders: OrderSummary[];
+  className?: string;
 }
 
-const STATUS_KEYS = [
-  'pending',
-  'paid',
-  'shipped',
-  'delivered',
-  'canceled',
-] as const
+const STATUS_KEYS = ['pending', 'paid', 'shipped', 'delivered', 'canceled'] as const;
 
 const STATUS_STYLE: Record<string, string> = {
   pending: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
@@ -39,59 +33,59 @@ const STATUS_STYLE: Record<string, string> = {
   shipped: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300',
   delivered: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
   canceled: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
-}
+};
 
 function isSortOption(value: string): value is SortOption {
-  return value === 'recent' || value === 'old' || value === 'amountAsc' || value === 'amountDesc'
+  return value === 'recent' || value === 'old' || value === 'amountAsc' || value === 'amountDesc';
 }
 
 function toTimestamp(input?: string | number | Date): number {
-  if (!input) return 0
-  const date = new Date(input)
-  const time = date.getTime()
-  return Number.isFinite(time) ? time : 0
+  if (!input) return 0;
+  const date = new Date(input);
+  const time = date.getTime();
+  return Number.isFinite(time) ? time : 0;
 }
 
 function normalizeStatus(status?: OrderStatus): string {
-  return typeof status === 'string' ? status.toLowerCase() : ''
+  return typeof status === 'string' ? status.toLowerCase() : '';
 }
 
 export default function OrderList({ orders = [], className }: Props) {
-  const locale = useLocale()
-  const t = useTranslations('orders')
-  const [query, setQuery] = useState('')
-  const [sort, setSort] = useState<SortOption>('recent')
+  const locale = useLocale();
+  const t = useTranslations('orders');
+  const [query, setQuery] = useState('');
+  const [sort, setSort] = useState<SortOption>('recent');
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    let base = Array.isArray(orders) ? [...orders] : []
+    const q = query.trim().toLowerCase();
+    let base = Array.isArray(orders) ? [...orders] : [];
 
     if (q) {
-      base = base.filter((order) => order.id.toLowerCase().includes(q))
+      base = base.filter((order) => order.id.toLowerCase().includes(q));
     }
 
     base.sort((a, b) => {
-      const dateA = toTimestamp(a.date)
-      const dateB = toTimestamp(b.date)
-      const totalA = typeof a.total === 'number' ? a.total : 0
-      const totalB = typeof b.total === 'number' ? b.total : 0
+      const dateA = toTimestamp(a.date);
+      const dateB = toTimestamp(b.date);
+      const totalA = typeof a.total === 'number' ? a.total : 0;
+      const totalB = typeof b.total === 'number' ? b.total : 0;
 
       switch (sort) {
         case 'recent':
-          return dateB - dateA
+          return dateB - dateA;
         case 'old':
-          return dateA - dateB
+          return dateA - dateB;
         case 'amountAsc':
-          return totalA - totalB
+          return totalA - totalB;
         case 'amountDesc':
-          return totalB - totalA
+          return totalB - totalA;
         default:
-          return 0
+          return 0;
       }
-    })
+    });
 
-    return base
-  }, [orders, query, sort])
+    return base;
+  }, [orders, query, sort]);
 
   if (!Array.isArray(orders) || orders.length === 0) {
     return (
@@ -108,7 +102,7 @@ export default function OrderList({ orders = [], className }: Props) {
           {t('discover_products')}
         </Link>
       </div>
-    )
+    );
   }
 
   return (
@@ -135,8 +129,8 @@ export default function OrderList({ orders = [], className }: Props) {
             <select
               value={sort}
               onChange={(e) => {
-                const value = e.target.value
-                if (isSortOption(value)) setSort(value)
+                const value = e.target.value;
+                if (isSortOption(value)) setSort(value);
               }}
               className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-2 text-sm"
               aria-label={t('sort_aria')}
@@ -152,15 +146,13 @@ export default function OrderList({ orders = [], className }: Props) {
 
       <ul className="space-y-4" role="list">
         {filtered.map((order) => {
-          const statusKey = normalizeStatus(order.status)
+          const statusKey = normalizeStatus(order.status);
           const badgeClass =
-            STATUS_STYLE[statusKey] ||
-            'bg-[hsl(var(--surface-2))] text-[hsl(var(--text))]'
-          const statusLabel =
-            STATUS_KEYS.includes(statusKey as (typeof STATUS_KEYS)[number])
-              ? t(`statuses.${statusKey}`)
-              : (order.status as string) || '—'
-          const itemsCount = typeof order.itemsCount === 'number' ? order.itemsCount : 0
+            STATUS_STYLE[statusKey] || 'bg-[hsl(var(--surface-2))] text-[hsl(var(--text))]';
+          const statusLabel = STATUS_KEYS.includes(statusKey as (typeof STATUS_KEYS)[number])
+            ? t(`statuses.${statusKey}`)
+            : (order.status as string) || '—';
+          const itemsCount = typeof order.itemsCount === 'number' ? order.itemsCount : 0;
 
           return (
             <li
@@ -187,7 +179,10 @@ export default function OrderList({ orders = [], className }: Props) {
                   </div>
 
                   <div className="mt-1 text-sm text-muted-foreground">
-                    {order.date ? formatDateTime(order.date, locale === 'en' ? 'en-GB' : 'fr-FR') : '—'} · {t('articles_count', { count: itemsCount || 0 })}
+                    {order.date
+                      ? formatDateTime(order.date, locale === 'en' ? 'en-GB' : 'fr-FR')
+                      : '—'}{' '}
+                    · {t('articles_count', { count: itemsCount || 0 })}
                   </div>
                 </div>
 
@@ -213,9 +208,9 @@ export default function OrderList({ orders = [], className }: Props) {
                 </div>
               </div>
             </li>
-          )
+          );
         })}
       </ul>
     </section>
-  )
+  );
 }

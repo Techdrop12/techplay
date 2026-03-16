@@ -24,7 +24,9 @@ function findJsFiles(dir, list = []) {
 }
 
 function hasJSX(content) {
-  return /return\s*[<(]|<\w+|<\/\w+|\/>|\.jsx\b/.test(content) || content.includes('React.createElement');
+  return (
+    /return\s*[<(]|<\w+|<\/\w+|\/>|\.jsx\b/.test(content) || content.includes('React.createElement')
+  );
 }
 
 const files = findJsFiles(srcRoot);

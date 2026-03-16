@@ -5,27 +5,27 @@
  * - Headers Cache-Control no-store pour les réponses sensibles
  */
 
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
 
-const IS_PRODUCTION = process.env.NODE_ENV === 'production'
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 export interface ApiErrorBody {
-  error: string
+  error: string;
   /** Uniquement en développement */
-  details?: string
+  details?: string;
 }
 
 export interface ApiSuccessBody<T = unknown> {
-  [key: string]: T | unknown
+  [key: string]: T | unknown;
 }
 
 /**
  * Réponse JSON avec Cache-Control no-store (à utiliser pour les routes API sensibles).
  */
 function json<T>(data: T, init?: ResponseInit): NextResponse<T> {
-  const res = NextResponse.json(data, init)
-  res.headers.set('Cache-Control', 'no-store, private, max-age=0')
-  return res
+  const res = NextResponse.json(data, init);
+  res.headers.set('Cache-Control', 'no-store, private, max-age=0');
+  return res;
 }
 
 /**
@@ -39,18 +39,21 @@ export function apiError(
 ): NextResponse<ApiErrorBody> {
   const body: ApiErrorBody = {
     error: message,
-  }
+  };
   if (!IS_PRODUCTION && options?.details) {
-    body.details = options.details
+    body.details = options.details;
   }
-  return json(body, { status })
+  return json(body, { status });
 }
 
 /**
  * Réponse succès standardisée.
  */
-export function apiSuccess<T>(data: ApiSuccessBody<T>, status = 200): NextResponse<ApiSuccessBody<T>> {
-  return json(data, { status })
+export function apiSuccess<T>(
+  data: ApiSuccessBody<T>,
+  status = 200
+): NextResponse<ApiSuccessBody<T>> {
+  return json(data, { status });
 }
 
 /**
@@ -59,20 +62,20 @@ export function apiSuccess<T>(data: ApiSuccessBody<T>, status = 200): NextRespon
  */
 export function safeErrorForLog(err: unknown): string {
   if (err instanceof Error) {
-    let msg = err.message ?? ''
+    let msg = err.message ?? '';
     // Redaction de patterns courants (token, clé, email dans le message)
-    msg = msg.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, '[EMAIL]')
-    msg = msg.replace(/\b(?:sk|pk)_[a-zA-Z0-9_]+\b/g, '[STRIPE_KEY]')
-    msg = msg.replace(/\bwhsec_[a-zA-Z0-9]+\b/g, '[WEBHOOK_SECRET]')
-    msg = msg.replace(/\b(?:Bearer|token|api[_-]?key)\s*[^\s]+/gi, '[TOKEN]')
-    if (msg.length > 500) msg = msg.slice(0, 500) + '…'
-    return msg
+    msg = msg.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, '[EMAIL]');
+    msg = msg.replace(/\b(?:sk|pk)_[a-zA-Z0-9_]+\b/g, '[STRIPE_KEY]');
+    msg = msg.replace(/\bwhsec_[a-zA-Z0-9]+\b/g, '[WEBHOOK_SECRET]');
+    msg = msg.replace(/\b(?:Bearer|token|api[_-]?key)\s*[^\s]+/gi, '[TOKEN]');
+    if (msg.length > 500) msg = msg.slice(0, 500) + '…';
+    return msg;
   }
   if (typeof err === 'string') {
-    const s = err.slice(0, 500)
-    return s.replace(/\b(?:sk|pk)_[a-zA-Z0-9_]+\b/g, '[STRIPE_KEY]')
+    const s = err.slice(0, 500);
+    return s.replace(/\b(?:sk|pk)_[a-zA-Z0-9_]+\b/g, '[STRIPE_KEY]');
   }
-  return 'Unknown error'
+  return 'Unknown error';
 }
 
-export { json as apiJson }
+export { json as apiJson };

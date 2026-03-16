@@ -1,29 +1,29 @@
 // src/components/ui/ExitIntentPopup.tsx
-'use client'
+'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import Link from '@/components/LocalizedLink'
-import { useFocusTrap } from '@/lib/useFocusTrap'
-import { useTranslations } from 'next-intl'
+import Link from '@/components/LocalizedLink';
+import { useFocusTrap } from '@/lib/useFocusTrap';
+import { useTranslations } from 'next-intl';
 
 type Props = {
-  requireCartItems?: boolean
-  hideOnRoutes?: string[]
-  ttlDays?: number
-  storageKey?: string
-  triggerAtTopY?: number
-  autoHideMs?: number
-  ctaHref?: string
-  promoCode?: string
-}
+  requireCartItems?: boolean;
+  hideOnRoutes?: string[];
+  ttlDays?: number;
+  storageKey?: string;
+  triggerAtTopY?: number;
+  autoHideMs?: number;
+  ctaHref?: string;
+  promoCode?: string;
+};
 
-const isBrowser = () => typeof window !== 'undefined' && typeof document !== 'undefined'
+const isBrowser = () => typeof window !== 'undefined' && typeof document !== 'undefined';
 
 function pushDL(event: string, extra?: Record<string, unknown>) {
   try {
-    window.dataLayer = window.dataLayer ?? []
-    window.dataLayer.push({ event, ...(extra ?? {}) })
+    window.dataLayer = window.dataLayer ?? [];
+    window.dataLayer.push({ event, ...(extra ?? {}) });
   } catch {}
 }
 
@@ -37,121 +37,125 @@ export default function ExitIntentPopup({
   ctaHref = '/commande',
   promoCode = 'WELCOME10',
 }: Props) {
-  const [open, setOpen] = useState(false)
-  const [eligible, setEligible] = useState(!requireCartItems)
-  const timerRef = useRef<number | null>(null)
-  const shownOnce = useRef(false)
-  const dialogRef = useRef<HTMLDivElement>(null)
-  const t = useTranslations('exit_intent')
-  useFocusTrap(open, dialogRef, { restoreFocus: true })
+  const [open, setOpen] = useState(false);
+  const [eligible, setEligible] = useState(!requireCartItems);
+  const timerRef = useRef<number | null>(null);
+  const shownOnce = useRef(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations('exit_intent');
+  useFocusTrap(open, dialogRef, { restoreFocus: true });
 
   const hiddenByRoute = useMemo(() => {
-    if (!isBrowser()) return false
-    const path = window.location.pathname || ''
-    return hideOnRoutes.some((route) => path.startsWith(route))
-  }, [hideOnRoutes])
+    if (!isBrowser()) return false;
+    const path = window.location.pathname || '';
+    return hideOnRoutes.some((route) => path.startsWith(route));
+  }, [hideOnRoutes]);
 
   const isDismissed = () => {
-    if (!isBrowser()) return false
+    if (!isBrowser()) return false;
     try {
-      const raw = localStorage.getItem(storageKey)
-      const until = raw ? Number.parseInt(raw, 10) : 0
-      return Date.now() < until
+      const raw = localStorage.getItem(storageKey);
+      const until = raw ? Number.parseInt(raw, 10) : 0;
+      return Date.now() < until;
     } catch {
-      return false
+      return false;
     }
-  }
+  };
 
   const persistDismiss = useCallback(() => {
-    if (!isBrowser()) return
+    if (!isBrowser()) return;
     try {
-      const until = Date.now() + ttlDays * 24 * 60 * 60 * 1000
-      localStorage.setItem(storageKey, String(until))
+      const until = Date.now() + ttlDays * 24 * 60 * 60 * 1000;
+      localStorage.setItem(storageKey, String(until));
     } catch {}
-  }, [storageKey, ttlDays])
+  }, [storageKey, ttlDays]);
 
   useEffect(() => {
-    if (!isBrowser() || !requireCartItems) return
+    if (!isBrowser() || !requireCartItems) return;
 
     try {
-      const parsed = JSON.parse(localStorage.getItem('cart') || '[]')
-      const items = Array.isArray(parsed) ? parsed : Array.isArray(parsed?.items) ? parsed.items : []
-      setEligible(items.length > 0)
+      const parsed = JSON.parse(localStorage.getItem('cart') || '[]');
+      const items = Array.isArray(parsed)
+        ? parsed
+        : Array.isArray(parsed?.items)
+          ? parsed.items
+          : [];
+      setEligible(items.length > 0);
     } catch {
-      setEligible(false)
+      setEligible(false);
     }
-  }, [requireCartItems])
+  }, [requireCartItems]);
 
   useEffect(() => {
-    if (!open || autoHideMs <= 0) return
+    if (!open || autoHideMs <= 0) return;
 
-    timerRef.current = window.setTimeout(() => setOpen(false), autoHideMs)
+    timerRef.current = window.setTimeout(() => setOpen(false), autoHideMs);
 
     return () => {
-      if (timerRef.current) window.clearTimeout(timerRef.current)
-      timerRef.current = null
-    }
-  }, [open, autoHideMs])
+      if (timerRef.current) window.clearTimeout(timerRef.current);
+      timerRef.current = null;
+    };
+  }, [open, autoHideMs]);
 
   useEffect(() => {
-    if (!isBrowser() || hiddenByRoute || isDismissed() || !eligible) return
+    if (!isBrowser() || hiddenByRoute || isDismissed() || !eligible) return;
 
-    const hasFinePointer = window.matchMedia?.('(pointer: fine)').matches ?? true
-    if (!hasFinePointer) return
+    const hasFinePointer = window.matchMedia?.('(pointer: fine)').matches ?? true;
+    if (!hasFinePointer) return;
 
     const onMouseOut = (e: MouseEvent) => {
-      const leavingDocument = !e.relatedTarget && e.clientY <= triggerAtTopY
+      const leavingDocument = !e.relatedTarget && e.clientY <= triggerAtTopY;
 
       if (leavingDocument && !shownOnce.current) {
-        shownOnce.current = true
-        setOpen(true)
-        pushDL('exit_intent_shown')
-        document.removeEventListener('mouseout', onMouseOut)
+        shownOnce.current = true;
+        setOpen(true);
+        pushDL('exit_intent_shown');
+        document.removeEventListener('mouseout', onMouseOut);
       }
-    }
+    };
 
-    document.addEventListener('mouseout', onMouseOut)
-    return () => document.removeEventListener('mouseout', onMouseOut)
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- isDismissed read in body only
-  }, [eligible, hiddenByRoute, triggerAtTopY])
+    document.addEventListener('mouseout', onMouseOut);
+    return () => document.removeEventListener('mouseout', onMouseOut);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- isDismissed read in body only
+  }, [eligible, hiddenByRoute, triggerAtTopY]);
 
   const close = useCallback(() => {
-    setOpen(false)
-    persistDismiss()
-    pushDL('exit_intent_closed')
-  }, [persistDismiss])
+    setOpen(false);
+    persistDismiss();
+    pushDL('exit_intent_closed');
+  }, [persistDismiss]);
 
   useEffect(() => {
-    if (!open) return
+    if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        e.preventDefault()
-        close()
+        e.preventDefault();
+        close();
       }
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open, close])
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, close]);
 
   useEffect(() => {
-    if (!open || !isBrowser()) return
+    if (!open || !isBrowser()) return;
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        e.preventDefault()
-        close()
+        e.preventDefault();
+        close();
       }
-    }
+    };
 
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [open, close])
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open, close]);
 
   const onBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) close()
-  }
+    if (e.target === e.currentTarget) close();
+  };
 
-  if (!open) return null
+  if (!open) return null;
 
   return (
     <div
@@ -182,8 +186,8 @@ export default function ExitIntentPopup({
             href={ctaHref}
             className="inline-flex items-center justify-center rounded-full bg-[hsl(var(--accent))] px-5 py-2.5 text-[15px] font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-md)] transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
             onClick={() => {
-              persistDismiss()
-              pushDL('exit_intent_cta_click')
+              persistDismiss();
+              pushDL('exit_intent_cta_click');
             }}
           >
             {t('cta')}
@@ -199,5 +203,5 @@ export default function ExitIntentPopup({
         </div>
       </div>
     </div>
-  )
+  );
 }

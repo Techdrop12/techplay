@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
-import Image from 'next/image'
-import { useTranslations } from 'next-intl'
+import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 export default function HeroSection() {
-  const t = useTranslations('hero')
+  const t = useTranslations('hero');
   return (
     <div className="relative text-white text-center py-20 bg-gradient-to-br from-blue-600 to-purple-600">
       <div className="absolute inset-0 opacity-20">
@@ -21,5 +21,5 @@ export default function HeroSection() {
         <p className="mt-4 text-lg md:text-xl">{t('subtitle')}</p>
       </div>
     </div>
-  )
+  );
 }

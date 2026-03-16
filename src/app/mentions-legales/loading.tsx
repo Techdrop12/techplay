@@ -12,5 +12,5 @@ export default function MentionsLegalesLoading() {
         ))}
       </div>
     </div>
-  )
+  );
 }

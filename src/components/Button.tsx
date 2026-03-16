@@ -1,44 +1,43 @@
 // src/components/Button.tsx
-'use client'
+'use client';
 
-import * as React from 'react'
+import * as React from 'react';
 
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
 
 type Variant =
-  | 'accent'      // bouton principal (couleur de marque)
-  | 'secondary'   // surface neutre
-  | 'outline'     // bordure
-  | 'ghost'       // transparent
-  | 'soft'        // fond subtil
-  | 'danger'      // action destructive
-  | 'link'        // lien déguisé en bouton
+  | 'accent' // bouton principal (couleur de marque)
+  | 'secondary' // surface neutre
+  | 'outline' // bordure
+  | 'ghost' // transparent
+  | 'soft' // fond subtil
+  | 'danger' // action destructive
+  | 'link'; // lien déguisé en bouton
 
-type LegacyVariant = 'primary' | 'secondary' | 'danger'
-type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+type LegacyVariant = 'primary' | 'secondary' | 'danger';
+type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
-export interface ButtonProps
-  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'disabled'> {
+export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'disabled'> {
   /** Variants modernes + compat héritée ('primary') */
-  variant?: Variant | LegacyVariant
-  size?: Size
-  fullWidth?: boolean
+  variant?: Variant | LegacyVariant;
+  size?: Size;
+  fullWidth?: boolean;
   /** alias rétro-compat éventuel */
-  block?: boolean
-  loading?: boolean
+  block?: boolean;
+  loading?: boolean;
   /** i18n du libellé pendant chargement */
-  loadingLabel?: string
-  leadingIcon?: ReactNode
-  trailingIcon?: ReactNode
-  disabled?: boolean
+  loadingLabel?: string;
+  leadingIcon?: ReactNode;
+  trailingIcon?: ReactNode;
+  disabled?: boolean;
 }
 
 const base =
   'inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition ' +
   'active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ' +
-  'disabled:opacity-60 disabled:cursor-not-allowed'
+  'disabled:opacity-60 disabled:cursor-not-allowed';
 
 const sizes: Record<Size, string> = {
   xs: 'px-2.5 py-1.5 text-[12px]',
@@ -46,30 +45,25 @@ const sizes: Record<Size, string> = {
   md: 'px-4 py-2.5 text-base',
   lg: 'px-5 py-3 text-lg',
   xl: 'px-6 py-3.5 text-[1.1rem]',
-}
+};
 
 const variants: Record<Variant, string> = {
   accent: 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] hover:opacity-95',
-  secondary:
-    'bg-[hsl(var(--surface-2))] text-[hsl(var(--text))] hover:brightness-[0.97]',
+  secondary: 'bg-[hsl(var(--surface-2))] text-[hsl(var(--text))] hover:brightness-[0.97]',
   outline:
     'border border-[hsl(var(--border))] text-[hsl(var(--text))] hover:bg-[hsl(var(--surface-2))]',
-  ghost:
-    'bg-transparent text-[hsl(var(--text))] hover:bg-[hsl(var(--surface-2))]',
-  soft:
-    'bg-accent/10 text-accent hover:bg-accent/15 ring-1 ring-inset ring-accent/20',
-  danger:
-    'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500',
-  link:
-    'bg-transparent text-accent hover:text-accent/80 underline underline-offset-2 decoration-2',
-}
+  ghost: 'bg-transparent text-[hsl(var(--text))] hover:bg-[hsl(var(--surface-2))]',
+  soft: 'bg-accent/10 text-accent hover:bg-accent/15 ring-1 ring-inset ring-accent/20',
+  danger: 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500',
+  link: 'bg-transparent text-accent hover:text-accent/80 underline underline-offset-2 decoration-2',
+};
 
 function normalizeVariant(v?: Variant | LegacyVariant): Variant {
-  if (!v) return 'accent'
-  if (v === 'primary') return 'accent'      // compat ancienne API
-  if (v === 'secondary') return 'secondary' // compat ancienne API
-  if (v === 'danger') return 'danger'       // compat ancienne API
-  return v
+  if (!v) return 'accent';
+  if (v === 'primary') return 'accent'; // compat ancienne API
+  if (v === 'secondary') return 'secondary'; // compat ancienne API
+  if (v === 'danger') return 'danger'; // compat ancienne API
+  return v;
 }
 
 function Spinner() {
@@ -89,13 +83,9 @@ function Spinner() {
         strokeWidth="4"
         fill="none"
       />
-      <path
-        className="opacity-90"
-        fill="currentColor"
-        d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4z"
-      />
+      <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4z" />
     </svg>
-  )
+  );
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function Button(
@@ -116,9 +106,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   },
   ref
 ) {
-  const isDisabled = disabled || loading
-  const v = normalizeVariant(variant)
-  const isFull = fullWidth ?? block
+  const isDisabled = disabled || loading;
+  const v = normalizeVariant(variant);
+  const isFull = fullWidth ?? block;
 
   return (
     <button
@@ -152,7 +142,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function Button(
         </>
       )}
     </button>
-  )
-})
+  );
+});
 
-export default Button
+export default Button;

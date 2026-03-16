@@ -1,25 +1,27 @@
 // src/components/NotFound.tsx
-'use client'
+'use client';
 
-import { usePathname, useSearchParams, useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
-import { useEffect, useMemo, useRef } from 'react'
+import { usePathname, useSearchParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useEffect, useMemo, useRef } from 'react';
 
-import Link from '@/components/LocalizedLink'
+import Link from '@/components/LocalizedLink';
 
 export default function NotFound() {
-  const t = useTranslations('not_found')
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const router = useRouter()
+  const t = useTranslations('not_found');
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   const attempted = useMemo(() => {
-    const qs = searchParams?.toString()
-    return qs ? `${pathname ?? '/' }?${qs}` : (pathname ?? '/')
-  }, [pathname, searchParams])
+    const qs = searchParams?.toString();
+    return qs ? `${pathname ?? '/'}?${qs}` : (pathname ?? '/');
+  }, [pathname, searchParams]);
 
-  const h1Ref = useRef<HTMLHeadingElement | null>(null)
-  useEffect(() => { h1Ref.current?.focus() }, [])
+  const h1Ref = useRef<HTMLHeadingElement | null>(null);
+  useEffect(() => {
+    h1Ref.current?.focus();
+  }, []);
 
   const popularLinks = [
     { href: '/', label: 'Accueil' },
@@ -29,7 +31,7 @@ export default function NotFound() {
     { href: '/wishlist', label: 'Wishlist' },
     { href: '/contact', label: 'Contact' },
     { href: '/blog', label: 'Blog' },
-  ]
+  ];
 
   return (
     <section className="mt-8">
@@ -48,7 +50,7 @@ export default function NotFound() {
         <Link
           href="/"
           className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] px-5 py-3 text-[15px] font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-md)] transition hover:opacity-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2"
-        aria-label={t('back_home')}
+          aria-label={t('back_home')}
         >
           ← {t('back_home')}
         </Link>
@@ -63,10 +65,7 @@ export default function NotFound() {
         </button>
       </div>
 
-      <nav
-        className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3"
-        aria-label={t('useful_links')}
-      >
+      <nav className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3" aria-label={t('useful_links')}>
         {popularLinks.map((l) => (
           <Link
             key={l.href}
@@ -87,5 +86,5 @@ export default function NotFound() {
         </a>
       </div>
     </section>
-  )
+  );
 }

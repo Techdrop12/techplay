@@ -21,7 +21,11 @@ export default function ChatBot() {
       body: JSON.stringify({ message: input, history }),
     });
     const data = await res.json();
-    setHistory([...history, { role: 'user', content: input }, { role: 'bot', content: data.reply }]);
+    setHistory([
+      ...history,
+      { role: 'user', content: input },
+      { role: 'bot', content: data.reply },
+    ]);
     setInput('');
     setLoading(false);
   };
@@ -29,9 +33,18 @@ export default function ChatBot() {
   return (
     <div className="fixed bottom-8 right-8 w-72 bg-white shadow-lg rounded-lg p-4 z-50 border">
       <div className="h-40 overflow-y-auto mb-2 text-xs">
-        {history.length === 0 && <div className="text-token-text/50">Pose-moi une question sur nos produits ou commandes !</div>}
+        {history.length === 0 && (
+          <div className="text-token-text/50">
+            Pose-moi une question sur nos produits ou commandes !
+          </div>
+        )}
         {history.map((msg, i) => (
-          <div key={i} className={msg.role === 'bot' ? 'text-[hsl(var(--accent))] my-1' : 'text-token-text/90 my-1'}>
+          <div
+            key={i}
+            className={
+              msg.role === 'bot' ? 'text-[hsl(var(--accent))] my-1' : 'text-token-text/90 my-1'
+            }
+          >
             <span className="font-bold">{msg.role === 'bot' ? 'Bot:' : 'Vous:'}</span> {msg.content}
           </div>
         ))}

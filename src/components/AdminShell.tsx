@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
-import type { ReactNode } from 'react'
+import type { ReactNode } from 'react';
 
-import AdminHeader from '@/components/AdminHeader'
-import AdminSidebar from '@/components/AdminSidebar'
-import { ToastSystem } from '@/components/ToastSystem'
+import AdminHeader from '@/components/AdminHeader';
+import AdminSidebar from '@/components/AdminSidebar';
+import { ToastSystem } from '@/components/ToastSystem';
 
 export default function AdminShell({ children }: { children: ReactNode }) {
   return (
@@ -18,5 +18,5 @@ export default function AdminShell({ children }: { children: ReactNode }) {
         <ToastSystem />
       </div>
     </div>
-  )
+  );
 }

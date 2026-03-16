@@ -8,11 +8,12 @@ const apiVersion = process.env.SANITY_API_VERSION || '2023-11-01';
 
 let _client: SanityClient | undefined;
 
-export function getSanityClient({ useCdn = true, token }: { useCdn?: boolean; token?: string } = {}): SanityClient {
+export function getSanityClient({
+  useCdn = true,
+  token,
+}: { useCdn?: boolean; token?: string } = {}): SanityClient {
   _client =
-    _client && !token
-      ? _client
-      : createClient({ projectId, dataset, apiVersion, useCdn, token });
+    _client && !token ? _client : createClient({ projectId, dataset, apiVersion, useCdn, token });
   return _client;
 }
 

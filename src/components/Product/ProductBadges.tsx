@@ -1,27 +1,27 @@
 // src/components/Product/ProductBadges.tsx
 
 type ProductBadgeLike = {
-  freeShipping?: boolean
-  isNew?: boolean
-}
+  freeShipping?: boolean;
+  isNew?: boolean;
+};
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
+  return typeof value === 'object' && value !== null;
 }
 
 function getProductBadges(product: unknown): ProductBadgeLike {
-  if (!isRecord(product)) return {}
+  if (!isRecord(product)) return {};
 
   return {
     freeShipping: product.freeShipping === true,
     isNew: product.isNew === true,
-  }
+  };
 }
 
 export default function ProductBadges({ product }: { product: unknown }) {
-  const { freeShipping, isNew } = getProductBadges(product)
+  const { freeShipping, isNew } = getProductBadges(product);
 
-  if (!freeShipping && !isNew) return null
+  if (!freeShipping && !isNew) return null;
 
   return (
     <div className="mt-2 flex gap-2">
@@ -37,5 +37,5 @@ export default function ProductBadges({ product }: { product: unknown }) {
         </span>
       )}
     </div>
-  )
+  );
 }

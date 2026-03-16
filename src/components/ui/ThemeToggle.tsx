@@ -1,16 +1,16 @@
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 
-import { useTheme } from '@/context/themeContext'
-import { cn } from '@/lib/utils'
+import { useTheme } from '@/context/themeContext';
+import { cn } from '@/lib/utils';
 
 type Props = {
-  className?: string
-  iconOnly?: boolean
-  size?: 'sm' | 'md' | 'lg'
-}
+  className?: string;
+  iconOnly?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+};
 
 function SunIcon({ className }: { className?: string }) {
   return (
@@ -20,7 +20,7 @@ function SunIcon({ className }: { className?: string }) {
         d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Zm0-15a1 1 0 0 1 1 1v2h-2V4a1 1 0 0 1 1-1Zm0 15a1 1 0 0 1 1 1v2h-2v-2a1 1 0 0 1 1-1Zm9-7v2h-2v-2h2ZM5 11v2H3v-2h2Zm11.95-5.536 1.414 1.414-1.414 1.414-1.414-1.414 1.414-1.414ZM8.464 15.536l1.414 1.414-1.414 1.414-1.414-1.414 1.414-1.414Zm8.486 2.828-1.414-1.414 1.414-1.414 1.414 1.414-1.414 1.414ZM8.464 8.464 7.05 7.05l1.414-1.414 1.414 1.414-1.414 1.414Z"
       />
     </svg>
-  )
+  );
 }
 
 function MoonIcon({ className }: { className?: string }) {
@@ -31,21 +31,21 @@ function MoonIcon({ className }: { className?: string }) {
         d="M20.742 13.045A8.5 8.5 0 0 1 10.955 3.258 9 9 0 1 0 20.742 13.045Z"
       />
     </svg>
-  )
+  );
 }
 
 export default function ThemeToggle({ className, iconOnly = true, size = 'md' }: Props) {
-  const { resolvedTheme, toggleTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
+  const { resolvedTheme, toggleTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => setMounted(true), [])
+  useEffect(() => setMounted(true), []);
 
-  const isDark = resolvedTheme === 'dark'
-  const t = useTranslations('theme')
+  const isDark = resolvedTheme === 'dark';
+  const t = useTranslations('theme');
 
-  if (!mounted) return null
+  if (!mounted) return null;
 
-  const label = isDark ? t('switch_to_light') : t('switch_to_dark')
+  const label = isDark ? t('switch_to_light') : t('switch_to_dark');
 
   const sizeMap = {
     sm: {
@@ -60,9 +60,9 @@ export default function ThemeToggle({ className, iconOnly = true, size = 'md' }:
       button: 'h-12 min-w-12 px-3 text-base',
       icon: 'h-6 w-6',
     },
-  } as const
+  } as const;
 
-  const currentSize = sizeMap[size]
+  const currentSize = sizeMap[size];
 
   return (
     <button
@@ -80,8 +80,12 @@ export default function ThemeToggle({ className, iconOnly = true, size = 'md' }:
         className
       )}
     >
-      {isDark ? <SunIcon className={currentSize.icon} /> : <MoonIcon className={currentSize.icon} />}
+      {isDark ? (
+        <SunIcon className={currentSize.icon} />
+      ) : (
+        <MoonIcon className={currentSize.icon} />
+      )}
       {iconOnly ? null : <span className="font-medium">{isDark ? t('light') : t('dark')}</span>}
     </button>
-  )
+  );
 }

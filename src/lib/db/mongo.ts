@@ -1,22 +1,21 @@
-import mongoose from 'mongoose'
+import mongoose from 'mongoose';
 
-import { log } from '@/lib/logger'
+import { log } from '@/lib/logger';
 
-const MONGO_URI = process.env.MONGODB_URI
-if (!MONGO_URI) throw new Error('MONGODB_URI is not defined')
+const MONGO_URI = process.env.MONGODB_URI;
+if (!MONGO_URI) throw new Error('MONGODB_URI is not defined');
 
-type MongooseInstance = typeof mongoose
+type MongooseInstance = typeof mongoose;
 
 declare global {
-   
-  var mongoose: { conn: MongooseInstance | null; promise: Promise<MongooseInstance> | null }
+  var mongoose: { conn: MongooseInstance | null; promise: Promise<MongooseInstance> | null };
 }
 
-let cached = global.mongoose
-if (!cached) cached = global.mongoose = { conn: null, promise: null }
+let cached = global.mongoose;
+if (!cached) cached = global.mongoose = { conn: null, promise: null };
 
 export default async function connectMongo(): Promise<MongooseInstance> {
-  if (cached.conn) return cached.conn
+  if (cached.conn) return cached.conn;
   if (!cached.promise) {
     cached.promise = mongoose
       .connect(MONGO_URI as string, {
@@ -29,11 +28,11 @@ export default async function connectMongo(): Promise<MongooseInstance> {
       })
       .then((m) => {
         if (process.env.NODE_ENV !== 'production') {
-          log('[mongo] Connected', (process.env.MONGODB_DB as string) ?? '')
+          log('[mongo] Connected', (process.env.MONGODB_DB as string) ?? '');
         }
-        return m
-      })
+        return m;
+      });
   }
-  cached.conn = await cached.promise
-  return cached.conn
+  cached.conn = await cached.promise;
+  return cached.conn;
 }

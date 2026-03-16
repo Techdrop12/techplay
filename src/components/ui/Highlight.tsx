@@ -7,9 +7,5 @@ interface HighlightProps {
 }
 
 export default function Highlight({ children }: HighlightProps) {
-  return (
-    <span className="bg-yellow-200 text-yellow-900 px-1 rounded">
-      {children}
-    </span>
-  );
+  return <span className="bg-yellow-200 text-yellow-900 px-1 rounded">{children}</span>;
 }

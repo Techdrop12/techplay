@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl';
 
-import SectionHeader from '@/components/SectionHeader'
+import SectionHeader from '@/components/SectionHeader';
 
 export default function LoadingSectionSkeleton() {
-  const t = useTranslations('common')
+  const t = useTranslations('common');
   return (
     <section className="motion-section" aria-busy="true" aria-live="polite">
       <SectionHeader title={t('loading')} />
@@ -15,5 +15,5 @@ export default function LoadingSectionSkeleton() {
         ))}
       </div>
     </section>
-  )
+  );
 }

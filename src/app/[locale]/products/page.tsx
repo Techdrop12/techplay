@@ -1,55 +1,49 @@
-import type { Metadata } from 'next'
+import type { Metadata } from 'next';
 
-import ProductCatalogue from '@/components/ProductCatalogue'
-import { getAllProducts } from '@/lib/data'
-import { isLocale, type Locale } from '@/lib/language'
+import ProductCatalogue from '@/components/ProductCatalogue';
+import { getAllProducts } from '@/lib/data';
+import { isLocale, type Locale } from '@/lib/language';
 import {
   resolveSearchParams,
   normalizeProductsSearchParams,
   mapProductsSortToCatalogue,
   buildProductsPageMetaStrings,
   type ProductsCatalogueQuery,
-} from '@/lib/products-catalogue-params'
-import { generateMeta, absoluteUrl } from '@/lib/seo'
+} from '@/lib/products-catalogue-params';
+import { generateMeta, absoluteUrl } from '@/lib/seo';
 
-export const revalidate = 300
+export const revalidate = 300;
 
 type PageProps = {
-  params?: Promise<{ locale: string }>
-  searchParams?: Promise<ProductsCatalogueQuery> | ProductsCatalogueQuery
-}
+  params?: Promise<{ locale: string }>;
+  searchParams?: Promise<ProductsCatalogueQuery> | ProductsCatalogueQuery;
+};
 
 function productsPathForLocale(locale: Locale): string {
-  return locale !== 'fr' ? `/${locale}/products` : '/products'
+  return locale !== 'fr' ? `/${locale}/products` : '/products';
 }
 
-export async function generateMetadata({
-  params,
-  searchParams,
-}: PageProps): Promise<Metadata> {
-  const { locale } = await (params ?? Promise.resolve({ locale: 'fr' }))
-  const sp = await resolveSearchParams(searchParams)
-  const query = normalizeProductsSearchParams(sp)
-  const { title, description } = buildProductsPageMetaStrings(query)
-  const path = isLocale(locale) && locale !== 'fr' ? `/${locale}/products` : '/products'
+export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
+  const { locale } = await (params ?? Promise.resolve({ locale: 'fr' }));
+  const sp = await resolveSearchParams(searchParams);
+  const query = normalizeProductsSearchParams(sp);
+  const { title, description } = buildProductsPageMetaStrings(query);
+  const path = isLocale(locale) && locale !== 'fr' ? `/${locale}/products` : '/products';
   return generateMeta({
     title,
     description,
     url: path,
     image: '/og-products.jpg',
-  })
+  });
 }
 
-export default async function LocaleProductsPage({
-  params,
-  searchParams,
-}: PageProps) {
-  const products = await getAllProducts()
-  const sp = await resolveSearchParams(searchParams)
-  const query = normalizeProductsSearchParams(sp)
-  const resolvedParams = await (params ?? Promise.resolve({ locale: 'fr' }))
-  const locale: Locale = isLocale(resolvedParams.locale) ? resolvedParams.locale : 'fr'
-  const path = productsPathForLocale(locale)
+export default async function LocaleProductsPage({ params, searchParams }: PageProps) {
+  const products = await getAllProducts();
+  const sp = await resolveSearchParams(searchParams);
+  const query = normalizeProductsSearchParams(sp);
+  const resolvedParams = await (params ?? Promise.resolve({ locale: 'fr' }));
+  const locale: Locale = isLocale(resolvedParams.locale) ? resolvedParams.locale : 'fr';
+  const path = productsPathForLocale(locale);
 
   return (
     <>
@@ -74,5 +68,5 @@ export default async function LocaleProductsPage({
         }}
       />
     </>
-  )
+  );
 }

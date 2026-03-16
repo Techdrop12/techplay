@@ -1,38 +1,41 @@
 // src/app/api/checkout/route.ts
-import crypto from 'crypto'
+import crypto from 'crypto';
 
-import { NextResponse } from 'next/server'
-import { z } from 'zod'
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
 
-import { serverEnv } from '@/env.server'
-import { apiError, apiJson, safeErrorForLog } from '@/lib/apiResponse'
-import { BRAND } from '@/lib/constants'
-import { getErrorMessage } from '@/lib/errors'
-import { error as logError } from '@/lib/logger'
-import { createRateLimiter, ipFromRequest } from '@/lib/rateLimit'
+import { serverEnv } from '@/env.server';
+import { apiError, apiJson, safeErrorForLog } from '@/lib/apiResponse';
+import { BRAND } from '@/lib/constants';
+import { getErrorMessage } from '@/lib/errors';
+import { error as logError } from '@/lib/logger';
+import { createRateLimiter, ipFromRequest } from '@/lib/rateLimit';
 
-const IS_PRODUCTION = process.env.NODE_ENV === 'production'
-const SITE_URL = BRAND.URL || (IS_PRODUCTION ? '' : 'http://localhost:3000')
-const STRIPE_KEY = serverEnv.STRIPE_SECRET_KEY?.trim() ?? ''
-const ALLOWED_ORIGINS = SITE_URL ? [SITE_URL] : []
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const SITE_URL = BRAND.URL || (IS_PRODUCTION ? '' : 'http://localhost:3000');
+const STRIPE_KEY = serverEnv.STRIPE_SECRET_KEY?.trim() ?? '';
+const ALLOWED_ORIGINS = SITE_URL ? [SITE_URL] : [];
 
 const checkoutLimiter = createRateLimiter({
   id: 'checkout',
   limit: IS_PRODUCTION ? 15 : 30,
   intervalMs: 60_000,
   strategy: 'fixed-window',
-})
+});
 
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 const LineItem = z.object({
   name: z.string().min(1),
   price: z.number().nonnegative(),
   quantity: z.number().int().positive().max(99),
   image: z.string().url().optional(),
-  currency: z.string().default('EUR').transform((v) => v.toLowerCase()),
-})
+  currency: z
+    .string()
+    .default('EUR')
+    .transform((v) => v.toLowerCase()),
+});
 
 const BodySchema = z.object({
   email: z.string().email(),
@@ -41,127 +44,121 @@ const BodySchema = z.object({
   currency: z.enum(['EUR', 'GBP', 'USD']).optional(),
   locale: z.string().min(2).max(5).optional(),
   idempotencyKey: z.string().optional(),
-})
+});
 
-type AllowedCurrency = 'EUR' | 'GBP' | 'USD'
-type AllowedCountry = 'FR' | 'BE' | 'LU' | 'DE' | 'ES' | 'IT' | 'GB' | 'US'
+type AllowedCurrency = 'EUR' | 'GBP' | 'USD';
+type AllowedCountry = 'FR' | 'BE' | 'LU' | 'DE' | 'ES' | 'IT' | 'GB' | 'US';
 
 function toAllowedCountries(input: unknown): AllowedCountry[] {
-  const fallback: AllowedCountry[] = ['FR']
+  const fallback: AllowedCountry[] = ['FR'];
 
   const normalize = (value: string): AllowedCountry | null => {
-    const upper = value.trim().toUpperCase()
-    const allowed: AllowedCountry[] = ['FR', 'BE', 'LU', 'DE', 'ES', 'IT', 'GB', 'US']
-    return allowed.includes(upper as AllowedCountry) ? (upper as AllowedCountry) : null
-  }
+    const upper = value.trim().toUpperCase();
+    const allowed: AllowedCountry[] = ['FR', 'BE', 'LU', 'DE', 'ES', 'IT', 'GB', 'US'];
+    return allowed.includes(upper as AllowedCountry) ? (upper as AllowedCountry) : null;
+  };
 
   if (Array.isArray(input)) {
     const out = input
       .filter((s): s is string => typeof s === 'string')
       .map(normalize)
-      .filter((s): s is AllowedCountry => s !== null)
+      .filter((s): s is AllowedCountry => s !== null);
 
-    return out.length > 0 ? out : fallback
+    return out.length > 0 ? out : fallback;
   }
 
   if (typeof input === 'string') {
     const out = input
       .split(',')
       .map(normalize)
-      .filter((s): s is AllowedCountry => s !== null)
+      .filter((s): s is AllowedCountry => s !== null);
 
-    return out.length > 0 ? out : fallback
+    return out.length > 0 ? out : fallback;
   }
 
-  return fallback
+  return fallback;
 }
 
 function originAllowed(req: Request): boolean {
-  const origin = req.headers.get('origin') || ''
-  const referer = req.headers.get('referer') || ''
+  const origin = req.headers.get('origin') || '';
+  const referer = req.headers.get('referer') || '';
 
   return (
     !origin ||
     ALLOWED_ORIGINS.some((allowedOrigin) => {
-      return origin.startsWith(allowedOrigin) || referer.startsWith(allowedOrigin)
+      return origin.startsWith(allowedOrigin) || referer.startsWith(allowedOrigin);
     })
-  )
+  );
 }
 
-
 function hashIdempotency(payload: unknown, ip: string): string {
-  const h = crypto.createHash('sha256')
-  h.update(JSON.stringify(payload))
-  h.update('|')
-  h.update(ip)
-  return h.digest('hex')
+  const h = crypto.createHash('sha256');
+  h.update(JSON.stringify(payload));
+  h.update('|');
+  h.update(ip);
+  return h.digest('hex');
 }
 
 export async function POST(request: Request) {
   try {
     if (IS_PRODUCTION && (!SITE_URL || SITE_URL.includes('example.com'))) {
-      return apiError('Configuration invalide', 503)
+      return apiError('Configuration invalide', 503);
     }
     if (!originAllowed(request)) {
-      return apiError('Forbidden', 403)
+      return apiError('Forbidden', 403);
     }
 
-    const ip = ipFromRequest(request)
-    const rl = checkoutLimiter.check(ip)
+    const ip = ipFromRequest(request);
+    const rl = checkoutLimiter.check(ip);
     if (!rl.ok) {
       return NextResponse.json(
         { error: 'Too many requests' },
         { status: 429, headers: checkoutLimiter.headers(rl) }
-      )
+      );
     }
 
-    const raw = await request.json().catch(() => ({}))
-    const parsed = BodySchema.safeParse(raw)
+    const raw = await request.json().catch(() => ({}));
+    const parsed = BodySchema.safeParse(raw);
 
     if (!parsed.success) {
-      const flat = parsed.error.flatten()
-      const detailsMsg = flat.formErrors?.[0] ?? parsed.error.message
-      return apiError('Invalid payload', 400, { details: detailsMsg })
+      const flat = parsed.error.flatten();
+      const detailsMsg = flat.formErrors?.[0] ?? parsed.error.message;
+      return apiError('Invalid payload', 400, { details: detailsMsg });
     }
 
-    const body = parsed.data
+    const body = parsed.data;
 
     const idem =
       body.idempotencyKey ||
       request.headers.get('x-idempotency-key') ||
-      hashIdempotency(
-        { email: body.email, address: body.address, items: body.items },
-        ip
-      )
+      hashIdempotency({ email: body.email, address: body.address, items: body.items }, ip);
 
-    const origin = (SITE_URL ? new URL(SITE_URL) : new URL('http://localhost:3000')).origin
-    const successUrl = `${origin}/commande/success?session_id={CHECKOUT_SESSION_ID}`
-    const cancelUrl = `${origin}/commande`
+    const origin = (SITE_URL ? new URL(SITE_URL) : new URL('http://localhost:3000')).origin;
+    const successUrl = `${origin}/commande/success?session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${origin}/commande`;
 
-    const currency: AllowedCurrency = (
-      body.currency ||
+    const currency: AllowedCurrency = (body.currency ||
       body.items?.[0]?.currency?.toUpperCase() ||
-      'EUR'
-    ) as AllowedCurrency
+      'EUR') as AllowedCurrency;
 
     const allowedCountries: AllowedCountry[] =
       currency === 'GBP'
         ? ['GB']
         : currency === 'USD'
           ? ['US']
-          : ['FR', 'BE', 'LU', 'DE', 'ES', 'IT']
+          : ['FR', 'BE', 'LU', 'DE', 'ES', 'IT'];
 
     if (!STRIPE_KEY) {
-      if (IS_PRODUCTION) return apiError('Service indisponible', 503)
-      const mockUrl = `${new URL(SITE_URL || 'http://localhost:3000').origin}/commande/success?mock=1`
-      return apiJson({ id: `sess_mock_${idem.slice(0, 10)}`, url: mockUrl })
+      if (IS_PRODUCTION) return apiError('Service indisponible', 503);
+      const mockUrl = `${new URL(SITE_URL || 'http://localhost:3000').origin}/commande/success?mock=1`;
+      return apiJson({ id: `sess_mock_${idem.slice(0, 10)}`, url: mockUrl });
     }
 
     {
-      const Stripe = (await import('stripe')).default
-      const stripe = new Stripe(STRIPE_KEY)
+      const Stripe = (await import('stripe')).default;
+      const stripe = new Stripe(STRIPE_KEY);
 
-      const liCurrency = currency.toLowerCase()
+      const liCurrency = currency.toLowerCase();
 
       const line_items =
         body.items && body.items.length > 0
@@ -190,7 +187,7 @@ export async function POST(request: Request) {
                 },
                 quantity: 1,
               },
-            ]
+            ];
 
       const session = await stripe.checkout.sessions.create(
         {
@@ -216,18 +213,18 @@ export async function POST(request: Request) {
           },
         },
         { idempotencyKey: idem }
-      )
+      );
 
-      return apiJson({ id: session.id, url: session.url })
+      return apiJson({ id: session.id, url: session.url });
     }
   } catch (err: unknown) {
-    logError('[checkout] error:', safeErrorForLog(err))
+    logError('[checkout] error:', safeErrorForLog(err));
     return apiError('Unexpected error', 500, {
       details: process.env.NODE_ENV === 'development' ? getErrorMessage(err) : undefined,
-    })
+    });
   }
 }
 
 export async function GET() {
-  return apiError('Method Not Allowed', 405)
+  return apiError('Method Not Allowed', 405);
 }

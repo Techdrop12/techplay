@@ -1,13 +1,13 @@
-'use client'
+'use client';
 
-import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
-import { toast } from 'react-hot-toast'
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
-import TableSkeleton from '@/components/admin/TableSkeleton'
+import TableSkeleton from '@/components/admin/TableSkeleton';
 
-const PAGE_SIZE = 25
+const PAGE_SIZE = 25;
 
 interface ProductRow {
   _id: string;
@@ -19,67 +19,67 @@ interface ProductRow {
 }
 
 export default function ProductTable() {
-  const t = useTranslations('admin')
-  const [products, setProducts] = useState<ProductRow[]>([])
-  const [categories, setCategories] = useState<string[]>([])
-  const [loading, setLoading] = useState(true)
-  const [categoryFilter, setCategoryFilter] = useState('')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [page, setPage] = useState(1)
-  const [total, setTotal] = useState(0)
-  const [pages, setPages] = useState(1)
-  const [refreshTrigger, setRefreshTrigger] = useState(0)
-  const router = useRouter()
+  const t = useTranslations('admin');
+  const [products, setProducts] = useState<ProductRow[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [pages, setPages] = useState(1);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const router = useRouter();
 
   const fetchProducts = useCallback(() => {
-    setLoading(true)
-    const params = new URLSearchParams({ page: String(page), limit: String(PAGE_SIZE) })
-    if (searchQuery.trim()) params.set('q', searchQuery.trim())
-    if (categoryFilter) params.set('category', categoryFilter)
+    setLoading(true);
+    const params = new URLSearchParams({ page: String(page), limit: String(PAGE_SIZE) });
+    if (searchQuery.trim()) params.set('q', searchQuery.trim());
+    if (categoryFilter) params.set('category', categoryFilter);
     fetch(`/api/admin/products?${params}`)
       .then((res) => res.json())
       .then((data: { items?: ProductRow[]; total?: number; pages?: number }) => {
-        setProducts(Array.isArray(data?.items) ? data.items : [])
-        setTotal(Number(data?.total) ?? 0)
-        setPages(Math.max(1, Number(data?.pages) ?? 1))
+        setProducts(Array.isArray(data?.items) ? data.items : []);
+        setTotal(Number(data?.total) ?? 0);
+        setPages(Math.max(1, Number(data?.pages) ?? 1));
       })
       .catch(() => toast.error(t('error_load_products')))
-      .finally(() => setLoading(false))
-  }, [page, searchQuery, categoryFilter, t])
+      .finally(() => setLoading(false));
+  }, [page, searchQuery, categoryFilter, t]);
 
   useEffect(() => {
-    fetchProducts()
-  }, [fetchProducts, refreshTrigger])
+    fetchProducts();
+  }, [fetchProducts, refreshTrigger]);
 
   const applyFilters = () => {
-    setPage(1)
-    setRefreshTrigger((t) => t + 1)
-  }
+    setPage(1);
+    setRefreshTrigger((t) => t + 1);
+  };
 
   useEffect(() => {
     fetch('/api/admin/products/categories')
       .then((res) => res.json())
       .then((data: string[]) => setCategories(Array.isArray(data) ? data : []))
-      .catch(() => {})
-  }, [])
+      .catch(() => {});
+  }, []);
 
-  const filteredProducts = products
+  const filteredProducts = products;
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm(t('confirm_delete'))) return
+    if (!window.confirm(t('confirm_delete'))) return;
     try {
-      const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE' })
-      if (!res.ok) throw new Error('Delete failed')
-      setProducts((prev) => prev.filter((p) => p._id !== id))
-      toast.success(t('product_deleted'))
-      fetchProducts()
+      const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Delete failed');
+      setProducts((prev) => prev.filter((p) => p._id !== id));
+      toast.success(t('product_deleted'));
+      fetchProducts();
     } catch {
-      toast.error(t('error_delete'))
+      toast.error(t('error_delete'));
     }
-  }
+  };
 
   if (loading) {
-    return <TableSkeleton rows={8} cols={5} ariaLabel={t('loading_products')} />
+    return <TableSkeleton rows={8} cols={5} ariaLabel={t('loading_products')} />;
   }
 
   return (
@@ -103,7 +103,9 @@ export default function ProductTable() {
         >
           <option value="">{t('all_categories')}</option>
           {categories.map((c) => (
-            <option key={c} value={c}>{c}</option>
+            <option key={c} value={c}>
+              {c}
+            </option>
           ))}
         </select>
         <button
@@ -135,7 +137,10 @@ export default function ProductTable() {
           →
         </button>
       </div>
-      <table className="min-w-full text-sm bg-[hsl(var(--surface))] border border-[hsl(var(--border))] shadow-[var(--shadow-sm)]" aria-label={t('products_title')}>
+      <table
+        className="min-w-full text-sm bg-[hsl(var(--surface))] border border-[hsl(var(--border))] shadow-[var(--shadow-sm)]"
+        aria-label={t('products_title')}
+      >
         <thead>
           <tr className="bg-[hsl(var(--surface-2))] text-left">
             <th className="p-2 border">{t('table_title')}</th>
@@ -154,7 +159,10 @@ export default function ProductTable() {
             </tr>
           ) : (
             filteredProducts.map((p) => (
-              <tr key={p._id} className="hover:bg-[hsl(var(--surface-2))] border-t border-[hsl(var(--border))]">
+              <tr
+                key={p._id}
+                className="hover:bg-[hsl(var(--surface-2))] border-t border-[hsl(var(--border))]"
+              >
                 <td className="p-2 border">{p.title}</td>
                 <td className="p-2 border">{p.price.toFixed(2)} €</td>
                 <td className="p-2 border">{p.stock}</td>

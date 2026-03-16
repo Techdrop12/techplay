@@ -6,7 +6,11 @@ interface PaginationControlsProps {
   onPageChange: (page: number) => void;
 }
 
-export default function PaginationControls({ currentPage, totalPages, onPageChange }: PaginationControlsProps) {
+export default function PaginationControls({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: PaginationControlsProps) {
   if (totalPages <= 1) return null;
 
   return (
@@ -18,7 +22,9 @@ export default function PaginationControls({ currentPage, totalPages, onPageChan
       >
         ← Précédent
       </button>
-      <span className="px-3 py-1">{currentPage} / {totalPages}</span>
+      <span className="px-3 py-1">
+        {currentPage} / {totalPages}
+      </span>
       <button
         disabled={currentPage === totalPages}
         onClick={() => onPageChange(currentPage + 1)}

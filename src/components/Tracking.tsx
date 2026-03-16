@@ -1,71 +1,71 @@
 // src/components/Tracking.tsx
-'use client'
+'use client';
 
-import dynamic from 'next/dynamic'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import dynamic from 'next/dynamic';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
-const Analytics = dynamic(() => import('./Analytics'), { ssr: false })
-const MetaPixel = dynamic(() => import('./MetaPixel'), { ssr: false })
-const Hotjar = dynamic(() => import('./Hotjar'), { ssr: false })
-const Clarity = dynamic(() => import('./Clarity'), { ssr: false })
-const RegisterSW = dynamic(() => import('./RegisterSW').then((m) => m.default), { ssr: false })
+const Analytics = dynamic(() => import('./Analytics'), { ssr: false });
+const MetaPixel = dynamic(() => import('./MetaPixel'), { ssr: false });
+const Hotjar = dynamic(() => import('./Hotjar'), { ssr: false });
+const Clarity = dynamic(() => import('./Clarity'), { ssr: false });
+const RegisterSW = dynamic(() => import('./RegisterSW').then((m) => m.default), { ssr: false });
 
-const GA_ID = process.env.NEXT_PUBLIC_GA_ID
-const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID
-const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID
-const HOTJAR_ID = process.env.NEXT_PUBLIC_HOTJAR_ID
-const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
+const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
+const HOTJAR_ID = process.env.NEXT_PUBLIC_HOTJAR_ID;
+const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID;
 
-const DISABLED = (process.env.NEXT_PUBLIC_ANALYTICS_DISABLED || '').toLowerCase() === 'true'
+const DISABLED = (process.env.NEXT_PUBLIC_ANALYTICS_DISABLED || '').toLowerCase() === 'true';
 
 type ConsentBooleans = {
-  analytics: boolean
-  ads: boolean
-}
+  analytics: boolean;
+  ads: boolean;
+};
 
 function Idle({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
-  const [ready, setReady] = useState(false)
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => setReady(true), delay || 0)
+    const timeoutId = window.setTimeout(() => setReady(true), delay || 0);
 
-    let idleId: number | null = null
+    let idleId: number | null = null;
     if (typeof window.requestIdleCallback === 'function') {
       idleId = window.requestIdleCallback(() => {
-        window.clearTimeout(timeoutId)
-        setReady(true)
-      })
+        window.clearTimeout(timeoutId);
+        setReady(true);
+      });
     }
 
     return () => {
-      window.clearTimeout(timeoutId)
+      window.clearTimeout(timeoutId);
       if (idleId != null && typeof window.cancelIdleCallback === 'function') {
-        window.cancelIdleCallback(idleId)
+        window.cancelIdleCallback(idleId);
       }
-    }
-  }, [delay])
+    };
+  }, [delay]);
 
-  return ready ? <>{children}</> : null
+  return ready ? <>{children}</> : null;
 }
 
 function readInitialConsent(): ConsentBooleans {
   try {
-    const s = window.__consentState ?? {}
-    const analytics = s.analytics_storage === 'granted'
+    const s = window.__consentState ?? {};
+    const analytics = s.analytics_storage === 'granted';
     const ads =
       s.ad_storage === 'granted' ||
       s.ad_user_data === 'granted' ||
-      s.ad_personalization === 'granted'
+      s.ad_personalization === 'granted';
 
-    const lsA = localStorage.getItem('consent:analytics') === '1'
-    const lsAds = localStorage.getItem('consent:ads') === '1'
+    const lsA = localStorage.getItem('consent:analytics') === '1';
+    const lsAds = localStorage.getItem('consent:ads') === '1';
 
     return {
       analytics: analytics || lsA,
       ads: ads || lsAds,
-    }
+    };
   } catch {
-    return { analytics: false, ads: false }
+    return { analytics: false, ads: false };
   }
 }
 
@@ -77,76 +77,76 @@ function applyConsentState(
     setConsent((prev) => ({
       analytics: typeof next.analytics === 'boolean' ? next.analytics : prev.analytics,
       ads: typeof next.ads === 'boolean' ? next.ads : prev.ads,
-    }))
-    return
+    }));
+    return;
   }
 
-  const analytics = next.analytics_storage === 'granted'
+  const analytics = next.analytics_storage === 'granted';
   const ads =
     next.ad_storage === 'granted' ||
     next.ad_user_data === 'granted' ||
-    next.ad_personalization === 'granted'
+    next.ad_personalization === 'granted';
 
-  setConsent({ analytics, ads })
+  setConsent({ analytics, ads });
 }
 
 export default function Tracking() {
   const [consent, setConsent] = useState<ConsentBooleans>(() =>
     typeof window === 'undefined' ? { analytics: false, ads: false } : readInitialConsent()
-  )
+  );
 
-  const wrappedRef = useRef(false)
+  const wrappedRef = useRef(false);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (typeof window === 'undefined') return;
 
     const onEvt = (e: Event) => {
       const detail = ((e as CustomEvent).detail ?? {}) as Partial<Gtag.ConsentUpdate> &
-        Record<string, unknown>
-      applyConsentState(detail, setConsent)
-    }
+        Record<string, unknown>;
+      applyConsentState(detail, setConsent);
+    };
 
-    window.addEventListener('tp:consent', onEvt as EventListener)
+    window.addEventListener('tp:consent', onEvt as EventListener);
 
     if (!wrappedRef.current) {
-      wrappedRef.current = true
+      wrappedRef.current = true;
 
-      const orig = window.__applyConsent
+      const orig = window.__applyConsent;
       if (typeof orig === 'function') {
         window.__applyConsent = (next) => {
           try {
             applyConsentState(
               (next ?? {}) as Partial<Gtag.ConsentUpdate> & Record<string, unknown>,
               setConsent
-            )
+            );
           } catch {}
 
-          orig(next)
-        }
+          orig(next);
+        };
       }
     }
 
     const id = window.setTimeout(() => {
       try {
-        setConsent(readInitialConsent())
+        setConsent(readInitialConsent());
       } catch {}
-    }, 300)
+    }, 300);
 
     return () => {
-      window.removeEventListener('tp:consent', onEvt as EventListener)
-      window.clearTimeout(id)
-    }
-  }, [])
+      window.removeEventListener('tp:consent', onEvt as EventListener);
+      window.clearTimeout(id);
+    };
+  }, []);
 
   const canAnalytics = useMemo(
     () => Boolean((GA_ID || GTM_ID) && consent.analytics),
     [consent.analytics]
-  )
-  const canMeta = useMemo(() => Boolean(META_PIXEL_ID && consent.ads), [consent.ads])
-  const canHotjar = useMemo(() => Boolean(HOTJAR_ID && consent.analytics), [consent.analytics])
-  const canClarity = useMemo(() => Boolean(CLARITY_ID && consent.analytics), [consent.analytics])
+  );
+  const canMeta = useMemo(() => Boolean(META_PIXEL_ID && consent.ads), [consent.ads]);
+  const canHotjar = useMemo(() => Boolean(HOTJAR_ID && consent.analytics), [consent.analytics]);
+  const canClarity = useMemo(() => Boolean(CLARITY_ID && consent.analytics), [consent.analytics]);
 
-  if (DISABLED) return null
+  if (DISABLED) return null;
 
   return (
     <>
@@ -178,5 +178,5 @@ export default function Tracking() {
         </Idle>
       )}
     </>
-  )
+  );
 }

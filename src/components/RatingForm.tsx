@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
-import { Star } from 'lucide-react'
-import { useState } from 'react'
+import { Star } from 'lucide-react';
+import { useState } from 'react';
 
 export default function RatingForm() {
-  const [rating, setRating] = useState(0)
+  const [rating, setRating] = useState(0);
 
   return (
     <div className="flex gap-2">
@@ -18,5 +18,5 @@ export default function RatingForm() {
         />
       ))}
     </div>
-  )
+  );
 }

@@ -58,23 +58,9 @@
   --font-inter: Inter, ui-sans-serif, system-ui;
   --font-sora: Sora, ui-sans-serif, system-ui;
   --font-sans:
-    var(--font-inter),
-    Inter,
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    Segoe UI,
-    Roboto,
-    Helvetica,
-    Arial,
-    'Apple Color Emoji',
-    'Segoe UI Emoji';
-  --font-heading:
-    var(--font-sora),
-    var(--font-inter),
-    Inter,
-    ui-sans-serif,
-    system-ui;
+    var(--font-inter), Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica,
+    Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
+  --font-heading: var(--font-sora), var(--font-inter), Inter, ui-sans-serif, system-ui;
 
   --step--1: clamp(0.875rem, 0.84rem + 0.15vw, 0.975rem);
   --step-0: clamp(1.0625rem, 1rem + 0.25vw, 1.15rem);
@@ -116,27 +102,21 @@
     hsl(175 60% 45% / 0.3),
     transparent 70%
   );
-  --overlay-hero: radial-gradient(
-    80% 60% at 50% 40%,
-    transparent,
-    rgba(0, 0, 0, 0.5)
-  );
-  --gradient-accent: linear-gradient(
-    135deg,
-    hsl(var(--accent)) 0%,
-    hsl(168 65% 32%) 100%
-  );
+  --overlay-hero: radial-gradient(80% 60% at 50% 40%, transparent, rgba(0, 0, 0, 0.5));
+  --gradient-accent: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(168 65% 32%) 100%);
   --gradient-accent-soft: linear-gradient(
     135deg,
     hsl(var(--accent) / 0.14) 0%,
     hsl(var(--accent-700) / 0.06) 100%
   );
-  --gradient-mesh: radial-gradient(ellipse 90% 60% at 50% -20%, hsl(var(--accent) / 0.08), transparent 55%),
+  --gradient-mesh:
+    radial-gradient(ellipse 90% 60% at 50% -20%, hsl(var(--accent) / 0.08), transparent 55%),
     radial-gradient(ellipse 70% 50% at 105% 0%, hsl(var(--accent) / 0.04), transparent 50%),
     radial-gradient(ellipse 70% 50% at -5% 0%, hsl(var(--accent) / 0.04), transparent 50%);
   --glow-accent: 0 0 0 1px hsl(var(--accent) / 0.2), 0 0 36px hsl(var(--accent) / 0.1);
   --glow-accent-strong: 0 0 0 1px hsl(var(--accent) / 0.35), 0 0 28px hsl(var(--accent) / 0.2);
-  --gradient-hero: radial-gradient(ellipse 120% 90% at 30% -5%, hsl(var(--accent) / 0.28), transparent 50%),
+  --gradient-hero:
+    radial-gradient(ellipse 120% 90% at 30% -5%, hsl(var(--accent) / 0.28), transparent 50%),
     radial-gradient(ellipse 90% 60% at 85% 40%, hsl(var(--accent) / 0.12), transparent 55%),
     radial-gradient(ellipse 70% 50% at 5% 90%, hsl(var(--accent) / 0.08), transparent 45%);
 
@@ -420,8 +400,12 @@ button {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes scaleIn {
@@ -495,7 +479,8 @@ button {
 }
 
 @keyframes glowPulse {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 0 0 hsl(var(--accent) / 0.25);
   }
   50% {
@@ -504,11 +489,21 @@ button {
 }
 
 /* Staggered section entrance (use with .motion-section) */
-.motion-section-delay-1 { animation-delay: 0.1s; }
-.motion-section-delay-2 { animation-delay: 0.2s; }
-.motion-section-delay-3 { animation-delay: 0.3s; }
-.motion-section-delay-4 { animation-delay: 0.4s; }
-.motion-section-delay-5 { animation-delay: 0.5s; }
+.motion-section-delay-1 {
+  animation-delay: 0.1s;
+}
+.motion-section-delay-2 {
+  animation-delay: 0.2s;
+}
+.motion-section-delay-3 {
+  animation-delay: 0.3s;
+}
+.motion-section-delay-4 {
+  animation-delay: 0.4s;
+}
+.motion-section-delay-5 {
+  animation-delay: 0.5s;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .motion-section-delay-1,

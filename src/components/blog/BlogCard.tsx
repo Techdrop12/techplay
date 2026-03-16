@@ -1,34 +1,35 @@
 // src/components/blog/BlogCard.tsx
-'use client'
+'use client';
 
-import { motion } from 'framer-motion'
-import Image from 'next/image'
+import { motion } from 'framer-motion';
+import Image from 'next/image';
 
-import type { BlogPost } from '@/types/blog'
+import type { BlogPost } from '@/types/blog';
 
-import Link from '@/components/LocalizedLink'
-import { safeProductImageUrl } from '@/lib/safeProductImage'
-import { cn, formatDate } from '@/lib/utils'
+import Link from '@/components/LocalizedLink';
+import { safeProductImageUrl } from '@/lib/safeProductImage';
+import { cn, formatDate } from '@/lib/utils';
 
 interface BlogCardProps {
-  article: BlogPost
+  article: BlogPost;
 }
 
 const BLUR_DATA_URL =
-  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+'
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIiB4PSIwIiB5PSIwIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYikiIGZpbGw9IiNlZWUiIC8+PC9zdmc+';
 
 function getSafeImage(article: BlogPost): string {
   if (article.image && typeof article.image === 'string') {
-    return safeProductImageUrl(article.image)
+    return safeProductImageUrl(article.image);
   }
 
-  return '/og-image.jpg'
+  return '/og-image.jpg';
 }
 
 export default function BlogCard({ article }: BlogCardProps) {
-  const imageSrc = getSafeImage(article)
-  const dateLabel = formatDate(article.createdAt)
-  const category = Array.isArray(article.tags) && article.tags.length > 0 ? article.tags[0] : undefined
+  const imageSrc = getSafeImage(article);
+  const dateLabel = formatDate(article.createdAt);
+  const category =
+    Array.isArray(article.tags) && article.tags.length > 0 ? article.tags[0] : undefined;
 
   return (
     <motion.article
@@ -80,10 +81,12 @@ export default function BlogCard({ article }: BlogCardProps) {
 
           <span className="mt-6 inline-flex items-center gap-1.5 text-[13px] font-medium text-[hsl(var(--accent))] decoration-[hsl(var(--accent))] underline-offset-2 group-hover:underline">
             Lire l'article
-            <span aria-hidden className="text-[10px] opacity-80">→</span>
+            <span aria-hidden className="text-[10px] opacity-80">
+              →
+            </span>
           </span>
         </div>
       </Link>
     </motion.article>
-  )
+  );
 }

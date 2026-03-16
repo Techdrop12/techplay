@@ -1,8 +1,8 @@
-import mongoose, { Schema, Types, type InferSchemaType } from 'mongoose'
+import mongoose, { Schema, Types, type InferSchemaType } from 'mongoose';
 
 function toSafeJsonRecord(value: unknown): Record<string, unknown> {
-  if (value && typeof value === 'object') return value as Record<string, unknown>
-  return {}
+  if (value && typeof value === 'object') return value as Record<string, unknown>;
+  return {};
 }
 
 const PackSchema = new Schema(
@@ -36,45 +36,44 @@ const PackSchema = new Schema(
       versionKey: false,
       transform: (_doc, ret) => {
         const raw = toSafeJsonRecord(ret) as Record<string, unknown> & {
-          _id?: Types.ObjectId | null
-          __v?: number
-          id?: string
-          title?: string | null
-          name?: string | null
-          image?: string | null
-          images?: string[] | null
-        }
+          _id?: Types.ObjectId | null;
+          __v?: number;
+          id?: string;
+          title?: string | null;
+          name?: string | null;
+          image?: string | null;
+          images?: string[] | null;
+        };
 
-        raw.id = raw._id?.toString?.() ?? String(raw._id ?? '')
+        raw.id = raw._id?.toString?.() ?? String(raw._id ?? '');
 
         const title =
           typeof raw.title === 'string' && raw.title.trim()
             ? raw.title
             : typeof raw.name === 'string' && raw.name.trim()
               ? raw.name
-              : 'Pack'
+              : 'Pack';
 
-        raw.title = title
+        raw.title = title;
 
         if (!raw.image && Array.isArray(raw.images) && typeof raw.images[0] === 'string') {
-          raw.image = raw.images[0]
+          raw.image = raw.images[0];
         }
 
-        const { _id, __v, ...rest } = raw
-        return rest
+        const { _id, __v, ...rest } = raw;
+        return rest;
       },
     },
   }
-)
+);
 
 PackSchema.virtual('id').get(function (this: { _id: Types.ObjectId }) {
-  return this._id.toString()
-})
+  return this._id.toString();
+});
 
-export type Pack = InferSchemaType<typeof PackSchema>
+export type Pack = InferSchemaType<typeof PackSchema>;
 
 const PackModel =
-  (mongoose.models.Pack as mongoose.Model<Pack>) ||
-  mongoose.model<Pack>('Pack', PackSchema)
+  (mongoose.models.Pack as mongoose.Model<Pack>) || mongoose.model<Pack>('Pack', PackSchema);
 
-export default PackModel
+export default PackModel;

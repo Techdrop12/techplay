@@ -1,10 +1,10 @@
 // src/lib/hooks/useDarkMode.ts — compat: wrap du ThemeProvider
-import { useMemo } from 'react'
+import { useMemo } from 'react';
 
-import { useTheme } from '@/context/themeContext'
+import { useTheme } from '@/context/themeContext';
 
 export function useDarkMode() {
-  const { resolvedTheme, setTheme, toggleTheme } = useTheme()
+  const { resolvedTheme, setTheme, toggleTheme } = useTheme();
   return useMemo(
     () => ({
       isDark: resolvedTheme === 'dark',
@@ -12,5 +12,5 @@ export function useDarkMode() {
       toggle: toggleTheme,
     }),
     [resolvedTheme, setTheme, toggleTheme]
-  )
+  );
 }

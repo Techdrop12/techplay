@@ -1,34 +1,34 @@
-'use client'
+'use client';
 
-import {useTranslations} from 'next-intl'
-import {useEffect, useMemo, useRef, useState} from 'react'
-import {toast} from 'react-hot-toast'
+import { useTranslations } from 'next-intl';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
-import type { Product } from '@/types/product'
+import type { Product } from '@/types/product';
 
-import HeroCarousel from '@/components/HeroCarousel'
-import MotionWrapper from '@/components/MotionWrapper'
-import ProductCard from '@/components/ProductCard'
+import HeroCarousel from '@/components/HeroCarousel';
+import MotionWrapper from '@/components/MotionWrapper';
+import ProductCard from '@/components/ProductCard';
 
 /* -------------------------------------------------------------------------- */
 /*                                   Types                                    */
 /* -------------------------------------------------------------------------- */
 
 type ProductLike = Product & {
-  tags?: string[]
-}
+  tags?: string[];
+};
 
-type FetchState = ProductLike[] | null // null = loading, [] = vide
+type FetchState = ProductLike[] | null; // null = loading, [] = vide
 
 /* -------------------------------------------------------------------------- */
 /*                              Category pill UI                              */
 /* -------------------------------------------------------------------------- */
 
 type CategoryPillProps = {
-  label: string
-  active: boolean
-  onClick: () => void
-}
+  label: string;
+  active: boolean;
+  onClick: () => void;
+};
 
 function CategoryPill({ label, active, onClick }: CategoryPillProps) {
   return (
@@ -41,19 +41,19 @@ function CategoryPill({ label, active, onClick }: CategoryPillProps) {
         'transition-all outline-none focus-visible:ring-2 focus-visible:ring-accent/50',
         active
           ? 'bg-accent text-white shadow'
-          : 'bg-[hsl(var(--surface-2))] text-[hsl(var(--text))] hover:bg-[hsl(var(--surface-3))]'
+          : 'bg-[hsl(var(--surface-2))] text-[hsl(var(--text))] hover:bg-[hsl(var(--surface-3))]',
       ].join(' ')}
     >
       {label}
     </button>
-  )
+  );
 }
 
 /* -------------------------------------------------------------------------- */
 /*                               Skeleton cards                               */
 /* -------------------------------------------------------------------------- */
 
-function GridSkeleton({ count = 12 }: { count?: number }) {
+function GridSkeleton({ count = 8 }: { count?: number }) {
   return (
     <div className="p-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
       {Array.from({ length: count }).map((_, i) => (
@@ -63,93 +63,94 @@ function GridSkeleton({ count = 12 }: { count?: number }) {
         />
       ))}
     </div>
-  )
+  );
 }
 
 /* ----------------------------- Empty state icon ---------------------------- */
 
 const EmptyIcon = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
-    <path fill="currentColor" d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5-5-5ZM10 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10Z"/>
+    <path
+      fill="currentColor"
+      d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5-5-5ZM10 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10Z"
+    />
   </svg>
-)
+);
 
 /* -------------------------------------------------------------------------- */
 /*                                 Component                                  */
 /* -------------------------------------------------------------------------- */
 
 export default function HomeClient() {
-  const tHome = useTranslations('home')
+  const tHome = useTranslations('home');
 
-  const [products, setProducts] = useState<FetchState>(null)
-  const [categories, setCategories] = useState<string[]>([])
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const [displayCount, setDisplayCount] = useState<number>(12)
-  const sentinelRef = useRef<HTMLDivElement | null>(null)
+  const [products, setProducts] = useState<FetchState>(null);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [displayCount, setDisplayCount] = useState<number>(8);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   /* ------------------------------- Fetch data ------------------------------ */
   useEffect(() => {
-    let cancelled = false
+    let cancelled = false;
 
     async function fetchData() {
       try {
-        const res = await fetch('/api/products', { cache: 'no-store' })
-        if (!res.ok) throw new Error('API error')
-        const data = (await res.json()) as ProductLike[]
-        if (cancelled) return
+        const res = await fetch('/api/products', { cache: 'no-store' });
+        if (!res.ok) throw new Error('API error');
+        const data = (await res.json()) as ProductLike[];
+        if (cancelled) return;
 
-        setProducts(data)
+        setProducts(data);
 
         const unique = Array.from(
-          new Set(
-            data.flatMap((p) => (Array.isArray(p.tags) ? p.tags : []))
-          )
-        )
-        setCategories(unique)
+          new Set(data.flatMap((p) => (Array.isArray(p.tags) ? p.tags : [])))
+        );
+        setCategories(unique);
       } catch {
         if (!cancelled) {
-          setProducts([])
-          toast.error(tHome('error_loading_products'))
+          setProducts([]);
+          toast.error(tHome('error_loading_products'));
         }
       }
     }
 
-    fetchData()
+    fetchData();
     return () => {
-      cancelled = true
-    }
-  }, [tHome])
+      cancelled = true;
+    };
+  }, [tHome]);
 
   /* ------------------------------- Derived UI ------------------------------ */
   const filteredProducts: ProductLike[] = useMemo(() => {
-    if (!products) return []
-    if (selectedCategory === 'all') return products
-    return products.filter((p) => p.tags?.includes(selectedCategory))
-  }, [products, selectedCategory])
+    if (!products) return [];
+    if (selectedCategory === 'all') return products;
+    return products.filter((p) => p.tags?.includes(selectedCategory));
+  }, [products, selectedCategory]);
 
   const visibleProducts = useMemo(
     () => filteredProducts.slice(0, displayCount),
     [filteredProducts, displayCount]
-  )
+  );
 
   /* ---------------------------- Infinite scroll ---------------------------- */
   useEffect(() => {
-    if (!sentinelRef.current) return
-    const el = sentinelRef.current
+    if (!sentinelRef.current) return;
+    const el = sentinelRef.current;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        const [entry] = entries
+        const [entry] = entries;
         if (entry.isIntersecting && displayCount < filteredProducts.length) {
-          setDisplayCount((prev) => prev + 12)
+          setDisplayCount((prev) => Math.min(prev + 8, filteredProducts.length));
         }
       },
-      { rootMargin: '200px 0px 400px 0px', threshold: 0.01 }
-    )
+      { rootMargin: '160px 0px 320px 0px', threshold: 0.1 }
+    );
 
-    observer.observe(el)
-    return () => observer.unobserve(el)
-  }, [displayCount, filteredProducts.length])
+    observer.observe(el);
+    return () => observer.unobserve(el);
+  }, [displayCount, filteredProducts.length]);
 
   /* ------------------------------ Loading state ---------------------------- */
   if (products === null) {
@@ -158,7 +159,7 @@ export default function HomeClient() {
         <HeroCarousel />
         <GridSkeleton />
       </MotionWrapper>
-    )
+    );
   }
 
   /* --------------------------------- Render -------------------------------- */
@@ -166,6 +167,38 @@ export default function HomeClient() {
     <MotionWrapper>
       {/* Hero */}
       <HeroCarousel />
+
+      {/* Hero tagline + reassurance strip */}
+      <section className="px-4 pt-6 pb-2">
+        <div className="mx-auto max-w-3xl text-center">
+          <h2 className="text-[1.05rem] font-semibold tracking-tight text-[hsl(var(--text))] sm:text-lg">
+            {tHome('hero_tagline_title')}
+          </h2>
+          <p className="mt-2 text-[0.9rem] text-token-text/70 sm:text-[0.95rem]">
+            {tHome('hero_tagline_subtitle')}
+          </p>
+        </div>
+
+        <div className="mt-4">
+          <div className="mx-auto flex max-w-4xl flex-col gap-2 rounded-2xl border border-[hsl(var(--border))]/70 bg-[hsl(var(--surface))]/85 px-3 py-2.5 text-[11px] text-token-text/80 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-4 sm:text-[0.8rem]">
+            <p className="flex items-center gap-2">
+              <span
+                className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))]"
+                aria-hidden="true"
+              />
+              <span>{tHome('reassurance_payment')}</span>
+            </p>
+            <p className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
+              <span>{tHome('reassurance_delivery')}</span>
+            </p>
+            <p className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-sky-500" aria-hidden="true" />
+              <span>{tHome('reassurance_support')}</span>
+            </p>
+          </div>
+        </div>
+      </section>
 
       {/* Categories (pills) */}
       {categories.length > 1 && (
@@ -178,8 +211,8 @@ export default function HomeClient() {
               label={tHome('all')}
               active={selectedCategory === 'all'}
               onClick={() => {
-                setSelectedCategory('all')
-                setDisplayCount(12)
+                setSelectedCategory('all');
+                setDisplayCount(8);
               }}
             />
             {categories.map((cat) => (
@@ -188,8 +221,8 @@ export default function HomeClient() {
                 label={cat}
                 active={selectedCategory === cat}
                 onClick={() => {
-                  setSelectedCategory(cat)
-                  setDisplayCount(12)
+                  setSelectedCategory(cat);
+                  setDisplayCount(8);
                 }}
               />
             ))}
@@ -199,6 +232,14 @@ export default function HomeClient() {
 
       {/* Products grid */}
       <section className="p-4">
+        <header className="mx-auto mb-3 max-w-5xl sm:mb-4">
+          <h2 className="text-base font-semibold tracking-tight text-[hsl(var(--text))] sm:text-lg">
+            {tHome('products_section_title')}
+          </h2>
+          <p className="mt-1 text-[0.85rem] text-token-text/70 sm:text-[0.9rem]">
+            {tHome('products_section_subtitle')}
+          </p>
+        </header>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {visibleProducts.map((p) => (
             <ProductCard key={p._id} product={p} />
@@ -207,11 +248,7 @@ export default function HomeClient() {
 
         {/* Empty state */}
         {filteredProducts.length === 0 && (
-          <div
-            className="text-center text-token-text/60 mt-10"
-            role="status"
-            aria-live="polite"
-          >
+          <div className="text-center text-token-text/60 mt-10" role="status" aria-live="polite">
             <div className="mx-auto mb-3 w-12 h-12 rounded-full bg-[hsl(var(--surface-2))] dark:bg-zinc-800 grid place-items-center">
               <EmptyIcon />
             </div>
@@ -223,17 +260,16 @@ export default function HomeClient() {
         <div ref={sentinelRef} className="h-8" aria-hidden="true" />
       </section>
     </MotionWrapper>
-  )
+  );
 }
 
 /* --------------------------------- Keyframes --------------------------------
    (si tu n’as pas ajouté le keyframe shimmer côté Tailwind, la classe ci-dessous
    garantit l’anim dans ce composant) */
 declare global {
-   
   namespace JSX {
     interface IntrinsicElements {
-      style: React.DetailedHTMLProps<React.StyleHTMLAttributes<HTMLStyleElement>, HTMLStyleElement>
+      style: React.DetailedHTMLProps<React.StyleHTMLAttributes<HTMLStyleElement>, HTMLStyleElement>;
     }
   }
 }

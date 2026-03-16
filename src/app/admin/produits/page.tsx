@@ -1,20 +1,20 @@
-import type { Metadata } from 'next'
-import { getTranslations } from 'next-intl/server'
-import Link from 'next/link'
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+import Link from 'next/link';
 
-import ProductTable from '@/components/ProductTable'
+import ProductTable from '@/components/ProductTable';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('admin')
+  const t = await getTranslations('admin');
   return {
     title: `Produits – Admin TechPlay`,
     description: t('products_management_heading'),
     robots: { index: false, follow: false },
-  }
+  };
 }
 
 export default async function AdminProduitsPage() {
-  const t = await getTranslations('admin')
+  const t = await getTranslations('admin');
   return (
     <div className="space-y-6">
       <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -32,5 +32,5 @@ export default async function AdminProduitsPage() {
         <ProductTable />
       </div>
     </div>
-  )
+  );
 }

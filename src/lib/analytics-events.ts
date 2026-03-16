@@ -12,9 +12,9 @@ export const FUNNEL_STEPS = {
   BEGIN_CHECKOUT: 'begin_checkout',
   ADD_SHIPPING: 'add_shipping_info',
   PURCHASE: 'purchase',
-} as const
+} as const;
 
-export type FunnelStep = (typeof FUNNEL_STEPS)[keyof typeof FUNNEL_STEPS]
+export type FunnelStep = (typeof FUNNEL_STEPS)[keyof typeof FUNNEL_STEPS];
 
 /** Noms de listes pour segmenter les sources (recommandations, cross-sell, etc.). */
 export const LIST_NAMES = {
@@ -31,9 +31,9 @@ export const LIST_NAMES = {
   CART_REMINDER: 'cart_reminder',
   PRODUCT_GRID: 'product_grid',
   RELATED: 'related',
-} as const
+} as const;
 
-export type ListName = (typeof LIST_NAMES)[keyof typeof LIST_NAMES]
+export type ListName = (typeof LIST_NAMES)[keyof typeof LIST_NAMES];
 
 /** Événements business pour relances et CRM (email, panier abandonné, etc.). */
 export const BUSINESS_EVENTS = {
@@ -42,24 +42,24 @@ export const BUSINESS_EVENTS = {
   EMAIL_CAPTURE: 'email_capture',
   CHECKOUT_STARTED: 'checkout_started',
   PURCHASE_COMPLETED: 'purchase_completed',
-} as const
+} as const;
 
 /** Contexte A/B pour mesurer les conversions par variante. */
 export type ABContext = {
-  experiment: string
-  variant: string
-}
+  experiment: string;
+  variant: string;
+};
 
 /** Payload minimal pour un événement funnel (dashboards). */
 export type FunnelEventPayload = {
-  funnel_step: FunnelStep
-  currency?: string
-  value?: number
-  item_list_name?: ListName | string
-  items?: Array<{ item_id: string; item_name: string; price?: number; quantity?: number }>
+  funnel_step: FunnelStep;
+  currency?: string;
+  value?: number;
+  item_list_name?: ListName | string;
+  items?: Array<{ item_id: string; item_name: string; price?: number; quantity?: number }>;
   /** Pour CRM / relances */
-  email?: string
+  email?: string;
   /** A/B testing */
-  ab_experiment?: string
-  ab_variant?: string
-}
+  ab_experiment?: string;
+  ab_variant?: string;
+};

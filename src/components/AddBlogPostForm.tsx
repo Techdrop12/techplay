@@ -1,14 +1,14 @@
-'use client'
+'use client';
 
-import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
-import { useState } from 'react'
-import { toast } from 'react-hot-toast'
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 export default function AddBlogPostForm() {
-  const t = useTranslations('admin')
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
+  const t = useTranslations('admin');
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     title: '',
     slug: '',
@@ -16,29 +16,29 @@ export default function AddBlogPostForm() {
     image: '',
     author: '',
     published: false,
-  })
-  const [apiError, setApiError] = useState<string | null>(null)
-  const [fieldErrors, setFieldErrors] = useState<Partial<Record<string, string>>>({})
+  });
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<string, string>>>({});
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    const { name, value, type } = e.target
+    const { name, value, type } = e.target;
     setForm((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
-    }))
-  }
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setApiError(null)
-    setFieldErrors({})
+    e.preventDefault();
+    setApiError(null);
+    setFieldErrors({});
     if (!form.title.trim()) {
-      setFieldErrors({ title: 'Titre requis' })
-      return
+      setFieldErrors({ title: 'Titre requis' });
+      return;
     }
-    setLoading(true)
+    setLoading(true);
     try {
       const res = await fetch('/api/blog', {
         method: 'POST',
@@ -51,33 +51,46 @@ export default function AddBlogPostForm() {
           author: form.author.trim() || undefined,
           published: form.published,
         }),
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (!res.ok) {
-        setApiError(data?.error || t('article_error'))
-        return
+        setApiError(data?.error || t('article_error'));
+        return;
       }
-      toast.success(t('article_created'))
-      router.push('/admin/blog')
-      router.refresh()
+      toast.success(t('article_created'));
+      router.push('/admin/blog');
+      router.refresh();
     } catch (e) {
-      setApiError(e instanceof Error ? e.message : t('article_creation_error'))
+      setApiError(e instanceof Error ? e.message : t('article_creation_error'));
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const inputErrorClass = 'border-red-500 dark:border-red-400 focus-visible:ring-red-500'
+  const inputErrorClass = 'border-red-500 dark:border-red-400 focus-visible:ring-red-500';
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-xl" noValidate aria-labelledby="add-blog-heading">
-      <h2 id="add-blog-heading" className="sr-only">Nouvel article</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 max-w-xl"
+      noValidate
+      aria-labelledby="add-blog-heading"
+    >
+      <h2 id="add-blog-heading" className="sr-only">
+        Nouvel article
+      </h2>
       {apiError && (
-        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-200">
+        <div
+          role="alert"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-200"
+        >
           {apiError}
         </div>
       )}
       <div>
-        <label htmlFor="blog-title" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">
+        <label
+          htmlFor="blog-title"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
           Titre *
         </label>
         <input
@@ -93,11 +106,20 @@ export default function AddBlogPostForm() {
           aria-describedby={fieldErrors.title ? 'blog-title-error' : undefined}
         />
         {fieldErrors.title && (
-          <p id="blog-title-error" role="alert" className="mt-1 text-sm text-red-600 dark:text-red-400">{fieldErrors.title}</p>
+          <p
+            id="blog-title-error"
+            role="alert"
+            className="mt-1 text-sm text-red-600 dark:text-red-400"
+          >
+            {fieldErrors.title}
+          </p>
         )}
       </div>
       <div>
-        <label htmlFor="blog-slug" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">
+        <label
+          htmlFor="blog-slug"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
           Slug (optionnel, généré depuis le titre si vide)
         </label>
         <input
@@ -111,7 +133,10 @@ export default function AddBlogPostForm() {
         />
       </div>
       <div>
-        <label htmlFor="blog-description" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">
+        <label
+          htmlFor="blog-description"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
           Description / extrait
         </label>
         <textarea
@@ -125,7 +150,10 @@ export default function AddBlogPostForm() {
         />
       </div>
       <div>
-        <label htmlFor="blog-image" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">
+        <label
+          htmlFor="blog-image"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
           URL image
         </label>
         <input
@@ -139,7 +167,10 @@ export default function AddBlogPostForm() {
         />
       </div>
       <div>
-        <label htmlFor="blog-author" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">
+        <label
+          htmlFor="blog-author"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
           Auteur
         </label>
         <input
@@ -183,5 +214,5 @@ export default function AddBlogPostForm() {
         </button>
       </div>
     </form>
-  )
+  );
 }

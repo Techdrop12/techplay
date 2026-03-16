@@ -1,71 +1,71 @@
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
-import { toast } from 'react-hot-toast'
+import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
-import ErrorWithRetry from '@/components/ui/ErrorWithRetry'
-import Link from '@/components/LocalizedLink'
-import { useCart } from '@/hooks/useCart'
-import { createCheckoutSession } from '@/lib/checkout'
-import { detectCurrency } from '@/lib/currency'
-import { getErrorMessageWithFallback } from '@/lib/errors'
-import { event as gaEvent, pushDataLayer, trackAddShippingInfo } from '@/lib/ga'
-import { error as logError } from '@/lib/logger'
-import { pixelInitiateCheckout } from '@/lib/meta-pixel'
-import { cn, formatPrice } from '@/lib/utils'
+import ErrorWithRetry from '@/components/ui/ErrorWithRetry';
+import Link from '@/components/LocalizedLink';
+import { useCart } from '@/hooks/useCart';
+import { createCheckoutSession } from '@/lib/checkout';
+import { detectCurrency } from '@/lib/currency';
+import { getErrorMessageWithFallback } from '@/lib/errors';
+import { event as gaEvent, pushDataLayer, trackAddShippingInfo } from '@/lib/ga';
+import { error as logError } from '@/lib/logger';
+import { pixelInitiateCheckout } from '@/lib/meta-pixel';
+import { cn, formatPrice } from '@/lib/utils';
 
 type FormErrors = {
-  email?: string
-  address?: string
-}
+  email?: string;
+  address?: string;
+};
 
 type CartItemLike = {
-  _id?: string
-  slug?: string
-  sku?: string
-  title?: string
-  name?: string
-  brand?: string
-  category?: string
-  variant?: string
-  price?: number
-  quantity?: number
-}
+  _id?: string;
+  slug?: string;
+  sku?: string;
+  title?: string;
+  name?: string;
+  brand?: string;
+  category?: string;
+  variant?: string;
+  price?: number;
+  quantity?: number;
+};
 
 type CheckoutSessionResult = {
-  url?: string
-}
+  url?: string;
+};
 
-const LS_EMAIL_KEY = 'checkout_email'
-const LS_ADDRESS_KEY = 'checkout_address'
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i
+const LS_EMAIL_KEY = 'checkout_email';
+const LS_ADDRESS_KEY = 'checkout_address';
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
 
-const isEmail = (value: string) => EMAIL_RE.test(String(value || '').trim())
-const isAddress = (value: string) => String(value || '').trim().length >= 6
+const isEmail = (value: string) => EMAIL_RE.test(String(value || '').trim());
+const isAddress = (value: string) => String(value || '').trim().length >= 6;
 
 function joinIds(...ids: Array<string | undefined>) {
-  return ids.filter(Boolean).join(' ')
+  return ids.filter(Boolean).join(' ');
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
+  return typeof value === 'object' && value !== null;
 }
 
 function toNumber(value: unknown, fallback = 0) {
-  const parsed = Number(value)
-  return Number.isFinite(parsed) ? parsed : fallback
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 function toStringSafe(value: unknown, fallback = '') {
-  return typeof value === 'string' && value.trim() ? value : fallback
+  return typeof value === 'string' && value.trim() ? value : fallback;
 }
 
 function getCartItems(input: unknown): CartItemLike[] {
-  if (!Array.isArray(input)) return []
+  if (!Array.isArray(input)) return [];
 
   return input.map((item) => {
-    if (!isRecord(item)) return {}
+    if (!isRecord(item)) return {};
 
     return {
       _id: toStringSafe(item._id),
@@ -78,8 +78,8 @@ function getCartItems(input: unknown): CartItemLike[] {
       variant: toStringSafe(item.variant),
       price: toNumber(item.price, 0),
       quantity: Math.max(1, Math.trunc(toNumber(item.quantity, 1))),
-    }
-  })
+    };
+  });
 }
 
 function IconCard({ size = 18, className = '' }: { size?: number; className?: string }) {
@@ -90,51 +90,60 @@ function IconCard({ size = 18, className = '' }: { size?: number; className?: st
         fill="currentColor"
         opacity="0.12"
       />
-      <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none" />
+      <rect
+        x="3"
+        y="5"
+        width="18"
+        height="14"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        fill="none"
+      />
       <rect x="5" y="9" width="14" height="2.25" rx="1" fill="currentColor" />
       <rect x="5" y="14" width="5.5" height="1.75" rx="0.9" fill="currentColor" opacity="0.7" />
     </svg>
-  )
+  );
 }
 
 export default function CheckoutForm() {
-  const t = useTranslations('checkout')
-  const { cart } = useCart()
+  const t = useTranslations('checkout');
+  const { cart } = useCart();
 
-  const [email, setEmail] = useState('')
-  const [address, setAddress] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [errors, setErrors] = useState<FormErrors>({})
-  const [status, setStatus] = useState('')
-  const [honeypot, setHoneypot] = useState('')
-  const [currency, setCurrency] = useState<'EUR' | 'GBP' | 'USD'>(() => detectCurrency())
-  const [lastError, setLastError] = useState<string | null>(null)
+  const [email, setEmail] = useState('');
+  const [address, setAddress] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [status, setStatus] = useState('');
+  const [honeypot, setHoneypot] = useState('');
+  const [currency, setCurrency] = useState<'EUR' | 'GBP' | 'USD'>(() => detectCurrency());
+  const [lastError, setLastError] = useState<string | null>(null);
 
-  const formRef = useRef<HTMLFormElement | null>(null)
-  const emailRef = useRef<HTMLInputElement | null>(null)
-  const addressRef = useRef<HTMLTextAreaElement | null>(null)
-  const statusRef = useRef<HTMLParagraphElement | null>(null)
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const emailRef = useRef<HTMLInputElement | null>(null);
+  const addressRef = useRef<HTMLTextAreaElement | null>(null);
+  const statusRef = useRef<HTMLParagraphElement | null>(null);
 
-  const emailHintId = useId()
-  const addressHintId = useId()
-  const statusId = useId()
+  const emailHintId = useId();
+  const addressHintId = useId();
+  const statusId = useId();
 
   const { subtotal, itemsCount, gaItems, pixelContents } = useMemo(() => {
-    const items = getCartItems(cart)
+    const items = getCartItems(cart);
 
     const subtotal = items.reduce(
       (sum, item) => sum + toNumber(item.price, 0) * Math.max(1, toNumber(item.quantity, 1)),
       0
-    )
+    );
 
     const itemsCount = items.reduce(
       (sum, item) => sum + Math.max(1, toNumber(item.quantity, 1)),
       0
-    )
+    );
 
     const gaItems = items.map((item) => {
-      const quantity = Math.max(1, toNumber(item.quantity, 1))
-      const price = toNumber(item.price, 0)
+      const quantity = Math.max(1, toNumber(item.quantity, 1));
+      const price = toNumber(item.price, 0);
 
       return {
         item_id: item._id || item.slug || item.sku || 'unknown-item',
@@ -144,91 +153,91 @@ export default function CheckoutForm() {
         item_brand: item.brand || undefined,
         item_category: item.category || undefined,
         item_variant: item.variant || undefined,
-      }
-    })
+      };
+    });
 
     const pixelContents = items.map((item) => ({
       id: item._id || item.slug || item.sku || 'unknown-item',
       quantity: Math.max(1, toNumber(item.quantity, 1)),
       item_price: toNumber(item.price, 0),
-    }))
+    }));
 
-    return { subtotal, itemsCount, gaItems, pixelContents }
-  }, [cart])
+    return { subtotal, itemsCount, gaItems, pixelContents };
+  }, [cart]);
 
   useEffect(() => {
     try {
       const searchParams =
-        typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+        typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
 
-      const queryEmail = searchParams?.get('email')
+      const queryEmail = searchParams?.get('email');
       if (queryEmail && isEmail(queryEmail)) {
-        setEmail(queryEmail)
-        return
+        setEmail(queryEmail);
+        return;
       }
 
-      const storedEmail = localStorage.getItem(LS_EMAIL_KEY)
+      const storedEmail = localStorage.getItem(LS_EMAIL_KEY);
       if (storedEmail && isEmail(storedEmail)) {
-        setEmail(storedEmail)
+        setEmail(storedEmail);
       }
 
-      const storedAddress = localStorage.getItem(LS_ADDRESS_KEY)
+      const storedAddress = localStorage.getItem(LS_ADDRESS_KEY);
       if (storedAddress && isAddress(storedAddress)) {
-        setAddress(storedAddress)
+        setAddress(storedAddress);
       }
     } catch {
       // no-op
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    setCurrency(detectCurrency())
-  }, [])
+    setCurrency(detectCurrency());
+  }, []);
 
   const announce = useCallback((message: string) => {
-    setStatus(message)
+    setStatus(message);
     if (statusRef.current) {
-      statusRef.current.textContent = message
+      statusRef.current.textContent = message;
     }
-  }, [])
+  }, []);
 
   const validate = useCallback(() => {
-    const nextErrors: FormErrors = {}
+    const nextErrors: FormErrors = {};
 
-    if (!isEmail(email)) nextErrors.email = t('validation_email')
-    if (!isAddress(address)) nextErrors.address = t('validation_address')
+    if (!isEmail(email)) nextErrors.email = t('validation_email');
+    if (!isAddress(address)) nextErrors.address = t('validation_address');
 
-    setErrors(nextErrors)
+    setErrors(nextErrors);
 
     if (nextErrors.email) {
-      emailRef.current?.focus()
-      return false
+      emailRef.current?.focus();
+      return false;
     }
 
     if (nextErrors.address) {
-      addressRef.current?.focus()
-      return false
+      addressRef.current?.focus();
+      return false;
     }
 
-    return true
-  }, [address, email, t])
+    return true;
+  }, [address, email, t]);
 
   const handleSubmit = useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
-      event.preventDefault()
+      event.preventDefault();
 
-      if (loading) return
-      if (honeypot) return
-      setLastError(null)
+      if (loading) return;
+      if (honeypot) return;
+      setLastError(null);
       if (!gaItems.length) {
-        toast.error(t('cart_empty_toast'))
-        return
+        toast.error(t('cart_empty_toast'));
+        return;
       }
-      if (!validate()) return
+      if (!validate()) return;
 
-      setLoading(true)
-      setStatus('')
-      formRef.current?.setAttribute('aria-busy', 'true')
+      setLoading(true);
+      setStatus('');
+      formRef.current?.setAttribute('aria-busy', 'true');
 
       try {
         try {
@@ -237,7 +246,7 @@ export default function CheckoutForm() {
             value: subtotal,
             items: gaItems,
             shipping_tier: 'standard',
-          })
+          });
         } catch {
           // no-op
         }
@@ -253,7 +262,7 @@ export default function CheckoutForm() {
               items: gaItems,
               shipping_tier: 'standard',
             },
-          })
+          });
         } catch {
           // no-op
         }
@@ -264,14 +273,14 @@ export default function CheckoutForm() {
             value: subtotal || undefined,
             num_items: itemsCount || undefined,
             contents: pixelContents,
-          })
+          });
         } catch {
           // no-op
         }
 
         try {
-          localStorage.setItem(LS_EMAIL_KEY, email.trim())
-          localStorage.setItem(LS_ADDRESS_KEY, address.trim())
+          localStorage.setItem(LS_EMAIL_KEY, email.trim());
+          localStorage.setItem(LS_ADDRESS_KEY, address.trim());
         } catch {
           // no-op
         }
@@ -282,12 +291,12 @@ export default function CheckoutForm() {
             category: 'checkout',
             label: 'begin_checkout',
             value: subtotal,
-          })
+          });
         } catch {
           // no-op
         }
 
-        announce(t('creating_session_announce'))
+        announce(t('creating_session_announce'));
 
         const session = (await createCheckoutSession({
           email: email.trim(),
@@ -297,49 +306,49 @@ export default function CheckoutForm() {
             typeof document !== 'undefined'
               ? (document.documentElement.lang || 'fr').slice(0, 2)
               : 'fr',
-        })) as CheckoutSessionResult | null | undefined
+        })) as CheckoutSessionResult | null | undefined;
 
         if (session?.url) {
           toast(t('redirect_toast'), {
             icon: <IconCard className="text-[hsl(var(--accent))]" />,
-          })
+          });
 
-          announce(t('redirect_announce'))
+          announce(t('redirect_announce'));
 
           try {
             pushDataLayer({
               event: 'checkout_redirect',
               provider: 'stripe_checkout',
               currency,
-            })
+            });
           } catch {
             // no-op
           }
 
-          window.location.href = session.url
-          return
+          window.location.href = session.url;
+          return;
         }
 
-        throw new Error('Session de paiement invalide')
+        throw new Error('Session de paiement invalide');
       } catch (error: unknown) {
-        const message = getErrorMessageWithFallback(error, 'Une erreur est survenue. Réessayez.')
+        const message = getErrorMessageWithFallback(error, 'Une erreur est survenue. Réessayez.');
 
-        logError('[Checkout] error:', error)
-        setLastError(message)
-        announce(message)
-        toast.error(message)
+        logError('[Checkout] error:', error);
+        setLastError(message);
+        announce(message);
+        toast.error(message);
 
         try {
           pushDataLayer({
             event: 'checkout_error',
             message,
-          })
+          });
         } catch {
           // no-op
         }
       } finally {
-        setLoading(false)
-        formRef.current?.setAttribute('aria-busy', 'false')
+        setLoading(false);
+        formRef.current?.setAttribute('aria-busy', 'false');
       }
     },
     [
@@ -356,19 +365,19 @@ export default function CheckoutForm() {
       t,
       validate,
     ]
-  )
+  );
 
   const handleEmailBlur = useCallback(() => {
-    if (!isEmail(email)) return
+    if (!isEmail(email)) return;
     try {
-      localStorage.setItem(LS_EMAIL_KEY, email.trim())
+      localStorage.setItem(LS_EMAIL_KEY, email.trim());
     } catch {
       // no-op
     }
-  }, [email])
+  }, [email]);
 
-  const emailDescribedBy = joinIds(errors.email ? 'email-error' : undefined, emailHintId)
-  const addressDescribedBy = joinIds(errors.address ? 'address-error' : undefined, addressHintId)
+  const emailDescribedBy = joinIds(errors.email ? 'email-error' : undefined, emailHintId);
+  const addressDescribedBy = joinIds(errors.address ? 'address-error' : undefined, addressHintId);
 
   return (
     <form
@@ -392,12 +401,13 @@ export default function CheckoutForm() {
 
       {/* En-tête tunnel : étape + réassurance */}
       <div className="rounded-xl bg-[hsl(var(--surface-2))]/60 px-4 py-3">
-        <h2 id="checkout-form-title" className="text-lg font-bold tracking-tight text-[hsl(var(--text))]">
+        <h2
+          id="checkout-form-title"
+          className="text-lg font-bold tracking-tight text-[hsl(var(--text))]"
+        >
           {t('coords_heading')}
         </h2>
-        <p className="mt-1 text-[13px] text-token-text/70">
-          {t('coords_intro')}
-        </p>
+        <p className="mt-1 text-[13px] text-token-text/70">{t('coords_intro')}</p>
         <p className="mt-2 text-[12px] text-token-text/60" aria-hidden="true">
           {t('secure_note')}
         </p>
@@ -405,7 +415,10 @@ export default function CheckoutForm() {
 
       <fieldset disabled={loading} className="space-y-6">
         <div>
-          <label htmlFor="checkout-email" className="mb-1 block text-[13px] font-medium text-[hsl(var(--text))]">
+          <label
+            htmlFor="checkout-email"
+            className="mb-1 block text-[13px] font-medium text-[hsl(var(--text))]"
+          >
             Email
           </label>
           <input
@@ -417,9 +430,9 @@ export default function CheckoutForm() {
             enterKeyHint="next"
             value={email}
             onChange={(event) => {
-              setEmail(event.target.value)
+              setEmail(event.target.value);
               if (errors.email) {
-                setErrors((prev) => ({ ...prev, email: undefined }))
+                setErrors((prev) => ({ ...prev, email: undefined }));
               }
             }}
             onBlur={handleEmailBlur}
@@ -454,7 +467,10 @@ export default function CheckoutForm() {
         </div>
 
         <div>
-          <label htmlFor="checkout-address" className="mb-1 block text-[13px] font-medium text-[hsl(var(--text))]">
+          <label
+            htmlFor="checkout-address"
+            className="mb-1 block text-[13px] font-medium text-[hsl(var(--text))]"
+          >
             {t('shipping_label')}
           </label>
           <textarea
@@ -464,9 +480,9 @@ export default function CheckoutForm() {
             rows={3}
             value={address}
             onChange={(event) => {
-              setAddress(event.target.value)
+              setAddress(event.target.value);
               if (errors.address) {
-                setErrors((prev) => ({ ...prev, address: undefined }))
+                setErrors((prev) => ({ ...prev, address: undefined }));
               }
             }}
             required
@@ -516,19 +532,26 @@ export default function CheckoutForm() {
           className="touch-target inline-flex min-h-[3.25rem] w-full items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-4 py-3.5 text-[15px] font-bold text-[hsl(var(--accent-fg))] shadow-lg transition-all duration-200 hover:shadow-xl active:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? (
-            <span className="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden />
+            <span
+              className="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent"
+              aria-hidden
+            />
           ) : (
             <IconCard />
           )}
-          <span>{loading ? t('redirecting_btn') : t('pay_btn') + ' ' + formatPrice(subtotal, { currency })}</span>
+          <span>
+            {loading
+              ? t('redirecting_btn')
+              : t('pay_btn') + ' ' + formatPrice(subtotal, { currency })}
+          </span>
         </button>
 
         {lastError && (
           <ErrorWithRetry
             message={lastError}
             onRetry={() => {
-              setLastError(null)
-              emailRef.current?.focus()
+              setLastError(null);
+              emailRef.current?.focus();
             }}
             retryLabel={t('retry_btn')}
           />
@@ -536,12 +559,16 @@ export default function CheckoutForm() {
 
         <p className="text-center text-[11px] text-token-text/60" role="status">
           {t('secure_footer_prefix')}
-          <Link className="underline underline-offset-1" href="/cgv">{t('link_cgv')}</Link>
+          <Link className="underline underline-offset-1" href="/cgv">
+            {t('link_cgv')}
+          </Link>
           {t('secure_footer_mid')}
-          <Link className="underline underline-offset-1" href="/confidentialite">{t('privacy_link')}</Link>
+          <Link className="underline underline-offset-1" href="/confidentialite">
+            {t('privacy_link')}
+          </Link>
           {t('secure_footer_suffix')}
         </p>
       </fieldset>
     </form>
-  )
+  );
 }

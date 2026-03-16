@@ -483,7 +483,14 @@
     "redirecting": "Redirecting…",
     "payment_error": "Payment error",
     "error_loading_products": "Error loading products.",
-    "no_products_available": "No products available."
+    "no_products_available": "No products available.",
+    "hero_tagline_title": "TechPlay – curated accessories and bundles for performance, style and reliability.",
+    "hero_tagline_subtitle": "Shop in a few clicks with fast delivery and support based in France.",
+    "products_section_title": "Our picks for you",
+    "products_section_subtitle": "Browse TechPlay’s most popular products right now.",
+    "reassurance_payment": "Secure payment (Stripe, Visa, Mastercard, PayPal)",
+    "reassurance_delivery": "48–72 h delivery from France",
+    "reassurance_support": "Responsive support, replies within 24–48 h"
   },
   "search": {
     "title": "Search",

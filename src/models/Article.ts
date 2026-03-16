@@ -1,10 +1,10 @@
-import mongoose, { Schema, Types, type InferSchemaType } from 'mongoose'
+import mongoose, { Schema, Types, type InferSchemaType } from 'mongoose';
 
 type JsonRecord = Record<string, unknown> & {
-  _id?: Types.ObjectId | { toString(): string }
-  __v?: number
-  id?: string
-}
+  _id?: Types.ObjectId | { toString(): string };
+  __v?: number;
+  id?: string;
+};
 
 const ArticleSchema = new Schema(
   {
@@ -24,24 +24,24 @@ const ArticleSchema = new Schema(
       virtuals: true,
       versionKey: false,
       transform: (_doc, ret: JsonRecord) => {
-        ret.id = ret._id?.toString?.() ?? String(ret._id ?? '')
-        const { _id, __v, ...rest } = ret
-        return rest
+        ret.id = ret._id?.toString?.() ?? String(ret._id ?? '');
+        const { _id, __v, ...rest } = ret;
+        return rest;
       },
     },
   }
-)
+);
 
 ArticleSchema.virtual('id').get(function (this: { _id: Types.ObjectId }) {
-  return this._id.toString()
-})
+  return this._id.toString();
+});
 
-ArticleSchema.index({ title: 'text', content: 'text', summary: 'text', tags: 'text' })
+ArticleSchema.index({ title: 'text', content: 'text', summary: 'text', tags: 'text' });
 
-export type Article = InferSchemaType<typeof ArticleSchema>
+export type Article = InferSchemaType<typeof ArticleSchema>;
 
 const ArticleModel =
   (mongoose.models.Article as mongoose.Model<Article>) ||
-  mongoose.model<Article>('Article', ArticleSchema)
+  mongoose.model<Article>('Article', ArticleSchema);
 
-export default ArticleModel
+export default ArticleModel;

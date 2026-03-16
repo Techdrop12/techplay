@@ -1,10 +1,10 @@
-import mongoose, { Schema, InferSchemaType, Types } from 'mongoose'
+import mongoose, { Schema, InferSchemaType, Types } from 'mongoose';
 
 type JsonTransformRet = Record<string, unknown> & {
-  _id?: unknown
-  __v?: unknown
-  id?: string
-}
+  _id?: unknown;
+  __v?: unknown;
+  id?: string;
+};
 
 const ContactSubmissionSchema = new Schema(
   {
@@ -19,20 +19,20 @@ const ContactSubmissionSchema = new Schema(
       virtuals: true,
       versionKey: false,
       transform: (_doc: unknown, ret: JsonTransformRet) => {
-        if (ret._id != null) ret.id = String(ret._id)
-        delete ret._id
-        delete ret.__v
-        return ret
+        if (ret._id != null) ret.id = String(ret._id);
+        delete ret._id;
+        delete ret.__v;
+        return ret;
       },
     },
   }
-)
+);
 
 ContactSubmissionSchema.virtual('id').get(function (this: { _id: Types.ObjectId }) {
-  return this._id.toString()
-})
+  return this._id.toString();
+});
 
-export type ContactSubmission = InferSchemaType<typeof ContactSubmissionSchema>
+export type ContactSubmission = InferSchemaType<typeof ContactSubmissionSchema>;
 
 export default (mongoose.models.ContactSubmission as mongoose.Model<ContactSubmission>) ||
-  mongoose.model<ContactSubmission>('ContactSubmission', ContactSubmissionSchema)
+  mongoose.model<ContactSubmission>('ContactSubmission', ContactSubmissionSchema);

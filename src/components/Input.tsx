@@ -1,28 +1,27 @@
 // src/components/Input.tsx
-'use client'
+'use client';
 
-import * as React from 'react'
-import { useTranslations } from 'next-intl'
+import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
 
-type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
-type Variant = 'solid' | 'outline' | 'ghost'
+type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+type Variant = 'solid' | 'outline' | 'ghost';
 
-export interface InputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
-  label?: React.ReactNode
-  help?: React.ReactNode
-  error?: React.ReactNode
-  size?: Size
-  variant?: Variant
-  fullWidth?: boolean
-  leadingIcon?: React.ReactNode
-  trailingIcon?: React.ReactNode
-  inputClassName?: string
-  containerClassName?: string
-  showPasswordToggle?: boolean
-  clearable?: boolean
+export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
+  label?: React.ReactNode;
+  help?: React.ReactNode;
+  error?: React.ReactNode;
+  size?: Size;
+  variant?: Variant;
+  fullWidth?: boolean;
+  leadingIcon?: React.ReactNode;
+  trailingIcon?: React.ReactNode;
+  inputClassName?: string;
+  containerClassName?: string;
+  showPasswordToggle?: boolean;
+  clearable?: boolean;
 }
 
 const sizeClasses: Record<Size, string> = {
@@ -31,16 +30,15 @@ const sizeClasses: Record<Size, string> = {
   md: 'h-10 px-3.5 text-base rounded-xl',
   lg: 'h-11 px-4 text-lg rounded-xl',
   xl: 'h-12 px-4 text-[1.05rem] rounded-2xl',
-}
+};
 
 const variantClasses: Record<Variant, string> = {
   solid:
     'bg-[hsl(var(--surface))] border border-[hsl(var(--border))] focus:bg-[hsl(var(--surface))] focus:border-[hsl(var(--accent))] focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2',
   outline:
     'bg-transparent border border-[hsl(var(--border))] focus:border-[hsl(var(--accent))] focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2',
-  ghost:
-    'bg-transparent border border-transparent',
-}
+  ghost: 'bg-transparent border border-transparent',
+};
 
 function EyeIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -50,7 +48,7 @@ function EyeIcon(props: React.SVGProps<SVGSVGElement>) {
         fill="currentColor"
       />
     </svg>
-  )
+  );
 }
 
 function EyeOffIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -61,189 +59,200 @@ function EyeOffIcon(props: React.SVGProps<SVGSVGElement>) {
         fill="currentColor"
       />
     </svg>
-  )
+  );
 }
 
-export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  function Input(
-    {
-      id,
-      label,
-      help,
-      error,
-      size = 'md',
-      variant = 'outline',
-      fullWidth = true,
-      className,
-      inputClassName,
-      containerClassName,
-      leadingIcon,
-      trailingIcon,
-      type = 'text',
-      showPasswordToggle = true,
-      clearable = false,
-      required,
-      autoComplete,
-      inputMode,
-      spellCheck,
-      ...props
-    },
-    ref
-  ) {
-    const autoId = React.useId()
-    const inputId = id ?? `inp-${autoId}`
-    const helpId = help ? `${inputId}-help` : undefined
-    const errorId = error ? `${inputId}-error` : undefined
-    const describedBy = [errorId, helpId].filter(Boolean).join(' ') || undefined
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(function Input(
+  {
+    id,
+    label,
+    help,
+    error,
+    size = 'md',
+    variant = 'outline',
+    fullWidth = true,
+    className,
+    inputClassName,
+    containerClassName,
+    leadingIcon,
+    trailingIcon,
+    type = 'text',
+    showPasswordToggle = true,
+    clearable = false,
+    required,
+    autoComplete,
+    inputMode,
+    spellCheck,
+    ...props
+  },
+  ref
+) {
+  const autoId = React.useId();
+  const inputId = id ?? `inp-${autoId}`;
+  const helpId = help ? `${inputId}-help` : undefined;
+  const errorId = error ? `${inputId}-error` : undefined;
+  const describedBy = [errorId, helpId].filter(Boolean).join(' ') || undefined;
 
-    const t = useTranslations('common')
-    const [reveal, setReveal] = React.useState(false)
-    const isPassword = type === 'password'
-    const effectiveType = isPassword && reveal ? 'text' : type
+  const t = useTranslations('common');
+  const [reveal, setReveal] = React.useState(false);
+  const isPassword = type === 'password';
+  const effectiveType = isPassword && reveal ? 'text' : type;
 
-    const effectiveAutoComplete =
-      autoComplete ??
-      (isPassword ? 'current-password' :
-       type === 'email' ? 'email' :
-       type === 'tel' ? 'tel' :
-       type === 'search' ? 'search' : undefined)
+  const effectiveAutoComplete =
+    autoComplete ??
+    (isPassword
+      ? 'current-password'
+      : type === 'email'
+        ? 'email'
+        : type === 'tel'
+          ? 'tel'
+          : type === 'search'
+            ? 'search'
+            : undefined);
 
-    const effectiveInputMode =
-      inputMode ??
-      (type === 'email' ? 'email' :
-       type === 'tel' ? 'tel' :
-       type === 'url' ? 'url' :
-       type === 'search' ? 'search' :
-       type === 'number' ? 'decimal' : undefined)
+  const effectiveInputMode =
+    inputMode ??
+    (type === 'email'
+      ? 'email'
+      : type === 'tel'
+        ? 'tel'
+        : type === 'url'
+          ? 'url'
+          : type === 'search'
+            ? 'search'
+            : type === 'number'
+              ? 'decimal'
+              : undefined);
 
-    const effectiveSpellCheck =
-      spellCheck ?? (type === 'email' || isPassword ? false : undefined)
+  const effectiveSpellCheck = spellCheck ?? (type === 'email' || isPassword ? false : undefined);
 
-    const hasError = Boolean(error)
+  const hasError = Boolean(error);
 
-    const controlledValue = props.value
-    const showClear =
-      clearable && !isPassword && controlledValue != null && String(controlledValue).length > 0
+  const controlledValue = props.value;
+  const showClear =
+    clearable && !isPassword && controlledValue != null && String(controlledValue).length > 0;
 
-    const innerRef = React.useRef<HTMLInputElement>(null)
-    React.useImperativeHandle(ref, () => innerRef.current as HTMLInputElement)
+  const innerRef = React.useRef<HTMLInputElement>(null);
+  React.useImperativeHandle(ref, () => innerRef.current as HTMLInputElement);
 
-    const clearValue = () => {
-      const el = innerRef.current
-      if (!el) return
+  const clearValue = () => {
+    const el = innerRef.current;
+    if (!el) return;
 
-      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-        window.HTMLInputElement.prototype,
-        'value'
-      )?.set
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype,
+      'value'
+    )?.set;
 
-      nativeInputValueSetter?.call(el, '')
-      el.dispatchEvent(new Event('input', { bubbles: true }))
-      el.focus()
-    }
+    nativeInputValueSetter?.call(el, '');
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.focus();
+  };
 
-    return (
-      <div className={cn('w-full', fullWidth && 'block', containerClassName)}>
-        {label && (
-          <label
-            htmlFor={inputId}
-            className="mb-1.5 block text-sm font-medium text-[hsl(var(--text))]"
-          >
-            {label}
-            {required ? (
-              <>
-                <span aria-hidden="true" className="text-red-600"> *</span>
-                <span className="sr-only"> (obligatoire)</span>
-              </>
-            ) : null}
-          </label>
-        )}
-
-        <div className="relative">
-          {leadingIcon ? (
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-y-0 left-0 grid w-10 place-items-center text-token-text/60"
-            >
-              {leadingIcon}
-            </span>
+  return (
+    <div className={cn('w-full', fullWidth && 'block', containerClassName)}>
+      {label && (
+        <label
+          htmlFor={inputId}
+          className="mb-1.5 block text-sm font-medium text-[hsl(var(--text))]"
+        >
+          {label}
+          {required ? (
+            <>
+              <span aria-hidden="true" className="text-red-600">
+                {' '}
+                *
+              </span>
+              <span className="sr-only"> (obligatoire)</span>
+            </>
           ) : null}
+        </label>
+      )}
 
-          <input
-            id={inputId}
-            ref={innerRef}
-            type={effectiveType}
-            aria-invalid={hasError || undefined}
-            aria-describedby={describedBy}
-            aria-errormessage={hasError ? errorId : undefined}
-            required={required}
-            autoComplete={effectiveAutoComplete}
-            inputMode={effectiveInputMode}
-            spellCheck={effectiveSpellCheck}
-            className={cn(
-              'w-full text-[hsl(var(--text))] placeholder:text-token-text/50',
-              'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent',
-              'disabled:opacity-60 disabled:cursor-not-allowed',
-              sizeClasses[size],
-              variantClasses[variant],
-              leadingIcon ? 'pl-10' : undefined,
-              (trailingIcon || isPassword || showClear) ? 'pr-10' : undefined,
-              hasError ? 'border-red-500 focus-visible:ring-red-500' : undefined,
-              inputClassName,
-              className
-            )}
-            {...props}
-          />
-
-          {showClear ? (
-            <button
-              type="button"
-              tabIndex={-1}
-              aria-label={t('clear_content_aria')}
-              onClick={clearValue}
-              className="absolute inset-y-0 right-0 grid w-10 place-items-center text-token-text/60 hover:text-[hsl(var(--text))]"
-            >
-              <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
-                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </button>
-          ) : isPassword && showPasswordToggle ? (
-            <button
-              type="button"
-              tabIndex={-1}
-              aria-label={reveal ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
-              onClick={() => setReveal((v) => !v)}
-              className="absolute inset-y-0 right-0 grid w-10 place-items-center text-token-text/60"
-            >
-              {reveal ? <EyeOffIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
-            </button>
-          ) : trailingIcon ? (
-            <span
-              aria-hidden="true"
-              className="absolute inset-y-0 right-0 grid w-10 place-items-center text-token-text/60"
-            >
-              {trailingIcon}
-            </span>
-          ) : null}
-        </div>
-
-        {hasError ? (
-          <p
-            id={errorId}
-            role="alert"
-            aria-live="polite"
-            className="mt-1.5 text-sm text-red-600"
+      <div className="relative">
+        {leadingIcon ? (
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 left-0 grid w-10 place-items-center text-token-text/60"
           >
-            {error}
-          </p>
-        ) : help ? (
-          <p id={helpId} className="mt-1.5 text-sm text-token-text/60">
-            {help}
-          </p>
+            {leadingIcon}
+          </span>
+        ) : null}
+
+        <input
+          id={inputId}
+          ref={innerRef}
+          type={effectiveType}
+          aria-invalid={hasError || undefined}
+          aria-describedby={describedBy}
+          aria-errormessage={hasError ? errorId : undefined}
+          required={required}
+          autoComplete={effectiveAutoComplete}
+          inputMode={effectiveInputMode}
+          spellCheck={effectiveSpellCheck}
+          className={cn(
+            'w-full text-[hsl(var(--text))] placeholder:text-token-text/50',
+            'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+            'disabled:opacity-60 disabled:cursor-not-allowed',
+            sizeClasses[size],
+            variantClasses[variant],
+            leadingIcon ? 'pl-10' : undefined,
+            trailingIcon || isPassword || showClear ? 'pr-10' : undefined,
+            hasError ? 'border-red-500 focus-visible:ring-red-500' : undefined,
+            inputClassName,
+            className
+          )}
+          {...props}
+        />
+
+        {showClear ? (
+          <button
+            type="button"
+            tabIndex={-1}
+            aria-label={t('clear_content_aria')}
+            onClick={clearValue}
+            className="absolute inset-y-0 right-0 grid w-10 place-items-center text-token-text/60 hover:text-[hsl(var(--text))]"
+          >
+            <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+              <path
+                d="M18 6L6 18M6 6l12 12"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+        ) : isPassword && showPasswordToggle ? (
+          <button
+            type="button"
+            tabIndex={-1}
+            aria-label={reveal ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+            onClick={() => setReveal((v) => !v)}
+            className="absolute inset-y-0 right-0 grid w-10 place-items-center text-token-text/60"
+          >
+            {reveal ? <EyeOffIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+          </button>
+        ) : trailingIcon ? (
+          <span
+            aria-hidden="true"
+            className="absolute inset-y-0 right-0 grid w-10 place-items-center text-token-text/60"
+          >
+            {trailingIcon}
+          </span>
         ) : null}
       </div>
-    )
-  }
-)
 
-export default Input
+      {hasError ? (
+        <p id={errorId} role="alert" aria-live="polite" className="mt-1.5 text-sm text-red-600">
+          {error}
+        </p>
+      ) : help ? (
+        <p id={helpId} className="mt-1.5 text-sm text-token-text/60">
+          {help}
+        </p>
+      ) : null}
+    </div>
+  );
+});
+
+export default Input;

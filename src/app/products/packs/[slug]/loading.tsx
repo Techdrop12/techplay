@@ -11,5 +11,5 @@ export default function PackSlugLoading() {
         </div>
       </div>
     </div>
-  )
+  );
 }

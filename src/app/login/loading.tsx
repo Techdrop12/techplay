@@ -10,5 +10,5 @@ export default function LoginLoading() {
         </div>
       </div>
     </main>
-  )
+  );
 }

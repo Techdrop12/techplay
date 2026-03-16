@@ -1,30 +1,30 @@
-import type { Metadata } from 'next'
-import { getTranslations } from 'next-intl/server'
-import { redirect } from 'next/navigation'
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+import { redirect } from 'next/navigation';
 
-import AccountProfileForm from '@/components/account/AccountProfileForm'
-import Link from '@/components/LocalizedLink'
-import { getSession } from '@/lib/auth'
+import AccountProfileForm from '@/components/account/AccountProfileForm';
+import Link from '@/components/LocalizedLink';
+import { getSession } from '@/lib/auth';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('account')
+  const t = await getTranslations('account');
   return {
     title: `${t('profile_page_title')} – TechPlay`,
     description: t('profile_meta_description'),
     robots: { index: false, follow: false },
-  }
+  };
 }
 
 export default async function AccountProfilPage() {
-  const t = await getTranslations('account')
-  const session = await getSession()
-  const isLoggedIn = Boolean(session?.user?.email?.trim())
+  const t = await getTranslations('account');
+  const session = await getSession();
+  const isLoggedIn = Boolean(session?.user?.email?.trim());
   if (!isLoggedIn) {
-    redirect('/login')
+    redirect('/login');
   }
 
-  const name = session?.user?.name ?? ''
-  const email = session?.user?.email ?? ''
+  const name = session?.user?.name ?? '';
+  const email = session?.user?.email ?? '';
 
   return (
     <main
@@ -42,9 +42,7 @@ export default async function AccountProfilPage() {
         <h1 id="profil-title" className="heading-page mt-3">
           {t('profile_page_title')}
         </h1>
-        <p className="mt-1 text-[15px] text-token-text/70">
-          {t('profile_intro')}
-        </p>
+        <p className="mt-1 text-[15px] text-token-text/70">{t('profile_intro')}</p>
       </header>
 
       <section
@@ -57,5 +55,5 @@ export default async function AccountProfilPage() {
         <AccountProfileForm defaultName={name} defaultEmail={email} />
       </section>
     </main>
-  )
+  );
 }

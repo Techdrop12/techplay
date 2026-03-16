@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import dynamic from 'next/dynamic'
+import dynamic from 'next/dynamic';
 
 const WishlistClientPage = dynamic(() => import('./WishlistClient'), {
   ssr: false,
@@ -22,8 +22,8 @@ const WishlistClientPage = dynamic(() => import('./WishlistClient'), {
       </div>
     </main>
   ),
-})
+});
 
 export default function WishlistShell() {
-  return <WishlistClientPage />
+  return <WishlistClientPage />;
 }

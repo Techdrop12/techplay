@@ -21,7 +21,9 @@ export default function RecentlyViewed() {
         const items = parsed?.items ?? (Array.isArray(parsed) ? parsed : []);
         setProducts(
           Array.isArray(items)
-            ? items.map((x: { data?: ViewedProduct }) => x.data ?? x).filter(Boolean) as ViewedProduct[]
+            ? (items
+                .map((x: { data?: ViewedProduct }) => x.data ?? x)
+                .filter(Boolean) as ViewedProduct[])
             : []
         );
       } catch {}

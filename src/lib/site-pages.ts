@@ -1,21 +1,23 @@
-import 'server-only'
+import 'server-only';
 
-import { connectToDatabase } from '@/lib/db'
-import SitePage from '@/models/SitePage'
+import { connectToDatabase } from '@/lib/db';
+import SitePage from '@/models/SitePage';
 
-export async function getSitePage(slug: string): Promise<{ title: string; content: string } | null> {
+export async function getSitePage(
+  slug: string
+): Promise<{ title: string; content: string } | null> {
   try {
-    await connectToDatabase()
+    await connectToDatabase();
     const doc = await SitePage.findOne({ slug: slug.trim().toLowerCase() })
       .select('title content')
       .lean()
-      .exec()
-    if (!doc) return null
+      .exec();
+    if (!doc) return null;
     return {
       title: doc.title ?? '',
       content: doc.content ?? '',
-    }
+    };
   } catch {
-    return null
+    return null;
   }
 }

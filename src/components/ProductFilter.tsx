@@ -1,9 +1,9 @@
-'use client'
+'use client';
 
-import { useEffect, useMemo, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useEffect, useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
-import type { Product } from '@/types/product'
+import type { Product } from '@/types/product';
 
 export type ProductFilterSort = 'new' | 'price_asc' | 'price_desc' | 'rating' | 'promo';
 
@@ -29,9 +29,9 @@ export default function ProductFilter({
   onFilter,
   initial = {},
 }: ProductFilterProps) {
-  const t = useTranslations('common')
-  const tFilters = useTranslations('filters')
-  const tSort = useTranslations('sort')
+  const t = useTranslations('common');
+  const tFilters = useTranslations('filters');
+  const tSort = useTranslations('sort');
   const [q, setQ] = useState(initial.q ?? '');
   const [selectedCategory, setSelectedCategory] = useState(initial.category ?? '');
   const [minPrice, setMinPrice] = useState(
@@ -47,11 +47,7 @@ export default function ProductFilter({
 
   // --------- catégories uniques triées (stable)
   const categories = useMemo(() => {
-    const set = new Set(
-      (products || [])
-        .map((p) => (p?.category ?? '').trim())
-        .filter(Boolean)
-    );
+    const set = new Set((products || []).map((p) => (p?.category ?? '').trim()).filter(Boolean));
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [products]);
 
@@ -63,10 +59,9 @@ export default function ProductFilter({
     const needle = q.trim().toLowerCase();
     if (needle) {
       res = res.filter((p) => {
-        const hay =
-          `${p?.title ?? ''} ${p?.description ?? ''} ${
-            Array.isArray(p?.tags) ? p.tags.join(' ') : ''
-          }`.toLowerCase();
+        const hay = `${p?.title ?? ''} ${p?.description ?? ''} ${
+          Array.isArray(p?.tags) ? p.tags.join(' ') : ''
+        }`.toLowerCase();
         return hay.includes(needle);
       });
     }

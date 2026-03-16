@@ -1,81 +1,81 @@
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
-import { useState } from 'react'
-import { toast } from 'react-hot-toast'
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import { toast } from 'react-hot-toast';
 
-import { contactSchema } from '@/lib/zodSchemas'
+import { contactSchema } from '@/lib/zodSchemas';
 
-type FieldErrors = Partial<Record<string, string>>
+type FieldErrors = Partial<Record<string, string>>;
 
 export default function ContactForm() {
-  const t = useTranslations('contact')
-  const [loading, setLoading] = useState(false)
-  const [sent, setSent] = useState(false)
-  const [apiError, setApiError] = useState<string | null>(null)
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
+  const t = useTranslations('contact');
+  const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [form, setForm] = useState({
     name: '',
     email: '',
     message: '',
     consent: false,
-  })
+  });
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    const { name, value, type } = e.target
+    const { name, value, type } = e.target;
     setForm((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
-    }))
-  }
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setApiError(null)
-    setFieldErrors({})
+    e.preventDefault();
+    setApiError(null);
+    setFieldErrors({});
     const payload = {
       name: form.name.trim() || undefined,
       email: form.email.trim(),
       message: form.message.trim(),
       consent: form.consent,
-    }
-    const parsed = contactSchema.safeParse(payload)
+    };
+    const parsed = contactSchema.safeParse(payload);
     if (!parsed.success) {
-      const errors: FieldErrors = {}
+      const errors: FieldErrors = {};
       for (const issue of parsed.error.issues) {
-        const path = issue.path[0] as string
-        if (path && !errors[path]) errors[path] = issue.message
+        const path = issue.path[0] as string;
+        if (path && !errors[path]) errors[path] = issue.message;
       }
-      setFieldErrors(errors)
-      return
+      setFieldErrors(errors);
+      return;
     }
-    setLoading(true)
+    setLoading(true);
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(parsed.data),
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (!res.ok) {
-        const msg = data?.error || t('toast_error')
-        setApiError(msg)
-        toast.error(msg)
-        return
+        const msg = data?.error || t('toast_error');
+        setApiError(msg);
+        toast.error(msg);
+        return;
       }
-      setSent(true)
-      setForm({ name: '', email: '', message: '', consent: false })
-      toast.success(t('toast_success'))
+      setSent(true);
+      setForm({ name: '', email: '', message: '', consent: false });
+      toast.success(t('toast_success'));
     } catch {
-      const msg = t('toast_error')
-      setApiError(msg)
-      toast.error(msg)
+      const msg = t('toast_error');
+      setApiError(msg);
+      toast.error(msg);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   if (sent) {
     return (
@@ -84,9 +84,7 @@ export default function ContactForm() {
         role="status"
         aria-live="polite"
       >
-        <p className="font-semibold text-green-800 dark:text-green-200">
-          {t('message_received')}
-        </p>
+        <p className="font-semibold text-green-800 dark:text-green-200">{t('message_received')}</p>
         <p className="mt-2 text-[14px] text-green-700 dark:text-green-300">
           {t('message_received_detail')}
         </p>
@@ -98,10 +96,10 @@ export default function ContactForm() {
           {t('send_another')}
         </button>
       </div>
-    )
+    );
   }
 
-  const inputErrorClass = 'border-red-500 dark:border-red-400 focus-visible:ring-red-500'
+  const inputErrorClass = 'border-red-500 dark:border-red-400 focus-visible:ring-red-500';
   return (
     <form
       onSubmit={handleSubmit}
@@ -112,9 +110,7 @@ export default function ContactForm() {
       <h2 id="contact-form-heading" className="heading-subsection">
         {t('form_heading')}
       </h2>
-      <p className="text-[14px] text-token-text/75">
-        {t('form_intro')}
-      </p>
+      <p className="text-[14px] text-token-text/75">{t('form_intro')}</p>
 
       {apiError && (
         <div
@@ -126,7 +122,10 @@ export default function ContactForm() {
       )}
 
       <div>
-        <label htmlFor="contact-name" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">
+        <label
+          htmlFor="contact-name"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
           {t('name_label')}
         </label>
         <input
@@ -141,14 +140,21 @@ export default function ContactForm() {
           aria-describedby={fieldErrors.name ? 'contact-name-error' : undefined}
         />
         {fieldErrors.name && (
-          <p id="contact-name-error" role="alert" className="mt-1 text-sm text-red-600 dark:text-red-400">
+          <p
+            id="contact-name-error"
+            role="alert"
+            className="mt-1 text-sm text-red-600 dark:text-red-400"
+          >
             {fieldErrors.name}
           </p>
         )}
       </div>
 
       <div>
-        <label htmlFor="contact-email" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">
+        <label
+          htmlFor="contact-email"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
           Email *
         </label>
         <input
@@ -164,14 +170,21 @@ export default function ContactForm() {
           aria-describedby={fieldErrors.email ? 'contact-email-error' : undefined}
         />
         {fieldErrors.email && (
-          <p id="contact-email-error" role="alert" className="mt-1 text-sm text-red-600 dark:text-red-400">
+          <p
+            id="contact-email-error"
+            role="alert"
+            className="mt-1 text-sm text-red-600 dark:text-red-400"
+          >
             {fieldErrors.email}
           </p>
         )}
       </div>
 
       <div>
-        <label htmlFor="contact-message" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">
+        <label
+          htmlFor="contact-message"
+          className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+        >
           Message *
         </label>
         <textarea
@@ -188,7 +201,11 @@ export default function ContactForm() {
           aria-describedby={fieldErrors.message ? 'contact-message-error' : undefined}
         />
         {fieldErrors.message ? (
-          <p id="contact-message-error" role="alert" className="mt-1 text-sm text-red-600 dark:text-red-400">
+          <p
+            id="contact-message-error"
+            role="alert"
+            className="mt-1 text-sm text-red-600 dark:text-red-400"
+          >
             {fieldErrors.message}
           </p>
         ) : (
@@ -219,5 +236,5 @@ export default function ContactForm() {
         {loading ? t('sending_btn') : t('submit_btn')}
       </button>
     </form>
-  )
+  );
 }

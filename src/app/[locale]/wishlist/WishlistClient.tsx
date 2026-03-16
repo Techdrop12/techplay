@@ -1,130 +1,126 @@
-'use client'
+'use client';
 
-import { useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { toast } from 'react-hot-toast'
+import { useSession } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
-import type { Product } from '@/types/product'
+import type { Product } from '@/types/product';
 
-import ProductCard from '@/components/ProductCard'
-import { useWishlist } from '@/hooks/useWishlist'
-import { sendEvent } from '@/lib/analytics'
-import Link from '@/components/LocalizedLink'
-import BackToHomeLink from '@/components/BackToHomeLink'
+import ProductCard from '@/components/ProductCard';
+import { useWishlist } from '@/hooks/useWishlist';
+import { sendEvent } from '@/lib/analytics';
+import Link from '@/components/LocalizedLink';
+import BackToHomeLink from '@/components/BackToHomeLink';
 
 type Keyable = {
-  _id?: string | number
-  slug?: string | number
-}
+  _id?: string | number;
+  slug?: string | number;
+};
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
+  return typeof value === 'object' && value !== null;
 }
 
 function getProductKey(p: Keyable, i: number): string | number {
-  return p._id ?? p.slug ?? i
+  return p._id ?? p.slug ?? i;
 }
 
 export default function WishlistClient() {
-  const t = useTranslations('wishlist')
-  const { data: session } = useSession()
-  const [syncing, setSyncing] = useState(false)
-  const isLoggedIn = Boolean(session?.user?.email)
+  const t = useTranslations('wishlist');
+  const { data: session } = useSession();
+  const [syncing, setSyncing] = useState(false);
+  const isLoggedIn = Boolean(session?.user?.email);
 
   const wishlistState = useWishlist() as {
-    items?: unknown[]
-    count?: number
-    add: (item: unknown) => void
-    remove: (id: string) => void
-    clear: () => void
-  }
+    items?: unknown[];
+    count?: number;
+    add: (item: unknown) => void;
+    remove: (id: string) => void;
+    clear: () => void;
+  };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps -- items from wishlistState, used in saveToServer/wishlist
-  const items = Array.isArray(wishlistState?.items) ? wishlistState.items : []
-  const count = typeof wishlistState?.count === 'number' ? wishlistState.count : items.length
+  const items = Array.isArray(wishlistState?.items) ? wishlistState.items : [];
+  const count = typeof wishlistState?.count === 'number' ? wishlistState.count : items.length;
 
   const saveToServer = useCallback(async () => {
-    if (!isLoggedIn) return
-    setSyncing(true)
+    if (!isLoggedIn) return;
+    setSyncing(true);
     try {
       const ids = items
-        .map((item) => (item as { id?: string; _id?: string })?.id ?? (item as { _id?: string })?._id)
-        .filter(Boolean) as string[]
+        .map(
+          (item) => (item as { id?: string; _id?: string })?.id ?? (item as { _id?: string })?._id
+        )
+        .filter(Boolean) as string[];
       const res = await fetch('/api/wishlist', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productIds: ids }),
-      })
-      if (!res.ok) throw new Error('Erreur')
-      toast.success(t('save_success'))
+      });
+      if (!res.ok) throw new Error('Erreur');
+      toast.success(t('save_success'));
     } catch {
-      toast.error(t('save_error'))
+      toast.error(t('save_error'));
     } finally {
-      setSyncing(false)
+      setSyncing(false);
     }
-  }, [isLoggedIn, items, t])
+  }, [isLoggedIn, items, t]);
 
   const loadFromServer = useCallback(async () => {
-    if (!isLoggedIn || !wishlistState.clear) return
-    setSyncing(true)
+    if (!isLoggedIn || !wishlistState.clear) return;
+    setSyncing(true);
     try {
-      const res = await fetch('/api/wishlist')
-      if (!res.ok) throw new Error('Erreur')
-      const data = await res.json()
-      const productIds: string[] = data?.productIds ?? []
+      const res = await fetch('/api/wishlist');
+      if (!res.ok) throw new Error('Erreur');
+      const data = await res.json();
+      const productIds: string[] = data?.productIds ?? [];
       if (productIds.length === 0) {
-        wishlistState.clear()
-        toast.success(t('load_empty'))
-        setSyncing(false)
-        return
+        wishlistState.clear();
+        toast.success(t('load_empty'));
+        setSyncing(false);
+        return;
       }
-      const productsRes = await fetch(`/api/products/by-ids?ids=${productIds.join(',')}`)
-      if (!productsRes.ok) throw new Error('Erreur chargement produits')
-      const products = (await productsRes.json()) as (Product & { _id: string })[]
-      wishlistState.clear()
-      products.forEach((p) => wishlistState.add({ ...p, id: String(p._id ?? '') }))
-      toast.success(t('load_success'))
+      const productsRes = await fetch(`/api/products/by-ids?ids=${productIds.join(',')}`);
+      if (!productsRes.ok) throw new Error('Erreur chargement produits');
+      const products = (await productsRes.json()) as (Product & { _id: string })[];
+      wishlistState.clear();
+      products.forEach((p) => wishlistState.add({ ...p, id: String(p._id ?? '') }));
+      toast.success(t('load_success'));
     } catch {
-      toast.error(t('load_error'))
+      toast.error(t('load_error'));
     } finally {
-      setSyncing(false)
+      setSyncing(false);
     }
-  }, [isLoggedIn, wishlistState, t])
+  }, [isLoggedIn, wishlistState, t]);
 
   const wishlist = useMemo(() => {
-    return items
-      .filter(isRecord)
-      .map((item) => {
-        const product = item as Partial<Product> & Keyable
+    return items.filter(isRecord).map((item) => {
+      const product = item as Partial<Product> & Keyable;
 
-        return {
-          ...product,
-          title:
-            typeof product.title === 'string' && product.title.trim()
-              ? product.title
-              : 'Product',
-          image:
-            typeof product.image === 'string' && product.image.trim()
-              ? product.image
-              : '/placeholder.png',
-          price:
-            typeof product.price === 'number' && Number.isFinite(product.price)
-              ? product.price
-              : 0,
-        } as Product & Keyable
-      })
-  }, [items])
+      return {
+        ...product,
+        title:
+          typeof product.title === 'string' && product.title.trim() ? product.title : 'Product',
+        image:
+          typeof product.image === 'string' && product.image.trim()
+            ? product.image
+            : '/placeholder.png',
+        price:
+          typeof product.price === 'number' && Number.isFinite(product.price) ? product.price : 0,
+      } as Product & Keyable;
+    });
+  }, [items]);
 
   useEffect(() => {
     try {
-      sendEvent?.('wishlist_view', { count })
+      sendEvent?.('wishlist_view', { count });
     } catch {
       // no-op
     }
-  }, [count])
+  }, [count]);
 
-  const tCart = useTranslations('cart')
+  const tCart = useTranslations('cart');
 
   return (
     <main
@@ -140,9 +136,7 @@ export default function WishlistClient() {
           {t('title')}
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-token-text/75">
-          {wishlist.length === 0
-            ? t('empty')
-            : t('intro_with_items')}
+          {wishlist.length === 0 ? t('empty') : t('intro_with_items')}
         </p>
       </header>
 
@@ -159,7 +153,11 @@ export default function WishlistClient() {
             >
               {tCart('view_products')}
             </Link>
-            <BackToHomeLink variant="outline" prefetch={false} className="!min-h-0 py-2.5 text-[15px]" />
+            <BackToHomeLink
+              variant="outline"
+              prefetch={false}
+              className="!min-h-0 py-2.5 text-[15px]"
+            />
           </div>
         </section>
       ) : (
@@ -172,9 +170,7 @@ export default function WishlistClient() {
               <ProductCard key={getProductKey(product, i)} product={product} />
             ))}
           </section>
-          <p className="mt-6 text-center text-[13px] text-token-text/60">
-            {t('saved_on_device')}
-          </p>
+          <p className="mt-6 text-center text-[13px] text-token-text/60">{t('saved_on_device')}</p>
           {isLoggedIn && (
             <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
               <button
@@ -198,5 +194,5 @@ export default function WishlistClient() {
         </>
       )}
     </main>
-  )
+  );
 }

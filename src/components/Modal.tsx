@@ -1,28 +1,28 @@
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
-import * as React from 'react'
-import * as ReactDOM from 'react-dom'
+import { useTranslations } from 'next-intl';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
 
 export interface ModalProps {
-  isOpen: boolean
-  onClose: () => void
-  title?: React.ReactNode
-  children?: React.ReactNode
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
-  closeOnOverlay?: boolean
-  closeOnEsc?: boolean
-  showClose?: boolean
-  lockScroll?: boolean
-  restoreFocus?: boolean
-  trapFocus?: boolean
-  describedById?: string
-  initialFocusRef?: React.RefObject<HTMLElement | null>
-  className?: string
-  overlayClassName?: string
-  container?: HTMLElement | null
+  isOpen: boolean;
+  onClose: () => void;
+  title?: React.ReactNode;
+  children?: React.ReactNode;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  closeOnOverlay?: boolean;
+  closeOnEsc?: boolean;
+  showClose?: boolean;
+  lockScroll?: boolean;
+  restoreFocus?: boolean;
+  trapFocus?: boolean;
+  describedById?: string;
+  initialFocusRef?: React.RefObject<HTMLElement | null>;
+  className?: string;
+  overlayClassName?: string;
+  container?: HTMLElement | null;
 }
 
 const SIZES: Record<NonNullable<ModalProps['size']>, string> = {
@@ -31,28 +31,28 @@ const SIZES: Record<NonNullable<ModalProps['size']>, string> = {
   lg: 'max-w-lg',
   xl: 'max-w-2xl',
   full: 'max-w-none h-[100dvh] sm:h-auto sm:max-w-3xl',
-}
+};
 
-let bodyLockCount = 0
-let previousBodyOverflow = ''
+let bodyLockCount = 0;
+let previousBodyOverflow = '';
 
 function lockBodyScroll(lock: boolean) {
-  if (typeof document === 'undefined') return
+  if (typeof document === 'undefined') return;
 
   if (lock) {
     if (bodyLockCount === 0) {
-      previousBodyOverflow = document.body.style.overflow
-      document.body.style.overflow = 'hidden'
+      previousBodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
     }
-    bodyLockCount += 1
-    return
+    bodyLockCount += 1;
+    return;
   }
 
-  bodyLockCount = Math.max(0, bodyLockCount - 1)
+  bodyLockCount = Math.max(0, bodyLockCount - 1);
 
   if (bodyLockCount === 0) {
-    document.body.style.overflow = previousBodyOverflow
-    previousBodyOverflow = ''
+    document.body.style.overflow = previousBodyOverflow;
+    previousBodyOverflow = '';
   }
 }
 
@@ -62,54 +62,54 @@ function useFocusTrap(
   initialFocusRef?: React.RefObject<HTMLElement | null>
 ) {
   React.useEffect(() => {
-    if (!active) return
+    if (!active) return;
 
-    const node = containerRef.current
-    if (!node) return
+    const node = containerRef.current;
+    if (!node) return;
 
     const selector =
-      'a[href],area[href],input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),button:not([disabled]),iframe,object,embed,[tabindex]:not([tabindex="-1"]),[contenteditable="true"]'
+      'a[href],area[href],input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),button:not([disabled]),iframe,object,embed,[tabindex]:not([tabindex="-1"]),[contenteditable="true"]';
 
     const getFocusable = () =>
       Array.from(node.querySelectorAll<HTMLElement>(selector)).filter(
         (el) => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true'
-      )
+      );
 
     const focusInitial = () => {
-      const list = getFocusable()
-      const target = initialFocusRef?.current ?? list[0] ?? node
-      window.setTimeout(() => target.focus(), 0)
-    }
+      const list = getFocusable();
+      const target = initialFocusRef?.current ?? list[0] ?? node;
+      window.setTimeout(() => target.focus(), 0);
+    };
 
-    focusInitial()
+    focusInitial();
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return
+      if (e.key !== 'Tab') return;
 
-      const list = getFocusable()
+      const list = getFocusable();
       if (list.length === 0) {
-        e.preventDefault()
-        node.focus()
-        return
+        e.preventDefault();
+        node.focus();
+        return;
       }
 
-      const first = list[0]
-      const last = list[list.length - 1]
+      const first = list[0];
+      const last = list[list.length - 1];
 
       if (e.shiftKey) {
         if (document.activeElement === first) {
-          e.preventDefault()
-          last.focus()
+          e.preventDefault();
+          last.focus();
         }
       } else if (document.activeElement === last) {
-        e.preventDefault()
-        first.focus()
+        e.preventDefault();
+        first.focus();
       }
-    }
+    };
 
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [active, containerRef, initialFocusRef])
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [active, containerRef, initialFocusRef]);
 }
 
 function ModalRoot({
@@ -128,37 +128,37 @@ function ModalRoot({
   overlayClassName,
   initialFocusRef,
 }: ModalProps) {
-  const tAria = useTranslations('aria')
-  const overlayRef = React.useRef<HTMLDivElement | null>(null)
-  const panelRef = React.useRef<HTMLDivElement | null>(null)
-  const titleId = React.useId()
-  const labelledBy = title ? `modal-title-${titleId}` : undefined
+  const tAria = useTranslations('aria');
+  const overlayRef = React.useRef<HTMLDivElement | null>(null);
+  const panelRef = React.useRef<HTMLDivElement | null>(null);
+  const titleId = React.useId();
+  const labelledBy = title ? `modal-title-${titleId}` : undefined;
 
   React.useEffect(() => {
-    if (!lockScroll) return
-    if (isOpen) lockBodyScroll(true)
-    return () => lockBodyScroll(false)
-  }, [isOpen, lockScroll])
+    if (!lockScroll) return;
+    if (isOpen) lockBodyScroll(true);
+    return () => lockBodyScroll(false);
+  }, [isOpen, lockScroll]);
 
   React.useEffect(() => {
-    if (!isOpen || !closeOnEsc) return
+    if (!isOpen || !closeOnEsc) return;
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
+      if (e.key === 'Escape') onClose();
+    };
 
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [isOpen, closeOnEsc, onClose])
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [isOpen, closeOnEsc, onClose]);
 
-  useFocusTrap(isOpen && trapFocus, panelRef, initialFocusRef)
+  useFocusTrap(isOpen && trapFocus, panelRef, initialFocusRef);
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   const handleOverlayMouseDown: React.MouseEventHandler<HTMLDivElement> = (e) => {
-    if (!closeOnOverlay) return
-    if (e.target === overlayRef.current) onClose()
-  }
+    if (!closeOnOverlay) return;
+    if (e.target === overlayRef.current) onClose();
+  };
 
   return (
     <div
@@ -197,7 +197,12 @@ function ModalRoot({
                        hover:bg-black/5 dark:hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
           >
             <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
-              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <path
+                d="M18 6L6 18M6 6l12 12"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
             </svg>
           </button>
         )}
@@ -213,53 +218,49 @@ function ModalRoot({
         <div className="px-6 pb-6 pt-4">{children}</div>
       </div>
     </div>
-  )
+  );
 }
 
 function Header({ children }: { children: React.ReactNode }) {
-  return <div className="px-6 pt-6 pb-3">{children}</div>
+  return <div className="px-6 pt-6 pb-3">{children}</div>;
 }
 
 function Body({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn('px-6 pb-6 pt-4', className)}>{children}</div>
+  return <div className={cn('px-6 pb-6 pt-4', className)}>{children}</div>;
 }
 
 function Footer({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="px-6 pb-6 pt-3 border-t border-[hsl(var(--border))]">
-      {children}
-    </div>
-  )
+  return <div className="px-6 pb-6 pt-3 border-t border-[hsl(var(--border))]">{children}</div>;
 }
 
 const Modal = Object.assign(
   function Modal(props: ModalProps) {
-    const [mounted, setMounted] = React.useState(false)
-    const triggerRef = React.useRef<HTMLElement | null>(null)
+    const [mounted, setMounted] = React.useState(false);
+    const triggerRef = React.useRef<HTMLElement | null>(null);
 
-    React.useEffect(() => setMounted(true), [])
+    React.useEffect(() => setMounted(true), []);
 
     React.useEffect(() => {
-      if (!mounted) return
+      if (!mounted) return;
 
       if (props.isOpen) {
-        triggerRef.current = document.activeElement as HTMLElement | null
+        triggerRef.current = document.activeElement as HTMLElement | null;
       } else if (props.restoreFocus !== false) {
-        triggerRef.current?.focus?.()
-        triggerRef.current = null
+        triggerRef.current?.focus?.();
+        triggerRef.current = null;
       }
-    }, [mounted, props.isOpen, props.restoreFocus])
+    }, [mounted, props.isOpen, props.restoreFocus]);
 
-    if (!mounted) return null
+    if (!mounted) return null;
 
-    const container = props.container ?? document.body
-    return ReactDOM.createPortal(<ModalRoot {...props} />, container)
+    const container = props.container ?? document.body;
+    return ReactDOM.createPortal(<ModalRoot {...props} />, container);
   },
   {
     Header,
     Body,
     Footer,
   }
-)
+);
 
-export default Modal
+export default Modal;

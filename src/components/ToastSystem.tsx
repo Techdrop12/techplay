@@ -1,16 +1,16 @@
-'use client'
+'use client';
 
-import { CheckCircle2, AlertCircle, Info, AlertTriangle } from 'lucide-react'
-import type { ReactElement } from 'react'
-import { Toaster, toast } from 'react-hot-toast'
+import { CheckCircle2, AlertCircle, Info, AlertTriangle } from 'lucide-react';
+import type { ReactElement } from 'react';
+import { Toaster, toast } from 'react-hot-toast';
 
-export type ToastType = 'success' | 'error' | 'info' | 'warning'
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 interface ToastOptions {
-  type?: ToastType
-  message: string
-  duration?: number
-  position?: 'top-right' | 'bottom-right' | 'top-left' | 'bottom-left'
+  type?: ToastType;
+  message: string;
+  duration?: number;
+  position?: 'top-right' | 'bottom-right' | 'top-left' | 'bottom-left';
 }
 
 const baseStyle = {
@@ -19,21 +19,21 @@ const baseStyle = {
   fontSize: '0.875rem',
   fontWeight: 500,
   boxShadow: 'var(--shadow-md)',
-} as const
+} as const;
 
 const styles: Record<ToastType, { background: string; color: string }> = {
   success: { background: 'hsl(var(--success))', color: '#fff' },
   error: { background: 'hsl(var(--danger))', color: '#fff' },
   info: { background: 'hsl(var(--accent))', color: '#fff' },
   warning: { background: 'hsl(var(--warning))', color: '#fff' },
-}
+};
 
 const iconComponents: Record<ToastType, ReactElement> = {
   success: <CheckCircle2 size={18} aria-hidden className="shrink-0" />,
   error: <AlertCircle size={18} aria-hidden className="shrink-0" />,
   info: <Info size={18} aria-hidden className="shrink-0" />,
   warning: <AlertTriangle size={18} aria-hidden className="shrink-0" />,
-}
+};
 
 export function showToast({
   type = 'info',
@@ -50,7 +50,7 @@ export function showToast({
       role: 'status',
       'aria-live': 'polite',
     },
-  })
+  });
 }
 
 export function ToastSystem() {
@@ -68,5 +68,5 @@ export function ToastSystem() {
         },
       }}
     />
-  )
+  );
 }

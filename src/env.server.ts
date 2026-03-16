@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
 const schema = z.object({
   // Stripe
@@ -36,7 +36,7 @@ const schema = z.object({
 
   // Recaptcha
   RECAPTCHA_SECRET_KEY: z.string().optional(),
-})
+});
 
 export const serverEnv = schema.parse({
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
@@ -64,17 +64,16 @@ export const serverEnv = schema.parse({
   BREVO_SENDER: process.env.BREVO_SENDER ?? undefined,
   BREVO_SENDER_NAME: process.env.BREVO_SENDER_NAME ?? undefined,
   RECAPTCHA_SECRET_KEY: process.env.RECAPTCHA_SECRET_KEY ?? undefined,
-})
+});
 
 /** En production, clés critiques requises (évite fallbacks dangereux). */
-const isProduction = process.env.NODE_ENV === 'production'
+const isProduction = process.env.NODE_ENV === 'production';
 if (isProduction) {
   if (!serverEnv.STRIPE_SECRET_KEY?.trim()) {
-    throw new Error('STRIPE_SECRET_KEY is required in production')
+    throw new Error('STRIPE_SECRET_KEY is required in production');
   }
-  const authSecret = serverEnv.NEXTAUTH_SECRET ?? serverEnv.AUTH_SECRET
+  const authSecret = serverEnv.NEXTAUTH_SECRET ?? serverEnv.AUTH_SECRET;
   if (!authSecret?.trim() || authSecret === 'change-me') {
-    throw new Error('NEXTAUTH_SECRET or AUTH_SECRET must be set and strong in production')
+    throw new Error('NEXTAUTH_SECRET or AUTH_SECRET must be set and strong in production');
   }
 }
-

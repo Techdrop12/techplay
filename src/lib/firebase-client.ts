@@ -24,14 +24,15 @@ export function requestNotificationPermission(): void {
   if (typeof window === 'undefined' || !messaging) return;
   Notification.requestPermission().then((perm) => {
     if (perm === 'granted') {
-      getToken(messaging, { vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY })
-        .then((token: string) => {
+      getToken(messaging, { vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY }).then(
+        (token: string) => {
           fetch('/api/notifications/save-token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ token }),
           });
-        });
+        }
+      );
     }
   });
 }

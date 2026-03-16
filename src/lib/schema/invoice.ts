@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
 export const invoiceSchema = z.object({
   orderId: z.string(),
@@ -11,4 +11,4 @@ export const invoiceSchema = z.object({
     })
   ),
   total: z.number(),
-})
+});

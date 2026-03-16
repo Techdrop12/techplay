@@ -1,12 +1,12 @@
-import type { Metadata } from 'next'
+import type { Metadata } from 'next';
 
-import OrderTable from '@/components/OrderTable'
+import OrderTable from '@/components/OrderTable';
 
 export const metadata: Metadata = {
   title: 'Commandes – Admin TechPlay',
   description: 'Liste des commandes passées sur la boutique.',
   robots: { index: false, follow: false },
-}
+};
 
 export default function AdminCommandesPage() {
   return (
@@ -23,5 +23,5 @@ export default function AdminCommandesPage() {
         <OrderTable />
       </div>
     </div>
-  )
+  );
 }

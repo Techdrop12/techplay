@@ -1,17 +1,17 @@
-'use client'
+'use client';
 
-import { LogOut, Menu, User } from 'lucide-react'
-import { useSession, signOut } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { LogOut, Menu, User } from 'lucide-react';
+import { useSession, signOut } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 
 export default function AdminHeader() {
-  const t = useTranslations('admin')
-  const { data: session } = useSession()
-  const [menuOpen, setMenuOpen] = useState(false)
+  const t = useTranslations('admin');
+  const { data: session } = useSession();
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const userName = session?.user?.name || 'Admin'
-  const userEmail = session?.user?.email || ''
+  const userName = session?.user?.name || 'Admin';
+  const userEmail = session?.user?.email || '';
 
   return (
     <header className="bg-[hsl(var(--surface))] border-b border-[hsl(var(--border))] shadow-[var(--shadow-sm)] px-4 py-3 flex justify-between items-center sticky top-0 z-40">

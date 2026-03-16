@@ -1,69 +1,72 @@
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
-import { toast } from 'react-hot-toast'
+import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 interface SlugConfig {
-  slug: string
-  label: string
+  slug: string;
+  label: string;
 }
 
 interface SitePageDoc {
-  slug: string
-  title: string
-  content: string
+  slug: string;
+  title: string;
+  content: string;
 }
 
 export default function SitePagesEditor({ slugs }: { slugs: readonly SlugConfig[] }) {
-  const t = useTranslations('admin')
-  const [selected, setSelected] = useState(slugs[0]?.slug ?? '')
-  const [_page, setPage] = useState<SitePageDoc | null>(null)
-  const [form, setForm] = useState({ title: '', content: '' })
-  const [loading, setLoading] = useState(false)
-  const [saving, setSaving] = useState(false)
+  const t = useTranslations('admin');
+  const [selected, setSelected] = useState(slugs[0]?.slug ?? '');
+  const [_page, setPage] = useState<SitePageDoc | null>(null);
+  const [form, setForm] = useState({ title: '', content: '' });
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const fetchPage = useCallback(async (slug: string) => {
-    setLoading(true)
-    try {
-      const res = await fetch(`/api/admin/site-pages?slug=${encodeURIComponent(slug)}`)
-      const data = await res.json()
-      if (res.status === 404) {
-        setPage(null)
-        const label = slugs.find((s) => s.slug === slug)?.label ?? slug
-        setForm({ title: label, content: '' })
-      } else if (res.ok) {
-        setPage(data)
-        setForm({ title: data.title ?? '', content: data.content ?? '' })
+  const fetchPage = useCallback(
+    async (slug: string) => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/admin/site-pages?slug=${encodeURIComponent(slug)}`);
+        const data = await res.json();
+        if (res.status === 404) {
+          setPage(null);
+          const label = slugs.find((s) => s.slug === slug)?.label ?? slug;
+          setForm({ title: label, content: '' });
+        } else if (res.ok) {
+          setPage(data);
+          setForm({ title: data.title ?? '', content: data.content ?? '' });
+        }
+      } catch {
+        toast.error(t('pages_error_load'));
+      } finally {
+        setLoading(false);
       }
-    } catch {
-      toast.error(t('pages_error_load'))
-    } finally {
-      setLoading(false)
-    }
-  }, [slugs, t])
+    },
+    [slugs, t]
+  );
 
   useEffect(() => {
-    if (selected) fetchPage(selected)
-  }, [selected, fetchPage])
+    if (selected) fetchPage(selected);
+  }, [selected, fetchPage]);
 
   const handleSave = async () => {
-    setSaving(true)
+    setSaving(true);
     try {
       const res = await fetch('/api/admin/site-pages', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ slug: selected, title: form.title, content: form.content }),
-      })
-      if (!res.ok) throw new Error('Erreur')
-      toast.success(t('pages_saved'))
-      setPage(await res.json())
+      });
+      if (!res.ok) throw new Error('Erreur');
+      toast.success(t('pages_saved'));
+      setPage(await res.json());
     } catch {
-      toast.error(t('pages_error_save'))
+      toast.error(t('pages_error_save'));
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   return (
     <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] shadow-[var(--shadow-sm)] overflow-hidden">
@@ -86,11 +89,18 @@ export default function SitePagesEditor({ slugs }: { slugs: readonly SlugConfig[
         </nav>
         <div className="flex-1 p-6">
           {loading ? (
-            <p className="text-token-text/60 animate-pulse" role="status">{t('pages_loading')}</p>
+            <p className="text-token-text/60 animate-pulse" role="status">
+              {t('pages_loading')}
+            </p>
           ) : (
             <>
               <div className="mb-4">
-                <label htmlFor="site-page-title" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">{t('pages_label_title')}</label>
+                <label
+                  htmlFor="site-page-title"
+                  className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+                >
+                  {t('pages_label_title')}
+                </label>
                 <input
                   id="site-page-title"
                   type="text"
@@ -100,7 +110,12 @@ export default function SitePagesEditor({ slugs }: { slugs: readonly SlugConfig[
                 />
               </div>
               <div className="mb-4">
-                <label htmlFor="site-page-content" className="block text-sm font-medium text-[hsl(var(--text))] mb-1">{t('pages_label_content')}</label>
+                <label
+                  htmlFor="site-page-content"
+                  className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
+                >
+                  {t('pages_label_content')}
+                </label>
                 <textarea
                   id="site-page-content"
                   rows={14}
@@ -124,5 +139,5 @@ export default function SitePagesEditor({ slugs }: { slugs: readonly SlugConfig[
         </div>
       </div>
     </div>
-  )
+  );
 }

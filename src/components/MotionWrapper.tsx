@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
-import { motion } from 'framer-motion'
+import { motion } from 'framer-motion';
 
-import type { ReactNode } from 'react'
+import type { ReactNode } from 'react';
 
 interface MotionWrapperProps {
-  children: ReactNode
+  children: ReactNode;
 }
 
 export default function MotionWrapper({ children }: MotionWrapperProps) {
@@ -18,5 +18,5 @@ export default function MotionWrapper({ children }: MotionWrapperProps) {
     >
       {children}
     </motion.div>
-  )
+  );
 }

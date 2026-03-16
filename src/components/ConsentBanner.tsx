@@ -1,31 +1,31 @@
 // src/components/ConsentBanner.tsx
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
-import { useEffect, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl';
+import { useEffect, useRef, useState } from 'react';
 
-import Link from '@/components/LocalizedLink'
-import { useFocusTrap } from '@/lib/useFocusTrap'
+import Link from '@/components/LocalizedLink';
+import { useFocusTrap } from '@/lib/useFocusTrap';
 
-const DISABLED = (process.env.NEXT_PUBLIC_ANALYTICS_DISABLED || '').toLowerCase() === 'true'
+const DISABLED = (process.env.NEXT_PUBLIC_ANALYTICS_DISABLED || '').toLowerCase() === 'true';
 
 type Prefs = {
-  analytics: boolean
-  ads: boolean
-  functionality: boolean
-}
+  analytics: boolean;
+  ads: boolean;
+  functionality: boolean;
+};
 
 function readDecided(): boolean {
   try {
-    return localStorage.getItem('consent:decided') === '1'
+    return localStorage.getItem('consent:decided') === '1';
   } catch {
-    return false
+    return false;
   }
 }
 
 function writeDecided(v: boolean) {
   try {
-    localStorage.setItem('consent:decided', v ? '1' : '0')
+    localStorage.setItem('consent:decided', v ? '1' : '0');
   } catch {}
 }
 
@@ -35,25 +35,25 @@ function readPrefs(): Prefs {
       analytics: (localStorage.getItem('consent:analytics') || '0') === '1',
       ads: (localStorage.getItem('consent:ads') || '0') === '1',
       functionality: true,
-    }
+    };
   } catch {
-    return { analytics: false, ads: false, functionality: true }
+    return { analytics: false, ads: false, functionality: true };
   }
 }
 
 function savePrefs(p: Prefs) {
   try {
-    localStorage.setItem('consent:analytics', p.analytics ? '1' : '0')
-    localStorage.setItem('consent:ads', p.ads ? '1' : '0')
+    localStorage.setItem('consent:analytics', p.analytics ? '1' : '0');
+    localStorage.setItem('consent:ads', p.ads ? '1' : '0');
   } catch {}
 }
 
 function pushDL(event: string, detail: Record<string, unknown>) {
   try {
     if (!Array.isArray(window.dataLayer)) {
-      window.dataLayer = []
+      window.dataLayer = [];
     }
-    window.dataLayer.push({ event, ...detail })
+    window.dataLayer.push({ event, ...detail });
   } catch {}
 }
 
@@ -65,124 +65,122 @@ function applyConsent(p: Prefs) {
     ad_personalization: p.ads ? 'granted' : 'denied',
     functionality_storage: 'granted',
     security_storage: 'granted',
-  }
+  };
 
   try {
-    window.dispatchEvent(new CustomEvent('tp:consent', { detail: p }))
+    window.dispatchEvent(new CustomEvent('tp:consent', { detail: p }));
   } catch {}
 
   try {
-    window.tpConsentUpdate?.(p)
+    window.tpConsentUpdate?.(p);
   } catch {}
 
   try {
-    window.__applyConsent?.(update)
+    window.__applyConsent?.(update);
   } catch {}
 }
 
 export default function ConsentBanner() {
-  const t = useTranslations('consent')
-  const [open, setOpen] = useState(false)
+  const t = useTranslations('consent');
+  const [open, setOpen] = useState(false);
   const [prefs, setPrefs] = useState<Prefs>({
     analytics: false,
     ads: false,
     functionality: true,
-  })
-  const [show, setShow] = useState(false)
-  const firstToggleRef = useRef<HTMLInputElement | null>(null)
-  const dialogRef = useRef<HTMLDivElement | null>(null)
+  });
+  const [show, setShow] = useState(false);
+  const firstToggleRef = useRef<HTMLInputElement | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
 
-  useFocusTrap(show, dialogRef, { restoreFocus: true })
+  useFocusTrap(show, dialogRef, { restoreFocus: true });
 
   useEffect(() => {
     const dnt =
-      navigator.doNotTrack === '1' ||
-      window.doNotTrack === '1' ||
-      navigator.msDoNotTrack === '1'
+      navigator.doNotTrack === '1' || window.doNotTrack === '1' || navigator.msDoNotTrack === '1';
 
-    if (dnt || readDecided()) return
+    if (dnt || readDecided()) return;
 
-    setPrefs(readPrefs())
-    setShow(true)
-  }, [])
+    setPrefs(readPrefs());
+    setShow(true);
+  }, []);
 
   useEffect(() => {
     window.tpOpenConsent = () => {
-      setPrefs(readPrefs())
-      setOpen(true)
-      setShow(true)
-      writeDecided(false)
-      window.setTimeout(() => firstToggleRef.current?.focus(), 0)
-    }
+      setPrefs(readPrefs());
+      setOpen(true);
+      setShow(true);
+      writeDecided(false);
+      window.setTimeout(() => firstToggleRef.current?.focus(), 0);
+    };
 
     window.tpResetConsent = () => {
       try {
-        localStorage.removeItem('consent:analytics')
-        localStorage.removeItem('consent:ads')
-        localStorage.removeItem('consent:decided')
+        localStorage.removeItem('consent:analytics');
+        localStorage.removeItem('consent:ads');
+        localStorage.removeItem('consent:decided');
       } catch {}
 
-      const p: Prefs = { analytics: false, ads: false, functionality: true }
-      applyConsent(p)
-      pushDL('consent_reset', { source: 'user' })
-      window.tpOpenConsent?.()
-    }
+      const p: Prefs = { analytics: false, ads: false, functionality: true };
+      applyConsent(p);
+      pushDL('consent_reset', { source: 'user' });
+      window.tpOpenConsent?.();
+    };
 
     return () => {
-      delete window.tpOpenConsent
-      delete window.tpResetConsent
-    }
-  }, [])
+      delete window.tpOpenConsent;
+      delete window.tpResetConsent;
+    };
+  }, []);
 
   useEffect(() => {
-    if (!show) return
-    document.documentElement.classList.add('consent-banner-open')
-    return () => document.documentElement.classList.remove('consent-banner-open')
-  }, [show])
+    if (!show) return;
+    document.documentElement.classList.add('consent-banner-open');
+    return () => document.documentElement.classList.remove('consent-banner-open');
+  }, [show]);
 
   useEffect(() => {
-    if (!open) return
+    if (!open) return;
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false)
-    }
+      if (e.key === 'Escape') setOpen(false);
+    };
 
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open])
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
 
-  if (DISABLED) return null
-  if (!show) return null
+  if (DISABLED) return null;
+  if (!show) return null;
 
   const acceptAll = () => {
-    const p: Prefs = { analytics: true, ads: true, functionality: true }
-    savePrefs(p)
-    applyConsent(p)
-    writeDecided(true)
-    pushDL('consent_accept_all', { analytics: 1, ads: 1 })
-    setShow(false)
-  }
+    const p: Prefs = { analytics: true, ads: true, functionality: true };
+    savePrefs(p);
+    applyConsent(p);
+    writeDecided(true);
+    pushDL('consent_accept_all', { analytics: 1, ads: 1 });
+    setShow(false);
+  };
 
   const refuseAll = () => {
-    const p: Prefs = { analytics: false, ads: false, functionality: true }
-    savePrefs(p)
-    applyConsent(p)
-    writeDecided(true)
-    pushDL('consent_reject_all', { analytics: 0, ads: 0 })
-    setShow(false)
-  }
+    const p: Prefs = { analytics: false, ads: false, functionality: true };
+    savePrefs(p);
+    applyConsent(p);
+    writeDecided(true);
+    pushDL('consent_reject_all', { analytics: 0, ads: 0 });
+    setShow(false);
+  };
 
   const saveSelected = () => {
-    const p: Prefs = { ...prefs, functionality: true }
-    savePrefs(p)
-    applyConsent(p)
-    writeDecided(true)
+    const p: Prefs = { ...prefs, functionality: true };
+    savePrefs(p);
+    applyConsent(p);
+    writeDecided(true);
     pushDL('consent_save_selected', {
       analytics: p.analytics ? 1 : 0,
       ads: p.ads ? 1 : 0,
-    })
-    setShow(false)
-  }
+    });
+    setShow(false);
+  };
 
   return (
     <div
@@ -221,9 +219,7 @@ export default function ConsentBanner() {
                   type="checkbox"
                   className="h-5 w-5 accent-[hsl(var(--accent))]"
                   checked={prefs.analytics}
-                  onChange={(e) =>
-                    setPrefs((prev) => ({ ...prev, analytics: e.target.checked }))
-                  }
+                  onChange={(e) => setPrefs((prev) => ({ ...prev, analytics: e.target.checked }))}
                 />
               </label>
 
@@ -233,15 +229,11 @@ export default function ConsentBanner() {
                   type="checkbox"
                   className="h-5 w-5 accent-[hsl(var(--accent))]"
                   checked={prefs.ads}
-                  onChange={(e) =>
-                    setPrefs((prev) => ({ ...prev, ads: e.target.checked }))
-                  }
+                  onChange={(e) => setPrefs((prev) => ({ ...prev, ads: e.target.checked }))}
                 />
               </label>
 
-              <p className="mt-1 text-xs text-token-text/60">
-                {t('functional_always_active')}
-              </p>
+              <p className="mt-1 text-xs text-token-text/60">{t('functional_always_active')}</p>
             </div>
           )}
 
@@ -267,8 +259,8 @@ export default function ConsentBanner() {
               <button
                 type="button"
                 onClick={() => {
-                  setOpen(true)
-                  window.setTimeout(() => firstToggleRef.current?.focus(), 0)
+                  setOpen(true);
+                  window.setTimeout(() => firstToggleRef.current?.focus(), 0);
                 }}
                 className="w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 text-[13px] font-semibold hover:shadow focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
               >
@@ -305,5 +297,5 @@ export default function ConsentBanner() {
         </div>
       </div>
     </div>
-  )
+  );
 }

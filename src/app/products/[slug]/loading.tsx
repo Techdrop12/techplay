@@ -11,5 +11,5 @@ export default function ProductSlugLoading() {
         </div>
       </div>
     </div>
-  )
+  );
 }

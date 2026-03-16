@@ -20,10 +20,7 @@ const colorMap: Record<StatusBadgeStatus, string> = {
 
 export default function StatusBadge({ status }: StatusBadgeProps) {
   const label = labelMap[status as StatusBadgeStatus] ?? status;
-  const color = colorMap[status as StatusBadgeStatus] ?? 'bg-[hsl(var(--surface-2))] text-[hsl(var(--text))]';
-  return (
-    <span className={`text-xs font-semibold px-2 py-1 rounded ${color}`}>
-      {label}
-    </span>
-  );
+  const color =
+    colorMap[status as StatusBadgeStatus] ?? 'bg-[hsl(var(--surface-2))] text-[hsl(var(--text))]';
+  return <span className={`text-xs font-semibold px-2 py-1 rounded ${color}`}>{label}</span>;
 }

@@ -1,70 +1,70 @@
-'use client'
+'use client';
 
-import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 
-import { useCart } from '@/hooks/useCart'
-import { pageview } from '@/lib/analytics'
+import { useCart } from '@/hooks/useCart';
+import { pageview } from '@/lib/analytics';
 
 export default function CartReminder() {
-  const t = useTranslations('cart')
-  const { cart } = useCart()
-  const router = useRouter()
-  const [show, setShow] = useState(false)
-  const [suggestion, setSuggestion] = useState<string | null>(null)
+  const t = useTranslations('cart');
+  const { cart } = useCart();
+  const router = useRouter();
+  const [show, setShow] = useState(false);
+  const [suggestion, setSuggestion] = useState<string | null>(null);
 
   // Enregistre le panier dans localStorage pour un rappel persistant
   useEffect(() => {
     if (cart.length > 0) {
-      localStorage.setItem('techplay_last_cart', JSON.stringify(cart))
+      localStorage.setItem('techplay_last_cart', JSON.stringify(cart));
     }
-  }, [cart])
+  }, [cart]);
 
   // Déclenche le rappel après 30s d'inactivité
   useEffect(() => {
     if (cart.length === 0) {
-      setShow(false)
-      return
+      setShow(false);
+      return;
     }
 
-    const timer = window.setTimeout(() => setShow(true), 30_000)
-    return () => window.clearTimeout(timer)
-  }, [cart])
+    const timer = window.setTimeout(() => setShow(true), 30_000);
+    return () => window.clearTimeout(timer);
+  }, [cart]);
 
   // Génère une suggestion basée sur le dernier produit ajouté
   useEffect(() => {
     if (cart.length === 0) {
-      setSuggestion(null)
-      return
+      setSuggestion(null);
+      return;
     }
 
-    const lastProduct = cart[cart.length - 1]
-    const fallback = 'Cliquez ici pour reprendre votre commande.'
-    setSuggestion(lastProduct?.title ? `Vous aimerez peut-être : ${lastProduct.title}` : fallback)
-  }, [cart])
+    const lastProduct = cart[cart.length - 1];
+    const fallback = 'Cliquez ici pour reprendre votre commande.';
+    setSuggestion(lastProduct?.title ? `Vous aimerez peut-être : ${lastProduct.title}` : fallback);
+  }, [cart]);
 
   // Tracking pageview + gtag si dispo
   useEffect(() => {
-    if (!show) return
+    if (!show) return;
 
-    pageview('/cart-reminder')
+    pageview('/cart-reminder');
 
     try {
       if (typeof window.gtag === 'function') {
-        window.gtag('event', 'cart_reminder_displayed')
+        window.gtag('event', 'cart_reminder_displayed');
       }
     } catch {
       // no-op
     }
-  }, [show])
+  }, [show]);
 
   const handleClick = () => {
-    setShow(false)
-    router.push('/cart')
-  }
+    setShow(false);
+    router.push('/cart');
+  };
 
-  if (!show || !suggestion) return null
+  if (!show || !suggestion) return null;
 
   return (
     <div
@@ -77,5 +77,5 @@ export default function CartReminder() {
       <strong className="mb-1 block font-semibold">🛒 Vous avez un panier en attente</strong>
       <span className="text-sm">{suggestion}</span>
     </div>
-  )
+  );
 }

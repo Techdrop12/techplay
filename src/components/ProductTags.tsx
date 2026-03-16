@@ -1,15 +1,15 @@
 // src/components/ProductTags.tsx
-'use client'
+'use client';
 
-import { motion } from 'framer-motion'
-import { useTranslations } from 'next-intl'
+import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
 
 interface ProductTagsProps {
-  tags?: string[]
-  variant?: 'soft' | 'solid' | 'ghost'
-  className?: string
+  tags?: string[];
+  variant?: 'soft' | 'solid' | 'ghost';
+  className?: string;
 }
 
 export default function ProductTags({
@@ -17,17 +17,17 @@ export default function ProductTags({
   variant = 'soft',
   className = '',
 }: ProductTagsProps) {
-  const t = useTranslations('misc')
-  if (!tags.length) return null
+  const t = useTranslations('misc');
+  if (!tags.length) return null;
 
-  const base = 'text-xs font-medium px-2 py-1 rounded inline-block transition'
+  const base = 'text-xs font-medium px-2 py-1 rounded inline-block transition';
   const variants = {
     soft: 'bg-[hsl(var(--surface-2))] text-token-text/85',
     solid: 'bg-[hsl(var(--accent)/0.15)] text-[hsl(var(--accent))]',
     ghost: 'border border-[hsl(var(--border))] text-token-text/70',
-  }
+  };
 
-  const style = variants[variant] || variants.soft
+  const style = variants[variant] || variants.soft;
 
   return (
     <motion.div
@@ -50,5 +50,5 @@ export default function ProductTags({
         </motion.span>
       ))}
     </motion.div>
-  )
+  );
 }

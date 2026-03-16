@@ -33,7 +33,10 @@ export function validateBody<T extends Record<string, unknown>>(
 
   for (const [k, v] of Object.entries(body)) {
     if (typeof v === 'string') {
-      body[k] = v.replace(/[\u0000-\u001F\u007F]/g, '').trim().slice(0, 10000);
+      body[k] = v
+        .replace(/[\u0000-\u001F\u007F]/g, '')
+        .trim()
+        .slice(0, 10000);
     }
   }
 

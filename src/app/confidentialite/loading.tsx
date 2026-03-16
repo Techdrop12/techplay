@@ -9,5 +9,5 @@ export default function ConfidentialiteLoading() {
         <div className="skeleton h-4 w-full max-w-sm rounded-lg" />
       </div>
     </div>
-  )
+  );
 }

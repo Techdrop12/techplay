@@ -1,11 +1,11 @@
-import mongoose, { InferSchemaType, Schema, Types } from 'mongoose'
+import mongoose, { InferSchemaType, Schema, Types } from 'mongoose';
 
 type SerializedToken = {
-  _id?: Types.ObjectId | string
-  __v?: unknown
-  id?: string
-  [key: string]: unknown
-}
+  _id?: Types.ObjectId | string;
+  __v?: unknown;
+  id?: string;
+  [key: string]: unknown;
+};
 
 const TokenSchema = new Schema(
   {
@@ -21,23 +21,23 @@ const TokenSchema = new Schema(
       virtuals: true,
       versionKey: false,
       transform: (_doc, ret) => {
-        const serialized = ret as SerializedToken
-        if (serialized._id != null) serialized.id = String(serialized._id)
-        const { _id, __v, ...rest } = serialized
-        return rest
+        const serialized = ret as SerializedToken;
+        if (serialized._id != null) serialized.id = String(serialized._id);
+        const { _id, __v, ...rest } = serialized;
+        return rest;
       },
     },
   }
-)
+);
 
 TokenSchema.virtual('id').get(function (this: { _id: Types.ObjectId }) {
-  return this._id.toString()
-})
+  return this._id.toString();
+});
 
-export type Token = InferSchemaType<typeof TokenSchema>
+export type Token = InferSchemaType<typeof TokenSchema>;
 
 const TokenModel =
   (mongoose.models.Token as mongoose.Model<Token> | undefined) ||
-  mongoose.model<Token>('Token', TokenSchema)
+  mongoose.model<Token>('Token', TokenSchema);
 
-export default TokenModel
+export default TokenModel;

@@ -3,7 +3,7 @@
  * Utilisé par checkout, panier, analytics et commande.
  */
 
-export type Currency = 'EUR' | 'GBP' | 'USD'
+export type Currency = 'EUR' | 'GBP' | 'USD';
 
 /**
  * Détecte la devise à partir du document/navigator ou d’un hint de locale.
@@ -18,12 +18,12 @@ export function detectCurrency(localeOrSource?: string): Currency {
       ''
     )
       .trim()
-      .toLowerCase()
+      .toLowerCase();
 
-    if (source.includes('gb') || source.endsWith('-uk') || source === 'uk') return 'GBP'
-    if (source.includes('us') || source.startsWith('en')) return 'USD'
-    return 'EUR'
+    if (source.includes('gb') || source.endsWith('-uk') || source === 'uk') return 'GBP';
+    if (source.includes('us') || source.startsWith('en')) return 'USD';
+    return 'EUR';
   } catch {
-    return 'EUR'
+    return 'EUR';
   }
 }

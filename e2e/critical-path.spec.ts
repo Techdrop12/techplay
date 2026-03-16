@@ -1,5 +1,5 @@
-import { expect } from '@playwright/test'
-import { test } from '@playwright/test'
+import { expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 /**
  * Parcours critique e-commerce : Accueil → Produit → Panier → Commande.
@@ -11,19 +11,19 @@ import { test } from '@playwright/test'
  */
 test.describe('Parcours critique', () => {
   test('Accueil → Produit → Panier → Page commande', async ({ page }) => {
-    test.setTimeout(90_000)
+    test.setTimeout(90_000);
     // / redirige vers /fr (middleware) ; on peut aussi aller directement sur /fr
-    await page.goto('/')
+    await page.goto('/');
 
     // Fermer la bannière cookies si elle est affichée (évite qu’elle gêne la suite)
     const acceptCookies = page.getByRole('button', {
       name: /Tout accepter|Accept all/i,
-    })
-    await acceptCookies.click({ timeout: 3_000 }).catch(() => {})
+    });
+    await acceptCookies.click({ timeout: 3_000 }).catch(() => {});
 
     // Aller au catalogue : liens produits stables et cliquables (pas bloqués par le hero)
-    await page.goto('/products')
-    await expect(page).toHaveURL(/\/products\/?$/)
+    await page.goto('/products');
+    await expect(page).toHaveURL(/\/products\/?$/);
 
     // Attendre que le catalogue ait fini de charger (résultats ou message vide)
     await page
@@ -33,104 +33,108 @@ test.describe('Parcours critique', () => {
         hasText: /\d+\s*(résultat|produit|result)|Aucun produit trouvé|No products found/i,
       })
       .first()
-      .waitFor({ state: 'visible', timeout: 12_000 })
+      .waitFor({ state: 'visible', timeout: 12_000 });
 
     // Lien fiche produit dans la grille catalogue (pas nav ni packs)
-    const productLink = page
-      .locator('#catalogue-products-grid a[href^="/products/"]')
-      .first()
+    const productLink = page.locator('#catalogue-products-grid a[href^="/products/"]').first();
 
     if (await productLink.isVisible().catch(() => false)) {
-      const href = await productLink.getAttribute('href')
-      const path = href.replace(/^https?:\/\/[^/]+/, '') || href
+      const href = await productLink.getAttribute('href');
+      const path = href.replace(/^https?:\/\/[^/]+/, '') || href;
       const isProductDetail =
         path &&
         path !== '/products' &&
         path !== '/products/' &&
-        /\/products\/(?!packs)[^/]+\/?$/.test(path.replace(/\?.*$/, ''))
+        /\/products\/(?!packs)[^/]+\/?$/.test(path.replace(/\?.*$/, ''));
 
       if (isProductDetail) {
-        await page.goto(href.startsWith('http') ? href : new URL(href, page.url()).toString())
-        await expect(page).toHaveURL(/\/products\/.+/)
+        await page.goto(href.startsWith('http') ? href : new URL(href, page.url()).toString());
+        await expect(page).toHaveURL(/\/products\/.+/);
       } else {
-        await page.goto('/products/packs')
-        await expect(page).toHaveURL(/\/products\/packs/)
-        const packLink = page.locator('main a[href^="/products/packs/"]').first()
-        await expect(packLink).toBeVisible({ timeout: 15_000 })
-        await packLink.click()
-        await expect(page).toHaveURL(/\/products\/packs\/.+/, { timeout: 12_000 })
+        await page.goto('/products/packs');
+        await expect(page).toHaveURL(/\/products\/packs/);
+        const packLink = page.locator('main a[href^="/products/packs/"]').first();
+        await expect(packLink).toBeVisible({ timeout: 15_000 });
+        await packLink.click();
+        await expect(page).toHaveURL(/\/products\/packs\/.+/, { timeout: 12_000 });
       }
     } else {
-      await page.goto('/products/packs')
-      await expect(page).toHaveURL(/\/products\/packs/)
-      const packLink = page.locator('main a[href^="/products/packs/"]').first()
-      await expect(packLink).toBeVisible({ timeout: 15_000 })
-      await packLink.click()
-      await expect(page).toHaveURL(/\/products\/packs\/.+/, { timeout: 12_000 })
+      await page.goto('/products/packs');
+      await expect(page).toHaveURL(/\/products\/packs/);
+      const packLink = page.locator('main a[href^="/products/packs/"]').first();
+      await expect(packLink).toBeVisible({ timeout: 15_000 });
+      await packLink.click();
+      await expect(page).toHaveURL(/\/products\/packs\/.+/, { timeout: 12_000 });
     }
 
     // Fiche produit ou pack : URL /products/xxx ou /products/packs/xxx
-    await expect(page).toHaveURL(/\/products\/.+/)
+    await expect(page).toHaveURL(/\/products\/.+/);
 
     // Les pages pack n’ont pas de bouton « Ajouter au panier » : aller sur une fiche produit
     if (page.url().includes('/products/packs/')) {
-      await page.goto('/products')
+      await page.goto('/products');
       await page
         .locator('main p')
         .filter({ hasText: /\d+\s*(résultat|produit|result)/i })
         .first()
-        .waitFor({ state: 'visible', timeout: 8_000 })
+        .waitFor({ state: 'visible', timeout: 8_000 });
       const productHref = await page.evaluate(() => {
-        const anchors = document.querySelectorAll('#catalogue-products-grid a[href^="/products/"]')
+        const anchors = document.querySelectorAll('#catalogue-products-grid a[href^="/products/"]');
         for (const a of anchors) {
-          const h = a.getAttribute('href') || ''
-          const path = h.replace(/^https?:\/\/[^/]+/, '').split('?')[0]
-          if (path && path !== '/products' && path !== '/products/' && !path.startsWith('/products/packs')) return h
+          const h = a.getAttribute('href') || '';
+          const path = h.replace(/^https?:\/\/[^/]+/, '').split('?')[0];
+          if (
+            path &&
+            path !== '/products' &&
+            path !== '/products/' &&
+            !path.startsWith('/products/packs')
+          )
+            return h;
         }
-        return null
-      })
+        return null;
+      });
       if (productHref) {
-        await page.goto(productHref.startsWith('http') ? productHref : new URL(productHref, page.url()).toString())
+        await page.goto(
+          productHref.startsWith('http') ? productHref : new URL(productHref, page.url()).toString()
+        );
       }
     }
 
     // Bouton "Ajouter au panier" / "Ajouter le pack" / "Commander" (data-action pour fiabilité)
-    const addToCart = page
-      .locator('button[data-action="add-to-cart"]')
-      .or(
-        page.getByRole('button', {
-          name: /Ajouter au panier|Ajouter le pack|Add to cart|Commander maintenant|Buy now|Ajouté/i,
-        })
-      )
-    await expect(addToCart.first()).toBeVisible({ timeout: 20_000 })
-    await addToCart.first().click()
+    const addToCart = page.locator('button[data-action="add-to-cart"]').or(
+      page.getByRole('button', {
+        name: /Ajouter au panier|Ajouter le pack|Add to cart|Commander maintenant|Buy now|Ajouté/i,
+      })
+    );
+    await expect(addToCart.first()).toBeVisible({ timeout: 20_000 });
+    await addToCart.first().click();
 
     // Aller au panier
-    await page.goto('/cart')
-    await expect(page).toHaveURL(/\/cart/)
+    await page.goto('/cart');
+    await expect(page).toHaveURL(/\/cart/);
     // Panier non vide : lien ou bouton vers commande
     const toCheckout = page
       .getByRole('link', {
         name: /Passer commande|Proceed to checkout|Payer/i,
       })
-      .or(page.getByRole('button', { name: /Passer commande|Proceed to checkout/i }))
-    await expect(toCheckout.first()).toBeVisible({ timeout: 5_000 })
-    await toCheckout.first().click()
+      .or(page.getByRole('button', { name: /Passer commande|Proceed to checkout/i }));
+    await expect(toCheckout.first()).toBeVisible({ timeout: 5_000 });
+    await toCheckout.first().click();
 
     // Page commande (accepte /commande ou /fr/commande ; si resté sur /cart, aller sur /commande)
-    const onCheckout = /\/(fr\/)?commande\/?$/
-    await page.waitForURL(onCheckout, { timeout: 8_000 }).catch(() => undefined)
+    const onCheckout = /\/(fr\/)?commande\/?$/;
+    await page.waitForURL(onCheckout, { timeout: 8_000 }).catch(() => undefined);
     if (!onCheckout.test(page.url())) {
       await page.goto(new URL('/commande', page.url()).toString(), {
         waitUntil: 'domcontentloaded',
         timeout: 45_000,
-      })
-      await expect(page).toHaveURL(onCheckout, { timeout: 10_000 })
+      });
+      await expect(page).toHaveURL(onCheckout, { timeout: 10_000 });
     }
     // Formulaire : champ email et bouton paiement
-    await expect(page.locator('input[type="email"]').first()).toBeVisible({ timeout: 5_000 })
-    await expect(
-      page.getByRole('button', { name: /Payer|Pay|Redirection/i })
-    ).toBeVisible({ timeout: 5_000 })
-  })
-})
+    await expect(page.locator('input[type="email"]').first()).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole('button', { name: /Payer|Pay|Redirection/i })).toBeVisible({
+      timeout: 5_000,
+    });
+  });
+});

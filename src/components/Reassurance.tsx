@@ -1,12 +1,12 @@
-'use client'
+'use client';
 
-import { Truck, Lock, Package } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { Truck, Lock, Package } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
-const iconClass = 'mx-auto mb-1.5 h-6 w-6 text-[hsl(var(--accent))]'
+const iconClass = 'mx-auto mb-1.5 h-6 w-6 text-[hsl(var(--accent))]';
 
 export default function Reassurance() {
-  const t = useTranslations('reassurance')
+  const t = useTranslations('reassurance');
   return (
     <div className="mt-16 grid grid-cols-1 gap-6 text-sm text-muted-foreground sm:grid-cols-3">
       <div className="text-center">
@@ -22,5 +22,5 @@ export default function Reassurance() {
         <p>{t('returns_30')}</p>
       </div>
     </div>
-  )
+  );
 }

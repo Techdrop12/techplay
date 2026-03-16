@@ -1,9 +1,9 @@
-export type GAParams = Record<string, unknown>
+export type GAParams = Record<string, unknown>;
 
 export type GAEvent = {
-  name: string
-  params?: GAParams
-}
+  name: string;
+  params?: GAParams;
+};
 
 export type FBQEvent =
   | 'PageView'
@@ -14,4 +14,4 @@ export type FBQEvent =
   | 'AddPaymentInfo'
   | 'Purchase'
   | 'Lead'
-  | string
+  | string;

@@ -1,22 +1,22 @@
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 
 type Prefs = {
-  analytics: boolean
-  ads: boolean
-}
+  analytics: boolean;
+  ads: boolean;
+};
 
 declare global {
   interface Window {
     tpConsentUpdate?: (payload: {
-      analytics?: boolean
-      ads?: boolean
-      functionality?: boolean
-      ad_user_data?: boolean
-      ad_personalization?: boolean
-    }) => void
+      analytics?: boolean;
+      ads?: boolean;
+      functionality?: boolean;
+      ad_user_data?: boolean;
+      ad_personalization?: boolean;
+    }) => void;
   }
 }
 
@@ -25,23 +25,23 @@ function readPrefs(): Prefs {
     return {
       analytics: localStorage.getItem('consent:analytics') === '1',
       ads: localStorage.getItem('consent:ads') === '1',
-    }
+    };
   } catch {
-    return { analytics: false, ads: false }
+    return { analytics: false, ads: false };
   }
 }
 
 function writePrefs(prefs: Prefs) {
   try {
-    localStorage.setItem('consent:analytics', prefs.analytics ? '1' : '0')
-    localStorage.setItem('consent:ads', prefs.ads ? '1' : '0')
-    localStorage.setItem('consent:decided', '1')
+    localStorage.setItem('consent:analytics', prefs.analytics ? '1' : '0');
+    localStorage.setItem('consent:ads', prefs.ads ? '1' : '0');
+    localStorage.setItem('consent:decided', '1');
   } catch {}
 }
 
 function applyConsent(prefs: Prefs) {
   try {
-    window.dispatchEvent(new CustomEvent('tp:consent', { detail: prefs }))
+    window.dispatchEvent(new CustomEvent('tp:consent', { detail: prefs }));
   } catch {}
   try {
     window.tpConsentUpdate?.({
@@ -50,32 +50,32 @@ function applyConsent(prefs: Prefs) {
       functionality: true,
       ad_user_data: prefs.ads,
       ad_personalization: prefs.ads,
-    })
+    });
   } catch {}
 }
 
 export default function ConfidentialitePrefs() {
-  const t = useTranslations('privacy_prefs')
-  const [prefs, setPrefs] = useState<Prefs>({ analytics: false, ads: false })
-  const [message, setMessage] = useState('')
+  const t = useTranslations('privacy_prefs');
+  const [prefs, setPrefs] = useState<Prefs>({ analytics: false, ads: false });
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
-    setPrefs(readPrefs())
-  }, [])
+    setPrefs(readPrefs());
+  }, []);
 
   const save = () => {
-    writePrefs(prefs)
-    applyConsent(prefs)
-    setMessage('Préférences mises à jour.')
-  }
+    writePrefs(prefs);
+    applyConsent(prefs);
+    setMessage('Préférences mises à jour.');
+  };
 
   const revoke = () => {
-    const next: Prefs = { analytics: false, ads: false }
-    setPrefs(next)
-    writePrefs(next)
-    applyConsent(next)
-    setMessage('Consentement révoqué.')
-  }
+    const next: Prefs = { analytics: false, ads: false };
+    setPrefs(next);
+    writePrefs(next);
+    applyConsent(next);
+    setMessage('Consentement révoqué.');
+  };
 
   return (
     <section
@@ -140,5 +140,5 @@ export default function ConfidentialitePrefs() {
         )}
       </div>
     </section>
-  )
+  );
 }

@@ -3,13 +3,13 @@
 // lecture estimée, tags naïfs, front-matter prêt si tu veux persister.
 
 export type GeneratedArticle = {
-  slug: string
-  title: string
-  content: string
-  excerpt: string
-  tags: string[]
-  readingMinutes: number
-}
+  slug: string;
+  title: string;
+  content: string;
+  excerpt: string;
+  tags: string[];
+  readingMinutes: number;
+};
 
 function slugify(input: string): string {
   return input
@@ -17,7 +17,7 @@ function slugify(input: string): string {
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)+/g, '')
+    .replace(/(^-|-$)+/g, '');
 }
 
 function makeOutline(_prompt: string): string[] {
@@ -27,24 +27,22 @@ function makeOutline(_prompt: string): string[] {
     'Étapes clés / Méthodologie',
     'Erreurs fréquentes et bonnes pratiques',
     'Conclusion et prochains pas',
-  ]
+  ];
 }
 
 function naiveTagsFromPrompt(prompt: string): string[] {
   const words = Array.from(
     new Set(prompt.toLowerCase().split(/[^a-zàâçéèêëîïôûùüÿñæœ0-9]+/g))
-  ).filter((word) => word.length > 3)
+  ).filter((word) => word.length > 3);
 
-  return words.slice(0, 6)
+  return words.slice(0, 6);
 }
 
-export async function generateArticleFromPrompt(
-  prompt: string
-): Promise<GeneratedArticle> {
-  const title = prompt.trim().replace(/\s+/g, ' ').slice(0, 120)
-  const slug = slugify(title)
+export async function generateArticleFromPrompt(prompt: string): Promise<GeneratedArticle> {
+  const title = prompt.trim().replace(/\s+/g, ' ').slice(0, 120);
+  const slug = slugify(title);
 
-  const sections = makeOutline(prompt)
+  const sections = makeOutline(prompt);
   const body = sections
     .map(
       (section) =>
@@ -52,17 +50,17 @@ export async function generateArticleFromPrompt(
         `Texte de remplissage pour **${section.toLowerCase()}** basé sur le thème « ${title} ». ` +
         `Adapte ce paragraphe avec des données réelles, exemples, chiffres et visuels si disponibles.\n`
     )
-    .join('\n')
+    .join('\n');
 
   const content =
     `# ${title}\n\n` +
     `> Résumé rapide : ${title}. Ce guide vous donne l’essentiel à connaître.\n\n` +
-    body
+    body;
 
-  const excerpt = `Résumé : ${title}.`
-  const wordCount = content.split(/\s+/).length
-  const readingMinutes = Math.max(1, Math.round(wordCount / 200))
-  const tags = naiveTagsFromPrompt(prompt)
+  const excerpt = `Résumé : ${title}.`;
+  const wordCount = content.split(/\s+/).length;
+  const readingMinutes = Math.max(1, Math.round(wordCount / 200));
+  const tags = naiveTagsFromPrompt(prompt);
 
-  return { slug, title, content, excerpt, tags, readingMinutes }
+  return { slug, title, content, excerpt, tags, readingMinutes };
 }

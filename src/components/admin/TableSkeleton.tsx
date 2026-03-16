@@ -1,9 +1,9 @@
-'use client'
+'use client';
 
 interface TableSkeletonProps {
-  rows?: number
-  cols?: number
-  ariaLabel?: string
+  rows?: number;
+  cols?: number;
+  ariaLabel?: string;
 }
 
 export default function TableSkeleton({
@@ -44,5 +44,5 @@ export default function TableSkeleton({
         </tbody>
       </table>
     </div>
-  )
+  );
 }

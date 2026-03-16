@@ -24,9 +24,5 @@ export default function ABTestBanner({ variantA, variantB }: ABTestBannerProps) 
     logEvent('ab_banner_view', { variant: v });
   }, []);
 
-  return (
-    <div className="my-3">
-      {variant === 'A' ? variantA : variantB}
-    </div>
-  );
+  return <div className="my-3">{variant === 'A' ? variantA : variantB}</div>;
 }

@@ -9,14 +9,14 @@ Conventions pour les erreurs côté API, logger et UI.
 - **Logs** : avant de logger une erreur, utiliser `safeErrorForLog(err)` pour redacter emails, clés Stripe, tokens.
 
 ```ts
-import { apiError, apiSuccess, safeErrorForLog } from '@/lib/apiResponse'
-import { error as logError } from '@/lib/logger'
+import { apiError, apiSuccess, safeErrorForLog } from '@/lib/apiResponse';
+import { error as logError } from '@/lib/logger';
 
 // Dans un catch :
-logError('[route]', safeErrorForLog(err))
+logError('[route]', safeErrorForLog(err));
 return apiError('Message utilisateur', 500, {
   details: process.env.NODE_ENV === 'development' ? getErrorMessage(err) : undefined,
-})
+});
 ```
 
 ## Logger (`@/lib/logger`)
@@ -31,8 +31,8 @@ return apiError('Message utilisateur', 500, {
 
 ## Résumé
 
-| Contexte | Outil | Règle |
-|----------|--------|--------|
-| Réponse API | `apiError` / `apiSuccess` | Format JSON homogène, pas de détail en prod |
-| Log serveur | `logError` + `safeErrorForLog` | Toujours assainir avant de logger |
-| Affichage UI | `getErrorMessage` dans error boundary | Message lisible, pas de stack |
+| Contexte     | Outil                                 | Règle                                       |
+| ------------ | ------------------------------------- | ------------------------------------------- |
+| Réponse API  | `apiError` / `apiSuccess`             | Format JSON homogène, pas de détail en prod |
+| Log serveur  | `logError` + `safeErrorForLog`        | Toujours assainir avant de logger           |
+| Affichage UI | `getErrorMessage` dans error boundary | Message lisible, pas de stack               |

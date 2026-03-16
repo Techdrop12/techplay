@@ -1,77 +1,77 @@
-'use client'
+'use client';
 
-import { motion } from 'framer-motion'
-import { Star, Trash2 } from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
-import { toast } from 'react-hot-toast'
+import { motion } from 'framer-motion';
+import { Star, Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
-import TableSkeleton from '@/components/admin/TableSkeleton'
+import TableSkeleton from '@/components/admin/TableSkeleton';
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 20;
 
 interface ReviewRow {
-  _id: string
-  name?: string
-  rating: number
-  comment?: string
-  productId?: string
-  createdAt?: string
+  _id: string;
+  name?: string;
+  rating: number;
+  comment?: string;
+  productId?: string;
+  createdAt?: string;
 }
 
 export default function AdminReviewTable() {
-  const t = useTranslations('admin')
-  const [reviews, setReviews] = useState<ReviewRow[]>([])
-  const [loading, setLoading] = useState(false)
-  const [ratingFilter, setRatingFilter] = useState<number | ''>('')
-  const [page, setPage] = useState(1)
-  const [total, setTotal] = useState(0)
-  const [pages, setPages] = useState(1)
+  const t = useTranslations('admin');
+  const [reviews, setReviews] = useState<ReviewRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [ratingFilter, setRatingFilter] = useState<number | ''>('');
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [pages, setPages] = useState(1);
 
   const fetchReviews = useCallback(async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const params = new URLSearchParams({ page: String(page), limit: String(PAGE_SIZE) })
-      if (ratingFilter !== '') params.set('rating', String(ratingFilter))
-      const res = await fetch(`/api/reviews?${params}`)
-      const data = await res.json()
+      const params = new URLSearchParams({ page: String(page), limit: String(PAGE_SIZE) });
+      if (ratingFilter !== '') params.set('rating', String(ratingFilter));
+      const res = await fetch(`/api/reviews?${params}`);
+      const data = await res.json();
       if (!res.ok) {
-        toast.error(data?.error ?? t('error_load_reviews'))
-        setReviews([])
-        return
+        toast.error(data?.error ?? t('error_load_reviews'));
+        setReviews([]);
+        return;
       }
-      setReviews(Array.isArray(data?.items) ? data.items : [])
-      setTotal(Number(data?.total) ?? 0)
-      setPages(Math.max(1, Number(data?.pages) ?? 1))
+      setReviews(Array.isArray(data?.items) ? data.items : []);
+      setTotal(Number(data?.total) ?? 0);
+      setPages(Math.max(1, Number(data?.pages) ?? 1));
     } catch {
-      toast.error(t('error_load_reviews'))
-      setReviews([])
+      toast.error(t('error_load_reviews'));
+      setReviews([]);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [page, ratingFilter, t])
+  }, [page, ratingFilter, t]);
 
   useEffect(() => {
-    fetchReviews()
-  }, [fetchReviews])
+    fetchReviews();
+  }, [fetchReviews]);
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t('confirm_delete_review'))) return
+    if (!confirm(t('confirm_delete_review'))) return;
     try {
-      const res = await fetch(`/api/reviews/${id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/reviews/${id}`, { method: 'DELETE' });
       if (res.ok) {
-        toast.success(t('review_deleted'))
-        setReviews((prev) => prev.filter((r) => r._id !== id))
-        setTotal((prev) => Math.max(0, prev - 1))
+        toast.success(t('review_deleted'));
+        setReviews((prev) => prev.filter((r) => r._id !== id));
+        setTotal((prev) => Math.max(0, prev - 1));
       } else {
-        throw new Error()
+        throw new Error();
       }
     } catch {
-      toast.error(t('delete_failed'))
+      toast.error(t('delete_failed'));
     }
-  }
+  };
 
-  const tPagination = useTranslations('pagination')
+  const tPagination = useTranslations('pagination');
 
   return (
     <div className="p-6 bg-white dark:bg-zinc-900 rounded-xl shadow-[var(--shadow-sm)] border border-[hsl(var(--border))]">
@@ -80,15 +80,17 @@ export default function AdminReviewTable() {
         <select
           value={ratingFilter}
           onChange={(e) => {
-            setRatingFilter(e.target.value === '' ? '' : Number(e.target.value))
-            setPage(1)
+            setRatingFilter(e.target.value === '' ? '' : Number(e.target.value));
+            setPage(1);
           }}
           className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
           aria-label={t('all_ratings')}
         >
           <option value="">{t('all_ratings')}</option>
           {[5, 4, 3, 2, 1].map((n) => (
-            <option key={n} value={n}>{n} {n > 1 ? t('stars') : t('star_one')}</option>
+            <option key={n} value={n}>
+              {n} {n > 1 ? t('stars') : t('star_one')}
+            </option>
           ))}
         </select>
         {!loading && total > 0 && (
@@ -121,10 +123,15 @@ export default function AdminReviewTable() {
       {loading ? (
         <TableSkeleton rows={6} cols={6} ariaLabel={t('loading_reviews')} />
       ) : reviews.length === 0 ? (
-        <p className="text-token-text/50">{ratingFilter !== '' ? t('no_reviews_filter') : t('no_reviews')}</p>
+        <p className="text-token-text/50">
+          {ratingFilter !== '' ? t('no_reviews_filter') : t('no_reviews')}
+        </p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full text-sm border border-[hsl(var(--border))] rounded-lg overflow-hidden" aria-label={t('reviews_title')}>
+          <table
+            className="min-w-full text-sm border border-[hsl(var(--border))] rounded-lg overflow-hidden"
+            aria-label={t('reviews_title')}
+          >
             <thead className="bg-[hsl(var(--surface-2))]">
               <tr>
                 <th className="text-left px-4 py-2">{t('review_name')}</th>
@@ -145,7 +152,11 @@ export default function AdminReviewTable() {
                 >
                   <td className="px-4 py-2 font-medium">{r.name}</td>
                   <td className="px-4 py-2">
-                    <div className="flex items-center gap-1" role="img" aria-label={`${r.rating} sur 5`}>
+                    <div
+                      className="flex items-center gap-1"
+                      role="img"
+                      aria-label={`${r.rating} sur 5`}
+                    >
                       {[1, 2, 3, 4, 5].map((i) => (
                         <Star
                           key={i}
@@ -179,5 +190,5 @@ export default function AdminReviewTable() {
         </div>
       )}
     </div>
-  )
+  );
 }

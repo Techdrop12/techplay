@@ -1,127 +1,125 @@
 // src/lib/ga.ts
 // Couche GA / dataLayer SSR-safe, tolérante, rétro-compatible (funnel + dashboards)
 
-import { FUNNEL_STEPS, type ListName } from './analytics-events'
+import { FUNNEL_STEPS, type ListName } from './analytics-events';
 
 export const GA_TRACKING_ID =
-  process.env.NEXT_PUBLIC_GA_ID ||
-  process.env.NEXT_PUBLIC_GA_TRACKING_ID ||
-  ''
+  process.env.NEXT_PUBLIC_GA_ID || process.env.NEXT_PUBLIC_GA_TRACKING_ID || '';
 
-export type GAParams = Record<string, unknown>
+export type GAParams = Record<string, unknown>;
 
 export type GAItem = {
-  item_id: string
-  item_name: string
-  price?: number
-  quantity?: number
-  item_category?: string
-  item_brand?: string
-  item_variant?: string
-  coupon?: string
-  discount?: number
-  index?: number
-}
+  item_id: string;
+  item_name: string;
+  price?: number;
+  quantity?: number;
+  item_category?: string;
+  item_brand?: string;
+  item_variant?: string;
+  coupon?: string;
+  discount?: number;
+  index?: number;
+};
 
 export type GAEventObject = {
-  action: string
-  category?: string
-  label?: string
-  value?: number
-  nonInteraction?: boolean
-  params?: GAParams
-}
+  action: string;
+  category?: string;
+  label?: string;
+  value?: number;
+  nonInteraction?: boolean;
+  params?: GAParams;
+};
 
-type DataLayerEntry = NonNullable<Window['dataLayer']>[number]
+type DataLayerEntry = NonNullable<Window['dataLayer']>[number];
 
-const isBrowser = () => typeof window !== 'undefined'
+const isBrowser = () => typeof window !== 'undefined';
 
 function getGtag() {
-  if (!isBrowser()) return undefined
-  return window.gtag
+  if (!isBrowser()) return undefined;
+  return window.gtag;
 }
 
 function ensureDataLayer(): NonNullable<Window['dataLayer']> {
-  if (!isBrowser()) return []
+  if (!isBrowser()) return [];
 
   if (!Array.isArray(window.dataLayer)) {
-    window.dataLayer = []
+    window.dataLayer = [];
   }
 
-  return window.dataLayer
+  return window.dataLayer;
 }
 
 export function pushDataLayer(obj: Record<string, unknown>): void {
-  if (!isBrowser()) return
-  ensureDataLayer().push(obj)
+  if (!isBrowser()) return;
+  ensureDataLayer().push(obj);
 }
 
 export function sendGA(event: { name: string; params?: GAParams }): void {
-  if (!event?.name) return
-  logEvent(event.name, event.params)
+  if (!event?.name) return;
+  logEvent(event.name, event.params);
 }
 
 export function initAnalytics(): void {
-  if (!isBrowser() || !GA_TRACKING_ID) return
+  if (!isBrowser() || !GA_TRACKING_ID) return;
 
-  ensureDataLayer()
+  ensureDataLayer();
 
   if (typeof window.gtag !== 'function') {
     window.gtag = (...args: Gtag.Command) => {
-      ensureDataLayer().push(args as DataLayerEntry)
-    }
+      ensureDataLayer().push(args as DataLayerEntry);
+    };
   }
 
   if (!window.__ga_inited) {
     try {
-      window.gtag?.('js', new Date())
+      window.gtag?.('js', new Date());
       window.gtag?.('config', GA_TRACKING_ID, {
         anonymize_ip: true,
         send_page_view: false,
-      })
-      window.__ga_inited = true
+      });
+      window.__ga_inited = true;
     } catch {}
   }
 }
 
 export function pageview(url: string): void {
-  if (!url) return
+  if (!url) return;
 
   const params: GAParams = {
     page_path: url,
     page_location: isBrowser() ? window.location.href : url,
     page_title: isBrowser() ? document.title : undefined,
-  }
+  };
 
-  const gtag = getGtag()
+  const gtag = getGtag();
   if (typeof gtag === 'function' && GA_TRACKING_ID) {
     try {
-      gtag('config', GA_TRACKING_ID, params)
-      return
+      gtag('config', GA_TRACKING_ID, params);
+      return;
     } catch {}
   }
 
-  pushDataLayer({ event: 'page_view', ...params })
+  pushDataLayer({ event: 'page_view', ...params });
 }
 
 export function logEvent(name: string, params?: GAParams): void {
-  if (!name) return
+  if (!name) return;
 
-  const gtag = getGtag()
+  const gtag = getGtag();
   if (typeof gtag === 'function') {
     try {
-      gtag('event', name, params ?? {})
-      return
+      gtag('event', name, params ?? {});
+      return;
     } catch {}
   }
 
-  pushDataLayer({ event: name, ...(params ?? {}) })
+  pushDataLayer({ event: name, ...(params ?? {}) });
 }
 
 export function event(input: string | GAEventObject, params?: GAParams): void {
   if (typeof input === 'string') {
-    logEvent(input, params)
-    return
+    logEvent(input, params);
+    return;
   }
 
   const payload: GAParams = {
@@ -130,31 +128,27 @@ export function event(input: string | GAEventObject, params?: GAParams): void {
     value: input.value,
     non_interaction: input.nonInteraction,
     ...(input.params ?? {}),
-  }
+  };
 
-  logEvent(input.action, payload)
+  logEvent(input.action, payload);
 }
 
 function str(v: unknown, fallback = ''): string {
-  return typeof v === 'string' ? v : v == null ? fallback : String(v)
+  return typeof v === 'string' ? v : v == null ? fallback : String(v);
 }
 
 function num(v: unknown): number | undefined {
-  const n = typeof v === 'number' ? v : Number(v)
-  return Number.isFinite(n) ? n : undefined
+  const n = typeof v === 'number' ? v : Number(v);
+  return Number.isFinite(n) ? n : undefined;
 }
 
 export function mapProductToGaItem(product: Record<string, unknown>): GAItem {
   const itemId =
-    str(product._id) ||
-    str(product.id) ||
-    str(product.slug) ||
-    str(product.sku) ||
-    'unknown-item'
+    str(product._id) || str(product.id) || str(product.slug) || str(product.sku) || 'unknown-item';
 
-  const price = num(product.price)
-  const oldPrice = num(product.oldPrice)
-  const quantity = Math.max(1, num(product.quantity) ?? 1)
+  const price = num(product.price);
+  const oldPrice = num(product.oldPrice);
+  const quantity = Math.max(1, num(product.quantity) ?? 1);
 
   return {
     item_id: itemId,
@@ -168,22 +162,22 @@ export function mapProductToGaItem(product: Record<string, unknown>): GAItem {
       typeof oldPrice === 'number' && typeof price === 'number' && oldPrice > price
         ? oldPrice - price
         : undefined,
-  }
+  };
 }
 
 export function trackViewItem(params: {
-  currency?: string
-  value?: number
-  items: GAItem[]
+  currency?: string;
+  value?: number;
+  items: GAItem[];
 }): void {
-  const payload = { ...params, funnel_step: FUNNEL_STEPS.VIEW_ITEM }
-  logEvent('view_item', payload)
+  const payload = { ...params, funnel_step: FUNNEL_STEPS.VIEW_ITEM };
+  logEvent('view_item', payload);
   try {
     ensureDataLayer().push({
       event: 'view_item',
       ecommerce: { currency: params.currency, value: params.value, items: params.items },
       funnel_step: FUNNEL_STEPS.VIEW_ITEM,
-    })
+    });
   } catch {
     // no-op
   }
@@ -191,16 +185,16 @@ export function trackViewItem(params: {
 
 /** Affichage d’une liste de produits (catalogue, catégorie, recommandations). Pour funnel + dashboards. */
 export function trackViewItemList(params: {
-  item_list_name?: ListName | string
-  currency?: string
-  value?: number
-  items: GAItem[]
+  item_list_name?: ListName | string;
+  currency?: string;
+  value?: number;
+  items: GAItem[];
 }): void {
   const payload = {
     ...params,
     funnel_step: 'view_list' as const,
-  }
-  logEvent('view_item_list', payload)
+  };
+  logEvent('view_item_list', payload);
   try {
     ensureDataLayer().push({
       event: 'view_item_list',
@@ -211,111 +205,118 @@ export function trackViewItemList(params: {
         items: params.items,
       },
       funnel_step: 'view_list',
-    })
+    });
   } catch {
     // no-op
   }
 }
 
 export function trackSelectItem(params: {
-  currency?: string
-  value?: number
-  item_list_name?: string
-  items: GAItem[]
+  currency?: string;
+  value?: number;
+  item_list_name?: string;
+  items: GAItem[];
 }): void {
-  logEvent('select_item', params)
+  logEvent('select_item', params);
 }
 
 export function trackAddToCart(params: {
-  currency?: string
-  value?: number
-  items: GAItem[]
-  item_list_name?: ListName | string
-  ab_experiment?: string
-  ab_variant?: string
+  currency?: string;
+  value?: number;
+  items: GAItem[];
+  item_list_name?: ListName | string;
+  ab_experiment?: string;
+  ab_variant?: string;
 }): void {
-  const payload = { ...params, funnel_step: FUNNEL_STEPS.ADD_TO_CART }
-  logEvent('add_to_cart', payload)
+  const payload = { ...params, funnel_step: FUNNEL_STEPS.ADD_TO_CART };
+  logEvent('add_to_cart', payload);
   try {
     ensureDataLayer().push({
       event: 'add_to_cart',
       ecommerce: { currency: params.currency, value: params.value, items: params.items },
       funnel_step: FUNNEL_STEPS.ADD_TO_CART,
       ...(params.item_list_name ? { item_list_name: params.item_list_name } : {}),
-      ...(params.ab_experiment ? { ab_experiment: params.ab_experiment, ab_variant: params.ab_variant } : {}),
-    })
+      ...(params.ab_experiment
+        ? { ab_experiment: params.ab_experiment, ab_variant: params.ab_variant }
+        : {}),
+    });
   } catch {
     // no-op
   }
 }
 
 export function trackViewCart(params: {
-  currency?: string
-  value?: number
-  items: GAItem[]
+  currency?: string;
+  value?: number;
+  items: GAItem[];
 }): void {
-  const payload = { ...params, funnel_step: FUNNEL_STEPS.VIEW_CART }
-  logEvent('view_cart', payload)
+  const payload = { ...params, funnel_step: FUNNEL_STEPS.VIEW_CART };
+  logEvent('view_cart', payload);
   try {
     ensureDataLayer().push({
       event: 'view_cart',
       ecommerce: { currency: params.currency, value: params.value, items: params.items },
       funnel_step: FUNNEL_STEPS.VIEW_CART,
-    })
+    });
   } catch {
     // no-op
   }
 }
 
 export function trackAddToWishlist(params: {
-  currency?: string
-  value?: number
-  items: GAItem[]
+  currency?: string;
+  value?: number;
+  items: GAItem[];
 }): void {
-  logEvent('add_to_wishlist', params)
+  logEvent('add_to_wishlist', params);
 }
 
 export function trackBeginCheckout(params: {
-  currency?: string
-  value?: number
-  coupon?: string
-  items: GAItem[]
+  currency?: string;
+  value?: number;
+  coupon?: string;
+  items: GAItem[];
 }): void {
-  const payload = { ...params, funnel_step: FUNNEL_STEPS.BEGIN_CHECKOUT }
-  logEvent('begin_checkout', payload)
+  const payload = { ...params, funnel_step: FUNNEL_STEPS.BEGIN_CHECKOUT };
+  logEvent('begin_checkout', payload);
   try {
     ensureDataLayer().push({
       event: 'begin_checkout',
-      ecommerce: { currency: params.currency, value: params.value, coupon: params.coupon, items: params.items },
+      ecommerce: {
+        currency: params.currency,
+        value: params.value,
+        coupon: params.coupon,
+        items: params.items,
+      },
       funnel_step: FUNNEL_STEPS.BEGIN_CHECKOUT,
-    })
+    });
   } catch {
     // no-op
   }
 }
 
 export function trackAddShippingInfo(params: {
-  currency?: string
-  value?: number
-  shipping_tier?: string
-  coupon?: string
-  items: GAItem[]
+  currency?: string;
+  value?: number;
+  shipping_tier?: string;
+  coupon?: string;
+  items: GAItem[];
 }): void {
-  logEvent('add_shipping_info', params)
+  logEvent('add_shipping_info', params);
 }
 
 export function trackPurchase(params: {
-  transaction_id?: string
-  affiliation?: string
-  value?: number
-  tax?: number
-  shipping?: number
-  currency?: string
-  coupon?: string
-  items: GAItem[]
+  transaction_id?: string;
+  affiliation?: string;
+  value?: number;
+  tax?: number;
+  shipping?: number;
+  currency?: string;
+  coupon?: string;
+  items: GAItem[];
 }): void {
-  const payload = { ...params, funnel_step: FUNNEL_STEPS.PURCHASE }
-  logEvent('purchase', payload)
+  const payload = { ...params, funnel_step: FUNNEL_STEPS.PURCHASE };
+  logEvent('purchase', payload);
   try {
     ensureDataLayer().push({
       event: 'purchase',
@@ -329,7 +330,7 @@ export function trackPurchase(params: {
         items: params.items,
       },
       funnel_step: FUNNEL_STEPS.PURCHASE,
-    })
+    });
   } catch {
     // no-op
   }
@@ -353,4 +354,4 @@ export default {
   trackBeginCheckout,
   trackAddShippingInfo,
   trackPurchase,
-}
+};

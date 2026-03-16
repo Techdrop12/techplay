@@ -1,27 +1,27 @@
-'use client'
+'use client';
 
-import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 
-import Logo from '../Logo'
+import Logo from '../Logo';
 
-import MobileNav from './MobileNav'
+import MobileNav from './MobileNav';
 
-import Link from '@/components/LocalizedLink'
+import Link from '@/components/LocalizedLink';
 import {
   CartIcon as Cart,
   HeartIcon as Heart,
   SearchIcon as Search,
   UserIcon as User,
-} from '@/components/ui/premium-icons'
-import ThemeToggle from '@/components/ui/ThemeToggle'
-import { useTheme } from '@/context/themeContext'
-import { useCart } from '@/hooks/useCart'
-import { useWishlist } from '@/hooks/useWishlist'
-import { getCategories } from '@/lib/categories'
-import { getCurrentLocale, localizePath } from '@/lib/i18n-routing'
-import { LOCALE_COOKIE, setLocaleCookie } from '@/lib/language'
-import { cn } from '@/lib/utils'
+} from '@/components/ui/premium-icons';
+import ThemeToggle from '@/components/ui/ThemeToggle';
+import { useTheme } from '@/context/themeContext';
+import { useCart } from '@/hooks/useCart';
+import { useWishlist } from '@/hooks/useWishlist';
+import { getCategories } from '@/lib/categories';
+import { getCurrentLocale, localizePath } from '@/lib/i18n-routing';
+import { LOCALE_COOKIE, setLocaleCookie } from '@/lib/language';
+import { cn } from '@/lib/utils';
 
 const STR = {
   fr: {
@@ -104,52 +104,46 @@ const STR = {
     switch_to_en: 'Switch to English',
     switch_to_fr: 'Switch to French',
   },
-} as const
+} as const;
 
 type NavLink = {
-  href: string
-  labelKey: keyof typeof STR.fr.nav
-}
+  href: string;
+  labelKey: keyof typeof STR.fr.nav;
+};
 
 type CartItemLike = {
-  quantity?: number
-}
+  quantity?: number;
+};
 
 type CartCollection =
   | CartItemLike[]
   | { items?: CartItemLike[]; count?: number; size?: number }
-  | undefined
+  | undefined;
 
 type WishlistCollection =
   | unknown[]
   | { items?: unknown[]; count?: number; size?: number }
-  | undefined
+  | undefined;
 
 type CartStoreLike = {
-  cart?: CartCollection
-}
+  cart?: CartCollection;
+};
 
 type WishlistStoreLike = {
-  wishlist?: WishlistCollection
-}
+  wishlist?: WishlistCollection;
+};
 
 const LINKS: NavLink[] = [
   { href: '/categorie', labelKey: 'categories' },
   { href: '/blog', labelKey: 'blog' },
   { href: '/contact', labelKey: 'contact' },
-]
+];
 
-const SCROLL_HIDE_OFFSET = 80
-const HOVER_PREFETCH_DELAY = 120
-const PLACEHOLDER_MS = 4000
+const SCROLL_HIDE_OFFSET = 80;
+const HOVER_PREFETCH_DELAY = 120;
+const PLACEHOLDER_MS = 4000;
 
-function ActionBadge({
-  children,
-  className,
-}: {
-  children: ReactNode
-  className?: string
-}) {
+function ActionBadge({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <span
       className={cn(
@@ -161,66 +155,66 @@ function ActionBadge({
     >
       {children}
     </span>
-  )
+  );
 }
 
 function getCartCount(cart: CartCollection): number {
   if (Array.isArray(cart)) {
     return cart.reduce((total, item) => {
-      const quantity = Number(item?.quantity ?? 1)
-      return total + (Number.isFinite(quantity) && quantity > 0 ? quantity : 1)
-    }, 0)
+      const quantity = Number(item?.quantity ?? 1);
+      return total + (Number.isFinite(quantity) && quantity > 0 ? quantity : 1);
+    }, 0);
   }
 
   if (cart && Array.isArray(cart.items)) {
     return cart.items.reduce((total, item) => {
-      const quantity = Number(item?.quantity ?? 1)
-      return total + (Number.isFinite(quantity) && quantity > 0 ? quantity : 1)
-    }, 0)
+      const quantity = Number(item?.quantity ?? 1);
+      return total + (Number.isFinite(quantity) && quantity > 0 ? quantity : 1);
+    }, 0);
   }
 
-  const count = Number(cart?.count ?? cart?.size ?? 0)
-  return Number.isFinite(count) ? count : 0
+  const count = Number(cart?.count ?? cart?.size ?? 0);
+  return Number.isFinite(count) ? count : 0;
 }
 
 function getWishlistCount(wishlist: WishlistCollection): number {
-  if (Array.isArray(wishlist)) return wishlist.length
-  if (wishlist && Array.isArray(wishlist.items)) return wishlist.items.length
+  if (Array.isArray(wishlist)) return wishlist.length;
+  if (wishlist && Array.isArray(wishlist.items)) return wishlist.items.length;
 
-  const count = Number(wishlist?.count ?? wishlist?.size ?? 0)
-  return Number.isFinite(count) ? count : 0
+  const count = Number(wishlist?.count ?? wishlist?.size ?? 0);
+  return Number.isFinite(count) ? count : 0;
 }
 
 function LocaleSwitch({ pathname }: { pathname: string }) {
-  const router = useRouter()
-  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr'
-  const t = STR[locale]
+  const router = useRouter();
+  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr';
+  const t = STR[locale];
 
   const setLang = (nextLocale: 'fr' | 'en') => {
-    if (nextLocale === locale) return
+    if (nextLocale === locale) return;
 
     try {
       const secure =
-        typeof location !== 'undefined' && location.protocol === 'https:' ? '; Secure' : ''
-      document.cookie = `${LOCALE_COOKIE}=${encodeURIComponent(nextLocale)}; Max-Age=31536000; Path=/; SameSite=Lax${secure}`
-      setLocaleCookie(nextLocale)
+        typeof location !== 'undefined' && location.protocol === 'https:' ? '; Secure' : '';
+      document.cookie = `${LOCALE_COOKIE}=${encodeURIComponent(nextLocale)}; Max-Age=31536000; Path=/; SameSite=Lax${secure}`;
+      setLocaleCookie(nextLocale);
     } catch {
       // no-op
     }
 
-    const href = localizePath(pathname, nextLocale)
+    const href = localizePath(pathname, nextLocale);
     // Sur les pages sans préfixe locale (ex. /blog, /contact), l’URL ne change pas :
     // forcer un rechargement pour que le serveur relise le cookie et affiche la bonne langue.
-    const currentPath = typeof window !== 'undefined' ? window.location.pathname : pathname
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : pathname;
     if (href === pathname || href === currentPath) {
-      if (typeof window !== 'undefined') window.location.assign(href)
-      return
+      if (typeof window !== 'undefined') window.location.assign(href);
+      return;
     }
-    router.replace(href)
-  }
+    router.replace(href);
+  };
 
-  const labels = { fr: 'FR', en: 'EN' } as const
-  const nextLocale = locale === 'fr' ? 'en' : 'fr'
+  const labels = { fr: 'FR', en: 'EN' } as const;
+  const nextLocale = locale === 'fr' ? 'en' : 'fr';
 
   return (
     <div
@@ -242,222 +236,221 @@ function LocaleSwitch({ pathname }: { pathname: string }) {
         {labels[locale]}
       </button>
     </div>
-  )
+  );
 }
 
 export default function Header() {
-  const pathname = usePathname() || '/'
-  const router = useRouter()
-  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr'
-  const t = STR[locale]
-  const L = (path: string) => localizePath(path, locale)
+  const pathname = usePathname() || '/';
+  const router = useRouter();
+  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr';
+  const t = STR[locale];
+  const L = (path: string) => localizePath(path, locale);
 
-  const searchAction = L('/search')
-  const categories = useMemo(() => getCategories(locale), [locale])
+  const searchAction = L('/search');
+  const categories = useMemo(() => getCategories(locale), [locale]);
 
-  const cartStore = useCart() as CartStoreLike
-  const wishlistStore = useWishlist() as WishlistStoreLike
+  const cartStore = useCart() as CartStoreLike;
+  const wishlistStore = useWishlist() as WishlistStoreLike;
 
-  const cartCount = useMemo(() => getCartCount(cartStore?.cart), [cartStore?.cart])
+  const cartCount = useMemo(() => getCartCount(cartStore?.cart), [cartStore?.cart]);
   const wishlistCount = useMemo(
     () => getWishlistCount(wishlistStore?.wishlist),
     [wishlistStore?.wishlist]
-  )
+  );
 
-  const { resolvedTheme } = useTheme()
-  const [hidden, setHidden] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
-  const [catOpen, setCatOpen] = useState(false)
-  const [placeholder, setPlaceholder] = useState<string>(() => t.trends[0] ?? '')
+  const { resolvedTheme } = useTheme();
+  const [hidden, setHidden] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [catOpen, setCatOpen] = useState(false);
+  const [placeholder, setPlaceholder] = useState<string>(() => t.trends[0] ?? '');
 
-  const lastY = useRef(0)
-  const ticking = useRef(false)
-  const reducedMotion = useRef(false)
-  const prefetchTimers = useRef<Map<string, number>>(new Map())
-  const searchRef = useRef<HTMLInputElement | null>(null)
-  const catBtnRef = useRef<HTMLButtonElement | null>(null)
-  const catPanelRef = useRef<HTMLDivElement | null>(null)
-  const catTimerRef = useRef<number | null>(null)
+  const lastY = useRef(0);
+  const ticking = useRef(false);
+  const reducedMotion = useRef(false);
+  const prefetchTimers = useRef<Map<string, number>>(new Map());
+  const searchRef = useRef<HTMLInputElement | null>(null);
+  const catBtnRef = useRef<HTMLButtonElement | null>(null);
+  const catPanelRef = useRef<HTMLDivElement | null>(null);
+  const catTimerRef = useRef<number | null>(null);
 
-  const catBtnId = useId()
-  const catPanelId = useId()
+  const catBtnId = useId();
+  const catPanelId = useId();
 
   const clearCatTimer = () => {
     if (catTimerRef.current) {
-      window.clearTimeout(catTimerRef.current)
-      catTimerRef.current = null
+      window.clearTimeout(catTimerRef.current);
+      catTimerRef.current = null;
     }
-  }
+  };
 
   const openCats = () => {
-    clearCatTimer()
-    setCatOpen(true)
-  }
+    clearCatTimer();
+    setCatOpen(true);
+  };
 
   const closeCats = (delay = 80) => {
-    clearCatTimer()
-    catTimerRef.current = window.setTimeout(() => setCatOpen(false), delay)
-  }
+    clearCatTimer();
+    catTimerRef.current = window.setTimeout(() => setCatOpen(false), delay);
+  };
 
   // Fermer le menu catégories au changement de thème (évite qu’un overlay reste actif et bloque les clics)
   useEffect(() => {
-    setCatOpen(false)
-  }, [resolvedTheme])
+    setCatOpen(false);
+  }, [resolvedTheme]);
 
   const isActive = (href: string) => {
-    const localized = L(href)
-    return localized === pathname || pathname.startsWith(`${localized}/`)
-  }
+    const localized = L(href);
+    return localized === pathname || pathname.startsWith(`${localized}/`);
+  };
 
   const prefetchPath = (href: string) => {
-    const target = L(href)
-    if (!target || isActive(href)) return
+    const target = L(href);
+    if (!target || isActive(href)) return;
 
     try {
-      router.prefetch(target)
+      router.prefetch(target);
     } catch {
       // no-op
     }
-  }
+  };
 
   const smartPrefetchStart = (href: string) => {
-    const target = L(href)
-    if (!target || isActive(href)) return
-    if (prefetchTimers.current.has(target)) return
+    const target = L(href);
+    if (!target || isActive(href)) return;
+    if (prefetchTimers.current.has(target)) return;
 
     const timer = window.setTimeout(() => {
-      prefetchPath(href)
-      prefetchTimers.current.delete(target)
-    }, HOVER_PREFETCH_DELAY)
+      prefetchPath(href);
+      prefetchTimers.current.delete(target);
+    }, HOVER_PREFETCH_DELAY);
 
-    prefetchTimers.current.set(target, timer)
-  }
+    prefetchTimers.current.set(target, timer);
+  };
 
   const smartPrefetchCancel = (href: string) => {
-    const target = L(href)
-    const timer = prefetchTimers.current.get(target)
+    const target = L(href);
+    const timer = prefetchTimers.current.get(target);
 
     if (timer) {
-      window.clearTimeout(timer)
-      prefetchTimers.current.delete(target)
+      window.clearTimeout(timer);
+      prefetchTimers.current.delete(target);
     }
-  }
+  };
 
   useEffect(() => {
-    const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)')
-    reducedMotion.current = !!mq?.matches
+    const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+    reducedMotion.current = !!mq?.matches;
 
     const onChange = () => {
-      reducedMotion.current = !!mq?.matches
-      if (reducedMotion.current) setHidden(false)
-    }
+      reducedMotion.current = !!mq?.matches;
+      if (reducedMotion.current) setHidden(false);
+    };
 
-    mq?.addEventListener?.('change', onChange)
-    return () => mq?.removeEventListener?.('change', onChange)
-  }, [])
+    mq?.addEventListener?.('change', onChange);
+    return () => mq?.removeEventListener?.('change', onChange);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => {
-      const y = window.scrollY
-      if (ticking.current) return
+      const y = window.scrollY;
+      if (ticking.current) return;
 
-      ticking.current = true
+      ticking.current = true;
 
       window.requestAnimationFrame(() => {
-        setScrolled(y > 4)
+        setScrolled(y > 4);
 
         if (!reducedMotion.current) {
-          setHidden(y > lastY.current && y > SCROLL_HIDE_OFFSET)
+          setHidden(y > lastY.current && y > SCROLL_HIDE_OFFSET);
         } else {
-          setHidden(false)
+          setHidden(false);
         }
 
-        lastY.current = y
-        ticking.current = false
-      })
-    }
+        lastY.current = y;
+        ticking.current = false;
+      });
+    };
 
-    window.addEventListener('scroll', onScroll, { passive: true })
-    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
 
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   useEffect(() => {
-    const trends: string[] = [...t.trends]
-    setPlaceholder(trends[0] ?? '')
+    const trends: string[] = [...t.trends];
+    setPlaceholder(trends[0] ?? '');
 
     const interval = window.setInterval(() => {
       setPlaceholder((current) => {
-        const currentIndex = trends.indexOf(current)
-        const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % trends.length : 0
-        return trends[nextIndex] ?? ''
-      })
-    }, PLACEHOLDER_MS)
+        const currentIndex = trends.indexOf(current);
+        const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % trends.length : 0;
+        return trends[nextIndex] ?? '';
+      });
+    }, PLACEHOLDER_MS);
 
-    return () => window.clearInterval(interval)
-  }, [t.trends])
+    return () => window.clearInterval(interval);
+  }, [t.trends]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement | null
-      const tag = target?.tagName
-      const editable =
-        tag === 'INPUT' || tag === 'TEXTAREA' || Boolean(target?.isContentEditable)
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName;
+      const editable = tag === 'INPUT' || tag === 'TEXTAREA' || Boolean(target?.isContentEditable);
 
-      const isCmdK = e.key.toLowerCase() === 'k' && (e.metaKey || e.ctrlKey)
-      const isSlash = e.key === '/'
+      const isCmdK = e.key.toLowerCase() === 'k' && (e.metaKey || e.ctrlKey);
+      const isSlash = e.key === '/';
 
       if (!editable && (isCmdK || isSlash)) {
-        e.preventDefault()
-        searchRef.current?.focus()
-        searchRef.current?.select()
+        e.preventDefault();
+        searchRef.current?.focus();
+        searchRef.current?.select();
       }
 
       if (e.key === 'Escape' && catOpen) {
-        e.preventDefault()
-        setCatOpen(false)
-        catBtnRef.current?.focus()
+        e.preventDefault();
+        setCatOpen(false);
+        catBtnRef.current?.focus();
       }
-    }
+    };
 
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [catOpen])
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [catOpen]);
 
   useEffect(() => {
     const onPointerDown = (e: globalThis.MouseEvent) => {
-      if (!catOpen) return
+      if (!catOpen) return;
 
-      const target = e.target as Node
-      if (catPanelRef.current?.contains(target) || catBtnRef.current?.contains(target)) return
+      const target = e.target as Node;
+      if (catPanelRef.current?.contains(target) || catBtnRef.current?.contains(target)) return;
 
-      setCatOpen(false)
-    }
+      setCatOpen(false);
+    };
 
-    window.addEventListener('mousedown', onPointerDown)
-    return () => window.removeEventListener('mousedown', onPointerDown)
-  }, [catOpen])
+    window.addEventListener('mousedown', onPointerDown);
+    return () => window.removeEventListener('mousedown', onPointerDown);
+  }, [catOpen]);
 
   useEffect(() => {
-    const timers = prefetchTimers.current
+    const timers = prefetchTimers.current;
     return () => {
-      clearCatTimer()
-      timers.forEach((timer) => window.clearTimeout(timer))
-      timers.clear()
-    }
-  }, [])
+      clearCatTimer();
+      timers.forEach((timer) => window.clearTimeout(timer));
+      timers.clear();
+    };
+  }, []);
 
   const onSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    const form = e.currentTarget
-    const data = new FormData(form)
-    const q = String(data.get('q') || '').trim()
+    const form = e.currentTarget;
+    const data = new FormData(form);
+    const q = String(data.get('q') || '').trim();
 
     if (!q) {
-      e.preventDefault()
-      searchRef.current?.focus()
+      e.preventDefault();
+      searchRef.current?.focus();
     }
-  }
+  };
 
   return (
     <header
@@ -498,8 +491,8 @@ export default function Header() {
           aria-label={t.headerNavAria}
         >
           {LINKS.map(({ href, labelKey }) => {
-            const label = t.nav[labelKey]
-            const active = isActive(href)
+            const label = t.nav[labelKey];
+            const active = isActive(href);
 
             if (labelKey === 'categories') {
               return (
@@ -578,7 +571,9 @@ export default function Header() {
                             >
                               <category.Icon className="pointer-events-none opacity-80" />
                               <span className="pointer-events-none flex-1">
-                                <span className="block text-sm font-semibold">{category.label}</span>
+                                <span className="block text-sm font-semibold">
+                                  {category.label}
+                                </span>
                                 <span className="block text-xs text-token-text/60">
                                   {category.desc}
                                 </span>
@@ -633,7 +628,7 @@ export default function Header() {
                     </div>
                   </div>
                 </div>
-              )
+              );
             }
 
             return (
@@ -661,7 +656,7 @@ export default function Header() {
                   />
                 ) : null}
               </Link>
-            )
+            );
           })}
         </nav>
 
@@ -731,7 +726,10 @@ export default function Header() {
         </form>
 
         {/* Zone 4 — Mobile : panier + menu */}
-        <div className="flex min-h-[2.75rem] items-center gap-3 lg:hidden" style={{ touchAction: 'manipulation' }}>
+        <div
+          className="flex min-h-[2.75rem] items-center gap-3 lg:hidden"
+          style={{ touchAction: 'manipulation' }}
+        >
           <Link
             href={L('/commande')}
             onPointerEnter={() => smartPrefetchStart('/commande')}
@@ -854,5 +852,5 @@ export default function Header() {
         className="pointer-events-none h-[2px] w-full bg-gradient-to-r from-transparent via-[hsl(var(--accent)/.40)] to-transparent"
       />
     </header>
-  )
+  );
 }
