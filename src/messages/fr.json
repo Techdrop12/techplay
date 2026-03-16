@@ -990,6 +990,8 @@
     "no_articles_available": "Aucun article {context}",
     "no_articles_for_query": "Aucun article pour « {query} »",
     "no_articles_empty": "Aucun article disponible",
+    "back_to_blog": "Retour au blog",
+    "breadcrumb_aria": "Fil d'Ariane",
     "article_title_placeholder": "Titre de l'article",
     "article_slug_placeholder": "mon-article",
     "article_summary_placeholder": "Résumé ou contenu court",

@@ -75,7 +75,7 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
     setIsNavigating(true);
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     // Garder la barre visible plus longtemps pour que le contenu ait le temps de s'afficher
-    const timeout = window.setTimeout(() => setIsNavigating(false), 520);
+    const timeout = window.setTimeout(() => setIsNavigating(false), 420);
 
     return () => window.clearTimeout(timeout);
   }, [pathname]);
@@ -228,7 +228,7 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
         data-theme={theme}
         data-pathname={pathname}
         aria-label={tAria('main_content')}
-        className="relative z-0 min-h-[calc(var(--vh,1vh)*100)] bg-token-surface px-[max(0px,env(safe-area-inset-left))] pb-[max(0px,env(safe-area-inset-bottom))] pr-[max(0px,env(safe-area-inset-right))] pt-[var(--header-offset,4.5rem)] text-token-text transition-colors page-entrance"
+        className="relative z-0 min-h-[calc(var(--vh,1vh)*100)] bg-token-surface px-[max(0px,env(safe-area-inset-left))] pb-[max(0px,env(safe-area-inset-bottom))] pr-[max(0px,env(safe-area-inset-right))] pt-[var(--header-offset,4.5rem)] text-token-text transition-colors"
       >
         <PageTransitions>
           <Suspense

@@ -972,6 +972,8 @@
     "no_articles_available": "No articles {context}",
     "no_articles_for_query": "No articles for « {query} »",
     "no_articles_empty": "No articles available",
+    "back_to_blog": "Back to blog",
+    "breadcrumb_aria": "Breadcrumb",
     "article_title_placeholder": "Article title",
     "article_slug_placeholder": "my-article",
     "article_summary_placeholder": "Summary or short content",

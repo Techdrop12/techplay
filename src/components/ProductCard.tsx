@@ -382,7 +382,7 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
                 idleText={t('add_to_cart')}
                 className={cn(
                   'min-h-[3rem] w-full rounded-xl font-bold',
-                  'bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))]',
+                  'bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))]',
                   'transition-all duration-250 ease-[var(--ease-smooth)]',
                   'hover:opacity-95 focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.5)] focus-visible:ring-offset-2'
                 )}

@@ -613,7 +613,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
 
             {/* 4. Action + livraison */}
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 sm:mt-5">
-              <span className="inline-flex min-h-[2.75rem] items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-4 py-2.5 text-[13px] font-bold text-[hsl(var(--accent-foreground))] transition-opacity group-hover:opacity-95">
+              <span className="inline-flex min-h-[2.75rem] items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-4 py-2.5 text-[13px] font-bold text-[hsl(var(--accent-fg))] transition-opacity group-hover:opacity-95">
                 {t.readPack}
                 <svg
                   width="16"

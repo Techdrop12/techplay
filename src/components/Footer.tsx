@@ -486,20 +486,20 @@ export default function Footer({
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_600px_at_90%_0%,hsl(var(--accent)/0.04),transparent_50%)]"
       />
 
-      <div className="relative mx-auto max-w-screen-xl px-6 pb-12 pt-20 sm:px-8 sm:pt-24">
+      <div className="relative mx-auto max-w-screen-xl px-4 pb-8 pt-10 sm:px-6 sm:pt-12">
         <h2 className="sr-only" id="footer-heading">
           {t.footerHeading}
         </h2>
 
-        <div className="grid grid-cols-1 gap-14 md:grid-cols-12 lg:gap-20">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-12 md:items-start lg:gap-10">
           {/* Bloc marque — présence éditoriale */}
-          <div className="space-y-8 md:col-span-5">
-            <header className="border-b border-[hsl(var(--border))]/60 pb-6 md:pb-8">
-              <p className="text-2xl font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-3xl">
+          <div className="space-y-5 md:col-span-5">
+            <header className="border-b border-[hsl(var(--border))]/60 pb-4 md:pb-5">
+              <p className="text-lg font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-xl">
                 <span>{companyName}</span>
                 <span className="text-[hsl(var(--accent))]">.</span>
               </p>
-              <p className="mt-4 max-w-md text-[15px] leading-relaxed text-token-text/80 sm:mt-5 sm:text-base">
+              <p className="mt-2 max-w-md text-[13px] leading-relaxed text-token-text/80 sm:text-sm">
                 {t.brandText}
               </p>
             </header>
@@ -507,64 +507,64 @@ export default function Footer({
             {!compact ? (
               <>
                 <div
-                  className="rounded-2xl border-2 border-[hsl(var(--border))] bg-[hsl(var(--surface))]/90 p-5 dark:bg-[hsl(var(--surface))]/50"
+                  className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/90 p-3 dark:bg-[hsl(var(--surface))]/50"
                   aria-label={t.badgesAria}
                 >
-                  <ul className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3" role="list">
-                    <li className="flex items-center gap-3">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-800 dark:bg-emerald-200 dark:text-emerald-950">
-                        <FaShieldAlt className="text-[15px]" aria-hidden="true" />
+                  <ul className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-3" role="list">
+                    <li className="flex items-center gap-2">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-emerald-500/15 text-emerald-800 dark:bg-emerald-200 dark:text-emerald-950">
+                        <FaShieldAlt className="text-[12px]" aria-hidden="true" />
                       </span>
-                      <span className="text-[12px] font-medium text-emerald-800 dark:text-emerald-200">
+                      <span className="text-[11px] font-medium text-emerald-800 dark:text-emerald-200">
                         {t.badges.secure}
                       </span>
                     </li>
-                    <li className="flex items-center gap-3">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))]">
-                        <FaTruck className="text-[15px]" aria-hidden="true" />
+                    <li className="flex items-center gap-2">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))]">
+                        <FaTruck className="text-[12px]" aria-hidden="true" />
                       </span>
-                      <span className="text-[12px] font-medium text-[hsl(var(--text))]">
+                      <span className="text-[11px] font-medium text-[hsl(var(--text))]">
                         {t.badges.shipping}
                       </span>
                     </li>
-                    <li className="flex items-center gap-3">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                        <FaHeadset className="text-[15px]" aria-hidden="true" />
+                    <li className="flex items-center gap-2">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                        <FaHeadset className="text-[12px]" aria-hidden="true" />
                       </span>
-                      <span className="text-[12px] font-medium text-[hsl(var(--text))]">
+                      <span className="text-[11px] font-medium text-[hsl(var(--text))]">
                         {t.badges.support}
                       </span>
                     </li>
                   </ul>
                 </div>
 
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--text))]/70">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--text))]/70">
                   {tFooter('we_accept')}
                 </p>
-                <div className="mt-2 flex flex-wrap items-center gap-3 sm:gap-4" aria-hidden="true">
+                <div className="mt-1.5 flex flex-wrap items-center gap-2 sm:gap-3" aria-hidden="true">
                   <span
-                    className="flex h-9 w-12 items-center justify-center rounded-lg border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface-2))] px-1.5 text-[hsl(var(--text))] shadow-sm dark:bg-white/10 dark:text-white"
+                    className="flex h-7 w-10 items-center justify-center rounded-md border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface-2))] px-1 text-[hsl(var(--text))] shadow-sm dark:bg-white/10 dark:text-white"
                     title="Visa"
                   >
-                    <FaCcVisa className="text-2xl" />
+                    <FaCcVisa className="text-lg" />
                   </span>
                   <span
-                    className="flex h-9 w-12 items-center justify-center rounded-lg border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface-2))] px-1.5 text-[hsl(var(--text))] shadow-sm dark:bg-white/10 dark:text-white"
+                    className="flex h-7 w-10 items-center justify-center rounded-md border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface-2))] px-1 text-[hsl(var(--text))] shadow-sm dark:bg-white/10 dark:text-white"
                     title="Mastercard"
                   >
-                    <FaCcMastercard className="text-2xl" />
+                    <FaCcMastercard className="text-lg" />
                   </span>
                   <span
-                    className="flex h-9 w-12 items-center justify-center rounded-lg border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface-2))] px-1.5 text-[hsl(var(--text))] shadow-sm dark:bg-white/10 dark:text-white"
+                    className="flex h-7 w-10 items-center justify-center rounded-md border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface-2))] px-1 text-[hsl(var(--text))] shadow-sm dark:bg-white/10 dark:text-white"
                     title="PayPal"
                   >
-                    <FaCcPaypal className="text-xl" />
+                    <FaCcPaypal className="text-base" />
                   </span>
                   <span
-                    className="flex h-9 w-12 items-center justify-center rounded-lg border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface-2))] px-1.5 text-[hsl(var(--text))] shadow-sm dark:bg-white/10 dark:text-white"
+                    className="flex h-7 w-10 items-center justify-center rounded-md border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface-2))] px-1 text-[hsl(var(--text))] shadow-sm dark:bg-white/10 dark:text-white"
                     title="Stripe"
                   >
-                    <SiStripe className="text-xl" />
+                    <SiStripe className="text-base" />
                   </span>
                 </div>
               </>
@@ -572,10 +572,10 @@ export default function Footer({
 
             {contact?.email || contact?.phone || contact?.address?.streetAddress ? (
               <>
-            <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--text))]/80">
+            <h3 className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--text))]/80">
                   {tFooter('get_in_touch')}
                 </h3>
-            <ul className="mt-2.5 space-y-1.5 text-[13px] leading-relaxed text-token-text/80">
+            <ul className="mt-1.5 space-y-1 text-[12px] leading-relaxed text-token-text/80">
                   {contact?.email ? (
                     <li>
                       <a
@@ -610,20 +610,20 @@ export default function Footer({
           </div>
 
           <div
-            className="grid grid-cols-2 gap-x-6 gap-y-10 py-6 sm:gap-x-8 sm:gap-y-12 sm:py-0 md:col-span-7 lg:grid-cols-[repeat(4,minmax(0,1fr))] lg:gap-x-8 lg:border-l lg:border-[hsl(var(--border))] lg:pl-12 xl:gap-x-10"
+            className="grid grid-cols-2 gap-x-4 gap-y-6 md:col-span-7 md:items-start lg:grid-cols-[repeat(4,minmax(0,1fr))] lg:gap-x-6 lg:border-l lg:border-[hsl(var(--border))] lg:pl-8 xl:gap-x-8"
             style={{ minWidth: 0 }}
           >
             {navGroups.map((group) => (
               <nav
                 key={group.title}
                 aria-label={group.title}
-                className="min-w-0 space-y-5 overflow-hidden"
+                className="min-w-0 space-y-3 overflow-hidden"
               >
-                <h3 className="break-words text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--text))]/80">
+                <h3 className="whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--text))]/80">
                   {group.title}
                 </h3>
 
-                <ul className="space-y-3.5">
+                <ul className="space-y-2">
                   {group.links.map(({ href, label, external }) => {
                     const finalHref = localizePath(href, locale);
                     const active =
@@ -637,10 +637,10 @@ export default function Footer({
                       group.title.toLowerCase().includes('legal');
 
                     const linkClass =
-                      'inline-flex min-h-[2.25rem] min-w-0 items-center gap-2.5 rounded-md py-1.5 text-[13px] text-[hsl(var(--text))]/75 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] sm:min-h-0 sm:py-1';
+                      'inline-flex min-w-0 items-center gap-2 rounded py-0.5 text-[12px] text-[hsl(var(--text))]/75 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]';
                     const content = (
                       <>
-                        {isLegal ? <LegalIcon label={label} className="h-5 w-5" /> : null}
+                        {isLegal ? <LegalIcon label={label} className="h-3.5 w-3.5 shrink-0" /> : null}
                         <span className="min-w-0 break-words">{label}</span>
                       </>
                     );
@@ -688,27 +688,27 @@ export default function Footer({
             ))}
 
             {!compact ? (
-              <div className="col-span-2 space-y-6 sm:col-span-3 lg:col-span-4 lg:mt-0 lg:rounded-xl lg:border lg:border-[hsl(var(--border))] lg:bg-[hsl(var(--surface))]/60 lg:px-6 lg:py-6 lg:dark:bg-[hsl(var(--surface))]/30">
+              <div className="col-span-2 flex flex-col gap-4 sm:col-span-3 lg:col-span-4 lg:rounded-lg lg:border lg:border-[hsl(var(--border))] lg:bg-[hsl(var(--surface))]/60 lg:px-4 lg:py-4 lg:dark:bg-[hsl(var(--surface))]/30">
                 <form
                   onSubmit={onSubscribe}
                   noValidate
-                  className="space-y-4 max-w-md"
+                  className="space-y-3 max-w-md"
                   aria-label={t.newsletterFormAria}
                   aria-busy={status === 'loading'}
                   aria-describedby={message ? messageId : undefined}
                 >
-                  <h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--text))]/80">
+                  <h3 className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--text))]/80">
                     {t.newsletterTitle}
                   </h3>
 
-                  <div className="flex flex-col gap-3 sm:flex-row">
+                  <div className="flex flex-col gap-2 sm:flex-row">
                     <input
                       id={emailId}
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder={t.newsletterPlaceholder}
-                      className="w-full rounded-xl border-2 border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-3.5 text-[15px] text-[hsl(var(--text))] placeholder:text-[hsl(var(--text))]/50 transition-[border-color,box-shadow] focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/0.25)] focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]"
+                      className="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-2.5 text-[13px] text-[hsl(var(--text))] placeholder:text-[hsl(var(--text))]/50 transition-[border-color,box-shadow] focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/0.25)] focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]"
                       aria-required="true"
                       aria-invalid={status === 'error' && !isValidEmail(email) ? 'true' : 'false'}
                       aria-describedby={status === 'error' ? messageId : undefined}
@@ -721,7 +721,7 @@ export default function Footer({
                     <button
                       type="submit"
                       disabled={status === 'loading'}
-                      className="shrink-0 rounded-xl bg-[hsl(var(--accent))] px-6 py-3.5 text-[15px] font-bold text-[hsl(var(--accent-foreground))] shadow-lg transition-all duration-200 hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] disabled:opacity-60 disabled:hover:shadow-lg"
+                      className="shrink-0 rounded-lg bg-[hsl(var(--accent))] px-4 py-2.5 text-[13px] font-semibold text-[hsl(var(--accent-fg))] shadow transition-all duration-200 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] disabled:opacity-60"
                       aria-label={t.newsletterButtonIdle}
                       data-gtm="footer_newsletter_submit"
                     >
@@ -731,14 +731,14 @@ export default function Footer({
 
                   <label
                     htmlFor={consentId}
-                    className="flex items-start gap-2.5 text-[13px] text-token-text/80"
+                    className="flex items-start gap-2 text-[12px] text-token-text/80"
                   >
                     <input
                       id={consentId}
                       type="checkbox"
                       checked={consent}
                       onChange={(e) => setConsent(e.target.checked)}
-                      className="mt-0.5"
+                      className="mt-0.5 shrink-0"
                     />
                     <span>
                       {t.consentTextStart}
@@ -778,10 +778,10 @@ export default function Footer({
                   ) : null}
                 </form>
 
-                <p className="text-[13px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--text))]/80">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--text))]/80">
                   {tFooter('follow_us')}
                 </p>
-                <div className="flex items-center gap-3 text-xl text-[hsl(var(--text))]/60">
+                <div className="flex items-center gap-2 text-base text-[hsl(var(--text))]/60">
                   <a
                     href="https://facebook.com/techplay"
                     target="_blank"
@@ -825,14 +825,14 @@ export default function Footer({
 
         {children ? <div className="mt-10 text-center">{children}</div> : null}
 
-        <div className="mt-14 flex flex-col items-center justify-between gap-6 border-t border-[hsl(var(--border))] pt-8 md:flex-row">
-          <p className="text-[12px] text-[hsl(var(--text))]/75">
+        <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-[hsl(var(--border))] pt-6 md:flex-row">
+          <p className="text-[11px] text-[hsl(var(--text))]/75">
             © {currentYear}{' '}
             <span className="font-semibold text-[hsl(var(--text))]">{companyName}</span>
             <span className="text-[hsl(var(--text))]/65">. {t.rightsReserved}</span>
           </p>
 
-          <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[12px] text-[hsl(var(--text))]/70">
+          <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[11px] text-[hsl(var(--text))]/70">
             <li className="inline-flex items-center gap-2">
               <FaLock className="h-4 w-4 shrink-0 text-[hsl(var(--text))]/60" aria-hidden="true" />
               <span className="sr-only">{tFooter('secure_payment')}</span>

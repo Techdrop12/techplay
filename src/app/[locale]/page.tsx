@@ -5,9 +5,11 @@ import { Suspense, type CSSProperties } from 'react';
 import type { Pack, Product } from '@/types/product';
 import type { Metadata } from 'next';
 
+import BestProducts from '@/components/BestProducts';
 import ClientTrackingScript from '@/components/ClientTrackingScript';
+import FAQ from '@/components/FAQ';
 import Link from '@/components/LocalizedLink';
-import LoadingSectionSkeleton from '@/components/LoadingSectionSkeleton';
+import PacksSection from '@/components/PacksSection';
 import SectionHeader from '@/components/SectionHeader';
 import TrustBadges from '@/components/TrustBadges';
 import { getPosts } from '@/lib/blog';
@@ -17,15 +19,14 @@ import { localizePath } from '@/lib/i18n-routing';
 import { isLocale } from '@/lib/language';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
-const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'));
-const BestProducts = dynamic(() => import('@/components/BestProducts'), {
-  loading: () => <LoadingSectionSkeleton />,
-});
-const PacksSection = dynamic(() => import('@/components/PacksSection'), {
-  loading: () => <LoadingSectionSkeleton />,
-});
-const FAQ = dynamic(() => import('@/components/FAQ'), {
-  loading: () => <LoadingSectionSkeleton />,
+const HeroCarousel = dynamic(() => import('@/components/HeroCarousel'), {
+  ssr: true,
+  loading: () => (
+    <div
+      className="h-full min-h-[280px] w-full rounded-[var(--radius-2xl)] bg-[hsl(var(--surface-2))]/60 sm:min-h-[320px] lg:min-h-[380px]"
+      aria-hidden
+    />
+  ),
 });
 const BlogCard = dynamic(() => import('@/components/blog/BlogCard').then((m) => m.default), {
   loading: () => <div className="skeleton aspect-[16/10] rounded-2xl" />,
@@ -170,19 +171,6 @@ function getProductName(product: Product): string {
   return product.title?.trim() || 'Produit';
 }
 
-function SectionSkeleton({ title }: { title: string }) {
-  return (
-    <section className="motion-section">
-      <SectionHeader title={title} />
-      <div className="rhythm-content grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-        {Array.from({ length: 8 }).map((_, index) => (
-          <div key={index} className="skeleton h-40 rounded-2xl" />
-        ))}
-      </div>
-    </section>
-  );
-}
-
 function SplitCTA({ locale }: { locale: HomeLocale }) {
   const t = STR[locale];
   return (
@@ -311,16 +299,16 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
         >
           <div className="container-app relative z-10 mx-auto grid max-w-screen-2xl gap-8 px-5 py-10 sm:gap-10 sm:px-6 sm:py-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1.2fr)] lg:items-center lg:gap-14 lg:py-14">
             <div className="space-y-7 sm:space-y-8">
-              <span className="animate-in inline-block text-[var(--step-subtitle)] font-bold uppercase tracking-[0.22em] text-[hsl(var(--accent))] drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)]">
+              <span className="inline-block text-[var(--step-subtitle)] font-bold uppercase tracking-[0.22em] text-[hsl(var(--accent))] drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)]">
                 {t.heroBadge}
               </span>
-              <h2 className="animate-in animate-in-delay-1 heading-section text-balance max-w-xl font-extrabold leading-[1.12] drop-shadow-[0_2px_8px_rgba(0,0,0,0.15)] sm:[font-size:var(--step-5)] md:text-5xl lg:text-[2.75rem] lg:leading-tight">
+              <h2 className="heading-section text-balance max-w-xl font-extrabold leading-[1.12] drop-shadow-[0_2px_8px_rgba(0,0,0,0.15)] sm:[font-size:var(--step-5)] md:text-5xl lg:text-[2.75rem] lg:leading-tight">
                 {t.heroTitle}
               </h2>
-              <p className="animate-in animate-in-delay-2 max-w-lg text-base font-medium leading-relaxed text-token-text/90 sm:text-[15px]">
+              <p className="max-w-lg text-base font-medium leading-relaxed text-token-text/90 sm:text-[15px]">
                 {t.heroSubtitle}
               </p>
-              <div className="animate-in animate-in-delay-3 flex flex-col items-stretch gap-4 pt-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+              <div className="flex flex-col items-stretch gap-4 pt-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
                 <Link
                   href="/products"
                   className="hero-cta-primary inline-flex w-full items-center justify-center gap-2.5 rounded-full px-8 py-4 text-[var(--step-0)] font-bold shadow-[var(--shadow-lg),0_0_24px_hsl(var(--accent)/0.25)] transition-all duration-200 hover:shadow-[var(--shadow-lg),0_0_32px_hsl(var(--accent)/0.35)] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] sm:w-auto"
@@ -382,9 +370,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
           >
             <SectionHeader kicker={t.bestKicker} title={t.bestTitle} sub={t.bestSub} />
             <div className="rhythm-content">
-              <Suspense fallback={<SectionSkeleton title={t.bestTitle} />}>
-                <BestProducts products={bestProducts} showTitle={false} />
-              </Suspense>
+              <BestProducts products={bestProducts} showTitle={false} />
             </div>
           </section>
           <section
@@ -395,9 +381,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
           >
             <SectionHeader kicker={t.packsKicker} title={t.packsTitle} sub={t.packsSub} />
             <div className="rhythm-content overflow-hidden rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/50 shadow-sm">
-              <Suspense fallback={<SectionSkeleton title={t.packsTitle} />}>
-                <PacksSection packs={recommendedPacks} showHeader={false} />
-              </Suspense>
+              <PacksSection packs={recommendedPacks} showHeader={false} />
             </div>
           </section>
           <TrustBadges variant="premium" />
@@ -432,9 +416,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
           >
             <SectionHeader kicker={t.faqKicker} title={t.faqTitle} />
             <div className="rhythm-content space-y-4">
-              <Suspense fallback={<SectionSkeleton title={t.faqTitle} />}>
-                <FAQ showSectionHeading={false} limit={4} showTools={false} />
-              </Suspense>
+              <FAQ showSectionHeading={false} limit={4} showTools={false} />
               <div className="text-center">
                 <Link
                   href="/faq"

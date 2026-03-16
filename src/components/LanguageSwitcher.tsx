@@ -6,12 +6,7 @@ import { useTranslations } from 'next-intl';
 
 import { event as gaEvent } from '@/lib/ga';
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing';
-import {
-  languages as SUPPORTED_LOCALES,
-  localeLabels,
-  type Locale,
-  setLocaleCookie,
-} from '@/lib/language';
+import { localeLabels, type Locale, setLocaleCookie } from '@/lib/language';
 
 export default function LanguageSwitcher() {
   const t = useTranslations('common');
@@ -52,36 +47,22 @@ export default function LanguageSwitcher() {
     router.replace(href);
   };
 
+  const nextLocale: Locale = current === 'fr' ? 'en' : 'fr';
+  const label = current === 'fr' ? 'FR' : 'EN';
+  const switchAria = current === 'fr' ? t('change_lang_to', { lang: localeLabels.en }) : t('change_lang_to', { lang: localeLabels.fr });
+
   return (
-    <div
-      className="inline-flex items-center rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/70 p-0.5 shadow-sm"
-      role="group"
-      aria-label={t('language_switcher_aria')}
+    <button
+      type="button"
+      onClick={() => changeLanguage(nextLocale)}
+      onMouseDown={(e) => e.preventDefault()}
+      aria-label={switchAria}
+      title={switchAria}
+      className="min-w-[2.5rem] rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-[hsl(var(--text))] shadow-sm transition hover:bg-[hsl(var(--surface-2))] hover:text-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[hsl(var(--accent))]"
+      data-gtm="lang_switch"
+      data-lang={current}
     >
-      {(SUPPORTED_LOCALES as readonly Locale[]).map((lang) => {
-        const active = current === lang;
-        return (
-          <button
-            key={lang}
-            type="button"
-            onClick={() => changeLanguage(lang)}
-            onMouseDown={(e) => e.preventDefault()}
-            disabled={active}
-            aria-pressed={active}
-            aria-current={active ? 'true' : undefined}
-            aria-label={t('change_lang_to', { lang: localeLabels[lang] })}
-            className={
-              active
-                ? 'min-w-[2rem] rounded-md px-2 py-1 text-[11px] font-semibold uppercase tracking-wide bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] cursor-default outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[hsl(var(--accent)/.5)]'
-                : 'min-w-[2rem] rounded-md px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-[hsl(var(--text))]/80 hover:bg-[hsl(var(--surface-2))] hover:text-[hsl(var(--text))] transition outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[hsl(var(--accent))]'
-            }
-            data-gtm="lang_switch"
-            data-lang={lang}
-          >
-            {lang === 'fr' ? 'FR' : 'EN'}
-          </button>
-        );
-      })}
-    </div>
+      {label}
+    </button>
   );
 }

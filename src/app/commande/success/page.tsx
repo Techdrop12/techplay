@@ -27,7 +27,7 @@ export default async function OrderSuccessPage({
 
   return (
     <main
-      className="mx-auto max-w-2xl px-4 py-20 sm:py-28"
+      className="container-app mx-auto w-full max-w-2xl py-20 sm:py-28"
       role="main"
       aria-labelledby="success-title"
     >

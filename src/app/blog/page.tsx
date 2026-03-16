@@ -292,14 +292,14 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
 
   return (
     <main
-      className="mx-auto max-w-7xl px-4 pt-20 pb-16 sm:px-6 sm:pt-24 sm:pb-20 lg:px-8"
+      className="container-app mx-auto w-full max-w-5xl pt-20 pb-16 sm:pt-24 sm:pb-20"
       aria-labelledby="blog-title"
     >
       <header className="mb-12 text-center sm:mb-14">
         <p className="heading-kicker">{tBlog('section_kicker')}</p>
         <h1
           id="blog-title"
-          className="heading-section mt-2 sm:[font-size:var(--step-5)] lg:text-5xl"
+          className="heading-page mt-2"
         >
           {q ? tBlog('search_results_title', { query: q }) : tBlog('page_title')}
         </h1>

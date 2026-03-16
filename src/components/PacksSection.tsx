@@ -404,7 +404,7 @@ export default function PacksSection({
           <div className="mt-8">
             <Link
               href={ctaHref}
-              className="inline-flex items-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-6 py-3.5 text-sm font-semibold text-[hsl(var(--accent-foreground))] shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl hover:shadow-[hsl(var(--accent)/0.3)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/0.5)] focus-visible:ring-offset-2"
+              className="inline-flex items-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-6 py-3.5 text-sm font-semibold text-[hsl(var(--accent-fg))] shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl hover:shadow-[hsl(var(--accent)/0.3)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/0.5)] focus-visible:ring-offset-2"
               onClick={() => pushDL('packs_empty_cta')}
             >
               {ctaLabel}
@@ -461,7 +461,7 @@ export default function PacksSection({
 
             <Link
               href="/products/packs"
-              className="inline-flex items-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-5 py-3 text-sm font-semibold text-[hsl(var(--accent-foreground))] shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/0.4)]"
+              className="inline-flex items-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-5 py-3 text-sm font-semibold text-[hsl(var(--accent-fg))] shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/0.4)]"
               aria-label={t.seeAllAria}
               onClick={() => pushDL('packs_see_all')}
             >
@@ -710,7 +710,7 @@ export default function PacksSection({
                         {/* Primary CTA */}
                         <span
                           className={cn(
-                            'mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-5 py-3.5 text-sm font-semibold text-[hsl(var(--accent-foreground))]',
+                            'mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-5 py-3.5 text-sm font-semibold text-[hsl(var(--accent-fg))]',
                             'transition-all duration-200 hover:scale-[1.02] hover:shadow-lg hover:shadow-[hsl(var(--accent)/0.35)]',
                             'focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.5)] focus-visible:ring-offset-2'
                           )}

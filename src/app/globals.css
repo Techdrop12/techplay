@@ -161,6 +161,31 @@
     transition: box-shadow var(--dur-fast) ease;
   }
 
+  /* Texte lisible sur fond vert (accent) : blanc partout */
+  .text-on-accent {
+    color: #fff !important;
+  }
+  a.btn-primary,
+  a.btn-premium,
+  a.hero-cta-primary,
+  button.btn-primary,
+  button.btn-premium,
+  a[class*='bg-[hsl(var(--accent))]'],
+  button[class*='bg-[hsl(var(--accent))]'] {
+    color: #fff !important;
+  }
+  a.btn-primary:hover,
+  a.btn-premium:hover,
+  a.hero-cta-primary:hover,
+  a[class*='bg-[hsl(var(--accent))]']:hover,
+  button[class*='bg-[hsl(var(--accent))]']:hover {
+    color: #fff !important;
+  }
+  a[class*='bg-[hsl(var(--accent))]']:hover,
+  a.btn-premium:hover {
+    text-decoration: none;
+  }
+
   input,
   textarea,
   select {
