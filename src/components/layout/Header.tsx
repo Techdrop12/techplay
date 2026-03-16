@@ -789,8 +789,6 @@ export default function Header() {
             </Link>
           </div>
         </div>
-
-        <MobileNav />
       </div>
 
       <div

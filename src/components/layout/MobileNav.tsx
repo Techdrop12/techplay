@@ -622,7 +622,7 @@ export default function MobileNav() {
         aria-controls={dialogId}
         aria-label={t.ui.openMenu}
         aria-keyshortcuts="Alt+M"
-        className="touch-manipulation grid shrink-0 min-h-[2.75rem] min-w-[2.75rem] place-items-center rounded-xl hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 md:hidden"
+        className="touch-manipulation grid shrink-0 min-h-[2.75rem] min-w-[2.75rem] place-items-center rounded-xl hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 lg:hidden"
         style={{ touchAction: 'manipulation' }}
       >
         <Icon.Menu />
@@ -653,7 +653,7 @@ export default function MobileNav() {
             />
 
             <motion.div
-              className="relative flex max-h-[88dvh] w-full flex-col overflow-x-hidden overflow-y-auto overscroll-contain border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/95 shadow-2xl sm:max-h-[90vh] sm:max-w-md sm:rounded-2xl"
+              className="relative flex max-h-[94dvh] w-full max-w-[100vw] flex-col border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/95 shadow-2xl sm:max-h-[92vh] sm:max-w-md sm:rounded-2xl [@media(orientation:landscape)]:max-h-[90dvh]"
               variants={sheetVariants}
               drag={reducedMotion ? false : 'y'}
               dragConstraints={{ top: 0, bottom: 0 }}
@@ -664,11 +664,11 @@ export default function MobileNav() {
             >
               <div className="shrink-0 pt-[env(safe-area-inset-top)]" />
               <div
-                className="mx-auto mt-4 h-1 w-12 rounded-full bg-token-text/15"
+                className="mx-auto mt-4 h-1 w-12 shrink-0 rounded-full bg-token-text/15"
                 aria-hidden="true"
               />
 
-              <div className="flex items-center justify-between gap-3 px-5 py-4">
+              <div className="flex shrink-0 items-center justify-between gap-3 px-5 py-4">
                 <h2
                   id={titleId}
                   className="text-lg font-semibold leading-tight text-[hsl(var(--text))]"
@@ -686,6 +686,10 @@ export default function MobileNav() {
                 </button>
               </div>
 
+              <div
+                className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-0 py-0"
+                style={{ WebkitOverflowScrolling: 'touch' }}
+              >
               <form
                 action={searchAction}
                 method="get"
@@ -984,7 +988,8 @@ export default function MobileNav() {
                 </button>
               </div>
 
-              <div className="pb-[env(safe-area-inset-bottom)]" />
+              <div className="shrink-0 pb-[env(safe-area-inset-bottom)]" />
+              </div>
             </motion.div>
           </motion.div>
         ) : null}

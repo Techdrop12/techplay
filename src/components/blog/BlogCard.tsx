@@ -42,7 +42,13 @@ export default function BlogCard({ article }: BlogCardProps) {
       aria-label={`Lire l'article : ${article.title}`}
     >
       <Link
-        href={article.slug?.trim() ? `/blog/${article.slug.trim().toLowerCase()}` : '/blog'}
+        href={
+          article.slug?.trim()
+            ? `/blog/${article.slug.trim().toLowerCase()}`
+            : article._id && /^[a-f0-9]{24}$/i.test(String(article._id))
+              ? `/blog/${article._id}`
+              : '/blog'
+        }
         className="flex flex-1 flex-col"
       >
         {/* Editorial feature image — no overlay, clean frame */}

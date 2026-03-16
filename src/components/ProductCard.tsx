@@ -171,7 +171,7 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
             image,
           }}
           floating
-          className="z-20"
+          className="right-3 top-3 z-20"
         />
 
         <Link
@@ -179,16 +179,16 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
           className="block rounded-[inherit] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/80"
           onClick={handleClick}
         >
-          {/* Larger product image with zoom on hover */}
+          {/* Larger product image with zoom on hover — image contrainte au cadre arrondi */}
           <div className="card-shine relative aspect-[4/3] w-full overflow-hidden rounded-t-[14px] bg-[hsl(var(--surface-2))] sm:aspect-[1/1]">
-            <div className="absolute inset-0">
+            <div className="absolute inset-0 overflow-hidden rounded-t-[14px]">
               <Image
                 src={image}
                 alt={title}
                 fill
                 sizes="(min-width:1280px) 22vw, (min-width:1024px) 25vw, (min-width:640px) 33vw, 50vw"
                 className={cn(
-                  'object-cover transition-[transform,opacity] duration-300 ease-[var(--ease-smooth)]',
+                  'rounded-t-[14px] object-cover object-center transition-[transform,opacity] duration-300 ease-[var(--ease-smooth)]',
                   imgLoaded ? 'opacity-100' : 'opacity-0',
                   !prefersReducedMotion && 'group-hover:scale-105',
                   secondImage && 'duration-400 group-hover:opacity-0'
@@ -208,7 +208,7 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
                   fill
                   sizes="(min-width:1280px) 22vw, (min-width:1024px) 25vw, (min-width:640px) 33vw, 50vw"
                   className={cn(
-                    'absolute inset-0 object-cover opacity-0 transition-[opacity,transform] duration-400 ease-[var(--ease-smooth)] group-hover:opacity-100',
+                    'absolute inset-0 rounded-t-[14px] object-cover object-center opacity-0 transition-[opacity,transform] duration-400 ease-[var(--ease-smooth)] group-hover:opacity-100',
                     !prefersReducedMotion && 'group-hover:scale-105'
                   )}
                   aria-hidden

@@ -359,7 +359,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
         <input type="hidden" name="category" value={categoryStr} />
       </form>
 
-      {posts.length === 0 && q ? (
+      {posts.length === 0 ? (
         <div
           className="mx-auto max-w-xl rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding text-center shadow-sm"
           role="status"
@@ -458,82 +458,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
           className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3"
           aria-label={tBlog('articles_list_aria')}
         >
-          {(posts.length > 0
-            ? posts
-            : [
-                {
-                  _id: 'fallback-1',
-                  id: 'fallback-1',
-                  slug: 'bien-choisir-son-casque-gaming',
-                  title:
-                    locale === 'en'
-                      ? 'How to pick a serious gaming headset in 2026'
-                      : 'Bien choisir son casque gaming en 2026',
-                  content: '',
-                  description:
-                    locale === 'en'
-                      ? 'Micro, spatial audio, comfort: a practical checklist to avoid bad surprises on game night.'
-                      : 'Micro, spatialisation, confort : la check-list pratique pour éviter les mauvaises surprises en pleine partie.',
-                  summary: '',
-                  excerpt: '',
-                  image: '/og-image.jpg',
-                  author: 'TechPlay',
-                  published: true,
-                  publishedAt: new Date().toISOString(),
-                  createdAt: new Date().toISOString(),
-                  updatedAt: new Date().toISOString(),
-                  category: 'Guides',
-                  tags: ['audio', 'gaming', 'guide'],
-                },
-                {
-                  _id: 'fallback-2',
-                  id: 'fallback-2',
-                  slug: 'optimiser-son-bureau-pour-le-gaming',
-                  title:
-                    locale === 'en'
-                      ? 'Desk setup: 5 upgrades that really change your gaming experience'
-                      : 'Setup bureau : 5 upgrades qui changent vraiment l’expérience de jeu',
-                  content: '',
-                  description:
-                    locale === 'en'
-                      ? 'From the right mousepad size to lighting and cable management, here is how to structure a clean, efficient setup.'
-                      : 'Tapis, éclairage, gestion des câbles, hauteur d’écran : comment structurer un setup propre et efficace.',
-                  summary: '',
-                  excerpt: '',
-                  image: '/og-image.jpg',
-                  author: 'TechPlay',
-                  published: true,
-                  publishedAt: new Date().toISOString(),
-                  createdAt: new Date().toISOString(),
-                  updatedAt: new Date().toISOString(),
-                  category: 'Setup',
-                  tags: ['setup', 'bureau', 'gaming'],
-                },
-                {
-                  _id: 'fallback-3',
-                  id: 'fallback-3',
-                  slug: 'clavier-mecanique-gaming-guide-rapide',
-                  title:
-                    locale === 'en'
-                      ? 'Mechanical keyboard for gaming: quick guide to switches & formats'
-                      : 'Clavier mécanique gaming : guide rapide switches & formats',
-                  content: '',
-                  description:
-                    locale === 'en'
-                      ? 'Red, brown, low-profile, TKL or full size: understand what really matters before buying.'
-                      : 'Rouge, marron, low profile, TKL ou full size : comprendre ce qui compte vraiment avant d’acheter.',
-                  summary: '',
-                  excerpt: '',
-                  image: '/og-image.jpg',
-                  author: 'TechPlay',
-                  published: true,
-                  publishedAt: new Date().toISOString(),
-                  createdAt: new Date().toISOString(),
-                  updatedAt: new Date().toISOString(),
-                  category: 'Claviers',
-                  tags: ['clavier', 'mécanique', 'guide'],
-                },
-              ]).map((post, idx) => (
+          {posts.map((post, idx) => (
             <BlogCard key={post._id || post.slug || `post-${idx}`} article={post} />
           ))}
         </section>

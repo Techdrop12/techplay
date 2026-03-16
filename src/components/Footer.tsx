@@ -495,11 +495,11 @@ export default function Footer({
           {/* Bloc marque — présence éditoriale */}
           <div className="space-y-5 md:col-span-4 lg:col-span-4">
             <header className="border-b border-[hsl(var(--border))]/60 pb-4 md:pb-5">
-              <p className="text-base font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-lg">
+              <p className="text-sm font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-base">
                 <span>{companyName}</span>
                 <span className="text-[hsl(var(--accent))]">.</span>
               </p>
-              <p className="mt-1.5 max-w-md text-[12px] leading-relaxed text-token-text/80 sm:text-[13px]">
+              <p className="mt-1.5 max-w-md text-[11px] leading-relaxed text-token-text/80 sm:text-[12px]">
                 {t.brandText}
               </p>
             </header>
@@ -538,7 +538,7 @@ export default function Footer({
                   </ul>
                 </div>
 
-                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--text))]/70">
+                <p className="text-[9px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--text))]/70">
                   {tFooter('we_accept')}
                 </p>
                 <div className="mt-1.5 flex flex-wrap items-center gap-2 sm:gap-3" aria-hidden="true">
@@ -572,10 +572,10 @@ export default function Footer({
 
             {contact?.email || contact?.phone || contact?.address?.streetAddress ? (
               <>
-            <h3 className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--text))]/80">
+            <h3 className="text-[9px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--text))]/80">
                   {tFooter('get_in_touch')}
                 </h3>
-            <ul className="mt-1.5 space-y-1 text-[12px] leading-relaxed text-token-text/80">
+            <ul className="mt-1.5 space-y-1 text-[11px] leading-relaxed text-token-text/80">
                   {contact?.email ? (
                     <li>
                       <a
@@ -619,7 +619,7 @@ export default function Footer({
                 aria-label={group.title}
                 className="min-w-0 space-y-2.5 overflow-hidden"
               >
-                <h3 className="break-words text-[9px] font-semibold uppercase leading-tight tracking-[0.06em] text-[hsl(var(--text))]/80">
+                <h3 className="break-words text-[8px] font-medium uppercase leading-tight tracking-[0.05em] text-[hsl(var(--text))]/75">
                   {group.title}
                 </h3>
 
@@ -637,7 +637,7 @@ export default function Footer({
                       group.title.toLowerCase().includes('legal');
 
                     const linkClass =
-                      'inline-flex min-w-0 items-center gap-1.5 rounded py-0.5 text-[11px] text-[hsl(var(--text))]/75 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]';
+                      'inline-flex min-w-0 items-center gap-1.5 rounded py-0.5 text-[10px] text-[hsl(var(--text))]/75 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]';
                     const content = (
                       <>
                         {isLegal ? <LegalIcon label={label} className="h-3.5 w-3.5 shrink-0" /> : null}
@@ -697,7 +697,7 @@ export default function Footer({
                   aria-busy={status === 'loading'}
                   aria-describedby={message ? messageId : undefined}
                 >
-                  <h3 className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--text))]/80">
+                  <h3 className="text-[9px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--text))]/80">
                     {t.newsletterTitle}
                   </h3>
 
@@ -778,7 +778,7 @@ export default function Footer({
                   ) : null}
                 </form>
 
-                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--text))]/80">
+                <p className="text-[9px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--text))]/80">
                   {tFooter('follow_us')}
                 </p>
                 <div className="flex items-center gap-2 text-base text-[hsl(var(--text))]/60">

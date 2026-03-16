@@ -625,33 +625,24 @@ export default function HeroCarousel({
         <div className="hero-carousel-glow-right" aria-hidden="true" />
       </div>
 
-      {/* Bloc éditorial — composition premium : badge → titre → preuve → CTA → confiance */}
-      {current?.text || current?.ctaLabel ? (
+      {/* Bloc éditorial — sans titre pour éviter chevauchement : preuve + CTA + confiance */}
+      {current?.ctaLabel || current?.badge ? (
         <div
           className="pointer-events-auto absolute inset-0 z-[2] flex flex-col justify-end pb-12 pl-5 pr-5 sm:pb-16 sm:pl-8 md:justify-center md:pb-0 md:pl-12 lg:pl-[clamp(2rem,6vw,4rem)] xl:pl-20"
           aria-hidden="false"
         >
           <div className="mx-auto w-full max-w-[32rem] md:mx-0 md:max-w-[28rem] lg:max-w-[34rem]">
-            {/* 1. Étiquette / catégorie — intégrée au flux */}
             {current.badge ? (
               <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/80 sm:mb-4 sm:text-xs">
                 {current.badge}
               </p>
             ) : null}
-            {/* 2. Titre principal — hiérarchie forte */}
-            {current.text ? (
-              <h2 className="text-[2rem] font-extrabold leading-[1.12] tracking-tight text-white sm:text-4xl md:text-[2.5rem] md:leading-[1.15] lg:text-[3rem] lg:leading-[1.1] xl:text-[3.25rem] [text-shadow:0_2px_24px_rgba(0,0,0,0.5)]">
-                {current.text}
-              </h2>
-            ) : null}
-            {/* 3. Ligne de preuve — valeur perçue */}
             <p
-              className="mt-4 text-[13px] text-white/90 sm:mt-5 sm:text-sm md:text-[13px]"
+              className="text-[13px] text-white/90 sm:text-sm md:text-[13px]"
               role="doc-subtitle"
             >
               {t.proofLine}
             </p>
-            {/* 4. CTA principal — action claire */}
             {current.ctaLabel && current.ctaLink ? (
               <div className="mt-6 sm:mt-8">
                 <Link
@@ -686,7 +677,6 @@ export default function HeroCarousel({
                 </Link>
               </div>
             ) : null}
-            {/* 5. Ligne de confiance — réassurance */}
             <p className="mt-4 text-[11px] text-white/70 sm:mt-5 sm:text-xs" aria-hidden="true">
               {t.trustLine}
             </p>

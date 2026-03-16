@@ -135,7 +135,7 @@ export default async function ContactPage() {
           >
             <h2
               id="contact-phone-heading"
-              className="text-[8px] font-medium uppercase tracking-[0.06em] leading-tight text-token-text/60 break-words"
+              className="line-clamp-2 min-w-0 break-normal text-[clamp(6px,1.6vw,8px)] font-medium uppercase leading-tight tracking-[0.06em] text-token-text/60"
             >
               {t('phone_heading')}
             </h2>
@@ -157,7 +157,7 @@ export default async function ContactPage() {
           >
             <h2
               id="contact-address-heading"
-              className="text-[8px] font-medium uppercase tracking-[0.06em] leading-tight text-token-text/60 break-words"
+              className="line-clamp-2 min-w-0 break-normal text-[clamp(6px,1.6vw,8px)] font-medium uppercase leading-tight tracking-[0.06em] text-token-text/60"
             >
               {t('address_heading')}
             </h2>
@@ -176,7 +176,7 @@ export default async function ContactPage() {
           >
             <h2
               id="contact-hours-heading"
-              className="text-[8px] font-medium uppercase tracking-[0.06em] leading-tight text-token-text/60 break-words"
+              className="line-clamp-2 min-w-0 break-normal text-[clamp(6px,1.6vw,8px)] font-medium uppercase leading-tight tracking-[0.06em] text-token-text/60"
             >
               {t('hours_heading')}
             </h2>
