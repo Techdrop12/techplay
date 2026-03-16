@@ -71,7 +71,7 @@ export default async function CategoryIndexPage() {
           <Link
             key={cat.slug}
             href={`/categorie/${cat.slug}`}
-            className="group flex flex-col rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[var(--shadow-sm)] transition hover:border-[hsl(var(--accent)/.4)] hover:shadow-[var(--shadow-md)]"
+            className="group flex min-w-0 flex-col overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[var(--shadow-sm)] transition hover:border-[hsl(var(--accent)/.4)] hover:shadow-[var(--shadow-md)]"
           >
             <span className="font-semibold text-[hsl(var(--text))] transition group-hover:text-[hsl(var(--accent))]">
               {cat.label}

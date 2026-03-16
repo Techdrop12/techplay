@@ -380,7 +380,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
             style={lazySectionStyle600}
           >
             <SectionHeader kicker={t.packsKicker} title={t.packsTitle} sub={t.packsSub} />
-            <div className="rhythm-content overflow-hidden rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/50 shadow-sm">
+            <div className="rhythm-content overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/50 shadow-sm">
               <PacksSection packs={recommendedPacks} showHeader={false} />
             </div>
           </section>

@@ -163,20 +163,20 @@ function TrustBadges({
 
   const variants: Record<NonNullable<TrustBadgesProps['variant']>, string> = {
     card: [
-      'rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]',
+      'overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))]',
       'shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)]',
       'hover:border-[hsl(var(--border))]',
       'transition-all duration-300 ease-out',
     ].join(' '),
     pill: [
-      'rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/95 backdrop-blur-sm',
+      'overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/95 backdrop-blur-sm',
       'shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)]',
       'hover:border-[hsl(var(--border))]',
       'transition-all duration-300 ease-out',
     ].join(' '),
     subtle: 'bg-transparent text-[hsl(var(--text))]/90',
     premium: [
-      'relative rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]',
+      'relative overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))]',
       'shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)]',
       'hover:border-[hsl(var(--border))]',
       'transition-all duration-300 ease-out',
@@ -235,7 +235,7 @@ function TrustBadges({
               {href ? (
                 <Link
                   href={href}
-                  className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 rounded-xl"
+                  className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 rounded-[var(--radius-2xl)]"
                 >
                   {content}
                 </Link>

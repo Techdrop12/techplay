@@ -25,7 +25,7 @@ export default function EmptyCart({ locale: _locale }: EmptyCartProps) {
       role="status"
       aria-live="polite"
       aria-label={message}
-      className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] py-16 text-center shadow-[var(--shadow-sm)]"
+      className="overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] py-16 text-center shadow-[var(--shadow-sm)]"
     >
       <div
         className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-[hsl(var(--surface-2))] text-token-text/50"

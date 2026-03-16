@@ -23,7 +23,7 @@ export default function NotFoundPage() {
       aria-labelledby="nf-title"
       role="main"
     >
-      <div className="mx-auto max-w-xl rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[var(--shadow-lg)]">
+      <div className="mx-auto max-w-xl overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[var(--shadow-lg)]">
         <NotFoundPageContent />
       </div>
     </main>

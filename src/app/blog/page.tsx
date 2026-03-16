@@ -361,7 +361,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
 
       {posts.length === 0 ? (
         <div
-          className="mx-auto max-w-xl rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding text-center shadow-sm"
+          className="mx-auto max-w-xl overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding text-center shadow-sm"
           role="status"
           aria-live="polite"
         >

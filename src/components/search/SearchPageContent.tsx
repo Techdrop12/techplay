@@ -78,7 +78,7 @@ export default function SearchPageContent({ query, products, blogItems }: Search
                 {blogItems.map((post) => (
                   <li key={String(post._id ?? post.id ?? post.slug)}>
                     <Link
-                      href={`/blog/${post.slug ?? ''}`}
+                      href={post.slug?.trim() ? `/blog/${post.slug.trim().toLowerCase()}` : '/blog'}
                       className="block rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-3 text-[15px] font-medium text-[hsl(var(--text))] transition hover:border-[hsl(var(--accent))] hover:bg-[hsl(var(--accent)/0.06)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
                     >
                       {post.title ?? t('untitled')}

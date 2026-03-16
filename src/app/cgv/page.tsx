@@ -28,7 +28,7 @@ export default async function CGVPage() {
 
   return (
     <main className="container-app mx-auto max-w-3xl py-10" role="main" aria-labelledby="cgv-title">
-      <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[var(--shadow-md)]">
+      <div className="overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[var(--shadow-md)]">
         <h1 id="cgv-title" className="heading-page mb-2">
           {t('title')}
         </h1>

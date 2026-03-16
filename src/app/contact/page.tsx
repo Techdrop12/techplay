@@ -64,7 +64,7 @@ export default async function ContactPage() {
 
       <div className="space-y-6">
         <section
-          className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-sm"
+          className="overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-sm"
           aria-labelledby="contact-subject-heading"
         >
           <h2 id="contact-subject-heading" className="heading-subsection">
@@ -100,7 +100,7 @@ export default async function ContactPage() {
         <ContactForm />
 
         <section
-          className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-sm"
+          className="overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-sm"
           aria-labelledby="contact-email-heading"
         >
           <h2 id="contact-email-heading" className="text-base font-semibold text-[hsl(var(--text))]">
@@ -130,12 +130,12 @@ export default async function ContactPage() {
         {/* Téléphone + Adresse + Horaires — titres et texte réduits, tout dans le cadre */}
         <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3 items-stretch">
           <section
-            className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/85 px-3 py-3 sm:px-4 sm:py-4"
+            className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/85 px-3 py-3 sm:px-4 sm:py-4"
             aria-labelledby="contact-phone-heading"
           >
             <h2
               id="contact-phone-heading"
-              className="line-clamp-2 min-w-0 break-normal text-[clamp(6px,1.6vw,8px)] font-medium uppercase leading-tight tracking-[0.06em] text-token-text/60"
+              className="line-clamp-2 min-w-0 break-normal text-[5px] font-medium uppercase leading-tight tracking-[0.06em] text-token-text/60"
             >
               {t('phone_heading')}
             </h2>
@@ -152,12 +152,12 @@ export default async function ContactPage() {
           </section>
 
           <section
-            className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/85 px-3 py-3 sm:px-4 sm:py-4"
+            className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/85 px-3 py-3 sm:px-4 sm:py-4"
             aria-labelledby="contact-address-heading"
           >
             <h2
               id="contact-address-heading"
-              className="line-clamp-2 min-w-0 break-normal text-[clamp(6px,1.6vw,8px)] font-medium uppercase leading-tight tracking-[0.06em] text-token-text/60"
+              className="line-clamp-2 min-w-0 break-normal text-[5px] font-medium uppercase leading-tight tracking-[0.06em] text-token-text/60"
             >
               {t('address_heading')}
             </h2>
@@ -171,12 +171,12 @@ export default async function ContactPage() {
           </section>
 
           <section
-            className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/85 px-3 py-3 sm:px-4 sm:py-4"
+            className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/85 px-3 py-3 sm:px-4 sm:py-4"
             aria-labelledby="contact-hours-heading"
           >
             <h2
               id="contact-hours-heading"
-              className="line-clamp-2 min-w-0 break-normal text-[clamp(6px,1.6vw,8px)] font-medium uppercase leading-tight tracking-[0.06em] text-token-text/60"
+              className="line-clamp-2 min-w-0 break-normal text-[5px] font-medium uppercase leading-tight tracking-[0.06em] text-token-text/60"
             >
               {t('hours_heading')}
             </h2>
@@ -265,7 +265,7 @@ export default async function ContactPage() {
           </div>
         </div>
 
-        <section className="rounded-2xl border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface))]/40 px-5 py-5 sm:px-6">
+        <section className="overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface))]/40 px-5 py-5 sm:px-6">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-token-text/60">
             {t('waiting_heading')}
           </h2>

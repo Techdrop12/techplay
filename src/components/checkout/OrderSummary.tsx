@@ -46,7 +46,7 @@ export default function OrderSummary({
   return (
     <section
       className={cn(
-        'rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[var(--shadow-md)] md:sticky md:top-6 md:self-start',
+        'overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[var(--shadow-md)] md:sticky md:top-6 md:self-start',
         className
       )}
       role="region"

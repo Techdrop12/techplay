@@ -36,7 +36,7 @@ export default function BlogCard({ article }: BlogCardProps) {
       whileHover={{ y: -2 }}
       transition={{ duration: 0.22, ease: [0.33, 1, 0.68, 1] }}
       className={cn(
-        'group relative flex flex-col overflow-hidden rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]',
+        'group relative flex flex-col overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))]',
         'shadow-[var(--shadow-sm)] transition-shadow duration-300 hover:shadow-[var(--shadow-md)]'
       )}
       aria-label={`Lire l'article : ${article.title}`}

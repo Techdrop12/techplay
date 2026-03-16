@@ -14,7 +14,7 @@ export default function EmptyWishlist() {
       initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: prefersReducedMotion ? 0 : 0.35 }}
-      className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] py-16 text-center shadow-[var(--shadow-sm)]"
+      className="overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] py-16 text-center shadow-[var(--shadow-sm)]"
       role="status"
       aria-live="polite"
       aria-label={t('empty')}

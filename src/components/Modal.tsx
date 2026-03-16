@@ -182,7 +182,7 @@ function ModalRoot({
         className={cn(
           'relative w-full outline-none',
           SIZES[size],
-          'rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-[hsl(var(--text))] shadow-[var(--shadow-lg)]',
+          'overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-[hsl(var(--text))] shadow-[var(--shadow-lg)]',
           'modal-panel-entrance',
           className
         )}

@@ -1,6 +1,5 @@
-import { NextResponse } from 'next/server';
-
 import { error as logError } from '@/lib/logger';
+import { apiError, apiJson, safeErrorForLog } from '@/lib/apiResponse';
 import { connectToDatabase } from '@/lib/db';
 import ContactSubmission from '@/models/ContactSubmission';
 import { requireAdmin } from '@/lib/requireAdmin';
@@ -16,9 +15,9 @@ export async function GET() {
   try {
     await connectToDatabase();
     const docs = await ContactSubmission.find({}).sort({ createdAt: -1 }).limit(200).lean().exec();
-    return NextResponse.json(toPlain(docs));
+    return apiJson(toPlain(docs));
   } catch (e) {
     logError('[admin/contact-submissions]', e);
-    return NextResponse.json({ error: 'Erreur chargement messages' }, { status: 500 });
+    return apiError('Erreur chargement messages', 500, { details: safeErrorForLog(e) });
   }
 }

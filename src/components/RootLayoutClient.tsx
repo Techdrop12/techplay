@@ -1,5 +1,6 @@
 'use client';
 
+import { SessionProvider } from 'next-auth/react';
 import { useEffect } from 'react';
 
 import type { ReactNode } from 'react';
@@ -169,5 +170,9 @@ export default function RootLayoutClient({ children }: Props) {
     };
   }, []);
 
-  return <CartProvider>{children}</CartProvider>;
+  return (
+    <SessionProvider>
+      <CartProvider>{children}</CartProvider>
+    </SessionProvider>
+  );
 }

@@ -24,7 +24,7 @@ export default function UpsellBlock({ productId, category }: UpsellBlockProps) {
 
   return (
     <section
-      className="rhythm-content rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 card-padding dark:bg-[hsl(var(--surface))]/40"
+      className="rhythm-content overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/60 card-padding dark:bg-[hsl(var(--surface))]/40"
       aria-labelledby="upsell-title"
     >
       <h2 id="upsell-title" className="mb-1 text-xl font-bold text-[hsl(var(--text))]">

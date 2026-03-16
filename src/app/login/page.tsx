@@ -20,7 +20,7 @@ export default function LoginPage() {
 
   return (
     <main className="mx-auto max-w-sm px-4 py-10" role="main" aria-labelledby="login-title">
-      <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[var(--shadow-md)]">
+      <div className="overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[var(--shadow-md)]">
         <h1 id="login-title" className="heading-page mb-6">
           {t('login_title')}
         </h1>

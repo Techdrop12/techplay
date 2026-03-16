@@ -288,7 +288,7 @@ export default function ProductGrid({
   if (isEmpty && !isLoading) {
     return (
       <div
-        className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/70 card-padding text-center"
+        className="overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/70 card-padding text-center"
         role="status"
       >
         <p className="text-base font-semibold text-token-text">

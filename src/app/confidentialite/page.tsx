@@ -46,7 +46,7 @@ export default async function ConfidentialitePage() {
       role="main"
       aria-labelledby="confidentialite-title"
     >
-      <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[var(--shadow-md)]">
+      <div className="overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[var(--shadow-md)]">
         <h1 id="confidentialite-title" className="heading-page mb-2">
           {t('page_title')}
         </h1>

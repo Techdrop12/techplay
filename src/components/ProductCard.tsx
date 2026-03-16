@@ -136,7 +136,7 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
       aria-label={t('product_aria', { title })}
       data-product-id={productId || product.slug}
       className={cn(
-        'group relative rounded-2xl p-[1px]',
+        'group relative flex w-full min-w-0 max-w-full flex-col rounded-2xl p-[1px]',
         'bg-gradient-to-b from-white/70 via-white/12 to-white/0 dark:from-white/18 dark:via-white/6 dark:to-transparent',
         'shadow-[0_4px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.22)]',
         'transition-[box-shadow,transform,border-color] duration-300 ease-[var(--ease-smooth)]',
@@ -155,7 +155,7 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
 
       <div
         className={cn(
-          'relative overflow-hidden rounded-[15px]',
+          'relative flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden rounded-[var(--radius-2xl)]',
           'border border-[hsl(var(--border))]/80 dark:border-white/10',
           'bg-[hsl(var(--surface))]/98 dark:bg-[hsl(var(--surface))]/92 supports-[backdrop-filter]:backdrop-blur-2xl',
           'transition-[box-shadow,border-color] duration-300 ease-[var(--ease-smooth)]',
@@ -171,17 +171,17 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
             image,
           }}
           floating
-          className="right-3 top-3 z-20"
+          className="left-3 top-3 right-auto z-20"
         />
 
         <Link
           href={href}
-          className="block rounded-[inherit] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/80"
+          className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[inherit] focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/80"
           onClick={handleClick}
         >
-          {/* Larger product image with zoom on hover — image contrainte au cadre arrondi */}
-          <div className="card-shine relative aspect-[4/3] w-full overflow-hidden rounded-t-[14px] bg-[hsl(var(--surface-2))] sm:aspect-[1/1]">
-            <div className="absolute inset-0 overflow-hidden rounded-t-[14px]">
+          {/* Cadre image — ratio fixe, tout le contenu s’adapte à l’intérieur */}
+          <div className="card-shine relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-t-[var(--radius-lg)] bg-[hsl(var(--surface-2))] sm:aspect-[1/1]">
+            <div className="absolute inset-0 overflow-hidden rounded-t-[var(--radius-lg)]">
               <Image
                 src={image}
                 alt={title}
@@ -224,8 +224,8 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
               )}
             </div>
 
-            {/* Badges: En stock, Promo, Livraison offerte — consistent premium style */}
-            <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-col gap-2 sm:left-4 sm:top-4">
+            {/* Badges: En stock, Promo, Livraison offerte — sous le cœur wishlist */}
+            <div className="pointer-events-none absolute left-3 top-12 z-10 flex flex-col gap-2 sm:left-4 sm:top-14">
               {product.isNew ? (
                 <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/95 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-950 shadow-md ring-1 ring-emerald-900/30">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-900/90" />
@@ -284,10 +284,10 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
             />
           </div>
 
-          {/* Bloc contenu — structure : identité → prix → réassurance → action */}
-          <div className="flex flex-col px-4 pt-4 pb-4 sm:px-5 sm:pt-5 sm:pb-5">
+          {/* Bloc contenu — tout s’adapte au cadre, pas de débordement */}
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden px-4 pt-4 pb-4 sm:px-5 sm:pt-5 sm:pb-5">
             {/* 1. Identité produit */}
-            <div className="min-w-0">
+            <div className="min-w-0 shrink-0">
               <h3
                 className="line-clamp-2 break-words text-[15px] font-bold leading-snug tracking-tight text-[hsl(var(--text))] sm:text-base"
                 title={title}
@@ -295,15 +295,15 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
                 {title}
               </h3>
               {product.brand || product.category ? (
-                <p className="mt-1 text-[11px] font-medium uppercase tracking-wider text-[hsl(var(--text))]/50">
+                <p className="mt-1 line-clamp-1 text-[11px] font-medium uppercase tracking-wider text-[hsl(var(--text))]/50">
                   {[product.brand, product.category].filter(Boolean).join(' · ')}
                 </p>
               ) : null}
             </div>
 
-            {/* 2. Prix — bloc dédié, hiérarchie forte */}
+            {/* 2. Prix — bloc dédié, reste dans le cadre */}
             <div
-              className="mt-4 flex flex-wrap items-baseline gap-2 rounded-lg bg-[hsl(var(--surface-2))]/80 px-3 py-2.5 sm:mt-5 sm:px-3.5 sm:py-3"
+              className="mt-4 flex min-w-0 flex-wrap items-baseline gap-2 rounded-lg bg-[hsl(var(--surface-2))]/80 px-3 py-2.5 sm:mt-5 sm:px-3.5 sm:py-3"
               itemProp="offers"
               itemScope
               itemType="https://schema.org/Offer"
@@ -329,8 +329,8 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
               ) : null}
             </div>
 
-            {/* 3. Réassurance — une ligne : note, stock, livraison */}
-            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] sm:mt-4">
+            {/* 3. Réassurance — une ligne, adaptée au cadre */}
+            <div className="mt-3 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] sm:mt-4">
               {ratingValue > 0 || reviewsCount > 0 ? (
                 <span className="flex items-center gap-1 text-[hsl(var(--text))]/70">
                   <RatingStars
@@ -364,8 +364,8 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
               <FreeShippingBadge price={product.price} minimal />
             </div>
 
-            {/* 4. Action principale — CTA plein, bloc unique */}
-            <div className="mt-4 sm:mt-5">
+            {/* 4. Action principale — CTA en bas du cadre */}
+            <div className="mt-4 shrink-0 sm:mt-5">
               <AddToCartButton
                 product={{
                   _id: product._id,

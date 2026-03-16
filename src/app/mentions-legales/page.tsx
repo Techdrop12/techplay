@@ -43,7 +43,7 @@ export default async function MentionsLegalesPage() {
       role="main"
       aria-labelledby="mentions-title"
     >
-      <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[var(--shadow-md)]">
+      <div className="overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[var(--shadow-md)]">
         <h1 id="mentions-title" className="heading-page mb-2">
           {t('page_title')}
         </h1>

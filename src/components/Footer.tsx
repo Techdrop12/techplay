@@ -538,7 +538,7 @@ export default function Footer({
                   </ul>
                 </div>
 
-                <p className="text-[9px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--text))]/70">
+                <p className="text-[7px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--text))]/70">
                   {tFooter('we_accept')}
                 </p>
                 <div className="mt-1.5 flex flex-wrap items-center gap-2 sm:gap-3" aria-hidden="true">
@@ -572,7 +572,7 @@ export default function Footer({
 
             {contact?.email || contact?.phone || contact?.address?.streetAddress ? (
               <>
-            <h3 className="text-[9px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--text))]/80">
+            <h3 className="text-[7px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--text))]/80">
                   {tFooter('get_in_touch')}
                 </h3>
             <ul className="mt-1.5 space-y-1 text-[11px] leading-relaxed text-token-text/80">
@@ -619,7 +619,7 @@ export default function Footer({
                 aria-label={group.title}
                 className="min-w-0 space-y-2.5 overflow-hidden"
               >
-                <h3 className="break-words text-[8px] font-medium uppercase leading-tight tracking-[0.05em] text-[hsl(var(--text))]/75">
+                <h3 className="break-words text-[6px] font-medium uppercase leading-tight tracking-[0.05em] text-[hsl(var(--text))]/75">
                   {group.title}
                 </h3>
 
@@ -697,8 +697,8 @@ export default function Footer({
                   aria-busy={status === 'loading'}
                   aria-describedby={message ? messageId : undefined}
                 >
-                  <h3 className="text-[9px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--text))]/80">
-                    {t.newsletterTitle}
+<h3 className="text-[7px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--text))]/80">
+                  {t.newsletterTitle}
                   </h3>
 
                   <div className="flex flex-col gap-2 sm:flex-row">
@@ -778,8 +778,8 @@ export default function Footer({
                   ) : null}
                 </form>
 
-                <p className="text-[9px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--text))]/80">
-                  {tFooter('follow_us')}
+<p className="text-[7px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--text))]/80">
+                {tFooter('follow_us')}
                 </p>
                 <div className="flex items-center gap-2 text-base text-[hsl(var(--text))]/60">
                   <a

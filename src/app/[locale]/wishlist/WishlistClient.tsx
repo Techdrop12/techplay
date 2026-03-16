@@ -142,7 +142,7 @@ export default function WishlistClient() {
 
       {wishlist.length === 0 ? (
         <section
-          className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-sm text-center"
+          className="overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-sm text-center"
           aria-label={t('empty_aria')}
         >
           <p className="text-[15px] text-token-text/75">{t('empty')}</p>

@@ -138,7 +138,7 @@ export default function CartSummary({
   return (
     <section
       className={cn(
-        'card space-y-5 rounded-2xl border-2 border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[0_8px_32px_rgba(15,23,42,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.18)]',
+        'card space-y-5 overflow-hidden rounded-[var(--radius-2xl)] border-2 border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-[0_8px_32px_rgba(15,23,42,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.18)]',
         className
       )}
       role="region"

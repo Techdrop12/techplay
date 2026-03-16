@@ -1,6 +1,5 @@
-import { NextResponse } from 'next/server';
-
 import { error as logError } from '@/lib/logger';
+import { apiError, apiSuccess, safeErrorForLog } from '@/lib/apiResponse';
 import { connectToDatabase } from '@/lib/db';
 import Product from '@/models/Product';
 import { requireAdmin } from '@/lib/requireAdmin';
@@ -36,7 +35,7 @@ export async function POST(req: Request) {
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
     if (!file || !file.size) {
-      return NextResponse.json({ error: 'Fichier manquant ou vide' }, { status: 400 });
+      return apiError('Fichier manquant ou vide', 400);
     }
 
     const text = await file.text();
@@ -44,15 +43,12 @@ export async function POST(req: Request) {
     try {
       raw = JSON.parse(text);
     } catch {
-      return NextResponse.json({ error: 'JSON invalide' }, { status: 400 });
+      return apiError('JSON invalide', 400);
     }
 
     const items = Array.isArray(raw) ? raw : [raw];
     if (items.length === 0) {
-      return NextResponse.json(
-        { success: false, error: 'Aucun produit dans le fichier' },
-        { status: 400 }
-      );
+      return apiError('Aucun produit dans le fichier', 400);
     }
 
     await connectToDatabase();
@@ -105,9 +101,9 @@ export async function POST(req: Request) {
       created++;
     }
 
-    return NextResponse.json({ success: true, count: created });
+    return apiSuccess({ success: true, count: created });
   } catch (e) {
     logError('[admin/import-products]', e);
-    return NextResponse.json({ error: "Erreur lors de l'import" }, { status: 500 });
+    return apiError("Erreur lors de l'import", 500, { details: safeErrorForLog(e) });
   }
 }

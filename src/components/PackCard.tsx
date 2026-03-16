@@ -366,7 +366,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
       itemScope
       itemType="https://schema.org/Product"
       className={cn(
-        'group relative rounded-[1.75rem] border border-[hsl(var(--accent)/0.22)] p-[2px]',
+        'group relative rounded-[var(--radius-3xl)] border border-[hsl(var(--accent)/0.22)] p-[2px] overflow-hidden',
         'shadow-[0_16px_48px_rgba(15,23,42,0.12),0_0_0_1px_hsl(var(--accent)/0.08)]',
         'transition-all duration-300 ease-[var(--ease-smooth)]',
         'hover:shadow-[0_24px_56px_rgba(15,23,42,0.18),0_0_0_1px_hsl(var(--accent)/0.2),0_0_32px_hsl(var(--accent)/0.08)] hover:-translate-y-1.5 hover:border-[hsl(var(--accent)/0.4)]',
@@ -415,7 +415,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
         {/* Pack identity: accent stripe + bundle label */}
         <div
           aria-hidden="true"
-          className="absolute left-0 right-0 top-0 z-20 h-1 rounded-t-[1.5rem] bg-gradient-to-r from-[hsl(var(--accent))] via-[hsl(var(--accent)/0.8)] to-[hsl(var(--accent)/0.5)]"
+          className="absolute left-0 right-0 top-0 z-20 h-1 rounded-t-[var(--radius-2xl)] bg-gradient-to-r from-[hsl(var(--accent))] via-[hsl(var(--accent)/0.8)] to-[hsl(var(--accent)/0.5)]"
         />
 
         <div
@@ -434,7 +434,7 @@ export default function PackCard({ pack, priority = false, className }: PackCard
           aria-label={t.readPack}
         >
           <div
-            className="card-shine relative aspect-[4/3] w-full overflow-hidden rounded-[1.45rem] bg-[hsl(var(--surface-2))] sm:aspect-[16/9]"
+            className="card-shine relative aspect-[4/3] w-full overflow-hidden rounded-t-[var(--radius-2xl)] bg-[hsl(var(--surface-2))] sm:aspect-[16/9]"
             aria-busy={!imageLoaded}
           >
             <Image

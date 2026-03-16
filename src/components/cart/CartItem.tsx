@@ -78,7 +78,7 @@ export default function CartItem({ item }: CartItemProps) {
       animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
       exit={prefersReduced ? undefined : { opacity: 0, y: -8 }}
       transition={{ duration: 0.22 }}
-      className="group flex items-center gap-4 rounded-2xl border-2 border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 p-4 shadow-sm transition-all duration-200 hover:bg-[hsl(var(--surface))] hover:shadow-md sm:p-5"
+      className="group flex min-w-0 items-center gap-4 overflow-hidden rounded-[var(--radius-2xl)] border-2 border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 p-4 shadow-sm transition-all duration-200 hover:bg-[hsl(var(--surface))] hover:shadow-md sm:p-5"
       role="listitem"
       aria-label={`Produit dans le panier : ${item.title}`}
       data-id={item._id}
@@ -87,7 +87,7 @@ export default function CartItem({ item }: CartItemProps) {
 
       <Link
         href={`/products/${item.slug}`}
-        className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+        className="relative h-20 w-20 shrink-0 overflow-hidden rounded-[var(--radius)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
         aria-label={`Voir la fiche produit de ${item.title}`}
       >
         <Image

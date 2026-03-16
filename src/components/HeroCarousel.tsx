@@ -23,7 +23,6 @@ import {
   type TouchEventHandler,
 } from 'react';
 
-import Link from '@/components/LocalizedLink';
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing';
 import { cn } from '@/lib/utils';
 import '@/styles/hero-carousel.css';
@@ -624,65 +623,6 @@ export default function HeroCarousel({
         />
         <div className="hero-carousel-glow-right" aria-hidden="true" />
       </div>
-
-      {/* Bloc éditorial — sans titre pour éviter chevauchement : preuve + CTA + confiance */}
-      {current?.ctaLabel || current?.badge ? (
-        <div
-          className="pointer-events-auto absolute inset-0 z-[2] flex flex-col justify-end pb-12 pl-5 pr-5 sm:pb-16 sm:pl-8 md:justify-center md:pb-0 md:pl-12 lg:pl-[clamp(2rem,6vw,4rem)] xl:pl-20"
-          aria-hidden="false"
-        >
-          <div className="mx-auto w-full max-w-[32rem] md:mx-0 md:max-w-[28rem] lg:max-w-[34rem]">
-            {current.badge ? (
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/80 sm:mb-4 sm:text-xs">
-                {current.badge}
-              </p>
-            ) : null}
-            <p
-              className="text-[13px] text-white/90 sm:text-sm md:text-[13px]"
-              role="doc-subtitle"
-            >
-              {t.proofLine}
-            </p>
-            {current.ctaLabel && current.ctaLink ? (
-              <div className="mt-6 sm:mt-8">
-                <Link
-                  href={localizePath(current.ctaLink, locale)}
-                  className={cn(
-                    'inline-flex w-full items-center justify-center gap-2.5 sm:w-auto sm:min-w-[12rem]',
-                    'rounded-2xl px-6 py-3.5 text-[15px] font-bold tracking-tight',
-                    'bg-white text-black',
-                    'shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-300',
-                    'hover:bg-white/95 hover:shadow-[0_12px_40px_rgba(0,0,0,0.5)]',
-                    'focus:outline-none focus-visible:ring-4 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40'
-                  )}
-                  data-gtm="hero_cta"
-                >
-                  {current.ctaLabel}
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    aria-hidden="true"
-                    className="shrink-0"
-                  >
-                    <path
-                      d="M5 12h14M12 5l7 7-7 7"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </Link>
-              </div>
-            ) : null}
-            <p className="mt-4 text-[11px] text-white/70 sm:mt-5 sm:text-xs" aria-hidden="true">
-              {t.trustLine}
-            </p>
-          </div>
-        </div>
-      ) : null}
 
       {showCounter && canNavigate ? (
         <div className="pointer-events-none glass absolute left-1/2 top-4 sm:top-5 z-[3] -translate-x-1/2 rounded-full border border-white/25 bg-black/50 px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-white shadow-lg backdrop-blur-xl">

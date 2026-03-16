@@ -1,6 +1,5 @@
-import { NextResponse } from 'next/server';
-
 import { error as logError } from '@/lib/logger';
+import { apiError, apiSuccess, safeErrorForLog } from '@/lib/apiResponse';
 import { connectToDatabase } from '@/lib/db';
 import NewsletterSubscriber from '@/models/NewsletterSubscriber';
 import { requireAdmin } from '@/lib/requireAdmin';
@@ -23,9 +22,9 @@ export async function GET(req: Request) {
       NewsletterSubscriber.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit).lean().exec(),
       NewsletterSubscriber.countDocuments(),
     ]);
-    return NextResponse.json(toPlain({ items: docs, total }));
+    return apiSuccess(toPlain({ items: docs, total }) as Record<string, unknown>);
   } catch (e) {
     logError('[admin/newsletter-subscribers]', e);
-    return NextResponse.json({ error: 'Erreur chargement' }, { status: 500 });
+    return apiError('Erreur chargement', 500, { details: safeErrorForLog(e) });
   }
 }

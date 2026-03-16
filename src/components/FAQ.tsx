@@ -226,7 +226,7 @@ export default function FAQ({ showSectionHeading = true, limit, showTools = true
           {[1, 2, 3, 4].map((k) => (
             <div
               key={k}
-              className="h-16 sm:h-[4.25rem] rounded-2xl bg-[hsl(var(--surface-2))] animate-pulse"
+              className="h-16 sm:h-[4.25rem] rounded-[var(--radius-2xl)] bg-[hsl(var(--surface-2))] animate-pulse"
             />
           ))}
         </div>
@@ -256,7 +256,7 @@ export default function FAQ({ showSectionHeading = true, limit, showTools = true
             <div
               key={faq._id}
               role="listitem"
-              className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] shadow-sm overflow-hidden transition-shadow hover:shadow-md"
+              className="overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] shadow-sm transition-shadow hover:shadow-md"
             >
               <button
                 ref={setHeaderRef(i)}

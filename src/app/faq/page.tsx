@@ -45,7 +45,7 @@ export default async function FAQPage() {
         </p>
       </header>
 
-      <section aria-label={t('heading')} className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-sm">
+      <section aria-label={t('heading')} className="overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-sm">
         <FAQ showSectionHeading={false} />
       </section>
     </main>

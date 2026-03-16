@@ -42,11 +42,11 @@ Liste non exhaustive de ce qui peut encore être amélioré ou complété sur le
 
 - **ImageWithZoom** : utiliser `next/image` ou retirer si inutilisé.
 - **FAQ / BlogCard** sur la home : déjà en `dynamic()` ; possible lazy-load plus agressif si besoin.
-- **Réponses d’API** : uniformiser le format d’erreur `{ error: string }` et les codes HTTP sur les routes `src/app/api`.
+- **Réponses d’API** : format d’erreur standardisé via `apiError()` / `apiSuccess()` dans `lib/apiResponse.ts`. Plusieurs routes admin (contact-submissions, newsletter-subscribers, import-products) ont été migrées ; le reste peut suivre le même pattern.
 
 ### 6. Accessibilité (optionnel)
 
-- Vérifier que tous les modals utilisent bien `trapFocus` + `restoreFocus`.
+- **Fait** : Modal (`src/components/Modal.tsx`) utilise `trapFocus` (par défaut) et `restoreFocus` (focus restauré sur l’élément déclencheur à la fermeture). Skip link « Aller au contenu » présent dans le layout, `main` avec `id="main"` et `aria-busy` sur les états de chargement.
 - Vérifier les `alt` des images (Logo sans texte déjà corrigé).
 
 ---

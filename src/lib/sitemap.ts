@@ -18,6 +18,7 @@ const ROUTES = [
   '/wishlist',
   '/blog',
   '/contact',
+  '/faq',
   '/confidentialite',
   '/mentions-legales',
   '/cgv',

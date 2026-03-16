@@ -103,7 +103,7 @@ export default function ContactForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6 shadow-sm"
+      className="space-y-4 overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6 shadow-sm"
       aria-labelledby="contact-form-heading"
       noValidate
     >
