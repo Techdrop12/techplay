@@ -56,9 +56,13 @@ const FALLBACK_FAQ_EN: FAQItem[] = [
 interface FAQProps {
   /** When false, the section heading is not rendered (e.g. when the page already shows it). */
   showSectionHeading?: boolean;
+  /** Optional max number of items to display (e.g. homepage teaser). */
+  limit?: number;
+  /** When false, search and expand/collapse tools are hidden (e.g. for homepage teaser). */
+  showTools?: boolean;
 }
 
-export default function FAQ({ showSectionHeading = true }: FAQProps) {
+export default function FAQ({ showSectionHeading = true, limit, showTools = true }: FAQProps) {
   const t = useTranslations('faq');
   const locale = useLocale();
   const [faqs, setFaqs] = useState<FAQItem[]>([]);
@@ -93,6 +97,11 @@ export default function FAQ({ showSectionHeading = true }: FAQProps) {
       (f) => f.question.toLowerCase().includes(q) || f.answer.toLowerCase().includes(q)
     );
   }, [faqs, search]);
+
+  const visibleFaqs = useMemo(
+    () => (typeof limit === 'number' && limit > 0 ? filteredFaqs.slice(0, limit) : filteredFaqs),
+    [filteredFaqs, limit]
+  );
 
   const toggleIndex = (index: number) => {
     setOpenSet((prev) => {
@@ -180,34 +189,36 @@ export default function FAQ({ showSectionHeading = true }: FAQProps) {
         {introContent}
       </p>
 
-      {/* Tools: search + expand/collapse */}
-      <div className="mt-6 mb-8 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-        <input
-          type="search"
-          inputMode="search"
-          placeholder={t('search_placeholder')}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full sm:max-w-sm rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-3 text-[15px] sm:text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] focus:ring-offset-2"
-          aria-label={t('search_aria')}
-        />
-        <div className="flex gap-2 flex-shrink-0">
-          <button
-            type="button"
-            onClick={expandAll}
-            className="rounded-xl bg-[hsl(var(--accent))] text-white px-4 py-3 text-sm font-semibold hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))] min-h-[2.75rem] sm:min-h-0"
-          >
-            {t('expand_all')}
-          </button>
-          <button
-            type="button"
-            onClick={collapseAll}
-            className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-3 text-sm text-token-text hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))] min-h-[2.75rem] sm:min-h-0"
-          >
-            {t('collapse_all')}
-          </button>
+      {/* Tools: search + expand/collapse (hidden when limit is set, e.g. homepage) */}
+      {showTools && (
+        <div className="mt-6 mb-8 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+          <input
+            type="search"
+            inputMode="search"
+            placeholder={t('search_placeholder')}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full sm:max-w-sm rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-3 text-[15px] sm:text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] focus:ring-offset-2"
+            aria-label={t('search_aria')}
+          />
+          <div className="flex gap-2 flex-shrink-0">
+            <button
+              type="button"
+              onClick={expandAll}
+              className="rounded-xl bg-[hsl(var(--accent))] text-white px-4 py-3 text-sm font-semibold hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))] min-h-[2.75rem] sm:min-h-0"
+            >
+              {t('expand_all')}
+            </button>
+            <button
+              type="button"
+              onClick={collapseAll}
+              className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-3 text-sm text-token-text hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))] min-h-[2.75rem] sm:min-h-0"
+            >
+              {t('collapse_all')}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* État chargement / vide */}
       {loading && (
@@ -236,7 +247,7 @@ export default function FAQ({ showSectionHeading = true }: FAQProps) {
 
       {/* Liste FAQ */}
       <div role="list" aria-live="polite" className="space-y-3 sm:space-y-4">
-        {filteredFaqs.map((faq, i) => {
+        {visibleFaqs.map((faq, i) => {
           const isOpen = openSet.has(i);
           const headerId = `faq-header-${faq._id}-${i}`;
           const panelId = `faq-panel-${faq._id}-${i}`;

@@ -1220,7 +1220,8 @@
     "section_title": "Frequently asked questions",
     "loading": "Loading FAQ…",
     "error": "Could not load FAQ.",
-    "empty": "No questions yet."
+    "empty": "No questions yet.",
+    "view_full_faq": "View full FAQ"
   },
   "avis": {
     "title": "Customer reviews",

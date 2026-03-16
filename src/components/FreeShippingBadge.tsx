@@ -169,7 +169,7 @@ export default function FreeShippingBadge({
   const baseChip =
     'inline-flex items-center gap-2 px-2.5 py-1 text-xs font-medium rounded-lg transition shadow-sm border';
   const okChip =
-    'bg-green-100 text-green-800 dark:bg-green-800/20 dark:text-green-300 border-green-200/70 dark:border-green-700/40';
+    'bg-green-100 text-green-900 dark:bg-green-800/30 dark:text-green-100 border-green-300/70 dark:border-green-600/50';
   const warnChip =
     'bg-yellow-50 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border-yellow-200/60 dark:border-yellow-700/40';
 

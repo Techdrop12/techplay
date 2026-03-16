@@ -181,7 +181,7 @@ export default function StickyFreeShippingBar({
               className={cn(
                 'hidden items-center rounded-full px-4 py-2 text-[13px] font-semibold transition sm:inline-flex',
                 reached
-                  ? 'bg-emerald-500 text-emerald-950 shadow-[0_8px_24px_rgba(16,185,129,0.4)] hover:shadow-[0_12px_32px_rgba(16,185,129,0.5)]'
+                  ? 'bg-emerald-600 text-white shadow-[0_8px_24px_rgba(5,150,105,0.45)] hover:bg-emerald-700 hover:shadow-[0_12px_32px_rgba(5,150,105,0.5)]'
                   : 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] shadow-[var(--shadow-sm)] hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2'
               )}
               aria-label={labelCart}

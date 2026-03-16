@@ -431,10 +431,19 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
             style={lazySectionStyle500}
           >
             <SectionHeader kicker={t.faqKicker} title={t.faqTitle} />
-            <div className="rhythm-content">
+            <div className="rhythm-content space-y-4">
               <Suspense fallback={<SectionSkeleton title={t.faqTitle} />}>
-                <FAQ showSectionHeading={false} />
+                <FAQ showSectionHeading={false} limit={4} showTools={false} />
               </Suspense>
+              <div className="text-center">
+                <Link
+                  href="/faq"
+                  className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-5 py-2.5 text-[13px] font-semibold text-token-text/80 transition hover:bg-[hsl(var(--surface-2))] focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+                >
+                  {locale === 'en' ? 'View all questions' : 'Voir toute la FAQ'}
+                  <span aria-hidden>→</span>
+                </Link>
+              </div>
             </div>
           </section>
           <SplitCTA locale={locale} />

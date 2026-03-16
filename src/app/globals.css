@@ -914,6 +914,15 @@
     color: hsl(var(--text) / 0.4);
   }
 
+  /* Readability on green backgrounds */
+  .text-on-green {
+    color: rgb(4 47 46);
+  }
+  .dark .text-on-green,
+  html.dark .text-on-green {
+    color: rgb(167 243 208);
+  }
+
   .bg-brand {
     background-color: hsl(var(--brand));
   }

@@ -8,6 +8,7 @@ import Logo from '../Logo';
 import MobileNav from './MobileNav';
 
 import Link from '@/components/LocalizedLink';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 import {
   CartIcon as Cart,
   HeartIcon as Heart,
@@ -20,7 +21,6 @@ import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
 import { getCategories } from '@/lib/categories';
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing';
-import { LOCALE_COOKIE, setLocaleCookie } from '@/lib/language';
 import { cn } from '@/lib/utils';
 
 const STR = {
@@ -183,60 +183,6 @@ function getWishlistCount(wishlist: WishlistCollection): number {
 
   const count = Number(wishlist?.count ?? wishlist?.size ?? 0);
   return Number.isFinite(count) ? count : 0;
-}
-
-function LocaleSwitch({ pathname }: { pathname: string }) {
-  const router = useRouter();
-  const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr';
-  const t = STR[locale];
-
-  const setLang = (nextLocale: 'fr' | 'en') => {
-    if (nextLocale === locale) return;
-
-    try {
-      const secure =
-        typeof location !== 'undefined' && location.protocol === 'https:' ? '; Secure' : '';
-      document.cookie = `${LOCALE_COOKIE}=${encodeURIComponent(nextLocale)}; Max-Age=31536000; Path=/; SameSite=Lax${secure}`;
-      setLocaleCookie(nextLocale);
-    } catch {
-      // no-op
-    }
-
-    const href = localizePath(pathname, nextLocale);
-    // Sur les pages sans préfixe locale (ex. /blog, /contact), l’URL ne change pas :
-    // forcer un rechargement pour que le serveur relise le cookie et affiche la bonne langue.
-    const currentPath = typeof window !== 'undefined' ? window.location.pathname : pathname;
-    if (href === pathname || href === currentPath) {
-      if (typeof window !== 'undefined') window.location.assign(href);
-      return;
-    }
-    router.replace(href);
-  };
-
-  const labels = { fr: 'FR', en: 'EN' } as const;
-  const nextLocale = locale === 'fr' ? 'en' : 'fr';
-
-  return (
-    <div
-      role="group"
-      aria-label={t.localeSwitcherAria}
-      className="inline-flex items-center rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/70 p-0.5 shadow-sm"
-    >
-      <button
-        type="button"
-        onClick={() => setLang(nextLocale)}
-        onMouseDown={(e) => e.preventDefault()}
-        aria-label={locale === 'fr' ? t.switch_to_en : t.switch_to_fr}
-        aria-current="true"
-        className="min-w-[2rem] rounded-md px-2 py-1 text-[11px] font-semibold uppercase tracking-wide transition outline-none focus:ring-2 focus:ring-offset-1 bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] hover:opacity-95 focus:ring-[hsl(var(--accent)/.5)]"
-        title={locale === 'fr' ? t.switch_to_en : t.switch_to_fr}
-        data-gtm="lang_switch"
-        data-lang={locale}
-      >
-        {labels[locale]}
-      </button>
-    </div>
-  );
 }
 
 export default function Header() {
@@ -755,7 +701,7 @@ export default function Header() {
         <div className="hidden items-center gap-2 sm:gap-3 md:flex">
           <div className="flex items-center gap-2 sm:gap-2.5">
             <ThemeToggle size="sm" />
-            <LocaleSwitch pathname={pathname} />
+            <LanguageSwitcher />
 
             <div className="relative">
               <Link

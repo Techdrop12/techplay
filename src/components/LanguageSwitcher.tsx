@@ -53,7 +53,11 @@ export default function LanguageSwitcher() {
   };
 
   return (
-    <div className="inline-flex gap-2" role="group" aria-label={t('language_switcher_aria')}>
+    <div
+      className="inline-flex items-center rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/70 p-0.5 shadow-sm"
+      role="group"
+      aria-label={t('language_switcher_aria')}
+    >
       {(SUPPORTED_LOCALES as readonly Locale[]).map((lang) => {
         const active = current === lang;
         return (
@@ -66,16 +70,15 @@ export default function LanguageSwitcher() {
             aria-pressed={active}
             aria-current={active ? 'true' : undefined}
             aria-label={t('change_lang_to', { lang: localeLabels[lang] })}
-            className={[
-              'px-2 py-1 rounded text-sm transition outline-none focus:ring-2',
+            className={
               active
-                ? 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] cursor-default'
-                : 'bg-[hsl(var(--surface-2))] text-[hsl(var(--text))] hover:opacity-90 focus:ring-[hsl(var(--accent))]',
-            ].join(' ')}
+                ? 'min-w-[2rem] rounded-md px-2 py-1 text-[11px] font-semibold uppercase tracking-wide bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] cursor-default outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[hsl(var(--accent)/.5)]'
+                : 'min-w-[2rem] rounded-md px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-[hsl(var(--text))]/80 hover:bg-[hsl(var(--surface-2))] hover:text-[hsl(var(--text))] transition outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[hsl(var(--accent))]'
+            }
             data-gtm="lang_switch"
             data-lang={lang}
           >
-            {lang === 'fr' ? '🇫🇷 FR' : '🇬🇧 EN'}
+            {lang === 'fr' ? 'FR' : 'EN'}
           </button>
         );
       })}

@@ -94,7 +94,7 @@ const T = {
         title: 'Aide & contact',
         links: [
           { label: 'Suivi de commande', href: '/commande' },
-          { label: 'FAQ', href: '/#faq' },
+          { label: 'FAQ', href: '/faq' },
           { label: 'Nous contacter', href: '/contact' },
           { label: 'Blog', href: '/blog' },
         ],
@@ -167,7 +167,7 @@ const T = {
         title: 'Help & contact',
         links: [
           { label: 'Order tracking', href: '/commande' },
-          { label: 'FAQ', href: '/#faq' },
+          { label: 'FAQ', href: '/faq' },
           { label: 'Contact us', href: '/contact' },
           { label: 'Blog', href: '/blog' },
         ],
@@ -512,10 +512,10 @@ export default function Footer({
                 >
                   <ul className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3" role="list">
                     <li className="flex items-center gap-3">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-800 dark:bg-emerald-200 dark:text-emerald-950">
                         <FaShieldAlt className="text-[15px]" aria-hidden="true" />
                       </span>
-                      <span className="text-[13px] font-medium text-[hsl(var(--text))]">
+                      <span className="text-[12px] font-medium text-emerald-800 dark:text-emerald-200">
                         {t.badges.secure}
                       </span>
                     </li>
@@ -523,7 +523,7 @@ export default function Footer({
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))]">
                         <FaTruck className="text-[15px]" aria-hidden="true" />
                       </span>
-                      <span className="text-[13px] font-medium text-[hsl(var(--text))]">
+                      <span className="text-[12px] font-medium text-[hsl(var(--text))]">
                         {t.badges.shipping}
                       </span>
                     </li>
@@ -531,7 +531,7 @@ export default function Footer({
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
                         <FaHeadset className="text-[15px]" aria-hidden="true" />
                       </span>
-                      <span className="text-[13px] font-medium text-[hsl(var(--text))]">
+                      <span className="text-[12px] font-medium text-[hsl(var(--text))]">
                         {t.badges.support}
                       </span>
                     </li>
@@ -572,10 +572,10 @@ export default function Footer({
 
             {contact?.email || contact?.phone || contact?.address?.streetAddress ? (
               <>
-                <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--text))]">
+            <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--text))]/80">
                   {tFooter('get_in_touch')}
                 </h3>
-                <ul className="mt-3 space-y-2 text-[14px] text-token-text/85">
+            <ul className="mt-2.5 space-y-1.5 text-[13px] leading-relaxed text-token-text/80">
                   {contact?.email ? (
                     <li>
                       <a
@@ -619,7 +619,7 @@ export default function Footer({
                 aria-label={group.title}
                 className="min-w-0 space-y-5 overflow-hidden"
               >
-                <h3 className="break-words text-[13px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--text))]">
+                <h3 className="break-words text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--text))]/80">
                   {group.title}
                 </h3>
 
@@ -637,7 +637,7 @@ export default function Footer({
                       group.title.toLowerCase().includes('legal');
 
                     const linkClass =
-                      'inline-flex min-h-[2.5rem] min-w-0 items-center gap-2.5 rounded-md py-2 text-[14px] text-[hsl(var(--text))]/85 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] sm:min-h-0 sm:py-1';
+                      'inline-flex min-h-[2.25rem] min-w-0 items-center gap-2.5 rounded-md py-1.5 text-[13px] text-[hsl(var(--text))]/75 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] sm:min-h-0 sm:py-1';
                     const content = (
                       <>
                         {isLegal ? <LegalIcon label={label} className="h-5 w-5" /> : null}
@@ -697,7 +697,7 @@ export default function Footer({
                   aria-busy={status === 'loading'}
                   aria-describedby={message ? messageId : undefined}
                 >
-                  <h3 className="text-[13px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--text))]">
+                  <h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--text))]/80">
                     {t.newsletterTitle}
                   </h3>
 
@@ -826,13 +826,13 @@ export default function Footer({
         {children ? <div className="mt-10 text-center">{children}</div> : null}
 
         <div className="mt-14 flex flex-col items-center justify-between gap-6 border-t border-[hsl(var(--border))] pt-8 md:flex-row">
-          <p className="text-[14px] text-[hsl(var(--text))]/80">
+          <p className="text-[12px] text-[hsl(var(--text))]/75">
             © {currentYear}{' '}
             <span className="font-semibold text-[hsl(var(--text))]">{companyName}</span>
             <span className="text-[hsl(var(--text))]/65">. {t.rightsReserved}</span>
           </p>
 
-          <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[14px] text-[hsl(var(--text))]/75">
+          <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[12px] text-[hsl(var(--text))]/70">
             <li className="inline-flex items-center gap-2">
               <FaLock className="h-4 w-4 shrink-0 text-[hsl(var(--text))]/60" aria-hidden="true" />
               <span className="sr-only">{tFooter('secure_payment')}</span>

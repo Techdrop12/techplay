@@ -9,6 +9,7 @@ import Header from './Header';
 
 const LiveChatLazy = dynamic(() => import('../LiveChat'), { ssr: false });
 
+import PageTransitions from '@/components/PageTransitions';
 import { useTheme } from '@/context/themeContext';
 import { pageview } from '@/lib/ga';
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing';
@@ -229,25 +230,27 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
         aria-label={tAria('main_content')}
         className="relative z-0 min-h-[calc(var(--vh,1vh)*100)] bg-token-surface px-[max(0px,env(safe-area-inset-left))] pb-[max(0px,env(safe-area-inset-bottom))] pr-[max(0px,env(safe-area-inset-right))] pt-[var(--header-offset,4.5rem)] text-token-text transition-colors page-entrance"
       >
-        <Suspense
-          fallback={
-            <div
-              className="flex min-h-[40vh] items-center justify-center px-4 py-12"
-              role="status"
-              aria-live="polite"
-            >
-              <span className="inline-flex items-center gap-2 text-sm text-token-text/70">
-                <span
-                  className="h-4 w-4 animate-spin rounded-full border-2 border-[hsl(var(--accent))]/30 border-t-[hsl(var(--accent))]"
-                  aria-hidden
-                />
-                {loadingFallback}
-              </span>
-            </div>
-          }
-        >
-          {children}
-        </Suspense>
+        <PageTransitions>
+          <Suspense
+            fallback={
+              <div
+                className="flex min-h-[40vh] items-center justify-center px-4 py-12"
+                role="status"
+                aria-live="polite"
+              >
+                <span className="inline-flex items-center gap-2 text-sm text-token-text/70">
+                  <span
+                    className="h-4 w-4 animate-spin rounded-full border-2 border-[hsl(var(--accent))]/30 border-t-[hsl(var(--accent))]"
+                    aria-hidden
+                  />
+                  {loadingFallback}
+                </span>
+              </div>
+            }
+          >
+            {children}
+          </Suspense>
+        </PageTransitions>
       </main>
 
       <ScrollTopButton />

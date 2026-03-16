@@ -1238,7 +1238,8 @@
     "section_title": "Questions fréquentes",
     "loading": "Chargement des questions…",
     "error": "Impossible de charger la FAQ.",
-    "empty": "Aucune question pour le moment."
+    "empty": "Aucune question pour le moment.",
+    "view_full_faq": "Voir toute la FAQ"
   },
   "avis": {
     "title": "Avis des clients",
