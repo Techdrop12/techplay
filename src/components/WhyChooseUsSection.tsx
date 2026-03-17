@@ -63,13 +63,13 @@ export default function WhyChooseUsSection({
         </h2>
         {sub ? <p className="heading-section-sub mt-4">{sub}</p> : null}
       </header>
-      <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {items.slice(0, 4).map((item, index) => {
           const Icon = ICONS[ICON_ORDER[index] ?? 'delivery'];
           return (
             <div
               key={index}
-              className="flex flex-col gap-3 rounded-xl border border-[hsl(var(--border))]/70 bg-[hsl(var(--surface))]/50 px-5 py-4 text-left transition-colors sm:px-6 sm:py-5"
+              className="flex flex-col gap-3 rounded-2xl border border-[hsl(var(--border))]/50 bg-[hsl(var(--surface))]/80 px-4 py-4 text-left shadow-[0_12px_32px_rgba(15,23,42,0.22)] transition-colors sm:px-5 sm:py-5"
             >
               <span className="text-[hsl(var(--accent))]" aria-hidden="true">
                 <Icon />

@@ -411,7 +411,7 @@ export default function Header() {
         hidden ? '-translate-y-full' : 'translate-y-0'
       )}
     >
-      <div className="container-app flex h-16 items-center justify-between gap-3 md:h-[4.5rem] md:gap-5 lg:h-[4.75rem]">
+      <div className="container-app flex h-16 items-center justify-between gap-2 md:h-[4.5rem] md:gap-3 lg:h-[4.75rem] lg:gap-5">
         {/* Zone 1 — Branding */}
         <Link
           href="/"
@@ -613,7 +613,7 @@ export default function Header() {
           role="search"
           aria-label={t.searchAria}
           onSubmit={onSearchSubmit}
-          className="relative hidden min-w-0 flex-1 items-center md:flex lg:max-w-xs xl:max-w-sm"
+          className="relative hidden min-w-0 flex-1 items-center lg:flex lg:max-w-xs xl:max-w-sm"
         >
           <label htmlFor="header-search" className="sr-only">
             {t.searchAria}
@@ -673,14 +673,14 @@ export default function Header() {
 
         {/* Zone 4 — Mobile : panier + menu */}
         <div
-          className="flex min-h-[2.75rem] items-center gap-3 lg:hidden"
+          className="flex min-h-[2.75rem] items-center gap-2 lg:hidden"
           style={{ touchAction: 'manipulation' }}
         >
           <Link
             href={L('/commande')}
             onPointerEnter={() => smartPrefetchStart('/commande')}
             onPointerLeave={() => smartPrefetchCancel('/commande')}
-            className="touch-target relative flex items-center justify-center rounded-xl p-2.5 hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 md:p-1.5"
+            className="touch-target relative flex items-center justify-center rounded-xl p-2.5 hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 md:p-2"
             aria-label={t.cartAria(cartCount)}
             data-gtm="header_cart_mobile"
             data-cart-icon
@@ -698,7 +698,7 @@ export default function Header() {
           <MobileNav />
         </div>
 
-        <div className="hidden items-center gap-2 sm:gap-3 md:flex">
+        <div className="hidden items-center gap-2 sm:gap-3 lg:flex">
           <div className="flex items-center gap-2 sm:gap-2.5">
             <ThemeToggle size="sm" />
             <LanguageSwitcher />

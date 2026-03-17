@@ -493,7 +493,7 @@ export default function Footer({
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-12 md:items-start lg:gap-12">
           {/* Bloc marque — présence éditoriale */}
-          <div className="space-y-5 md:col-span-4 lg:col-span-4">
+          <div className="space-y-5 md:col-span-4 lg:col-span-4 lg:pr-6">
             <header className="border-b border-[hsl(var(--border))]/60 pb-4 md:pb-5">
               <p className="text-xs font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-sm md:text-base">
                 <span>{companyName}</span>
@@ -610,7 +610,7 @@ export default function Footer({
           </div>
 
           <div
-            className="grid grid-cols-2 gap-x-6 gap-y-6 md:col-span-8 md:items-start lg:grid-cols-[repeat(4,minmax(0,1fr))] lg:gap-x-10 lg:border-l lg:border-[hsl(var(--border))] lg:pl-10 xl:gap-x-12 xl:pl-12"
+            className="grid grid-cols-2 gap-x-6 gap-y-6 md:col-span-8 md:items-start lg:grid-cols-[repeat(4,minmax(0,1fr))] lg:gap-x-12 lg:border-l lg:border-[hsl(var(--border))] lg:pl-10 xl:gap-x-14 xl:pl-14"
             style={{ minWidth: 0 }}
           >
             {navGroups.map((group) => (
@@ -619,7 +619,7 @@ export default function Footer({
                 aria-label={group.title}
                 className="min-w-0 space-y-2.5 overflow-hidden"
               >
-                <h3 className="break-words text-[11px] font-medium uppercase leading-tight tracking-[0.08em] text-[hsl(var(--text))]/80 sm:text-[12px]">
+                <h3 className="text-[11px] font-medium uppercase leading-tight tracking-[0.08em] text-[hsl(var(--text))]/80 sm:text-[12px] md:whitespace-nowrap">
                   {group.title}
                 </h3>
 
@@ -688,8 +688,8 @@ export default function Footer({
             ))}
 
             {!compact ? (
-              <div className="col-span-2 flex flex-col sm:col-span-3 lg:col-span-4">
-                <div className="rounded-xl border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface))]/50 px-4 py-5 dark:bg-[hsl(var(--surface))]/30 sm:px-5 lg:border-[hsl(var(--border))] lg:bg-[hsl(var(--surface))]/60 lg:dark:bg-[hsl(var(--surface))]/30">
+              <div className="col-span-2 flex flex-col sm:col-span-2 lg:col-span-2 lg:pl-4">
+                <div className="rounded-2xl border border-[hsl(var(--border))]/70 bg-[radial-gradient(circle_at_top,_hsl(var(--surface-2))/85,_hsl(var(--surface))/98)] px-4 py-5 shadow-[0_18px_46px_rgba(15,23,42,0.35)] dark:bg-[hsl(var(--surface))]/40 sm:px-5 lg:border-[hsl(var(--border))]/80">
                   <form
                     onSubmit={onSubscribe}
                     noValidate
@@ -698,7 +698,7 @@ export default function Footer({
                     aria-busy={status === 'loading'}
                     aria-describedby={message ? messageId : undefined}
                   >
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--text))]">
+                    <h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--text))]/85">
                       {t.newsletterTitle}
                     </h3>
 
@@ -709,7 +709,7 @@ export default function Footer({
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder={t.newsletterPlaceholder}
-                        className="min-h-[2.75rem] w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-3 text-[14px] text-[hsl(var(--text))] placeholder:text-[hsl(var(--text))]/50 transition-[border-color,box-shadow] focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/0.2)] focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]"
+                        className="min-h-[2.75rem] w-full rounded-xl border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface))]/98 px-4 py-2.5 text-[14px] text-[hsl(var(--text))] placeholder:text-[hsl(var(--text))]/55 shadow-sm transition-[border-color,box-shadow] focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/0.22)] focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]"
                         aria-required="true"
                         aria-invalid={status === 'error' && !isValidEmail(email) ? 'true' : 'false'}
                         aria-describedby={status === 'error' ? messageId : undefined}
@@ -722,7 +722,7 @@ export default function Footer({
                       <button
                         type="submit"
                         disabled={status === 'loading'}
-                        className="min-h-[2.75rem] shrink-0 rounded-xl bg-[hsl(var(--accent))] px-5 py-3 text-sm font-semibold text-[hsl(var(--accent-fg))] shadow-md transition-all duration-200 hover:opacity-95 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.5)] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] disabled:opacity-60"
+                        className="min-h-[2.75rem] shrink-0 rounded-xl bg-[hsl(var(--accent))] px-5 py-2.5 text-[13px] font-semibold text-[hsl(var(--accent-fg))] shadow-md transition-all duration-200 hover:opacity-96 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.5)] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] disabled:opacity-60"
                         aria-label={t.newsletterButtonIdle}
                         data-gtm="footer_newsletter_submit"
                       >

@@ -529,7 +529,11 @@ export default function CheckoutForm() {
           disabled={loading}
           aria-busy={loading ? 'true' : 'false'}
           data-gtm="checkout_submit_btn"
-          className="touch-target inline-flex min-h-[3.25rem] w-full items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-4 py-3.5 text-[15px] font-bold text-[hsl(var(--accent-fg))] shadow-lg transition-all duration-200 hover:shadow-xl active:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+          className={cn(
+            'btn-premium w-full justify-center rounded-xl text-[15px] font-bold',
+            'min-h-[3.25rem] px-4 py-3.5',
+            'disabled:cursor-not-allowed disabled:opacity-60'
+          )}
         >
           {loading ? (
             <span

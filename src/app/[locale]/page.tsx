@@ -10,12 +10,13 @@ import ClientTrackingScript from '@/components/ClientTrackingScript';
 import FAQ from '@/components/FAQ';
 import Link from '@/components/LocalizedLink';
 import PacksSection from '@/components/PacksSection';
+import BundleBuilder from '@/components/BundleBuilder';
 import SectionHeader from '@/components/SectionHeader';
 import TrustBadges from '@/components/TrustBadges';
 import WhyChooseUsSection from '@/components/WhyChooseUsSection';
 import { getPosts } from '@/lib/blog';
 import { BRAND } from '@/lib/constants';
-import { getBestProducts, getRecommendedPacks } from '@/lib/data';
+import { getAllProducts, getBestProducts, getRecommendedPacks } from '@/lib/data';
 import { localizePath } from '@/lib/i18n-routing';
 import { isLocale } from '@/lib/language';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
@@ -246,15 +247,19 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
   setRequestLocale(locale);
   const t = STR[locale];
   const tHome = await getTranslations('home');
-  const [bestProductsResult, recommendedPacksResult, blogResult] = await Promise.allSettled([
-    getBestProducts(),
-    getRecommendedPacks(),
-    getPosts({ limit: 3, sort: 'newest', publishedOnly: true }),
-  ]);
+  const [bestProductsResult, recommendedPacksResult, blogResult, allProductsResult] =
+    await Promise.allSettled([
+      getBestProducts(),
+      getRecommendedPacks(),
+      getPosts({ limit: 3, sort: 'newest', publishedOnly: true }),
+      getAllProducts(),
+    ]);
   const bestProducts: Product[] =
     bestProductsResult.status === 'fulfilled' ? bestProductsResult.value : [];
   const recommendedPacks: Pack[] =
     recommendedPacksResult.status === 'fulfilled' ? recommendedPacksResult.value : [];
+  const allProducts: Product[] =
+    allProductsResult.status === 'fulfilled' ? allProductsResult.value : [];
   const blogData = blogResult.status === 'fulfilled' ? blogResult.value : null;
   const blogItems = blogData?.items ?? [];
   const blogPostsForCards = (blogItems as Record<string, unknown>[])
@@ -462,6 +467,18 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
               </div>
             </div>
           </section>
+          {allProducts.length > 0 && (
+            <section
+              id="builder"
+              aria-label="Build your setup"
+              className="motion-section motion-section-delay-3 section-spacing-sm"
+            >
+              <SectionHeader kicker="Bundle personnalisé" title="Construis ton setup" />
+              <div className="rhythm-content">
+                <BundleBuilder products={allProducts} />
+              </div>
+            </section>
+          )}
           <SplitCTA locale={locale} />
         </div>
       </div>

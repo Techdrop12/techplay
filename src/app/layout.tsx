@@ -372,6 +372,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           }}
         />
 
+        <div className="md:hidden h-20" aria-hidden />
         <div className="pb-[env(safe-area-inset-bottom)]" aria-hidden />
       </body>
     </html>

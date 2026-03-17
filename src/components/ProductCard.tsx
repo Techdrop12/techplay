@@ -285,12 +285,12 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
           </div>
 
           {/* Bloc contenu — rythme vertical et respiration */}
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden px-4 pt-5 pb-5 sm:px-5 sm:pt-6 sm:pb-6">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden px-4 pt-5 pb-6 sm:px-5 sm:pt-6 sm:pb-7">
             {/* 1. Identité produit — hauteur fixe 2 lignes pour composition stable */}
             <div className="min-w-0 shrink-0">
               <div className="min-h-[2.5em]">
                 <h3
-                  className="line-clamp-2 text-[15px] font-bold leading-tight tracking-tight text-[hsl(var(--text))] sm:text-base [hyphens:none] [overflow-wrap:break-word]"
+                  className="line-clamp-2 text-[15px] font-bold leading-snug tracking-tight text-[hsl(var(--text))] sm:text-base [hyphens:none] [overflow-wrap:break-word]"
                   title={title}
                 >
                   {title}
@@ -332,7 +332,7 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
             </div>
 
             {/* 3. Réassurance — une ligne, adaptée au cadre */}
-            <div className="mt-4 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] sm:mt-5">
+            <div className="mt-5 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] sm:mt-5">
               {ratingValue > 0 || reviewsCount > 0 ? (
                 <span className="flex items-center gap-1 text-[hsl(var(--text))]/70">
                   <RatingStars
@@ -367,7 +367,7 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
             </div>
 
             {/* 4. Action principale — CTA stable, une ligne, bon touch target */}
-            <div className="mt-5 min-w-0 shrink-0 sm:mt-6">
+            <div className="mt-6 min-w-0 shrink-0 sm:mt-7">
               <AddToCartButton
                 product={{
                   _id: product._id,

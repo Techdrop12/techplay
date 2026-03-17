@@ -70,7 +70,7 @@ const GRID_COLS = {
 
 function getGridClasses(cols?: Cols): string {
   const safe = {
-    base: cols?.base ?? 2,
+    base: cols?.base ?? 1,
     sm: cols?.sm ?? 2,
     md: cols?.md ?? 3,
     lg: cols?.lg ?? 3,

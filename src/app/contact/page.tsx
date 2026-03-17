@@ -130,12 +130,12 @@ export default async function ContactPage() {
         {/* Téléphone + Adresse + Horaires — titres et texte réduits, tout dans le cadre */}
         <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3 items-stretch">
           <section
-            className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/85 px-3 py-3 sm:px-4 sm:py-4"
+            className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[hsl(var(--border))]/75 bg-[hsl(var(--surface))]/82 px-3.5 py-3.5 sm:px-4 sm:py-4"
             aria-labelledby="contact-phone-heading"
           >
             <h2
               id="contact-phone-heading"
-              className="line-clamp-2 min-w-0 break-normal text-[5px] font-medium uppercase leading-tight tracking-[0.06em] text-token-text/60"
+              className="line-clamp-2 min-w-0 break-normal text-[10px] font-medium uppercase leading-snug tracking-[0.12em] text-token-text/60"
             >
               {t('phone_heading')}
             </h2>
@@ -148,20 +148,20 @@ export default async function ContactPage() {
               </svg>
               <span className="min-w-0 truncate">{SUPPORT_PHONE}</span>
             </a>
-            <p className="mt-1 text-[10px] leading-snug text-token-text/60">{t('phone_hours')}</p>
+            <p className="mt-1 text-[10px] leading-snug text-token-text/65">{t('phone_hours')}</p>
           </section>
 
           <section
-            className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/85 px-3 py-3 sm:px-4 sm:py-4"
+            className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[hsl(var(--border))]/75 bg-[hsl(var(--surface))]/82 px-3.5 py-3.5 sm:px-4 sm:py-4"
             aria-labelledby="contact-address-heading"
           >
             <h2
               id="contact-address-heading"
-              className="line-clamp-2 min-w-0 break-normal text-[5px] font-medium uppercase leading-tight tracking-[0.06em] text-token-text/60"
+              className="line-clamp-2 min-w-0 break-normal text-[10px] font-medium uppercase leading-snug tracking-[0.12em] text-token-text/60"
             >
               {t('address_heading')}
             </h2>
-            <address className="mt-1.5 min-w-0 flex-1 break-words not-italic text-[11px] leading-relaxed text-token-text/80">
+            <address className="mt-1.5 min-w-0 flex-1 break-words not-italic text-[11px] leading-relaxed text-token-text/75">
               {ADDRESS.street}
               <br />
               {ADDRESS.postalCode} {ADDRESS.city}
@@ -171,16 +171,16 @@ export default async function ContactPage() {
           </section>
 
           <section
-            className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/85 px-3 py-3 sm:px-4 sm:py-4"
+            className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[hsl(var(--border))]/75 bg-[hsl(var(--surface))]/82 px-3.5 py-3.5 sm:px-4 sm:py-4"
             aria-labelledby="contact-hours-heading"
           >
             <h2
               id="contact-hours-heading"
-              className="line-clamp-2 min-w-0 break-normal text-[5px] font-medium uppercase leading-tight tracking-[0.06em] text-token-text/60"
+              className="line-clamp-2 min-w-0 break-normal text-[10px] font-medium uppercase leading-snug tracking-[0.12em] text-token-text/60"
             >
               {t('hours_heading')}
             </h2>
-            <dl className="mt-1.5 min-w-0 flex-1 space-y-1 text-[11px] text-token-text/80">
+            <dl className="mt-1.5 min-w-0 flex-1 space-y-1.5 text-[11px] text-token-text/78">
               {HOURS_KEYS.map(({ joursKey, heuresKey }) => (
                 <div key={joursKey} className="flex min-w-0 justify-between gap-2">
                   <dt className="min-w-0 shrink text-token-text/70">{t(joursKey)}</dt>

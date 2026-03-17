@@ -509,7 +509,7 @@ export default function BestProducts({
             ? { variants: containerVariants, initial: 'hidden', whileInView: 'show' }
             : {})}
           viewport={{ once: true, amount: 0.15 }}
-          className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4"
+          className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4"
           role="list"
           aria-describedby={showTitle ? subId : undefined}
           id={gridId}

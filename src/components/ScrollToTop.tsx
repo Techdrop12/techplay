@@ -65,13 +65,13 @@ export default function ScrollToTop({
       type="button"
       onClick={scrollTop}
       className={cn(
-        'fixed z-50 inline-grid h-10 w-10 place-items-center rounded-full outline-none transition active:scale-95',
+        'fixed z-40 inline-grid h-9 w-9 place-items-center rounded-full outline-none transition active:scale-95',
         'scroll-top-entrance',
-        'border border-[hsl(var(--accent)/0.25)] shadow-[0_2px_10px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.22)]',
+        'border border-[hsl(var(--accent)/0.22)] shadow-[0_8px_26px_rgba(15,23,42,0.25)]/70 dark:shadow-[0_10px_30px_rgba(0,0,0,0.6)]',
         'focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.4)] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]',
         highContrast
           ? 'bg-[hsl(var(--text))] text-[hsl(var(--bg))] hover:opacity-90 dark:bg-[hsl(var(--text))] dark:text-[hsl(var(--bg))]'
-          : 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] hover:opacity-95',
+          : 'bg-[hsl(var(--surface))]/96 text-[hsl(var(--accent))] hover:bg-[hsl(var(--surface-2))]/98',
         positionClassName,
         className
       )}
@@ -79,7 +79,7 @@ export default function ScrollToTop({
       title={ariaLabel ?? tAria('scroll_top')}
       {...props}
     >
-      <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden="true">
         <path d="M12 5l7 7-1.4 1.4L13 8.8V20h-2V8.8L6.4 13.4 5 12z" fill="currentColor" />
       </svg>
     </button>

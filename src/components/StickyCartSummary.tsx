@@ -314,31 +314,29 @@ export default function StickyCartSummary({
           prefersReduced ? { duration: 0.15 } : { type: 'spring', stiffness: 320, damping: 26 }
         }
         className={cn(
-          'md:hidden fixed bottom-0 left-0 right-0 z-[60]',
-          'backdrop-blur supports-[backdrop-filter]:bg-white/85 dark:supports-[backdrop-filter]:bg-zinc-900/85',
-          'border-t border-[hsl(var(--border))] shadow-[var(--shadow-md)]',
-          'pb-[env(safe-area-inset-bottom)]',
+          'md:hidden fixed inset-x-0 bottom-0 z-[60]',
+          'pointer-events-none pb-[calc(env(safe-area-inset-bottom)+0.5rem)]',
           className
         )}
-        style={{ pointerEvents: 'none' }}
         role="region"
         aria-label={tx('mobile_summary')}
         data-visible="true"
       >
-        <div style={{ pointerEvents: 'auto' }}>
-          <div className="flex items-center justify-between px-4 py-2">
+        <div className="px-3 pb-1 pointer-events-auto">
+          <div className="mx-auto max-w-xl rounded-2xl border border-[hsl(var(--border))]/70 bg-[hsl(var(--surface))]/95 shadow-[0_16px_40px_rgba(15,23,42,0.35)] backdrop-blur supports-[backdrop-filter]:bg-[hsl(var(--surface))]/92">
+          <div className="flex items-center justify-between px-4 py-2.5">
             <button
               type="button"
               onClick={() => setCollapsedPersist(!collapsed)}
-              className="rounded-md px-1 -mx-1 text-sm font-semibold text-[hsl(var(--text))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
+              className="rounded-full px-2 -mx-1 text-[12px] font-semibold text-[hsl(var(--text))]/85 hover:bg-[hsl(var(--surface-2))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
               aria-expanded={!collapsed}
               aria-controls="sticky-cart-panel"
             >
               {collapsed ? tx('show') : tx('hide')} · {count} {count > 1 ? tx('items') : tx('item')}
             </button>
 
-            <div className="text-sm text-[hsl(var(--text))]" aria-live="polite">
-              {tx('total')} : <strong className="ml-1">{formatPrice(payable)}</strong>
+            <div className="text-[13px] font-medium text-[hsl(var(--text))]" aria-live="polite">
+              {tx('total')} <span className="ml-1 font-semibold">{formatPrice(payable)}</span>
             </div>
           </div>
 
@@ -353,7 +351,7 @@ export default function StickyCartSummary({
                 transition={{ duration: 0.22, ease: 'easeInOut' }}
                 className="overflow-hidden"
               >
-                <div className="px-4 pt-1">
+                <div className="px-4 pt-1.5">
                   <div className="mb-1 flex items-center justify-between text-[11px] text-token-text/70">
                     <span>{tx('free_shipping')}</span>
                     <span aria-hidden="true">{progress}%</span>
@@ -403,7 +401,7 @@ export default function StickyCartSummary({
                     value={Number.isFinite(tax) && tax > 0 ? formatPrice(tax) : '—'}
                   />
                   <Line label={tx('shipping')} value={shippingDisplay} />
-                  <div className="my-2 border-t border-[hsl(var(--border))]" />
+                  <div className="my-2 border-t border-[hsl(var(--border))]/70" />
                   <Line label={tx('total')} value={formatPrice(payable)} bold />
                 </div>
 
@@ -411,7 +409,7 @@ export default function StickyCartSummary({
                   <Link
                     href={cartHref}
                     onClick={() => onCta('voir_panier')}
-                    className="btn-outline inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
+                    className="inline-flex items-center justify-center rounded-full border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface))]/96 px-3.5 py-2 text-[13px] font-semibold text-[hsl(var(--text))] hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
                     aria-label={tx('view_cart')}
                   >
                     {tx('view_cart')}
@@ -420,15 +418,15 @@ export default function StickyCartSummary({
                   <Link
                     href={checkoutHref}
                     onClick={() => onCta('commander')}
-                    className="inline-flex items-center justify-center rounded-lg bg-[hsl(var(--accent))] px-3 py-2 text-sm font-extrabold text-white shadow-md hover:opacity-90 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
+                    className="inline-flex items-center justify-center rounded-full bg-[hsl(var(--accent))] px-3.5 py-2 text-[13px] font-extrabold text-[hsl(var(--accent-fg))] shadow-md hover:opacity-92 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
                     aria-label={tx('checkout')}
                   >
                     {tx('checkout')} →
                   </Link>
                 </div>
 
-                <div className="px-4 pb-3 -mt-1">
-                  <ul className="flex items-center justify-between text-[11px] text-token-text/70">
+                <div className="px-4 pb-3 -mt-0.5">
+                  <ul className="flex items-center justify-between text-[11px] text-token-text/65">
                     <li className="flex items-center gap-1.5">
                       <IconLock className="text-token-text/70" />
                       <span>{tx('secure_payment')}</span>
@@ -447,6 +445,7 @@ export default function StickyCartSummary({
             )}
           </AnimatePresence>
         </div>
+      </div>
       </motion.aside>
     </AnimatePresence>
   );

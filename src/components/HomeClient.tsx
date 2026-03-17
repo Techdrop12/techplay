@@ -180,7 +180,7 @@ export default function HomeClient() {
         </div>
 
         <div className="mt-4">
-          <div className="mx-auto flex max-w-4xl flex-col gap-2 rounded-2xl border border-[hsl(var(--border))]/70 bg-[hsl(var(--surface))]/85 px-3 py-2.5 text-[11px] text-token-text/80 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-4 sm:text-[0.8rem]">
+        <div className="mx-auto flex max-w-4xl flex-col gap-1.5 rounded-2xl border border-[hsl(var(--border))]/45 bg-[hsl(var(--surface))]/92 px-3.5 py-2.5 text-[11px] text-token-text/80 shadow-[0_10px_30px_rgba(15,23,42,0.25)] sm:flex-row sm:items-center sm:justify-between sm:px-4 sm:text-[0.8rem]">
             <p className="flex items-center gap-2">
               <span
                 className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))]"
@@ -231,7 +231,7 @@ export default function HomeClient() {
       )}
 
       {/* Products grid */}
-      <section className="p-4">
+      <section className="px-4 pb-6 pt-2">
         <header className="mx-auto mb-3 max-w-5xl sm:mb-4">
           <h2 className="text-base font-semibold tracking-tight text-[hsl(var(--text))] sm:text-lg">
             {tHome('products_section_title')}
@@ -240,7 +240,7 @@ export default function HomeClient() {
             {tHome('products_section_subtitle')}
           </p>
         </header>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
           {visibleProducts.map((p) => (
             <ProductCard key={p._id} product={p} />
           ))}

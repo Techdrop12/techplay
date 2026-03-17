@@ -222,7 +222,27 @@ export default function CheckoutPage() {
             >
               <CartSummary items={items} />
               <CheckoutForm />
-              <p className="text-center text-[11px] text-token-text/60">{t('secure_note')}</p>
+              <div className="rounded-lg border border-[hsl(var(--border))]/70 bg-[hsl(var(--surface-2))]/80 px-3.5 py-2.5 text-[11px] text-token-text/70">
+                <div className="flex items-center gap-2">
+                  <span
+                    aria-hidden="true"
+                    className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/12 text-emerald-600"
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5z" />
+                      <path d="M10 11V7a2 2 0 1 1 4 0v4" />
+                    </svg>
+                  </span>
+                  <p className="font-medium text-[hsl(var(--text))]">{t('secure_note')}</p>
+                </div>
+              </div>
             </aside>
           </div>
 
