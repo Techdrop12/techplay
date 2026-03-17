@@ -614,11 +614,7 @@ export default function Footer({
             style={{ minWidth: 0 }}
           >
             {navGroups.map((group) => (
-              <nav
-                key={group.title}
-                aria-label={group.title}
-                className="min-w-0 space-y-2.5 overflow-hidden"
-              >
+              <nav key={group.title} aria-label={group.title} className="min-w-0 space-y-2.5">
                 <h3 className="footer-nav-heading text-[hsl(var(--text))]/80">
                   {group.title}
                 </h3>
