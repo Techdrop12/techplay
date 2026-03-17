@@ -510,7 +510,7 @@ export default function Footer({
                   className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/90 p-3 dark:bg-[hsl(var(--surface))]/50"
                   aria-label={t.badgesAria}
                 >
-                  <ul className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2 md:grid-cols-3" role="list">
+                  <ul className="grid grid-cols-1 gap-3 text-sm" role="list">
                     <li className="flex min-w-[0] items-center gap-2 rounded-lg bg-[hsl(var(--surface-2))/60] px-2.5 py-1.5">
                       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-emerald-500/15 text-emerald-800 dark:bg-emerald-200 dark:text-emerald-950">
                         <FaShieldAlt className="text-[13px]" aria-hidden="true" />
