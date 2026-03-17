@@ -610,7 +610,7 @@ export default function Footer({
           </div>
 
           <div
-            className="grid grid-cols-2 gap-x-6 gap-y-6 md:col-span-8 md:items-start lg:grid-cols-[repeat(4,minmax(0,1fr))] lg:gap-x-12 lg:border-l lg:border-[hsl(var(--border))] lg:pl-10 xl:gap-x-14 xl:pl-14"
+            className="grid grid-cols-2 gap-x-6 gap-y-6 md:col-span-8 md:items-start lg:grid-cols-[repeat(4,minmax(9rem,1fr))] lg:gap-x-12 lg:border-l lg:border-[hsl(var(--border))] lg:pl-10 xl:grid-cols-[repeat(4,minmax(10rem,1fr))] xl:gap-x-14 xl:pl-14"
             style={{ minWidth: 0 }}
           >
             {navGroups.map((group) => (
@@ -619,7 +619,7 @@ export default function Footer({
                 aria-label={group.title}
                 className="min-w-0 space-y-2.5 overflow-hidden"
               >
-                <h3 className="text-[11px] font-medium uppercase leading-tight tracking-[0.08em] text-[hsl(var(--text))]/80 sm:text-[12px] md:whitespace-nowrap">
+                <h3 className="footer-nav-heading text-[hsl(var(--text))]/80">
                   {group.title}
                 </h3>
 
@@ -641,7 +641,7 @@ export default function Footer({
                     const content = (
                       <>
                         {isLegal ? <LegalIcon label={label} className="h-3.5 w-3.5 shrink-0" /> : null}
-                        <span className="min-w-0 break-words">{label}</span>
+                        <span className="min-w-0 break-normal leading-snug">{label}</span>
                       </>
                     );
 

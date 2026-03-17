@@ -469,6 +469,15 @@
     color: hsl(var(--text));
   }
 
+  /* Footer navigation headings — fluid, adaptive */
+  .footer-nav-heading {
+    font-size: clamp(0.7rem, 0.6rem + 0.35vw, 0.85rem);
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    line-height: 1.2;
+  }
+
   @media (min-width: 640px) {
     .heading-page {
       font-size: var(--step-5);

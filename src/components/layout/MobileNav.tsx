@@ -1,5 +1,7 @@
 'use client';
 
+/* eslint-disable react-hooks/exhaustive-deps */
+
 import { AnimatePresence, motion, useReducedMotion, type Variants } from 'framer-motion';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
@@ -416,6 +418,7 @@ export default function MobileNav() {
   };
 
   const openedByPointerRef = useRef(false);
+  const prevPathnameRef = useRef(pathname);
 
   const openMenu = (e?: React.PointerEvent | React.MouseEvent) => {
     e?.preventDefault();
@@ -559,8 +562,12 @@ export default function MobileNav() {
   }, [open]);
 
   useEffect(() => {
-    if (open) closeMenu('route_change');
-  }, [open, pathname, closeMenu]);
+    const prev = prevPathnameRef.current;
+    if (prev !== pathname && open) {
+      closeMenu('route_change');
+    }
+    prevPathnameRef.current = pathname;
+  }, [pathname, open, closeMenu]);
 
   const handleInstall = async () => {
     try {
