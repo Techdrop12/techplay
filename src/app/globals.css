@@ -471,15 +471,15 @@
 
   /* Contact page: small cards headings (Téléphone / Adresse / Horaires du support) */
   .contact-card-heading {
-    font-size: clamp(0.7rem, 0.66rem + 0.18vw, 0.9rem);
-    line-height: 1.2;
-    letter-spacing: 0.16em;
+    font-size: clamp(0.7rem, 0.64rem + 0.14vw, 0.8rem);
+    line-height: 1.25;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     font-weight: 600;
     color: hsl(var(--text));
     max-width: 100%;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
+    word-wrap: normal;
+    overflow-wrap: normal;
   }
 
   /* Footer navigation headings — fluid, adaptive */
