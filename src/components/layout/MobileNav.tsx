@@ -3,6 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion, type Variants } from 'framer-motion';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import * as ReactDOM from 'react-dom';
 
 import Link from '@/components/LocalizedLink';
 import ThemeToggle from '@/components/ui/ThemeToggle';
@@ -280,6 +281,11 @@ export default function MobileNav() {
   const [searchFocused, setSearchFocused] = useState(false);
   const [recentQs, setRecentQs] = useState<string[]>([]);
   const [canInstall, setCanInstall] = useState(false);
+  const [portalTargetReady, setPortalTargetReady] = useState(false);
+
+  useEffect(() => {
+    setPortalTargetReady(true);
+  }, []);
 
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
@@ -289,20 +295,41 @@ export default function MobileNav() {
   const savedScrollY = useRef(0);
   const startY = useRef<number | null>(null);
 
+  const overlayTransition = reducedMotion
+    ? { duration: 0 }
+    : { duration: 0.2, ease: [0.16, 1, 0.3, 1] as const };
+  const overlayExitTransition = reducedMotion
+    ? { duration: 0 }
+    : { duration: 0.14, ease: [0.16, 1, 0.3, 1] as const };
+
   const overlayVariants: Variants = {
     hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: reducedMotion ? 0 : 0.18 } },
-    exit: { opacity: 0, transition: { duration: 0.12 } },
+    visible: { opacity: 1, transition: overlayTransition },
+    exit: { opacity: 0, transition: overlayExitTransition },
   };
 
+  const sheetTransition = reducedMotion
+    ? { duration: 0 }
+    : { duration: 0.26, ease: [0.16, 1, 0.3, 1] as const };
+  const sheetExitTransition = reducedMotion
+    ? { duration: 0 }
+    : { duration: 0.18, ease: [0.16, 1, 0.3, 1] as const };
+
   const sheetVariants: Variants = {
-    hidden: { y: reducedMotion ? 0 : '10%', opacity: 0.001 },
+    hidden: {
+      y: reducedMotion ? 0 : '12%',
+      opacity: reducedMotion ? 1 : 0.6,
+    },
     visible: {
       y: 0,
       opacity: 1,
-      transition: { duration: reducedMotion ? 0 : 0.22, ease: 'easeOut' },
+      transition: sheetTransition,
     },
-    exit: { y: reducedMotion ? 0 : '10%', opacity: 0, transition: { duration: 0.16 } },
+    exit: {
+      y: reducedMotion ? 0 : '12%',
+      opacity: reducedMotion ? 1 : 0.6,
+      transition: sheetExitTransition,
+    },
   };
 
   const isActive = (href: string) => {
@@ -323,17 +350,27 @@ export default function MobileNav() {
   };
 
   const lockScroll = () => {
-    savedScrollY.current = window.scrollY || document.documentElement.scrollTop;
+    const scrollY =
+      window.scrollY ??
+      window.pageYOffset ??
+      document.documentElement.scrollTop ??
+      0;
+    savedScrollY.current = scrollY;
 
     const body = document.body;
+    const html = document.documentElement;
     const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
 
+    html.style.overflow = 'hidden';
+    if (scrollbarWidth > 0) html.style.paddingRight = `${scrollbarWidth}px`;
     body.style.position = 'fixed';
     body.style.top = `-${savedScrollY.current}px`;
     body.style.left = '0';
     body.style.right = '0';
     body.style.overflow = 'hidden';
     body.style.width = '100%';
+    body.style.touchAction = 'none';
+    body.style.overscrollBehavior = 'none';
     if (scrollbarWidth > 0) body.style.paddingRight = `${scrollbarWidth}px`;
 
     const main = document.getElementById('main') as InertHTMLElement | null;
@@ -350,6 +387,11 @@ export default function MobileNav() {
 
   const unlockScroll = () => {
     const body = document.body;
+    const html = document.documentElement;
+    const scrollY = savedScrollY.current;
+
+    html.style.overflow = '';
+    html.style.paddingRight = '';
     body.style.position = '';
     body.style.top = '';
     body.style.left = '';
@@ -357,8 +399,8 @@ export default function MobileNav() {
     body.style.overflow = '';
     body.style.width = '';
     body.style.paddingRight = '';
-
-    window.scrollTo(0, savedScrollY.current);
+    body.style.touchAction = '';
+    body.style.overscrollBehavior = '';
 
     if (mainRef.current) {
       try {
@@ -369,6 +411,8 @@ export default function MobileNav() {
       mainRef.current.removeAttribute('aria-hidden');
       mainRef.current = null;
     }
+
+    window.scrollTo(0, scrollY);
   };
 
   const openedByPointerRef = useRef(false);
@@ -383,6 +427,7 @@ export default function MobileNav() {
       openedByPointerRef.current = false;
       return;
     }
+    lockScroll();
     setOpen(true);
     try {
       navigator.vibrate?.(8);
@@ -393,6 +438,7 @@ export default function MobileNav() {
   };
 
   const closeMenu = (reason = 'close_btn') => {
+    unlockScroll();
     setOpen(false);
     track({ action: 'mobile_nav_close', label: reason });
   };
@@ -619,8 +665,8 @@ export default function MobileNav() {
         onPointerDown={openMenu}
         aria-haspopup="dialog"
         aria-expanded={open}
-        aria-controls={dialogId}
-        aria-label={t.ui.openMenu}
+        aria-controls={open ? dialogId : undefined}
+        aria-label={open ? t.ui.closeMenu : t.ui.openMenu}
         aria-keyshortcuts="Alt+M"
         className="touch-manipulation grid shrink-0 min-h-[2.75rem] min-w-[2.75rem] place-items-center rounded-xl hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 lg:hidden"
         style={{ touchAction: 'manipulation' }}
@@ -628,32 +674,35 @@ export default function MobileNav() {
         <Icon.Menu />
       </button>
 
-      <AnimatePresence>
-        {open ? (
-          <motion.div
-            key="mobile-nav"
-            id={dialogId}
-            ref={dialogRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={titleId}
-            className="fixed inset-0 z-[9999] flex items-end justify-center overscroll-contain sm:items-center"
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            onTouchStart={onTouchStart}
-            onTouchMove={onTouchMove}
-            onTouchEnd={onTouchEnd}
-          >
+      {portalTargetReady && typeof document !== 'undefined' && document.body
+        ? ReactDOM.createPortal(
+            <AnimatePresence>
+              {open ? (
+                <motion.div
+                  key="mobile-nav"
+                  id={dialogId}
+                  ref={dialogRef}
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby={titleId}
+                  className="fixed inset-0 z-[9999] isolate flex min-h-[100dvh] items-end justify-center overscroll-contain sm:items-center"
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  onTouchStart={onTouchStart}
+                  onTouchMove={onTouchMove}
+                  onTouchEnd={onTouchEnd}
+                >
             <motion.div
-              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+              className="absolute inset-0 z-0 bg-black/60 backdrop-blur-md"
+              style={{ top: 0, left: 0, right: 0, bottom: 0, minHeight: '100dvh' }}
               variants={overlayVariants}
               onClick={() => closeMenu('backdrop')}
               aria-hidden="true"
             />
 
             <motion.div
-              className="relative flex max-h-[94dvh] w-full max-w-[100vw] flex-col border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/95 shadow-2xl sm:max-h-[92vh] sm:max-w-md sm:rounded-2xl [@media(orientation:landscape)]:max-h-[90dvh]"
+              className="relative z-10 flex min-h-[100dvh] w-full max-w-[100vw] flex-col border-0 border-t border-[hsl(var(--border))] bg-[hsl(var(--surface))] shadow-2xl sm:min-h-0 sm:max-h-[92vh] sm:max-w-md sm:rounded-2xl sm:border [@media(orientation:landscape)]:min-h-0 [@media(orientation:landscape)]:max-h-[90dvh]"
               variants={sheetVariants}
               drag={reducedMotion ? false : 'y'}
               dragConstraints={{ top: 0, bottom: 0 }}
@@ -781,7 +830,10 @@ export default function MobileNav() {
 
                   <Link
                     href="/wishlist"
-                    onPointerDown={() => prefetchOnPointer('/wishlist')}
+                    onPointerDown={() => {
+                      prefetchOnPointer('/wishlist');
+                      closeMenu('quick_wishlist');
+                    }}
                     onFocus={() => prefetchOnPointer('/wishlist')}
                     onClick={() => {
                       track({ action: 'mobile_nav_quick_wishlist' });
@@ -800,7 +852,10 @@ export default function MobileNav() {
 
                   <Link
                     href="/account"
-                    onPointerDown={() => prefetchOnPointer('/account')}
+                    onPointerDown={() => {
+                      prefetchOnPointer('/account');
+                      closeMenu('quick_account');
+                    }}
                     onFocus={() => prefetchOnPointer('/account')}
                     onClick={() => {
                       track({ action: 'mobile_nav_quick_account' });
@@ -855,7 +910,10 @@ export default function MobileNav() {
                           <li key={category.href}>
                             <Link
                               href={category.href}
-                              onPointerDown={() => prefetchOnPointer(category.href)}
+                              onPointerDown={() => {
+                                prefetchOnPointer(category.href);
+                                closeMenu('cat_click');
+                              }}
                               onFocus={() => prefetchOnPointer(category.href)}
                               onClick={() => {
                                 track({ action: 'mobile_nav_cat', label: category.href });
@@ -925,7 +983,10 @@ export default function MobileNav() {
                       <li key={href}>
                         <Link
                           href={href}
-                          onPointerDown={() => prefetchOnPointer(href)}
+                          onPointerDown={() => {
+                            prefetchOnPointer(href);
+                            closeMenu('nav_link');
+                          }}
                           onFocus={() => prefetchOnPointer(href)}
                           onClick={() => {
                             track({ action: 'mobile_nav_link_click', label: href });
@@ -957,7 +1018,10 @@ export default function MobileNav() {
               <div className="flex items-center gap-3 border-t border-[hsl(var(--border))] px-5 py-4">
                 <Link
                   href="/commande"
-                  onPointerDown={() => prefetchOnPointer('/commande')}
+                  onPointerDown={() => {
+                    prefetchOnPointer('/commande');
+                    closeMenu('cart_btn');
+                  }}
                   onFocus={() => prefetchOnPointer('/commande')}
                   onClick={() => {
                     track({
@@ -991,9 +1055,12 @@ export default function MobileNav() {
               <div className="shrink-0 pb-[env(safe-area-inset-bottom)]" />
               </div>
             </motion.div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>,
+            document.body
+          )
+        : null}
     </>
   );
 }

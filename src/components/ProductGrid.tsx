@@ -70,11 +70,11 @@ const GRID_COLS = {
 
 function getGridClasses(cols?: Cols): string {
   const safe = {
-    base: cols?.base ?? 1,
+    base: cols?.base ?? 2,
     sm: cols?.sm ?? 2,
-    md: cols?.md ?? 2,
+    md: cols?.md ?? 3,
     lg: cols?.lg ?? 3,
-    xl: cols?.xl ?? 4,
+    xl: cols?.xl ?? 3,
   };
 
   return [
@@ -309,7 +309,7 @@ export default function ProductGrid({
           key="grid"
           ref={gridRef}
           layout={!prefersReducedMotion}
-          className={cn('grid gap-5 sm:gap-6 lg:gap-8', getGridClasses(columns), className)}
+          className={cn('grid w-full min-w-0 gap-3 sm:gap-4 md:gap-5 lg:gap-6', getGridClasses(columns), className)}
           aria-live="polite"
           aria-busy={isLoading ? 'true' : 'false'}
           role="list"
@@ -320,6 +320,7 @@ export default function ProductGrid({
               key={getProductKey(product, index)}
               layout={!prefersReducedMotion}
               role="listitem"
+              className="min-w-0 w-full"
             >
               <ProductCard product={product} priority={index < 2} />
             </motion.div>

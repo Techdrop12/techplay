@@ -3,6 +3,7 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 import type { BlogPost } from '@/types/blog';
 
@@ -12,6 +13,8 @@ import { cn, formatDate } from '@/lib/utils';
 
 interface BlogCardProps {
   article: BlogPost;
+  /** When true, card spans 2 cols on lg and uses larger typography (listing hero). */
+  featured?: boolean;
 }
 
 const BLUR_DATA_URL =
@@ -25,7 +28,8 @@ function getSafeImage(article: BlogPost): string {
   return '/og-image.jpg';
 }
 
-export default function BlogCard({ article }: BlogCardProps) {
+export default function BlogCard({ article, featured }: BlogCardProps) {
+  const t = useTranslations('blog');
   const imageSrc = getSafeImage(article);
   const dateLabel = formatDate(article.createdAt);
   const category =
@@ -37,9 +41,10 @@ export default function BlogCard({ article }: BlogCardProps) {
       transition={{ duration: 0.22, ease: [0.33, 1, 0.68, 1] }}
       className={cn(
         'group relative flex flex-col overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))]',
-        'shadow-[var(--shadow-sm)] transition-shadow duration-300 hover:shadow-[var(--shadow-md)]'
+        'shadow-[var(--shadow-sm)] transition-shadow duration-300 hover:shadow-[var(--shadow-md)]',
+        featured && 'lg:col-span-2'
       )}
-      aria-label={`Lire l'article : ${article.title}`}
+      aria-label={t('read_more') + ': ' + article.title}
     >
       <Link
         href={
@@ -57,7 +62,7 @@ export default function BlogCard({ article }: BlogCardProps) {
             src={imageSrc}
             alt={article.title ? String(article.title) : ''}
             fill
-            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+            sizes={featured ? '(min-width: 1024px) 66vw, (min-width: 640px) 50vw, 100vw' : '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw'}
             className="object-cover transition-transform duration-500 ease-[var(--ease-smooth)] group-hover:scale-[1.02]"
             placeholder="blur"
             blurDataURL={BLUR_DATA_URL}
@@ -78,18 +83,30 @@ export default function BlogCard({ article }: BlogCardProps) {
             </p>
           ) : null}
 
-          <h2 className="mt-2.5 line-clamp-2 text-[1.125rem] font-bold leading-snug tracking-tight text-[hsl(var(--text))] sm:text-[1.25rem] sm:leading-snug">
+          <h2
+            className={cn(
+              'mt-2.5 line-clamp-2 font-bold leading-snug tracking-tight text-[hsl(var(--text))]',
+              featured
+                ? 'text-[1.25rem] sm:text-[1.5rem] lg:text-[1.375rem]'
+                : 'text-[1.125rem] sm:text-[1.25rem] sm:leading-snug'
+            )}
+          >
             {article.title}
           </h2>
 
           {article.description ? (
-            <p className="mt-4 line-clamp-3 text-[14px] leading-[1.6] text-token-text/75">
+            <p
+              className={cn(
+                'mt-4 text-[14px] leading-[1.6] text-token-text/75',
+                featured ? 'line-clamp-4' : 'line-clamp-3'
+              )}
+            >
               {article.description}
             </p>
           ) : null}
 
           <span className="mt-6 inline-flex items-center gap-1.5 text-[13px] font-medium text-[hsl(var(--accent))] decoration-[hsl(var(--accent))] underline-offset-2 group-hover:underline">
-            Lire l'article
+            {t('read_more')}
             <span aria-hidden className="text-[10px] opacity-80">
               →
             </span>

@@ -336,10 +336,10 @@ export default function ProductCatalogue({
                 </p>
               </div>
             ) : (
-              <div className="px-5 pb-8 pt-6 sm:px-6 sm:pb-10 sm:pt-8">
+              <div className="pb-8 pt-6 sm:pb-10 sm:pt-8">
                 <ProductGrid
                   products={filteredProducts}
-                  className="mt-0"
+                  className="mt-0 w-full min-w-0"
                   listName={LIST_NAMES.CATALOGUE}
                   id="catalogue-products-grid"
                 />

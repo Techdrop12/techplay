@@ -9,6 +9,7 @@ import Header from './Header';
 
 const LiveChatLazy = dynamic(() => import('../LiveChat'), { ssr: false });
 
+import FooterTrustStrip from '@/components/FooterTrustStrip';
 import PageTransitions from '@/components/PageTransitions';
 import { useTheme } from '@/context/themeContext';
 import { pageview } from '@/lib/ga';
@@ -255,6 +256,7 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
 
       <ScrollTopButton />
       {chat ? <LiveChatLazy /> : null}
+      <FooterTrustStrip />
       <FooterLazy />
     </>
   );

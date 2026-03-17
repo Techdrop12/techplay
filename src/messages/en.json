@@ -115,7 +115,8 @@
     "secure_payment": "Secure payment:",
     "shipping": "Shipping",
     "returns": "Returns",
-    "security": "Security"
+    "security": "Security",
+    "trust_strip": "Rated 4.8 by our customers"
   },
   "product_card": {
     "new": "New",
@@ -982,7 +983,10 @@
     "generator_subject_placeholder": "Blog topic",
     "meta_title_suffix": " | TechPlay",
     "meta_page": "Page {page}",
-    "search_meta_description": "Articles matching « {query} » on TechPlay blog."
+    "search_meta_description": "Articles matching « {query} » on TechPlay blog.",
+    "editorial_intro": "Our blog brings together guides, reviews, and news to help you choose and get the most from your setup.",
+    "updated_on": "Updated on {date}",
+    "min_read": "{min} min read"
   },
   "confidentialite": {
     "page_title": "Privacy policy",

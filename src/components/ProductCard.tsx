@@ -180,7 +180,7 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
           onClick={handleClick}
         >
           {/* Cadre image — ratio fixe, tout le contenu s’adapte à l’intérieur */}
-          <div className="card-shine relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-t-[var(--radius-lg)] bg-[hsl(var(--surface-2))] sm:aspect-[1/1]">
+          <div className="card-shine relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-t-[var(--radius-lg)] bg-[hsl(var(--surface-2))]">
             <div className="absolute inset-0 overflow-hidden rounded-t-[var(--radius-lg)]">
               <Image
                 src={image}
@@ -284,18 +284,20 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
             />
           </div>
 
-          {/* Bloc contenu — tout s’adapte au cadre, pas de débordement */}
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden px-4 pt-4 pb-4 sm:px-5 sm:pt-5 sm:pb-5">
-            {/* 1. Identité produit */}
+          {/* Bloc contenu — rythme vertical et respiration */}
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden px-4 pt-5 pb-5 sm:px-5 sm:pt-6 sm:pb-6">
+            {/* 1. Identité produit — hauteur fixe 2 lignes pour composition stable */}
             <div className="min-w-0 shrink-0">
-              <h3
-                className="line-clamp-2 break-words text-[15px] font-bold leading-snug tracking-tight text-[hsl(var(--text))] sm:text-base"
-                title={title}
-              >
-                {title}
-              </h3>
+              <div className="min-h-[2.5em]">
+                <h3
+                  className="line-clamp-2 text-[15px] font-bold leading-tight tracking-tight text-[hsl(var(--text))] sm:text-base [hyphens:none] [overflow-wrap:break-word]"
+                  title={title}
+                >
+                  {title}
+                </h3>
+              </div>
               {product.brand || product.category ? (
-                <p className="mt-1 line-clamp-1 text-[11px] font-medium uppercase tracking-wider text-[hsl(var(--text))]/50">
+                <p className="mt-1.5 line-clamp-1 text-[11px] font-medium uppercase tracking-wider text-[hsl(var(--text))]/50">
                   {[product.brand, product.category].filter(Boolean).join(' · ')}
                 </p>
               ) : null}
@@ -303,7 +305,7 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
 
             {/* 2. Prix — bloc dédié, reste dans le cadre */}
             <div
-              className="mt-4 flex min-w-0 flex-wrap items-baseline gap-2 rounded-lg bg-[hsl(var(--surface-2))]/80 px-3 py-2.5 sm:mt-5 sm:px-3.5 sm:py-3"
+              className="mt-5 flex min-w-0 flex-wrap items-baseline gap-2 rounded-lg bg-[hsl(var(--surface-2))]/80 px-3.5 py-3 sm:mt-6 sm:px-4 sm:py-3.5"
               itemProp="offers"
               itemScope
               itemType="https://schema.org/Offer"
@@ -330,7 +332,7 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
             </div>
 
             {/* 3. Réassurance — une ligne, adaptée au cadre */}
-            <div className="mt-3 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] sm:mt-4">
+            <div className="mt-4 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] sm:mt-5">
               {ratingValue > 0 || reviewsCount > 0 ? (
                 <span className="flex items-center gap-1 text-[hsl(var(--text))]/70">
                   <RatingStars
@@ -364,8 +366,8 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
               <FreeShippingBadge price={product.price} minimal />
             </div>
 
-            {/* 4. Action principale — CTA en bas du cadre */}
-            <div className="mt-4 shrink-0 sm:mt-5">
+            {/* 4. Action principale — CTA stable, une ligne, bon touch target */}
+            <div className="mt-5 min-w-0 shrink-0 sm:mt-6">
               <AddToCartButton
                 product={{
                   _id: product._id,
@@ -381,7 +383,8 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
                 withIcon
                 idleText={t('add_to_cart')}
                 className={cn(
-                  'min-h-[3rem] w-full rounded-xl font-bold',
+                  'min-h-[2.75rem] w-full shrink-0 rounded-xl py-2.5 font-bold sm:min-h-[3rem] sm:py-3',
+                  'inline-flex items-center justify-center whitespace-nowrap',
                   'bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))]',
                   'transition-all duration-250 ease-[var(--ease-smooth)]',
                   'hover:opacity-95 focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.5)] focus-visible:ring-offset-2'

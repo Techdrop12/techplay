@@ -12,6 +12,7 @@ import Link from '@/components/LocalizedLink';
 import PacksSection from '@/components/PacksSection';
 import SectionHeader from '@/components/SectionHeader';
 import TrustBadges from '@/components/TrustBadges';
+import WhyChooseUsSection from '@/components/WhyChooseUsSection';
 import { getPosts } from '@/lib/blog';
 import { BRAND } from '@/lib/constants';
 import { getBestProducts, getRecommendedPacks } from '@/lib/data';
@@ -81,6 +82,17 @@ const STR = {
     noscriptProducts: 'Voir les produits',
     productsSectionLabel: 'Sélection de produits populaires',
     packsSectionLabel: 'Sélection de packs recommandés',
+    whyKicker: 'Pourquoi nous',
+    whyTitle: 'Une expérience pensée pour vous',
+    whySub: 'Livraison soignée, paiement sécurisé et équipe à l’écoute.',
+    why1Title: 'Livraison rapide & suivie',
+    why1Desc: 'Colis expédiés sous 24–48 h, suivi jusqu’à chez vous.',
+    why2Title: 'Paiement 100 % sécurisé',
+    why2Desc: 'CB, Apple Pay, Google Pay. Données protégées.',
+    why3Title: 'Retours faciles',
+    why3Desc: 'Échange ou remboursement sous 30 jours.',
+    why4Title: 'Support réactif',
+    why4Desc: 'Une question ? Notre équipe vous répond rapidement.',
     blogKicker: 'Guides & SEO',
     blogTitle: 'Blog gaming & setup',
     blogSub:
@@ -120,6 +132,17 @@ const STR = {
     noscriptProducts: 'View products',
     productsSectionLabel: 'Popular products selection',
     packsSectionLabel: 'Recommended bundles selection',
+    whyKicker: 'Why choose us',
+    whyTitle: 'An experience built around you',
+    whySub: 'Careful shipping, secure payment and a team that listens.',
+    why1Title: 'Fast & tracked delivery',
+    why1Desc: 'Orders shipped within 24–48 h, tracked to your door.',
+    why2Title: '100 % secure payment',
+    why2Desc: 'Card, Apple Pay, Google Pay. Your data is protected.',
+    why3Title: 'Easy returns',
+    why3Desc: 'Exchange or refund within 30 days.',
+    why4Title: 'Responsive support',
+    why4Desc: 'Questions? Our team gets back to you quickly.',
     blogKicker: 'Guides & SEO',
     blogTitle: 'Gaming blog & guides',
     blogSub:
@@ -384,6 +407,17 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
               <PacksSection packs={recommendedPacks} showHeader={false} />
             </div>
           </section>
+          <WhyChooseUsSection
+            kicker={t.whyKicker}
+            title={t.whyTitle}
+            sub={t.whySub}
+            items={[
+              { title: t.why1Title, description: t.why1Desc },
+              { title: t.why2Title, description: t.why2Desc },
+              { title: t.why3Title, description: t.why3Desc },
+              { title: t.why4Title, description: t.why4Desc },
+            ]}
+          />
           <TrustBadges variant="premium" />
           {blogPostsForCards.length > 0 && (
             <section

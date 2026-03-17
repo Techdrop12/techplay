@@ -16,6 +16,7 @@ import { formatDate } from '@/lib/utils';
 export const revalidate = 60;
 
 const SITE = BRAND.URL;
+const WPM = 200;
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -31,6 +32,12 @@ function toIso(date: unknown): string | undefined {
   if (date instanceof Date) return date.toISOString();
   if (typeof date === 'string' && date) return date;
   return undefined;
+}
+
+function readingTimeMinutes(text: string): number {
+  const stripped = text.replace(/<[^>]+>/g, ' ').trim();
+  const words = stripped ? stripped.split(/\s+/).filter(Boolean).length : 0;
+  return Math.max(1, Math.ceil(words / WPM));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -70,7 +77,14 @@ export default async function BlogArticlePage({ params }: PageProps) {
   const image = record.image ? safeProductImageUrl(String(record.image)) : '/og-image.jpg';
   const author = getString(record.author, 'TechPlay');
   const publishedAt = toIso(record.publishedAt ?? record.createdAt);
+  const updatedAt = toIso(record.updatedAt);
   const dateLocale = locale === 'en' ? 'en-US' : 'fr-FR';
+  const minRead = readingTimeMinutes(description);
+  const showUpdated =
+    updatedAt &&
+    publishedAt &&
+    updatedAt !== publishedAt &&
+    new Date(updatedAt).getTime() - new Date(publishedAt).getTime() > 60_000;
 
   const tBlog = await getTranslations('blog');
   const crumbs = jsonLdBreadcrumbs([
@@ -96,21 +110,22 @@ export default async function BlogArticlePage({ params }: PageProps) {
 
       <article className="space-y-6">
         <header className="space-y-4">
-          {publishedAt ? (
-            <p className="text-[12px] font-medium uppercase tracking-[0.12em] text-token-text/55">
-              {formatDate(publishedAt, dateLocale)}
-            </p>
-          ) : null}
-          <h1
-            id="article-title"
-            className="heading-page"
-          >
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] font-medium uppercase tracking-[0.12em] text-token-text/55">
+            {publishedAt ? (
+              <time dateTime={publishedAt}>{formatDate(publishedAt, dateLocale)}</time>
+            ) : null}
+            {publishedAt || minRead > 0 ? (
+              <span>{tBlog('min_read', { min: minRead })}</span>
+            ) : null}
+            {showUpdated && updatedAt ? (
+              <span>{tBlog('updated_on', { date: formatDate(updatedAt, dateLocale) })}</span>
+            ) : null}
+          </div>
+          <h1 id="article-title" className="heading-page">
             {title}
           </h1>
           {author ? (
-            <p className="text-[14px] text-token-text/70">
-              {tBlog('author', { author })}
-            </p>
+            <p className="text-[14px] text-token-text/70">{tBlog('author', { author })}</p>
           ) : null}
         </header>
 
@@ -126,7 +141,7 @@ export default async function BlogArticlePage({ params }: PageProps) {
 
         {description ? (
           <div
-            className="prose prose-neutral dark:prose-invert max-w-none text-[15px] leading-relaxed text-token-text/90"
+            className="blog-article-body prose prose-neutral dark:prose-invert max-w-none text-[15px] leading-relaxed text-[hsl(var(--text))]/90 prose-p:mb-4 prose-headings:font-semibold"
             dangerouslySetInnerHTML={{ __html: description.replace(/\n/g, '<br />') }}
           />
         ) : null}
@@ -157,7 +172,18 @@ export default async function BlogArticlePage({ params }: PageProps) {
             image: image,
             author: { '@type': 'Person', name: author },
             datePublished: publishedAt || undefined,
-            url: `${SITE}/blog/${slug}`,
+            dateModified: updatedAt || publishedAt || undefined,
+            url: `${SITE}${localizePath(`/blog/${slug}`, locale)}`,
+            publisher: {
+              '@type': 'Organization',
+              name: BRAND.NAME,
+              url: SITE,
+              logo: { '@type': 'ImageObject', url: `${SITE}/logo.png` },
+            },
+            mainEntityOfPage: {
+              '@type': 'WebPage',
+              '@id': `${SITE}${localizePath(`/blog/${slug}`, locale)}`,
+            },
           }),
         }}
       />

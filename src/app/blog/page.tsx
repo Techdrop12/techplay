@@ -306,6 +306,11 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
         <p className="mx-auto mt-4 max-w-2xl heading-section-sub">
           {q ? tBlog('search_results_subtitle') : tBlog('page_subtitle')}
         </p>
+        {!q && posts.length > 0 ? (
+          <p className="mx-auto mt-6 max-w-2xl text-[14px] leading-relaxed text-[hsl(var(--text))]/75">
+            {tBlog('editorial_intro')}
+          </p>
+        ) : null}
       </header>
 
       <form
@@ -459,7 +464,11 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
           aria-label={tBlog('articles_list_aria')}
         >
           {posts.map((post, idx) => (
-            <BlogCard key={post._id || post.slug || `post-${idx}`} article={post} />
+            <BlogCard
+              key={post._id || post.slug || `post-${idx}`}
+              article={post}
+              featured={idx === 0 && page === 1 && !q}
+            />
           ))}
         </section>
       )}
@@ -537,6 +546,25 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }}
+      />
+
+      {/* Blog as a CollectionPage for SEO and credibility */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Blog',
+            name: tBlog('jsonld_name'),
+            description: tBlog('jsonld_description'),
+            url: `${SITE}${localizePath('/blog', locale)}`,
+            publisher: {
+              '@type': 'Organization',
+              name: BRAND.NAME,
+              url: SITE,
+            },
+          }),
+        }}
       />
 
       {posts.length > 0 && (

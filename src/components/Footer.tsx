@@ -495,7 +495,7 @@ export default function Footer({
           {/* Bloc marque — présence éditoriale */}
           <div className="space-y-5 md:col-span-4 lg:col-span-4">
             <header className="border-b border-[hsl(var(--border))]/60 pb-4 md:pb-5">
-              <p className="text-sm font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-base">
+              <p className="text-xs font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-sm md:text-base">
                 <span>{companyName}</span>
                 <span className="text-[hsl(var(--accent))]">.</span>
               </p>
@@ -619,7 +619,7 @@ export default function Footer({
                 aria-label={group.title}
                 className="min-w-0 space-y-2.5 overflow-hidden"
               >
-                <h3 className="break-words text-[6px] font-medium uppercase leading-tight tracking-[0.05em] text-[hsl(var(--text))]/75">
+                <h3 className="break-words text-[11px] font-medium uppercase leading-tight tracking-[0.08em] text-[hsl(var(--text))]/80 sm:text-[12px]">
                   {group.title}
                 </h3>
 
@@ -688,46 +688,47 @@ export default function Footer({
             ))}
 
             {!compact ? (
-              <div className="col-span-2 flex flex-col gap-4 sm:col-span-3 lg:col-span-4 lg:rounded-lg lg:border lg:border-[hsl(var(--border))] lg:bg-[hsl(var(--surface))]/60 lg:px-4 lg:py-4 lg:dark:bg-[hsl(var(--surface))]/30">
-                <form
-                  onSubmit={onSubscribe}
-                  noValidate
-                  className="space-y-3 max-w-md"
-                  aria-label={t.newsletterFormAria}
-                  aria-busy={status === 'loading'}
-                  aria-describedby={message ? messageId : undefined}
-                >
-<h3 className="text-[7px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--text))]/80">
-                  {t.newsletterTitle}
-                  </h3>
+              <div className="col-span-2 flex flex-col sm:col-span-3 lg:col-span-4">
+                <div className="rounded-xl border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface))]/50 px-4 py-5 dark:bg-[hsl(var(--surface))]/30 sm:px-5 lg:border-[hsl(var(--border))] lg:bg-[hsl(var(--surface))]/60 lg:dark:bg-[hsl(var(--surface))]/30">
+                  <form
+                    onSubmit={onSubscribe}
+                    noValidate
+                    className="space-y-4 max-w-md"
+                    aria-label={t.newsletterFormAria}
+                    aria-busy={status === 'loading'}
+                    aria-describedby={message ? messageId : undefined}
+                  >
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--text))]">
+                      {t.newsletterTitle}
+                    </h3>
 
-                  <div className="flex flex-col gap-2 sm:flex-row">
-                    <input
-                      id={emailId}
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder={t.newsletterPlaceholder}
-                      className="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-2.5 text-[13px] text-[hsl(var(--text))] placeholder:text-[hsl(var(--text))]/50 transition-[border-color,box-shadow] focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/0.25)] focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]"
-                      aria-required="true"
-                      aria-invalid={status === 'error' && !isValidEmail(email) ? 'true' : 'false'}
-                      aria-describedby={status === 'error' ? messageId : undefined}
-                      autoComplete="email"
-                      autoCapitalize="off"
-                      autoCorrect="off"
-                      spellCheck={false}
-                      inputMode="email"
-                    />
-                    <button
-                      type="submit"
-                      disabled={status === 'loading'}
-                      className="shrink-0 rounded-lg bg-[hsl(var(--accent))] px-4 py-2.5 text-[13px] font-semibold text-[hsl(var(--accent-fg))] shadow transition-all duration-200 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] disabled:opacity-60"
-                      aria-label={t.newsletterButtonIdle}
-                      data-gtm="footer_newsletter_submit"
-                    >
-                      {status === 'loading' ? t.newsletterButtonLoading : t.newsletterButtonIdle}
-                    </button>
-                  </div>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+                      <input
+                        id={emailId}
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder={t.newsletterPlaceholder}
+                        className="min-h-[2.75rem] w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-3 text-[14px] text-[hsl(var(--text))] placeholder:text-[hsl(var(--text))]/50 transition-[border-color,box-shadow] focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/0.2)] focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]"
+                        aria-required="true"
+                        aria-invalid={status === 'error' && !isValidEmail(email) ? 'true' : 'false'}
+                        aria-describedby={status === 'error' ? messageId : undefined}
+                        autoComplete="email"
+                        autoCapitalize="off"
+                        autoCorrect="off"
+                        spellCheck={false}
+                        inputMode="email"
+                      />
+                      <button
+                        type="submit"
+                        disabled={status === 'loading'}
+                        className="min-h-[2.75rem] shrink-0 rounded-xl bg-[hsl(var(--accent))] px-5 py-3 text-sm font-semibold text-[hsl(var(--accent-fg))] shadow-md transition-all duration-200 hover:opacity-95 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.5)] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] disabled:opacity-60"
+                        aria-label={t.newsletterButtonIdle}
+                        data-gtm="footer_newsletter_submit"
+                      >
+                        {status === 'loading' ? t.newsletterButtonLoading : t.newsletterButtonIdle}
+                      </button>
+                    </div>
 
                   <label
                     htmlFor={consentId}
@@ -777,8 +778,9 @@ export default function Footer({
                     </p>
                   ) : null}
                 </form>
+                </div>
 
-<p className="text-[7px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--text))]/80">
+                <p className="mt-6 text-[7px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--text))]/80">
                 {tFooter('follow_us')}
                 </p>
                 <div className="flex items-center gap-2 text-base text-[hsl(var(--text))]/60">
