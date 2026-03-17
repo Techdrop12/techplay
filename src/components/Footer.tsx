@@ -510,28 +510,28 @@ export default function Footer({
                   className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/90 p-3 dark:bg-[hsl(var(--surface))]/50"
                   aria-label={t.badgesAria}
                 >
-                  <ul className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-3" role="list">
-                    <li className="flex items-center gap-2">
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-emerald-500/15 text-emerald-800 dark:bg-emerald-200 dark:text-emerald-950">
-                        <FaShieldAlt className="text-[12px]" aria-hidden="true" />
+                  <ul className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2 md:grid-cols-3" role="list">
+                    <li className="flex min-w-[0] items-center gap-2 rounded-lg bg-[hsl(var(--surface-2))/60] px-2.5 py-1.5">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-emerald-500/15 text-emerald-800 dark:bg-emerald-200 dark:text-emerald-950">
+                        <FaShieldAlt className="text-[13px]" aria-hidden="true" />
                       </span>
-                      <span className="text-[11px] font-medium text-emerald-800 dark:text-emerald-200">
+                      <span className="min-w-0 text-[11px] font-medium text-emerald-800 dark:text-emerald-200 whitespace-normal leading-snug">
                         {t.badges.secure}
                       </span>
                     </li>
-                    <li className="flex items-center gap-2">
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))]">
-                        <FaTruck className="text-[12px]" aria-hidden="true" />
+                    <li className="flex min-w-[0] items-center gap-2 rounded-lg bg-[hsl(var(--surface-2))/60] px-2.5 py-1.5">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))]">
+                        <FaTruck className="text-[13px]" aria-hidden="true" />
                       </span>
-                      <span className="text-[11px] font-medium text-[hsl(var(--text))]">
+                      <span className="min-w-0 text-[11px] font-medium text-[hsl(var(--text))] whitespace-normal leading-snug">
                         {t.badges.shipping}
                       </span>
                     </li>
-                    <li className="flex items-center gap-2">
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                        <FaHeadset className="text-[12px]" aria-hidden="true" />
+                    <li className="flex min-w-[0] items-center gap-2 rounded-lg bg-[hsl(var(--surface-2))/60] px-2.5 py-1.5">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                        <FaHeadset className="text-[13px]" aria-hidden="true" />
                       </span>
-                      <span className="text-[11px] font-medium text-[hsl(var(--text))]">
+                      <span className="min-w-0 text-[11px] font-medium text-[hsl(var(--text))] whitespace-normal leading-snug">
                         {t.badges.support}
                       </span>
                     </li>
