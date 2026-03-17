@@ -128,14 +128,14 @@ export default async function ContactPage() {
         </section>
 
         {/* Téléphone + Adresse + Horaires — headings must remain fully readable */}
-        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 items-stretch">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 2xl:grid-cols-3 items-stretch">
           <section
             className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[hsl(var(--border))]/75 bg-[hsl(var(--surface))]/82 px-3.5 py-3.5 sm:px-4 sm:py-4"
             aria-labelledby="contact-phone-heading"
           >
             <h2
               id="contact-phone-heading"
-              className="min-w-0 break-normal text-[11px] font-medium uppercase leading-snug tracking-[0.12em] text-token-text/60"
+            className="min-w-0 break-normal text-[10px] font-medium uppercase leading-snug tracking-[0.08em] text-token-text/60"
             >
               {t('phone_heading')}
             </h2>
@@ -176,7 +176,7 @@ export default async function ContactPage() {
           >
             <h2
               id="contact-hours-heading"
-              className="min-w-0 break-normal text-[11px] font-medium uppercase leading-snug tracking-[0.12em] text-token-text/60"
+            className="min-w-0 break-normal text-[10px] font-medium uppercase leading-snug tracking-[0.08em] text-token-text/60"
             >
               {t('hours_heading')}
             </h2>

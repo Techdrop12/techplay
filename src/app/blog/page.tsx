@@ -427,9 +427,9 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
                   </svg>
                 </span>
               </div>
-              <h2 className="mt-6 heading-subsection">{tBlog('editorial_coming_soon')}</h2>
+              <h2 className="mt-6 heading-subsection">{tBlog('page_title')}</h2>
               <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-token-text/70">
-                {tBlog('editorial_coming_intro')}
+                {tBlog('editorial_intro')}
               </p>
               <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
                 <Link

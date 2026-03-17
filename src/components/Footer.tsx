@@ -493,7 +493,7 @@ export default function Footer({
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-12 md:items-start lg:gap-12">
           {/* Bloc marque — présence éditoriale */}
-          <div className="space-y-5 md:col-span-4 lg:col-span-3 lg:pr-6">
+          <div className="space-y-5 md:col-span-3 lg:col-span-2 lg:pr-6">
             <header className="border-b border-[hsl(var(--border))]/60 pb-4 md:pb-5">
               <p className="text-xs font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-sm md:text-base">
                 <span>{companyName}</span>
@@ -610,7 +610,7 @@ export default function Footer({
           </div>
 
           <div
-            className="grid grid-cols-2 gap-x-6 gap-y-6 md:col-span-8 lg:col-span-9 md:items-start lg:grid-cols-[repeat(4,minmax(11rem,1fr))] lg:gap-x-12 lg:border-l lg:border-[hsl(var(--border))] lg:pl-10 xl:grid-cols-[repeat(4,minmax(12rem,1fr))] xl:gap-x-14 xl:pl-14"
+            className="grid grid-cols-2 gap-x-6 gap-y-6 md:col-span-9 lg:col-span-10 md:items-start lg:grid-cols-[repeat(4,minmax(12rem,1fr))] lg:gap-x-12 lg:border-l lg:border-[hsl(var(--border))] lg:pl-10 xl:grid-cols-[repeat(4,minmax(13rem,1fr))] xl:gap-x-14 xl:pl-14"
             style={{ minWidth: 0 }}
           >
             {navGroups.map((group) => (

@@ -342,6 +342,11 @@ export default function ProductCatalogue({
                   className="mt-0 w-full min-w-0"
                   listName={LIST_NAMES.CATALOGUE}
                   id="catalogue-products-grid"
+                  columns={
+                    filteredProducts.length === 1
+                      ? { base: 1, sm: 1, md: 1, lg: 1, xl: 1 }
+                      : undefined
+                  }
                 />
               </div>
             )}

@@ -471,11 +471,11 @@
 
   /* Footer navigation headings — fluid, adaptive */
   .footer-nav-heading {
-    font-size: clamp(0.7rem, 0.6rem + 0.35vw, 0.85rem);
+    font-size: clamp(0.7rem, 0.6rem + 0.3vw, 0.8rem);
     font-weight: 600;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    line-height: 1.2;
+    line-height: 1.22;
   }
 
   @media (min-width: 640px) {
