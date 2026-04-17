@@ -21,5 +21,5 @@ _À appliquer dans les paramètres de déploiement (ex. Vercel, Netlify, etc.) s
 
 ## Warnings npm « deprecated » (gérés dans le projet)
 
-- **node-domexception** : un script `postinstall` (`scripts/patch-node-domexception.cjs`) remplace le code par l’usage de `globalThis.DOMException` (Node 18+). Le warning peut encore s’afficher pendant `npm install`, mais le code exécuté utilise bien le natif.
+- **node-domexception** : remplacé par un stub local via `overrides` dans `package.json` (`file:./patches/node-domexception-native`), plus le script `postinstall` (`scripts/patch-node-domexception.cjs`) en secours. Le warning npm ne devrait plus apparaître après `npm install` avec le `package-lock.json` à jour.
 - **jpeg-exif** : dépendance transitive de **pdfkit** (génération PDF / factures). Le package est déprécié et non maintenu ; le warning restera jusqu’à ce que pdfkit propose une alternative. Aucun impact fonctionnel connu pour l’usage actuel (images dans les PDF).

@@ -2,8 +2,15 @@ import { apiError, apiSuccess, safeErrorForLog } from '@/lib/apiResponse';
 import { connectToDatabase } from '@/lib/db';
 import { error as logError } from '@/lib/logger';
 import Order from '@/models/Order';
-import Product from '@/models/Product';
 import { requireAdmin } from '@/lib/requireAdmin';
+
+type ProductAggRow = {
+  _id: unknown;
+  title?: string;
+  totalRevenue?: number;
+  orders?: number;
+  lastOrderAt?: Date | string | null;
+};
 
 type InsightsResponse = {
   topProducts: { id: string; title: string; totalRevenue: number; orders: number }[];
@@ -115,14 +122,14 @@ export async function GET() {
       ]).exec(),
     ]);
 
-    const topProducts = (topProductsAgg || []).map((p: any) => ({
+    const topProducts = (topProductsAgg || []).map((p: ProductAggRow) => ({
       id: String(p._id),
       title: p.title || '—',
       totalRevenue: Math.round((p.totalRevenue ?? 0) * 100) / 100,
       orders: p.orders ?? 0,
     }));
 
-    const weakProducts = (weakProductsAgg || []).map((p: any) => ({
+    const weakProducts = (weakProductsAgg || []).map((p: ProductAggRow) => ({
       id: String(p._id),
       title: p.title || '—',
       lastOrderAt: p.lastOrderAt ? new Date(p.lastOrderAt).toISOString() : null,

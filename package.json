@@ -89,7 +89,8 @@
   },
   "overrides": {
     "glob": "^13.0.0",
-    "@tootallnate/once": "^3.0.1"
+    "@tootallnate/once": "^3.0.1",
+    "node-domexception": "file:./patches/node-domexception-native"
   },
   "engines": {
     "node": ">=20.9.0 <23",

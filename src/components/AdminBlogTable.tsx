@@ -110,7 +110,6 @@ export default function AdminBlogTable() {
     try {
       const ids = Array.from(selectedIds);
       for (const id of ids) {
-        // eslint-disable-next-line no-await-in-loop
         const res = await fetch(`/api/blog/toggle-publish?id=${id}`, { method: 'POST' });
         if (!res.ok) throw new Error();
       }
@@ -132,7 +131,6 @@ export default function AdminBlogTable() {
     try {
       const ids = Array.from(selectedIds);
       for (const id of ids) {
-        // eslint-disable-next-line no-await-in-loop
         const res = await fetch(`/api/blog/delete?id=${id}`, { method: 'DELETE' });
         if (!res.ok) throw new Error();
       }

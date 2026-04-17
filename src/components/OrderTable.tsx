@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import TableSkeleton from '@/components/admin/TableSkeleton';
@@ -44,15 +44,26 @@ export default function OrderTable() {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
 
+  const textFiltersRef = useRef({
+    searchQuery,
+    minTotal,
+    maxTotal,
+    fromDate,
+    toDate,
+  });
+  textFiltersRef.current = { searchQuery, minTotal, maxTotal, fromDate, toDate };
+
   const fetchOrders = useCallback(() => {
     setLoading(true);
+    const { searchQuery: q, minTotal: minT, maxTotal: maxT, fromDate: from, toDate: to } =
+      textFiltersRef.current;
     const params = new URLSearchParams({ page: String(page), limit: String(PAGE_SIZE) });
     if (statusFilter) params.set('status', statusFilter);
-    if (searchQuery.trim()) params.set('q', searchQuery.trim());
-    if (minTotal.trim()) params.set('minTotal', minTotal.trim());
-    if (maxTotal.trim()) params.set('maxTotal', maxTotal.trim());
-    if (fromDate) params.set('from', fromDate);
-    if (toDate) params.set('to', toDate);
+    if (q.trim()) params.set('q', q.trim());
+    if (minT.trim()) params.set('minTotal', minT.trim());
+    if (maxT.trim()) params.set('maxTotal', maxT.trim());
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
     fetch(`/api/admin/orders?${params}`)
       .then((res) => res.json())
       .then((data: { items?: OrderRow[]; total?: number; pages?: number }) => {

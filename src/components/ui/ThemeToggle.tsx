@@ -34,6 +34,21 @@ function MoonIcon({ className }: { className?: string }) {
   );
 }
 
+const sizeMap = {
+  sm: {
+    button: 'h-9 min-w-9 px-2 text-sm',
+    icon: 'h-4 w-4',
+  },
+  md: {
+    button: 'h-10 min-w-10 px-2.5 text-sm',
+    icon: 'h-5 w-5',
+  },
+  lg: {
+    button: 'h-12 min-w-12 px-3 text-base',
+    icon: 'h-6 w-6',
+  },
+} as const;
+
 export default function ThemeToggle({ className, iconOnly = true, size = 'md' }: Props) {
   const { resolvedTheme, toggleTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -42,27 +57,26 @@ export default function ThemeToggle({ className, iconOnly = true, size = 'md' }:
 
   const isDark = resolvedTheme === 'dark';
   const t = useTranslations('theme');
+  const currentSize = sizeMap[size];
 
-  if (!mounted) return null;
+  if (!mounted) {
+    return (
+      <span
+        className={cn(
+          'inline-flex items-center justify-center gap-2 rounded-full border border-[hsl(var(--border))]/60',
+          'bg-[hsl(var(--surface))]/50 text-token-text/35 backdrop-blur',
+          currentSize.button,
+          className
+        )}
+        aria-hidden
+      >
+        <MoonIcon className={currentSize.icon} />
+        {iconOnly ? null : <span className="font-medium opacity-40">…</span>}
+      </span>
+    );
+  }
 
   const label = isDark ? t('switch_to_light') : t('switch_to_dark');
-
-  const sizeMap = {
-    sm: {
-      button: 'h-9 min-w-9 px-2 text-sm',
-      icon: 'h-4 w-4',
-    },
-    md: {
-      button: 'h-10 min-w-10 px-2.5 text-sm',
-      icon: 'h-5 w-5',
-    },
-    lg: {
-      button: 'h-12 min-w-12 px-3 text-base',
-      icon: 'h-6 w-6',
-    },
-  } as const;
-
-  const currentSize = sizeMap[size];
 
   return (
     <button

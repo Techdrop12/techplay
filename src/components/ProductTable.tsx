@@ -3,7 +3,7 @@
 import { Eye, Pencil, Search, SlidersHorizontal, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import TableSkeleton from '@/components/admin/TableSkeleton';
@@ -41,16 +41,36 @@ export default function ProductTable() {
   const [savingRowId, setSavingRowId] = useState<string | null>(null);
   const router = useRouter();
 
+  const listFiltersRef = useRef({
+    searchQuery,
+    categoryFilter,
+    lowStockOnly,
+    noImageOnly,
+    featuredOnly,
+    isNewOnly,
+    bestSellerOnly,
+  });
+  listFiltersRef.current = {
+    searchQuery,
+    categoryFilter,
+    lowStockOnly,
+    noImageOnly,
+    featuredOnly,
+    isNewOnly,
+    bestSellerOnly,
+  };
+
   const fetchProducts = useCallback(() => {
     setLoading(true);
+    const f = listFiltersRef.current;
     const params = new URLSearchParams({ page: String(page), limit: String(PAGE_SIZE) });
-    if (searchQuery.trim()) params.set('q', searchQuery.trim());
-    if (categoryFilter) params.set('category', categoryFilter);
-    if (lowStockOnly) params.set('lowStock', '1');
-    if (noImageOnly) params.set('noImage', '1');
-    if (featuredOnly) params.set('featured', '1');
-    if (isNewOnly) params.set('isNew', '1');
-    if (bestSellerOnly) params.set('bestSeller', '1');
+    if (f.searchQuery.trim()) params.set('q', f.searchQuery.trim());
+    if (f.categoryFilter) params.set('category', f.categoryFilter);
+    if (f.lowStockOnly) params.set('lowStock', '1');
+    if (f.noImageOnly) params.set('noImage', '1');
+    if (f.featuredOnly) params.set('featured', '1');
+    if (f.isNewOnly) params.set('isNew', '1');
+    if (f.bestSellerOnly) params.set('bestSeller', '1');
     fetch(`/api/admin/products?${params}`)
       .then((res) => res.json())
       .then((data: { items?: ProductRow[]; total?: number; pages?: number }) => {
@@ -69,7 +89,7 @@ export default function ProductTable() {
       })
       .catch(() => toast.error(t('error_load_products')))
       .finally(() => setLoading(false));
-  }, [page, searchQuery, categoryFilter, t]);
+  }, [page, t]);
 
   useEffect(() => { fetchProducts(); }, [fetchProducts, refreshTrigger]);
 
@@ -160,11 +180,12 @@ export default function ProductTable() {
     if (!window.confirm(t('bulk_confirm_delete', { count: selectedIds.size }))) return;
     const ids = Array.from(selectedIds);
     try {
-      for (const id of ids) {
-        // eslint-disable-next-line no-await-in-loop
-        const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE' });
-        if (!res.ok) throw new Error();
-      }
+      await Promise.all(
+        ids.map(async (id) => {
+          const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE' });
+          if (!res.ok) throw new Error();
+        })
+      );
       toast.success(t('product_deleted'));
       setSelectedIds(new Set());
       fetchProducts();
