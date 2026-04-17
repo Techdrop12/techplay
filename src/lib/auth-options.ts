@@ -16,7 +16,7 @@ const ADMIN_EMAIL = serverEnv.ADMIN_EMAIL || 'admin@techplay.local';
 const ADMIN_HASH = serverEnv.ADMIN_PASSWORD_HASH;
 const AUTH_SECRET = serverEnv.NEXTAUTH_SECRET || serverEnv.AUTH_SECRET || 'change-me';
 
-type AppRole = 'admin' | 'user';
+export type AppRole = 'admin' | 'ops' | 'support' | 'content' | 'read_only' | 'user';
 
 type AppUser = User & {
   id: string;
@@ -60,7 +60,12 @@ function getRequestIp(req?: RequestLike): string {
 function getUserRole(user: User | undefined): AppRole {
   if (!user) return 'user';
   const maybe = user as Partial<AppUser>;
-  return maybe.role === 'admin' ? 'admin' : 'user';
+  const role = maybe.role;
+  const allowed: AppRole[] = ['admin', 'ops', 'support', 'content', 'read_only', 'user'];
+  if (role && allowed.includes(role as AppRole)) {
+    return role as AppRole;
+  }
+  return 'user';
 }
 
 export const authOptions: NextAuthOptions = {

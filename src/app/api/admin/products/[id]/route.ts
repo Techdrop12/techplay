@@ -66,6 +66,13 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
               .filter(Boolean)
           : [];
     }
+    if (body.published != null) product.published = Boolean(body.published);
+    if (body.featured != null) product.featured = Boolean(body.featured);
+    if (body.isNew != null) product.isNew = Boolean(body.isNew);
+    if (body.isBestSeller != null) product.isBestSeller = Boolean(body.isBestSeller);
+    if (body.promo !== undefined) {
+      product.promo = body.promo ?? undefined;
+    }
 
     await product.save();
     return NextResponse.json(toPlain(product));

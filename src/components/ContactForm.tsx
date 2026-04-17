@@ -19,6 +19,8 @@ export default function ContactForm() {
     email: '',
     message: '',
     consent: false,
+    // Honeypot anti-bot: champ caché qui doit rester vide
+    website: '',
   });
 
   const handleChange = (
@@ -40,6 +42,7 @@ export default function ContactForm() {
       email: form.email.trim(),
       message: form.message.trim(),
       consent: form.consent,
+      website: form.website.trim(),
     };
     const parsed = contactSchema.safeParse(payload);
     if (!parsed.success) {
@@ -66,7 +69,7 @@ export default function ContactForm() {
         return;
       }
       setSent(true);
-      setForm({ name: '', email: '', message: '', consent: false });
+      setForm({ name: '', email: '', message: '', consent: false, website: '' });
       toast.success(t('toast_success'));
     } catch {
       const msg = t('toast_error');
@@ -227,11 +230,24 @@ export default function ContactForm() {
         </label>
       </div>
 
+      {/* Champ honeypot discret pour piéger les bots (non visible pour l'utilisateur) */}
+      <div className="hidden" aria-hidden="true">
+        <label htmlFor="contact-website">Votre site web</label>
+        <input
+          id="contact-website"
+          name="website"
+          type="text"
+          autoComplete="off"
+          value={form.website}
+          onChange={handleChange}
+        />
+      </div>
+
       <button
         type="submit"
         disabled={loading}
         aria-busy={loading}
-        className="w-full rounded-xl bg-[hsl(var(--accent))] px-5 py-3 text-[15px] font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-md)] transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 disabled:opacity-60"
+        className="btn-primary w-full rounded-xl px-5 py-3 text-[15px] font-semibold shadow-[var(--shadow-md)] disabled:opacity-60"
       >
         {loading ? t('sending_btn') : t('submit_btn')}
       </button>

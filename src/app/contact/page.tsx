@@ -109,7 +109,7 @@ export default async function ContactPage() {
           <p className="mt-2 text-[13px] text-token-text/75">{t('email_intro')}</p>
           <a
             href={`mailto:${SUPPORT_EMAIL}`}
-            className="mt-3 inline-flex w-fit items-center gap-2 rounded-lg border border-[hsl(var(--accent))] bg-[hsl(var(--surface))] px-4 py-2 text-[13px] font-medium text-[hsl(var(--accent))] shadow-sm transition hover:bg-[hsl(var(--accent)/0.08)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
+            className="btn-primary mt-3 inline-flex w-fit items-center gap-2 rounded-lg px-4 py-2 text-[13px] font-semibold shadow-sm"
           >
             <svg
               width="18"

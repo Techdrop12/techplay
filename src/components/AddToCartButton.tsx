@@ -522,7 +522,7 @@ export default function AddToCartButton({
     ]
   );
 
-  const idleLabel = idleText ?? 'Ajouter au panier';
+  const idleLabel = idleText ?? tCart('add_to_cart');
 
   return (
     <>

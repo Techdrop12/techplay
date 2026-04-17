@@ -130,7 +130,7 @@ export default async function AccountPage() {
   const email = session?.user?.email?.trim() ?? '';
   const userName = session?.user?.name ?? null;
   const userImage = session?.user?.image ?? null;
-  const displayName = firstName(userName) || 'Client';
+  const displayName = firstName(userName) || '';
 
   const STATUS_LABEL: Record<string, string> = {
     pending: t('status_pending'),
@@ -304,7 +304,7 @@ export default async function AccountPage() {
               />
             ) : (
               <span className="flex h-full w-full items-center justify-center text-xl font-bold text-[hsl(var(--accent))]">
-                {displayName.charAt(0).toUpperCase() || '?'}
+                {(displayName || email || '?').charAt(0).toUpperCase()}
               </span>
             )}
           </div>
@@ -315,7 +315,7 @@ export default async function AccountPage() {
             <p className="mt-0.5 text-[14px] text-token-text/70">{email}</p>
           </div>
         </div>
-        <AccountLogoutButton className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[14px] font-medium text-token-text/80 transition hover:bg-[hsl(var(--surface-2))] hover:text-[hsl(var(--text))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2" />
+        <AccountLogoutButton className="btn-outline rounded-xl px-4 py-2.5 text-[14px] font-medium" />
       </header>
 
       {/* Stats */}
@@ -323,16 +323,18 @@ export default async function AccountPage() {
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-5 shadow-sm">
             <p className="text-[12px] font-semibold uppercase tracking-wider text-token-text/60">
-              Commandes
+              {t('orders_count_label')}
             </p>
             <p className="mt-1 text-2xl font-bold tabular-nums text-[hsl(var(--text))]">
               {orders.length}
             </p>
-            <p className="mt-0.5 text-[13px] text-token-text/60">passées sur TechPlay</p>
+            <p className="mt-0.5 text-[13px] text-token-text/60">
+              {t('orders_count_suffix')}
+            </p>
           </div>
           <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-5 shadow-sm">
             <p className="text-[12px] font-semibold uppercase tracking-wider text-token-text/60">
-              Dernière commande
+              {t('last_order_label')}
             </p>
             <p className="mt-1 text-lg font-semibold text-[hsl(var(--text))]">
               {lastOrderDate ?? '—'}
@@ -340,7 +342,7 @@ export default async function AccountPage() {
           </div>
           <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-5 shadow-sm">
             <p className="text-[12px] font-semibold uppercase tracking-wider text-token-text/60">
-              Total commandé
+              {t('total_spent_label')}
             </p>
             <p className="mt-1 text-2xl font-bold tabular-nums text-[hsl(var(--accent))]">
               {formatPrice(totalSpent)}

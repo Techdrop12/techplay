@@ -1,4 +1,5 @@
 import { error as logError } from '@/lib/logger';
+import { logAdminAction } from '@/lib/audit';
 import { apiError, apiSuccess, safeErrorForLog } from '@/lib/apiResponse';
 import { connectToDatabase } from '@/lib/db';
 import Order from '@/models/Order';
@@ -16,13 +17,65 @@ export async function GET(req: Request) {
   const page = Math.max(1, Number(url.searchParams.get('page')) || 1);
   const limit = Math.min(100, Math.max(10, Number(url.searchParams.get('limit')) || 25));
   const statusFilter = url.searchParams.get('status')?.trim() || null;
+  const q = url.searchParams.get('q')?.trim() || null;
+  const minTotal = url.searchParams.get('minTotal');
+  const maxTotal = url.searchParams.get('maxTotal');
+  const from = url.searchParams.get('from');
+  const to = url.searchParams.get('to');
   const skip = (page - 1) * limit;
 
   try {
     await connectToDatabase();
-    const filter = statusFilter
-      ? { status: new RegExp(`^${statusFilter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
-      : {};
+    const filter: Record<string, unknown> = {};
+
+    if (statusFilter) {
+      filter.status = new RegExp(
+        `^${statusFilter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`,
+        'i'
+      );
+    }
+
+    if (q) {
+      const rx = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      filter.$or = [
+        { 'user.name': rx },
+        { 'user.email': rx },
+        { email: rx },
+        { 'items.title': rx },
+      ];
+    }
+
+    if (minTotal || maxTotal) {
+      const totalFilter: Record<string, unknown> = {};
+      if (minTotal && !Number.isNaN(Number(minTotal))) {
+        totalFilter.$gte = Number(minTotal);
+      }
+      if (maxTotal && !Number.isNaN(Number(maxTotal))) {
+        totalFilter.$lte = Number(maxTotal);
+      }
+      if (Object.keys(totalFilter).length > 0) {
+        filter.total = totalFilter;
+      }
+    }
+
+    if (from || to) {
+      const dateFilter: Record<string, unknown> = {};
+      if (from) {
+        const d = new Date(from);
+        if (!Number.isNaN(d.getTime())) {
+          dateFilter.$gte = d;
+        }
+      }
+      if (to) {
+        const d = new Date(to);
+        if (!Number.isNaN(d.getTime())) {
+          dateFilter.$lte = d;
+        }
+      }
+      if (Object.keys(dateFilter).length > 0) {
+        filter.createdAt = dateFilter;
+      }
+    }
     const [docs, total] = await Promise.all([
       Order.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean().exec(),
       Order.countDocuments(filter),
@@ -48,7 +101,7 @@ export async function GET(req: Request) {
       })
     );
 
-    return apiSuccess(
+    const response = apiSuccess(
       toPlain({
         items: list,
         total,
@@ -57,6 +110,24 @@ export async function GET(req: Request) {
         pages: Math.max(1, Math.ceil(total / limit)),
       }) as Record<string, unknown>
     );
+
+    // Audit lecture liste (filtrée) des commandes
+    await logAdminAction({
+      action: 'order.list',
+      resourceType: 'order',
+      meta: {
+        statusFilter,
+        q,
+        minTotal,
+        maxTotal,
+        from,
+        to,
+        page,
+        limit,
+      },
+    });
+
+    return response;
   } catch (e) {
     logError('[admin/orders]', safeErrorForLog(e));
     return apiError('Erreur chargement commandes', 500);

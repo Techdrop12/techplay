@@ -43,7 +43,12 @@ export async function POST(req: Request) {
     return apiError(message, 400);
   }
 
-  const { name, email, message, consent } = parsed.data;
+  const { name, email, message, consent, website } = parsed.data;
+
+  // Honeypot rempli => on répond succès sans rien stocker pour ne pas aider les bots
+  if (website && website.trim().length > 0) {
+    return apiSuccess({ ok: true } as Record<string, unknown>);
+  }
 
   try {
     await connectToDatabase();

@@ -114,13 +114,14 @@ export default function CartSummary({
     const c = (raw || '').trim().toUpperCase();
     if (!c) return;
     if (!couponCodes[c]) {
-      setMsg('Code invalide.');
-      announce('Code promo invalide');
+      const invalid = t('code_invalid');
+      setMsg(invalid);
+      announce(invalid);
       return;
     }
     setApplied(c);
-    setMsg('Code appliqué ✔︎');
-    announce(`Code ${c} appliqué`);
+    setMsg(t('code_applied'));
+    announce(t('announce_applied', { code: c }));
     if (typeof window !== 'undefined') localStorage.setItem(LS_COUPON_KEY, c);
     onCouponApplied?.(c);
   };

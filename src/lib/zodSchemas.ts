@@ -44,6 +44,13 @@ export const contactSchema = z.object({
   message: messageSchema,
   name: nameSchema.optional(),
   consent: z.boolean().optional().default(false),
+  // Champ honeypot anti-bot : doit rester vide côté humain
+  website: z
+    .string()
+    .trim()
+    .max(0, 'Valeur non autorisée')
+    .optional()
+    .default(''),
 });
 export type ContactInput = z.infer<typeof contactSchema>;
 

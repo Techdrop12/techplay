@@ -38,11 +38,21 @@ export default function OrderTable() {
   const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [minTotal, setMinTotal] = useState('');
+  const [maxTotal, setMaxTotal] = useState('');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
 
   const fetchOrders = useCallback(() => {
     setLoading(true);
     const params = new URLSearchParams({ page: String(page), limit: String(PAGE_SIZE) });
     if (statusFilter) params.set('status', statusFilter);
+    if (searchQuery.trim()) params.set('q', searchQuery.trim());
+    if (minTotal.trim()) params.set('minTotal', minTotal.trim());
+    if (maxTotal.trim()) params.set('maxTotal', maxTotal.trim());
+    if (fromDate) params.set('from', fromDate);
+    if (toDate) params.set('to', toDate);
     fetch(`/api/admin/orders?${params}`)
       .then((res) => res.json())
       .then((data: { items?: OrderRow[]; total?: number; pages?: number }) => {
@@ -57,6 +67,11 @@ export default function OrderTable() {
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
+
+  const applyFilters = () => {
+    setPage(1);
+    fetchOrders();
+  };
 
   const updateStatus = async (orderId: string, newStatus: string) => {
     try {
@@ -109,7 +124,7 @@ export default function OrderTable() {
 
   return (
     <div className="overflow-x-auto p-4">
-      <div className="flex flex-wrap items-center gap-4 mb-4">
+      <div className="flex flex-wrap items-center gap-4 mb-3">
         <h2 className="text-2xl font-bold text-[hsl(var(--text))]">{t('orders_title')}</h2>
         <select
           value={statusFilter}
@@ -155,6 +170,80 @@ export default function OrderTable() {
         >
           {t('export_csv')}
         </button>
+      </div>
+      <div className="mb-4 grid gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)] items-end text-xs">
+        <div className="flex flex-wrap items-end gap-2">
+          <div className="flex flex-col">
+            <label htmlFor="orders-search" className="mb-1 font-medium text-token-text/80">
+              {t('orders_search_label')}
+            </label>
+            <input
+              id="orders-search"
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t('orders_search_placeholder')}
+              className="w-40 rounded border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-2 py-1 text-xs"
+            />
+          </div>
+          <div className="flex flex-col">
+            <label htmlFor="orders-min-total" className="mb-1 font-medium text-token-text/80">
+              {t('orders_min_total')}
+            </label>
+            <input
+              id="orders-min-total"
+              type="number"
+              value={minTotal}
+              onChange={(e) => setMinTotal(e.target.value)}
+              className="w-28 rounded border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-2 py-1 text-xs"
+            />
+          </div>
+          <div className="flex flex-col">
+            <label htmlFor="orders-max-total" className="mb-1 font-medium text-token-text/80">
+              {t('orders_max_total')}
+            </label>
+            <input
+              id="orders-max-total"
+              type="number"
+              value={maxTotal}
+              onChange={(e) => setMaxTotal(e.target.value)}
+              className="w-28 rounded border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-2 py-1 text-xs"
+            />
+          </div>
+        </div>
+        <div className="flex flex-wrap items-end gap-2 justify-start md:justify-end">
+          <div className="flex flex-col">
+            <label htmlFor="orders-from-date" className="mb-1 font-medium text-token-text/80">
+              {t('orders_from_date')}
+            </label>
+            <input
+              id="orders-from-date"
+              type="date"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              className="rounded border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-2 py-1 text-xs"
+            />
+          </div>
+          <div className="flex flex-col">
+            <label htmlFor="orders-to-date" className="mb-1 font-medium text-token-text/80">
+              {t('orders_to_date')}
+            </label>
+            <input
+              id="orders-to-date"
+              type="date"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+              className="rounded border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-2 py-1 text-xs"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={applyFilters}
+            className="rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-[11px] font-medium text-token-text/80 hover:bg-[hsl(var(--surface-2))]"
+          >
+            {t('advanced_filters_apply')}
+          </button>
+        </div>
       </div>
       <table className="min-w-full table-auto border border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-sm">
         <thead>

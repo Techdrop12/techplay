@@ -32,6 +32,7 @@ const ProductSchema = new Schema(
       startDate: Date,
       endDate: Date,
     },
+    published: { type: Boolean, default: true, index: true },
     featured: { type: Boolean, default: false, index: true },
     isNew: { type: Boolean, default: false, index: true },
     isBestSeller: { type: Boolean, default: false, index: true },

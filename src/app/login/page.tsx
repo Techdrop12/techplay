@@ -59,7 +59,7 @@ export default function LoginPage() {
           </div>
           <button
             type="submit"
-            className="w-full rounded-full bg-[hsl(var(--accent))] px-4 py-2.5 text-[15px] font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-md)] transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+            className="btn-primary w-full rounded-xl px-4 py-2.5 text-[15px] font-semibold shadow-[var(--shadow-md)]"
           >
             {tAccount('sign_in')}
           </button>

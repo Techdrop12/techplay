@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { apiError } from '@/lib/apiResponse';
 import { connectToDatabase } from '@/lib/db';
 import { error as logError } from '@/lib/logger';
+import { logAdminAction } from '@/lib/audit';
 import Product from '@/models/Product';
 import { requireAdmin } from '@/lib/requireAdmin';
 
@@ -19,6 +20,11 @@ export async function GET(req: Request) {
   const limit = Math.min(100, Math.max(10, Number(url.searchParams.get('limit')) || 25));
   const q = url.searchParams.get('q')?.trim() || null;
   const category = url.searchParams.get('category')?.trim() || null;
+  const lowStock = url.searchParams.get('lowStock') === '1';
+  const noImage = url.searchParams.get('noImage') === '1';
+  const featured = url.searchParams.get('featured') === '1';
+  const isNew = url.searchParams.get('isNew') === '1';
+  const bestSeller = url.searchParams.get('bestSeller') === '1';
   const skip = (page - 1) * limit;
 
   try {
@@ -35,6 +41,21 @@ export async function GET(req: Request) {
       ];
     }
     if (category) filter.category = category;
+    if (lowStock) filter.stock = { $lte: 3 };
+    if (noImage) {
+      filter.$and = [
+        ...(Array.isArray(filter.$and) ? (filter.$and as unknown[]) : []),
+        {
+          $or: [
+            { image: { $in: [null, ''] } },
+            { images: { $size: 0 } },
+          ],
+        },
+      ];
+    }
+    if (featured) filter.featured = true;
+    if (isNew) filter.isNew = true;
+    if (bestSeller) filter.isBestSeller = true;
 
     const [docs, total] = await Promise.all([
       Product.find(filter)
@@ -125,6 +146,21 @@ export async function POST(req: Request) {
       image,
       images: images.length ? images : undefined,
       tags: tags.length ? tags : undefined,
+    });
+
+    // Audit : création produit
+    await logAdminAction({
+      action: 'product.create',
+      resourceType: 'product',
+      resourceId: doc._id?.toString?.(),
+      meta: {
+        sku,
+        title,
+        price,
+        stock,
+        category,
+        brand,
+      },
     });
 
     return NextResponse.json(toPlain(doc));
