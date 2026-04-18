@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 
 import type { KeyboardEvent, RefCallback } from 'react';
 
@@ -64,31 +64,41 @@ interface FAQProps {
 
 export default function FAQ({ showSectionHeading = true, limit, showTools = true }: FAQProps) {
   const t = useTranslations('faq');
-  const locale = useLocale();
+  const rawLocale = useLocale();
+  /** Valeur stable pour les deps d’effet (évite les boucles si `useLocale` varie entre rendus). */
+  const locale = rawLocale === 'en' ? 'en' : 'fr';
   const [faqs, setFaqs] = useState<FAQItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [openSet, setOpenSet] = useState<Set<number>>(new Set());
   const headerRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
-  const fetchFAQs = useCallback(async () => {
-    try {
-      setLoading(true);
-      const res = await fetch(`/api/faq?locale=${locale}`, { cache: 'no-store' });
-      if (!res.ok) throw new Error('API error');
-      const data = await res.json();
-      setFaqs(Array.isArray(data) ? data : []);
-    } catch (error) {
-      logError('Erreur de chargement des FAQs', error);
-      setFaqs(locale === 'en' ? FALLBACK_FAQ_EN : FALLBACK_FAQ_FR);
-    } finally {
-      setLoading(false);
-    }
-  }, [locale]);
-
   useEffect(() => {
-    fetchFAQs();
-  }, [fetchFAQs]);
+    let cancelled = false;
+
+    const run = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/faq?locale=${locale}`, { cache: 'no-store' });
+        if (cancelled) return;
+        if (!res.ok) throw new Error('API error');
+        const data = await res.json();
+        if (cancelled) return;
+        setFaqs(Array.isArray(data) ? data : []);
+      } catch (error) {
+        if (cancelled) return;
+        logError('Erreur de chargement des FAQs', error);
+        setFaqs(locale === 'en' ? FALLBACK_FAQ_EN : FALLBACK_FAQ_FR);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [locale]);
 
   const filteredFaqs = useMemo(() => {
     const q = search.trim().toLowerCase();

@@ -2,7 +2,8 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { useMemo } from 'react';
 
 import type { Pack } from '@/types/product';
 
@@ -11,7 +12,7 @@ import ProductTags from '@/components/ProductTags';
 import StarsRating from '@/components/StarsRating';
 import WishlistButton from '@/components/WishlistButton';
 import { safeProductImageUrl } from '@/lib/safeProductImage';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, storefrontPriceOpts } from '@/lib/utils';
 
 interface Props {
   pack: Pack;
@@ -19,6 +20,8 @@ interface Props {
 
 export default function PackDetails({ pack }: Props) {
   const t = useTranslations('pack');
+  const routeLocale = useLocale();
+  const priceFmt = useMemo(() => storefrontPriceOpts(routeLocale), [routeLocale]);
   const {
     _id,
     title = 'Pack',
@@ -63,10 +66,10 @@ export default function PackDetails({ pack }: Props) {
         {/* Prix */}
         <div className="flex items-center gap-4">
           <span className="text-2xl font-semibold text-[hsl(var(--accent))]">
-            {formatPrice(price)}
+            {formatPrice(price, priceFmt)}
           </span>
           {oldPrice && (
-            <span className="line-through text-token-text/60 text-lg">{formatPrice(oldPrice)}</span>
+            <span className="line-through text-token-text/60 text-lg">{formatPrice(oldPrice, priceFmt)}</span>
           )}
         </div>
 

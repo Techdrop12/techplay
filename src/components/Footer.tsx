@@ -477,13 +477,21 @@ export default function Footer({
 
   return (
     <footer
-      className="relative overflow-hidden border-t border-[hsl(var(--border))] bg-[hsl(var(--surface-2))] text-[hsl(var(--text))] pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+      className="relative overflow-hidden border-t-2 border-token-border bg-token-surface text-token-text shadow-[0_-12px_40px_-24px_rgba(15,23,42,0.12)] dark:shadow-[0_-16px_48px_-28px_rgba(0,0,0,0.45)] pb-[max(1.5rem,env(safe-area-inset-bottom))]"
       role="contentinfo"
       aria-label={t.ariaFooter}
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_600px_at_90%_0%,hsl(var(--accent)/0.04),transparent_50%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_520px_at_78%_-8%,hsl(var(--accent)/0.08),transparent_52%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[hsl(var(--accent)/0.04)] via-transparent to-transparent"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 backdrop-blur-[1px]"
       />
 
       <div className="relative mx-auto max-w-screen-xl px-4 pb-8 pt-10 sm:px-6 sm:pt-12">
@@ -493,9 +501,9 @@ export default function Footer({
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-12 md:items-start lg:gap-12">
           {/* Bloc marque — présence éditoriale */}
-          <div className="space-y-5 md:col-span-3 lg:col-span-2 lg:pr-6">
-            <header className="border-b border-[hsl(var(--border))]/60 pb-4 md:pb-5">
-              <p className="text-xs font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-sm md:text-base">
+          <div className="space-y-4 md:col-span-3 lg:col-span-2 lg:pr-6">
+            <header className="border-b border-token-border/70 pb-4 md:pb-5">
+              <p className="text-xs font-extrabold tracking-tight text-token-text sm:text-sm md:text-base">
                 <span>{companyName}</span>
                 <span className="text-[hsl(var(--accent))]">.</span>
               </p>
@@ -506,39 +514,22 @@ export default function Footer({
 
             {!compact ? (
               <>
-                <div
-                  className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/90 p-3 dark:bg-[hsl(var(--surface))]/50"
-                  aria-label={t.badgesAria}
-                >
-                  <ul className="grid grid-cols-1 gap-3 text-sm" role="list">
-                    <li className="flex min-w-[0] items-center gap-2 rounded-lg bg-[hsl(var(--surface-2))/60] px-2.5 py-1.5">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-emerald-500/15 text-emerald-800 dark:bg-emerald-200 dark:text-emerald-950">
-                        <FaShieldAlt className="text-[13px]" aria-hidden="true" />
-                      </span>
-                      <span className="min-w-0 text-[11px] font-medium text-emerald-800 dark:text-emerald-200 whitespace-normal leading-snug">
-                        {t.badges.secure}
-                      </span>
+                <ul className="space-y-2" role="list" aria-label={t.badgesAria}>
+                    <li className="flex items-center gap-2 text-[11px] font-medium text-token-text/80">
+                      <FaShieldAlt className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden="true" />
+                      {t.badges.secure}
                     </li>
-                    <li className="flex min-w-[0] items-center gap-2 rounded-lg bg-[hsl(var(--surface-2))/60] px-2.5 py-1.5">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[hsl(var(--accent)/0.12)] text-[hsl(var(--accent))]">
-                        <FaTruck className="text-[13px]" aria-hidden="true" />
-                      </span>
-                      <span className="min-w-0 text-[11px] font-medium text-[hsl(var(--text))] whitespace-normal leading-snug">
-                        {t.badges.shipping}
-                      </span>
+                    <li className="flex items-center gap-2 text-[11px] font-medium text-token-text/80">
+                      <FaTruck className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden="true" />
+                      {t.badges.shipping}
                     </li>
-                    <li className="flex min-w-[0] items-center gap-2 rounded-lg bg-[hsl(var(--surface-2))/60] px-2.5 py-1.5">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                        <FaHeadset className="text-[13px]" aria-hidden="true" />
-                      </span>
-                      <span className="min-w-0 text-[11px] font-medium text-[hsl(var(--text))] whitespace-normal leading-snug">
-                        {t.badges.support}
-                      </span>
+                    <li className="flex items-center gap-2 text-[11px] font-medium text-token-text/80">
+                      <FaHeadset className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden="true" />
+                      {t.badges.support}
                     </li>
                   </ul>
-                </div>
 
-                <p className="text-[7px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--text))]/70">
+                <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-token-text/60">
                   {tFooter('we_accept')}
                 </p>
                 <div className="mt-1.5 flex flex-wrap items-center gap-2 sm:gap-3" aria-hidden="true">
@@ -572,9 +563,9 @@ export default function Footer({
 
             {contact?.email || contact?.phone || contact?.address?.streetAddress ? (
               <>
-            <h3 className="text-[7px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--text))]/80">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-token-text/60">
                   {tFooter('get_in_touch')}
-                </h3>
+                </p>
             <ul className="mt-1.5 space-y-1 text-[11px] leading-relaxed text-token-text/80">
                   {contact?.email ? (
                     <li>
@@ -615,9 +606,9 @@ export default function Footer({
           >
             {navGroups.map((group) => (
               <nav key={group.title} aria-label={group.title} className="min-w-0 space-y-2.5">
-                <h3 className="footer-nav-heading text-[hsl(var(--text))]/80">
+                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-token-text/65">
                   {group.title}
-                </h3>
+                </p>
 
                 <ul className="space-y-1.5">
                   {group.links.map(({ href, label, external }) => {
@@ -633,7 +624,7 @@ export default function Footer({
                       group.title.toLowerCase().includes('legal');
 
                     const linkClass =
-                      'inline-flex min-w-0 items-center gap-1.5 rounded py-0.5 text-[10px] text-[hsl(var(--text))]/75 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]';
+                      'inline-flex min-w-0 items-center gap-1.5 rounded py-2 text-[10px] text-[hsl(var(--text))]/75 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]';
                     const content = (
                       <>
                         {isLegal ? <LegalIcon label={label} className="h-3.5 w-3.5 shrink-0" /> : null}
@@ -685,7 +676,7 @@ export default function Footer({
 
             {!compact ? (
               <div className="col-span-2 flex flex-col sm:col-span-2 lg:col-span-2 lg:pl-4">
-                <div className="rounded-2xl border border-[hsl(var(--border))]/70 bg-[radial-gradient(circle_at_top,_hsl(var(--surface-2))/85,_hsl(var(--surface))/98)] px-4 py-5 shadow-[0_18px_46px_rgba(15,23,42,0.35)] dark:bg-[hsl(var(--surface))]/40 sm:px-5 lg:border-[hsl(var(--border))]/80">
+                <div className="rounded-xl border border-token-border/60 bg-token-surface/60 px-4 py-5 sm:px-5">
                   <form
                     onSubmit={onSubscribe}
                     noValidate
@@ -694,9 +685,9 @@ export default function Footer({
                     aria-busy={status === 'loading'}
                     aria-describedby={message ? messageId : undefined}
                   >
-                    <h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--text))]/85">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-token-text/65">
                       {t.newsletterTitle}
-                    </h3>
+                    </p>
 
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
                       <input
@@ -718,7 +709,8 @@ export default function Footer({
                       <button
                         type="submit"
                         disabled={status === 'loading'}
-                        className="min-h-[2.75rem] shrink-0 rounded-xl bg-[hsl(var(--accent))] px-5 py-2.5 text-[13px] font-semibold text-[hsl(var(--accent-fg))] shadow-md transition-all duration-200 hover:opacity-96 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.5)] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] disabled:opacity-60"
+                        className="min-h-[2.75rem] shrink-0 rounded-xl bg-accent px-5 py-2.5 text-[13px] font-semibold text-white shadow-md transition hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 disabled:opacity-60"
+                        style={{ backgroundColor: 'hsl(var(--accent))', color: '#fff' }}
                         aria-label={t.newsletterButtonIdle}
                         data-gtm="footer_newsletter_submit"
                       >
@@ -776,8 +768,8 @@ export default function Footer({
                 </form>
                 </div>
 
-                <p className="mt-6 text-[7px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--text))]/80">
-                {tFooter('follow_us')}
+                <p className="mt-6 text-[10px] font-medium uppercase tracking-[0.08em] text-token-text/60">
+                  {tFooter('follow_us')}
                 </p>
                 <div className="flex items-center gap-2 text-base text-[hsl(var(--text))]/60">
                   <a
@@ -823,8 +815,8 @@ export default function Footer({
 
         {children ? <div className="mt-10 text-center">{children}</div> : null}
 
-        <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-[hsl(var(--border))] pt-6 md:flex-row">
-          <p className="text-[11px] text-[hsl(var(--text))]/75">
+        <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-token-border/80 pt-6 md:flex-row">
+          <p className="text-[11px] text-token-text/75">
             © {currentYear}{' '}
             <span className="font-semibold text-[hsl(var(--text))]">{companyName}</span>
             <span className="text-[hsl(var(--text))]/65">. {t.rightsReserved}</span>

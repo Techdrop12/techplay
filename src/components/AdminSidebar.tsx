@@ -10,7 +10,6 @@ import {
   Package,
   PlusCircle,
   ShoppingCart,
-  Sparkles,
   Star,
   Upload,
 } from 'lucide-react';
@@ -45,7 +44,6 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/admin/blog', labelKey: 'nav_blog', icon: <BookOpen size={17} /> },
       { href: '/admin/blog/nouveau', labelKey: 'nav_new_article', icon: <PlusCircle size={17} /> },
-      { href: '/admin/generate-blog', labelKey: 'nav_generate_blog', icon: <Sparkles size={17} /> },
       { href: '/admin/pages', labelKey: 'nav_legal', icon: <FileText size={17} /> },
     ],
   },

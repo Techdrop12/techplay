@@ -201,7 +201,7 @@ function TrustBadges({
       </h2>
 
       <ul
-        className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 px-4 sm:px-6"
+        className="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 px-4 sm:px-6"
         role="list"
       >
         {items.map(({ icon, label, href, sr }, i) => {

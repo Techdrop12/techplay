@@ -103,11 +103,9 @@ export default function OrderTable() {
     }
   };
 
-  const filteredOrders = orders;
-
   const exportCsv = () => {
     const headers = ['Date', 'Client', 'Email', 'Produits', 'Montant (€)', 'Statut'];
-    const rows = filteredOrders.map((o) => [
+    const rows = orders.map((o) => [
       o.createdAt ? new Date(o.createdAt).toISOString().slice(0, 19) : '',
       (o.name ?? '').replace(/"/g, '""'),
       (o.email ?? '').replace(/"/g, '""'),
@@ -268,7 +266,7 @@ export default function OrderTable() {
           </tr>
         </thead>
         <tbody>
-          {filteredOrders.map((o) => (
+          {orders.map((o) => (
             <tr key={o._id} className="border-t border-[hsl(var(--border))]">
               <td className="p-2">{o.name}</td>
               <td className="p-2">{o.email}</td>
@@ -295,7 +293,7 @@ export default function OrderTable() {
           ))}
         </tbody>
       </table>
-      {filteredOrders.length === 0 && !loading && (
+      {orders.length === 0 && !loading && (
         <p className="text-token-text/60 p-4">
           {statusFilter ? t('no_orders_filter') : t('no_orders')}
         </p>

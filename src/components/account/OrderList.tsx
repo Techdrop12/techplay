@@ -7,7 +7,7 @@ import InvoiceButton from './InvoiceButton';
 
 import Link from '@/components/LocalizedLink';
 import { formatDateTime } from '@/lib/formatDate';
-import { cn, formatPrice } from '@/lib/utils';
+import { cn, formatPrice, storefrontPriceOpts } from '@/lib/utils';
 
 type OrderStatus = 'pending' | 'paid' | 'shipped' | 'delivered' | 'canceled' | string;
 type SortOption = 'recent' | 'old' | 'amountAsc' | 'amountDesc';
@@ -52,6 +52,7 @@ function normalizeStatus(status?: OrderStatus): string {
 
 export default function OrderList({ orders = [], className }: Props) {
   const locale = useLocale();
+  const priceFmt = useMemo(() => storefrontPriceOpts(locale), [locale]);
   const t = useTranslations('orders');
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<SortOption>('recent');
@@ -108,7 +109,7 @@ export default function OrderList({ orders = [], className }: Props) {
   return (
     <section className={cn('space-y-4', className)} aria-label={t('list_aria')}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-sm text-muted-foreground">
+        <div className="text-sm text-token-text/60">
           {t('orders_count', { count: filtered.length })}
         </div>
 
@@ -178,7 +179,7 @@ export default function OrderList({ orders = [], className }: Props) {
                     </span>
                   </div>
 
-                  <div className="mt-1 text-sm text-muted-foreground">
+                  <div className="mt-1 text-sm text-token-text/60">
                     {order.date
                       ? formatDateTime(order.date, locale === 'en' ? 'en-GB' : 'fr-FR')
                       : '—'}{' '}
@@ -190,7 +191,7 @@ export default function OrderList({ orders = [], className }: Props) {
                   <div className="text-sm">
                     {t('order_total_label')}{' '}
                     <strong className="text-[hsl(var(--text))]">
-                      {typeof order.total === 'number' ? formatPrice(order.total) : '—'}
+                      {typeof order.total === 'number' ? formatPrice(order.total, priceFmt) : '—'}
                     </strong>
                   </div>
 

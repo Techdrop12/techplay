@@ -1,11 +1,12 @@
 'use client';
 
+import { useLocale } from 'next-intl';
 import { useMemo, useState } from 'react';
 
 import type { Product } from '@/types/product';
 
 import { useCart } from '@/hooks/useCart';
-import { cn, formatPrice } from '@/lib/utils';
+import { cn, formatPrice, storefrontPriceOpts } from '@/lib/utils';
 
 type BundleCategory = 'mouse' | 'keyboard' | 'accessory';
 
@@ -22,6 +23,8 @@ interface BundleBuilderProps {
 }
 
 export default function BundleBuilder({ products }: BundleBuilderProps) {
+  const routeLocale = useLocale();
+  const priceFmt = useMemo(() => storefrontPriceOpts(routeLocale), [routeLocale]);
   const { addToCart } = useCart();
 
   const [selected, setSelected] = useState<Partial<Record<BundleCategory, Product>>>({});
@@ -107,9 +110,9 @@ export default function BundleBuilder({ products }: BundleBuilderProps) {
       >
         <header className="flex items-baseline justify-between gap-3">
           <div>
-            <h3 className="text-[13px] font-semibold tracking-tight text-[hsl(var(--text))]">
+            <p className="text-[13px] font-semibold tracking-tight text-[hsl(var(--text))]">
               {title}
-            </h3>
+            </p>
             <p className="mt-1 text-[11px] text-token-text/70">{description}</p>
           </div>
           {current ? (
@@ -133,7 +136,7 @@ export default function BundleBuilder({ products }: BundleBuilderProps) {
             <p className="text-[12px] font-semibold text-[hsl(var(--text))] line-clamp-2">
               {current.title}
             </p>
-            <p className="mt-1 text-[11px] text-token-text/70">{formatPrice(current.price)}</p>
+            <p className="mt-1 text-[11px] text-token-text/70">{formatPrice(current.price, priceFmt)}</p>
           </div>
         ) : (
           <p className="rounded-xl border border-dashed border-[hsl(var(--border))]/70 bg-[hsl(var(--surface-2))]/50 px-3 py-2 text-[11px] text-token-text/70">
@@ -163,7 +166,7 @@ export default function BundleBuilder({ products }: BundleBuilderProps) {
               >
                 <span className="line-clamp-2 flex-1 text-[hsl(var(--text))]">{product.title}</span>
                 <span className="shrink-0 text-[11px] font-semibold text-token-text/80">
-                  {formatPrice(product.price)}
+                  {formatPrice(product.price, priceFmt)}
                 </span>
               </button>
             );
@@ -203,23 +206,23 @@ export default function BundleBuilder({ products }: BundleBuilderProps) {
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
             <span className="text-[12px] text-token-text/65">Sous-total produits</span>
             <span className="text-[13px] font-semibold text-[hsl(var(--text))]">
-              {formatPrice(subtotal || 0)}
+              {formatPrice(subtotal || 0, priceFmt)}
             </span>
           </div>
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
             <span className="text-[12px] text-token-text/65">Remise bundle</span>
             <span className="text-[13px] font-semibold text-emerald-600 dark:text-emerald-400">
-              −{formatPrice(discount || 0)} ({Math.round(BUNDLE_DISCOUNT_RATE * 100)}%)
+              −{formatPrice(discount || 0, priceFmt)} ({Math.round(BUNDLE_DISCOUNT_RATE * 100)}%)
             </span>
           </div>
           <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
             <span className="text-[12px] text-token-text/65">Total bundle</span>
             <span className="text-[16px] font-bold text-[hsl(var(--text))]">
-              {formatPrice(total || 0)}
+              {formatPrice(total || 0, priceFmt)}
             </span>
             {discount > 0 && (
               <span className="text-[12px] font-medium text-emerald-600 dark:text-emerald-400">
-                Vous économisez {formatPrice(discount || 0)}
+                Vous économisez {formatPrice(discount || 0, priceFmt)}
               </span>
             )}
           </div>

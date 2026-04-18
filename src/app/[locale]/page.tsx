@@ -73,7 +73,11 @@ const STR = {
       'Sélections expertes : plusieurs produits ensemble à prix pack. Économisez plus, livraison offerte.',
     faqTitle: 'Questions fréquentes',
     faqKicker: 'FAQ',
-    ctaTitle: 'Appel à l’action',
+    faqViewAll: 'Voir toute la FAQ',
+    bundleKicker: 'Bundle personnalisé',
+    bundleTitle: 'Construis ton setup',
+    bundleAria: 'Constructeur de bundle personnalisé',
+    ctaTitle: "Appel à l'action",
     ctaOffer: 'Offre du moment',
     ctaHeadline: 'Boostez votre setup en ',
     ctaSpan: 'un clic',
@@ -85,9 +89,9 @@ const STR = {
     packsSectionLabel: 'Sélection de packs recommandés',
     whyKicker: 'Pourquoi nous',
     whyTitle: 'Une expérience pensée pour vous',
-    whySub: 'Livraison soignée, paiement sécurisé et équipe à l’écoute.',
+    whySub: "Livraison soignée, paiement sécurisé et équipe à l'écoute.",
     why1Title: 'Livraison rapide & suivie',
-    why1Desc: 'Colis expédiés sous 24–48 h, suivi jusqu’à chez vous.',
+    why1Desc: "Colis expédiés sous 24–48 h, suivi jusqu'à chez vous.",
     why2Title: 'Paiement 100 % sécurisé',
     why2Desc: 'CB, Apple Pay, Google Pay. Données protégées.',
     why3Title: 'Retours faciles',
@@ -123,6 +127,10 @@ const STR = {
     packsSub: 'Expert picks: multiple products together at bundle price. Save more, free delivery.',
     faqTitle: 'Frequently asked questions',
     faqKicker: 'FAQ',
+    faqViewAll: 'View all questions',
+    bundleKicker: 'Custom bundle',
+    bundleTitle: 'Build your setup',
+    bundleAria: 'Custom bundle builder',
     ctaTitle: 'Call to action',
     ctaOffer: 'Deal of the moment',
     ctaHeadline: 'Boost your setup in ',
@@ -220,14 +228,14 @@ function SplitCTA({ locale }: { locale: HomeLocale }) {
           <div className="mt-8 flex flex-wrap gap-4">
             <Link
               href="/products/packs"
-              className="btn btn-premium btn-lg inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-[var(--step-0)] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)]"
+              className="btn btn-premium btn-lg inline-flex w-full items-center justify-center gap-2 rounded-full px-8 py-3.5 text-[var(--step-0)] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)] sm:w-auto"
               data-gtm="home_cta_packs"
             >
               {t.ctaPacks}
             </Link>
             <Link
               href="/products"
-              className="btn btn-outline btn-lg inline-flex items-center gap-2 rounded-full border-[hsl(var(--border))] px-8 py-3.5 text-[var(--step-0)] hover:bg-[hsl(var(--surface-2))] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.3)]"
+              className="btn btn-outline btn-lg inline-flex w-full items-center justify-center gap-2 rounded-full border-[hsl(var(--border))] px-8 py-3.5 text-[var(--step-0)] hover:bg-[hsl(var(--surface-2))] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.3)] sm:w-auto"
               data-gtm="home_cta_products"
             >
               {t.ctaProducts}
@@ -236,8 +244,18 @@ function SplitCTA({ locale }: { locale: HomeLocale }) {
         </div>
         <div
           aria-hidden
-          className="min-h-[220px] rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface-2))]/50 sm:min-h-[280px]"
-        />
+          className="relative hidden min-h-[220px] overflow-hidden rounded-[var(--radius-2xl)] sm:block sm:min-h-[280px]"
+          style={{
+            background:
+              'radial-gradient(ellipse 80% 80% at 60% 50%, hsl(var(--accent)/.18) 0%, hsl(var(--accent)/.06) 50%, transparent 80%), hsl(var(--surface-2))',
+          }}
+        >
+          <div className="absolute inset-0 flex items-center justify-center opacity-20">
+            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -325,15 +343,15 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
           className="motion-section relative w-full overflow-hidden rounded-b-[var(--radius-3xl)] border-0 border-b border-[hsl(var(--border))] bg-[length:120%_120%] shadow-[var(--shadow-xl)]"
           style={{ backgroundImage: 'var(--gradient-hero)' }}
         >
-          <div className="container-app relative z-10 mx-auto grid max-w-screen-2xl gap-8 px-5 py-10 sm:gap-10 sm:px-6 sm:py-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1.2fr)] lg:items-center lg:gap-14 lg:py-14">
-            <div className="space-y-7 sm:space-y-8">
+          <div className="container-app relative z-10 mx-auto grid max-w-screen-2xl gap-6 px-5 py-8 sm:gap-10 sm:px-6 sm:py-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1.2fr)] lg:items-center lg:gap-14 lg:py-14">
+            <div className="space-y-5 sm:space-y-8">
               <span className="inline-block text-[var(--step-subtitle)] font-bold uppercase tracking-[0.22em] text-[hsl(var(--accent))] drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)]">
                 {t.heroBadge}
               </span>
               <h2 className="heading-section text-balance max-w-xl font-extrabold leading-[1.12] drop-shadow-[0_2px_8px_rgba(0,0,0,0.15)] sm:[font-size:var(--step-5)] md:text-5xl lg:text-[2.75rem] lg:leading-tight">
                 {t.heroTitle}
               </h2>
-              <p className="max-w-lg text-base font-medium leading-relaxed text-token-text/90 sm:text-[15px]">
+              <p className="max-w-lg text-[14px] font-medium leading-relaxed text-token-text/90 sm:text-[15px]">
                 {t.heroSubtitle}
               </p>
               <div className="flex flex-col items-stretch gap-4 pt-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
@@ -356,7 +374,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
                 variant="pill"
                 compact
                 truncateLabels={false}
-                className="!mt-8 !border-0 !bg-transparent !py-4 [&_ul]:!max-w-none [&_ul]:grid-cols-1 [&_ul]:sm:grid-cols-3 [&_ul]:gap-4"
+                className="!mt-5 !border-0 !bg-transparent !py-2 sm:!mt-8 sm:!py-4 [&_ul]:!max-w-none [&_ul]:grid-cols-1 [&_ul]:sm:grid-cols-3 [&_ul]:gap-2 sm:[&_ul]:gap-4"
                 badges={[
                   { icon: 'truck', label: tHome('trust_fast_delivery') },
                   { icon: 'shield', label: tHome('trust_warranty') },
@@ -393,7 +411,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
           <section
             id="best-products"
             aria-label={t.productsSectionLabel}
-            className="motion-section motion-section-delay-1 section-spacing-sm"
+            className="motion-section motion-section-delay-1"
             style={lazySectionStyle600}
           >
             <SectionHeader kicker={t.bestKicker} title={t.bestTitle} sub={t.bestSub} />
@@ -404,7 +422,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
           <section
             id="packs"
             aria-label={t.packsSectionLabel}
-            className="motion-section motion-section-delay-2 section-spacing-sm"
+            className="motion-section motion-section-delay-2"
             style={lazySectionStyle600}
           >
             <SectionHeader kicker={t.packsKicker} title={t.packsTitle} sub={t.packsSub} />
@@ -428,7 +446,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
             <section
               id="blog"
               aria-label={t.blogSectionLabel}
-              className="motion-section motion-section-delay-2 section-spacing-sm"
+              className="motion-section motion-section-delay-2"
               style={lazySectionStyle500}
             >
               <SectionHeader kicker={t.blogKicker} title={t.blogTitle} sub={t.blogSub} />
@@ -450,7 +468,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
           <section
             id="faq"
             aria-label={t.faqTitle}
-            className="motion-section motion-section-delay-3 section-spacing-sm"
+            className="motion-section motion-section-delay-3"
             style={lazySectionStyle500}
           >
             <SectionHeader kicker={t.faqKicker} title={t.faqTitle} />
@@ -461,7 +479,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
                   href="/faq"
                   className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-5 py-2.5 text-[13px] font-semibold text-token-text/80 transition hover:bg-[hsl(var(--surface-2))] focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
                 >
-                  {locale === 'en' ? 'View all questions' : 'Voir toute la FAQ'}
+                  {t.faqViewAll}
                   <span aria-hidden>→</span>
                 </Link>
               </div>
@@ -470,10 +488,10 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
           {allProducts.length > 0 && (
             <section
               id="builder"
-              aria-label="Build your setup"
-              className="motion-section motion-section-delay-3 section-spacing-sm"
+              aria-label={t.bundleAria}
+              className="motion-section motion-section-delay-3"
             >
-              <SectionHeader kicker="Bundle personnalisé" title="Construis ton setup" />
+              <SectionHeader kicker={t.bundleKicker} title={t.bundleTitle} />
               <div className="rhythm-content">
                 <BundleBuilder products={allProducts} />
               </div>

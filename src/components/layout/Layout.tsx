@@ -7,25 +7,18 @@ import { Suspense, type ReactNode, useEffect, useRef, useState } from 'react';
 
 import Header from './Header';
 
-const LiveChatLazy = dynamic(() => import('../LiveChat'), { ssr: false });
-
+import Footer from '@/components/Footer';
 import FooterTrustStrip from '@/components/FooterTrustStrip';
-import PageTransitions from '@/components/PageTransitions';
+import RouteViewShell from '@/components/RouteViewShell';
 import { useTheme } from '@/context/themeContext';
 import { pageview } from '@/lib/ga';
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing';
 
 const NAV_START_EVENT = 'nextjs:nav-start';
 const ScrollTopButton = dynamic(() => import('../ui/ScrollTopButton'), { ssr: false });
-const FooterLazy = dynamic(() => import('@/components/Footer'), {
-  ssr: true,
-  loading: () => null,
-});
-
 interface LayoutProps {
   children: ReactNode;
   analytics?: boolean;
-  chat?: boolean;
 }
 
 type RequestIdle = (
@@ -33,7 +26,7 @@ type RequestIdle = (
   options?: { timeout?: number }
 ) => number;
 
-export default function Layout({ children, analytics = true, chat = false }: LayoutProps) {
+export default function Layout({ children, analytics = true }: LayoutProps) {
   const pathname = usePathname() || '/';
   const router = useRouter();
   const { theme } = useTheme();
@@ -229,9 +222,9 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
         data-theme={theme}
         data-pathname={pathname}
         aria-label={tAria('main_content')}
-        className="relative z-0 min-h-[calc(var(--vh,1vh)*100)] bg-token-surface px-[max(0px,env(safe-area-inset-left))] pb-[max(0px,env(safe-area-inset-bottom))] pr-[max(0px,env(safe-area-inset-right))] pt-[var(--header-offset,4.5rem)] text-token-text transition-colors"
+        className="relative z-0 min-h-[calc(var(--vh,1vh)*100)] bg-token-surface px-[max(0px,env(safe-area-inset-left))] pb-[max(0px,env(safe-area-inset-bottom))] pr-[max(0px,env(safe-area-inset-right))] pt-[var(--header-offset,4.5rem)] text-token-text transition-colors before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:z-0 before:h-36 before:bg-gradient-to-b before:from-[hsl(var(--accent)/0.055)] before:to-transparent before:content-['']"
       >
-        <PageTransitions>
+        <RouteViewShell>
           <Suspense
             fallback={
               <div
@@ -251,13 +244,12 @@ export default function Layout({ children, analytics = true, chat = false }: Lay
           >
             {children}
           </Suspense>
-        </PageTransitions>
+        </RouteViewShell>
       </main>
 
       <ScrollTopButton />
-      {chat ? <LiveChatLazy /> : null}
       <FooterTrustStrip />
-      <FooterLazy />
+      <Footer />
     </>
   );
 }

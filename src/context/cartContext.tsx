@@ -108,7 +108,7 @@ function ensureItemShape(input: Partial<CartItem> | unknown): CartItem {
     _id: String(source._id ?? ''),
     slug: String(source.slug ?? ''),
     title: String(source.title ?? 'Produit'),
-    image: String(source.image ?? '/placeholder.png'),
+    image: String(source.image ?? '/og-image.jpg'),
     price: Number.isFinite(Number(source.price)) ? Number(source.price) : 0,
     quantity: clamp(Math.trunc(Number(source.quantity ?? 1)), MIN_QTY, MAX_QTY),
     sku: source.sku ? String(source.sku) : undefined,

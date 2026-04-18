@@ -1,6 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -10,7 +11,7 @@ import { UI } from '@/lib/constants';
 import { event } from '@/lib/ga';
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing';
 import { logEvent } from '@/lib/logEvent';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, storefrontPriceOpts } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 
 type AppLocale = 'fr' | 'en';
@@ -142,6 +143,8 @@ export default function StickyCartSummary({
   const pathname = usePathname() || '';
   const detectedLocale = getCurrentLocale(pathname) as AppLocale;
   const loc: AppLocale = locale ?? detectedLocale;
+  const routeLocale = useLocale();
+  const priceFmt = useMemo(() => storefrontPriceOpts(routeLocale), [routeLocale]);
   const prefersReduced = useReducedMotion();
 
   const messages = MESSAGES[loc] ?? MESSAGES.fr;
@@ -300,7 +303,7 @@ export default function StickyCartSummary({
   const shippingDisplay = Number.isFinite(shipping)
     ? shipping === 0
       ? tx('offered')
-      : formatPrice(shipping)
+      : formatPrice(shipping, priceFmt)
     : '—';
 
   return (
@@ -336,7 +339,7 @@ export default function StickyCartSummary({
             </button>
 
             <div className="text-[13px] font-medium text-[hsl(var(--text))]" aria-live="polite">
-              {tx('total')} <span className="ml-1 font-semibold">{formatPrice(payable)}</span>
+              {tx('total')} <span className="ml-1 font-semibold">{formatPrice(payable, priceFmt)}</span>
             </div>
           </div>
 
@@ -386,23 +389,23 @@ export default function StickyCartSummary({
                     aria-live="polite"
                   >
                     {remaining > 0
-                      ? tx('free_shipping_remaining', { amount: formatPrice(remaining) })
+                      ? tx('free_shipping_remaining', { amount: formatPrice(remaining, priceFmt) })
                       : tx('free_shipping_unlocked')}
                   </p>
                 </div>
 
                 <div className="space-y-1 px-4 pt-2 text-[13px] text-token-text/80">
-                  <Line label={tx('subtotal')} value={formatPrice(subtotal)} />
+                  <Line label={tx('subtotal')} value={formatPrice(subtotal, priceFmt)} />
                   {discount > 0 && (
-                    <Line label={tx('discount')} value={`- ${formatPrice(discount)}`} accent />
+                    <Line label={tx('discount')} value={`- ${formatPrice(discount, priceFmt)}`} accent />
                   )}
                   <Line
                     label={tx('vat')}
-                    value={Number.isFinite(tax) && tax > 0 ? formatPrice(tax) : '—'}
+                    value={Number.isFinite(tax) && tax > 0 ? formatPrice(tax, priceFmt) : '—'}
                   />
                   <Line label={tx('shipping')} value={shippingDisplay} />
                   <div className="my-2 border-t border-[hsl(var(--border))]/70" />
-                  <Line label={tx('total')} value={formatPrice(payable)} bold />
+                  <Line label={tx('total')} value={formatPrice(payable, priceFmt)} bold />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 px-4 py-3">

@@ -115,7 +115,7 @@ export default function AccountProfileForm({ defaultName, defaultEmail }: Accoun
           type="submit"
           disabled={savingName}
           aria-busy={savingName}
-          className="btn-primary rounded-xl px-5 py-2.5 text-[15px] font-semibold shadow-[var(--shadow-sm)] disabled:opacity-60"
+          className="btn-primary rounded-xl bg-[hsl(var(--accent))] px-5 py-2.5 text-[15px] font-semibold text-white shadow-[var(--shadow-sm)] transition hover:opacity-90 disabled:opacity-60"
         >
           {savingName ? tCommon('saving') : tCommon('save')}
         </button>
@@ -191,7 +191,7 @@ export default function AccountProfileForm({ defaultName, defaultEmail }: Accoun
           type="submit"
           disabled={savingPwd}
           aria-busy={savingPwd}
-          className="btn-primary rounded-xl px-5 py-2.5 text-[15px] font-semibold shadow-[var(--shadow-sm)] disabled:opacity-60"
+          className="btn-primary rounded-xl bg-[hsl(var(--accent))] px-5 py-2.5 text-[15px] font-semibold text-white shadow-[var(--shadow-sm)] transition hover:opacity-90 disabled:opacity-60"
         >
           {savingPwd ? tCommon('saving') : t('password_save_btn')}
         </button>

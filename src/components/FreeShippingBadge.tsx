@@ -1,11 +1,11 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { UI } from '@/lib/constants';
-import { cn, formatPrice } from '@/lib/utils';
+import { cn, formatPrice, storefrontPriceOpts } from '@/lib/utils';
 
 interface FreeShippingBadgeProps {
   price: number;
@@ -112,18 +112,29 @@ export default function FreeShippingBadge({
   const [reachedPersisted, setReachedPersisted] = useState(false);
   const reachedOnce = useRef(false);
   const t = useTranslations('free_shipping');
+  const routeLocale = useLocale();
+  const priceOpts = useMemo(
+    () => storefrontPriceOpts(_locale ?? routeLocale),
+    [_locale, routeLocale]
+  );
 
-  const T = {
-    eligibleShort: t('eligible_short'),
-    eligibleLong: t('eligible_long'),
-    missing: (amt: number) => t('missing', { amount: formatPrice(amt) }),
-    srEligible: (thr: number) => t('sr_eligible', { threshold: formatPrice(thr) }),
-    srMissing: (rem: number, thr: number) =>
-      t('sr_missing', { remaining: formatPrice(rem), threshold: formatPrice(thr) }),
-    progressLabel: t('progress_label'),
-    policy: t('policy'),
-    aria100: t('aria_100_reached'),
-  };
+  const T = useMemo(
+    () => ({
+      eligibleShort: t('eligible_short'),
+      eligibleLong: t('eligible_long'),
+      missing: (amt: number) => t('missing', { amount: formatPrice(amt, priceOpts) }),
+      srEligible: (thr: number) => t('sr_eligible', { threshold: formatPrice(thr, priceOpts) }),
+      srMissing: (rem: number, thr: number) =>
+        t('sr_missing', {
+          remaining: formatPrice(rem, priceOpts),
+          threshold: formatPrice(thr, priceOpts),
+        }),
+      progressLabel: t('progress_label'),
+      policy: t('policy'),
+      aria100: t('aria_100_reached'),
+    }),
+    [t, priceOpts]
+  );
 
   const remaining = Math.max(0, threshold - price);
   const isEligible = remaining <= 0;

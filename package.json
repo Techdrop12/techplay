@@ -22,7 +22,8 @@
     "prepare": "husky",
     "postinstall": "node scripts/patch-node-domexception.cjs && next telemetry disable",
     "start:prod": "next build && next start -p 3000",
-    "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix --no-error-on-unmatched-pattern"
+    "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix --no-error-on-unmatched-pattern",
+    "hash-admin-password": "node scripts/hash-admin-password.mjs"
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.11.1",

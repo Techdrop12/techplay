@@ -427,7 +427,6 @@ TechPlay_FINAL_DELIVERY
 │   │   ├── LoadingOverlay.tsx
 │   │   ├── LoadingSectionSkeleton.tsx
 │   │   ├── LocalizedLink.tsx
-│   │   ├── LoginForm.tsx
 │   │   ├── Logo.tsx
 │   │   ├── LowStockWarning.tsx
 │   │   ├── MetaPixel.tsx
@@ -441,7 +440,7 @@ TechPlay_FINAL_DELIVERY
 │   │   ├── PackCard.tsx
 │   │   ├── PackDetails.tsx
 │   │   ├── PacksSection.tsx
-│   │   ├── PageTransitions.tsx
+│   │   ├── RouteViewShell.tsx
 │   │   ├── Price.tsx
 │   │   ├── PricingBadge.tsx
 │   │   ├── ProductABTestBadge.tsx

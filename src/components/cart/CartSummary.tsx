@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import type { Product } from '@/types/product';
@@ -8,7 +8,7 @@ import type { Product } from '@/types/product';
 import FreeShippingBadge from '@/components/FreeShippingBadge';
 import Link from '@/components/LocalizedLink';
 import { UI } from '@/lib/constants';
-import { cn, formatPrice } from '@/lib/utils';
+import { cn, formatPrice, storefrontPriceOpts } from '@/lib/utils';
 
 type CouponSpec =
   | { type: 'percent'; value: number } // ex: 10 = -10%
@@ -52,6 +52,8 @@ export default function CartSummary({
   className = '',
 }: CartSummaryProps) {
   const t = useTranslations('cart');
+  const routeLocale = useLocale();
+  const priceFmt = useMemo(() => storefrontPriceOpts(routeLocale), [routeLocale]);
   const [code, setCode] = useState('');
   const [applied, setApplied] = useState('');
   const [msg, setMsg] = useState('');
@@ -163,19 +165,19 @@ export default function CartSummary({
       <div className="space-y-1.5 text-[13px] text-token-text/80">
         <Row
           label={`${t('subtotal')} (${t('items_count', { count: itemsCount })})`}
-          value={formatPrice(subtotal)}
+          value={formatPrice(subtotal, priceFmt)}
         />
         {discount > 0 && (
           <Row
             label={`${t('discount_label')}${applied ? ` (${applied})` : ''}`}
-            value={`- ${formatPrice(discount)}`}
+            value={`- ${formatPrice(discount, priceFmt)}`}
             valueClass="text-emerald-600 dark:text-emerald-400 font-semibold"
           />
         )}
-        <Row label={t('vat_est')} value={taxRate > 0 ? formatPrice(tax) : '—'} />
+        <Row label={t('vat_est')} value={taxRate > 0 ? formatPrice(tax, priceFmt) : '—'} />
         <Row
           label={t('shipping')}
-          value={shipping === 0 ? t('shipping_free') : formatPrice(shipping)}
+          value={shipping === 0 ? t('shipping_free') : formatPrice(shipping, priceFmt)}
         />
       </div>
       <hr className="border-[hsl(var(--border))]" />
@@ -185,14 +187,14 @@ export default function CartSummary({
           className="text-xl font-extrabold tabular-nums text-[hsl(var(--text))]"
           aria-label={t('total')}
         >
-          {formatPrice(total)}
+          {formatPrice(total, priceFmt)}
         </span>
       </div>
 
       {/* Économies totales */}
       {savings > 0 && (
         <p className="text-[12px] text-emerald-600 dark:text-emerald-400">
-          {t('you_save', { amount: formatPrice(savings) })}
+          {t('you_save', { amount: formatPrice(savings, priceFmt) })}
           {applied ? ` (${applied})` : ''}
         </p>
       )}
@@ -207,7 +209,7 @@ export default function CartSummary({
       </Link>
 
       <p className="text-[11px] text-token-text/60">
-        {t('footer_secure', { threshold: formatPrice(shippingThreshold) })}
+        {t('footer_secure', { threshold: formatPrice(shippingThreshold, priceFmt) })}
       </p>
 
       <div className="space-y-2 border-t border-[hsl(var(--border))] pt-4">

@@ -74,9 +74,9 @@ export default function WhyChooseUsSection({
               <span className="text-[hsl(var(--accent))]" aria-hidden="true">
                 <Icon />
               </span>
-              <h3 className="text-[15px] font-semibold leading-tight text-[hsl(var(--text))] sm:text-base">
+              <p className="text-[15px] font-semibold leading-tight text-[hsl(var(--text))] sm:text-base">
                 {item.title}
-              </h3>
+              </p>
               <p className="text-[13px] leading-relaxed text-[hsl(var(--text))]/70">
                 {item.description}
               </p>

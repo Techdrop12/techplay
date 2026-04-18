@@ -110,9 +110,9 @@ export default function ContactForm() {
       aria-labelledby="contact-form-heading"
       noValidate
     >
-      <h2 id="contact-form-heading" className="heading-subsection">
+      <p id="contact-form-heading" className="text-[17px] font-semibold leading-snug text-[hsl(var(--text))]">
         {t('form_heading')}
-      </h2>
+      </p>
       <p className="text-[14px] text-token-text/75">{t('form_intro')}</p>
 
       {apiError && (
@@ -247,7 +247,7 @@ export default function ContactForm() {
         type="submit"
         disabled={loading}
         aria-busy={loading}
-        className="btn-primary w-full rounded-xl px-5 py-3 text-[15px] font-semibold shadow-[var(--shadow-md)] disabled:opacity-60"
+        className="btn-primary w-full rounded-xl bg-[hsl(var(--accent))] px-5 py-3 text-[15px] font-semibold text-white shadow-[var(--shadow-md)] transition hover:opacity-90 disabled:opacity-60"
       >
         {loading ? t('sending_btn') : t('submit_btn')}
       </button>

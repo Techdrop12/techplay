@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { memo, useMemo, useState } from 'react';
 
 import type { Product } from '@/types/product';
@@ -15,7 +15,7 @@ import WishlistButton from '@/components/WishlistButton';
 import { pushDataLayer } from '@/lib/ga';
 import { logEvent } from '@/lib/logEvent';
 import { getProductImage, getProductSecondImage } from '@/lib/productImage';
-import { cn, formatPrice } from '@/lib/utils';
+import { cn, formatPrice, storefrontPriceOpts } from '@/lib/utils';
 
 interface ProductCardProps {
   product: Product;
@@ -72,6 +72,8 @@ function getReviewsCount(product: Product): number {
 
 function ProductCard({ product, className, priority = false }: ProductCardProps) {
   const prefersReducedMotion = useReducedMotion();
+  const routeLocale = useLocale();
+  const priceFmt = useMemo(() => storefrontPriceOpts(routeLocale), [routeLocale]);
   const t = useTranslations('product_card');
 
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -317,15 +319,15 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
                 href={outOfStock ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock'}
               />
               <span className="text-xl font-extrabold tabular-nums tracking-tight text-[hsl(var(--text))] sm:text-2xl">
-                {formatPrice(product.price)}
+                {formatPrice(product.price, priceFmt)}
               </span>
               {hasDiscount && typeof oldPrice === 'number' ? (
                 <>
                   <span className="text-sm font-medium text-[hsl(var(--text))]/50 line-through">
-                    {formatPrice(oldPrice)}
+                    {formatPrice(oldPrice, priceFmt)}
                   </span>
                   <span className="ml-auto inline-flex rounded-md bg-[hsl(var(--accent)/0.15)] px-2 py-0.5 text-[11px] font-bold text-[hsl(var(--accent))]">
-                    −{formatPrice(oldPrice - product.price)}
+                    −{formatPrice(oldPrice - product.price, priceFmt)}
                   </span>
                 </>
               ) : null}

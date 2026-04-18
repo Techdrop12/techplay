@@ -276,7 +276,7 @@ export default function AdminBlogTable() {
             ))}
             {filteredPosts.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-4 text-center text-token-text/50">
+                <td colSpan={5} className="px-4 py-4 text-center text-token-text/50">
                   {posts.length === 0 ? t('no_articles') : t('no_articles_filter')}
                 </td>
               </tr>

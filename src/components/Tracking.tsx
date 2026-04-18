@@ -6,15 +6,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 const Analytics = dynamic(() => import('./Analytics'), { ssr: false });
 const MetaPixel = dynamic(() => import('./MetaPixel'), { ssr: false });
-const Hotjar = dynamic(() => import('./Hotjar'), { ssr: false });
-const Clarity = dynamic(() => import('./Clarity'), { ssr: false });
-const RegisterSW = dynamic(() => import('./RegisterSW').then((m) => m.default), { ssr: false });
-
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
 const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
-const HOTJAR_ID = process.env.NEXT_PUBLIC_HOTJAR_ID;
-const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID;
 
 const DISABLED = (process.env.NEXT_PUBLIC_ANALYTICS_DISABLED || '').toLowerCase() === 'true';
 
@@ -143,17 +137,10 @@ export default function Tracking() {
     [consent.analytics]
   );
   const canMeta = useMemo(() => Boolean(META_PIXEL_ID && consent.ads), [consent.ads]);
-  const canHotjar = useMemo(() => Boolean(HOTJAR_ID && consent.analytics), [consent.analytics]);
-  const canClarity = useMemo(() => Boolean(CLARITY_ID && consent.analytics), [consent.analytics]);
-
   if (DISABLED) return null;
 
   return (
     <>
-      <Idle>
-        <RegisterSW />
-      </Idle>
-
       {canAnalytics && (
         <Idle>
           <Analytics />
@@ -163,18 +150,6 @@ export default function Tracking() {
       {canMeta && (
         <Idle delay={150}>
           <MetaPixel />
-        </Idle>
-      )}
-
-      {canHotjar && (
-        <Idle delay={300}>
-          <Hotjar />
-        </Idle>
-      )}
-
-      {canClarity && (
-        <Idle delay={450}>
-          <Clarity />
         </Idle>
       )}
     </>

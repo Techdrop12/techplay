@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
+import { useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import {
   useCallback,
@@ -23,7 +24,7 @@ import { pushDataLayer } from '@/lib/ga';
 import { getCurrentLocale } from '@/lib/i18n-routing';
 import { logEvent } from '@/lib/logEvent';
 import { safeProductImageUrl } from '@/lib/safeProductImage';
-import { cn, formatPrice } from '@/lib/utils';
+import { cn, formatPrice, storefrontPriceOpts } from '@/lib/utils';
 
 interface PackCardProps {
   pack: Pack;
@@ -164,6 +165,8 @@ const toAbs = (value?: string) => {
 export default function PackCard({ pack, priority = false, className }: PackCardProps) {
   const pathname = usePathname() || '/';
   const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr';
+  const routeLocale = useLocale();
+  const priceFmt = useMemo(() => storefrontPriceOpts(routeLocale), [routeLocale]);
   const t = STR[locale];
   const prefersReducedMotion = useReducedMotion();
 
@@ -581,14 +584,14 @@ export default function PackCard({ pack, priority = false, className }: PackCard
               <meta itemProp="price" content={Math.max(0, Number(price || 0)).toFixed(2)} />
               <span
                 className="text-xl font-extrabold tracking-tight text-[hsl(var(--accent))] sm:text-2xl"
-                aria-label={`Prix : ${formatPrice(price)}`}
+                aria-label={`Prix : ${formatPrice(price, priceFmt)}`}
               >
-                {formatPrice(price)}
+                {formatPrice(price, priceFmt)}
               </span>
               {typeof referencePrice === 'number' && referencePrice > price ? (
                 <>
                   <span className="text-sm text-token-text/50 line-through">
-                    {formatPrice(referencePrice)}
+                    {formatPrice(referencePrice, priceFmt)}
                   </span>
                   {typeof discountPercent === 'number' ? (
                     <span className="ml-auto rounded-md bg-emerald-500/15 px-2 py-0.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
@@ -602,10 +605,10 @@ export default function PackCard({ pack, priority = false, className }: PackCard
             {/* 3. Économie — une ligne si applicable */}
             {typeof savingsEuro === 'number' && savingsEuro > 0 ? (
               <p className="mt-2 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
-                {t.save} {formatPrice(savingsEuro)}
+                {t.save} {formatPrice(savingsEuro, priceFmt)}
                 {typeof itemsValue === 'number' ? (
                   <span className="ml-1 font-normal text-token-text/60">
-                    ({t.itemValue} {formatPrice(itemsValue)})
+                    ({t.itemValue} {formatPrice(itemsValue, priceFmt)})
                   </span>
                 ) : null}
               </p>

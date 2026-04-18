@@ -23,7 +23,10 @@ const schema = z.object({
   NEXTAUTH_SECRET: z.string().optional(),
   AUTH_SECRET: z.string().optional(),
   ADMIN_EMAIL: z.string().optional(),
+  /** bcrypt du mot de passe admin (recommandé partout). */
   ADMIN_PASSWORD_HASH: z.string().optional(),
+  /** Mot de passe admin en clair : accepté seulement si `NODE_ENV !== 'production'` et pas de hash. */
+  ADMIN_PASSWORD: z.string().optional(),
   ADMIN_REVALIDATE_TOKEN: z.string().optional(),
 
   // Cron / revalidate
@@ -57,6 +60,7 @@ export const serverEnv = schema.parse({
   AUTH_SECRET: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? undefined,
   ADMIN_EMAIL: process.env.ADMIN_EMAIL ?? undefined,
   ADMIN_PASSWORD_HASH: process.env.ADMIN_PASSWORD_HASH ?? undefined,
+  ADMIN_PASSWORD: process.env.ADMIN_PASSWORD ?? undefined,
   ADMIN_REVALIDATE_TOKEN: process.env.ADMIN_REVALIDATE_TOKEN ?? undefined,
   CRON_SECRET: process.env.CRON_SECRET ?? undefined,
 

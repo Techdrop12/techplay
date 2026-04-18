@@ -130,7 +130,7 @@ export default function WishlistButton({
 
       toast(t.removedFromWishlist, {
         icon: <HeartCrack size={18} className="text-token-text/60" />,
-        style: { borderRadius: '10px', background: '#111827', color: '#fff' },
+        style: { borderRadius: '10px', background: 'hsl(var(--surface-2))', color: 'hsl(var(--text))' },
       });
 
       try {
@@ -164,7 +164,7 @@ export default function WishlistButton({
 
     toast.success(t.addedToWishlist, {
       icon: <Heart size={18} className="text-red-500" />,
-      style: { borderRadius: '10px', background: '#111827', color: '#fff' },
+      style: { borderRadius: '10px', background: 'hsl(var(--surface-2))', color: 'hsl(var(--text))' },
     });
 
     setRippler((k) => k + 1);

@@ -40,7 +40,7 @@ import { DEFAULT_LOCALE, isLocale, type AppLocale } from '@/lib/language';
 import { logEvent } from '@/lib/logEvent';
 import { pixelViewContent } from '@/lib/meta-pixel';
 import { safeProductImageUrl } from '@/lib/safeProductImage';
-import { cn, formatPrice } from '@/lib/utils';
+import { cn, formatPrice, intlLocaleForStoreRoute } from '@/lib/utils';
 
 interface Props {
   product: Product;
@@ -163,7 +163,8 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
   const viewedRef = useRef(false);
 
   const safeLocale: AppLocale = isLocale(locale) ? locale : DEFAULT_LOCALE;
-  const currency = detectCurrency(safeLocale === 'en' ? 'en' : undefined);
+  const currency = detectCurrency(safeLocale);
+  const priceLocale = intlLocaleForStoreRoute(safeLocale);
 
   const t =
     safeLocale === 'en'
@@ -698,27 +699,27 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
               className="text-[2rem] font-extrabold tabular-nums tracking-tight text-[hsl(var(--accent))] sm:text-3xl"
               aria-label={
                 safeLocale === 'en'
-                  ? `Price: ${formatPrice(price, { currency })}`
-                  : `Prix : ${formatPrice(price, { currency })}`
+                  ? `Price: ${formatPrice(price, { currency, locale: priceLocale })}`
+                  : `Prix : ${formatPrice(price, { currency, locale: priceLocale })}`
               }
             >
-              {formatPrice(price, { currency })}
+              {formatPrice(price, { currency, locale: priceLocale })}
             </span>
             {typeof oldPrice === 'number' && oldPrice > price ? (
               <span className="text-base font-medium text-token-text/50 line-through">
-                {formatPrice(oldPrice, { currency })}
+                {formatPrice(oldPrice, { currency, locale: priceLocale })}
               </span>
             ) : null}
             {discount && amountSaved ? (
               <span className="ml-auto rounded-md bg-[hsl(var(--accent)/0.12)] px-2.5 py-1 text-[12px] font-bold text-[hsl(var(--accent))]">
-                {t.save} {formatPrice(amountSaved, { currency })} (−{discount}%)
+                {t.save} {formatPrice(amountSaved, { currency, locale: priceLocale })} (−{discount}%)
               </span>
             ) : null}
             {quantity > 1 ? (
               <span className="w-full text-[13px] text-token-text/70 sm:w-auto">
                 Total ({quantity}×)&nbsp;:{' '}
                 <span className="font-semibold text-[hsl(var(--text))]">
-                  {formatPrice(total, { currency })}
+                  {formatPrice(total, { currency, locale: priceLocale })}
                 </span>
               </span>
             ) : null}

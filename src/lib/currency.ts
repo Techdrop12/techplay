@@ -11,17 +11,15 @@ export type Currency = 'EUR' | 'GBP' | 'USD';
  */
 export function detectCurrency(localeOrSource?: string): Currency {
   try {
-    const source = (
-      localeOrSource ??
-      (typeof document !== 'undefined' ? document.documentElement?.lang : '') ??
-      (typeof navigator !== 'undefined' ? navigator.language : '') ??
-      ''
-    )
+    const source = String(localeOrSource ?? '')
       .trim()
       .toLowerCase();
 
+    // Sans argument explicite : pas d’heuristique document/navigateur (hydratation SSR/CSR).
+    if (!source) return 'EUR';
+
     if (source.includes('gb') || source.endsWith('-uk') || source === 'uk') return 'GBP';
-    if (source.includes('us') || source.startsWith('en')) return 'USD';
+    if (source.includes('us') || source === 'en-us' || /\ben[-_]us\b/.test(source)) return 'USD';
     return 'EUR';
   } catch {
     return 'EUR';

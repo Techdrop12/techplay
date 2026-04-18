@@ -12,8 +12,10 @@ import type { JWT } from 'next-auth/jwt';
 
 import { serverEnv } from '@/env.server';
 
-const ADMIN_EMAIL = serverEnv.ADMIN_EMAIL || 'admin@techplay.local';
-const ADMIN_HASH = serverEnv.ADMIN_PASSWORD_HASH;
+const ADMIN_EMAIL = (serverEnv.ADMIN_EMAIL || 'admin@techplay.local').trim().toLowerCase();
+const ADMIN_HASH = serverEnv.ADMIN_PASSWORD_HASH?.trim();
+/** Dev uniquement : si pas de hash bcrypt, mot de passe en clair (jamais en prod). */
+const ADMIN_PASSWORD_DEV = serverEnv.ADMIN_PASSWORD?.trim();
 const AUTH_SECRET = serverEnv.NEXTAUTH_SECRET || serverEnv.AUTH_SECRET || 'change-me';
 
 export type AppRole = 'admin' | 'ops' | 'support' | 'content' | 'read_only' | 'user';
@@ -68,6 +70,96 @@ function getUserRole(user: User | undefined): AppRole {
   return 'user';
 }
 
+/** Cookies `__Secure-*` + `secure: true` ne fonctionnent pas en http://localhost. */
+function shouldUseSecureAuthCookies(): boolean {
+  if (process.env.VERCEL === '1') return true;
+  const url = process.env.NEXTAUTH_URL || process.env.AUTH_URL || '';
+  return typeof url === 'string' && url.startsWith('https://');
+}
+
+const secureCookies = shouldUseSecureAuthCookies();
+
+async function authorizeAdminCredentials(
+  credentials: Record<'email' | 'password', string> | undefined,
+  req?: RequestLike
+): Promise<AppUser | null> {
+  const ip = getRequestIp(req);
+  if (!credentials?.email || !credentials?.password) return null;
+  if (throttled(`admin:${ip}`)) return null;
+
+  const email = credentials.email.trim().toLowerCase();
+  if (email !== ADMIN_EMAIL) return null;
+
+  let passwordOk = false;
+
+  if (ADMIN_HASH) {
+    passwordOk = await verifyPassword(credentials.password, ADMIN_HASH);
+  } else if (process.env.NODE_ENV !== 'production' && ADMIN_PASSWORD_DEV) {
+    passwordOk = credentials.password === ADMIN_PASSWORD_DEV;
+  } else {
+    return null;
+  }
+
+  if (!passwordOk) return null;
+
+  const sessionEmail =
+    (serverEnv.ADMIN_EMAIL && serverEnv.ADMIN_EMAIL.trim()) || 'admin@techplay.local';
+
+  return {
+    id: 'admin-1',
+    email: sessionEmail,
+    name: 'Admin',
+    role: 'admin',
+  };
+}
+
+async function authorizeCustomerCredentials(
+  credentials: Record<'email' | 'password', string> | undefined,
+  req?: RequestLike
+): Promise<AppUser | null> {
+  const ip = getRequestIp(req);
+  if (!credentials?.email || !credentials?.password) return null;
+  if (throttled(`cust:${ip}`)) return null;
+
+  const email = credentials.email.trim().toLowerCase();
+  if (!email) return null;
+  if (email === ADMIN_EMAIL) return null;
+
+  const mongoUri = serverEnv.MONGODB_URI?.trim();
+  if (!mongoUri) return null;
+
+  try {
+    const dbConnect = (await import('@/lib/dbConnect')).default;
+    const User = (await import('@/models/User')).default;
+    await dbConnect();
+    const doc = await User.findOne({ email }).select('+password').lean();
+    if (!doc) return null;
+
+    const rec = doc as {
+      password?: string;
+      email: string;
+      name?: string;
+      _id: { toString(): string };
+      isAdmin?: boolean;
+    };
+
+    if (!rec.password) return null;
+    if (rec.isAdmin) return null;
+
+    const ok = await verifyPassword(credentials.password, rec.password);
+    if (!ok) return null;
+
+    return {
+      id: rec._id.toString(),
+      email: rec.email,
+      name: rec.name ?? '',
+      role: 'user',
+    };
+  } catch {
+    return null;
+  }
+}
+
 export const authOptions: NextAuthOptions = {
   secret: AUTH_SECRET,
   session: {
@@ -80,52 +172,43 @@ export const authOptions: NextAuthOptions = {
 
   cookies: {
     sessionToken: {
-      name: '__Secure-next-auth.session-token',
+      name: secureCookies ? '__Secure-next-auth.session-token' : 'next-auth.session-token',
       options: {
         httpOnly: true,
         sameSite: 'lax',
         path: '/',
-        secure: true,
+        secure: secureCookies,
       },
     },
   },
 
   providers: [
     CredentialsProvider({
-      name: 'Email',
+      id: 'admin-credentials',
+      name: 'Administration',
       credentials: {
         email: { label: 'Email', type: 'text' },
         password: { label: 'Mot de passe', type: 'password' },
       },
       async authorize(credentials, req) {
-        const ip = getRequestIp(req as RequestLike);
-
-        if (!credentials?.email || !credentials?.password) return null;
-        if (throttled(ip)) return null;
-
-        const userRecord =
-          credentials.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() && ADMIN_HASH
-            ? {
-                id: 'admin-1',
-                email: ADMIN_EMAIL,
-                passwordHash: ADMIN_HASH,
-                role: 'admin' as const,
-              }
-            : null;
-
-        if (!userRecord) return null;
-
-        const ok = await verifyPassword(credentials.password, userRecord.passwordHash);
-        if (!ok) return null;
-
-        const user: AppUser = {
-          id: userRecord.id,
-          email: userRecord.email,
-          name: 'Admin',
-          role: userRecord.role,
-        };
-
-        return user;
+        return authorizeAdminCredentials(
+          credentials as Record<'email' | 'password', string> | undefined,
+          req as RequestLike
+        );
+      },
+    }),
+    CredentialsProvider({
+      id: 'customer-credentials',
+      name: 'Espace client',
+      credentials: {
+        email: { label: 'Email', type: 'text' },
+        password: { label: 'Mot de passe', type: 'password' },
+      },
+      async authorize(credentials, req) {
+        return authorizeCustomerCredentials(
+          credentials as Record<'email' | 'password', string> | undefined,
+          req as RequestLike
+        );
       },
     }),
   ],

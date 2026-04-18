@@ -20,9 +20,10 @@ const CURRENCY_FALLBACK_BY_LOCALE: Record<string, string> = {
   'fr-fr': 'EUR',
   'fr-be': 'EUR',
   'fr-ca': 'CAD',
-  en: 'USD',
+  /** Route `en` sans région : boutique EU (évite USD implicite / mismatch SSR). */
+  en: 'EUR',
+  'en-gb': 'EUR',
   'en-us': 'USD',
-  'en-gb': 'GBP',
   'en-ca': 'CAD',
   'en-au': 'AUD',
   de: 'EUR',
@@ -31,10 +32,20 @@ const CURRENCY_FALLBACK_BY_LOCALE: Record<string, string> = {
   it: 'EUR',
 };
 
+/** BCP-47 pour Intl à partir du segment de locale Next (ex. `useLocale()` → `fr` | `en`). */
+export function intlLocaleForStoreRoute(routeLocale: string): string {
+  const base = String(routeLocale || 'fr').split(/[-_]/)[0]?.toLowerCase() ?? 'fr';
+  return base === 'en' ? 'en-GB' : 'fr-FR';
+}
+
+/** Options stables SSR/CSR pour les prix catalogue (EUR + locale issue de la route). */
+export function storefrontPriceOpts(routeLocale: string): PriceOptions {
+  return { locale: intlLocaleForStoreRoute(routeLocale), currency: 'EUR' };
+}
+
 function resolveLocale(input?: string): string {
   if (input) return input;
-  if (typeof navigator !== 'undefined' && navigator.language) return navigator.language;
-  // côté serveur : par défaut FR
+  // Ne pas lire `navigator` : le HTML SSR et le premier rendu client doivent coïncider.
   return 'fr-FR';
 }
 

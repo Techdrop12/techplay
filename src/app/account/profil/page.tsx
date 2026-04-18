@@ -50,7 +50,7 @@ export default async function AccountProfilPage() {
         aria-labelledby="profil-form-heading"
       >
         <h2 id="profil-form-heading" className="sr-only">
-          Formulaire profil
+          {t('save_profile')}
         </h2>
         <AccountProfileForm defaultName={name} defaultEmail={email} />
       </section>

@@ -14,6 +14,7 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -77,11 +78,14 @@ interface HeroCarouselProps {
   onSlideChange?: (index: number, slide: Slide) => void;
 }
 
+/** Images par défaut (domaine déjà dans `next.config` → `images.unsplash.com`). Remplace par `/carousel/*.jpg` quand tu ajoutes les fichiers dans `public/`. */
 const DEFAULT_SLIDES: ReadonlyArray<Slide> = [
   {
     id: 1,
-    imageMobile: '/carousel/hero-1-mobile.jpg',
-    imageDesktop: '/carousel/hero-1-desktop.jpg',
+    imageMobile:
+      'https://images.unsplash.com/photo-1592840496694-26d035b17f98?auto=format&fit=crop&w=900&q=85',
+    imageDesktop:
+      'https://images.unsplash.com/photo-1592840496694-26d035b17f98?auto=format&fit=crop&w=1920&q=85',
     alt: 'Casques gaming — immersion totale',
     text: 'Casques Gaming — Immersion totale',
     ctaLabel: 'Découvrir',
@@ -90,8 +94,10 @@ const DEFAULT_SLIDES: ReadonlyArray<Slide> = [
   },
   {
     id: 2,
-    imageMobile: '/carousel/hero-2-mobile.jpg',
-    imageDesktop: '/carousel/hero-2-desktop.jpg',
+    imageMobile:
+      'https://images.unsplash.com/photo-1527814050087-3793815479db?auto=format&fit=crop&w=900&q=85',
+    imageDesktop:
+      'https://images.unsplash.com/photo-1527814050087-3793815479db?auto=format&fit=crop&w=1920&q=85',
     alt: 'Souris RGB — précision & style',
     text: 'Souris RGB — Précision & Style',
     ctaLabel: 'Explorer',
@@ -99,8 +105,10 @@ const DEFAULT_SLIDES: ReadonlyArray<Slide> = [
   },
   {
     id: 3,
-    imageMobile: '/carousel/hero-3-mobile.jpg',
-    imageDesktop: '/carousel/hero-3-desktop.jpg',
+    imageMobile:
+      'https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?auto=format&fit=crop&w=900&q=85',
+    imageDesktop:
+      'https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?auto=format&fit=crop&w=1920&q=85',
     alt: 'Claviers mécaniques — réactivité ultime',
     text: 'Claviers Mécaniques — Réactivité ultime',
     ctaLabel: 'Voir plus',
@@ -127,10 +135,14 @@ function pushDL(event: string, payload?: Record<string, unknown>) {
   }
 }
 
+const HERO_IMG_FALLBACK =
+  'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1920&q=85';
+
 function getImageSrc(slide?: Slide): { desktop: string; mobile: string } {
-  const desktop = slide?.imageDesktop || slide?.image || slide?.poster || '/og-image.jpg';
+  const desktop =
+    slide?.imageDesktop || slide?.image || slide?.poster || HERO_IMG_FALLBACK;
   const mobile =
-    slide?.imageMobile || slide?.imageDesktop || slide?.image || slide?.poster || '/og-image.jpg';
+    slide?.imageMobile || slide?.imageDesktop || slide?.image || slide?.poster || HERO_IMG_FALLBACK;
 
   return { desktop, mobile };
 }
@@ -162,6 +174,10 @@ export default function HeroCarousel({
   const [index, setIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [progress, setProgress] = useState(0);
+  /** Incrémenté dans useLayout sur changement de slide — évite de lister `index` + `next` dans l’effet RAF (identités instables → boucle infinie). */
+  const [slideEpoch, setSlideEpoch] = useState(0);
+  const progressRef = useRef(0);
+  progressRef.current = progress;
 
   const userPausedRef = useRef(false);
   const touchStartX = useRef<number | null>(null);
@@ -246,6 +262,8 @@ export default function HeroCarousel({
       return nextIndex;
     });
   }, [canNavigate, total]);
+  const nextRef = useRef(next);
+  nextRef.current = next;
 
   const prev = useCallback(() => {
     setIndex((currentIndex) => {
@@ -290,15 +308,17 @@ export default function HeroCarousel({
     [effectiveAutoplay]
   );
 
-  useEffect(() => {
+  // Synchronous reset before paint + epoch pour relancer l’autoplay sans dépendre de `index`/`next` dans l’effet RAF.
+  useLayoutEffect(() => {
     setProgress(0);
+    setSlideEpoch((e) => e + 1);
   }, [index]);
 
   useEffect(() => {
     if (!effectiveAutoplay || isPaused) return;
 
     let rafId = 0;
-    const start = performance.now() - (progress / 100) * intervalMs;
+    const start = performance.now() - (progressRef.current / 100) * intervalMs;
 
     const tick = (now: number) => {
       const elapsed = now - start;
@@ -306,7 +326,7 @@ export default function HeroCarousel({
 
       if (ratio >= 1) {
         setProgress(100);
-        next();
+        nextRef.current();
         return;
       }
 
@@ -316,7 +336,8 @@ export default function HeroCarousel({
 
     rafId = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(rafId);
-  }, [effectiveAutoplay, intervalMs, isPaused, next, progress]);
+    // Pas de `progress` (rafraîchi chaque frame), pas de `next`/`index` (identités ou scheduling instables).
+  }, [effectiveAutoplay, intervalMs, isPaused, slideEpoch]);
 
   useEffect(() => {
     if (!pauseWhenHidden) return;
@@ -461,8 +482,8 @@ export default function HeroCarousel({
     <section
       ref={containerRef}
       className={cn(
-        'relative w-full select-none overflow-hidden rounded-2xl bg-gradient-to-b from-black/92 via-black/85 to-black/94 shadow-[0_32px_96px_rgba(0,0,0,0.55)]',
-        'min-h-[340px] h-[65vh] sm:min-h-[420px] sm:h-[72vh] lg:h-[84vh] will-change-transform touch-pan-y',
+        'relative w-full select-none overflow-hidden rounded-2xl bg-black/90 shadow-[0_32px_96px_rgba(0,0,0,0.55)]',
+        'min-h-[240px] h-[48vh] sm:min-h-[380px] sm:h-[68vh] lg:h-[82vh] will-change-transform touch-pan-y',
         className
       )}
       role="region"
@@ -533,7 +554,7 @@ export default function HeroCarousel({
                 ease: 'easeInOut',
               },
             }}
-            className="pointer-events-none absolute inset-0 will-change-transform m-4 sm:m-6 lg:m-8"
+            className="pointer-events-none absolute inset-0 will-change-transform"
           >
             {/* Soft glow behind product/image area */}
             <div
@@ -574,13 +595,10 @@ export default function HeroCarousel({
                   priority={index === 0}
                   fetchPriority={index === 0 ? 'high' : 'auto'}
                   quality={85}
-                  className="object-contain object-bottom max-h-[85%] w-full sm:hidden"
+                  className="object-cover w-full sm:hidden"
                   placeholder="blur"
                   blurDataURL={BLUR_DATA_URL}
                   draggable={false}
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
                 />
                 <Image
                   src={desktopSrc}
@@ -590,13 +608,10 @@ export default function HeroCarousel({
                   priority={index === 0}
                   fetchPriority={index === 0 ? 'high' : 'auto'}
                   quality={88}
-                  className="hidden object-contain object-center sm:block"
+                  className="hidden object-cover sm:block"
                   placeholder="blur"
                   blurDataURL={BLUR_DATA_URL}
                   draggable={false}
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
                 />
               </>
             )}

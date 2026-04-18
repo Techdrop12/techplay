@@ -153,7 +153,7 @@ const nextConfig = {
 
   async redirects() {
     return [
-      { source: '/', destination: '/fr', permanent: false },
+      // "/" → "/fr" : géré par src/middleware.ts.
 
       { source: '/produit', destination: '/products', permanent: true },
       { source: '/produit/', destination: '/products', permanent: true },
@@ -174,6 +174,19 @@ const nextConfig = {
         destination: '/:locale/products/packs/:slug',
         permanent: true,
       },
+
+      // Non-locale routes now deleted — redirect to localized versions.
+      { source: '/products', destination: '/fr/products', permanent: true },
+      { source: '/products/:path*', destination: '/fr/products/:path*', permanent: true },
+      { source: '/search', destination: '/fr/search', permanent: true },
+      { source: '/success', destination: '/fr', permanent: false },
+
+      // Admin lives at /admin/* (not under [locale]); these fix mistaken /fr|/en prefixed URLs (404).
+      { source: '/fr/admin/:path*', destination: '/admin/:path*', permanent: false },
+      { source: '/en/admin/:path*', destination: '/admin/:path*', permanent: false },
+      // No app/admin/page.tsx — bare /admin would 404; send to dashboard (layout → login if needed).
+      { source: '/admin', destination: '/admin/dashboard', permanent: false },
+      { source: '/admin/', destination: '/admin/dashboard', permanent: false },
     ];
   },
 

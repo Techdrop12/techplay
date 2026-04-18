@@ -80,8 +80,8 @@
   --container-max: 1320px;
   --container-narrow: 760px;
   --header-offset: 4.5rem;
-  --section-gap: clamp(4.5rem, 10vw, 8rem);
-  --section-gap-sm: clamp(3rem, 6vw, 5rem);
+  --section-gap: clamp(2.5rem, 5vw, 4rem);
+  --section-gap-sm: clamp(1.5rem, 3vw, 2.5rem);
   --space-card: clamp(1.25rem, 2.5vw, 1.75rem);
   --space-section-inline: clamp(1.25rem, 5vw, 2.5rem);
   /* Content rhythm: space after section heading, between stacked blocks */

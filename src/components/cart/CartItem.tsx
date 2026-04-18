@@ -4,13 +4,13 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import Link from '@/components/LocalizedLink';
 import { useCart } from '@/hooks/useCart';
 import { safeProductImageUrl } from '@/lib/safeProductImage';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, storefrontPriceOpts } from '@/lib/utils';
 
 interface CartItemProps {
   item: {
@@ -30,6 +30,8 @@ const clamp = (n: number) => Math.max(MIN_QTY, Math.min(MAX_QTY, Math.trunc(n ||
 
 export default function CartItem({ item }: CartItemProps) {
   const t = useTranslations('cart');
+  const routeLocale = useLocale();
+  const priceFmt = useMemo(() => storefrontPriceOpts(routeLocale), [routeLocale]);
   const prefersReduced = useReducedMotion();
   const { removeFromCart, increment, decrement, updateQuantity } = useCart();
 
@@ -107,7 +109,7 @@ export default function CartItem({ item }: CartItemProps) {
           {item.title}
         </Link>
         <p className="text-[12px] text-token-text/60">
-          {formatPrice(item.price)}/{t('unit_label')}
+          {formatPrice(item.price, priceFmt)}/{t('unit_label')}
         </p>
         <div className="inline-flex items-center gap-0 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/80 px-0.5 py-1 sm:px-1 sm:py-0.5">
           <button
@@ -146,9 +148,9 @@ export default function CartItem({ item }: CartItemProps) {
       <div className="flex shrink-0 flex-col items-end gap-1.5">
         <p
           className="text-base font-bold tabular-nums text-[hsl(var(--accent))]"
-          aria-label={`Total pour ${item.title} : ${formatPrice(lineTotal)}`}
+          aria-label={`Total pour ${item.title} : ${formatPrice(lineTotal, priceFmt)}`}
         >
-          {formatPrice(lineTotal)}
+          {formatPrice(lineTotal, priceFmt)}
         </p>
         <button
           type="button"

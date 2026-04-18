@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
@@ -13,7 +13,7 @@ import { getErrorMessageWithFallback } from '@/lib/errors';
 import { event as gaEvent, pushDataLayer, trackAddShippingInfo } from '@/lib/ga';
 import { error as logError } from '@/lib/logger';
 import { pixelInitiateCheckout } from '@/lib/meta-pixel';
-import { cn, formatPrice } from '@/lib/utils';
+import { cn, formatPrice, intlLocaleForStoreRoute } from '@/lib/utils';
 
 type FormErrors = {
   email?: string;
@@ -108,6 +108,11 @@ function IconCard({ size = 18, className = '' }: { size?: number; className?: st
 
 export default function CheckoutForm() {
   const t = useTranslations('checkout');
+  const routeLocale = useLocale();
+  const checkoutPriceLocale = useMemo(
+    () => intlLocaleForStoreRoute(routeLocale),
+    [routeLocale]
+  );
   const { cart } = useCart();
 
   const [email, setEmail] = useState('');
@@ -546,7 +551,7 @@ export default function CheckoutForm() {
           <span>
             {loading
               ? t('redirecting_btn')
-              : t('pay_btn') + ' ' + formatPrice(subtotal, { currency })}
+              : t('pay_btn') + ' ' + formatPrice(subtotal, { currency, locale: checkoutPriceLocale })}
           </span>
         </button>
 

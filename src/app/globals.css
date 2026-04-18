@@ -1134,6 +1134,28 @@
   }
 }
 
+/* Transitions entre routes (CSS uniquement — pas de Framer sur le shell = pas d’hydratation) */
+@keyframes tp-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tp-page-transition {
+  animation: tp-page-enter 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tp-page-transition {
+    animation: none;
+  }
+}
+
 /* fadeInUp et slideUpStagger sont définis dans design-tokens.css */
 
 /* ===================== Impression ===================== */
@@ -1169,5 +1191,40 @@
     content: ' (' attr(href) ')';
     font-size: 0.85em;
     color: #555;
+  }
+}
+
+/* ===================== Cascade-layer override bridge =====================
+   Unlayered CSS beats ALL @layer rules (CSS Cascade §3.1).
+   Required because @layer components font-size overrides and btn backgrounds
+   fail to win over @layer base in the Turbopack/Vercel production build.
+   ======================================================================= */
+
+/* btn-primary/premium guaranteed background regardless of forms plugin reset */
+.btn-primary {
+  background-color: hsl(var(--accent));
+  color: #fff;
+}
+.btn-premium {
+  color: #fff;
+}
+
+/* heading-subsection: force smaller size on h2/h3 card headings */
+h2.heading-subsection,
+h3.heading-subsection {
+  font-size: var(--step-2);
+}
+@media (min-width: 640px) {
+  h2.heading-subsection,
+  h3.heading-subsection {
+    font-size: var(--step-3);
+  }
+}
+
+/* Mobile: tighter hero carousel */
+@media (max-width: 639px) {
+  .hero-carousel-mobile-compact {
+    min-height: 220px;
+    height: 42vh;
   }
 }

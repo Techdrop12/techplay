@@ -2,7 +2,7 @@
 // Utilitaire central : formatage (prix, date), cn, round2, clamp.
 // Préférer importer depuis @/lib/utils pour un point d’entrée unique.
 
-export { formatPrice } from './formatPrice';
+export { formatPrice, intlLocaleForStoreRoute, storefrontPriceOpts } from './formatPrice';
 export { formatDate, formatDateTime, formatRelative, timeAgo, toDate } from './formatDate';
 
 /** Fusion de classes robuste (strings, objets, tableaux) + déduplication */

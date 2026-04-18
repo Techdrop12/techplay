@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 
@@ -11,7 +11,7 @@ import type { Pack } from '@/types/product';
 import Link from '@/components/LocalizedLink';
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing';
 import { safeProductImageUrl } from '@/lib/safeProductImage';
-import { cn, formatPrice } from '@/lib/utils';
+import { cn, formatPrice, storefrontPriceOpts } from '@/lib/utils';
 
 interface Props {
   packs: Pack[];
@@ -209,6 +209,8 @@ export default function PacksSection({
 }: Props) {
   const pathname = usePathname() || '/';
   const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr';
+  const routeLocale = useLocale();
+  const priceFmt = useMemo(() => storefrontPriceOpts(routeLocale), [routeLocale]);
   const tCommon = useTranslations('common');
 
   const t = useMemo(() => {
@@ -395,9 +397,9 @@ export default function PacksSection({
               <DuotoneGift size={40} />
             </span>
           </div>
-          <h3 className="mt-6 text-xl font-bold tracking-tight text-[hsl(var(--text))] sm:text-2xl">
+          <p className="mt-6 text-[18px] font-bold tracking-tight text-[hsl(var(--text))] sm:text-[20px]">
             {title}
-          </h3>
+          </p>
           <p className="mt-3 text-[15px] leading-relaxed text-[hsl(var(--text))]/70">
             {description}
           </p>
@@ -692,11 +694,11 @@ export default function PacksSection({
                         <div className="flex flex-wrap items-baseline gap-2">
                           {sumBefore > packPrice && (
                             <span className="text-sm font-medium text-[hsl(var(--text))]/50 line-through">
-                              {formatPrice(sumBefore)}
+                              {formatPrice(sumBefore, priceFmt)}
                             </span>
                           )}
                           <span className="text-xl font-extrabold tabular-nums tracking-tight text-[hsl(var(--accent))] sm:text-2xl">
-                            {formatPrice(packPrice)}
+                            {formatPrice(packPrice, priceFmt)}
                           </span>
                         </div>
 

@@ -67,9 +67,9 @@ export default async function ContactPage() {
           className="overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-sm"
           aria-labelledby="contact-subject-heading"
         >
-          <h2 id="contact-subject-heading" className="heading-subsection">
+          <p id="contact-subject-heading" className="text-[17px] font-semibold leading-snug text-[hsl(var(--text))]">
             {t('subject_heading')}
-          </h2>
+          </p>
           <p className="mt-2 text-[14px] text-token-text/75">{t('subject_intro')}</p>
           <ul className="mt-4 flex flex-wrap gap-3" role="list">
             {MAILTO_SUBJECT_KEYS.map(({ labelKey, subject }) => (
@@ -103,13 +103,13 @@ export default async function ContactPage() {
           className="overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] card-padding shadow-sm"
           aria-labelledby="contact-email-heading"
         >
-          <h2 id="contact-email-heading" className="text-base font-semibold text-[hsl(var(--text))]">
+          <p id="contact-email-heading" className="text-[17px] font-semibold leading-snug text-[hsl(var(--text))]">
             {t('email_heading')}
-          </h2>
+          </p>
           <p className="mt-2 text-[13px] text-token-text/75">{t('email_intro')}</p>
           <a
             href={`mailto:${SUPPORT_EMAIL}`}
-            className="btn-primary mt-3 inline-flex w-fit items-center gap-2 rounded-lg px-4 py-2 text-[13px] font-semibold shadow-sm"
+            className="btn-primary mt-3 inline-flex w-fit items-center gap-2 rounded-lg bg-[hsl(var(--accent))] px-4 py-2 text-[13px] font-semibold text-white shadow-sm transition hover:opacity-90"
           >
             <svg
               width="18"
@@ -133,12 +133,12 @@ export default async function ContactPage() {
             className="flex min-h-0 flex-col rounded-[var(--radius-lg)] border border-[hsl(var(--border))]/75 bg-[hsl(var(--surface))]/82 px-3.5 py-3.5 sm:px-4 sm:py-4"
             aria-labelledby="contact-phone-heading"
           >
-            <h2
+            <p
               id="contact-phone-heading"
-              className="contact-card-heading text-token-text/70"
+              className="text-[10px] font-semibold uppercase tracking-[0.1em] text-token-text/60"
             >
               {t('phone_heading')}
-            </h2>
+            </p>
             <a
               href={`tel:${SUPPORT_PHONE.replace(/\s+/g, '')}`}
               className="mt-1.5 inline-flex w-fit max-w-full items-center gap-1.5 text-[12px] font-semibold text-[hsl(var(--accent))] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 rounded break-all"
@@ -155,12 +155,12 @@ export default async function ContactPage() {
             className="flex min-h-0 flex-col rounded-[var(--radius-lg)] border border-[hsl(var(--border))]/75 bg-[hsl(var(--surface))]/82 px-3.5 py-3.5 sm:px-4 sm:py-4"
             aria-labelledby="contact-address-heading"
           >
-            <h2
+            <p
               id="contact-address-heading"
-              className="contact-card-heading text-token-text/70"
+              className="text-[10px] font-semibold uppercase tracking-[0.1em] text-token-text/60"
             >
               {t('address_heading')}
-            </h2>
+            </p>
             <address className="mt-1.5 min-w-0 flex-1 break-words not-italic text-[11px] leading-relaxed text-token-text/75">
               {ADDRESS.street}
               <br />
@@ -174,12 +174,12 @@ export default async function ContactPage() {
             className="flex min-h-0 flex-col rounded-[var(--radius-lg)] border border-[hsl(var(--border))]/75 bg-[hsl(var(--surface))]/82 px-3.5 py-3.5 sm:px-4 sm:py-4"
             aria-labelledby="contact-hours-heading"
           >
-            <h2
+            <p
               id="contact-hours-heading"
-              className="contact-card-heading text-token-text/70"
+              className="text-[10px] font-semibold uppercase tracking-[0.1em] text-token-text/60"
             >
               {t('hours_heading')}
-            </h2>
+            </p>
             <dl className="mt-1.5 min-w-0 flex-1 space-y-1.5 text-[11px] text-token-text/78">
               {HOURS_KEYS.map(({ joursKey, heuresKey }) => (
                 <div key={joursKey} className="flex min-w-0 justify-between gap-2">
@@ -266,9 +266,9 @@ export default async function ContactPage() {
         </div>
 
         <section className="overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))]/80 bg-[hsl(var(--surface))]/40 px-5 py-5 sm:px-6">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-token-text/60">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-token-text/60">
             {t('waiting_heading')}
-          </h2>
+          </p>
           <p className="mt-2 text-[14px] text-token-text/75">
             {t('waiting_intro')}{' '}
             <Link

@@ -1,25 +1,21 @@
 'use client';
 
-import { AnimatePresence, motion } from 'framer-motion';
-
+import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 
+/**
+ * Variante « UI » : même comportement que {@link RouteViewShell} — pas de
+ * `window` dans le rendu (hydratation sûre).
+ */
 interface PageTransitionProps {
   children?: ReactNode;
 }
 
 export default function PageTransition({ children }: PageTransitionProps) {
+  const pathname = usePathname();
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={typeof window !== 'undefined' ? window.location.pathname : 'page'}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
-        transition={{ duration: 0.25 }}
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
+    <div key={pathname} className="tp-page-transition min-h-0 w-full">
+      {children}
+    </div>
   );
 }

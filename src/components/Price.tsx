@@ -4,8 +4,9 @@
 import * as React from 'react';
 
 import type { HTMLAttributes, ReactNode } from 'react';
+import { useLocale } from 'next-intl';
 
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, intlLocaleForStoreRoute } from '@/lib/utils';
 
 type Numeric = number | string;
 
@@ -63,12 +64,13 @@ export default function Price({
   microdata = false,
   ...rest
 }: PriceProps) {
+  const routeLocale = useLocale();
   const numeric = toNumber(amount);
   if (numeric === null) {
     // Fallback robuste si montant invalide
     return (
       <span
-        className={`inline-flex items-baseline text-sm text-muted-foreground ${className}`}
+        className={`inline-flex items-baseline text-sm text-token-text/60 ${className}`}
         aria-label={ariaLabel ?? 'Prix indisponible'}
         {...rest}
       >
@@ -78,10 +80,11 @@ export default function Price({
   }
 
   const origNumber = toNumber(original);
+  const effectiveLocale = locale ?? intlLocaleForStoreRoute(routeLocale);
 
   // Formatage unifié via lib/formatPrice (SSR/CSR-safe + cache Intl)
   const formatted = formatPrice(numeric, {
-    locale,
+    locale: effectiveLocale,
     currency,
     compact,
     minimumFractionDigits,
@@ -91,7 +94,7 @@ export default function Price({
   const formattedOriginal =
     origNumber !== null
       ? formatPrice(origNumber, {
-          locale,
+          locale: effectiveLocale,
           currency,
           compact,
           minimumFractionDigits,

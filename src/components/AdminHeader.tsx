@@ -4,7 +4,7 @@ import { ChevronRight, LogOut, Menu, PanelLeft, Search } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useAdminLayout } from '@/components/AdminShell';
 
@@ -27,7 +27,19 @@ export default function AdminHeader() {
   const { data: session } = useSession();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const { sidebarCollapsed, toggleSidebar } = useAdminLayout();
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [menuOpen]);
 
   const userName = session?.user?.name || 'Admin';
   const userEmail = session?.user?.email || '';
@@ -122,7 +134,7 @@ export default function AdminHeader() {
 
       {/* Mobile dropdown */}
       {menuOpen && (
-        <div className="absolute top-[calc(100%+4px)] right-4 w-52 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] shadow-[var(--shadow-md)] p-3 z-50 sm:hidden">
+        <div ref={menuRef} className="absolute top-[calc(100%+4px)] right-4 w-52 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] shadow-[var(--shadow-md)] p-3 z-50 sm:hidden">
           <div className="flex items-center gap-2 mb-3 pb-2 border-b border-[hsl(var(--border))]">
             <UserAvatar name={userName} />
             <div className="min-w-0">

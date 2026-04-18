@@ -283,7 +283,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           {CatIcon && <CatIcon className="opacity-90" />}
           {displayCategory}
         </h1>
-        <p className="mt-3 max-w-2xl mx-auto text-lg text-muted-foreground">
+        <p className="mt-3 max-w-2xl mx-auto text-lg text-token-text/60">
           Découvrez notre sélection dans la catégorie « {displayCategory} ».
         </p>
       </div>

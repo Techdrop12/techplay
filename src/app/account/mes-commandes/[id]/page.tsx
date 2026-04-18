@@ -59,7 +59,7 @@ export default async function OrderDetailPage({ params }: Props) {
         <Link
           href="/account"
           className="text-[13px] font-medium text-token-text/70 transition hover:text-[hsl(var(--accent))] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-          aria-label="Retour à l’espace client"
+          aria-label={t('back_to_account')}
         >
           {t('back_to_account')}
         </Link>
