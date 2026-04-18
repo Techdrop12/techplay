@@ -61,7 +61,7 @@ export default function AdminStatsBlock() {
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-token-text/60">
             {t('stats_eyebrow')}
           </p>
-          <h2 className="text-sm font-semibold text-[hsl(var(--text))]">{t('stats_title')}</h2>
+          <p className="text-sm font-semibold text-[hsl(var(--text))]">{t('stats_title')}</p>
         </div>
         <div
           role="group"

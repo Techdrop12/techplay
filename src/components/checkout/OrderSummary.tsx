@@ -53,12 +53,12 @@ export default function OrderSummary({
       aria-labelledby="order-summary-title"
       aria-label={t('summary_aria')}
     >
-      <h2
+      <p
         id="order-summary-title"
         className="text-base font-semibold tracking-tight text-[hsl(var(--text))] border-b border-[hsl(var(--border))] pb-3 mb-4"
       >
         {t('summary_title')}
-      </h2>
+      </p>
 
       {showBreakdown && (
         <dl className="space-y-2 text-[13px] text-token-text/80 mb-4">

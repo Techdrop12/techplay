@@ -182,9 +182,9 @@ export default function BundleBuilder({ products }: BundleBuilderProps) {
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--accent))]">
           Build your perfect setup
         </p>
-        <h2 className="text-lg font-bold leading-snug text-[hsl(var(--text))] sm:text-xl">
+        <p className="text-lg font-bold leading-snug text-[hsl(var(--text))] sm:text-xl">
           Compose ton propre bundle
-        </h2>
+        </p>
         <p className="text-[13px] text-token-text/75">
           Crée ton setup sur mesure en combinant souris, clavier et accessoire, et{' '}
           <span className="font-semibold text-[hsl(var(--accent))]">

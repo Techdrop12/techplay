@@ -88,17 +88,17 @@ export default async function OrderDetailPage({ params }: Props) {
         aria-label={t('order_summary_aria')}
       >
         <div>
-          <h2 className="text-[12px] font-semibold uppercase tracking-wide text-token-text/60">
+          <p className="text-[12px] font-semibold uppercase tracking-wide text-token-text/60">
             {tOrders('status')}
-          </h2>
+          </p>
           <p className="mt-1 text-[15px] font-medium">{status}</p>
         </div>
 
         {items.length > 0 && (
           <div>
-            <h2 className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-token-text/60">
+            <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-token-text/60">
               {tOrders('articles_heading')}
-            </h2>
+            </p>
             <ul className="divide-y divide-[hsl(var(--border))]" role="list">
               {items.map(
                 (
@@ -120,17 +120,17 @@ export default async function OrderDetailPage({ params }: Props) {
         )}
 
         <div>
-          <h2 className="text-[12px] font-semibold uppercase tracking-wide text-token-text/60">
+          <p className="text-[12px] font-semibold uppercase tracking-wide text-token-text/60">
             {tOrders('delivery_address_heading')}
-          </h2>
+          </p>
           <p className="mt-1 whitespace-pre-line text-[15px] text-token-text/85">{address}</p>
         </div>
 
         {(trackingNumber || shippingProvider) && (
           <div>
-            <h2 className="text-[12px] font-semibold uppercase tracking-wide text-token-text/60">
+            <p className="text-[12px] font-semibold uppercase tracking-wide text-token-text/60">
               {tOrders('tracking_heading')}
-            </h2>
+            </p>
             <p className="mt-1">
               {shippingProvider && <span className="font-medium">{shippingProvider}</span>}
               {shippingProvider && trackingNumber && ' · '}

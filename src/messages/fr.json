@@ -23,7 +23,7 @@
     "login_title": "Connexion",
     "login_description": "Connectez-vous à votre compte TechPlay pour accéder à votre espace et à vos commandes.",
     "commande_title": "Commande",
-    "commande_description": "Finalisez votre commande en toute sécurité. Paiement Stripe, livraison 48–72 h.",
+    "commande_description": "Finalisez votre commande en toute sécurité. Paiement Stripe, livraison internationale suivie.",
     "account_title": "Espace client – TechPlay",
     "account_description": "Accédez à vos commandes, suivez vos livraisons et gérez votre compte TechPlay.",
     "search_title": "Recherche – TechPlay",
@@ -568,8 +568,9 @@
   "home": {
     "title": "Accueil",
     "description": "Découvrez les meilleurs gadgets high-tech et accessoires livrés chez vous.",
-    "trust_fast_delivery": "Livraison rapide",
-    "trust_warranty": "Garantie 2 ans",
+    "trust_fast_delivery": "Livraison internationale",
+    "trust_warranty": "Support client",
+    "trust_returns": "Retours 30 jours",
     "trust_secure": "Paiement sécurisé",
     "categories": "Catégories",
     "all": "Tous",
@@ -588,8 +589,8 @@
     "products_section_title": "Notre sélection pour vous",
     "products_section_subtitle": "Parcourez les produits TechPlay les plus populaires du moment.",
     "reassurance_payment": "Paiement sécurisé (Stripe, Visa, Mastercard, PayPal)",
-    "reassurance_delivery": "Livraison 48–72 h depuis la France",
-    "reassurance_support": "Support client réactif, réponse sous 24–48 h"
+    "reassurance_delivery": "Livraison internationale suivie",
+    "reassurance_support": "Support client réactif, réponse rapide"
   },
   "search": {
     "title": "Recherche",
@@ -830,8 +831,8 @@
   "trust_badges": {
     "payment_secure": "Paiement sécurisé",
     "payment_secure_sr": "Paiement sécurisé par Stripe, chiffrement SSL",
-    "delivery_48_72": "Livraison 48–72 h",
-    "delivery_48_72_sr": "Livraison en 48 à 72 h ouvrées",
+    "delivery_48_72": "Livraison internationale",
+    "delivery_48_72_sr": "Livraison internationale suivie",
     "support": "Support réactif",
     "support_sr": "Équipe support joignable pour toute question",
     "returns_30": "Retours 30 jours",
@@ -851,7 +852,7 @@
     "title": "Commande validée",
     "thank_you": "Merci pour votre commande",
     "email_sent": "Un email de confirmation a été envoyé à l'adresse indiquée.",
-    "delivery_info": "Livraison sous 48–72 h · Suivi colis par email",
+    "delivery_info": "Livraison internationale · Suivi colis par email",
     "demo_mode": "Mode démo : aucune transaction réelle.",
     "reference": "Référence :",
     "session_unspecified": "Session non spécifiée.",

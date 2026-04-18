@@ -108,9 +108,9 @@ export default function CartList({
       <span ref={srRef} className="sr-only" role="status" aria-live="polite" />
 
       <div className="mb-4 flex items-center justify-between border-b border-[hsl(var(--border))] pb-3">
-        <h2 className="text-base font-semibold tracking-tight text-[hsl(var(--text))]">
+        <p className="text-base font-semibold tracking-tight text-[hsl(var(--text))]">
           {t('items_heading')}
-        </h2>
+        </p>
         {showControls && (
           <button
             type="button"

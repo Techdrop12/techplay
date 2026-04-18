@@ -190,7 +190,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           payments: 'Payments:',
           returns: 'Free 30-day returns',
           secured: 'Secure payment',
-          shipping: 'Ships in 24h',
+          shipping: 'International shipping',
           deliveryReturns: 'Delivery & returns',
           specs: 'Specifications',
           detailedSpecs: 'Detailed specifications available on the product sheet.',
@@ -224,7 +224,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
           payments: 'Paiements :',
           returns: 'Retours gratuits 30 jours',
           secured: 'Paiement sécurisé',
-          shipping: 'Expédition sous 24h',
+          shipping: 'Expédition internationale',
           deliveryReturns: 'Livraison & retours',
           specs: 'Spécifications',
           detailedSpecs: 'Caractéristiques détaillées disponibles sur la fiche.',
@@ -963,8 +963,8 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
             <ul className="mt-2 list-disc space-y-1 pl-5 text-[13px] text-token-text/70">
               <li>
                 {safeLocale === 'en'
-                  ? 'Delivery within 48–72h in mainland France'
-                  : 'Livraison 48–72h en France métropolitaine'}
+                  ? 'International tracked delivery'
+                  : 'Livraison internationale suivie'}
               </li>
               <li>
                 {safeLocale === 'en'

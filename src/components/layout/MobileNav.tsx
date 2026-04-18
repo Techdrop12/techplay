@@ -19,7 +19,7 @@ const STR = {
   fr: {
     nav: [
       { href: '/products', label: 'Tous les produits' },
-      { href: '/products/packs', label: 'Packs recommandés' },
+      { href: '/#builder', label: 'Créer un bundle' },
       { href: '/categorie', label: 'Catégories' },
       { href: '/wishlist', label: 'Wishlist' },
       { href: '/blog', label: 'Blog' },
@@ -58,7 +58,7 @@ const STR = {
   en: {
     nav: [
       { href: '/products', label: 'All products' },
-      { href: '/products/packs', label: 'Packs' },
+      { href: '/#builder', label: 'Build a bundle' },
       { href: '/categorie', label: 'Categories' },
       { href: '/wishlist', label: 'Wishlist' },
       { href: '/blog', label: 'Blog' },

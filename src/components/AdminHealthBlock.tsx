@@ -115,9 +115,9 @@ export default function AdminHealthBlock() {
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-token-text/60">
             {t('health_title_eyebrow')}
           </p>
-          <h2 className="text-sm font-semibold text-[hsl(var(--text))]">
+          <p className="text-sm font-semibold text-[hsl(var(--text))]">
             {t('health_title')}
-          </h2>
+          </p>
         </div>
         {data.generatedAt && (
           <p className="text-[11px] text-token-text/50">

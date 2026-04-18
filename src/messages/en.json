@@ -23,7 +23,7 @@
     "login_title": "Log in",
     "login_description": "Sign in to your TechPlay account to access your space and orders.",
     "commande_title": "Checkout",
-    "commande_description": "Complete your order securely. Stripe payment, 48–72 h delivery.",
+    "commande_description": "Complete your order securely. Stripe payment, international tracked delivery.",
     "account_title": "My account – TechPlay",
     "account_description": "View your orders, track deliveries and manage your TechPlay account.",
     "search_title": "Search – TechPlay",
@@ -568,8 +568,9 @@
   "home": {
     "title": "Home",
     "description": "Discover the best high-tech gadgets and accessories delivered to your door.",
-    "trust_fast_delivery": "Fast delivery",
-    "trust_warranty": "2-year warranty",
+    "trust_fast_delivery": "International delivery",
+    "trust_warranty": "Customer support",
+    "trust_returns": "30-day returns",
     "trust_secure": "Secure payment",
     "categories": "Categories",
     "all": "All",
@@ -588,8 +589,8 @@
     "products_section_title": "Our picks for you",
     "products_section_subtitle": "Browse TechPlay’s most popular products right now.",
     "reassurance_payment": "Secure payment (Stripe, Visa, Mastercard, PayPal)",
-    "reassurance_delivery": "48–72 h delivery from France",
-    "reassurance_support": "Responsive support, replies within 24–48 h"
+    "reassurance_delivery": "International tracked delivery",
+    "reassurance_support": "Responsive support, fast replies"
   },
   "search": {
     "title": "Search",
@@ -812,8 +813,8 @@
   "trust_badges": {
     "payment_secure": "Secure payment",
     "payment_secure_sr": "Secure payment via Stripe, SSL encryption",
-    "delivery_48_72": "Delivery 48–72 h",
-    "delivery_48_72_sr": "Delivery within 48 to 72 business hours",
+    "delivery_48_72": "International delivery",
+    "delivery_48_72_sr": "International tracked delivery",
     "support": "Responsive support",
     "support_sr": "Support team available for any questions",
     "returns_30": "30-day returns",
@@ -833,7 +834,7 @@
     "title": "Order confirmed",
     "thank_you": "Thank you for your order",
     "email_sent": "A confirmation email has been sent to the address provided.",
-    "delivery_info": "Delivery within 48–72 h · Tracking by email",
+    "delivery_info": "International delivery · Tracking by email",
     "demo_mode": "Demo mode: no real transaction.",
     "reference": "Reference:",
     "session_unspecified": "Session not specified.",

@@ -78,14 +78,11 @@ interface HeroCarouselProps {
   onSlideChange?: (index: number, slide: Slide) => void;
 }
 
-/** Images par défaut (domaine déjà dans `next.config` → `images.unsplash.com`). Remplace par `/carousel/*.jpg` quand tu ajoutes les fichiers dans `public/`. */
 const DEFAULT_SLIDES: ReadonlyArray<Slide> = [
   {
     id: 1,
-    imageMobile:
-      'https://images.unsplash.com/photo-1592840496694-26d035b17f98?auto=format&fit=crop&w=900&q=85',
-    imageDesktop:
-      'https://images.unsplash.com/photo-1592840496694-26d035b17f98?auto=format&fit=crop&w=1920&q=85',
+    imageMobile: '/carousel/hero-1-mobile.jpg',
+    imageDesktop: '/carousel/hero-1-desktop.jpg',
     alt: 'Casques gaming — immersion totale',
     text: 'Casques Gaming — Immersion totale',
     ctaLabel: 'Découvrir',
@@ -94,10 +91,8 @@ const DEFAULT_SLIDES: ReadonlyArray<Slide> = [
   },
   {
     id: 2,
-    imageMobile:
-      'https://images.unsplash.com/photo-1527814050087-3793815479db?auto=format&fit=crop&w=900&q=85',
-    imageDesktop:
-      'https://images.unsplash.com/photo-1527814050087-3793815479db?auto=format&fit=crop&w=1920&q=85',
+    imageMobile: '/carousel/hero-2-mobile.jpg',
+    imageDesktop: '/carousel/hero-2-desktop.jpg',
     alt: 'Souris RGB — précision & style',
     text: 'Souris RGB — Précision & Style',
     ctaLabel: 'Explorer',
@@ -105,10 +100,8 @@ const DEFAULT_SLIDES: ReadonlyArray<Slide> = [
   },
   {
     id: 3,
-    imageMobile:
-      'https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?auto=format&fit=crop&w=900&q=85',
-    imageDesktop:
-      'https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?auto=format&fit=crop&w=1920&q=85',
+    imageMobile: '/carousel/hero-3-mobile.jpg',
+    imageDesktop: '/carousel/hero-3-desktop.jpg',
     alt: 'Claviers mécaniques — réactivité ultime',
     text: 'Claviers Mécaniques — Réactivité ultime',
     ctaLabel: 'Voir plus',
@@ -212,7 +205,7 @@ export default function HeroCarousel({
           noscriptProducts: 'View products',
           slideWord: 'Slide ',
           proofLine: 'Free delivery from €49 · Secure payment',
-          trustLine: 'Delivery 48–72h · 30-day free returns',
+          trustLine: 'International delivery · 30-day free returns',
         }
       : {
           mainLabel: 'Carrousel principal TechPlay',
@@ -234,7 +227,7 @@ export default function HeroCarousel({
           noscriptProducts: 'Voir les produits',
           slideWord: 'Diapositive ',
           proofLine: 'Livraison offerte dès 49€ · Paiement sécurisé',
-          trustLine: 'Livraison 48–72h · Retours gratuits 30 jours',
+          trustLine: 'Livraison internationale · Retours gratuits 30 jours',
         };
   }, [locale]);
 

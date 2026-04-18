@@ -20,7 +20,7 @@ const FALLBACK_FAQ_FR: FAQItem[] = [
   {
     _id: '1',
     question: 'Quels sont les délais de livraison ?',
-    answer: 'Livraison en 48 à 72 h ouvrées. Livraison offerte dès 49 € d’achat.',
+    answer: "Livraison internationale suivie. Livraison offerte dès 49 € d'achat.",
   },
   {
     _id: '2',
@@ -39,7 +39,7 @@ const FALLBACK_FAQ_EN: FAQItem[] = [
   {
     _id: '1',
     question: 'What are the delivery times?',
-    answer: 'Delivery within 48 to 72 business hours. Free shipping from €49.',
+    answer: 'International tracked delivery. Free shipping from €49.',
   },
   {
     _id: '2',

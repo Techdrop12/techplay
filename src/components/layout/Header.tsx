@@ -28,7 +28,7 @@ const STR = {
     nav: {
       categories: 'Catégories',
       products: 'Tous les produits',
-      packs: 'Packs recommandés',
+      packs: 'Créer un bundle',
       wishlist: 'Wishlist',
       blog: 'Blog',
       contact: 'Support & contact',
@@ -46,9 +46,9 @@ const STR = {
       'souris sans fil',
     ],
     selection: 'Sélection',
-    packsTitle: 'Packs recommandés',
-    packsDesc: 'Les meilleures combinaisons pour booster ton setup.',
-    viewPacks: 'Voir les packs',
+    packsTitle: 'Créer mon bundle',
+    packsDesc: 'Compose ton setup sur mesure et économise sur chaque combinaison.',
+    viewPacks: 'Créer un bundle',
     allProducts: 'Tous les produits',
     wishlistAria: (n: number) => (n > 0 ? `Voir la wishlist (${n})` : 'Voir la wishlist'),
     cartAria: (n: number) => (n > 0 ? `Voir le panier (${n})` : 'Voir le panier'),
@@ -68,7 +68,7 @@ const STR = {
     nav: {
       categories: 'Categories',
       products: 'All products',
-      packs: 'Packs',
+      packs: 'Build a bundle',
       wishlist: 'Wishlist',
       blog: 'Blog',
       contact: 'Support & contact',
@@ -86,9 +86,9 @@ const STR = {
       'wireless mouse',
     ],
     selection: 'Featured',
-    packsTitle: 'Recommended packs',
-    packsDesc: 'Best combos to boost your setup.',
-    viewPacks: 'View packs',
+    packsTitle: 'Build my bundle',
+    packsDesc: 'Compose your custom setup and save on every combination.',
+    viewPacks: 'Build a bundle',
     allProducts: 'All products',
     wishlistAria: (n: number) => (n > 0 ? `View wishlist (${n})` : 'View wishlist'),
     cartAria: (n: number) => (n > 0 ? `View cart (${n})` : 'View cart'),
@@ -547,11 +547,7 @@ export default function Header() {
                           <p className="mt-2 text-sm text-token-text/70">{t.packsDesc}</p>
                           <div className="mt-3 flex flex-wrap gap-2">
                             <Link
-                              href="/products/packs"
-                              onPointerEnter={() => smartPrefetchStart('/products/packs')}
-                              onPointerLeave={() => smartPrefetchCancel('/products/packs')}
-                              onFocus={() => smartPrefetchStart('/products/packs')}
-                              onBlur={() => smartPrefetchCancel('/products/packs')}
+                              href="/#builder"
                               role="menuitem"
                               className="inline-flex items-center rounded-lg bg-[hsl(var(--accent))] px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-[hsl(var(--accent)/.92)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
                             >

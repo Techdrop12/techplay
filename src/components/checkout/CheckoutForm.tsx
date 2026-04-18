@@ -406,12 +406,12 @@ export default function CheckoutForm() {
 
       {/* En-tête tunnel : étape + réassurance */}
       <div className="rounded-xl bg-[hsl(var(--surface-2))]/60 px-4 py-3">
-        <h2
+        <p
           id="checkout-form-title"
           className="text-lg font-bold tracking-tight text-[hsl(var(--text))]"
         >
           {t('coords_heading')}
-        </h2>
+        </p>
         <p className="mt-1 text-[13px] text-token-text/70">{t('coords_intro')}</p>
         <p className="mt-2 text-[12px] text-token-text/60" aria-hidden="true">
           {t('secure_note')}

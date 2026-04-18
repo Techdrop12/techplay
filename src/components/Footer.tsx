@@ -118,7 +118,7 @@ const T = {
     ] as NavGroup[],
     badges: {
       secure: 'Paiement sécurisé',
-      shipping: 'Livraison 48–72 h',
+      shipping: 'Livraison internationale',
       support: 'Support réactif',
     },
     badgesAria: 'Garanties',
@@ -191,7 +191,7 @@ const T = {
     ] as NavGroup[],
     badges: {
       secure: 'Secure payment',
-      shipping: '48–72h delivery',
+      shipping: 'International delivery',
       support: 'Quick support',
     },
     badgesAria: 'Our guarantees',

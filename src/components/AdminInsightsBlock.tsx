@@ -78,9 +78,9 @@ export default function AdminInsightsBlock() {
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-token-text/60">
               {t('insights_eyebrow')}
             </p>
-            <h2 className="text-sm font-semibold text-[hsl(var(--text))]">
+            <p className="text-sm font-semibold text-[hsl(var(--text))]">
               {t('insights_title')}
-            </h2>
+            </p>
           </div>
         </div>
       </header>
@@ -88,9 +88,9 @@ export default function AdminInsightsBlock() {
       <div className="grid gap-4 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1.2fr)_minmax(0,1fr)]">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-semibold text-token-text/80">
+            <p className="text-xs font-semibold text-token-text/80">
               {t('insights_top_products')}
-            </h3>
+            </p>
           </div>
           <ul className="space-y-1.5 text-xs">
             {topProducts.length === 0 ? (
@@ -125,9 +125,9 @@ export default function AdminInsightsBlock() {
         </div>
 
         <div className="space-y-2">
-          <h3 className="text-xs font-semibold text-token-text/80">
+          <p className="text-xs font-semibold text-token-text/80">
             {t('insights_weak_products')}
-          </h3>
+          </p>
           <ul className="space-y-1.5 text-xs">
             {weakProducts.length === 0 ? (
               <li className="text-token-text/60">{t('insights_weak_products_empty')}</li>
@@ -160,9 +160,9 @@ export default function AdminInsightsBlock() {
         </div>
 
         <div className="space-y-2">
-          <h3 className="text-xs font-semibold text-token-text/80">
+          <p className="text-xs font-semibold text-token-text/80">
             {t('insights_orders_customers')}
-          </h3>
+          </p>
           <div className="space-y-2 rounded-md bg-[hsl(var(--surface-2))] px-2 py-2 text-xs">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1">

@@ -8,7 +8,7 @@ const FAQ_FR: FAQEntry[] = [
     _id: '1',
     question: 'Quels sont les délais de livraison ?',
     answer:
-      'Livraison en 48 à 72 h ouvrées en France métropolitaine. Livraison offerte dès 49 € d’achat. Vous recevez un lien de suivi par email dès l’expédition.',
+      "Livraison internationale suivie. Livraison offerte dès 49 € d'achat. Vous recevez un lien de suivi par email dès l'expédition.",
   },
   {
     _id: '2',
@@ -32,7 +32,7 @@ const FAQ_FR: FAQEntry[] = [
     _id: '5',
     question: 'Quelle garantie sur les produits ?',
     answer:
-      'Nos produits bénéficient de la garantie légale de conformité (2 ans) et, selon les fabricants, d’une garantie constructeur. Consultez la fiche produit pour le détail.',
+      'Nos produits bénéficient de la garantie légale de conformité prévue par la loi. Pour toute question, contactez notre support.',
   },
   {
     _id: '6',
@@ -65,7 +65,7 @@ const FAQ_EN: FAQEntry[] = [
     _id: '1',
     question: 'What are the delivery times?',
     answer:
-      'Delivery within 48 to 72 business hours in mainland France. Free shipping from €49. You will receive a tracking link by email as soon as your order ships.',
+      'International tracked delivery. Free shipping from €49. You will receive a tracking link by email as soon as your order ships.',
   },
   {
     _id: '2',
@@ -89,7 +89,7 @@ const FAQ_EN: FAQEntry[] = [
     _id: '5',
     question: 'What warranty do products have?',
     answer:
-      'Our products come with the legal conformity warranty (2 years) and, depending on the manufacturer, a manufacturer warranty. See the product page for details.',
+      'Our products come with the legal conformity warranty required by law. For any questions, contact our support team.',
   },
   {
     _id: '6',

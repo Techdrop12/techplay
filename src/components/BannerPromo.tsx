@@ -50,7 +50,7 @@ const defaultPromos: Promo[] = [
     },
   },
   {
-    text: '🚚 Livraison rapide 48–72h sur tout TechPlay',
+    text: '🚚 Livraison internationale suivie sur tout TechPlay',
     url: '/categorie',
     bg: 'bg-gradient-to-r from-accent via-accent/90 to-brand',
   },

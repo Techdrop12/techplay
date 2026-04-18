@@ -17,8 +17,8 @@ import { event as gaEvent, mapProductToGaItem, trackViewCart } from '@/lib/ga';
 type CartProduct = Product & { quantity: number };
 
 const CART_REASSURANCE = {
-  fr: 'Livraison 48–72h · Paiement sécurisé · Retours gratuits 30 jours',
-  en: 'Delivery 48–72h · Secure payment · 30-day free returns',
+  fr: 'Livraison internationale · Paiement sécurisé · Retours gratuits 30 jours',
+  en: 'International delivery · Secure payment · 30-day free returns',
 } as const;
 
 export default function CartPageClient() {

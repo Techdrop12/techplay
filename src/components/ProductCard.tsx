@@ -275,7 +275,7 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
             ) : null}
 
             {outOfStock ? (
-              <div className="absolute inset-0 grid place-items-center bg-black/55 text-xs font-semibold uppercase tracking-wider text-white/90">
+              <div className="pointer-events-none absolute inset-0 grid place-items-center bg-black/55 text-xs font-semibold uppercase tracking-wider text-white/90">
                 {t('out_of_stock')}
               </div>
             ) : null}

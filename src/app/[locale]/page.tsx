@@ -2,21 +2,20 @@ import dynamic from 'next/dynamic';
 import { notFound } from 'next/navigation';
 import { Suspense, type CSSProperties } from 'react';
 
-import type { Pack, Product } from '@/types/product';
+import type { Product } from '@/types/product';
 import type { Metadata } from 'next';
 
 import BestProducts from '@/components/BestProducts';
 import ClientTrackingScript from '@/components/ClientTrackingScript';
 import FAQ from '@/components/FAQ';
 import Link from '@/components/LocalizedLink';
-import PacksSection from '@/components/PacksSection';
 import BundleBuilder from '@/components/BundleBuilder';
 import SectionHeader from '@/components/SectionHeader';
 import TrustBadges from '@/components/TrustBadges';
 import WhyChooseUsSection from '@/components/WhyChooseUsSection';
 import { getPosts } from '@/lib/blog';
 import { BRAND } from '@/lib/constants';
-import { getAllProducts, getBestProducts, getRecommendedPacks } from '@/lib/data';
+import { getAllProducts, getBestProducts } from '@/lib/data';
 import { localizePath } from '@/lib/i18n-routing';
 import { isLocale } from '@/lib/language';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
@@ -60,7 +59,7 @@ const STR = {
     heroSubtitle:
       'Sélection pointue de périphériques et packs gaming haut de gamme : performances stables, design soigné et expérience clé en main pour élever votre niveau de jeu.',
     heroPrimaryCta: 'Voir les produits',
-    heroSecondaryCta: 'Explorer les packs',
+    heroSecondaryCta: 'Créer mon bundle',
     catsKicker: 'Explorer',
     catsTitle: 'Catégories incontournables',
     catsSub: 'Des sélections ciblées pour trouver vite le bon setup.',
@@ -81,8 +80,8 @@ const STR = {
     ctaOffer: 'Offre du moment',
     ctaHeadline: 'Boostez votre setup en ',
     ctaSpan: 'un clic',
-    ctaText: 'Packs optimisés, meilleurs prix, livraison rapide et expérience premium.',
-    ctaPacks: 'Découvrir les packs',
+    ctaText: 'Bundles personnalisés, meilleurs prix et expérience premium.',
+    ctaPacks: 'Créer mon bundle',
     ctaProducts: 'Voir les produits',
     noscriptProducts: 'Voir les produits',
     productsSectionLabel: 'Sélection de produits populaires',
@@ -90,8 +89,8 @@ const STR = {
     whyKicker: 'Pourquoi nous',
     whyTitle: 'Une expérience pensée pour vous',
     whySub: "Livraison soignée, paiement sécurisé et équipe à l'écoute.",
-    why1Title: 'Livraison rapide & suivie',
-    why1Desc: "Colis expédiés sous 24–48 h, suivi jusqu'à chez vous.",
+    why1Title: 'Livraison internationale suivie',
+    why1Desc: "Livraison internationale suivie jusqu'à chez vous.",
     why2Title: 'Paiement 100 % sécurisé',
     why2Desc: 'CB, Apple Pay, Google Pay. Données protégées.',
     why3Title: 'Retours faciles',
@@ -115,7 +114,7 @@ const STR = {
     heroSubtitle:
       'Curated high-end gaming tech — headsets, mice, keyboards and complete bundles — engineered for consistent performance, refined aesthetics and tournament-ready setups.',
     heroPrimaryCta: 'View products',
-    heroSecondaryCta: 'Explore Packs',
+    heroSecondaryCta: 'Build my bundle',
     catsKicker: 'Explore',
     catsTitle: 'Must-have categories',
     catsSub: 'Curated selections to find the right setup faster.',
@@ -135,8 +134,8 @@ const STR = {
     ctaOffer: 'Deal of the moment',
     ctaHeadline: 'Boost your setup in ',
     ctaSpan: 'one click',
-    ctaText: 'Optimized bundles, better prices, fast delivery and a premium experience.',
-    ctaPacks: 'Discover bundles',
+    ctaText: 'Custom bundles, better prices and a premium experience.',
+    ctaPacks: 'Build my bundle',
     ctaProducts: 'View products',
     noscriptProducts: 'View products',
     productsSectionLabel: 'Popular products selection',
@@ -144,8 +143,8 @@ const STR = {
     whyKicker: 'Why choose us',
     whyTitle: 'An experience built around you',
     whySub: 'Careful shipping, secure payment and a team that listens.',
-    why1Title: 'Fast & tracked delivery',
-    why1Desc: 'Orders shipped within 24–48 h, tracked to your door.',
+    why1Title: 'International tracked delivery',
+    why1Desc: 'International tracked shipping, all the way to your door.',
     why2Title: '100 % secure payment',
     why2Desc: 'Card, Apple Pay, Google Pay. Your data is protected.',
     why3Title: 'Easy returns',
@@ -227,9 +226,9 @@ function SplitCTA({ locale }: { locale: HomeLocale }) {
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link
-              href="/products/packs"
+              href="#builder"
               className="btn btn-premium btn-lg inline-flex w-full items-center justify-center gap-2 rounded-full px-8 py-3.5 text-[var(--step-0)] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)] sm:w-auto"
-              data-gtm="home_cta_packs"
+              data-gtm="home_cta_bundle"
             >
               {t.ctaPacks}
             </Link>
@@ -265,17 +264,14 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
   setRequestLocale(locale);
   const t = STR[locale];
   const tHome = await getTranslations('home');
-  const [bestProductsResult, recommendedPacksResult, blogResult, allProductsResult] =
+  const [bestProductsResult, blogResult, allProductsResult] =
     await Promise.allSettled([
       getBestProducts(),
-      getRecommendedPacks(),
       getPosts({ limit: 3, sort: 'newest', publishedOnly: true }),
       getAllProducts(),
     ]);
   const bestProducts: Product[] =
     bestProductsResult.status === 'fulfilled' ? bestProductsResult.value : [];
-  const recommendedPacks: Pack[] =
-    recommendedPacksResult.status === 'fulfilled' ? recommendedPacksResult.value : [];
   const allProducts: Product[] =
     allProductsResult.status === 'fulfilled' ? allProductsResult.value : [];
   const blogData = blogResult.status === 'fulfilled' ? blogResult.value : null;
@@ -363,7 +359,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
                   {t.heroPrimaryCta}
                 </Link>
                 <Link
-                  href="/products/packs"
+                  href="#builder"
                   className="btn btn-ghost inline-flex w-full items-center justify-center gap-2 rounded-full border-2 border-[hsl(var(--border))] px-6 py-3 text-[14px] font-semibold text-token-text/90 hover:border-[hsl(var(--accent)/.3)] hover:bg-[hsl(var(--surface-2))] hover:text-[hsl(var(--text))] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.25)] sm:w-auto"
                   data-gtm="home_hero_secondary"
                 >
@@ -377,7 +373,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
                 className="!mt-5 !border-0 !bg-transparent !py-2 sm:!mt-8 sm:!py-4 [&_ul]:!max-w-none [&_ul]:grid-cols-1 [&_ul]:sm:grid-cols-3 [&_ul]:gap-2 sm:[&_ul]:gap-4"
                 badges={[
                   { icon: 'truck', label: tHome('trust_fast_delivery') },
-                  { icon: 'shield', label: tHome('trust_warranty') },
+                  { icon: 'shield', label: tHome('trust_returns') },
                   { icon: 'lock', label: tHome('trust_secure') },
                 ]}
               />
@@ -417,17 +413,6 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
             <SectionHeader kicker={t.bestKicker} title={t.bestTitle} sub={t.bestSub} />
             <div className="rhythm-content">
               <BestProducts products={bestProducts} showTitle={false} />
-            </div>
-          </section>
-          <section
-            id="packs"
-            aria-label={t.packsSectionLabel}
-            className="motion-section motion-section-delay-2"
-            style={lazySectionStyle600}
-          >
-            <SectionHeader kicker={t.packsKicker} title={t.packsTitle} sub={t.packsSub} />
-            <div className="rhythm-content overflow-hidden rounded-[var(--radius-2xl)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/50 shadow-sm">
-              <PacksSection packs={recommendedPacks} showHeader={false} />
             </div>
           </section>
           <WhyChooseUsSection
