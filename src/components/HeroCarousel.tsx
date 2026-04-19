@@ -3,7 +3,6 @@
 import {
   AnimatePresence,
   motion,
-  useReducedMotion,
   useScroll,
   useTransform,
   type MotionStyle,
@@ -14,7 +13,6 @@ import {
   useCallback,
   useEffect,
   useId,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -23,6 +21,8 @@ import {
   type SyntheticEvent,
   type TouchEventHandler,
 } from 'react';
+
+import { useCarousel } from '@/hooks/useCarousel';
 
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing';
 import { cn } from '@/lib/utils';
@@ -163,22 +163,35 @@ export default function HeroCarousel({
   const locale = getCurrentLocale(pathname);
 
   const total = Math.max(0, slides.length);
-  const canNavigate = total > 1;
-  const [index, setIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const [progress, setProgress] = useState(0);
-  /** Incrémenté dans useLayout sur changement de slide — évite de lister `index` + `next` dans l’effet RAF (identités instables → boucle infinie). */
-  const [slideEpoch, setSlideEpoch] = useState(0);
-  const progressRef = useRef(0);
-  progressRef.current = progress;
-
-  const userPausedRef = useRef(false);
   const touchStartX = useRef<number | null>(null);
-  const prefersReducedMotion = useReducedMotion();
   const srId = useId();
   const instructionsId = useId();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  const {
+    index,
+    progress,
+    isPaused,
+    isUserPaused,
+    prefersReducedMotion,
+    canNavigate,
+    next,
+    prev,
+    goTo,
+    pauseUser,
+    resumeUser,
+    autoPause,
+    autoResume,
+    runManualAction,
+  } = useCarousel({
+    total,
+    intervalMs,
+    autoplay,
+    pauseOnHover,
+    pauseWhenHidden,
+    containerRef,
+  });
 
   const effectiveAutoplay = autoplay && !prefersReducedMotion && canNavigate;
 
@@ -233,12 +246,6 @@ export default function HeroCarousel({
 
   const current = useMemo(() => slides[index], [slides, index]);
 
-  useEffect(() => {
-    if (index > Math.max(0, slides.length - 1)) {
-      setIndex(0);
-    }
-  }, [index, slides.length]);
-
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end start'],
@@ -248,140 +255,20 @@ export default function HeroCarousel({
   const parallaxStyle: MotionStyle | undefined =
     !prefersReducedMotion && parallaxPx > 0 ? { y } : undefined;
 
-  const next = useCallback(() => {
-    setIndex((currentIndex) => {
-      const nextIndex = canNavigate ? (currentIndex + 1) % total : 0;
-      pushDL('hero_next', { index: nextIndex });
-      return nextIndex;
-    });
-  }, [canNavigate, total]);
-  const nextRef = useRef(next);
-  nextRef.current = next;
-
-  const prev = useCallback(() => {
-    setIndex((currentIndex) => {
-      const prevIndex = canNavigate ? (currentIndex - 1 + total) % total : 0;
-      pushDL('hero_prev', { index: prevIndex });
-      return prevIndex;
-    });
-  }, [canNavigate, total]);
-
-  const pauseUser = useCallback(() => {
-    userPausedRef.current = true;
-    setIsPaused(true);
-    pushDL('hero_paused_user');
-  }, []);
-
-  const resumeUser = useCallback(() => {
-    userPausedRef.current = false;
-    setIsPaused(false);
-    pushDL('hero_resumed_user');
-  }, []);
-
-  const autoPause = useCallback(() => {
-    if (userPausedRef.current) return;
-    setIsPaused(true);
-  }, []);
-
-  const autoResume = useCallback(() => {
-    if (userPausedRef.current) return;
-    setIsPaused(false);
-  }, []);
-
-  const runManualAction = useCallback(
-    (action: () => void) => {
-      const shouldResume = !userPausedRef.current && effectiveAutoplay;
-      if (shouldResume) setIsPaused(true);
-      action();
-      setProgress(0);
-      if (shouldResume) {
-        requestAnimationFrame(() => setIsPaused(false));
-      }
-    },
-    [effectiveAutoplay]
-  );
-
-  // Synchronous reset before paint + epoch pour relancer l’autoplay sans dépendre de `index`/`next` dans l’effet RAF.
-  useLayoutEffect(() => {
-    setProgress(0);
-    setSlideEpoch((e) => e + 1);
-  }, [index]);
-
-  useEffect(() => {
-    if (!effectiveAutoplay || isPaused) return;
-
-    let rafId = 0;
-    const start = performance.now() - (progressRef.current / 100) * intervalMs;
-
-    const tick = (now: number) => {
-      const elapsed = now - start;
-      const ratio = elapsed / intervalMs;
-
-      if (ratio >= 1) {
-        setProgress(100);
-        nextRef.current();
-        return;
-      }
-
-      setProgress(ratio * 100);
-      rafId = window.requestAnimationFrame(tick);
-    };
-
-    rafId = window.requestAnimationFrame(tick);
-    return () => window.cancelAnimationFrame(rafId);
-    // Pas de `progress` (rafraîchi chaque frame), pas de `next`/`index` (identités ou scheduling instables).
-  }, [effectiveAutoplay, intervalMs, isPaused, slideEpoch]);
-
-  useEffect(() => {
-    if (!pauseWhenHidden) return;
-
-    const onVisibilityChange = () => {
-      if (document.hidden) autoPause();
-      else autoResume();
-    };
-
-    document.addEventListener('visibilitychange', onVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
-  }, [autoPause, autoResume, pauseWhenHidden]);
-
-  useEffect(() => {
-    if (!pauseWhenHidden || typeof window === 'undefined') return;
-
-    const element = containerRef.current;
-    if (!element) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries[0]?.isIntersecting;
-        if (visible) autoResume();
-        else autoPause();
-      },
-      { threshold: 0.4 }
-    );
-
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [autoPause, autoResume, pauseWhenHidden]);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !canNavigate) return;
 
-    const nextIdx = (index + 1) % total;
-    const prevIdx = (index - 1 + total) % total;
-    const nextSlide = slides[nextIdx];
-    const prevSlide = slides[prevIdx];
+    const id = window.setTimeout(() => {
+      const nextIdx = (index + 1) % total;
+      const { desktop, mobile } = getImageSrc(slides[nextIdx]);
+      [desktop, mobile].filter(Boolean).forEach((src) => {
+        const img = new window.Image();
+        img.src = src;
+      });
+    }, 1000);
 
-    const urls = [
-      getImageSrc(nextSlide).desktop,
-      getImageSrc(nextSlide).mobile,
-      getImageSrc(prevSlide).desktop,
-      getImageSrc(prevSlide).mobile,
-    ].filter(Boolean);
-
-    urls.forEach((src) => {
-      const img = new window.Image();
-      img.src = src;
-    });
+    return () => window.clearTimeout(id);
   }, [canNavigate, index, slides, total]);
 
   useEffect(() => {
@@ -445,12 +332,12 @@ export default function HeroCarousel({
     } else if (e.key === 'ArrowLeft') {
       runManualAction(prev);
     } else if (e.key === 'Home') {
-      runManualAction(() => setIndex(0));
+      runManualAction(() => goTo(0));
     } else if (e.key === 'End') {
-      runManualAction(() => setIndex(canNavigate ? total - 1 : 0));
+      runManualAction(() => goTo(canNavigate ? total - 1 : 0));
     } else if (e.key === ' ' || e.key === 'Spacebar' || e.key === 'Space') {
       e.preventDefault();
-      if (userPausedRef.current) resumeUser();
+      if (isUserPaused) resumeUser();
       else pauseUser();
     }
   };
@@ -571,7 +458,7 @@ export default function HeroCarousel({
                 disablePictureInPicture
                 controls={false}
                 onPlay={(e: SyntheticEvent<HTMLVideoElement>) => {
-                  if (userPausedRef.current) {
+                  if (isUserPaused) {
                     e.currentTarget.pause();
                   }
                 }}
@@ -587,7 +474,7 @@ export default function HeroCarousel({
                   sizes="100vw"
                   priority={index === 0}
                   fetchPriority={index === 0 ? 'high' : 'auto'}
-                  quality={85}
+                  quality={75}
                   className="object-cover w-full sm:hidden"
                   placeholder="blur"
                   blurDataURL={BLUR_DATA_URL}
@@ -600,7 +487,7 @@ export default function HeroCarousel({
                   sizes="100vw"
                   priority={index === 0}
                   fetchPriority={index === 0 ? 'high' : 'auto'}
-                  quality={88}
+                  quality={78}
                   className="hidden object-cover sm:block"
                   placeholder="blur"
                   blurDataURL={BLUR_DATA_URL}
@@ -706,7 +593,7 @@ export default function HeroCarousel({
         <button
           type="button"
           onClick={() => {
-            if (userPausedRef.current) resumeUser();
+            if (isUserPaused) resumeUser();
             else pauseUser();
           }}
           aria-label={isPaused ? t.play : t.pause}
@@ -737,7 +624,7 @@ export default function HeroCarousel({
             const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
             const target = Math.min(total - 1, Math.floor(ratio * total));
 
-            runManualAction(() => setIndex(target));
+            runManualAction(() => goTo(target));
             pushDL('hero_seek', { target });
           }}
           style={progressClickable ? { cursor: 'pointer' } : undefined}
@@ -775,7 +662,7 @@ export default function HeroCarousel({
                     aria-current={active ? 'true' : undefined}
                     data-gtm="hero_bullet"
                     data-idx={i}
-                    onClick={() => runManualAction(() => setIndex(i))}
+                    onClick={() => runManualAction(() => goTo(i))}
                   />
                 </li>
               );
@@ -811,7 +698,7 @@ export default function HeroCarousel({
                     aria-current={active ? 'true' : undefined}
                     data-gtm="hero_thumb"
                     data-idx={i}
-                    onClick={() => runManualAction(() => setIndex(i))}
+                    onClick={() => runManualAction(() => goTo(i))}
                   >
                     <Image
                       src={thumb}

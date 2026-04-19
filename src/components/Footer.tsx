@@ -501,7 +501,7 @@ export default function Footer({
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-12 md:items-start lg:gap-12">
           {/* Bloc marque — présence éditoriale */}
-          <div className="space-y-4 md:col-span-3 lg:col-span-2 lg:pr-6">
+          <div className="space-y-4 md:col-span-3 lg:col-span-2 lg:pr-6" suppressHydrationWarning>
             <header className="border-b border-token-border/70 pb-4 md:pb-5">
               <p className="text-xs font-extrabold tracking-tight text-token-text sm:text-sm md:text-base">
                 <span>{companyName}</span>

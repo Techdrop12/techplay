@@ -269,6 +269,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
   const [activeIdx, setActiveIdx] = useState(0);
   const [zoomed, setZoomed] = useState(false);
   const [origin, setOrigin] = useState({ x: 50, y: 50 });
+  const [notifying, setNotifying] = useState(false);
 
   const activeImage = safeGallery[activeIdx] || image;
   const total = useMemo(() => price * quantity, [price, quantity]);
@@ -815,9 +816,22 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
                 {t.unavailable}
                 <button
                   type="button"
-                  onClick={() => toast(t.notifyToast)}
-                  className="min-h-[44px] min-w-[44px] font-medium underline underline-offset-2 hover:no-underline sm:min-h-0 sm:min-w-0"
+                  disabled={notifying}
+                  aria-busy={notifying ? 'true' : 'false'}
+                  onClick={() => {
+                    if (notifying) return;
+                    setNotifying(true);
+                    toast(t.notifyToast);
+                    window.setTimeout(() => setNotifying(false), 2500);
+                  }}
+                  className="inline-flex items-center gap-1.5 min-h-[44px] min-w-[44px] font-medium underline underline-offset-2 hover:no-underline disabled:opacity-60 sm:min-h-0 sm:min-w-0"
                 >
+                  {notifying && (
+                    <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.25" strokeWidth="4" fill="none" />
+                      <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" fill="none" />
+                    </svg>
+                  )}
                   {t.notifyMe}
                 </button>
               </div>

@@ -121,7 +121,7 @@ export default function FilterPanel({
   selected,
   setSelected,
   sticky = true,
-  stickyTopClass = 'top-16',
+  stickyTopClass = 'top-16 md:top-[4.5rem] lg:top-[4.75rem]',
   counts,
   syncQueryKey = 'cat',
   id,

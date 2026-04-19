@@ -236,6 +236,12 @@ export default function CheckoutForm() {
       setLastError(null);
       if (!gaItems.length) {
         toast.error(t('cart_empty_toast'));
+        try {
+          const cartEl = document.querySelector<HTMLElement>('[data-cart-summary],[data-cart],[aria-label*="panier"],[aria-label*="cart"]');
+          cartEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } catch {
+          // no-op
+        }
         return;
       }
       if (!validate()) return;

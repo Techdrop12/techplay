@@ -17,6 +17,7 @@ import type { Product } from '@/types/product';
 
 import Button from '@/components/Button';
 import { useCart } from '@/hooks/useCart';
+import { flyTo, spawnRipple } from '@/lib/animations';
 import { detectCurrency } from '@/lib/currency';
 import { trackAddToCart as rawTrackAddToCart } from '@/lib/ga';
 import { logEvent as rawLogEvent } from '@/lib/logEvent';
@@ -113,88 +114,6 @@ function safeCall(fn: unknown, ...args: unknown[]): unknown {
   }
 }
 
-function spawnRipple(e: ReactMouseEvent<HTMLElement>) {
-  if (!canUseDOM()) return;
-
-  const target = e.currentTarget as HTMLElement;
-  const rect = target.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  const size = Math.max(rect.width, rect.height);
-
-  const span = document.createElement('span');
-  span.style.position = 'absolute';
-  span.style.left = `${x - size / 2}px`;
-  span.style.top = `${y - size / 2}px`;
-  span.style.width = `${size}px`;
-  span.style.height = `${size}px`;
-  span.style.borderRadius = '9999px';
-  span.style.pointerEvents = 'none';
-  span.style.background = 'rgba(255,255,255,0.35)';
-  span.style.mixBlendMode = 'overlay';
-
-  if (!target.style.position) target.style.position = 'relative';
-  target.appendChild(span);
-
-  const anim = span.animate(
-    [
-      { transform: 'scale(0.6)', opacity: 0.35 },
-      { transform: 'scale(1.3)', opacity: 0 },
-    ],
-    { duration: 520, easing: 'ease-out' }
-  );
-
-  anim.onfinish = () => span.remove();
-}
-
-function flyTo(source: HTMLElement, target: HTMLElement, prefersReduced: boolean) {
-  if (!canUseDOM()) return;
-
-  const dot = document.createElement('div');
-  const from = source.getBoundingClientRect();
-  const to = target.getBoundingClientRect();
-
-  const startX = from.left + from.width / 2;
-  const startY = from.top + from.height / 2;
-  const endX = to.left + to.width / 2;
-  const endY = to.top + to.height / 2;
-
-  dot.style.position = 'fixed';
-  dot.style.left = `${startX}px`;
-  dot.style.top = `${startY}px`;
-  dot.style.width = '10px';
-  dot.style.height = '10px';
-  dot.style.borderRadius = '9999px';
-  dot.style.background = 'hsl(var(--accent))';
-  dot.style.boxShadow = '0 0 0 6px rgba(20,184,166,0.15)';
-  dot.style.zIndex = '999999';
-  dot.style.pointerEvents = 'none';
-
-  document.body.appendChild(dot);
-
-  const duration = prefersReduced ? 200 : 650;
-  const curveX = startX + (endX - startX) * 0.6;
-  const curveY = Math.min(startY, endY) - 120;
-
-  const keyframes: Keyframe[] = [
-    { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0 },
-    {
-      transform: `translate(${curveX - startX}px, ${curveY - startY}px) scale(0.9)`,
-      opacity: 0.95,
-      offset: 0.6,
-    },
-    {
-      transform: `translate(${endX - startX}px, ${endY - startY}px) scale(0.6)`,
-      opacity: 0,
-      offset: 1,
-    },
-  ];
-
-  dot.animate(keyframes, {
-    duration,
-    easing: prefersReduced ? 'linear' : 'cubic-bezier(.2,.8,.2,1)',
-  }).onfinish = () => dot.remove();
-}
 
 const Spinner = () => (
   <svg className="mr-2 -ml-0.5 h-4 w-4 animate-spin" viewBox="0 0 24 24" aria-hidden="true">

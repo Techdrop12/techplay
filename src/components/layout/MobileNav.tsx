@@ -4,7 +4,7 @@
 
 import { AnimatePresence, motion, useReducedMotion, type Variants } from 'framer-motion';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useReducer, useRef } from 'react';
 import * as ReactDOM from 'react-dom';
 
 import Link from '@/components/LocalizedLink';
@@ -194,6 +194,56 @@ type InertHTMLElement = HTMLElement & { inert?: boolean };
 
 const PLACEHOLDER_MS = 4000;
 
+type NavState = {
+  open: boolean;
+  catsOpen: boolean;
+  placeholder: string;
+  searchFocused: boolean;
+  recentQs: string[];
+  canInstall: boolean;
+  portalMounted: boolean;
+  searching: boolean;
+};
+
+type NavAction =
+  | { type: 'OPEN' }
+  | { type: 'CLOSE' }
+  | { type: 'TOGGLE_CATS' }
+  | { type: 'SET_CATS'; payload: boolean }
+  | { type: 'SET_PLACEHOLDER'; payload: string }
+  | { type: 'SET_SEARCH_FOCUSED'; payload: boolean }
+  | { type: 'SET_RECENT_QS'; payload: string[] }
+  | { type: 'SET_CAN_INSTALL'; payload: boolean }
+  | { type: 'PORTAL_MOUNTED' }
+  | { type: 'SET_SEARCHING'; payload: boolean };
+
+function navReducer(state: NavState, action: NavAction): NavState {
+  switch (action.type) {
+    case 'OPEN':
+      return { ...state, open: true, portalMounted: true };
+    case 'CLOSE':
+      return { ...state, open: false, catsOpen: false, searching: false };
+    case 'TOGGLE_CATS':
+      return { ...state, catsOpen: !state.catsOpen };
+    case 'SET_CATS':
+      return { ...state, catsOpen: action.payload };
+    case 'SET_PLACEHOLDER':
+      return { ...state, placeholder: action.payload };
+    case 'SET_SEARCH_FOCUSED':
+      return { ...state, searchFocused: action.payload };
+    case 'SET_RECENT_QS':
+      return { ...state, recentQs: action.payload };
+    case 'SET_CAN_INSTALL':
+      return { ...state, canInstall: action.payload };
+    case 'PORTAL_MOUNTED':
+      return { ...state, portalMounted: true };
+    case 'SET_SEARCHING':
+      return { ...state, searching: action.payload };
+    default:
+      return state;
+  }
+}
+
 const safeParseArray = <T,>(raw: string | null): T[] => {
   if (!raw) return [];
   try {
@@ -277,17 +327,18 @@ export default function MobileNav() {
     return Number.isFinite(count) ? count : 0;
   }, [wishlist]);
 
-  const [open, setOpen] = useState(false);
-  const [catsOpen, setCatsOpen] = useState(false);
-  const [placeholder, setPlaceholder] = useState<string>(() => t.trends[0] ?? '');
-  const [searchFocused, setSearchFocused] = useState(false);
-  const [recentQs, setRecentQs] = useState<string[]>([]);
-  const [canInstall, setCanInstall] = useState(false);
-  const [portalTargetReady, setPortalTargetReady] = useState(false);
+  const [state, dispatch] = useReducer(navReducer, {
+    open: false,
+    catsOpen: false,
+    placeholder: t.trends[0] ?? '',
+    searchFocused: false,
+    recentQs: [],
+    canInstall: false,
+    portalMounted: false,
+    searching: false,
+  });
 
-  useEffect(() => {
-    setPortalTargetReady(true);
-  }, []);
+  const { open, catsOpen, placeholder, searchFocused, recentQs, canInstall, portalMounted, searching } = state;
 
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
@@ -431,7 +482,7 @@ export default function MobileNav() {
       return;
     }
     lockScroll();
-    setOpen(true);
+    dispatch({ type: 'OPEN' });
     try {
       navigator.vibrate?.(8);
     } catch {
@@ -442,7 +493,7 @@ export default function MobileNav() {
 
   const closeMenu = (reason = 'close_btn') => {
     unlockScroll();
-    setOpen(false);
+    dispatch({ type: 'CLOSE' });
     track({ action: 'mobile_nav_close', label: reason });
   };
 
@@ -451,10 +502,10 @@ export default function MobileNav() {
       const e = event as BeforeInstallPromptEvent;
       e.preventDefault();
       deferredPrompt.current = e;
-      setCanInstall(true);
+      dispatch({ type: 'SET_CAN_INSTALL', payload: true });
     };
 
-    const onInstalled = () => setCanInstall(false);
+    const onInstalled = () => dispatch({ type: 'SET_CAN_INSTALL', payload: false });
 
     window.addEventListener('beforeinstallprompt', onBeforeInstall);
     window.addEventListener('appinstalled', onInstalled);
@@ -468,7 +519,7 @@ export default function MobileNav() {
   useEffect(() => {
     try {
       const arr = safeParseArray<string>(localStorage.getItem('recent:q'));
-      if (arr.length) setRecentQs(arr.slice(0, 6));
+      if (arr.length) dispatch({ type: 'SET_RECENT_QS', payload: arr.slice(0, 6) });
     } catch {
       // no-op
     }
@@ -476,7 +527,7 @@ export default function MobileNav() {
 
   useEffect(() => {
     const trends = [...t.trends];
-    setPlaceholder(trends[0] ?? '');
+    dispatch({ type: 'SET_PLACEHOLDER', payload: trends[0] ?? '' });
 
     let index = 0;
     let intervalId: number | null = null;
@@ -485,7 +536,7 @@ export default function MobileNav() {
       if (intervalId || searchFocused || document.visibilityState !== 'visible') return;
       intervalId = window.setInterval(() => {
         index = (index + 1) % trends.length;
-        setPlaceholder(trends[index] ?? '');
+        dispatch({ type: 'SET_PLACEHOLDER', payload: trends[index] ?? '' });
       }, PLACEHOLDER_MS);
     };
 
@@ -511,12 +562,26 @@ export default function MobileNav() {
   }, [searchFocused, t.trends]);
 
   useEffect(() => {
+    const onAltM = (e: KeyboardEvent) => {
+      if (e.altKey && e.key === 'm') {
+        e.preventDefault();
+        if (open) closeMenu('alt_m');
+        else openMenu();
+      }
+    };
+    window.addEventListener('keydown', onAltM);
+    return () => window.removeEventListener('keydown', onAltM);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!open) return;
 
       if (e.key === 'Escape') {
         e.preventDefault();
         closeMenu('escape');
+        return;
       }
 
       if (e.key === 'Tab' && dialogRef.current) {
@@ -552,7 +617,6 @@ export default function MobileNav() {
       unlockScroll();
       window.removeEventListener('keydown', onKey);
       triggerRef.current?.focus();
-      setCatsOpen(false);
     }
 
     return () => {
@@ -577,7 +641,7 @@ export default function MobileNav() {
       await promptEvent.prompt();
       await promptEvent.userChoice;
       deferredPrompt.current = null;
-      setCanInstall(false);
+      dispatch({ type: 'SET_CAN_INSTALL', payload: false });
     } catch {
       // no-op
     }
@@ -591,7 +655,7 @@ export default function MobileNav() {
       const arr = safeParseArray<string>(localStorage.getItem('recent:q'));
       const next = [cleaned, ...arr.filter((item) => !same(item, cleaned))].slice(0, 6);
       localStorage.setItem('recent:q', JSON.stringify(next));
-      setRecentQs(next);
+      dispatch({ type: 'SET_RECENT_QS', payload: next });
     } catch {
       // no-op
     }
@@ -616,6 +680,7 @@ export default function MobileNav() {
 
     pushRecent(q);
     track({ action: 'search_submit', label: q });
+    dispatch({ type: 'SET_SEARCHING', payload: true });
   };
 
   const goSearch = (q: string) => {
@@ -647,7 +712,7 @@ export default function MobileNav() {
   };
 
   const openCatsFromNav = () => {
-    setCatsOpen(true);
+    dispatch({ type: 'SET_CATS', payload: true });
     track({ action: 'mobile_nav_link_click', label: '/categorie' });
 
     requestAnimationFrame(() => {
@@ -680,7 +745,7 @@ export default function MobileNav() {
         <Icon.Menu />
       </button>
 
-      {portalTargetReady && typeof document !== 'undefined' && document.body
+      {portalMounted && typeof document !== 'undefined' && document.body
         ? ReactDOM.createPortal(
             <AnimatePresence>
               {open ? (
@@ -765,8 +830,8 @@ export default function MobileNav() {
                     enterKeyHint="search"
                     inputMode="search"
                     aria-keyshortcuts="/ Control+K Meta+K"
-                    onFocus={() => setSearchFocused(true)}
-                    onBlur={() => setSearchFocused(false)}
+                    onFocus={() => dispatch({ type: 'SET_SEARCH_FOCUSED', payload: true })}
+                    onBlur={() => dispatch({ type: 'SET_SEARCH_FOCUSED', payload: false })}
                   />
 
                   <datalist id="mobile-search-suggestions">
@@ -779,9 +844,17 @@ export default function MobileNav() {
                     type="submit"
                     className="absolute right-1.5 top-1.5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-[hsl(var(--accent))]/6 text-token-text/80 hover:bg-[hsl(var(--accent))]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))/0.4]"
                     aria-label={t.ui.searchBtn}
+                    aria-busy={searching ? 'true' : 'false'}
                     title={t.ui.searchBtn}
                   >
-                    <Icon.Search />
+                    {searching ? (
+                      <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.25" strokeWidth="4" fill="none" />
+                        <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" fill="none" />
+                      </svg>
+                    ) : (
+                      <Icon.Search />
+                    )}
                   </button>
                 </div>
               </form>
@@ -813,7 +886,7 @@ export default function MobileNav() {
                         } catch {
                           // no-op
                         }
-                        setRecentQs([]);
+                        dispatch({ type: 'SET_RECENT_QS', payload: [] });
                       }}
                       className="focus-ring min-h-[2.5rem] rounded-full bg-[hsl(var(--surface))]/70 px-3.5 py-1.5 text-[12px] text-token-text/70 hover:bg-[hsl(var(--surface-2))]/80"
                       aria-label={t.ui.clear}
@@ -890,7 +963,7 @@ export default function MobileNav() {
               <div className="px-5 pb-4 pt-2">
                 <button
                   type="button"
-                  onClick={() => setCatsOpen((value) => !value)}
+                  onClick={() => dispatch({ type: 'TOGGLE_CATS' })}
                   aria-expanded={catsOpen}
                   aria-controls={catsPanelId}
                   className="focus-ring flex min-h-[2.75rem] w-full items-center justify-between rounded-2xl border border-[hsl(var(--border))]/55 bg-[hsl(var(--surface))]/95 px-4 py-3 text-[15px] font-semibold hover:bg-[hsl(var(--surface-2))]/90"
