@@ -213,6 +213,7 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
                     'absolute inset-0 rounded-t-[14px] object-cover object-center opacity-0 transition-[opacity,transform] duration-400 ease-[var(--ease-smooth)] group-hover:opacity-100',
                     !prefersReducedMotion && 'group-hover:scale-105'
                   )}
+                  loading="lazy"
                   aria-hidden
                   draggable={false}
                 />
@@ -386,7 +387,7 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
                 idleText={t('add_to_cart')}
                 className={cn(
                   'min-h-[2.75rem] w-full shrink-0 rounded-xl py-2.5 font-bold sm:min-h-[3rem] sm:py-3',
-                  'inline-flex items-center justify-center whitespace-nowrap',
+                  'inline-flex items-center justify-center',
                   'bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))]',
                   'transition-all duration-250 ease-[var(--ease-smooth)]',
                   'hover:opacity-95 focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.5)] focus-visible:ring-offset-2'

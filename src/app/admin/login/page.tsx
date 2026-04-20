@@ -62,6 +62,7 @@ export default function AdminLoginPage() {
             <input
               id="admin-login-email"
               type="email"
+                inputMode="email"
               autoComplete="username"
               placeholder={t('email_placeholder')}
               className="w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"

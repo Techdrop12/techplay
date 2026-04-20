@@ -24,6 +24,7 @@ export async function GET(req: Request) {
   if (!q) {
     return apiSuccess({ results: [] });
   }
+  if (q.length > 200) return apiError('Requête trop longue', 400);
 
   const rx = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
 

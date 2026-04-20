@@ -44,7 +44,7 @@ export default function CartList({
         _id: String(it._id ?? it.slug ?? `cart-item-${index}`),
         slug: it.slug ?? '',
         title: it.title ?? t('product_fallback'),
-        image: it.image ?? '/placeholder.png',
+        image: it.image ?? '/fallback.png',
         price: Number(it.price ?? 0),
         quantity: Math.max(1, Number(it.quantity || 1)),
       })),

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/Childhood/.claude/projects/c--Users-Childhood-Desktop-Site-web-Dossier-Techplay--web-alex--Site-Techplay--web-alex-/da53ebfd-8433-4d4d-92e1-2b5924d72ee7/tool-results/**)",
+      "Bash(grep -oE \"src/components/[^/]+\\\\.tsx$\")"
+    ]
+  }
+}

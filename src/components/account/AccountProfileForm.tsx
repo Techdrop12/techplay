@@ -85,6 +85,8 @@ export default function AccountProfileForm({ defaultName, defaultEmail }: Accoun
           <input
             id="profil-email"
             type="email"
+            inputMode="email"
+            autoComplete="email"
             value={defaultEmail}
             readOnly
             className="w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface-2))] px-4 py-2.5 text-[15px] text-token-text/70 cursor-not-allowed"

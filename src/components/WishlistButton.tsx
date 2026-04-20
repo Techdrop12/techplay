@@ -94,7 +94,7 @@ export default function WishlistButton({
   const valid = pid.length > 0;
   const isWishlisted = valid ? has(pid) : false;
 
-  const dim = size === 'sm' ? 28 : size === 'lg' ? 40 : 32;
+  const dim = size === 'sm' ? 44 : size === 'lg' ? 48 : 44;
   const iconSize = size === 'sm' ? 18 : size === 'lg' ? 22 : 20;
 
   const baseFloating =

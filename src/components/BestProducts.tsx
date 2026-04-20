@@ -9,10 +9,11 @@ import type { Product } from '@/types/product';
 
 import ProductCard from '@/components/ProductCard';
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing';
+import { readBoolean, readNumber, readString, type AnyRecord } from '@/lib/recordReaders';
 import { cn } from '@/lib/utils';
 
 type SortKey = 'popular' | 'priceAsc' | 'priceDesc' | 'rating';
-type ProductRecord = Record<string, unknown>;
+type ProductRecord = AnyRecord;
 
 interface BestProductsProps {
   products: Product[];
@@ -61,36 +62,6 @@ function toRecord(value: unknown): ProductRecord {
   return isRecord(value) ? value : {};
 }
 
-function readString(record: ProductRecord, keys: readonly string[]): string | undefined {
-  for (const key of keys) {
-    const value = record[key];
-    if (typeof value === 'string' && value.trim()) return value.trim();
-  }
-  return undefined;
-}
-
-function readNumber(record: ProductRecord, keys: readonly string[]): number | undefined {
-  for (const key of keys) {
-    const value = record[key];
-    const parsed =
-      typeof value === 'number'
-        ? value
-        : typeof value === 'string' && value.trim()
-          ? Number(value)
-          : NaN;
-
-    if (Number.isFinite(parsed)) return parsed;
-  }
-  return undefined;
-}
-
-function readBoolean(record: ProductRecord, keys: readonly string[]): boolean | undefined {
-  for (const key of keys) {
-    const value = record[key];
-    if (typeof value === 'boolean') return value;
-  }
-  return undefined;
-}
 
 function readFirstImage(record: ProductRecord): string | undefined {
   const direct = readString(record, ['image']);

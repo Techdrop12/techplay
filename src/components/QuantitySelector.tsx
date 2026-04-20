@@ -200,7 +200,7 @@ export default function QuantitySelector({
         onContextMenu={(e) => e.preventDefault()}
         disabled={minusDisabled}
         className={cn(
-          'px-3 py-1 border rounded-md text-lg font-bold transition',
+          'min-h-[44px] min-w-[44px] px-3 py-2 border rounded-md text-lg font-bold transition',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-blue-600',
           minusDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-[hsl(var(--surface-2))]'
         )}
@@ -235,8 +235,8 @@ export default function QuantitySelector({
         aria-valuemax={max}
         aria-valuenow={qty}
         className={cn(
-          'w-16 text-center font-semibold text-lg',
-          'border rounded-md py-1.5 px-2 bg-white dark:bg-zinc-900',
+          'w-16 min-h-[44px] text-center font-semibold text-lg',
+          'border rounded-md py-2 px-2 bg-white dark:bg-zinc-900',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-blue-600'
         )}
       />

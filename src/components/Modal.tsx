@@ -192,7 +192,7 @@ function ModalRoot({
             type="button"
             onClick={onClose}
             aria-label={tAria('close_modal')}
-            className="absolute right-3.5 top-3.5 inline-grid h-9 w-9 place-items-center rounded-full
+            className="absolute right-2.5 top-2.5 inline-grid h-11 w-11 place-items-center rounded-full
                        text-token-text/70 hover:text-[hsl(var(--text))]
                        hover:bg-black/5 dark:hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
           >

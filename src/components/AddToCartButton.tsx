@@ -270,7 +270,7 @@ export default function AddToCartButton({
       const id = String(product?._id ?? '');
       const slug = String(product?.slug ?? '');
       const title = String(product?.title ?? 'Produit');
-      const image = String(product?.image ?? '/placeholder.png');
+      const image = String(product?.image ?? '/fallback.png');
       const price = Number(product?.price ?? 0);
       const quantity = clamp(Math.trunc(Number(product?.quantity ?? 1)), 1, 99);
 

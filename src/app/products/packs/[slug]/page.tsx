@@ -40,7 +40,7 @@ export async function generateMetadata({
       url: `${SITE}/products/packs/${slug}`,
       images: pack.image
         ? [{ url: pack.image, alt: pack.title }]
-        : [{ url: `${SITE}/placeholder.png`, alt: 'Pack TechPlay' }],
+        : [{ url: `${SITE}/fallback.png`, alt: 'Pack TechPlay' }],
     },
   };
 }

@@ -28,7 +28,7 @@ export default function PackDetails({ pack }: Props) {
     price = 0,
     oldPrice,
     rating = 0,
-    image = '/placeholder.png',
+    image = '/fallback.png',
     slug,
     description = '',
     tags = [],

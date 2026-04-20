@@ -105,7 +105,7 @@ export default function WishlistClient() {
         image:
           typeof product.image === 'string' && product.image.trim()
             ? product.image
-            : '/placeholder.png',
+            : '/fallback.png',
         price:
           typeof product.price === 'number' && Number.isFinite(product.price) ? product.price : 0,
       } as Product & Keyable;

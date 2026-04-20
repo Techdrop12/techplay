@@ -5,11 +5,13 @@ import { getTranslations } from 'next-intl/server';
 import type { Product } from '@/types/product';
 import type { Metadata } from 'next';
 
+import ErrorBoundary from '@/components/ErrorBoundary';
 import ProductJsonLd from '@/components/JsonLd/ProductJsonLd';
 import ProductDetail from '@/components/ProductDetail';
 import ProductGrid from '@/components/ProductGrid';
 import { LIST_NAMES } from '@/lib/analytics-events';
 import { getProductBySlug, getRelatedProducts } from '@/lib/data';
+import { readBoolean, readNumber, readString } from '@/lib/recordReaders';
 import { DEFAULT_LOCALE } from '@/lib/language';
 import { getFallbackDescription } from '@/lib/meta';
 import { generateProductMeta, jsonLdBreadcrumbs } from '@/lib/seo';
@@ -29,39 +31,6 @@ function toSeoRecord(product: Product | null): ProductSeoRecord | null {
   return product as ProductSeoRecord;
 }
 
-function readString(record: Record<string, unknown>, keys: readonly string[]): string | undefined {
-  for (const key of keys) {
-    const value = record[key];
-    if (typeof value === 'string' && value.trim()) return value.trim();
-  }
-  return undefined;
-}
-
-function readNumber(record: Record<string, unknown>, keys: readonly string[]): number | undefined {
-  for (const key of keys) {
-    const value = record[key];
-    const parsed =
-      typeof value === 'number'
-        ? value
-        : typeof value === 'string' && value.trim()
-          ? Number(value)
-          : NaN;
-
-    if (Number.isFinite(parsed)) return parsed;
-  }
-  return undefined;
-}
-
-function readBoolean(
-  record: Record<string, unknown>,
-  keys: readonly string[]
-): boolean | undefined {
-  for (const key of keys) {
-    const value = record[key];
-    if (typeof value === 'boolean') return value;
-  }
-  return undefined;
-}
 
 function readImage(record: Record<string, unknown>): string {
   const direct = readString(record, ['image']);
@@ -186,12 +155,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             >
               Vous aimerez aussi
             </h2>
-            <ProductGrid
-              products={relatedProducts}
-              listName={LIST_NAMES.RELATED}
-              emptyMessage=""
-              showWishlistIcon
-            />
+            <ErrorBoundary>
+              <ProductGrid
+                products={relatedProducts}
+                listName={LIST_NAMES.RELATED}
+                emptyMessage=""
+                showWishlistIcon
+              />
+            </ErrorBoundary>
           </section>
         )}
       </main>

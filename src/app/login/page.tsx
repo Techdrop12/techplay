@@ -65,6 +65,7 @@ function CustomerLoginForm() {
             <input
               id="login-email"
               type="email"
+                inputMode="email"
               placeholder={t('email')}
               autoComplete="email"
               aria-invalid={hasError}

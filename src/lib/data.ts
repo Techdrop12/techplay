@@ -1,3 +1,5 @@
+import { cache } from 'react';
+
 import { connectToDatabase } from './db';
 
 import type { BlogPost } from '@/types/blog';
@@ -60,7 +62,7 @@ const PACK_LIST_FIELDS = [
   'createdAt',
 ].join(' ');
 
-export async function getBestProducts(): Promise<ProductType[]> {
+export const getBestProducts = cache(async function getBestProducts(): Promise<ProductType[]> {
   await connectToDatabase();
 
   const docs = await Product.find({ featured: true })
@@ -71,9 +73,9 @@ export async function getBestProducts(): Promise<ProductType[]> {
     .exec();
 
   return toPlain<ProductType[]>(docs);
-}
+});
 
-export async function getAllProducts(): Promise<ProductType[]> {
+export const getAllProducts = cache(async function getAllProducts(): Promise<ProductType[]> {
   await connectToDatabase();
 
   const docs = await Product.find({})
@@ -83,14 +85,14 @@ export async function getAllProducts(): Promise<ProductType[]> {
     .exec();
 
   return toPlain<ProductType[]>(docs);
-}
+});
 
-export async function getProductBySlug(slug: string): Promise<ProductType | null> {
+export const getProductBySlug = cache(async function getProductBySlug(slug: string): Promise<ProductType | null> {
   await connectToDatabase();
 
   const product = await Product.findOne({ slug }).lean().exec();
   return product ? toPlain<ProductType>(product) : null;
-}
+});
 
 export async function getRelatedProducts(
   currentSlug: string,

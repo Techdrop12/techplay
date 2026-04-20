@@ -33,8 +33,6 @@ export async function PATCH(req: Request) {
     return apiSuccess(updated as Record<string, unknown>);
   } catch (e) {
     logError('[account/profile] PATCH', e);
-    return apiError('Erreur mise à jour', 500, {
-      details: e instanceof Error ? e.message : undefined,
-    });
+    return apiError('Erreur mise à jour', 500);
   }
 }

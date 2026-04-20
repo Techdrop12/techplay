@@ -31,6 +31,7 @@ export async function GET(req: Request) {
     await connectToDatabase();
     const filter: Record<string, unknown> = {};
     if (q) {
+      if (q.length > 200) return apiError('Requête trop longue', 400);
       const rx = new RegExp(String(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
       filter.$or = [
         { title: rx },
@@ -71,7 +72,7 @@ export async function GET(req: Request) {
     return NextResponse.json(toPlain({ items: docs, total, page, limit, pages }));
   } catch (e) {
     logError('[admin/products] GET', e);
-    return apiError('Erreur serveur', 500, { details: e instanceof Error ? e.message : undefined });
+    return apiError('Erreur serveur', 500);
   }
 }
 
@@ -166,8 +167,6 @@ export async function POST(req: Request) {
     return NextResponse.json(toPlain(doc));
   } catch (e) {
     logError('[admin/products] POST', e);
-    return apiError('Erreur lors de la création', 500, {
-      details: e instanceof Error ? e.message : undefined,
-    });
+    return apiError('Erreur lors de la création', 500);
   }
 }

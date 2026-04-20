@@ -3,9 +3,16 @@ import { getSession } from '@/lib/auth';
 import { apiError, apiSuccess } from '@/lib/apiResponse';
 import { connectToDatabase } from '@/lib/db';
 import { hashPassword, verifyPassword } from '@/lib/bcrypt';
+import { createRateLimiter, ipFromRequest } from '@/lib/rateLimit';
 import User from '@/models/User';
 
+const passwordLimiter = createRateLimiter({ id: 'account-password', limit: 5, intervalMs: 60_000 });
+
 export async function POST(req: Request) {
+  const ip = ipFromRequest(req);
+  const rl = passwordLimiter.check(ip);
+  if (!rl.ok) return apiError('Trop de tentatives, réessaie dans une minute', 429);
+
   const session = await getSession();
   const email = session?.user?.email?.trim();
   if (!email) return apiError('Non connecté', 401);

@@ -24,7 +24,7 @@ function sanitizeItem(input: unknown): CartItem | null {
   if (!_id || !slug) return null;
 
   const title = String(input.title ?? 'Produit');
-  const image = String(input.image ?? '/placeholder.png');
+  const image = String(input.image ?? '/fallback.png');
   const price = Number(input.price);
   const quantity = Math.max(1, Number(input.quantity ?? 1));
 

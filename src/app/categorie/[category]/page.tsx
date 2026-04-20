@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import type { SVGProps, JSX } from 'react';
 import { getTranslations } from 'next-intl/server';
 
+import ErrorBoundary from '@/components/ErrorBoundary';
 import Link from '@/components/LocalizedLink';
 import ProductGrid from '@/components/ProductGrid';
 import { LIST_NAMES } from '@/lib/analytics-events';
@@ -354,11 +355,13 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         )}
       </form>
 
-      <ProductGrid
-        products={pageItems}
-        listName={LIST_NAMES.CATEGORY}
-        emptyMessage={`Aucun produit trouvé dans la catégorie "${displayCategory}".`}
-      />
+      <ErrorBoundary>
+        <ProductGrid
+          products={pageItems}
+          listName={LIST_NAMES.CATEGORY}
+          emptyMessage={`Aucun produit trouvé dans la catégorie "${displayCategory}".`}
+        />
+      </ErrorBoundary>
 
       <nav
         aria-label={tCategory('pagination_aria')}

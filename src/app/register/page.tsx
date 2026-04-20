@@ -85,6 +85,7 @@ function RegisterForm() {
             <input
               id="reg-email"
               type="email"
+                inputMode="email"
               placeholder={t('register_email')}
               autoComplete="email"
               aria-invalid={error === t('register_error_email')}

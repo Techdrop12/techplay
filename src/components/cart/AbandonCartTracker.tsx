@@ -77,7 +77,7 @@ export default function AbandonCartTracker({
           const title = toSafeString(product.title, 'Produit');
           const price = toSafePrice(product.price);
           const quantity = toSafeQuantity(product.quantity);
-          const image = toSafeString(product.image, '/placeholder.png');
+          const image = toSafeString(product.image, '/fallback.png');
 
           return {
             id,

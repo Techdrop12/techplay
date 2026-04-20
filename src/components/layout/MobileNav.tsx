@@ -984,7 +984,7 @@ export default function MobileNav() {
                       transition={{ duration: reducedMotion ? 0 : 0.22, ease: 'easeOut' }}
                       className="overflow-hidden"
                     >
-                      <ul className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+                      <ul className="mt-3 grid grid-cols-1 gap-2 xs:grid-cols-2 gap-2.5 sm:grid-cols-3">
                         {categories.map((category) => (
                           <li key={category.href}>
                             <Link

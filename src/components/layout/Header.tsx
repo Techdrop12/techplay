@@ -706,7 +706,7 @@ export default function Header() {
                 onPointerLeave={() => smartPrefetchCancel('/wishlist')}
                 onFocus={() => smartPrefetchStart('/wishlist')}
                 onBlur={() => smartPrefetchCancel('/wishlist')}
-                className="relative rounded-lg p-0.5 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+                className="relative inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1.5 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
                 aria-label={t.wishlistAria(wishlistCount)}
                 data-gtm="header_wishlist"
               >
@@ -731,7 +731,7 @@ export default function Header() {
               onPointerLeave={() => smartPrefetchCancel('/account')}
               onFocus={() => smartPrefetchStart('/account')}
               onBlur={() => smartPrefetchCancel('/account')}
-              className="hidden items-center justify-center rounded-lg p-0.5 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] xl:inline-flex"
+              className="hidden min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1.5 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] xl:inline-flex"
               aria-label={t.account.aria}
               title={t.account.title}
               data-gtm="header_account"

@@ -43,7 +43,7 @@ export default function ArticleJsonLd({ post }: ArticleJsonLdProps) {
     },
     image: {
       '@type': 'ImageObject',
-      url: post.image || `${siteUrl}/placeholder.png`,
+      url: post.image || `${siteUrl}/fallback.png`,
     },
     mainEntityOfPage: {
       '@type': 'WebPage',

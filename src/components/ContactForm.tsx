@@ -164,6 +164,7 @@ export default function ContactForm() {
           id="contact-email"
           name="email"
           type="email"
+                inputMode="email"
           required
           value={form.email}
           onChange={handleChange}
@@ -194,11 +195,11 @@ export default function ContactForm() {
           id="contact-message"
           name="message"
           required
-          rows={5}
+          rows={3}
           minLength={10}
           value={form.message}
           onChange={handleChange}
-          className={`w-full rounded-xl border bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${fieldErrors.message ? inputErrorClass : 'border-[hsl(var(--border))] focus-visible:ring-[hsl(var(--accent))]'}`}
+          className={`w-full rounded-xl border bg-[hsl(var(--surface))] px-4 py-2.5 text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 sm:rows-5 min-h-[100px] sm:min-h-[140px] ${fieldErrors.message ? inputErrorClass : 'border-[hsl(var(--border))] focus-visible:ring-[hsl(var(--accent))]'}`}
           placeholder={t('message_placeholder')}
           aria-invalid={!!fieldErrors.message}
           aria-describedby={fieldErrors.message ? 'contact-message-error' : undefined}

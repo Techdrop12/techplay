@@ -14,7 +14,6 @@ import type { Metadata, Viewport } from 'next';
 import type React from 'react';
 
 import AfterIdleClient from '@/components/AfterIdleClient';
-import AppInstallPrompt from '@/components/AppInstallPrompt';
 import ConsentBanner from '@/components/ConsentBanner';
 import OfflineBanner from '@/components/OfflineBanner';
 import DarkModeScript from '@/components/DarkModeScript';
@@ -284,7 +283,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   <Tracking />
                 </Suspense>
 
-                <AppInstallPrompt />
                 <StickyFreeShippingBar />
                 <StickyCartSummary />
                 <ConsentBanner />

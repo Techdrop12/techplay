@@ -89,10 +89,10 @@ export default function ProductJsonLd({ product, maxReviews = 0 }: Props) {
   const productUrl = absUrl(productPath) ?? `${ORIGIN}/products/${slug}`;
   const sku = String(_id || product.sku || slug || '');
 
-  const imagesInput = Array.isArray(image) ? image : [image ?? '/placeholder.png'];
+  const imagesInput = Array.isArray(image) ? image : [image ?? '/fallback.png'];
   const images = imagesInput.map((src) => absUrl(src)).filter((src): src is string => Boolean(src));
 
-  const finalImages = images.length > 0 ? images : [`${ORIGIN}/placeholder.png`];
+  const finalImages = images.length > 0 ? images : [`${ORIGIN}/fallback.png`];
 
   const priceRaw: string | number | undefined = product.price;
   const priceNumber =

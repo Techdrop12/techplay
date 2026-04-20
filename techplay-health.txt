@@ -1,1 +1,0 @@
-TS_HEAD=src/app/api/invoice/route.ts(62,32): error TS2339: Property 'currency' does not exist on type '{}'.

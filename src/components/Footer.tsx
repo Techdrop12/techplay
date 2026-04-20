@@ -507,7 +507,7 @@ export default function Footer({
                 <span>{companyName}</span>
                 <span className="text-[hsl(var(--accent))]">.</span>
               </p>
-              <p className="mt-1.5 max-w-md text-[11px] leading-relaxed text-token-text/80 sm:text-[12px]">
+              <p className="mt-1.5 max-w-md text-xs leading-relaxed text-token-text/80 sm:text-[12px]">
                 {t.brandText}
               </p>
             </header>
@@ -515,21 +515,21 @@ export default function Footer({
             {!compact ? (
               <>
                 <ul className="space-y-2" role="list" aria-label={t.badgesAria}>
-                    <li className="flex items-center gap-2 text-[11px] font-medium text-token-text/80">
+                    <li className="flex items-center gap-2 text-xs font-medium text-token-text/80">
                       <FaShieldAlt className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden="true" />
                       {t.badges.secure}
                     </li>
-                    <li className="flex items-center gap-2 text-[11px] font-medium text-token-text/80">
+                    <li className="flex items-center gap-2 text-xs font-medium text-token-text/80">
                       <FaTruck className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden="true" />
                       {t.badges.shipping}
                     </li>
-                    <li className="flex items-center gap-2 text-[11px] font-medium text-token-text/80">
+                    <li className="flex items-center gap-2 text-xs font-medium text-token-text/80">
                       <FaHeadset className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden="true" />
                       {t.badges.support}
                     </li>
                   </ul>
 
-                <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-token-text/60">
+                <p className="text-xs font-medium uppercase tracking-[0.08em] text-token-text/60">
                   {tFooter('we_accept')}
                 </p>
                 <div className="mt-1.5 flex flex-wrap items-center gap-2 sm:gap-3" aria-hidden="true">
@@ -563,10 +563,10 @@ export default function Footer({
 
             {contact?.email || contact?.phone || contact?.address?.streetAddress ? (
               <>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-token-text/60">
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-token-text/60">
                   {tFooter('get_in_touch')}
                 </p>
-            <ul className="mt-1.5 space-y-1 text-[11px] leading-relaxed text-token-text/80">
+            <ul className="mt-1.5 space-y-1 text-xs leading-relaxed text-token-text/80">
                   {contact?.email ? (
                     <li>
                       <a
@@ -606,7 +606,7 @@ export default function Footer({
           >
             {navGroups.map((group) => (
               <nav key={group.title} aria-label={group.title} className="min-w-0 space-y-2.5">
-                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-token-text/65">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-[0.12em] text-token-text/65">
                   {group.title}
                 </p>
 
@@ -624,7 +624,7 @@ export default function Footer({
                       group.title.toLowerCase().includes('legal');
 
                     const linkClass =
-                      'inline-flex min-w-0 items-center gap-1.5 rounded py-2 text-[10px] text-[hsl(var(--text))]/75 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]';
+                      'inline-flex min-w-0 min-h-[44px] items-center gap-1.5 rounded py-2 text-xs text-[hsl(var(--text))]/75 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]';
                     const content = (
                       <>
                         {isLegal ? <LegalIcon label={label} className="h-3.5 w-3.5 shrink-0" /> : null}
@@ -685,7 +685,7 @@ export default function Footer({
                     aria-busy={status === 'loading'}
                     aria-describedby={message ? messageId : undefined}
                   >
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-token-text/65">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-token-text/65">
                       {t.newsletterTitle}
                     </p>
 
@@ -768,7 +768,7 @@ export default function Footer({
                 </form>
                 </div>
 
-                <p className="mt-6 text-[10px] font-medium uppercase tracking-[0.08em] text-token-text/60">
+                <p className="mt-6 text-xs font-medium uppercase tracking-[0.08em] text-token-text/60">
                   {tFooter('follow_us')}
                 </p>
                 <div className="flex items-center gap-2 text-base text-[hsl(var(--text))]/60">
@@ -816,13 +816,13 @@ export default function Footer({
         {children ? <div className="mt-10 text-center">{children}</div> : null}
 
         <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-token-border/80 pt-6 md:flex-row">
-          <p className="text-[11px] text-token-text/75">
+          <p className="text-xs text-token-text/75">
             © {currentYear}{' '}
             <span className="font-semibold text-[hsl(var(--text))]">{companyName}</span>
             <span className="text-[hsl(var(--text))]/65">. {t.rightsReserved}</span>
           </p>
 
-          <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[11px] text-[hsl(var(--text))]/70">
+          <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-[hsl(var(--text))]/70">
             <li className="inline-flex items-center gap-2">
               <FaLock className="h-4 w-4 shrink-0 text-[hsl(var(--text))]/60" aria-hidden="true" />
               <span className="sr-only">{tFooter('secure_payment')}</span>

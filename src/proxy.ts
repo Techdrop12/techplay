@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 import { DEFAULT_LOCALE } from '@/lib/language';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname?.replace(/\/+/g, '/').trim() || '';
 
   const isRoot = pathname === '' || pathname === '/';
