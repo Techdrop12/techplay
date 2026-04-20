@@ -375,14 +375,42 @@ export default function BestProducts({
         </>
       )}
 
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/70 p-3">
-        <div className="text-xs text-token-text/70" aria-live="polite">
-          {t.display} <span className="font-semibold">{visibleCount}</span> /{' '}
-          <span>{totalCount}</span>
+      <div className="mb-5 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/70 p-3">
+        <div className="flex items-center justify-between gap-2">
+          <div className="text-xs text-token-text/70" aria-live="polite">
+            {t.display} <span className="font-semibold">{visibleCount}</span> /{' '}
+            <span>{totalCount}</span>
+          </div>
+
+          {showControls && (
+            <div className="flex items-center gap-2">
+              <label className="sr-only" htmlFor={`${headingId}-sort`}>
+                {t.sortLabel}
+              </label>
+              <select
+                id={`${headingId}-sort`}
+                className="min-h-[2.25rem] rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-2.5 py-1.5 text-[12px] font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
+                value={sortBy}
+                onChange={(e) => {
+                  const next = (e.currentTarget.value as SortKey) || 'popular';
+                  setSortBy(next);
+                  setAnnounce(t.sortAnnounce(next));
+                  pushDL('best_products_sort', { sort: next });
+                }}
+                aria-label={t.sortLabel}
+                aria-controls={gridId}
+              >
+                <option value="popular">{t.sort.popular}</option>
+                <option value="priceAsc">{t.sort.priceAsc}</option>
+                <option value="priceDesc">{t.sort.priceDesc}</option>
+                <option value="rating">{t.sort.rating}</option>
+              </select>
+            </div>
+          )}
         </div>
 
         {showControls && (
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="mt-2.5 flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => {
@@ -394,7 +422,7 @@ export default function BestProducts({
                 });
               }}
               className={cn(
-                'rounded-full border px-3 py-1.5 text-xs font-semibold transition',
+                'min-h-[2.25rem] rounded-full border px-3.5 py-1.5 text-xs font-semibold transition',
                 filterPromo
                   ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent)/.12)] text-[hsl(var(--accent))]'
                   : 'border-token-border bg-token-surface hover:shadow'
@@ -417,7 +445,7 @@ export default function BestProducts({
                 });
               }}
               className={cn(
-                'rounded-full border px-3 py-1.5 text-xs font-semibold transition',
+                'min-h-[2.25rem] rounded-full border px-3.5 py-1.5 text-xs font-semibold transition',
                 filterStock
                   ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent)/.12)] text-[hsl(var(--accent))]'
                   : 'border-token-border bg-token-surface hover:shadow'
@@ -429,29 +457,6 @@ export default function BestProducts({
               {t.inStock}
             </button>
 
-            <label className="sr-only" htmlFor={`${headingId}-sort`}>
-              {t.sortLabel}
-            </label>
-
-            <select
-              id={`${headingId}-sort`}
-              className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-[12px] font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
-              value={sortBy}
-              onChange={(e) => {
-                const next = (e.currentTarget.value as SortKey) || 'popular';
-                setSortBy(next);
-                setAnnounce(t.sortAnnounce(next));
-                pushDL('best_products_sort', { sort: next });
-              }}
-              aria-label={t.sortLabel}
-              aria-controls={gridId}
-            >
-              <option value="popular">{t.sort.popular}</option>
-              <option value="priceAsc">{t.sort.priceAsc}</option>
-              <option value="priceDesc">{t.sort.priceDesc}</option>
-              <option value="rating">{t.sort.rating}</option>
-            </select>
-
             {activeFilters ? (
               <button
                 type="button"
@@ -461,7 +466,7 @@ export default function BestProducts({
                   setAnnounce(t.resetAnnounce);
                   pushDL('best_products_reset_filters');
                 }}
-                className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-xs font-semibold transition hover:shadow"
+                className="min-h-[2.25rem] rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3.5 py-1.5 text-xs font-semibold transition hover:shadow"
               >
                 {tCommon('reset_filters')}
               </button>

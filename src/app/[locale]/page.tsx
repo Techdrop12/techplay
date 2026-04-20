@@ -370,7 +370,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
                 variant="pill"
                 compact
                 truncateLabels={false}
-                className="!mt-5 !border-0 !bg-transparent !py-2 sm:!mt-8 sm:!py-4 [&_ul]:!max-w-none [&_ul]:grid-cols-1 [&_ul]:sm:grid-cols-3 [&_ul]:gap-2 sm:[&_ul]:gap-4"
+                className="!mt-5 !border-0 !bg-transparent !py-2 sm:!mt-8 sm:!py-4 [&_ul]:!max-w-none [&_ul]:grid-cols-3 [&_ul]:gap-2 sm:[&_ul]:gap-4 [&_.flex]:!min-h-0 [&_.flex]:px-2 [&_.flex]:py-2 [&_.flex]:sm:px-4 [&_.flex]:sm:py-3.5 [&_svg]:!w-4 [&_svg]:!h-4 [&_svg]:sm:!w-8 [&_svg]:sm:!h-8 [&_span]:text-[11px] [&_span]:leading-tight [&_span]:sm:text-[13px]"
                 badges={[
                   { icon: 'truck', label: tHome('trust_fast_delivery') },
                   { icon: 'shield', label: tHome('trust_returns') },

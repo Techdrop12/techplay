@@ -144,7 +144,7 @@ export default function BundleBuilder({ products }: BundleBuilderProps) {
           </p>
         )}
 
-        <div className="mt-2 grid grid-cols-1 gap-2 max-h-[260px] overflow-y-auto pr-1">
+        <div className="mt-2 grid grid-cols-1 gap-2 md:max-h-[260px] md:overflow-y-auto md:pr-1">
           {items.map((product) => {
             const active = current?._id === product._id;
             return (

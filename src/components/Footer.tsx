@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import {
   useId,
   useMemo,
+  useRef,
   useState,
   type FormEvent,
   type MouseEvent as ReactMouseEvent,
@@ -251,6 +252,101 @@ function pushDataLayer(eventName: string, payload: Record<string, unknown> = {})
   } catch {
     // no-op
   }
+}
+
+type FooterNavGroupProps = {
+  group: NavGroup;
+  locale: 'fr' | 'en';
+  pathname: string;
+  onNavClick: (groupTitle: string, label: string, href: string, e?: ReactMouseEvent<HTMLElement>) => void;
+};
+
+function FooterNavGroup({ group, locale, pathname, onNavClick }: FooterNavGroupProps) {
+  const [open, setOpen] = useState(false);
+  const panelRef = useRef<HTMLUListElement | null>(null);
+  const panelId = useId();
+
+  const linkClass =
+    'inline-flex min-w-0 min-h-[44px] items-center gap-1.5 rounded py-2 text-xs text-[hsl(var(--text))]/75 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]';
+
+  const links = group.links.map(({ href, label, external }) => {
+    const finalHref = localizePath(href, locale);
+    const active =
+      href === '/'
+        ? pathname === finalHref || pathname === '/'
+        : pathname === finalHref || pathname.startsWith(`${finalHref}/`);
+    const isCookie = label.toLowerCase().includes('cookie');
+    const isLegal =
+      group.title.toLowerCase().includes('légal') ||
+      group.title.toLowerCase().includes('legal');
+
+    const content = (
+      <>
+        {isLegal ? <LegalIcon label={label} className="h-3.5 w-3.5 shrink-0" /> : null}
+        <span className="min-w-0 break-normal leading-snug">{label}</span>
+      </>
+    );
+
+    return (
+      <li key={`${group.title}-${href}-${label}`}>
+        {external ? (
+          <a href={href} target="_blank" rel="noopener noreferrer" className={linkClass} onClick={(e) => onNavClick(group.title, label, href, e)} data-gtm="footer_link_external">
+            {content}
+          </a>
+        ) : isCookie ? (
+          <a href="#cookies" role="button" aria-controls="tp-consent-panel" className={linkClass} onClick={(e) => onNavClick(group.title, label, '#cookies', e)} data-gtm="footer_link_cookies">
+            {content}
+          </a>
+        ) : (
+          <Link href={href} aria-current={active ? 'page' : undefined} className={linkClass} onClick={(e) => onNavClick(group.title, label, href, e)} data-gtm="footer_link_internal">
+            {content}
+          </Link>
+        )}
+      </li>
+    );
+  });
+
+  return (
+    <nav aria-label={group.title} className="min-w-0">
+      {/* Mobile: tap-to-expand header */}
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between border-b border-[hsl(var(--border))]/50 py-3.5 text-xs font-semibold uppercase tracking-[0.12em] text-token-text/65 transition-colors hover:text-token-text/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] md:hidden"
+      >
+        {group.title}
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          className={cn('shrink-0 transition-transform duration-200', open ? 'rotate-180' : '')}
+        >
+          <path fill="currentColor" d="M12 15.5 4.5 8 6 6.5l6 6 6-6L19.5 8 12 15.5z" />
+        </svg>
+      </button>
+
+      {/* Desktop: always-visible title */}
+      <p className="mb-1 hidden text-xs font-semibold uppercase tracking-[0.12em] text-token-text/65 md:block">
+        {group.title}
+      </p>
+
+      {/* Links — always visible on desktop, toggled on mobile */}
+      <ul
+        id={panelId}
+        ref={panelRef}
+        className={cn(
+          'space-y-1.5 overflow-hidden transition-all duration-200 ease-out',
+          'md:block md:!max-h-none md:opacity-100 md:pt-0',
+          open ? 'max-h-[500px] opacity-100 pt-2' : 'max-h-0 opacity-0 md:opacity-100'
+        )}
+      >
+        {links}
+      </ul>
+    </nav>
+  );
 }
 
 function LegalIcon({ label, className }: { label: string; className?: string }) {
@@ -601,77 +697,17 @@ export default function Footer({
           </div>
 
           <div
-            className="grid grid-cols-2 gap-x-6 gap-y-6 md:col-span-9 lg:col-span-10 md:items-start lg:grid-cols-[repeat(4,minmax(12rem,1fr))] lg:gap-x-12 lg:border-l lg:border-[hsl(var(--border))] lg:pl-10 xl:grid-cols-[repeat(4,minmax(13rem,1fr))] xl:gap-x-14 xl:pl-14"
+            className="grid grid-cols-2 gap-x-6 gap-y-0 md:col-span-9 md:gap-y-6 lg:col-span-10 md:items-start lg:grid-cols-[repeat(4,minmax(12rem,1fr))] lg:gap-x-12 lg:border-l lg:border-[hsl(var(--border))] lg:pl-10 xl:grid-cols-[repeat(4,minmax(13rem,1fr))] xl:gap-x-14 xl:pl-14"
             style={{ minWidth: 0 }}
           >
             {navGroups.map((group) => (
-              <nav key={group.title} aria-label={group.title} className="min-w-0 space-y-2.5">
-                <p className="mb-1 text-xs font-semibold uppercase tracking-[0.12em] text-token-text/65">
-                  {group.title}
-                </p>
-
-                <ul className="space-y-1.5">
-                  {group.links.map(({ href, label, external }) => {
-                    const finalHref = localizePath(href, locale);
-                    const active =
-                      href === '/'
-                        ? pathname === finalHref || pathname === '/'
-                        : pathname === finalHref || pathname.startsWith(`${finalHref}/`);
-
-                    const isCookie = label.toLowerCase().includes('cookie');
-                    const isLegal =
-                      group.title.toLowerCase().includes('légal') ||
-                      group.title.toLowerCase().includes('legal');
-
-                    const linkClass =
-                      'inline-flex min-w-0 min-h-[44px] items-center gap-1.5 rounded py-2 text-xs text-[hsl(var(--text))]/75 transition-colors hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]';
-                    const content = (
-                      <>
-                        {isLegal ? <LegalIcon label={label} className="h-3.5 w-3.5 shrink-0" /> : null}
-                        <span className="min-w-0 break-normal leading-snug">{label}</span>
-                      </>
-                    );
-
-                    return (
-                      <li key={`${group.title}-${href}-${label}`}>
-                        {external ? (
-                          <a
-                            href={href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={linkClass}
-                            onClick={(e) => onNavClick(group.title, label, href, e)}
-                            data-gtm="footer_link_external"
-                          >
-                            {content}
-                          </a>
-                        ) : isCookie ? (
-                          <a
-                            href="#cookies"
-                            role="button"
-                            aria-controls="tp-consent-panel"
-                            className={linkClass}
-                            onClick={(e) => onNavClick(group.title, label, '#cookies', e)}
-                            data-gtm="footer_link_cookies"
-                          >
-                            {content}
-                          </a>
-                        ) : (
-                          <Link
-                            href={href}
-                            aria-current={active ? 'page' : undefined}
-                            className={linkClass}
-                            onClick={(e) => onNavClick(group.title, label, href, e)}
-                            data-gtm="footer_link_internal"
-                          >
-                            {content}
-                          </Link>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </nav>
+              <FooterNavGroup
+                key={group.title}
+                group={group}
+                locale={locale}
+                pathname={pathname}
+                onNavClick={onNavClick}
+              />
             ))}
 
             {!compact ? (
