@@ -344,6 +344,8 @@ export default function MobileNav() {
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const mainRef = useRef<InertHTMLElement | null>(null);
   const searchRef = useRef<HTMLInputElement | null>(null);
+  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
+  const catsBtnRef = useRef<HTMLButtonElement | null>(null);
   const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
   const savedScrollY = useRef(0);
   const startY = useRef<number | null>(null);
@@ -717,10 +719,15 @@ export default function MobileNav() {
 
     requestAnimationFrame(() => {
       try {
-        document.getElementById(catsPanelId)?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest',
-        });
+        const btn = catsBtnRef.current;
+        const container = scrollAreaRef.current;
+        if (btn && container) {
+          const btnTop =
+            btn.getBoundingClientRect().top -
+            container.getBoundingClientRect().top +
+            container.scrollTop;
+          container.scrollTo({ top: Math.max(0, btnTop - 16), behavior: 'smooth' });
+        }
       } catch {
         // no-op
       }
@@ -807,6 +814,7 @@ export default function MobileNav() {
               </div>
 
               <div
+                ref={scrollAreaRef}
                 className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-0 py-0"
                 style={{ WebkitOverflowScrolling: 'touch' }}
               >
@@ -962,6 +970,7 @@ export default function MobileNav() {
 
               <div className="px-5 pb-4 pt-2">
                 <button
+                  ref={catsBtnRef}
                   type="button"
                   onClick={() => dispatch({ type: 'TOGGLE_CATS' })}
                   aria-expanded={catsOpen}
