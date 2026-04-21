@@ -573,17 +573,17 @@ export default function Footer({
 
   return (
     <footer
-      className="relative overflow-hidden border-t-2 border-token-border bg-token-surface text-token-text shadow-[0_-12px_40px_-24px_rgba(15,23,42,0.12)] dark:shadow-[0_-16px_48px_-28px_rgba(0,0,0,0.45)] pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+      className="relative overflow-hidden bg-token-surface text-token-text pb-[max(1.5rem,env(safe-area-inset-bottom))]"
       role="contentinfo"
       aria-label={t.ariaFooter}
     >
+      {/* Barre accent en haut */}
+      <div aria-hidden="true" className="h-[3px] w-full bg-gradient-to-r from-transparent via-[hsl(var(--accent))] to-transparent opacity-60" />
+      <div aria-hidden="true" className="border-t border-token-border/60" />
+
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_520px_at_78%_-8%,hsl(var(--accent)/0.08),transparent_52%)]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[hsl(var(--accent)/0.04)] via-transparent to-transparent"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_400px_at_70%_0%,hsl(var(--accent)/0.07),transparent_55%)]"
       />
       <div
         aria-hidden="true"
@@ -712,7 +712,7 @@ export default function Footer({
 
             {!compact ? (
               <div className="col-span-2 flex flex-col sm:col-span-2 lg:col-span-2 lg:pl-4">
-                <div className="rounded-xl border border-token-border/60 bg-token-surface/60 px-4 py-5 sm:px-5">
+                <div className="rounded-2xl border border-[hsl(var(--accent)/0.25)] bg-gradient-to-br from-[hsl(var(--accent)/0.07)] via-token-surface/80 to-token-surface/60 px-4 py-5 sm:px-5 shadow-[0_0_32px_-8px_hsl(var(--accent)/0.15)]">
                   <form
                     onSubmit={onSubscribe}
                     noValidate
@@ -721,9 +721,14 @@ export default function Footer({
                     aria-busy={status === 'loading'}
                     aria-describedby={message ? messageId : undefined}
                   >
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-token-text/65">
-                      {t.newsletterTitle}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(var(--accent)/0.15)] text-[hsl(var(--accent))]" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                      </span>
+                      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-token-text/65">
+                        {t.newsletterTitle}
+                      </p>
+                    </div>
 
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
                       <input
@@ -804,45 +809,45 @@ export default function Footer({
                 </form>
                 </div>
 
-                <p className="mt-6 text-xs font-medium uppercase tracking-[0.08em] text-token-text/60">
-                  {tFooter('follow_us')}
-                </p>
-                <div className="flex items-center gap-2 text-base text-[hsl(var(--text))]/60">
-                  <a
-                    href="https://facebook.com/techplay"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={t.social.facebook}
-                    className="rounded-lg p-2 transition-all duration-200 hover:scale-110 hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
-                    onClick={() => onSocialClick('facebook')}
-                    data-gtm="footer_social_facebook"
-                  >
-                    <FaFacebookF />
-                  </a>
-
-                  <a
-                    href="https://twitter.com/techplay"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={t.social.twitter}
-                    className="rounded-lg p-2 transition-all duration-200 hover:scale-110 hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
-                    onClick={() => onSocialClick('twitter')}
-                    data-gtm="footer_social_twitter"
-                  >
-                    <FaTwitter />
-                  </a>
-
-                  <a
-                    href="https://instagram.com/techplay"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={t.social.instagram}
-                    className="rounded-lg p-2 transition-all duration-200 hover:scale-110 hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
-                    onClick={() => onSocialClick('instagram')}
-                    data-gtm="footer_social_instagram"
-                  >
-                    <FaInstagram />
-                  </a>
+                <div className="mt-6 flex items-center justify-between">
+                  <p className="text-xs font-medium uppercase tracking-[0.08em] text-token-text/60">
+                    {tFooter('follow_us')}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <a
+                      href="https://facebook.com/techplay"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={t.social.facebook}
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-[hsl(var(--border))]/60 bg-token-surface/80 text-sm text-[hsl(var(--text))]/60 transition-all duration-200 hover:border-[hsl(var(--accent))/0.5] hover:bg-[hsl(var(--accent)/0.1)] hover:scale-110 hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
+                      onClick={() => onSocialClick('facebook')}
+                      data-gtm="footer_social_facebook"
+                    >
+                      <FaFacebookF />
+                    </a>
+                    <a
+                      href="https://twitter.com/techplay"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={t.social.twitter}
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-[hsl(var(--border))]/60 bg-token-surface/80 text-sm text-[hsl(var(--text))]/60 transition-all duration-200 hover:border-[hsl(var(--accent))/0.5] hover:bg-[hsl(var(--accent)/0.1)] hover:scale-110 hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
+                      onClick={() => onSocialClick('twitter')}
+                      data-gtm="footer_social_twitter"
+                    >
+                      <FaTwitter />
+                    </a>
+                    <a
+                      href="https://instagram.com/techplay"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={t.social.instagram}
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-[hsl(var(--border))]/60 bg-token-surface/80 text-sm text-[hsl(var(--text))]/60 transition-all duration-200 hover:border-[hsl(var(--accent))/0.5] hover:bg-[hsl(var(--accent)/0.1)] hover:scale-110 hover:text-[hsl(var(--accent))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
+                      onClick={() => onSocialClick('instagram')}
+                      data-gtm="footer_social_instagram"
+                    >
+                      <FaInstagram />
+                    </a>
+                  </div>
                 </div>
               </div>
             ) : null}

@@ -8,7 +8,6 @@ import { Suspense, type ReactNode, useEffect, useRef, useState } from 'react';
 import Header from './Header';
 
 import Footer from '@/components/Footer';
-import FooterTrustStrip from '@/components/FooterTrustStrip';
 import RouteViewShell from '@/components/RouteViewShell';
 import { useTheme } from '@/context/themeContext';
 import { pageview } from '@/lib/ga';
@@ -248,7 +247,6 @@ export default function Layout({ children, analytics = true }: LayoutProps) {
       </main>
 
       <ScrollTopButton />
-      <FooterTrustStrip />
       <Footer />
     </>
   );
