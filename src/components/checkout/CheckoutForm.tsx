@@ -449,7 +449,7 @@ export default function CheckoutForm() {
             onBlur={handleEmailBlur}
             required
             autoComplete="email"
-            autoCapitalize="off"
+            autoCapitalize="none"
             autoCorrect="off"
             spellCheck={false}
             placeholder={t('email_placeholder')}

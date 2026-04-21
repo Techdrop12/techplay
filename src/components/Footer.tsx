@@ -737,7 +737,7 @@ export default function Footer({
                         aria-invalid={status === 'error' && !isValidEmail(email) ? 'true' : 'false'}
                         aria-describedby={status === 'error' ? messageId : undefined}
                         autoComplete="email"
-                        autoCapitalize="off"
+                        autoCapitalize="none"
                         autoCorrect="off"
                         spellCheck={false}
                         inputMode="email"
