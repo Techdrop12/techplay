@@ -7,6 +7,20 @@
 @layer base {
   /* color-scheme défini dans design-tokens.css */
 
+  html.scroll-locked {
+    overflow: hidden;
+  }
+
+  html.scroll-locked body {
+    position: fixed;
+    left: 0;
+    right: 0;
+    overflow: hidden;
+    width: 100%;
+    touch-action: none;
+    overscroll-behavior: none;
+  }
+
   html {
     scroll-behavior: smooth;
     text-rendering: optimizeLegibility;

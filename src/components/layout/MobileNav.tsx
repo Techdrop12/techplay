@@ -4,7 +4,7 @@
 
 import { AnimatePresence, motion, useReducedMotion, type Variants } from 'framer-motion';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useId, useMemo, useReducer, useRef } from 'react';
+import { startTransition, useEffect, useId, useMemo, useReducer, useRef } from 'react';
 import * as ReactDOM from 'react-dom';
 
 import Link from '@/components/LocalizedLink';
@@ -405,64 +405,39 @@ export default function MobileNav() {
   };
 
   const lockScroll = () => {
-    const scrollY =
-      window.scrollY ??
-      window.pageYOffset ??
-      document.documentElement.scrollTop ??
-      0;
+    const scrollY = window.scrollY ?? window.pageYOffset ?? document.documentElement.scrollTop ?? 0;
     savedScrollY.current = scrollY;
 
-    const body = document.body;
     const html = document.documentElement;
-    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    const scrollbarWidth = window.innerWidth - html.clientWidth;
 
-    html.style.overflow = 'hidden';
-    if (scrollbarWidth > 0) html.style.paddingRight = `${scrollbarWidth}px`;
-    body.style.position = 'fixed';
-    body.style.top = `-${savedScrollY.current}px`;
-    body.style.left = '0';
-    body.style.right = '0';
-    body.style.overflow = 'hidden';
-    body.style.width = '100%';
-    body.style.touchAction = 'none';
-    body.style.overscrollBehavior = 'none';
-    if (scrollbarWidth > 0) body.style.paddingRight = `${scrollbarWidth}px`;
+    html.classList.add('scroll-locked');
+    html.style.setProperty('--scroll-y', `-${scrollY}px`);
+    document.body.style.top = `-${scrollY}px`;
+    if (scrollbarWidth > 0) {
+      html.style.paddingRight = `${scrollbarWidth}px`;
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
 
     const main = document.getElementById('main') as InertHTMLElement | null;
     if (main) {
       mainRef.current = main;
-      try {
-        main.inert = true;
-      } catch {
-        // no-op
-      }
+      try { main.inert = true; } catch { /* no-op */ }
       main.setAttribute('aria-hidden', 'true');
     }
   };
 
   const unlockScroll = () => {
-    const body = document.body;
     const html = document.documentElement;
     const scrollY = savedScrollY.current;
 
-    html.style.overflow = '';
+    html.classList.remove('scroll-locked');
     html.style.paddingRight = '';
-    body.style.position = '';
-    body.style.top = '';
-    body.style.left = '';
-    body.style.right = '';
-    body.style.overflow = '';
-    body.style.width = '';
-    body.style.paddingRight = '';
-    body.style.touchAction = '';
-    body.style.overscrollBehavior = '';
+    document.body.style.top = '';
+    document.body.style.paddingRight = '';
 
     if (mainRef.current) {
-      try {
-        mainRef.current.inert = false;
-      } catch {
-        // no-op
-      }
+      try { mainRef.current.inert = false; } catch { /* no-op */ }
       mainRef.current.removeAttribute('aria-hidden');
       mainRef.current = null;
     }
@@ -484,7 +459,7 @@ export default function MobileNav() {
       return;
     }
     lockScroll();
-    dispatch({ type: 'OPEN' });
+    startTransition(() => dispatch({ type: 'OPEN' }));
     try {
       navigator.vibrate?.(8);
     } catch {
@@ -495,7 +470,7 @@ export default function MobileNav() {
 
   const closeMenu = (reason = 'close_btn') => {
     unlockScroll();
-    dispatch({ type: 'CLOSE' });
+    startTransition(() => dispatch({ type: 'CLOSE' }));
     track({ action: 'mobile_nav_close', label: reason });
   };
 

@@ -132,7 +132,7 @@ const nextConfig = {
   },
 
   images: {
-    qualities: [75, 85, 88],
+    qualities: [75, 78, 85, 88],
     formats: ['image/avif', 'image/webp'],
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
