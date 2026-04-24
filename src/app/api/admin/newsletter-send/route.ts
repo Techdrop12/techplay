@@ -4,10 +4,13 @@ import { error as logError } from '@/lib/logger';
 import NewsletterSubscriber from '@/models/NewsletterSubscriber';
 import { sendBrevoEmail } from '@/lib/email/sendBrevo';
 import { requireAdmin } from '@/lib/requireAdmin';
+import { checkAdminRateLimit } from '@/lib/adminRateLimit';
 
 export async function POST(req: Request) {
   const err = await requireAdmin();
   if (err) return err;
+  const rl = checkAdminRateLimit(req, 'send');
+  if (rl) return rl;
 
   try {
     const { subject, html, testEmail } = await req.json();

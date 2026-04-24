@@ -5,6 +5,7 @@ import Order from '@/models/Order';
 import NewsletterSubscriber from '@/models/NewsletterSubscriber';
 import Product from '@/models/Product';
 import { requireAdmin } from '@/lib/requireAdmin';
+import { checkAdminRateLimit } from '@/lib/adminRateLimit';
 
 function toCSV(rows: Record<string, unknown>[]): string {
   if (!rows.length) return '';
@@ -19,6 +20,8 @@ function toCSV(rows: Record<string, unknown>[]): string {
 export async function GET(req: Request) {
   const err = await requireAdmin();
   if (err) return err;
+  const rl = checkAdminRateLimit(req, 'export');
+  if (rl) return rl;
 
   const url = new URL(req.url);
   const type = url.searchParams.get('type');

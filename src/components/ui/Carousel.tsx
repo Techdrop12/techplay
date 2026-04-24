@@ -19,11 +19,15 @@ export default function Carousel({ images }: CarouselProps) {
 
   return (
     <div className="relative w-full max-w-md mx-auto">
-      <img
-        src={images[current]}
-        alt={`Image ${current + 1}`}
-        className="w-full rounded-lg shadow"
-      />
+      <div className="aspect-[4/3] w-full overflow-hidden rounded-lg shadow">
+        <img
+          src={images[current]}
+          alt={`Image ${current + 1}`}
+          className="w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
       <button
         onClick={prev}
         aria-label={t('carousel_prev_aria')}

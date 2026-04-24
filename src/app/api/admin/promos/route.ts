@@ -3,10 +3,13 @@ import { connectToDatabase } from '@/lib/db';
 import { error as logError } from '@/lib/logger';
 import Coupon from '@/models/Coupon';
 import { requireAdmin } from '@/lib/requireAdmin';
+import { checkAdminRateLimit } from '@/lib/adminRateLimit';
 
-export async function GET() {
+export async function GET(req: Request) {
   const err = await requireAdmin();
   if (err) return err;
+  const rl = checkAdminRateLimit(req, 'read');
+  if (rl) return rl;
 
   try {
     await connectToDatabase();
@@ -21,6 +24,8 @@ export async function GET() {
 export async function POST(req: Request) {
   const err = await requireAdmin();
   if (err) return err;
+  const rl = checkAdminRateLimit(req, 'write');
+  if (rl) return rl;
 
   try {
     const body = await req.json();

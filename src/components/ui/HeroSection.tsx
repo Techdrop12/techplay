@@ -12,8 +12,9 @@ export default function HeroSection() {
           src="/hero-bg.jpg"
           fill
           alt="Arrière-plan hero TechPlay"
-          sizes="(max-width: 768px) 100vw, 50vw"
+          sizes="100vw"
           style={{ objectFit: 'cover' }}
+          priority
         />
       </div>
       <div className="relative z-10">

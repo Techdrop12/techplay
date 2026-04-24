@@ -5,6 +5,7 @@ import { createContext, useContext, useState } from 'react';
 
 import AdminCommandPalette from '@/components/AdminCommandPalette';
 import AdminHeader from '@/components/AdminHeader';
+import AdminMobileNav from '@/components/AdminMobileNav';
 import AdminSidebar from '@/components/AdminSidebar';
 import { ToastSystem } from '@/components/ToastSystem';
 
@@ -37,9 +38,10 @@ export default function AdminShell({ children }: { children: ReactNode }) {
         <AdminSidebar />
         <div className="flex-1 flex flex-col min-w-0">
           <AdminHeader />
-          <main className="flex-1 p-4 sm:p-6" role="main">
+          <main className="flex-1 p-4 sm:p-6 pb-20 md:pb-6" role="main">
             {children}
           </main>
+          <AdminMobileNav />
           <ToastSystem />
         </div>
         <AdminCommandPalette />
