@@ -1,9 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Star, Trash2 } from 'lucide-react';
+import { Star, Trash2, MessageSquare, Check, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import TableSkeleton from '@/components/admin/TableSkeleton';
@@ -17,6 +17,7 @@ interface ReviewRow {
   comment?: string;
   productId?: string;
   createdAt?: string;
+  adminReply?: string;
 }
 
 export default function AdminReviewTable() {
@@ -27,6 +28,8 @@ export default function AdminReviewTable() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(1);
+  const [replyingId, setReplyingId] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState('');
 
   const fetchReviews = useCallback(async () => {
     setLoading(true);
@@ -54,6 +57,28 @@ export default function AdminReviewTable() {
   useEffect(() => {
     fetchReviews();
   }, [fetchReviews]);
+
+  const handleReply = async (id: string) => {
+    try {
+      const res = await fetch('/api/admin/reviews/reply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reviewId: id, reply: replyText }),
+      });
+      if (res.ok) {
+        toast.success('Réponse enregistrée');
+        setReviews((prev) =>
+          prev.map((r) => (r._id === id ? { ...r, adminReply: replyText || undefined } : r))
+        );
+        setReplyingId(null);
+        setReplyText('');
+      } else {
+        throw new Error();
+      }
+    } catch {
+      toast.error('Erreur lors de l\'enregistrement');
+    }
+  };
 
   const handleDelete = async (id: string) => {
     if (!confirm(t('confirm_delete_review'))) return;
@@ -144,6 +169,7 @@ export default function AdminReviewTable() {
             </thead>
             <tbody>
               {reviews.map((r) => (
+                <Fragment key={r._id}>
                 <motion.tr
                   key={r._id}
                   initial={{ opacity: 0, y: 5 }}
@@ -167,23 +193,72 @@ export default function AdminReviewTable() {
                       ))}
                     </div>
                   </td>
-                  <td className="px-4 py-2 max-w-xs break-words">{r.comment}</td>
+                  <td className="px-4 py-2 max-w-xs break-words">
+                    <div>{r.comment}</div>
+                    {r.adminReply && (
+                      <div className="mt-1 text-xs text-[hsl(var(--accent))] italic">
+                        ↳ {r.adminReply}
+                      </div>
+                    )}
+                  </td>
                   <td className="px-4 py-2 text-xs text-token-text/70">{r.productId}</td>
                   <td className="px-4 py-2 text-xs text-token-text/50">
                     {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '—'}
                   </td>
                   <td className="px-4 py-2 text-center">
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(r._id)}
-                      className="text-red-600 hover:text-red-800 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 rounded p-1"
-                      title={t('delete')}
-                      aria-label={t('delete')}
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    <div className="flex items-center justify-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setReplyingId(replyingId === r._id ? null : r._id);
+                          setReplyText(r.adminReply ?? '');
+                        }}
+                        className="text-[hsl(var(--accent))] hover:opacity-80 transition rounded p-1"
+                        title="Répondre"
+                      >
+                        <MessageSquare size={15} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(r._id)}
+                        className="text-red-600 hover:text-red-800 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 rounded p-1"
+                        title={t('delete')}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </td>
                 </motion.tr>
+                {replyingId === r._id && (
+                  <tr className="border-t border-[hsl(var(--border))] bg-[hsl(var(--surface-2))]">
+                    <td colSpan={6} className="px-4 py-3">
+                      <div className="flex items-start gap-2">
+                        <textarea
+                          value={replyText}
+                          onChange={(e) => setReplyText(e.target.value)}
+                          placeholder="Votre réponse publique à cet avis..."
+                          rows={2}
+                          className="flex-1 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-2 text-sm resize-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleReply(r._id)}
+                          className="flex items-center gap-1 rounded-lg bg-[hsl(var(--accent))] px-3 py-2 text-xs font-semibold text-[hsl(var(--accent-fg))] hover:opacity-90"
+                        >
+                          <Check size={13} /> Enregistrer
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setReplyingId(null)}
+                          className="flex items-center gap-1 rounded-lg border border-[hsl(var(--border))] px-3 py-2 text-xs hover:bg-[hsl(var(--surface))]"
+                        >
+                          <X size={13} /> Annuler
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+                </Fragment>
               ))}
             </tbody>
           </table>

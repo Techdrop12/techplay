@@ -18,6 +18,8 @@ const ReviewSchema = new Schema(
     comment: { type: String, trim: true },
     verified: { type: Boolean, default: false, index: true },
     helpfulCount: { type: Number, default: 0 },
+    adminReply: { type: String, trim: true },
+    adminRepliedAt: { type: Date },
     status: {
       type: String,
       default: 'published',

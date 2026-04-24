@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 
 import ProductTable from '@/components/ProductTable';
+import AdminExportButton from '@/components/AdminExportButton';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('admin');
@@ -21,12 +22,15 @@ export default async function AdminProduitsPage() {
         <h1 id="admin-produits-title" className="heading-page">
           {t('products_management_heading')}
         </h1>
-        <Link
-          href="/admin/produits/nouveau"
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-4 py-2.5 text-sm font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-sm)] transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-        >
-          {t('add_product_btn')}
-        </Link>
+        <div className="flex items-center gap-2 flex-wrap">
+          <AdminExportButton type="products" label="Exporter CSV" />
+          <Link
+            href="/admin/produits/nouveau"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-4 py-2.5 text-sm font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-sm)] transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
+          >
+            {t('add_product_btn')}
+          </Link>
+        </div>
       </header>
       <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] shadow-[var(--shadow-sm)]">
         <ProductTable />

@@ -7,6 +7,7 @@ import AdminReviewTable from '@/components/AdminReviewTable';
 import AdminStatsBlock from '@/components/AdminStatsBlock';
 import AdminHealthBlock from '@/components/AdminHealthBlock';
 import AdminInsightsBlock from '@/components/AdminInsightsBlock';
+import AdminSalesChart from '@/components/AdminSalesChart';
 import OrderTable from '@/components/OrderTable';
 import ProductTable from '@/components/ProductTable';
 
@@ -75,6 +76,11 @@ export default async function AdminDashboardPage() {
       </section>
 
       <AdminHealthBlock />
+
+      <section aria-labelledby="admin-chart-heading">
+        <h2 id="admin-chart-heading" className="sr-only">Graphique des ventes</h2>
+        <AdminSalesChart />
+      </section>
 
       <section aria-labelledby="admin-insights-heading">
         <h2 id="admin-insights-heading" className="sr-only">

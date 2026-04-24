@@ -12,6 +12,11 @@ import {
   ShoppingCart,
   Star,
   Upload,
+  Users,
+  Tag,
+  ShieldCheck,
+  Send,
+  Settings,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -29,6 +34,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/admin/dashboard', labelKey: 'nav_dashboard', icon: <LayoutDashboard size={17} /> },
       { href: '/admin/commandes', labelKey: 'nav_orders', icon: <ShoppingCart size={17} /> },
+      { href: '/admin/clients', labelKey: 'nav_clients', icon: <Users size={17} /> },
     ],
   },
   {
@@ -37,6 +43,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: '/admin/produits', labelKey: 'nav_products', icon: <Package size={17} /> },
       { href: '/admin/produits/nouveau', labelKey: 'nav_add_product', icon: <PlusCircle size={17} /> },
       { href: '/admin/import', labelKey: 'nav_import', icon: <Upload size={17} /> },
+      { href: '/admin/promos', labelKey: 'nav_promos', icon: <Tag size={17} /> },
     ],
   },
   {
@@ -53,6 +60,14 @@ const NAV_GROUPS: NavGroup[] = [
       { href: '/admin/avis', labelKey: 'nav_reviews', icon: <Star size={17} /> },
       { href: '/admin/contact', labelKey: 'nav_contact', icon: <MessageSquare size={17} /> },
       { href: '/admin/newsletter', labelKey: 'nav_newsletter', icon: <Mail size={17} /> },
+      { href: '/admin/newsletter-send', labelKey: 'nav_newsletter_send', icon: <Send size={17} /> },
+    ],
+  },
+  {
+    groupKey: 'group_system',
+    items: [
+      { href: '/admin/audit', labelKey: 'nav_audit', icon: <ShieldCheck size={17} /> },
+      { href: '/admin/parametres', labelKey: 'nav_settings', icon: <Settings size={17} /> },
     ],
   },
 ];
