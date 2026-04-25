@@ -1,5 +1,3 @@
-import SibApiV3Sdk from 'sib-api-v3-sdk';
-
 import { log } from '@/lib/logger';
 
 export interface BrevoAttachment {
@@ -19,6 +17,8 @@ export interface SendBrevoParams {
   params?: Record<string, unknown>;
   tags?: string[];
 }
+
+const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
 
 export async function sendBrevoEmail({
   to,
@@ -44,33 +44,44 @@ export async function sendBrevoEmail({
     return { mocked: true };
   }
 
-  const client = SibApiV3Sdk.ApiClient.instance;
-  client.authentications['api-key'].apiKey = apiKey;
-
-  const api = new SibApiV3Sdk.TransactionalEmailsApi();
-
-  const normalize = (list: string | string[] | undefined): { email: string }[] | undefined =>
+  const normalize = (list: string | string[] | undefined) =>
     !list ? undefined : (Array.isArray(list) ? list : [list]).map((email) => ({ email }));
 
-  const email = new SibApiV3Sdk.SendSmtpEmail({
-    to: normalize(to),
-    cc: normalize(cc),
-    bcc: normalize(bcc),
+  const body: Record<string, unknown> = {
     sender: { email: fromEmail, name: fromName },
+    to: normalize(to),
     subject,
-    htmlContent: html,
-    textContent: text,
-    params,
-    tags,
-    attachment:
-      attachments?.map((a) => ({
+    ...(html && { htmlContent: html }),
+    ...(text && { textContent: text }),
+    ...(cc && { cc: normalize(cc) }),
+    ...(bcc && { bcc: normalize(bcc) }),
+    ...(params && { params }),
+    ...(tags?.length && { tags }),
+    ...(attachments.length && {
+      attachment: attachments.map((a) => ({
         content: a.content,
         name: a.name,
         type: a.type,
-      })) ?? undefined,
+      })),
+    }),
+  };
+
+  const res = await fetch(BREVO_API_URL, {
+    method: 'POST',
+    headers: {
+      'api-key': apiKey,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(body),
   });
 
-  return api.sendTransacEmail(email);
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`Brevo API error ${res.status}: ${error}`);
+  }
+
+  return res.json();
 }
 
 export default sendBrevoEmail;
