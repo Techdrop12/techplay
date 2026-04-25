@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Suspense, type ReactNode, useEffect, useRef, useState } from 'react';
 
 import Header from './Header';
+import BottomTabBar from './BottomTabBar';
 
 import Footer from '@/components/Footer';
 import RouteViewShell from '@/components/RouteViewShell';
@@ -248,6 +249,7 @@ export default function Layout({ children, analytics = true }: LayoutProps) {
 
       <ScrollTopButton />
       <Footer />
+      <BottomTabBar />
     </>
   );
 }

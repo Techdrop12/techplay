@@ -667,11 +667,30 @@ export default function Header() {
           </div>
         </form>
 
-        {/* Zone 4 — Mobile : panier + menu */}
+        {/* Zone 4 — Mobile : wishlist + panier + menu */}
         <div
-          className="flex min-h-[2.75rem] items-center gap-2 lg:hidden"
+          className="flex min-h-[2.75rem] items-center gap-1 lg:hidden"
           style={{ touchAction: 'manipulation' }}
         >
+          <Link
+            href={L('/wishlist')}
+            onPointerEnter={() => smartPrefetchStart('/wishlist')}
+            onPointerLeave={() => smartPrefetchCancel('/wishlist')}
+            className="touch-target relative flex items-center justify-center rounded-xl p-2.5 hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 md:p-2"
+            aria-label={t.wishlistAria(wishlistCount)}
+            data-gtm="header_wishlist_mobile"
+          >
+            <span className="pointer-events-none inline-flex">
+              <Heart />
+            </span>
+            {wishlistCount > 0 ? (
+              <span className="pointer-events-none absolute -right-1 -top-1 flex min-w-[1.15rem] items-center justify-center rounded-full bg-fuchsia-600 px-1 py-0.5 text-[10px] font-bold tabular-nums text-white">
+                <span className="sr-only">Wishlist count: </span>
+                {wishlistCount > 99 ? '99+' : wishlistCount}
+              </span>
+            ) : null}
+          </Link>
+
           <Link
             href={L('/commande')}
             onPointerEnter={() => smartPrefetchStart('/commande')}

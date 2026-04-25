@@ -148,7 +148,7 @@ const Icon = {
       height="16"
       viewBox="0 0 24 24"
       aria-hidden="true"
-      className={`transition-transform ${open ? 'rotate-180' : ''}`}
+      className={`transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
     >
       <path fill="currentColor" d="M12 15.5 4.5 8 6 6.5l6 6 6-6L19.5 8 12 15.5z" />
     </svg>
@@ -169,6 +169,58 @@ const Icon = {
       />
     </svg>
   ),
+};
+
+const NavIcon = {
+  Products: () => (
+    <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <path d="M16 10a4 4 0 0 1-8 0" />
+    </svg>
+  ),
+  Builder: () => (
+    <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="12 2 2 7 12 12 22 7 12 2" />
+      <polyline points="2 17 12 22 22 17" />
+      <polyline points="2 12 12 17 22 12" />
+    </svg>
+  ),
+  Grid: () => (
+    <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="7" />
+      <rect x="14" y="3" width="7" height="7" />
+      <rect x="14" y="14" width="7" height="7" />
+      <rect x="3" y="14" width="7" height="7" />
+    </svg>
+  ),
+  Wishlist: () => (
+    <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+    </svg>
+  ),
+  Blog: () => (
+    <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+    </svg>
+  ),
+  Contact: () => (
+    <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+      <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z" />
+      <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+    </svg>
+  ),
+};
+
+const NAV_ICON_MAP = {
+  '/products': NavIcon.Products,
+  '/#builder': NavIcon.Builder,
+  '/categorie': NavIcon.Grid,
+  '/wishlist': NavIcon.Wishlist,
+  '/blog': NavIcon.Blog,
+  '/contact': NavIcon.Contact,
 };
 
 type CartItemLike = { quantity?: number };
@@ -345,8 +397,7 @@ export default function MobileNav() {
   const mainRef = useRef<InertHTMLElement | null>(null);
   const searchRef = useRef<HTMLInputElement | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
-  const catsBtnRef = useRef<HTMLButtonElement | null>(null);
-  const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
+const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
   const savedScrollY = useRef(0);
   const startY = useRef<number | null>(null);
 
@@ -688,27 +739,6 @@ export default function MobileNav() {
     startY.current = null;
   };
 
-  const openCatsFromNav = () => {
-    dispatch({ type: 'SET_CATS', payload: true });
-    track({ action: 'mobile_nav_link_click', label: '/categorie' });
-
-    requestAnimationFrame(() => {
-      try {
-        const btn = catsBtnRef.current;
-        const container = scrollAreaRef.current;
-        if (btn && container) {
-          const btnTop =
-            btn.getBoundingClientRect().top -
-            container.getBoundingClientRect().top +
-            container.scrollTop;
-          container.scrollTo({ top: Math.max(0, btnTop - 16), behavior: 'smooth' });
-        }
-      } catch {
-        // no-op
-      }
-    });
-  };
-
   return (
     <>
       <button
@@ -808,7 +838,7 @@ export default function MobileNav() {
                     name="q"
                     placeholder={`${t.ui.placeholderPrefix} ${placeholder}`}
                     list="mobile-search-suggestions"
-                    className="min-h-[3rem] w-full rounded-2xl border border-[hsl(var(--border))]/60 bg-[hsl(var(--surface))]/95 px-4 py-2.5 pr-12 text-[15px] placeholder:text-token-text/55 shadow-sm focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/.26)]"
+                    className="min-h-[3rem] w-full rounded-2xl border border-[hsl(var(--border))]/60 bg-[hsl(var(--surface))]/95 px-4 py-2.5 pr-12 text-[16px] sm:text-[15px] placeholder:text-token-text/55 shadow-sm focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/.26)]"
                     autoComplete="off"
                     enterKeyHint="search"
                     inputMode="search"
@@ -887,7 +917,7 @@ export default function MobileNav() {
                 <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-token-text/60">
                   {t.ui.quickAccessLabel}
                 </p>
-                <div className="flex flex-wrap items-center gap-2.5">
+                <div className="flex flex-wrap items-center gap-2">
                   <ThemeToggle size="md" />
 
                   <Link
@@ -901,10 +931,11 @@ export default function MobileNav() {
                       track({ action: 'mobile_nav_quick_wishlist' });
                       closeMenu('quick_wishlist');
                     }}
-                    className="focus-ring inline-flex min-h-[2.5rem] items-center gap-2 rounded-xl border border-[hsl(var(--border))]/60 bg-[hsl(var(--surface))]/95 px-3.5 py-2 text-[13px] font-medium hover:bg-[hsl(var(--surface-2))]/80"
+                    className="focus-ring inline-flex min-h-[2.5rem] items-center gap-2 rounded-xl border border-[hsl(var(--border))]/60 bg-[hsl(var(--surface))]/95 px-3.5 py-2 text-[13px] font-medium transition active:scale-[0.97] hover:bg-[hsl(var(--surface-2))]/80"
                     aria-label={t.ui.wishlist(wishlistCount)}
                   >
                     <Icon.Heart />
+                    <span>{locale === 'fr' ? 'Wishlist' : 'Wishlist'}</span>
                     {wishlistCount > 0 ? (
                       <span className="rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-[11px] font-bold text-white">
                         {wishlistCount}
@@ -923,17 +954,18 @@ export default function MobileNav() {
                       track({ action: 'mobile_nav_quick_account' });
                       closeMenu('quick_account');
                     }}
-                    className="focus-ring inline-flex min-h-[2.5rem] items-center gap-2 rounded-xl border border-[hsl(var(--border))]/60 bg-[hsl(var(--surface))]/95 px-3.5 py-2 text-[13px] font-medium hover:bg-[hsl(var(--surface-2))]/80"
+                    className="focus-ring inline-flex min-h-[2.5rem] items-center gap-2 rounded-xl border border-[hsl(var(--border))]/60 bg-[hsl(var(--surface))]/95 px-3.5 py-2 text-[13px] font-medium transition active:scale-[0.97] hover:bg-[hsl(var(--surface-2))]/80"
                     aria-label={t.ui.account}
                   >
                     <Icon.User />
+                    <span>{t.ui.account}</span>
                   </Link>
 
                   {canInstall ? (
                     <button
                       onClick={handleInstall}
                       type="button"
-                      className="ml-auto inline-flex min-h-[2.5rem] items-center gap-2 rounded-full bg-gradient-to-r from-lime-500 to-emerald-500 px-4 py-2 text-[13px] font-semibold text-white shadow-md hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+                      className="ml-auto inline-flex min-h-[2.5rem] items-center gap-2 rounded-full bg-gradient-to-r from-lime-500 to-emerald-500 px-4 py-2 text-[13px] font-semibold text-white shadow-md transition active:scale-[0.97] hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
                       aria-label={t.ui.installAppTitle}
                       title={t.ui.installAppTitle}
                     >
@@ -942,74 +974,6 @@ export default function MobileNav() {
                   ) : null}
                 </div>
               </section>
-
-              <div className="px-5 pb-4 pt-2">
-                <button
-                  ref={catsBtnRef}
-                  type="button"
-                  onClick={() => dispatch({ type: 'TOGGLE_CATS' })}
-                  aria-expanded={catsOpen}
-                  aria-controls={catsPanelId}
-                  className="focus-ring flex min-h-[2.75rem] w-full items-center justify-between rounded-2xl border border-[hsl(var(--border))]/55 bg-[hsl(var(--surface))]/95 px-4 py-3 text-[15px] font-semibold hover:bg-[hsl(var(--surface-2))]/90"
-                >
-                  {t.ui.categories}
-                  <Icon.Chevron open={catsOpen} />
-                </button>
-
-                <AnimatePresence initial={false}>
-                  {catsOpen ? (
-                    <motion.div
-                      id={catsPanelId}
-                      role="region"
-                      aria-label={t.ui.categories}
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: reducedMotion ? 0 : 0.22, ease: 'easeOut' }}
-                      className="overflow-hidden"
-                    >
-                      <ul className="mt-3 grid grid-cols-1 gap-2 xs:grid-cols-2 gap-2.5 sm:grid-cols-3">
-                        {categories.map((category) => (
-                          <li key={category.href}>
-                            <Link
-                              href={category.href}
-                              onPointerDown={() => {
-                                prefetchOnPointer(category.href);
-                                closeMenu('cat_click');
-                              }}
-                              onFocus={() => prefetchOnPointer(category.href)}
-                              onClick={() => {
-                                track({ action: 'mobile_nav_cat', label: category.href });
-                                closeMenu('cat_click');
-                              }}
-                              className="focus-ring group flex min-h-[3rem] items-center gap-3 rounded-2xl border border-[hsl(var(--border))]/35 bg-[hsl(var(--surface))]/92 p-3 shadow-[0_6px_18px_rgba(15,23,42,0.22)] transition hover:-translate-y-0.5 hover:border-[hsl(var(--accent)/.35)] hover:bg-[hsl(var(--surface-2))]/95 hover:shadow-[0_12px_30px_rgba(15,23,42,0.3)]"
-                            >
-                              <category.Icon className="opacity-80" />
-                              <span className="flex-1">
-                                <span className="block text-sm font-semibold">
-                                  {category.label}
-                                </span>
-                                <span className="block text-xs text-token-text/60">
-                                  {category.desc}
-                                </span>
-                              </span>
-                              <svg
-                                width="18"
-                                height="18"
-                                viewBox="0 0 24 24"
-                                className="opacity-50 group-hover:opacity-90"
-                                aria-hidden="true"
-                              >
-                                <path fill="currentColor" d="M9 18l6-6-6-6v12z" />
-                              </svg>
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </motion.div>
-                  ) : null}
-                </AnimatePresence>
-              </div>
 
               <section
                 className="border-t border-[hsl(var(--border))]/40 bg-[hsl(var(--surface))]/94 px-5 pt-5 pb-5"
@@ -1029,18 +993,78 @@ export default function MobileNav() {
                         <li key={href}>
                           <button
                             type="button"
-                            onClick={openCatsFromNav}
+                            onClick={() => dispatch({ type: 'TOGGLE_CATS' })}
                             aria-expanded={catsOpen}
                             aria-controls={catsPanelId}
-                            className="focus-ring flex min-h-[2.75rem] w-full items-center rounded-2xl border border-transparent px-4 py-3 text-left transition hover:bg-[hsl(var(--surface-2))]/80 active:bg-[hsl(var(--surface-2))]/70"
+                            className="focus-ring flex min-h-[2.75rem] w-full items-center gap-3 justify-between rounded-2xl border border-transparent px-4 py-3 text-left transition active:scale-[0.98] hover:bg-[hsl(var(--surface-2))]/80 active:bg-[hsl(var(--surface-2))]/70"
                           >
-                            {label}
+                            <span className="flex items-center gap-3">
+                              <span className="shrink-0 text-token-text/55">
+                                <NavIcon.Grid />
+                              </span>
+                              {label}
+                            </span>
+                            <Icon.Chevron open={catsOpen} />
                           </button>
+                          <AnimatePresence initial={false}>
+                            {catsOpen ? (
+                              <motion.div
+                                id={catsPanelId}
+                                role="region"
+                                aria-label={t.ui.categories}
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: reducedMotion ? 0 : 0.22, ease: 'easeOut' }}
+                                className="overflow-hidden"
+                              >
+                                <ul className="mb-1 mt-2 grid grid-cols-1 gap-2 xs:grid-cols-2 gap-2.5 sm:grid-cols-3">
+                                  {categories.map((category) => (
+                                    <li key={category.href}>
+                                      <Link
+                                        href={category.href}
+                                        onPointerDown={() => {
+                                          prefetchOnPointer(category.href);
+                                          closeMenu('cat_click');
+                                        }}
+                                        onFocus={() => prefetchOnPointer(category.href)}
+                                        onClick={() => {
+                                          track({ action: 'mobile_nav_cat', label: category.href });
+                                          closeMenu('cat_click');
+                                        }}
+                                        className="focus-ring group flex min-h-[3rem] items-center gap-3 rounded-2xl border border-[hsl(var(--border))]/35 bg-[hsl(var(--surface))]/92 p-3 shadow-[0_6px_18px_rgba(15,23,42,0.22)] transition hover:-translate-y-0.5 hover:border-[hsl(var(--accent)/.35)] hover:bg-[hsl(var(--surface-2))]/95 hover:shadow-[0_12px_30px_rgba(15,23,42,0.3)]"
+                                      >
+                                        <category.Icon className="opacity-80" />
+                                        <span className="flex-1">
+                                          <span className="block text-sm font-semibold">
+                                            {category.label}
+                                          </span>
+                                          <span className="block text-xs text-token-text/60">
+                                            {category.desc}
+                                          </span>
+                                        </span>
+                                        <svg
+                                          width="18"
+                                          height="18"
+                                          viewBox="0 0 24 24"
+                                          className="opacity-50 group-hover:opacity-90"
+                                          aria-hidden="true"
+                                        >
+                                          <path fill="currentColor" d="M9 18l6-6-6-6v12z" />
+                                        </svg>
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </motion.div>
+                            ) : null}
+                          </AnimatePresence>
                         </li>
                       );
                     }
 
                     const active = isActive(href);
+                    const NavIconComp = NAV_ICON_MAP[href];
 
                     return (
                       <li key={href}>
@@ -1057,17 +1081,22 @@ export default function MobileNav() {
                           }}
                           aria-current={active ? 'page' : undefined}
                           className={[
-                            'focus-ring flex min-h-[2.75rem] items-center rounded-2xl px-4 py-3 transition active:bg-[hsl(var(--surface-2))]/70',
+                            'focus-ring flex min-h-[2.75rem] items-center gap-3 rounded-2xl px-4 py-3 transition active:scale-[0.98] active:bg-[hsl(var(--surface-2))]/70',
                             promo
-                              ? 'bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-center font-semibold text-white shadow-md hover:shadow-lg'
+                              ? 'bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 font-semibold text-white shadow-md hover:shadow-lg'
                               : active
                                 ? 'border border-[hsl(var(--accent)/.30)] bg-[hsl(var(--accent)/.06)] font-semibold text-[hsl(var(--accent))]'
                                 : 'border border-transparent hover:bg-[hsl(var(--surface-2))]/80',
                           ].join(' ')}
                         >
+                          {NavIconComp ? (
+                            <span className={['shrink-0', active ? 'text-[hsl(var(--accent))]' : promo ? 'text-white/80' : 'text-token-text/50'].join(' ')}>
+                              <NavIconComp />
+                            </span>
+                          ) : null}
                           {label}
                           {promo ? (
-                            <span className="ml-2 inline-flex align-middle">
+                            <span className="ml-auto inline-flex align-middle">
                               <Icon.Flame />
                             </span>
                           ) : null}
