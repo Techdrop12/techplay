@@ -10,7 +10,18 @@ const DEFAULT_LOCALE: Locale = 'fr';
 
 const LOCALE_COOKIE = 'NEXT_LOCALE';
 
-const LOCALIZABLE_ROOTS = ['/cart', '/commande', '/blog'];
+const LOCALIZABLE_ROOTS = [
+  '/cart',
+  '/commande',
+  '/blog',
+  '/categorie',
+  '/contact',
+  '/faq',
+  '/cgv',
+  '/confidentialite',
+  '/mentions-legales',
+  '/compare',
+];
 
 function detectLocale(request: NextRequest): Locale {
   const cookie = request.cookies.get(LOCALE_COOKIE)?.value;
@@ -89,5 +100,13 @@ export const config = {
     '/commande/:path*',
     '/blog',
     '/blog/:path*',
+    '/categorie',
+    '/categorie/:path*',
+    '/contact',
+    '/faq',
+    '/cgv',
+    '/confidentialite',
+    '/mentions-legales',
+    '/compare',
   ],
 };

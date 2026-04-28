@@ -27,6 +27,14 @@ const LOCALIZED_PATHNAMES: readonly string[] = [
   '/commande',
   '/commande/success',
   '/blog',
+  '/categorie',
+  '/contact',
+  '/faq',
+  '/cgv',
+  '/confidentialite',
+  '/mentions-legales',
+  '/products/packs',
+  '/compare',
 ];
 
 function normalizePathname(p: string): string {
