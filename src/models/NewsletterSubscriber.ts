@@ -6,6 +6,9 @@ const NewsletterSubscriberSchema = new Schema(
     locale: { type: String, trim: true },
     pathname: { type: String, trim: true },
     source: { type: String, default: 'footer', trim: true },
+    confirmed: { type: Boolean, default: false, index: true },
+    confirmToken: { type: String, index: true, sparse: true },
+    confirmedAt: { type: Date },
   },
   { timestamps: true }
 );

@@ -6,7 +6,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Suspense, type ReactNode, useEffect, useRef, useState } from 'react';
 
 import Header from './Header';
-import BottomTabBar from './BottomTabBar';
+
+const BottomTabBar = dynamic(() => import('./BottomTabBar'), { ssr: false });
 
 import Footer from '@/components/Footer';
 import RouteViewShell from '@/components/RouteViewShell';

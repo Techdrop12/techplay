@@ -4,6 +4,7 @@ const WishlistSchema = new Schema(
   {
     email: { type: String, required: true, unique: true, trim: true, lowercase: true, index: true },
     productIds: [{ type: Schema.Types.ObjectId, ref: 'Product' }],
+    shareToken: { type: String, index: true, sparse: true },
   },
   { timestamps: true }
 );

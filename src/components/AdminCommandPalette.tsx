@@ -98,7 +98,7 @@ export default function AdminCommandPalette() {
           setSearchResults(Array.isArray(data?.results) ? data.results : []);
           setHighlightIndex(0);
         })
-        .catch(() => {})
+        .catch((e) => console.warn(e))
         .finally(() => setLoading(false));
     }, 200);
     return () => { clearTimeout(id); controller.abort(); };

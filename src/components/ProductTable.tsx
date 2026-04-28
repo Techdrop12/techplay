@@ -97,7 +97,7 @@ export default function ProductTable() {
     fetch('/api/admin/products/categories')
       .then((res) => res.json())
       .then((data: string[]) => setCategories(Array.isArray(data) ? data : []))
-      .catch(() => {});
+      .catch((e) => console.warn(e));
   }, []);
 
   const applyFilters = () => { setPage(1); setRefreshTrigger((n) => n + 1); };
