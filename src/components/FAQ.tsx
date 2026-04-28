@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocale, useTranslations } from 'next-intl';
@@ -19,17 +19,23 @@ interface FAQItem {
 const FALLBACK_FAQ_FR: FAQItem[] = [
   {
     _id: '1',
+    question: 'Pourquoi choisir TechPlay ?',
+    answer:
+      "Nous sélectionnons rigoureusement chaque produit : qualité garantie, meilleur rapport qualité/prix, livraison rapide et support humain réactif. Pas de remplissage — seulement les meilleurs produits gaming et high-tech.",
+  },
+  {
+    _id: '2',
     question: 'Quels sont les délais de livraison ?',
     answer: "Livraison internationale suivie. Livraison offerte dès 49 € d'achat.",
   },
   {
-    _id: '2',
+    _id: '3',
     question: 'Puis-je retourner un article ?',
     answer:
-      'Oui. Retours gratuits sous 30 jours : contactez-nous pour obtenir l’étiquette de retour.',
+      "Oui. Retours gratuits sous 30 jours : contactez-nous pour obtenir l'étiquette de retour.",
   },
   {
-    _id: '3',
+    _id: '4',
     question: 'Le paiement est-il sécurisé ?',
     answer: 'Oui. Paiement par Stripe (CB, Apple Pay, Google Pay). Données cryptées.',
   },
@@ -38,16 +44,22 @@ const FALLBACK_FAQ_FR: FAQItem[] = [
 const FALLBACK_FAQ_EN: FAQItem[] = [
   {
     _id: '1',
+    question: 'Why choose TechPlay?',
+    answer:
+      'We rigorously select every product: guaranteed quality, best value, fast delivery and real human support. No filler — only the best gaming and high-tech gear.',
+  },
+  {
+    _id: '2',
     question: 'What are the delivery times?',
     answer: 'International tracked delivery. Free shipping from €49.',
   },
   {
-    _id: '2',
+    _id: '3',
     question: 'Can I return an item?',
     answer: 'Yes. Free returns within 30 days: contact us to get a return label.',
   },
   {
-    _id: '3',
+    _id: '4',
     question: 'Is payment secure?',
     answer: 'Yes. Payment via Stripe (card, Apple Pay, Google Pay). Data encrypted.',
   },
@@ -65,7 +77,7 @@ interface FAQProps {
 export default function FAQ({ showSectionHeading = true, limit, showTools = true }: FAQProps) {
   const t = useTranslations('faq');
   const rawLocale = useLocale();
-  /** Valeur stable pour les deps d’effet (évite les boucles si `useLocale` varie entre rendus). */
+  /** Valeur stable pour les deps d'effet (évite les boucles si `useLocale` varie entre rendus). */
   const locale = rawLocale === 'en' ? 'en' : 'fr';
   const [faqs, setFaqs] = useState<FAQItem[]>([]);
   const [loading, setLoading] = useState(true);

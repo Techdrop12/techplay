@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { usePathname } from 'next/navigation';
 import {
@@ -78,7 +78,7 @@ const T = {
     ariaFooter: 'Pied de page',
     footerHeading: 'Informations et navigation secondaire',
     brandText:
-      'Des accessoires et packs sélectionnés pour la performance, l’innovation et le style.',
+      "Des accessoires et packs sélectionnés pour la performance, l'innovation et le style.",
     legalTitle: 'Légal',
     defaultGroups: [
       {
@@ -123,18 +123,18 @@ const T = {
       support: 'Support réactif',
     },
     badgesAria: 'Garanties',
-    newsletterTitle: 'Newsletter',
+    newsletterTitle: 'Deals & nouveautés — −10 % sur votre 1ʳᵉ commande',
     newsletterPlaceholder: 'votre@email.com',
-    newsletterButtonIdle: 'S’inscrire',
+    newsletterButtonIdle: "S'inscrire",
     newsletterButtonLoading: 'Envoi…',
     newsletterFormAria: 'Inscription newsletter',
     newsletterSuccess: 'Inscription confirmée. Bienvenue chez TechPlay !',
     newsletterToastSuccess: 'Vous êtes inscrit(e) 🎉',
     newsletterToastError: 'Inscription impossible pour le moment',
-    invalidEmail: 'Merci d’entrer une adresse email valide.',
+    invalidEmail: "Merci d'entrer une adresse email valide.",
     consentRequired: 'Vous devez accepter la politique de confidentialité.',
     genericError: 'Une erreur est survenue. Réessayez.',
-    consentTextStart: 'J’accepte de recevoir vos emails et la ',
+    consentTextStart: "J'accepte de recevoir vos emails et la ",
     privacyPolicy: 'politique de confidentialité',
     consentTextEnd: '.',
     hiddenWebsiteLabel: 'Votre site web',
@@ -196,7 +196,7 @@ const T = {
       support: 'Quick support',
     },
     badgesAria: 'Our guarantees',
-    newsletterTitle: 'Newsletter',
+    newsletterTitle: 'Best deals & news — −10% on your 1st order',
     newsletterPlaceholder: 'your@email.com',
     newsletterButtonIdle: 'Subscribe',
     newsletterButtonLoading: 'Sending…',

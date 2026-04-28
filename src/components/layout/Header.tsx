@@ -32,7 +32,8 @@ const HEADER_TRENDS = {
 
 type NavLink = {
   href: string;
-  labelKey: 'categories' | 'blog' | 'contact';
+  labelKey?: 'categories' | 'blog' | 'contact';
+  labels?: { fr: string; en: string };
 };
 
 type CartItemLike = {
@@ -59,8 +60,9 @@ type WishlistStoreLike = {
 
 const LINKS: NavLink[] = [
   { href: '/categorie', labelKey: 'categories' },
+  { href: '/products', labels: { fr: 'Produits', en: 'Products' } },
+  { href: '/products/packs', labels: { fr: 'Packs', en: 'Packs' } },
   { href: '/blog', labelKey: 'blog' },
-  { href: '/contact', labelKey: 'contact' },
 ];
 
 const SCROLL_HIDE_OFFSET = 80;
@@ -361,8 +363,8 @@ export default function Header() {
           className="hidden shrink-0 items-center border-l border-[hsl(var(--border))]/50 pl-4 lg:flex lg:gap-6 xl:gap-8 xl:pl-6"
           aria-label={t('nav_aria')}
         >
-          {LINKS.map(({ href, labelKey }) => {
-            const label = t(labelKey);
+          {LINKS.map(({ href, labelKey, labels }) => {
+            const label = labels ? labels[locale] : t(labelKey!);
             const active = isActive(href);
 
             if (labelKey === 'categories') {

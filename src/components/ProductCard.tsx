@@ -334,8 +334,21 @@ function ProductCard({ product, className, priority = false }: ProductCardProps)
               ) : null}
             </div>
 
-            {/* 3. Réassurance — une ligne, adaptée au cadre */}
-            <div className="mt-5 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] sm:mt-5">
+            {/* 3. Micro-bénéfice conversion */}
+            {(product.isBestSeller || (ratingValue >= 4 && reviewsCount > 0)) && (
+              <p className="mt-3 text-[11px] font-semibold text-[hsl(var(--accent))]">
+                {product.isBestSeller
+                  ? routeLocale === 'en'
+                    ? '✓ Best seller · Top value'
+                    : '✓ Best seller · Top rapport qualité/prix'
+                  : routeLocale === 'en'
+                    ? '✓ Highly rated · Trusted by customers'
+                    : '✓ Très bien noté · Apprécié des clients'}
+              </p>
+            )}
+
+            {/* 4. Réassurance — une ligne, adaptée au cadre */}
+            <div className="mt-3 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] sm:mt-4">
               {ratingValue > 0 || reviewsCount > 0 ? (
                 <span className="flex items-center gap-1 text-[hsl(var(--text))]/70">
                   <RatingStars
