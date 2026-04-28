@@ -8,15 +8,8 @@ import { z } from 'zod';
 import { serverEnv } from '@/env.server';
 import { getErrorMessage } from '@/lib/errors';
 import { error as logError } from '@/lib/logger';
-import { createRateLimiter, ipFromRequest, withRateLimit } from '@/lib/rateLimit';
-
-// ------------- Rate limit (5 req / min par IP, fenêtre glissante) -------------
-const limiter = createRateLimiter({
-  id: 'review',
-  limit: 5,
-  intervalMs: 60_000,
-  strategy: 'sliding-window',
-});
+import { cloudCheck, rateLimitHeaders } from '@/lib/cloudRateLimit';
+import { ipFromRequest } from '@/lib/rateLimit';
 
 // ------------- Validation -------------
 const ReviewSchemaZ = z.object({
@@ -235,5 +228,10 @@ async function handler(request: Request) {
   return NextResponse.json({ success: true, message: 'Avis reçu' }, { status: 200 });
 }
 
-// Middleware rate limit -> ajoute les bons headers et gère 429
-export const POST = withRateLimit(handler, limiter);
+export async function POST(req: Request) {
+  const rl = await cloudCheck(req, { id: 'review', limit: 5, windowSec: 60 });
+  if (!rl.ok) {
+    return new Response('Too Many Requests', { status: 429, headers: rateLimitHeaders(rl) });
+  }
+  return handler(req);
+}

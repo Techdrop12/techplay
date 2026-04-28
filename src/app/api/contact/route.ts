@@ -4,27 +4,19 @@ import { error as logError } from '@/lib/logger';
 import { connectToDatabase } from '@/lib/db';
 import ContactSubmission from '@/models/ContactSubmission';
 import { apiError, apiSuccess, safeErrorForLog } from '@/lib/apiResponse';
-import { createRateLimiter, ipFromRequest } from '@/lib/rateLimit';
+import { cloudCheck, rateLimitHeaders } from '@/lib/cloudRateLimit';
 import { contactSchema } from '@/lib/zodSchemas';
-
-const contactLimiter = createRateLimiter({
-  id: 'contact',
-  limit: 10,
-  intervalMs: 60_000,
-  strategy: 'fixed-window',
-});
 
 function toPlain(obj: unknown) {
   return JSON.parse(JSON.stringify(obj));
 }
 
 export async function POST(req: Request) {
-  const ip = ipFromRequest(req);
-  const rl = contactLimiter.check(ip);
+  const rl = await cloudCheck(req, { id: 'contact', limit: 10, windowSec: 60 });
   if (!rl.ok) {
     return NextResponse.json(
       { error: 'Trop de requêtes. Réessayez dans une minute.' },
-      { status: 429, headers: contactLimiter.headers(rl) }
+      { status: 429, headers: rateLimitHeaders(rl) }
     );
   }
 

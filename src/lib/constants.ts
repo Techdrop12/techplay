@@ -4,8 +4,8 @@
 export const BRAND = {
   NAME: process.env.NEXT_PUBLIC_SITE_NAME ?? 'TechPlay',
   /** URL sans slash final (canonical, OG, etc.) */
-  URL: (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://techplay.example.com').replace(/\/+$/, ''),
-  SUPPORT_EMAIL: process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'support@techplay.example.com',
+  URL: (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.techplay.fr').replace(/\/+$/, ''),
+  SUPPORT_EMAIL: process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'support@techplay.fr',
   PHONE: process.env.NEXT_PUBLIC_SUPPORT_PHONE ?? '+33 1 23 45 67 89',
   ADDRESS:
     process.env.NEXT_PUBLIC_COMPANY_ADDRESS ??

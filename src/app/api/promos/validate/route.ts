@@ -4,17 +4,10 @@ import { apiError, apiJson } from '@/lib/apiResponse';
 import { connectToDatabase } from '@/lib/db';
 import { error as logError } from '@/lib/logger';
 import { safeErrorForLog } from '@/lib/apiResponse';
-import { createRateLimiter, ipFromRequest } from '@/lib/rateLimit';
+import { cloudCheck } from '@/lib/cloudRateLimit';
 import Coupon from '@/models/Coupon';
 
 export const dynamic = 'force-dynamic';
-
-const validateLimiter = createRateLimiter({
-  id: 'promo-validate',
-  limit: 10,
-  intervalMs: 60_000,
-  strategy: 'fixed-window',
-});
 
 const BodySchema = z.object({
   code: z
@@ -26,8 +19,7 @@ const BodySchema = z.object({
 });
 
 export async function POST(req: Request) {
-  const ip = ipFromRequest(req);
-  const rl = validateLimiter.check(ip);
+  const rl = await cloudCheck(req, { id: 'promo-validate', limit: 10, windowSec: 60 });
   if (!rl.ok) return apiError('Trop de tentatives', 429);
 
   const raw = await req.json().catch(() => ({}));

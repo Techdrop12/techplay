@@ -624,7 +624,12 @@ export default function CheckoutForm() {
             {t('promo_label')}
           </label>
           {promoResult ? (
-            <div className="flex items-center gap-2 rounded-xl border border-emerald-500/60 bg-emerald-500/8 px-3.5 py-3">
+            <div
+              className="flex items-center gap-2 rounded-xl border border-emerald-500/60 bg-emerald-500/8 px-3.5 py-3"
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+            >
               <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" className="shrink-0 text-emerald-600">
                 <path fill="currentColor" d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
               </svg>

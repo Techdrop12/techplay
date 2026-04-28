@@ -9,19 +9,12 @@ import { apiError, apiJson, safeErrorForLog } from '@/lib/apiResponse';
 import { BRAND } from '@/lib/constants';
 import { getErrorMessage } from '@/lib/errors';
 import { error as logError } from '@/lib/logger';
-import { createRateLimiter, ipFromRequest } from '@/lib/rateLimit';
+import { cloudCheck, rateLimitHeaders } from '@/lib/cloudRateLimit';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const SITE_URL = BRAND.URL || (IS_PRODUCTION ? '' : 'http://localhost:3000');
 const STRIPE_KEY = serverEnv.STRIPE_SECRET_KEY?.trim() ?? '';
 const ALLOWED_ORIGINS = SITE_URL ? [SITE_URL] : [];
-
-const checkoutLimiter = createRateLimiter({
-  id: 'checkout',
-  limit: IS_PRODUCTION ? 15 : 30,
-  intervalMs: 60_000,
-  strategy: 'fixed-window',
-});
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -108,14 +101,17 @@ export async function POST(request: Request) {
       return apiError('Forbidden', 403);
     }
 
-    const ip = ipFromRequest(request);
-    const rl = checkoutLimiter.check(ip);
+    const rl = await cloudCheck(request, { id: 'checkout', limit: IS_PRODUCTION ? 15 : 30, windowSec: 60 });
     if (!rl.ok) {
       return NextResponse.json(
         { error: 'Too many requests' },
-        { status: 429, headers: checkoutLimiter.headers(rl) }
+        { status: 429, headers: rateLimitHeaders(rl) }
       );
     }
+
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+      ?? request.headers.get('x-real-ip')
+      ?? 'unknown';
 
     const raw = await request.json().catch(() => ({}));
     const parsed = BodySchema.safeParse(raw);

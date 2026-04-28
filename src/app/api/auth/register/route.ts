@@ -2,15 +2,12 @@ import bcrypt from 'bcryptjs';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { createUser, getUserByEmail } from '@/lib/db/users';
-import { createRateLimiter, ipFromRequest } from '@/lib/rateLimit';
-
-const registerLimiter = createRateLimiter({ id: 'register', limit: 5, intervalMs: 60_000 });
+import { cloudCheck, rateLimitHeaders } from '@/lib/cloudRateLimit';
 
 export async function POST(req: NextRequest) {
-  const ip = ipFromRequest(req);
-  const rl = registerLimiter.check(ip);
+  const rl = await cloudCheck(req, { id: 'register', limit: 5, windowSec: 60 });
   if (!rl.ok) {
-    return NextResponse.json({ error: 'too_many_requests' }, { status: 429, headers: registerLimiter.headers(rl) });
+    return NextResponse.json({ error: 'too_many_requests' }, { status: 429, headers: rateLimitHeaders(rl) });
   }
   try {
     const { name, email, password } = (await req.json()) as {

@@ -731,6 +731,9 @@ export default function Footer({
                     </div>
 
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+                      <label htmlFor={emailId} className="sr-only">
+                        {locale === 'en' ? 'Email address' : 'Adresse e-mail'}
+                      </label>
                       <input
                         id={emailId}
                         type="email"
