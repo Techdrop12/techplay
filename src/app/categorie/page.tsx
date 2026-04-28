@@ -4,7 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import Link from '@/components/LocalizedLink';
 import { generateMeta, jsonLdBreadcrumbs, jsonLdItemList } from '@/lib/seo';
 
-export const revalidate = 3600;
+export const revalidate = 600;
 
 const CATEGORIES: { slug: string; label: string; description: string }[] = [
   {

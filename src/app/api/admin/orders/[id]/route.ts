@@ -1,6 +1,9 @@
+import { z } from 'zod';
+
 import { error as logError } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/apiResponse';
 import { connectToDatabase } from '@/lib/db';
+import { toPlain } from '@/lib/utils';
 import Order from '@/models/Order';
 import { requireAdmin } from '@/lib/requireAdmin';
 
@@ -13,9 +16,9 @@ const ALLOWED_STATUSES = [
   'annulée',
 ] as const;
 
-function toPlain(obj: unknown) {
-  return JSON.parse(JSON.stringify(obj));
-}
+const PatchSchema = z.object({
+  status: z.enum(ALLOWED_STATUSES),
+});
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const err = await requireAdmin();
@@ -42,18 +45,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const { id } = await params;
   if (!id) return apiError('ID manquant', 400);
 
-  let body: { status?: string };
-  try {
-    body = await req.json();
-  } catch {
-    return apiError('Body JSON invalide', 400);
-  }
-
-  const status = body?.status != null ? String(body.status).trim() : '';
-  if (!status) return apiError('Statut manquant', 400);
-  if (!ALLOWED_STATUSES.includes(status as (typeof ALLOWED_STATUSES)[number])) {
+  const raw = await req.json().catch(() => ({}));
+  const parsed = PatchSchema.safeParse(raw);
+  if (!parsed.success) {
     return apiError(`Statut invalide. Autorisés: ${ALLOWED_STATUSES.join(', ')}`, 400);
   }
+  const { status } = parsed.data;
 
   try {
     await connectToDatabase();

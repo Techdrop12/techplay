@@ -45,6 +45,20 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(target, { status: 308 });
   }
 
+  // Account route protection (requires any valid session)
+  if (pathname.startsWith('/account')) {
+    const token = await getToken({
+      req: request,
+      secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET,
+    });
+    if (!token) {
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('callbackUrl', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    return NextResponse.next();
+  }
+
   // Admin route protection
   if (!pathname.startsWith('/admin') || pathname.startsWith('/admin/login')) {
     return NextResponse.next();
@@ -66,5 +80,14 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/cart', '/cart/:path*', '/commande', '/commande/:path*', '/blog', '/blog/:path*'],
+  matcher: [
+    '/admin/:path*',
+    '/account/:path*',
+    '/cart',
+    '/cart/:path*',
+    '/commande',
+    '/commande/:path*',
+    '/blog',
+    '/blog/:path*',
+  ],
 };

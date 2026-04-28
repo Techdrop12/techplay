@@ -12,6 +12,16 @@ import { generateMeta, jsonLdBreadcrumbs, jsonLdItemList } from '@/lib/seo';
 
 export const revalidate = 900;
 
+export async function generateStaticParams(): Promise<{ category: string }[]> {
+  try {
+    const products = await getAllProducts();
+    const categories = [...new Set(products.map(p => (p as Record<string, unknown>).category as string).filter(Boolean))];
+    return categories.map(c => ({ category: c }));
+  } catch {
+    return [];
+  }
+}
+
 type SortKey = 'price_asc' | 'price_desc' | 'rating' | 'new' | 'promo';
 type ProductRecord = Record<string, unknown>;
 type IconComponent = (props: SVGProps<SVGSVGElement>) => JSX.Element;

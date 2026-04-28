@@ -1,6 +1,7 @@
 // src/components/blog/BlogCard.tsx
 'use client';
 
+import { memo } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
@@ -28,7 +29,7 @@ function getSafeImage(article: BlogPost): string {
   return '/og-image.jpg';
 }
 
-export default function BlogCard({ article, featured }: BlogCardProps) {
+function BlogCard({ article, featured }: BlogCardProps) {
   const t = useTranslations('blog');
   const imageSrc = getSafeImage(article);
   const dateLabel = formatDate(article.createdAt);
@@ -116,3 +117,5 @@ export default function BlogCard({ article, featured }: BlogCardProps) {
     </motion.article>
   );
 }
+
+export default memo(BlogCard);

@@ -2,6 +2,7 @@ import mongoose, { Schema, type InferSchemaType } from 'mongoose';
 
 const ReturnSchema = new Schema(
   {
+    orderId: { type: Schema.Types.ObjectId, ref: 'Order', index: true },
     orderRef: { type: String, required: true, index: true },
     email: { type: String, required: true, lowercase: true, index: true },
     reason: {

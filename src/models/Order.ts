@@ -26,9 +26,20 @@ const OrderSchema = new mongoose.Schema(
     meta: mongoose.Schema.Types.Mixed,
     coupon: String,
     deliveredAt: Date,
+    refundStatus: {
+      type: String,
+      enum: ['none', 'partial', 'full'],
+      default: 'none',
+    },
+    paymentMethod: String,
+    shippingCost: { type: Number, default: 0, min: 0 },
+    taxAmount: { type: Number, default: 0, min: 0 },
+    notes: String,
   },
   { timestamps: true }
 );
+
+OrderSchema.index({ 'meta.stripeEventId': 1 }, { unique: true, sparse: true });
 
 export type OrderDoc = InferSchemaType<typeof OrderSchema>;
 

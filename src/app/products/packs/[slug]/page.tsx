@@ -7,9 +7,18 @@ import type { Metadata } from 'next';
 import ProductJsonLd from '@/components/JsonLd/ProductJsonLd';
 import PackDetails from '@/components/PackDetails';
 import { BRAND } from '@/lib/constants';
-import { getPackBySlug } from '@/lib/data';
+import { getAllPacks, getPackBySlug } from '@/lib/data';
 
 export const revalidate = 1800;
+
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
+  try {
+    const packs = await getAllPacks();
+    return packs.filter(p => p.slug).map(p => ({ slug: p.slug as string }));
+  } catch {
+    return [];
+  }
+}
 
 const SITE = BRAND.URL;
 

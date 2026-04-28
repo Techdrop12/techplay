@@ -3,7 +3,7 @@
 
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
-import { useEffect, useMemo, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 
 import type { Product } from '@/types/product';
 
@@ -26,7 +26,7 @@ interface CartListProps {
   className?: string;
 }
 
-export default function CartList({
+function CartList({
   items,
   showControls = true,
   onClear,
@@ -154,3 +154,5 @@ export default function CartList({
     </section>
   );
 }
+
+export default memo(CartList);

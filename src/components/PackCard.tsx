@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import {
+  memo,
   useCallback,
   useEffect,
   useId,
@@ -162,7 +163,7 @@ const toAbs = (value?: string) => {
   return value;
 };
 
-export default function PackCard({ pack, priority = false, className }: PackCardProps) {
+function PackCard({ pack, priority = false, className }: PackCardProps) {
   const pathname = usePathname() || '/';
   const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr';
   const routeLocale = useLocale();
@@ -645,3 +646,5 @@ export default function PackCard({ pack, priority = false, className }: PackCard
     </motion.article>
   );
 }
+
+export default memo(PackCard);

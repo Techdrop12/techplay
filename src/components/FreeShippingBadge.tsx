@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 
 import { UI } from '@/lib/constants';
 import { cn, formatPrice, storefrontPriceOpts } from '@/lib/utils';
@@ -93,7 +93,7 @@ function ConfettiSVG() {
   );
 }
 
-export default function FreeShippingBadge({
+function FreeShippingBadge({
   price,
   threshold = UI.FREE_SHIPPING_THRESHOLD,
   className,
@@ -435,3 +435,5 @@ export default function FreeShippingBadge({
     </div>
   );
 }
+
+export default memo(FreeShippingBadge);

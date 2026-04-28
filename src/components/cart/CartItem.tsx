@@ -5,7 +5,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 
 import Link from '@/components/LocalizedLink';
 import { useCart } from '@/hooks/useCart';
@@ -28,7 +28,7 @@ const MAX_QTY = 99;
 
 const clamp = (n: number) => Math.max(MIN_QTY, Math.min(MAX_QTY, Math.trunc(n || 0)));
 
-export default function CartItem({ item }: CartItemProps) {
+function CartItem({ item }: CartItemProps) {
   const t = useTranslations('cart');
   const routeLocale = useLocale();
   const priceFmt = useMemo(() => storefrontPriceOpts(routeLocale), [routeLocale]);
@@ -165,3 +165,5 @@ export default function CartItem({ item }: CartItemProps) {
     </motion.li>
   );
 }
+
+export default memo(CartItem);

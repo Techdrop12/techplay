@@ -122,8 +122,23 @@ function makeIdemKey(input: { productId: string; email?: string; comment: string
 }
 
 // ------------- Helpers -------------
-function stripTags(value: string) {
-  return value.replace(/<[^>]*>/g, '').trim();
+function stripTags(value: string): string {
+  // Decode common HTML entities before stripping to prevent encoded injection
+  let text = value
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&amp;/gi, '&')
+    .replace(/&#x[0-9a-f]+;/gi, '')
+    .replace(/&#[0-9]+;/gi, '');
+  // Iterative tag stripping handles nested/malformed tags like <sc<ript>
+  let prev = '';
+  while (prev !== text) {
+    prev = text;
+    text = text.replace(/<[^>]*>/g, '');
+  }
+  // Remove javascript: and data: protocols
+  text = text.replace(/javascript:/gi, '').replace(/data:/gi, '');
+  return text.replace(/\s+/g, ' ').trim();
 }
 
 function getErrorCode(error: unknown): string | number | undefined {

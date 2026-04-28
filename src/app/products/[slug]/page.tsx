@@ -10,13 +10,22 @@ import ProductJsonLd from '@/components/JsonLd/ProductJsonLd';
 import ProductDetail from '@/components/ProductDetail';
 import ProductGrid from '@/components/ProductGrid';
 import { LIST_NAMES } from '@/lib/analytics-events';
-import { getProductBySlug, getRelatedProducts } from '@/lib/data';
+import { getAllProducts, getProductBySlug, getRelatedProducts } from '@/lib/data';
 import { readBoolean, readNumber, readString } from '@/lib/recordReaders';
 import { DEFAULT_LOCALE } from '@/lib/language';
 import { getFallbackDescription } from '@/lib/meta';
 import { generateProductMeta, jsonLdBreadcrumbs } from '@/lib/seo';
 
 export const revalidate = 1800;
+
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
+  try {
+    const products = await getAllProducts();
+    return products.filter(p => p.slug).map(p => ({ slug: p.slug as string }));
+  } catch {
+    return [];
+  }
+}
 
 const getProductCached = cache(async (slug: string) => getProductBySlug(slug));
 

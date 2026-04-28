@@ -36,6 +36,7 @@ const ProductSchema = new Schema(
     featured: { type: Boolean, default: false, index: true },
     isNew: { type: Boolean, default: false, index: true },
     isBestSeller: { type: Boolean, default: false, index: true },
+    recommended: { type: Boolean, default: false, index: true },
     supplier: String,
     reference: String,
     tags: [{ type: String }],
@@ -60,7 +61,10 @@ ProductSchema.virtual('id').get(function (this: { _id: Types.ObjectId }) {
   return this._id.toString();
 });
 
-ProductSchema.index({ title: 'text', description: 'text', brand: 'text', category: 'text' });
+ProductSchema.index(
+  { title: 'text', description: 'text', brand: 'text', category: 'text' },
+  { weights: { title: 10, category: 5, brand: 3, description: 1 }, name: 'product_text_search' }
+);
 
 export type Product = InferSchemaType<typeof ProductSchema>;
 

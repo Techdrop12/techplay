@@ -110,6 +110,18 @@ export async function getRelatedProducts(
   return toPlain<ProductType[]>(docs);
 }
 
+export async function getAllPacks(): Promise<PackType[]> {
+  await connectToDatabase();
+
+  const docs = await Pack.find({})
+    .sort({ createdAt: -1 })
+    .select(PACK_LIST_FIELDS)
+    .lean()
+    .exec();
+
+  return toPlain<PackType[]>(docs);
+}
+
 export async function getRecommendedPacks(): Promise<PackType[]> {
   await connectToDatabase();
 

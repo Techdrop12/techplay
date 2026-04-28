@@ -5,8 +5,10 @@ import type Stripe from 'stripe';
 import { serverEnv } from '@/env.server';
 import { apiError, apiJson, safeErrorForLog } from '@/lib/apiResponse';
 import { createOrder, getOrderByStripeEventId } from '@/lib/db/orders';
-import { error as logError } from '@/lib/logger';
+import { connectToDatabase } from '@/lib/db';
+import { error as logError, log } from '@/lib/logger';
 import stripe from '@/lib/stripe';
+import Order from '@/models/Order';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -78,6 +80,43 @@ export async function POST(req: Request) {
           },
         });
 
+        break;
+      }
+
+      case 'charge.failed': {
+        const charge = event.data.object as Stripe.Charge;
+        logError('[stripe-webhook] Paiement échoué', {
+          chargeId: charge.id,
+          amount: charge.amount,
+          failureCode: charge.failure_code,
+          failureMessage: charge.failure_message,
+          email: charge.billing_details?.email,
+        });
+        break;
+      }
+
+      case 'charge.refunded': {
+        const charge = event.data.object as Stripe.Charge;
+        const paymentIntentId = typeof charge.payment_intent === 'string' ? charge.payment_intent : null;
+
+        if (paymentIntentId) {
+          try {
+            await connectToDatabase();
+            const isFullRefund = charge.amount_refunded >= charge.amount;
+            await Order.findOneAndUpdate(
+              { 'meta.stripePaymentIntentId': paymentIntentId },
+              {
+                $set: {
+                  status: 'annulée',
+                  refundStatus: isFullRefund ? 'full' : 'partial',
+                },
+              }
+            ).exec();
+            log('[stripe-webhook] Commande remboursée', { paymentIntentId, isFullRefund });
+          } catch (refundErr) {
+            logError('[stripe-webhook] Erreur mise à jour remboursement', safeErrorForLog(refundErr));
+          }
+        }
         break;
       }
 
