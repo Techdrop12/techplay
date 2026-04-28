@@ -1,5 +1,7 @@
 'use client';
 
+import { memo } from 'react';
+
 import { cn } from '@/lib/utils';
 
 export interface SectionHeaderProps {
@@ -18,7 +20,7 @@ export interface SectionHeaderProps {
   className?: string;
 }
 
-export default function SectionHeader({
+function SectionHeader({
   kicker,
   title,
   sub,
@@ -39,3 +41,5 @@ export default function SectionHeader({
     </header>
   );
 }
+
+export default memo(SectionHeader);

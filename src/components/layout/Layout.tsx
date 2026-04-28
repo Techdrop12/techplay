@@ -222,7 +222,7 @@ export default function Layout({ children, analytics = true }: LayoutProps) {
         data-theme={theme}
         data-pathname={pathname}
         aria-label={tAria('main_content')}
-        className="relative z-0 min-h-[calc(var(--vh,1vh)*100)] bg-token-surface px-[max(0px,env(safe-area-inset-left))] pb-[max(0px,env(safe-area-inset-bottom))] pr-[max(0px,env(safe-area-inset-right))] pt-[var(--header-offset,4.5rem)] text-token-text transition-colors before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:z-0 before:h-36 before:bg-gradient-to-b before:from-[hsl(var(--accent)/0.055)] before:to-transparent before:content-['']"
+        className="relative z-0 min-h-[calc(var(--vh,1vh)*100)] bg-token-surface px-[max(0px,env(safe-area-inset-left))] pb-[calc(3.75rem+env(safe-area-inset-bottom,0px))] pr-[max(0px,env(safe-area-inset-right))] pt-[var(--header-offset,4.5rem)] text-token-text transition-colors lg:pb-[max(0px,env(safe-area-inset-bottom))] before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:z-0 before:h-36 before:bg-gradient-to-b before:from-[hsl(var(--accent)/0.055)] before:to-transparent before:content-['']"
       >
         <RouteViewShell>
           <Suspense

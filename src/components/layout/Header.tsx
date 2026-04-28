@@ -20,95 +20,19 @@ import { useTheme } from '@/context/themeContext';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
 import { getCategories } from '@/lib/categories';
+import { useTranslations } from 'next-intl';
+
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing';
 import { cn } from '@/lib/utils';
 
-const STR = {
-  fr: {
-    nav: {
-      categories: 'Catégories',
-      products: 'Tous les produits',
-      packs: 'Créer un bundle',
-      wishlist: 'Wishlist',
-      blog: 'Blog',
-      contact: 'Support & contact',
-    },
-    headerNavAria: 'Navigation principale',
-    searchAria: 'Recherche produits',
-    searchHint: 'Raccourcis : « / » ou « Ctrl/⌘ K » pour rechercher.',
-    placeholderPrefix: 'Rechercher… ex :',
-    trends: [
-      'écouteurs bluetooth',
-      'casque gaming',
-      'chargeur rapide USB-C',
-      'pack starter',
-      'power bank',
-      'souris sans fil',
-    ],
-    selection: 'Sélection',
-    packsTitle: 'Créer mon bundle',
-    packsDesc: 'Compose ton setup sur mesure et économise sur chaque combinaison.',
-    viewPacks: 'Créer un bundle',
-    allProducts: 'Tous les produits',
-    wishlistAria: (n: number) => (n > 0 ? `Voir la wishlist (${n})` : 'Voir la wishlist'),
-    cartAria: (n: number) => (n > 0 ? `Voir le panier (${n})` : 'Voir le panier'),
-    cartShort: 'Panier',
-    cartItemsCount: (n: number) => (n === 1 ? '1 article' : `${n} articles`),
-    account: {
-      aria: 'Espace client',
-      title: 'Espace client',
-    },
-    headerAria: 'En-tête du site',
-    logoAria: 'TechPlay — Accueil',
-    localeSwitcherAria: 'Sélecteur de langue',
-    switch_to_en: 'Passer en anglais',
-    switch_to_fr: 'Passer en français',
-  },
-  en: {
-    nav: {
-      categories: 'Categories',
-      products: 'All products',
-      packs: 'Build a bundle',
-      wishlist: 'Wishlist',
-      blog: 'Blog',
-      contact: 'Support & contact',
-    },
-    headerNavAria: 'Primary navigation',
-    searchAria: 'Product search',
-    searchHint: 'Shortcuts: “/” or “Ctrl/⌘ K” to search.',
-    placeholderPrefix: 'Search… e.g.:',
-    trends: [
-      'bluetooth earbuds',
-      'gaming headset',
-      'USB-C fast charger',
-      'starter pack',
-      'power bank',
-      'wireless mouse',
-    ],
-    selection: 'Featured',
-    packsTitle: 'Build my bundle',
-    packsDesc: 'Compose your custom setup and save on every combination.',
-    viewPacks: 'Build a bundle',
-    allProducts: 'All products',
-    wishlistAria: (n: number) => (n > 0 ? `View wishlist (${n})` : 'View wishlist'),
-    cartAria: (n: number) => (n > 0 ? `View cart (${n})` : 'View cart'),
-    cartShort: 'Cart',
-    cartItemsCount: (n: number) => (n === 1 ? '1 item' : `${n} items`),
-    account: {
-      aria: 'Account',
-      title: 'Account',
-    },
-    headerAria: 'Site header',
-    logoAria: 'TechPlay — Home',
-    localeSwitcherAria: 'Language selector',
-    switch_to_en: 'Switch to English',
-    switch_to_fr: 'Switch to French',
-  },
+const HEADER_TRENDS = {
+  fr: ['écouteurs bluetooth', 'casque gaming', 'chargeur rapide USB-C', 'pack starter', 'power bank', 'souris sans fil'],
+  en: ['bluetooth earbuds', 'gaming headset', 'USB-C fast charger', 'starter pack', 'power bank', 'wireless mouse'],
 } as const;
 
 type NavLink = {
   href: string;
-  labelKey: keyof typeof STR.fr.nav;
+  labelKey: 'categories' | 'blog' | 'contact';
 };
 
 type CartItemLike = {
@@ -189,9 +113,10 @@ export default function Header() {
   const pathname = usePathname() || '/';
   const router = useRouter();
   const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr';
-  const t = STR[locale];
+  const t = useTranslations('header');
   const L = (path: string) => localizePath(path, locale);
 
+  const trends = HEADER_TRENDS[locale];
   const searchAction = L('/search');
   const categories = useMemo(() => getCategories(locale), [locale]);
 
@@ -208,7 +133,7 @@ export default function Header() {
   const [hidden, setHidden] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [catOpen, setCatOpen] = useState(false);
-  const [placeholder, setPlaceholder] = useState<string>(() => t.trends[0] ?? '');
+  const [placeholder, setPlaceholder] = useState<string>(() => trends[0] ?? '');
 
   const lastY = useRef(0);
   const ticking = useRef(false);
@@ -324,19 +249,19 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    const trends: string[] = [...t.trends];
-    setPlaceholder(trends[0] ?? '');
+    const localTrends: string[] = [...trends];
+    setPlaceholder(localTrends[0] ?? '');
 
     const interval = window.setInterval(() => {
       setPlaceholder((current) => {
-        const currentIndex = trends.indexOf(current);
-        const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % trends.length : 0;
-        return trends[nextIndex] ?? '';
+        const currentIndex = localTrends.indexOf(current);
+        const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % localTrends.length : 0;
+        return localTrends[nextIndex] ?? '';
       });
     }, PLACEHOLDER_MS);
 
     return () => window.clearInterval(interval);
-  }, [t.trends]);
+  }, [trends]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -401,7 +326,7 @@ export default function Header() {
   return (
     <header
       role="banner"
-      aria-label={t.headerAria}
+      aria-label={t('header_aria')}
       data-hidden={hidden ? 'true' : 'false'}
       data-scrolled={scrolled ? 'true' : 'false'}
       className={cn(
@@ -415,7 +340,7 @@ export default function Header() {
         {/* Zone 1 — Branding */}
         <Link
           href="/"
-          aria-label={t.logoAria}
+          aria-label={t('logo_aria')}
           rel="home"
           className="touch-target shrink-0 rounded-xl p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))] md:p-1.5"
           data-gtm="header_logo_home"
@@ -434,10 +359,10 @@ export default function Header() {
         {/* Zone 2 — Navigation principale (desktop) : bloc visuel distinct */}
         <nav
           className="hidden shrink-0 items-center border-l border-[hsl(var(--border))]/50 pl-4 lg:flex lg:gap-6 xl:gap-8 xl:pl-6"
-          aria-label={t.headerNavAria}
+          aria-label={t('nav_aria')}
         >
           {LINKS.map(({ href, labelKey }) => {
-            const label = t.nav[labelKey];
+            const label = t(labelKey);
             const active = isActive(href);
 
             if (labelKey === 'categories') {
@@ -541,17 +466,17 @@ export default function Header() {
                       <div className="md:col-span-1">
                         <div className="h-full rounded-2xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.12)] via-[hsl(var(--surface))] to-[hsl(var(--surface-2))] p-4 shadow-md md:p-5">
                           <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent))]/90">
-                            {t.selection}
+                            {t('selection')}
                           </p>
-                          <h3 className="mt-1 text-lg font-extrabold">{t.packsTitle}</h3>
-                          <p className="mt-2 text-sm text-token-text/70">{t.packsDesc}</p>
+                          <h3 className="mt-1 text-lg font-extrabold">{t('packs_title')}</h3>
+                          <p className="mt-2 text-sm text-token-text/70">{t('packs_desc')}</p>
                           <div className="mt-3 flex flex-wrap gap-2">
                             <Link
                               href="/#builder"
                               role="menuitem"
                               className="inline-flex items-center rounded-lg bg-[hsl(var(--accent))] px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-[hsl(var(--accent)/.92)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
                             >
-                              {t.viewPacks}
+                              {t('view_packs')}
                             </Link>
                             <Link
                               href="/products"
@@ -562,7 +487,7 @@ export default function Header() {
                               role="menuitem"
                               className="inline-flex items-center rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-[13px] font-semibold hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.30)]"
                             >
-                              {t.allProducts}
+                              {t('all_products')}
                             </Link>
                           </div>
                         </div>
@@ -607,12 +532,12 @@ export default function Header() {
           action={searchAction}
           method="get"
           role="search"
-          aria-label={t.searchAria}
+          aria-label={t('search_aria')}
           onSubmit={onSearchSubmit}
           className="relative hidden min-w-0 flex-1 items-center lg:flex lg:max-w-xs xl:max-w-sm"
         >
           <label htmlFor="header-search" className="sr-only">
-            {t.searchAria}
+            {t('search_aria')}
           </label>
 
           <div className="relative w-full">
@@ -627,7 +552,7 @@ export default function Header() {
               id="header-search"
               type="search"
               name="q"
-              placeholder={`${t.placeholderPrefix} ${placeholder}`}
+              placeholder={`${t('placeholder_prefix')} ${placeholder}`}
               list="header-search-suggestions"
               className={cn(
                 'w-full rounded-xl border-2 py-2.5 pl-10 pr-11 text-sm transition-[border-color,box-shadow]',
@@ -647,8 +572,8 @@ export default function Header() {
               <button
                 type="submit"
                 className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[hsl(var(--accent))] text-[hsl(var(--accent-fg))] shadow-md transition-all duration-200 hover:scale-[1.05] hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]"
-                aria-label={t.searchAria}
-                title={t.searchAria}
+                aria-label={t('search_aria')}
+                title={t('search_aria')}
                 data-gtm="header_search_submit"
               >
                 <Search className="h-4 w-4" />
@@ -657,13 +582,13 @@ export default function Header() {
           </div>
 
           <datalist id="header-search-suggestions">
-            {t.trends.map((item) => (
+            {trends.map((item) => (
               <option key={item} value={item} />
             ))}
           </datalist>
 
           <div id="header-search-hint" className="sr-only">
-            {t.searchHint}
+            {t('search_hint')}
           </div>
         </form>
 
@@ -677,7 +602,7 @@ export default function Header() {
             onPointerEnter={() => smartPrefetchStart('/wishlist')}
             onPointerLeave={() => smartPrefetchCancel('/wishlist')}
             className="touch-target relative flex items-center justify-center rounded-xl p-2.5 hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 md:p-2"
-            aria-label={t.wishlistAria(wishlistCount)}
+            aria-label={wishlistCount > 0 ? t('wishlist_aria_count', { count: wishlistCount }) : t('wishlist_aria')}
             data-gtm="header_wishlist_mobile"
           >
             <span className="pointer-events-none inline-flex">
@@ -696,7 +621,7 @@ export default function Header() {
             onPointerEnter={() => smartPrefetchStart('/commande')}
             onPointerLeave={() => smartPrefetchCancel('/commande')}
             className="touch-target relative flex items-center justify-center rounded-xl p-2.5 hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 md:p-2"
-            aria-label={t.cartAria(cartCount)}
+            aria-label={cartCount > 0 ? t('cart_aria_count', { count: cartCount }) : t('cart_aria')}
             data-gtm="header_cart_mobile"
             data-cart-icon
           >
@@ -726,7 +651,7 @@ export default function Header() {
                 onFocus={() => smartPrefetchStart('/wishlist')}
                 onBlur={() => smartPrefetchCancel('/wishlist')}
                 className="relative inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1.5 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
-                aria-label={t.wishlistAria(wishlistCount)}
+                aria-label={wishlistCount > 0 ? t('wishlist_aria_count', { count: wishlistCount }) : t('wishlist_aria')}
                 data-gtm="header_wishlist"
               >
                 <ActionBadge>
@@ -751,8 +676,8 @@ export default function Header() {
               onFocus={() => smartPrefetchStart('/account')}
               onBlur={() => smartPrefetchCancel('/account')}
               className="hidden min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1.5 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] xl:inline-flex"
-              aria-label={t.account.aria}
-              title={t.account.title}
+              aria-label={t('account_aria')}
+              title={t('account_title')}
               data-gtm="header_account"
             >
               <ActionBadge>
@@ -776,7 +701,7 @@ export default function Header() {
                 'border-[hsl(var(--accent)/0.4)] bg-[hsl(var(--accent)/0.12)] hover:border-[hsl(var(--accent)/0.6)] hover:bg-[hsl(var(--accent)/0.18)] hover:shadow-md',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/0.5)] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--surface))]'
               )}
-              aria-label={t.cartAria(cartCount)}
+              aria-label={cartCount > 0 ? t('cart_aria_count', { count: cartCount }) : t('cart_aria')}
               data-gtm="header_cart"
               data-cart-icon
             >
@@ -784,10 +709,10 @@ export default function Header() {
                 <Cart />
               </span>
               <span className="pointer-events-none hidden flex-col leading-tight xl:inline-flex">
-                <span className="font-semibold text-[hsl(var(--text))]">{t.cartShort}</span>
+                <span className="font-semibold text-[hsl(var(--text))]">{t('cart_short')}</span>
                 {cartCount > 0 ? (
                   <span className="text-[11px] font-medium text-token-text/60">
-                    {t.cartItemsCount(cartCount)}
+                    {t('cart_items', { count: cartCount })}
                   </span>
                 ) : null}
               </span>

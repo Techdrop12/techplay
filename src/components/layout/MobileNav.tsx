@@ -7,6 +7,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { startTransition, useEffect, useId, useMemo, useReducer, useRef } from 'react';
 import * as ReactDOM from 'react-dom';
 
+import { useTranslations } from 'next-intl';
+
 import Link from '@/components/LocalizedLink';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import { useCart } from '@/hooks/useCart';
@@ -15,86 +17,33 @@ import { getCategories } from '@/lib/categories';
 import { event as gaEvent } from '@/lib/ga';
 import { getCurrentLocale, localizePath } from '@/lib/i18n-routing';
 
-const STR = {
-  fr: {
-    nav: [
-      { href: '/products', label: 'Tous les produits' },
-      { href: '/#builder', label: 'Créer un bundle' },
-      { href: '/categorie', label: 'Catégories' },
-      { href: '/wishlist', label: 'Wishlist' },
-      { href: '/blog', label: 'Blog' },
-      { href: '/contact', label: 'Support & contact' },
-    ],
-    ui: {
-      openMenu: 'Ouvrir le menu mobile',
-      closeMenu: 'Fermer le menu mobile',
-      menu: 'Menu',
-      searchAria: 'Recherche produits',
-      searchBtn: 'Lancer la recherche',
-      placeholderPrefix: 'Rechercher… ex :',
-      recent: 'Recherches récentes',
-      clear: 'Effacer',
-      categories: 'Catégories',
-      wishlist: (n: number) => (n > 0 ? `Voir la wishlist (${n})` : 'Voir la wishlist'),
-      account: 'Espace client',
-      cart: (n: number) => (n > 0 ? `Voir le panier (${n})` : 'Voir le panier'),
-      installApp: 'Installer l’app',
-      installAppTitle: 'Installer l’application',
-      dealsAria: 'Voir les offres du jour',
-      dealsTitle: 'Offres du jour',
-      mobileNavAria: 'Navigation mobile',
-      shopLabel: 'Par où commencer',
-      quickAccessLabel: 'Compte & accès',
-    },
-    trends: [
-      'écouteurs bluetooth',
-      'casque gaming',
-      'chargeur rapide USB-C',
-      'pack starter',
-      'power bank',
-      'souris sans fil',
-    ],
-  },
-  en: {
-    nav: [
-      { href: '/products', label: 'All products' },
-      { href: '/#builder', label: 'Build a bundle' },
-      { href: '/categorie', label: 'Categories' },
-      { href: '/wishlist', label: 'Wishlist' },
-      { href: '/blog', label: 'Blog' },
-      { href: '/contact', label: 'Support & contact' },
-    ],
-    ui: {
-      openMenu: 'Open mobile menu',
-      closeMenu: 'Close mobile menu',
-      menu: 'Menu',
-      searchAria: 'Product search',
-      searchBtn: 'Start search',
-      placeholderPrefix: 'Search… e.g.:',
-      recent: 'Recent searches',
-      clear: 'Clear',
-      categories: 'Categories',
-      wishlist: (n: number) => (n > 0 ? `View wishlist (${n})` : 'View wishlist'),
-      account: 'Account',
-      cart: (n: number) => (n > 0 ? `View cart (${n})` : 'View cart'),
-      installApp: 'Install app',
-      installAppTitle: 'Install the app',
-      dealsAria: "See today's deals",
-      dealsTitle: "Today's deals",
-      mobileNavAria: 'Mobile navigation',
-      shopLabel: 'Where to go',
-      quickAccessLabel: 'Account & access',
-    },
-    trends: [
-      'bluetooth earbuds',
-      'gaming headset',
-      'USB-C fast charger',
-      'starter pack',
-      'power bank',
-      'wireless mouse',
-    ],
-  },
+// Suggestions de recherche par locale (exemples produits, pas des chaînes traduisibles)
+const TRENDS = {
+  fr: ['écouteurs bluetooth', 'casque gaming', 'chargeur rapide USB-C', 'pack starter', 'power bank', 'souris sans fil'],
+  en: ['bluetooth earbuds', 'gaming headset', 'USB-C fast charger', 'starter pack', 'power bank', 'wireless mouse'],
 } as const;
+
+export type MobileNavUi = {
+  openMenu: string;
+  closeMenu: string;
+  menu: string;
+  searchAria: string;
+  searchBtn: string;
+  placeholderPrefix: string;
+  recent: string;
+  clear: string;
+  categories: string;
+  wishlist: (n: number) => string;
+  account: string;
+  cart: (n: number) => string;
+  installApp: string;
+  installAppTitle: string;
+  mobileNavAria: string;
+  shopLabel: string;
+  quickAccessLabel: string;
+};
+
+export type MobileNavItem = { href: string; label: string };
 
 const Icon = {
   Menu: () => (
@@ -336,13 +285,336 @@ function track(args: {
   }
 }
 
+/* ── Sub-components ─────────────────────────────────────────────────── */
+
+type SearchProps = {
+  searchAction: string;
+  ui: MobileNavUi;
+  trends: readonly string[];
+  placeholder: string;
+  searching: boolean;
+  recentQs: string[];
+  searchRef: React.RefObject<HTMLInputElement | null>;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  onSearch: (q: string) => void;
+  onClearRecent: () => void;
+  onFocusSearch: () => void;
+  onBlurSearch: () => void;
+};
+
+function MobileNavSearch({
+  searchAction, ui, trends, placeholder, searching, recentQs,
+  searchRef, onSubmit, onSearch, onClearRecent, onFocusSearch, onBlurSearch,
+}: SearchProps) {
+  return (
+    <>
+      <form
+        action={searchAction}
+        method="get"
+        role="search"
+        aria-label={ui.searchAria}
+        onSubmit={onSubmit}
+        className="px-5 pb-4 pt-4"
+      >
+        <div className="relative">
+          <input
+            ref={searchRef}
+            type="search"
+            name="q"
+            placeholder={`${ui.placeholderPrefix} ${placeholder}`}
+            list="mobile-search-suggestions"
+            className="min-h-[3rem] w-full rounded-2xl border border-[hsl(var(--border))]/60 bg-[hsl(var(--surface))]/95 px-4 py-2.5 pr-12 text-[16px] sm:text-[15px] placeholder:text-token-text/55 shadow-sm focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/.26)]"
+            autoComplete="off"
+            enterKeyHint="search"
+            inputMode="search"
+            aria-keyshortcuts="/ Control+K Meta+K"
+            onFocus={onFocusSearch}
+            onBlur={onBlurSearch}
+          />
+          <datalist id="mobile-search-suggestions">
+            {trends.map((item) => <option value={item} key={item} />)}
+          </datalist>
+          <button
+            type="submit"
+            className="absolute right-1.5 top-1.5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-[hsl(var(--accent))]/6 text-token-text/80 hover:bg-[hsl(var(--accent))]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))/0.4]"
+            aria-label={ui.searchBtn}
+            aria-busy={searching ? 'true' : 'false'}
+            title={ui.searchBtn}
+          >
+            {searching ? (
+              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.25" strokeWidth="4" fill="none" />
+                <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" fill="none" />
+              </svg>
+            ) : (
+              <Icon.Search />
+            )}
+          </button>
+        </div>
+      </form>
+
+      {recentQs.length > 0 ? (
+        <div className="px-5 pb-4 pt-1.5">
+          <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-token-text/60">
+            {ui.recent}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {recentQs.map((q) => (
+              <button
+                key={q}
+                type="button"
+                onClick={() => onSearch(q)}
+                className="focus-ring min-h-[2.5rem] rounded-full border border-[hsl(var(--border))]/60 bg-[hsl(var(--surface))]/95 px-3.5 py-1.5 text-[13px] hover:bg-[hsl(var(--surface-2))]/80"
+                aria-label={`${ui.searchBtn}: ${q}`}
+              >
+                {q.length > 26 ? `${q.slice(0, 24)}…` : q}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={onClearRecent}
+              className="focus-ring min-h-[2.5rem] rounded-full bg-[hsl(var(--surface))]/70 px-3.5 py-1.5 text-[12px] text-token-text/70 hover:bg-[hsl(var(--surface-2))]/80"
+              aria-label={ui.clear}
+            >
+              {ui.clear}
+            </button>
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+type QuickAccessProps = {
+  ui: MobileNavUi;
+  wishlistCount: number;
+  canInstall: boolean;
+  locale: string;
+  onClose: (reason: string) => void;
+  onInstall: () => Promise<void>;
+  prefetch: (href: string) => void;
+};
+
+function MobileNavQuickAccess({
+  ui, wishlistCount, canInstall, locale, onClose, onInstall, prefetch,
+}: QuickAccessProps) {
+  return (
+    <section
+      className="border-t border-[hsl(var(--border))]/40 bg-[hsl(var(--surface))]/92 px-5 py-4"
+      aria-label={ui.quickAccessLabel}
+    >
+      <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-token-text/60">
+        {ui.quickAccessLabel}
+      </p>
+      <div className="flex flex-wrap items-center gap-2">
+        <ThemeToggle size="md" />
+        <Link
+          href="/wishlist"
+          onPointerDown={() => { prefetch('/wishlist'); onClose('quick_wishlist'); }}
+          onFocus={() => prefetch('/wishlist')}
+          onClick={() => { track({ action: 'mobile_nav_quick_wishlist' }); onClose('quick_wishlist'); }}
+          className="focus-ring inline-flex min-h-[2.5rem] items-center gap-2 rounded-xl border border-[hsl(var(--border))]/60 bg-[hsl(var(--surface))]/95 px-3.5 py-2 text-[13px] font-medium transition active:scale-[0.97] hover:bg-[hsl(var(--surface-2))]/80"
+          aria-label={ui.wishlist(wishlistCount)}
+        >
+          <Icon.Heart />
+          <span>{locale === 'fr' ? 'Wishlist' : 'Wishlist'}</span>
+          {wishlistCount > 0 ? (
+            <span className="rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-[11px] font-bold text-white">
+              {wishlistCount}
+            </span>
+          ) : null}
+        </Link>
+        <Link
+          href="/account"
+          onPointerDown={() => { prefetch('/account'); onClose('quick_account'); }}
+          onFocus={() => prefetch('/account')}
+          onClick={() => { track({ action: 'mobile_nav_quick_account' }); onClose('quick_account'); }}
+          className="focus-ring inline-flex min-h-[2.5rem] items-center gap-2 rounded-xl border border-[hsl(var(--border))]/60 bg-[hsl(var(--surface))]/95 px-3.5 py-2 text-[13px] font-medium transition active:scale-[0.97] hover:bg-[hsl(var(--surface-2))]/80"
+          aria-label={ui.account}
+        >
+          <Icon.User />
+          <span>{ui.account}</span>
+        </Link>
+        {canInstall ? (
+          <button
+            onClick={() => void onInstall()}
+            type="button"
+            className="ml-auto inline-flex min-h-[2.5rem] items-center gap-2 rounded-full bg-gradient-to-r from-lime-500 to-emerald-500 px-4 py-2 text-[13px] font-semibold text-white shadow-md transition active:scale-[0.97] hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+            aria-label={ui.installAppTitle}
+            title={ui.installAppTitle}
+          >
+            <Icon.Download /> {ui.installApp}
+          </button>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+type NavLinksProps = {
+  nav: readonly MobileNavItem[];
+  ui: MobileNavUi;
+  categories: ReturnType<typeof getCategories>;
+  locale: string;
+  catsOpen: boolean;
+  catsPanelId: string;
+  reducedMotion: boolean | null;
+  isActive: (href: string) => boolean;
+  onClose: (reason: string) => void;
+  onToggleCats: () => void;
+  prefetch: (href: string) => void;
+};
+
+function MobileNavLinks({
+  nav, ui, categories, catsOpen, catsPanelId, reducedMotion,
+  isActive, onClose, onToggleCats, prefetch,
+}: NavLinksProps) {
+  return (
+    <section
+      className="border-t border-[hsl(var(--border))]/40 bg-[hsl(var(--surface))]/94 px-5 pt-5 pb-5"
+      aria-label={ui.mobileNavAria}
+    >
+      <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-token-text/60">
+        {ui.shopLabel}
+      </p>
+      <ul className="grid grid-cols-1 gap-2 text-[15px]">
+        {nav.map((item) => {
+          const { href, label } = item;
+          const promo = ('promo' in item && item.promo === true) || href.includes('promo=1');
+
+          if (href === '/categorie') {
+            return (
+              <li key={href}>
+                <button
+                  type="button"
+                  onClick={onToggleCats}
+                  aria-expanded={catsOpen}
+                  aria-controls={catsPanelId}
+                  className="focus-ring flex min-h-[2.75rem] w-full items-center gap-3 justify-between rounded-2xl border border-transparent px-4 py-3 text-left transition active:scale-[0.98] hover:bg-[hsl(var(--surface-2))]/80 active:bg-[hsl(var(--surface-2))]/70"
+                >
+                  <span className="flex items-center gap-3">
+                    <span className="shrink-0 text-token-text/55"><NavIcon.Grid /></span>
+                    {label}
+                  </span>
+                  <Icon.Chevron open={catsOpen} />
+                </button>
+                <AnimatePresence initial={false}>
+                  {catsOpen ? (
+                    <motion.div
+                      id={catsPanelId}
+                      role="region"
+                      aria-label={ui.categories}
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: reducedMotion ? 0 : 0.22, ease: 'easeOut' }}
+                      className="overflow-hidden"
+                    >
+                      <ul className="mb-1 mt-2 grid grid-cols-1 xs:grid-cols-2 gap-2.5 sm:grid-cols-3">
+                        {categories.map((category) => (
+                          <li key={category.href}>
+                            <Link
+                              href={category.href}
+                              onPointerDown={() => { prefetch(category.href); onClose('cat_click'); }}
+                              onFocus={() => prefetch(category.href)}
+                              onClick={() => { track({ action: 'mobile_nav_cat', label: category.href }); onClose('cat_click'); }}
+                              className="focus-ring group flex min-h-[3rem] items-center gap-3 rounded-2xl border border-[hsl(var(--border))]/35 bg-[hsl(var(--surface))]/92 p-3 shadow-[0_6px_18px_rgba(15,23,42,0.22)] transition hover:-translate-y-0.5 hover:border-[hsl(var(--accent)/.35)] hover:bg-[hsl(var(--surface-2))]/95 hover:shadow-[0_12px_30px_rgba(15,23,42,0.3)]"
+                            >
+                              <category.Icon className="opacity-80" />
+                              <span className="flex-1">
+                                <span className="block text-sm font-semibold">{category.label}</span>
+                                <span className="block text-xs text-token-text/60">{category.desc}</span>
+                              </span>
+                              <svg width="18" height="18" viewBox="0 0 24 24" className="opacity-50 group-hover:opacity-90" aria-hidden="true">
+                                <path fill="currentColor" d="M9 18l6-6-6-6v12z" />
+                              </svg>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+              </li>
+            );
+          }
+
+          const active = isActive(href);
+          const NavIconComp = NAV_ICON_MAP[href as keyof typeof NAV_ICON_MAP];
+
+          return (
+            <li key={href}>
+              <Link
+                href={href}
+                onPointerDown={() => { prefetch(href); onClose('nav_link'); }}
+                onFocus={() => prefetch(href)}
+                onClick={() => { track({ action: 'mobile_nav_link_click', label: href }); onClose('nav_link'); }}
+                aria-current={active ? 'page' : undefined}
+                className={[
+                  'focus-ring flex min-h-[2.75rem] items-center gap-3 rounded-2xl px-4 py-3 transition active:scale-[0.98] active:bg-[hsl(var(--surface-2))]/70',
+                  promo
+                    ? 'bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 font-semibold text-white shadow-md hover:shadow-lg'
+                    : active
+                      ? 'border border-[hsl(var(--accent)/.30)] bg-[hsl(var(--accent)/.06)] font-semibold text-[hsl(var(--accent))]'
+                      : 'border border-transparent hover:bg-[hsl(var(--surface-2))]/80',
+                ].join(' ')}
+              >
+                {NavIconComp ? (
+                  <span className={['shrink-0', active ? 'text-[hsl(var(--accent))]' : promo ? 'text-white/80' : 'text-token-text/50'].join(' ')}>
+                    <NavIconComp />
+                  </span>
+                ) : null}
+                {label}
+                {promo ? <span className="ml-auto inline-flex align-middle"><Icon.Flame /></span> : null}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
+/* ── Main component ──────────────────────────────────────────────────── */
+
 export default function MobileNav() {
   const pathname = usePathname() || '/';
   const router = useRouter();
   const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr';
-  const t = STR[locale];
+  const tRaw = useTranslations('mobile_nav');
   const L = (path: string) => localizePath(path, locale);
   const searchAction = L('/search');
+
+  const trends = TRENDS[locale];
+
+  const ui = useMemo((): MobileNavUi => ({
+    openMenu: tRaw('open_menu'),
+    closeMenu: tRaw('close_menu'),
+    menu: tRaw('menu'),
+    searchAria: tRaw('search_aria'),
+    searchBtn: tRaw('search_btn'),
+    placeholderPrefix: tRaw('placeholder_prefix'),
+    recent: tRaw('recent'),
+    clear: tRaw('clear'),
+    categories: tRaw('categories'),
+    wishlist: (n) => n > 0 ? tRaw('wishlist_label_count', { count: n }) : tRaw('wishlist_label'),
+    account: tRaw('account'),
+    cart: (n) => n > 0 ? tRaw('cart_label_count', { count: n }) : tRaw('cart_label'),
+    installApp: tRaw('install_app'),
+    installAppTitle: tRaw('install_app_title'),
+    mobileNavAria: tRaw('nav_aria'),
+    shopLabel: tRaw('shop_label'),
+    quickAccessLabel: tRaw('quick_access_label'),
+  }), [tRaw]);
+
+  const nav = useMemo((): MobileNavItem[] => [
+    { href: '/products', label: tRaw('nav_all_products') },
+    { href: '/#builder', label: tRaw('nav_builder') },
+    { href: '/categorie', label: tRaw('nav_categories') },
+    { href: '/wishlist', label: tRaw('nav_wishlist') },
+    { href: '/blog', label: tRaw('nav_blog') },
+    { href: '/contact', label: tRaw('nav_contact') },
+  ], [tRaw]);
 
   const categories = useMemo(() => getCategories(locale), [locale]);
   const reducedMotion = useReducedMotion();
@@ -382,7 +654,7 @@ export default function MobileNav() {
   const [state, dispatch] = useReducer(navReducer, {
     open: false,
     catsOpen: false,
-    placeholder: t.trends[0] ?? '',
+    placeholder: TRENDS[locale === 'en' ? 'en' : 'fr'][0] ?? '',
     searchFocused: false,
     recentQs: [],
     canInstall: false,
@@ -456,10 +728,12 @@ const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
   };
 
   const lockScroll = () => {
+    const html = document.documentElement;
+    if (html.classList.contains('scroll-locked')) return;
+
     const scrollY = window.scrollY ?? window.pageYOffset ?? document.documentElement.scrollTop ?? 0;
     savedScrollY.current = scrollY;
 
-    const html = document.documentElement;
     const scrollbarWidth = window.innerWidth - html.clientWidth;
 
     html.classList.add('scroll-locked');
@@ -480,6 +754,8 @@ const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
 
   const unlockScroll = () => {
     const html = document.documentElement;
+    if (!html.classList.contains('scroll-locked')) return;
+
     const scrollY = savedScrollY.current;
 
     html.classList.remove('scroll-locked');
@@ -554,8 +830,8 @@ const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
   }, []);
 
   useEffect(() => {
-    const trends = [...t.trends];
-    dispatch({ type: 'SET_PLACEHOLDER', payload: trends[0] ?? '' });
+    const localTrends = [...trends];
+    dispatch({ type: 'SET_PLACEHOLDER', payload: localTrends[0] ?? '' });
 
     let index = 0;
     let intervalId: number | null = null;
@@ -563,8 +839,8 @@ const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
     const start = () => {
       if (intervalId || searchFocused || document.visibilityState !== 'visible') return;
       intervalId = window.setInterval(() => {
-        index = (index + 1) % trends.length;
-        dispatch({ type: 'SET_PLACEHOLDER', payload: trends[index] ?? '' });
+        index = (index + 1) % localTrends.length;
+        dispatch({ type: 'SET_PLACEHOLDER', payload: localTrends[index] ?? '' });
       }, PLACEHOLDER_MS);
     };
 
@@ -587,7 +863,7 @@ const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
       document.removeEventListener('visibilitychange', onVisibility);
       stop();
     };
-  }, [searchFocused, t.trends]);
+  }, [searchFocused, trends]);
 
   useEffect(() => {
     const onAltM = (e: KeyboardEvent) => {
@@ -749,7 +1025,7 @@ const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={open ? dialogId : undefined}
-        aria-label={open ? t.ui.closeMenu : t.ui.openMenu}
+        aria-label={open ? ui.closeMenu : ui.openMenu}
         aria-keyshortcuts="Alt+M"
         className="touch-manipulation grid shrink-0 min-h-[2.75rem] min-w-[2.75rem] place-items-center rounded-xl hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 lg:hidden"
         style={{ touchAction: 'manipulation' }}
@@ -785,7 +1061,7 @@ const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
             />
 
             <motion.div
-              className="relative z-10 flex min-h-[100dvh] w-full max-w-[100vw] flex-col border-0 border-t border-[hsl(var(--border))]/60 bg-[hsl(var(--surface))]/98 shadow-[0_-18px_40px_rgba(15,23,42,0.55)] sm:min-h-0 sm:max-h-[92vh] sm:max-w-md sm:rounded-2xl sm:border sm:border-[hsl(var(--border))]/60 sm:bg-[radial-gradient(circle_at_top,_hsl(var(--surface-2))/65,_hsl(var(--surface))_52%)] [@media(orientation:landscape)]:min-h-0 [@media(orientation:landscape)]:max-h-[90dvh]"
+              className="relative z-10 flex max-h-[92dvh] w-full max-w-[100vw] flex-col rounded-t-3xl border-t border-[hsl(var(--border))]/60 bg-[hsl(var(--surface))]/98 shadow-[0_-18px_40px_rgba(15,23,42,0.55)] sm:max-h-[92vh] sm:max-w-md sm:rounded-2xl sm:border sm:border-[hsl(var(--border))]/60 sm:bg-[radial-gradient(circle_at_top,_hsl(var(--surface-2))/65,_hsl(var(--surface))_52%)] [@media(orientation:landscape)]:max-h-[90dvh]"
               variants={sheetVariants}
               drag={reducedMotion ? false : 'y'}
               dragConstraints={{ top: 0, bottom: 0 }}
@@ -805,14 +1081,14 @@ const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
                   id={titleId}
                   className="text-[15px] font-semibold leading-tight tracking-tight text-[hsl(var(--text))]/85"
                 >
-                  {t.ui.menu}
+                  {ui.menu}
                 </h2>
 
                 <button
                   onClick={() => closeMenu('close_btn')}
                   type="button"
                   className="flex min-h-[2.5rem] min-w-[2.5rem] shrink-0 items-center justify-center rounded-full hover:bg-[hsl(var(--surface-2))]/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))/0.9] focus-visible:ring-offset-2"
-                  aria-label={t.ui.closeMenu}
+                  aria-label={ui.closeMenu}
                 >
                   <Icon.Close />
                 </button>
@@ -823,289 +1099,47 @@ const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
                 className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-0 py-0"
                 style={{ WebkitOverflowScrolling: 'touch' }}
               >
-              <form
-                action={searchAction}
-                method="get"
-                role="search"
-                aria-label={t.ui.searchAria}
+              <MobileNavSearch
+                searchAction={searchAction}
+                ui={ui}
+                trends={trends}
+                placeholder={placeholder}
+                searching={searching}
+                recentQs={recentQs}
+                searchRef={searchRef}
                 onSubmit={onSearchSubmit}
-                className="px-5 pb-4 pt-1"
-              >
-                <div className="relative">
-                  <input
-                    ref={searchRef}
-                    type="search"
-                    name="q"
-                    placeholder={`${t.ui.placeholderPrefix} ${placeholder}`}
-                    list="mobile-search-suggestions"
-                    className="min-h-[3rem] w-full rounded-2xl border border-[hsl(var(--border))]/60 bg-[hsl(var(--surface))]/95 px-4 py-2.5 pr-12 text-[16px] sm:text-[15px] placeholder:text-token-text/55 shadow-sm focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/.26)]"
-                    autoComplete="off"
-                    enterKeyHint="search"
-                    inputMode="search"
-                    aria-keyshortcuts="/ Control+K Meta+K"
-                    onFocus={() => dispatch({ type: 'SET_SEARCH_FOCUSED', payload: true })}
-                    onBlur={() => dispatch({ type: 'SET_SEARCH_FOCUSED', payload: false })}
-                  />
+                onSearch={goSearch}
+                onClearRecent={() => {
+                  try { localStorage.removeItem('recent:q'); } catch { /* no-op */ }
+                  dispatch({ type: 'SET_RECENT_QS', payload: [] });
+                }}
+                onFocusSearch={() => dispatch({ type: 'SET_SEARCH_FOCUSED', payload: true })}
+                onBlurSearch={() => dispatch({ type: 'SET_SEARCH_FOCUSED', payload: false })}
+              />
 
-                  <datalist id="mobile-search-suggestions">
-                    {t.trends.map((item) => (
-                      <option value={item} key={item} />
-                    ))}
-                  </datalist>
+              <MobileNavQuickAccess
+                ui={ui}
+                wishlistCount={wishlistCount}
+                canInstall={canInstall}
+                locale={locale}
+                onClose={closeMenu}
+                onInstall={handleInstall}
+                prefetch={prefetchOnPointer}
+              />
 
-                  <button
-                    type="submit"
-                    className="absolute right-1.5 top-1.5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-[hsl(var(--accent))]/6 text-token-text/80 hover:bg-[hsl(var(--accent))]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))/0.4]"
-                    aria-label={t.ui.searchBtn}
-                    aria-busy={searching ? 'true' : 'false'}
-                    title={t.ui.searchBtn}
-                  >
-                    {searching ? (
-                      <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.25" strokeWidth="4" fill="none" />
-                        <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" fill="none" />
-                      </svg>
-                    ) : (
-                      <Icon.Search />
-                    )}
-                  </button>
-                </div>
-              </form>
-
-              {recentQs.length > 0 ? (
-                <div className="px-5 pb-4 pt-1.5">
-                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-token-text/60">
-                    {t.ui.recent}
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    {recentQs.map((q) => (
-                      <button
-                        key={q}
-                        type="button"
-                        onClick={() => goSearch(q)}
-                        className="focus-ring min-h-[2.5rem] rounded-full border border-[hsl(var(--border))]/60 bg-[hsl(var(--surface))]/95 px-3.5 py-1.5 text-[13px] hover:bg-[hsl(var(--surface-2))]/80"
-                        aria-label={`${t.ui.searchBtn}: ${q}`}
-                      >
-                        {q.length > 26 ? `${q.slice(0, 24)}…` : q}
-                      </button>
-                    ))}
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        try {
-                          localStorage.removeItem('recent:q');
-                        } catch {
-                          // no-op
-                        }
-                        dispatch({ type: 'SET_RECENT_QS', payload: [] });
-                      }}
-                      className="focus-ring min-h-[2.5rem] rounded-full bg-[hsl(var(--surface))]/70 px-3.5 py-1.5 text-[12px] text-token-text/70 hover:bg-[hsl(var(--surface-2))]/80"
-                      aria-label={t.ui.clear}
-                    >
-                      {t.ui.clear}
-                    </button>
-                  </div>
-                </div>
-              ) : null}
-
-              <section
-                className="border-t border-[hsl(var(--border))]/40 bg-[hsl(var(--surface))]/92 px-5 py-4"
-                aria-label={t.ui.quickAccessLabel}
-              >
-                <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-token-text/60">
-                  {t.ui.quickAccessLabel}
-                </p>
-                <div className="flex flex-wrap items-center gap-2">
-                  <ThemeToggle size="md" />
-
-                  <Link
-                    href="/wishlist"
-                    onPointerDown={() => {
-                      prefetchOnPointer('/wishlist');
-                      closeMenu('quick_wishlist');
-                    }}
-                    onFocus={() => prefetchOnPointer('/wishlist')}
-                    onClick={() => {
-                      track({ action: 'mobile_nav_quick_wishlist' });
-                      closeMenu('quick_wishlist');
-                    }}
-                    className="focus-ring inline-flex min-h-[2.5rem] items-center gap-2 rounded-xl border border-[hsl(var(--border))]/60 bg-[hsl(var(--surface))]/95 px-3.5 py-2 text-[13px] font-medium transition active:scale-[0.97] hover:bg-[hsl(var(--surface-2))]/80"
-                    aria-label={t.ui.wishlist(wishlistCount)}
-                  >
-                    <Icon.Heart />
-                    <span>{locale === 'fr' ? 'Wishlist' : 'Wishlist'}</span>
-                    {wishlistCount > 0 ? (
-                      <span className="rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-[11px] font-bold text-white">
-                        {wishlistCount}
-                      </span>
-                    ) : null}
-                  </Link>
-
-                  <Link
-                    href="/account"
-                    onPointerDown={() => {
-                      prefetchOnPointer('/account');
-                      closeMenu('quick_account');
-                    }}
-                    onFocus={() => prefetchOnPointer('/account')}
-                    onClick={() => {
-                      track({ action: 'mobile_nav_quick_account' });
-                      closeMenu('quick_account');
-                    }}
-                    className="focus-ring inline-flex min-h-[2.5rem] items-center gap-2 rounded-xl border border-[hsl(var(--border))]/60 bg-[hsl(var(--surface))]/95 px-3.5 py-2 text-[13px] font-medium transition active:scale-[0.97] hover:bg-[hsl(var(--surface-2))]/80"
-                    aria-label={t.ui.account}
-                  >
-                    <Icon.User />
-                    <span>{t.ui.account}</span>
-                  </Link>
-
-                  {canInstall ? (
-                    <button
-                      onClick={handleInstall}
-                      type="button"
-                      className="ml-auto inline-flex min-h-[2.5rem] items-center gap-2 rounded-full bg-gradient-to-r from-lime-500 to-emerald-500 px-4 py-2 text-[13px] font-semibold text-white shadow-md transition active:scale-[0.97] hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
-                      aria-label={t.ui.installAppTitle}
-                      title={t.ui.installAppTitle}
-                    >
-                      <Icon.Download /> {t.ui.installApp}
-                    </button>
-                  ) : null}
-                </div>
-              </section>
-
-              <section
-                className="border-t border-[hsl(var(--border))]/40 bg-[hsl(var(--surface))]/94 px-5 pt-5 pb-5"
-                aria-label={t.ui.mobileNavAria}
-              >
-                <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-token-text/60">
-                  {t.ui.shopLabel}
-                </p>
-                <ul className="grid grid-cols-1 gap-1.5 text-[15px]">
-                  {t.nav.map((item) => {
-                    const { href, label } = item;
-                    const promo =
-                      ('promo' in item && item.promo === true) || href.includes('promo=1');
-
-                    if (href === '/categorie') {
-                      return (
-                        <li key={href}>
-                          <button
-                            type="button"
-                            onClick={() => dispatch({ type: 'TOGGLE_CATS' })}
-                            aria-expanded={catsOpen}
-                            aria-controls={catsPanelId}
-                            className="focus-ring flex min-h-[2.75rem] w-full items-center gap-3 justify-between rounded-2xl border border-transparent px-4 py-3 text-left transition active:scale-[0.98] hover:bg-[hsl(var(--surface-2))]/80 active:bg-[hsl(var(--surface-2))]/70"
-                          >
-                            <span className="flex items-center gap-3">
-                              <span className="shrink-0 text-token-text/55">
-                                <NavIcon.Grid />
-                              </span>
-                              {label}
-                            </span>
-                            <Icon.Chevron open={catsOpen} />
-                          </button>
-                          <AnimatePresence initial={false}>
-                            {catsOpen ? (
-                              <motion.div
-                                id={catsPanelId}
-                                role="region"
-                                aria-label={t.ui.categories}
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: reducedMotion ? 0 : 0.22, ease: 'easeOut' }}
-                                className="overflow-hidden"
-                              >
-                                <ul className="mb-1 mt-2 grid grid-cols-1 gap-2 xs:grid-cols-2 gap-2.5 sm:grid-cols-3">
-                                  {categories.map((category) => (
-                                    <li key={category.href}>
-                                      <Link
-                                        href={category.href}
-                                        onPointerDown={() => {
-                                          prefetchOnPointer(category.href);
-                                          closeMenu('cat_click');
-                                        }}
-                                        onFocus={() => prefetchOnPointer(category.href)}
-                                        onClick={() => {
-                                          track({ action: 'mobile_nav_cat', label: category.href });
-                                          closeMenu('cat_click');
-                                        }}
-                                        className="focus-ring group flex min-h-[3rem] items-center gap-3 rounded-2xl border border-[hsl(var(--border))]/35 bg-[hsl(var(--surface))]/92 p-3 shadow-[0_6px_18px_rgba(15,23,42,0.22)] transition hover:-translate-y-0.5 hover:border-[hsl(var(--accent)/.35)] hover:bg-[hsl(var(--surface-2))]/95 hover:shadow-[0_12px_30px_rgba(15,23,42,0.3)]"
-                                      >
-                                        <category.Icon className="opacity-80" />
-                                        <span className="flex-1">
-                                          <span className="block text-sm font-semibold">
-                                            {category.label}
-                                          </span>
-                                          <span className="block text-xs text-token-text/60">
-                                            {category.desc}
-                                          </span>
-                                        </span>
-                                        <svg
-                                          width="18"
-                                          height="18"
-                                          viewBox="0 0 24 24"
-                                          className="opacity-50 group-hover:opacity-90"
-                                          aria-hidden="true"
-                                        >
-                                          <path fill="currentColor" d="M9 18l6-6-6-6v12z" />
-                                        </svg>
-                                      </Link>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </motion.div>
-                            ) : null}
-                          </AnimatePresence>
-                        </li>
-                      );
-                    }
-
-                    const active = isActive(href);
-                    const NavIconComp = NAV_ICON_MAP[href];
-
-                    return (
-                      <li key={href}>
-                        <Link
-                          href={href}
-                          onPointerDown={() => {
-                            prefetchOnPointer(href);
-                            closeMenu('nav_link');
-                          }}
-                          onFocus={() => prefetchOnPointer(href)}
-                          onClick={() => {
-                            track({ action: 'mobile_nav_link_click', label: href });
-                            closeMenu('nav_link');
-                          }}
-                          aria-current={active ? 'page' : undefined}
-                          className={[
-                            'focus-ring flex min-h-[2.75rem] items-center gap-3 rounded-2xl px-4 py-3 transition active:scale-[0.98] active:bg-[hsl(var(--surface-2))]/70',
-                            promo
-                              ? 'bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 font-semibold text-white shadow-md hover:shadow-lg'
-                              : active
-                                ? 'border border-[hsl(var(--accent)/.30)] bg-[hsl(var(--accent)/.06)] font-semibold text-[hsl(var(--accent))]'
-                                : 'border border-transparent hover:bg-[hsl(var(--surface-2))]/80',
-                          ].join(' ')}
-                        >
-                          {NavIconComp ? (
-                            <span className={['shrink-0', active ? 'text-[hsl(var(--accent))]' : promo ? 'text-white/80' : 'text-token-text/50'].join(' ')}>
-                              <NavIconComp />
-                            </span>
-                          ) : null}
-                          {label}
-                          {promo ? (
-                            <span className="ml-auto inline-flex align-middle">
-                              <Icon.Flame />
-                            </span>
-                          ) : null}
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </section>
+              <MobileNavLinks
+                nav={nav}
+                ui={ui}
+                categories={categories}
+                locale={locale}
+                catsOpen={catsOpen}
+                catsPanelId={catsPanelId}
+                reducedMotion={reducedMotion}
+                isActive={isActive}
+                onClose={closeMenu}
+                onToggleCats={() => dispatch({ type: 'TOGGLE_CATS' })}
+                prefetch={prefetchOnPointer}
+              />
 
               <div className="flex items-center gap-2.5 border-t border-[hsl(var(--border))]/40 bg-[hsl(var(--surface))]/94 px-5 py-3.5">
                 <Link
@@ -1124,7 +1158,7 @@ const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
                     closeMenu('cart_btn');
                   }}
                   className="focus-ring flex min-h-[2.85rem] flex-1 items-center justify-center gap-2 rounded-full border border-[hsl(var(--accent)/.45)] bg-[hsl(var(--accent)/.10)] px-4 py-2.5 text-[15px] font-semibold hover:bg-[hsl(var(--accent)/.18)] focus-visible:ring-[hsl(var(--accent)/.5)]"
-                  aria-label={t.ui.cart(cartCount)}
+                  aria-label={ui.cart(cartCount)}
                 >
                   <Icon.Cart />
                   {cartCount > 0 ? (
@@ -1138,9 +1172,9 @@ const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
                   onClick={() => closeMenu('footer_close')}
                   type="button"
                   className="min-h-[2.75rem] min-w-[2.75rem] shrink-0 rounded-full px-3 text-[12px] font-medium text-token-text/65 hover:bg-[hsl(var(--surface-2))]/80 hover:text-token-text/85 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))/0.9] focus-visible:ring-offset-2"
-                  aria-label={t.ui.closeMenu}
+                  aria-label={ui.closeMenu}
                 >
-                  {t.ui.closeMenu}
+                  {ui.closeMenu}
                 </button>
               </div>
 

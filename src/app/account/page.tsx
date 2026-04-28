@@ -154,6 +154,13 @@ export default async function AccountPage() {
       icon: ICONS.orders,
     },
     {
+      href: '/account/retours',
+      titleKey: 'link_contact' as const,
+      descKey: 'link_contact_desc' as const,
+      icon: ICONS.orders,
+      label: 'Mes retours',
+    },
+    {
       href: '/contact',
       titleKey: 'link_contact' as const,
       descKey: 'link_contact_desc' as const,

@@ -573,7 +573,7 @@ export default function Footer({
 
   return (
     <footer
-      className="relative overflow-hidden bg-token-surface text-token-text pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+      className="relative overflow-hidden bg-token-surface text-token-text pb-[calc(3.75rem+max(1.5rem,env(safe-area-inset-bottom,0px)))] lg:pb-[max(1.5rem,env(safe-area-inset-bottom))]"
       role="contentinfo"
       aria-label={t.ariaFooter}
     >
@@ -697,7 +697,7 @@ export default function Footer({
           </div>
 
           <div
-            className="grid grid-cols-2 gap-x-6 gap-y-0 md:col-span-9 md:gap-y-6 lg:col-span-10 md:items-start lg:grid-cols-[repeat(4,minmax(12rem,1fr))] lg:gap-x-12 lg:border-l lg:border-[hsl(var(--border))] lg:pl-10 xl:grid-cols-[repeat(4,minmax(13rem,1fr))] xl:gap-x-14 xl:pl-14"
+            className="grid grid-cols-2 gap-x-4 gap-y-1 sm:gap-x-6 md:col-span-9 md:gap-y-6 lg:col-span-10 md:items-start lg:grid-cols-[repeat(4,minmax(12rem,1fr))] lg:gap-x-12 lg:border-l lg:border-[hsl(var(--border))] lg:pl-10 xl:grid-cols-[repeat(4,minmax(13rem,1fr))] xl:gap-x-14 xl:pl-14"
             style={{ minWidth: 0 }}
           >
             {navGroups.map((group) => (

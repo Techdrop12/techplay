@@ -375,8 +375,8 @@ export default function BestProducts({
         </>
       )}
 
-      <div className="mb-5 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/70 p-3">
-        <div className="flex items-center justify-between gap-2">
+      <div className="mb-5 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/70 p-3 sm:p-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <div className="text-xs text-token-text/70" aria-live="polite">
             {t.display} <span className="font-semibold">{visibleCount}</span> /{' '}
             <span>{totalCount}</span>
@@ -389,7 +389,7 @@ export default function BestProducts({
               </label>
               <select
                 id={`${headingId}-sort`}
-                className="min-h-[2.25rem] rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-2.5 py-1.5 text-[12px] font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
+                className="min-h-[2.5rem] rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-2.5 py-2 text-[13px] font-semibold focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.30)]"
                 value={sortBy}
                 onChange={(e) => {
                   const next = (e.currentTarget.value as SortKey) || 'popular';
@@ -422,7 +422,7 @@ export default function BestProducts({
                 });
               }}
               className={cn(
-                'min-h-[2.25rem] rounded-full border px-3.5 py-1.5 text-xs font-semibold transition',
+                'min-h-[2.5rem] rounded-full border px-3.5 py-2 text-[13px] font-semibold transition',
                 filterPromo
                   ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent)/.12)] text-[hsl(var(--accent))]'
                   : 'border-token-border bg-token-surface hover:shadow'
@@ -445,7 +445,7 @@ export default function BestProducts({
                 });
               }}
               className={cn(
-                'min-h-[2.25rem] rounded-full border px-3.5 py-1.5 text-xs font-semibold transition',
+                'min-h-[2.5rem] rounded-full border px-3.5 py-2 text-[13px] font-semibold transition',
                 filterStock
                   ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent)/.12)] text-[hsl(var(--accent))]'
                   : 'border-token-border bg-token-surface hover:shadow'
@@ -466,7 +466,7 @@ export default function BestProducts({
                   setAnnounce(t.resetAnnounce);
                   pushDL('best_products_reset_filters');
                 }}
-                className="min-h-[2.25rem] rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3.5 py-1.5 text-xs font-semibold transition hover:shadow"
+                className="min-h-[2.5rem] rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3.5 py-2 text-[13px] font-semibold transition hover:shadow"
               >
                 {tCommon('reset_filters')}
               </button>
@@ -485,7 +485,7 @@ export default function BestProducts({
             ? { variants: containerVariants, initial: 'hidden', whileInView: 'show' }
             : {})}
           viewport={{ once: true, amount: 0.15 }}
-          className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4"
+          className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-4"
           role="list"
           aria-describedby={showTitle ? subId : undefined}
           id={gridId}
@@ -518,7 +518,7 @@ export default function BestProducts({
               setAnnounce(t.allShown);
               pushDL('best_products_see_more_click');
             }}
-            className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-5 py-2.5 text-[13px] font-semibold shadow-sm transition hover:shadow focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-6 py-3 text-[14px] font-semibold shadow-sm transition hover:shadow focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
             aria-controls={gridId}
             aria-expanded={expanded ? 'true' : 'false'}
           >

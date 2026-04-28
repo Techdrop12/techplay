@@ -47,23 +47,36 @@ export async function POST(req: Request) {
         const email =
           session.customer_details?.email || (session.customer_email as string | null) || '';
 
-        const total =
-          typeof session.amount_total === 'number' ? session.amount_total / 100 : undefined;
-
-        if (email) {
-          await createOrder({
-            user: { email },
-            email,
-            total,
-            status: 'payée',
-            meta: {
-              ...(session.metadata || {}),
-              stripeSessionId: session.id,
-              stripeEventId: event.id,
-              stripePaymentIntentId: session.payment_intent || undefined,
-            },
+        if (!email || !email.includes('@')) {
+          logError('[stripe-webhook] email manquant, commande ignorée', {
+            sessionId: session.id,
+            eventId: event.id,
           });
+          return apiJson({ received: true, skipped: 'no_email' });
         }
+
+        if (typeof session.amount_total !== 'number' || session.amount_total <= 0) {
+          logError('[stripe-webhook] montant invalide, commande ignorée', {
+            sessionId: session.id,
+            amountTotal: session.amount_total,
+          });
+          return apiJson({ received: true, skipped: 'invalid_amount' });
+        }
+
+        const total = session.amount_total / 100;
+
+        await createOrder({
+          user: { email },
+          email,
+          total,
+          status: 'payée',
+          meta: {
+            ...(session.metadata || {}),
+            stripeSessionId: session.id,
+            stripeEventId: event.id,
+            stripePaymentIntentId: session.payment_intent || undefined,
+          },
+        });
 
         break;
       }

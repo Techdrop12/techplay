@@ -1,11 +1,13 @@
 // src/components/ProductCardSkeleton.tsx
+import { memo } from 'react';
+
 import Skeleton from '@/components/ui/Skeleton';
 
 type Props = {
   imageHeight?: number;
 };
 
-export default function ProductCardSkeleton({ imageHeight = 160 }: Props) {
+function ProductCardSkeleton({ imageHeight = 160 }: Props) {
   return (
     <div className="space-y-4 rounded-xl bg-[hsl(var(--surface))] p-4 shadow-[var(--shadow-sm)]">
       <Skeleton variant="image" height={imageHeight} radiusClass="rounded-lg" />
@@ -14,3 +16,5 @@ export default function ProductCardSkeleton({ imageHeight = 160 }: Props) {
     </div>
   );
 }
+
+export default memo(ProductCardSkeleton);

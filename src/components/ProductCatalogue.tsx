@@ -132,6 +132,9 @@ export default function ProductCatalogue({
   const [query, setQuery] = useState(initialQuery);
   const [selectedCategory, setCategory] = useState<string | null>(initialCategory);
   const [sortOption, setSortOption] = useState<CatalogueSort>(initialSort);
+  const [selectedBrand, setBrand] = useState<string | null>(null);
+  const [minRating, setMinRating] = useState<number>(0);
+  const [inStockOnly, setInStockOnly] = useState(false);
 
   const deferredQuery = useDeferredValue(query);
 
@@ -157,6 +160,15 @@ export default function ProductCatalogue({
       }),
     [searchableDocs]
   );
+
+  const brands = useMemo(() => {
+    const set = new Set<string>();
+    for (const p of safeProducts) {
+      const b = typeof p.brand === 'string' && p.brand.trim() ? p.brand.trim() : null;
+      if (b) set.add(b);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b, locale === 'en' ? 'en' : 'fr', { sensitivity: 'base' }));
+  }, [safeProducts, locale]);
 
   const categories = useMemo(() => {
     const map = new Map<string, string>();
@@ -203,7 +215,25 @@ export default function ProductCatalogue({
       return true;
     });
 
-    const sorted = [...priceFiltered].sort((a, b) => {
+    const brandFiltered = selectedBrand
+      ? priceFiltered.filter((p) =>
+          typeof p.brand === 'string' && normalizeText(p.brand) === normalizeText(selectedBrand)
+        )
+      : priceFiltered;
+
+    const ratingFiltered = minRating > 0
+      ? brandFiltered.filter((p) => {
+          const r = typeof p.rating === 'number' ? p.rating :
+            (p.aggregateRating as { average?: number } | undefined)?.average ?? 0;
+          return r >= minRating;
+        })
+      : brandFiltered;
+
+    const stockFiltered = inStockOnly
+      ? ratingFiltered.filter((p) => typeof p.stock !== 'number' || p.stock > 0)
+      : ratingFiltered;
+
+    const sorted = [...stockFiltered].sort((a, b) => {
       if (sortOption === 'asc') return getPrice(a) - getPrice(b);
       if (sortOption === 'desc') return getPrice(b) - getPrice(a);
       return (a.title ?? '').localeCompare(b.title ?? '', locale === 'en' ? 'en' : 'fr', {
@@ -226,6 +256,9 @@ export default function ProductCatalogue({
   const hasActiveFilters =
     query.trim().length > 0 ||
     !!selectedCategory ||
+    !!selectedBrand ||
+    minRating > 0 ||
+    inStockOnly ||
     typeof initialMin === 'number' ||
     typeof initialMax === 'number';
 
@@ -264,6 +297,66 @@ export default function ProductCatalogue({
                 setSelected={setCategory}
               />
             </div>
+
+            {/* Filtres avancés — marque, note, stock */}
+            {(brands.length > 1 || true) && (
+              <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-[hsl(var(--border))]/40 pt-4">
+                {brands.length > 1 && (
+                  <div className="flex items-center gap-2">
+                    <label className="text-[12px] font-semibold text-token-text/60 uppercase tracking-wide">
+                      {locale === 'fr' ? 'Marque' : 'Brand'}
+                    </label>
+                    <select
+                      value={selectedBrand ?? ''}
+                      onChange={(e) => setBrand(e.target.value || null)}
+                      className="min-h-[2.5rem] rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/90 px-3 py-1.5 text-[13px] font-medium focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent)/.25)]"
+                      aria-label={locale === 'fr' ? 'Filtrer par marque' : 'Filter by brand'}
+                    >
+                      <option value="">{locale === 'fr' ? 'Toutes' : 'All'}</option>
+                      {brands.map((b) => <option key={b} value={b}>{b}</option>)}
+                    </select>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2">
+                  <label className="text-[12px] font-semibold text-token-text/60 uppercase tracking-wide">
+                    {locale === 'fr' ? 'Note min.' : 'Min. rating'}
+                  </label>
+                  <div className="flex gap-1" role="group" aria-label={locale === 'fr' ? 'Note minimum' : 'Minimum rating'}>
+                    {[0, 3, 4, 4.5].map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setMinRating(r)}
+                        className={cn(
+                          'min-h-[2.5rem] rounded-xl border px-3 py-1.5 text-[13px] font-semibold transition',
+                          minRating === r
+                            ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent)/.12)] text-[hsl(var(--accent))]'
+                            : 'border-token-border bg-[hsl(var(--surface))]/90 hover:shadow'
+                        )}
+                        aria-pressed={minRating === r}
+                      >
+                        {r === 0 ? (locale === 'fr' ? 'Tous' : 'All') : `${r}★+`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setInStockOnly((v) => !v)}
+                  className={cn(
+                    'min-h-[2.5rem] rounded-xl border px-3.5 py-1.5 text-[13px] font-semibold transition',
+                    inStockOnly
+                      ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent)/.12)] text-[hsl(var(--accent))]'
+                      : 'border-token-border bg-[hsl(var(--surface))]/90 hover:shadow'
+                  )}
+                  aria-pressed={inStockOnly}
+                >
+                  {locale === 'fr' ? '✓ En stock' : '✓ In stock'}
+                </button>
+              </div>
+            )}
           </section>
 
           <section
@@ -302,6 +395,9 @@ export default function ProductCatalogue({
                     onClick={() => {
                       setQuery('');
                       setCategory(null);
+                      setBrand(null);
+                      setMinRating(0);
+                      setInStockOnly(false);
                     }}
                     className={cn(
                       'shrink-0 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]',

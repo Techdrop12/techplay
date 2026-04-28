@@ -8,8 +8,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type KeyboardEventHandler,
-  type PointerEventHandler,
 } from 'react';
 import { toast } from 'react-hot-toast';
 import { FaCcMastercard, FaCcPaypal, FaCcVisa } from 'react-icons/fa';
@@ -17,6 +15,7 @@ import { FaCcMastercard, FaCcPaypal, FaCcVisa } from 'react-icons/fa';
 import type { AggregateRating, Product, Review } from '@/types/product';
 
 import AddToCartButtonAB from '@/components/AddToCartButtonAB';
+import ProductGallery from '@/components/Product/ProductGallery';
 import FreeShippingBadge from '@/components/FreeShippingBadge';
 import PricingBadge from '@/components/PricingBadge';
 import ProductReviews from '@/components/Product/ProductReviews';
@@ -159,7 +158,6 @@ function IconShare({ size = 18, className = '' }: { size?: number; className?: s
 export default function ProductDetail({ product, locale = 'fr' }: Props) {
   const prefersReducedMotion = useReducedMotion();
   const sectionRef = useRef<HTMLElement | null>(null);
-  const mediaRef = useRef<HTMLDivElement | null>(null);
   const viewedRef = useRef(false);
 
   const safeLocale: AppLocale = isLocale(locale) ? locale : DEFAULT_LOCALE;
@@ -265,13 +263,7 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
   const safeGallery = gallery.length > 0 ? gallery : [image];
 
   const [quantity, setQuantity] = useState(1);
-  const [imgLoaded, setImgLoaded] = useState(false);
-  const [activeIdx, setActiveIdx] = useState(0);
-  const [zoomed, setZoomed] = useState(false);
-  const [origin, setOrigin] = useState({ x: 50, y: 50 });
   const [notifying, setNotifying] = useState(false);
-
-  const activeImage = safeGallery[activeIdx] || image;
   const total = useMemo(() => price * quantity, [price, quantity]);
 
   const aggregate = useMemo(
@@ -373,31 +365,14 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
       const target = event.target as HTMLElement | null;
       const tag = target?.tagName;
       const editable = tag === 'INPUT' || tag === 'TEXTAREA' || target?.isContentEditable;
-
       if (editable) return;
-
       if (event.key === '+') setQuantity((q) => clamp(q + 1, 1, 99));
       if (event.key === '-') setQuantity((q) => clamp(q - 1, 1, 99));
-      if (event.key === 'ArrowLeft') setActiveIdx((i) => Math.max(0, i - 1));
-      if (event.key === 'ArrowRight') setActiveIdx((i) => Math.min(safeGallery.length - 1, i + 1));
     };
 
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [safeGallery.length]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || safeGallery.length <= 1) return;
-
-    const nextIndex = (activeIdx + 1) % safeGallery.length;
-    const prevIndex = (activeIdx - 1 + safeGallery.length) % safeGallery.length;
-
-    for (const src of [safeGallery[nextIndex], safeGallery[prevIndex]]) {
-      if (!src) continue;
-      const img = new window.Image();
-      img.src = src;
-    }
-  }, [activeIdx, safeGallery]);
+  }, []);
 
   const onAddToCart = useCallback(() => {
     try {
@@ -445,21 +420,6 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     }
   }, [currency, price, product, title]);
 
-  const onThumbSelect = (idx: number) => {
-    setActiveIdx(idx);
-
-    try {
-      trackSelectItem({
-        currency,
-        value: price,
-        items: [{ ...mapProductToGaItem(toGaSource(product)), quantity: 1 }],
-        item_list_name: 'product_gallery',
-      });
-    } catch {
-      // no-op
-    }
-  };
-
   const share = async () => {
     try {
       const url = typeof window !== 'undefined' ? window.location.href : '';
@@ -482,39 +442,6 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
     }
   };
 
-  const onPointerMove: PointerEventHandler<HTMLDivElement> = (event) => {
-    if (!mediaRef.current || !zoomed) return;
-
-    const rect = mediaRef.current.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width) * 100;
-    const y = ((event.clientY - rect.top) / rect.height) * 100;
-
-    setOrigin({
-      x: clamp(x, 0, 100),
-      y: clamp(y, 0, 100),
-    });
-  };
-
-  const toggleZoom = () => {
-    if (prefersReducedMotion) return;
-    setZoomed((value) => !value);
-  };
-
-  const onMediaKeyDown: KeyboardEventHandler<HTMLDivElement> = (event) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      toggleZoom();
-    }
-
-    if (event.key === 'ArrowLeft') {
-      setActiveIdx((i) => Math.max(0, i - 1));
-    }
-
-    if (event.key === 'ArrowRight') {
-      setActiveIdx((i) => Math.min(safeGallery.length - 1, i + 1));
-    }
-  };
-
   return (
     <motion.section
       ref={sectionRef}
@@ -530,135 +457,28 @@ export default function ProductDetail({ product, locale = 'fr' }: Props) {
       itemScope
       itemType="https://schema.org/Product"
     >
-      <div className="flex flex-col gap-5 sm:gap-8 min-w-0">
-        {/* Main image: framed for emphasis; less frame padding on mobile */}
-        <div className="rounded-2xl bg-[hsl(var(--surface-2))] p-2 shadow-[var(--shadow-lg)] sm:p-3">
-          <div
-            ref={mediaRef}
-            className={cn(
-              'relative aspect-square w-full overflow-hidden rounded-xl',
-              'border border-[hsl(var(--border))]',
-              'bg-[hsl(var(--surface))] shadow-[var(--shadow-md)]'
-            )}
-            onPointerMove={onPointerMove}
-            onPointerLeave={() => setZoomed(false)}
-            onClick={toggleZoom}
-            onKeyDown={onMediaKeyDown}
-            role="button"
-            aria-label={`${t.imageLabel} ${activeIdx + 1} ${t.of} ${safeGallery.length} : ${title}`}
-            aria-busy={!imgLoaded}
-            tabIndex={0}
-          >
-            <Image
-              key={activeImage}
-              src={activeImage}
-              alt={`${t.imageLabel} ${activeIdx + 1} ${t.of} ${safeGallery.length} - ${title}`}
-              fill
-              sizes="(min-width: 1024px) 50vw, 100vw"
-              priority
-              placeholder="blur"
-              blurDataURL={BLUR_DATA_URL}
-              className={cn(
-                'object-cover transition-transform duration-700 will-change-transform',
-                zoomed ? 'scale-125 cursor-zoom-out' : 'cursor-zoom-in hover:scale-[1.03]'
-              )}
-              style={{ transformOrigin: `${origin.x}% ${origin.y}%` }}
-              onLoad={() => setImgLoaded(true)}
-              itemProp="image"
-              draggable={false}
-            />
-
-            {!imgLoaded && (
-              <div
-                className="absolute inset-0 animate-pulse bg-gradient-to-br from-[hsl(var(--surface-2))] via-[hsl(var(--surface))] to-[hsl(var(--surface-2))]"
-                aria-hidden="true"
-              />
-            )}
-
-            <div className="pointer-events-none absolute left-4 top-4 z-10 flex flex-col gap-1.5 sm:left-5 sm:top-5">
-              {isNew ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/95 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-950 shadow-[0_12px_35px_rgba(4,120,87,0.7)] ring-1 ring-emerald-900/40">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-900/90" />
-                  {t.newLabel}
-                </span>
-              ) : null}
-
-              {isBestSeller ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-300/95 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-950 shadow-[0_12px_35px_rgba(120,53,15,0.55)] ring-1 ring-amber-900/35">
-                  <span className="h-1.5 w-1.5 rounded-full bg-amber-700" />
-                  {t.bestSeller}
-                </span>
-              ) : null}
-
-              {discount ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/95 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-red-50 shadow-[0_12px_35px_rgba(127,29,29,0.7)] ring-1 ring-red-900/40">
-                  <span className="h-1.5 w-1.5 rounded-full bg-red-200" />-{discount}%
-                </span>
-              ) : null}
-            </div>
-
-            <div className="absolute bottom-4 right-4 z-10">
-              <PricingBadge price={price} oldPrice={oldPrice} showDiscountLabel showOldPrice />
-            </div>
-
-            <div className="absolute right-4 top-4 z-10 flex gap-2 sm:right-5 sm:top-5">
-              <button
-                type="button"
-                onClick={share}
-                className="rounded-full border border-white/20 bg-black/40 px-3.5 py-2.5 text-white shadow-[0_12px_35px_rgba(15,23,42,0.7)] backdrop-blur-xl transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
-                aria-label={t.share}
-                title={t.share}
-              >
-                <IconShare size={18} />
-              </button>
-            </div>
-
-            <p className="sr-only">{zoomed ? t.imageHelpOut : t.imageHelp}</p>
-          </div>
-        </div>
-
-        {safeGallery.length > 1 ? (
-          <nav aria-label={t.galleryLabel} className="flex flex-col gap-3">
-            <ul
-              role="list"
-              className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 sm:gap-4 sm:flex-wrap sm:overflow-visible sm:pb-0"
-            >
-              {safeGallery.map((src, idx) => {
-                const active = idx === activeIdx;
-
-                return (
-                  <li key={`${src}-${idx}`} className="shrink-0 snap-start sm:shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => onThumbSelect(idx)}
-                      onMouseEnter={() => !prefersReducedMotion && setActiveIdx(idx)}
-                      className={cn(
-                        'relative flex h-20 w-20 overflow-hidden rounded-xl border transition-all duration-200 sm:h-24 sm:w-24',
-                        active
-                          ? 'border-[hsl(var(--accent))] ring-2 ring-[hsl(var(--accent))] ring-offset-2 ring-offset-[hsl(var(--surface))] shadow-[var(--shadow-md)]'
-                          : 'border-[hsl(var(--border))] hover:border-[hsl(var(--accent)/.5)] hover:shadow-[var(--shadow-sm)]'
-                      )}
-                      aria-label={`${t.imageLabel} ${idx + 1}`}
-                      aria-current={active ? 'true' : undefined}
-                    >
-                      <Image
-                        src={src}
-                        alt={title ? `${title} (${idx + 1})` : ''}
-                        fill
-                        sizes="96px"
-                        className="object-cover"
-                        loading="lazy"
-                        placeholder="blur"
-                        blurDataURL={BLUR_DATA_URL}
-                      />
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
-        ) : null}
-      </div>
+      <ProductGallery
+        gallery={safeGallery}
+        title={title}
+        isNew={isNew}
+        isBestSeller={isBestSeller}
+        discount={discount}
+        price={price}
+        oldPrice={oldPrice}
+        t={t}
+        prefersReducedMotion={prefersReducedMotion}
+        onShare={share}
+        onActiveChange={(idx) => {
+          try {
+            trackSelectItem({
+              currency,
+              value: price,
+              items: [{ ...mapProductToGaItem(toGaSource(product)), quantity: 1 }],
+              item_list_name: 'product_gallery',
+            });
+          } catch { /* no-op */ }
+        }}
+      />
 
       {/* Colonne droite : titre + bloc achat — sticky desktop pour mise en scène commerciale */}
       <div className="flex flex-col gap-6 sm:gap-8 lg:sticky lg:top-24 lg:self-start lg:gap-6">

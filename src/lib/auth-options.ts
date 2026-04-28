@@ -6,6 +6,7 @@
 import CredentialsProvider from 'next-auth/providers/credentials';
 
 import { verifyPassword } from './bcrypt';
+import { warn } from './logger';
 
 import type { NextAuthOptions, Session, User } from 'next-auth';
 import type { JWT } from 'next-auth/jwt';
@@ -85,10 +86,16 @@ async function authorizeAdminCredentials(
 ): Promise<AppUser | null> {
   const ip = getRequestIp(req);
   if (!credentials?.email || !credentials?.password) return null;
-  if (throttled(`admin:${ip}`)) return null;
+  if (throttled(`admin:${ip}`)) {
+    warn('[auth] Admin login throttled', { ip });
+    return null;
+  }
 
   const email = credentials.email.trim().toLowerCase();
-  if (email !== ADMIN_EMAIL) return null;
+  if (email !== ADMIN_EMAIL) {
+    warn('[auth] Admin login failed — unknown email', { ip, email });
+    return null;
+  }
 
   let passwordOk = false;
 
@@ -100,7 +107,10 @@ async function authorizeAdminCredentials(
     return null;
   }
 
-  if (!passwordOk) return null;
+  if (!passwordOk) {
+    warn('[auth] Admin login failed — wrong password', { ip, email });
+    return null;
+  }
 
   const sessionEmail =
     (serverEnv.ADMIN_EMAIL && serverEnv.ADMIN_EMAIL.trim()) || 'admin@techplay.local';
@@ -119,7 +129,10 @@ async function authorizeCustomerCredentials(
 ): Promise<AppUser | null> {
   const ip = getRequestIp(req);
   if (!credentials?.email || !credentials?.password) return null;
-  if (throttled(`cust:${ip}`)) return null;
+  if (throttled(`cust:${ip}`)) {
+    warn('[auth] Customer login throttled', { ip });
+    return null;
+  }
 
   const email = credentials.email.trim().toLowerCase();
   if (!email) return null;
@@ -147,7 +160,10 @@ async function authorizeCustomerCredentials(
     if (rec.isAdmin) return null;
 
     const ok = await verifyPassword(credentials.password, rec.password);
-    if (!ok) return null;
+    if (!ok) {
+      warn('[auth] Customer login failed — wrong password', { ip, email });
+      return null;
+    }
 
     return {
       id: rec._id.toString(),

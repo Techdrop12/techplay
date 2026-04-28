@@ -4,12 +4,9 @@ import { apiError } from '@/lib/apiResponse';
 import { connectToDatabase } from '@/lib/db';
 import { error as logError } from '@/lib/logger';
 import { logAdminAction } from '@/lib/audit';
+import { toPlain } from '@/lib/utils';
 import Product from '@/models/Product';
 import { requireAdmin } from '@/lib/requireAdmin';
-
-function toPlain(obj: unknown) {
-  return JSON.parse(JSON.stringify(obj));
-}
 
 export async function GET(req: Request) {
   const err = await requireAdmin();

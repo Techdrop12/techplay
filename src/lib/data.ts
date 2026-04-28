@@ -1,6 +1,7 @@
 import { cache } from 'react';
 
 import { connectToDatabase } from './db';
+import { toPlain } from './utils';
 
 import type { BlogPost } from '@/types/blog';
 import type { Pack as PackType, Product as ProductType } from '@/types/product';
@@ -9,10 +10,6 @@ import type { PipelineStage } from 'mongoose';
 import Blog from '@/models/Blog';
 import Pack from '@/models/Pack';
 import Product from '@/models/Product';
-
-function toPlain<T>(value: unknown): T {
-  return JSON.parse(JSON.stringify(value)) as T;
-}
 
 const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 

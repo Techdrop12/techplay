@@ -20,6 +20,15 @@ type FormErrors = {
   address?: string;
 };
 
+type PromoStatus = 'idle' | 'loading' | 'valid' | 'error';
+type PromoResult = {
+  code: string;
+  type: 'percent' | 'fixed';
+  value: number;
+  discount: number;
+  finalTotal: number;
+};
+
 type CartItemLike = {
   _id?: string;
   slug?: string;
@@ -124,10 +133,16 @@ export default function CheckoutForm() {
   const [currency, setCurrency] = useState<'EUR' | 'GBP' | 'USD'>(() => detectCurrency());
   const [lastError, setLastError] = useState<string | null>(null);
 
+  const [promoCode, setPromoCode] = useState('');
+  const [promoStatus, setPromoStatus] = useState<PromoStatus>('idle');
+  const [promoMessage, setPromoMessage] = useState('');
+  const [promoResult, setPromoResult] = useState<PromoResult | null>(null);
+
   const formRef = useRef<HTMLFormElement | null>(null);
   const emailRef = useRef<HTMLInputElement | null>(null);
   const addressRef = useRef<HTMLTextAreaElement | null>(null);
   const statusRef = useRef<HTMLParagraphElement | null>(null);
+  const promoRef = useRef<HTMLInputElement | null>(null);
 
   const emailHintId = useId();
   const addressHintId = useId();
@@ -307,6 +322,37 @@ export default function CheckoutForm() {
           // no-op
         }
 
+        // Vérification stock avant Stripe
+        const cartItems = getCartItems(cart);
+        const stockCheckItems = cartItems
+          .filter((i) => i.slug)
+          .map((i) => ({ slug: i.slug as string, quantity: Math.max(1, toNumber(i.quantity, 1)) }));
+
+        if (stockCheckItems.length > 0) {
+          try {
+            const stockRes = await fetch('/api/products/check-stock', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ items: stockCheckItems }),
+            });
+            if (stockRes.ok) {
+              const stockData = (await stockRes.json()) as {
+                ok: boolean;
+                outOfStock?: { title: string; available: number }[];
+              };
+              if (!stockData.ok && stockData.outOfStock?.length) {
+                const names = stockData.outOfStock
+                  .map((p) => `${p.title} (${p.available} dispo.)`)
+                  .join(', ');
+                throw new Error(`Stock insuffisant : ${names}`);
+              }
+            }
+          } catch (err) {
+            if (err instanceof Error && err.message.startsWith('Stock insuffisant')) throw err;
+            // Réseau KO → on laisse passer (dégradé gracieux)
+          }
+        }
+
         announce(t('creating_session_announce'));
 
         const session = (await createCheckoutSession({
@@ -377,6 +423,52 @@ export default function CheckoutForm() {
       validate,
     ]
   );
+
+  const applyPromo = useCallback(async () => {
+    const code = promoCode.trim().toUpperCase();
+    if (!code) return;
+    setPromoStatus('loading');
+    setPromoMessage('');
+    try {
+      const res = await fetch('/api/promos/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, subtotal }),
+      });
+      const data = (await res.json()) as { discount?: number; finalTotal?: number; type?: string; value?: number; error?: string };
+      if (res.ok && data.discount !== undefined) {
+        setPromoResult({
+          code,
+          type: data.type as 'percent' | 'fixed',
+          value: data.value ?? 0,
+          discount: data.discount,
+          finalTotal: data.finalTotal ?? subtotal,
+        });
+        setPromoStatus('valid');
+        setPromoMessage(
+          data.type === 'percent'
+            ? `Code appliqué : -${data.value}% (−${data.discount?.toFixed(2)} €)`
+            : `Code appliqué : −${data.discount?.toFixed(2)} €`
+        );
+      } else {
+        setPromoResult(null);
+        setPromoStatus('error');
+        setPromoMessage(data.error ?? 'Code invalide');
+      }
+    } catch {
+      setPromoResult(null);
+      setPromoStatus('error');
+      setPromoMessage('Erreur de vérification. Réessayez.');
+    }
+  }, [promoCode, subtotal]);
+
+  const removePromo = useCallback(() => {
+    setPromoCode('');
+    setPromoResult(null);
+    setPromoStatus('idle');
+    setPromoMessage('');
+    promoRef.current?.focus();
+  }, []);
 
   const handleEmailBlur = useCallback(() => {
     if (!isEmail(email)) return;
@@ -523,6 +615,78 @@ export default function CheckoutForm() {
           ) : null}
         </div>
 
+        {/* Code promo */}
+        <div>
+          <label
+            htmlFor="checkout-promo"
+            className="mb-1 block text-[13px] font-medium text-[hsl(var(--text))]"
+          >
+            {t('promo_label')}
+          </label>
+          {promoResult ? (
+            <div className="flex items-center gap-2 rounded-xl border border-emerald-500/60 bg-emerald-500/8 px-3.5 py-3">
+              <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" className="shrink-0 text-emerald-600">
+                <path fill="currentColor" d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
+              </svg>
+              <span className="flex-1 text-[13px] font-semibold text-emerald-700 dark:text-emerald-400">
+                {promoMessage}
+              </span>
+              <button
+                type="button"
+                onClick={removePromo}
+                className="text-[12px] text-token-text/60 underline underline-offset-2 hover:text-token-text/90 focus:outline-none focus-visible:ring-1 focus-visible:ring-[hsl(var(--accent))]"
+              >
+                Retirer
+              </button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <input
+                ref={promoRef}
+                id="checkout-promo"
+                type="text"
+                value={promoCode}
+                onChange={(e) => {
+                  setPromoCode(e.target.value.toUpperCase());
+                  if (promoStatus !== 'idle') {
+                    setPromoStatus('idle');
+                    setPromoMessage('');
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') { e.preventDefault(); void applyPromo(); }
+                }}
+                placeholder={t('promo_placeholder')}
+                autoComplete="off"
+                autoCapitalize="characters"
+                maxLength={32}
+                className={cn(
+                  'min-h-[2.75rem] flex-1 rounded-xl border-2 px-3.5 py-2.5 text-[14px] font-mono uppercase tracking-widest transition',
+                  'bg-[hsl(var(--surface))]/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[hsl(var(--surface))]',
+                  promoStatus === 'error'
+                    ? 'border-red-400 focus:border-red-500 focus:ring-red-400'
+                    : 'border-[hsl(var(--border))] focus:border-[hsl(var(--accent))] focus:ring-[hsl(var(--accent))]'
+                )}
+              />
+              <button
+                type="button"
+                onClick={() => void applyPromo()}
+                disabled={!promoCode.trim() || promoStatus === 'loading'}
+                className="min-h-[2.75rem] shrink-0 rounded-xl bg-[hsl(var(--surface-2))] px-4 text-[13px] font-semibold transition hover:bg-[hsl(var(--border))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] disabled:opacity-50"
+              >
+                {promoStatus === 'loading' ? (
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden />
+                ) : (
+                  'Appliquer'
+                )}
+              </button>
+            </div>
+          )}
+          {promoStatus === 'error' && promoMessage ? (
+            <p className="mt-1 text-xs text-red-600" role="alert">{promoMessage}</p>
+          ) : null}
+        </div>
+
         <div className="hidden" aria-hidden="true">
           <label htmlFor="website">{t('website_label')}</label>
           <input
@@ -557,8 +721,16 @@ export default function CheckoutForm() {
           <span>
             {loading
               ? t('redirecting_btn')
-              : t('pay_btn') + ' ' + formatPrice(subtotal, { currency, locale: checkoutPriceLocale })}
+              : t('pay_btn') + ' ' + formatPrice(
+                  promoResult ? promoResult.finalTotal : subtotal,
+                  { currency, locale: checkoutPriceLocale }
+                )}
           </span>
+          {promoResult ? (
+            <span className="ml-1 rounded-md bg-white/20 px-1.5 py-0.5 text-[11px] font-bold">
+              -{formatPrice(promoResult.discount, { currency, locale: checkoutPriceLocale })}
+            </span>
+          ) : null}
         </button>
 
         {lastError && (

@@ -40,3 +40,8 @@ export const round2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 10
 
 /** Clamp utilitaire */
 export const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
+
+/** Sérialise un document Mongoose/MongoDB en POJO JSON-safe (supprime _id, __v Buffers, etc.) */
+export function toPlain<T = unknown>(value: unknown): T {
+  return JSON.parse(JSON.stringify(value)) as T;
+}

@@ -51,12 +51,19 @@ type MongoLikeError = {
   message?: unknown;
 };
 
-// ------------- ReCAPTCHA (optionnel) -------------
+// ------------- ReCAPTCHA -------------
 async function verifyRecaptcha(token: string | undefined, ip: string) {
   const secret = serverEnv.RECAPTCHA_SECRET_KEY;
+  const IS_PROD = process.env.NODE_ENV === 'production';
 
-  if (!secret || !token) {
+  if (!secret) {
+    // En production sans clé configurée → bloquer les soumissions
+    if (IS_PROD) return { ok: false, score: 0 };
     return { ok: true, score: 0 };
+  }
+
+  if (!token) {
+    return { ok: false, score: 0 };
   }
 
   const body = new URLSearchParams({

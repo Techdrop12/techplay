@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from '@/components/LocalizedLink';
 import { useCart } from '@/hooks/useCart';
@@ -61,7 +61,7 @@ const UserIcon = () => (
   </svg>
 );
 
-export default function BottomTabBar() {
+function BottomTabBar() {
   const pathname = usePathname() || '/';
   const locale = getCurrentLocale(pathname) === 'en' ? 'en' : 'fr';
   const t = STR[locale];
@@ -108,7 +108,7 @@ export default function BottomTabBar() {
                 aria-label={badge > 0 ? `${label} (${badge})` : label}
                 aria-current={active ? 'page' : undefined}
                 className={[
-                  'relative flex flex-1 flex-col items-center justify-center gap-[3px]',
+                  'relative flex flex-1 flex-col items-center justify-center gap-1',
                   'transition-all duration-150 focus:outline-none focus-visible:bg-[hsl(var(--accent))]/10',
                   active
                     ? 'text-[hsl(var(--accent))]'
@@ -120,7 +120,7 @@ export default function BottomTabBar() {
                   {badge > 0 ? (
                     <span
                       aria-hidden="true"
-                      className="pointer-events-none absolute -right-2 -top-1.5 flex min-w-[1.1rem] items-center justify-center rounded-full bg-[hsl(var(--accent))] px-[0.28rem] py-px text-[9px] font-bold tabular-nums leading-none text-white shadow-sm"
+                      className="pointer-events-none absolute -right-2.5 -top-2 flex min-w-[1.1rem] items-center justify-center rounded-full bg-[hsl(var(--accent))] px-[0.28rem] py-0.5 text-[10px] font-bold tabular-nums leading-none text-white shadow-sm"
                     >
                       {badge > 99 ? '99+' : badge}
                     </span>
@@ -129,7 +129,7 @@ export default function BottomTabBar() {
 
                 <span
                   className={[
-                    'text-[10px] leading-none tracking-wide',
+                    'text-[11px] leading-tight tracking-normal',
                     active ? 'font-semibold' : 'font-medium',
                   ].join(' ')}
                 >
@@ -151,3 +151,5 @@ export default function BottomTabBar() {
     </nav>
   );
 }
+
+export default memo(BottomTabBar);
