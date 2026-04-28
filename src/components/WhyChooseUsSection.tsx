@@ -69,9 +69,9 @@ export default function WhyChooseUsSection({
           return (
             <div
               key={index}
-              className="flex flex-col gap-3 rounded-2xl border border-[hsl(var(--border))]/50 bg-[hsl(var(--surface))]/80 px-4 py-4 text-left shadow-[0_12px_32px_rgba(15,23,42,0.22)] transition-colors sm:px-5 sm:py-5"
+              className="group flex flex-col gap-3 rounded-2xl border border-[hsl(var(--border))]/50 bg-[hsl(var(--surface))]/80 px-4 py-4 text-left shadow-[0_12px_32px_rgba(15,23,42,0.22)] transition-all duration-300 hover:-translate-y-1.5 hover:border-[hsl(var(--accent)/0.4)] hover:shadow-[0_20px_60px_rgba(15,23,42,0.18)] dark:hover:border-[hsl(var(--accent)/0.5)] sm:px-5 sm:py-5"
             >
-              <span className="text-[hsl(var(--accent))]" aria-hidden="true">
+              <span className="text-[hsl(var(--accent))] transition-transform duration-300 group-hover:scale-110" aria-hidden="true">
                 <Icon />
               </span>
               <p className="text-[15px] font-semibold leading-tight text-[hsl(var(--text))] sm:text-base">

@@ -31,7 +31,14 @@ function SectionHeader({
 }: SectionHeaderProps) {
   return (
     <header className={cn(center && 'mx-auto max-w-3xl text-center', className)}>
-      {kicker ? <p className="heading-kicker">{kicker}</p> : null}
+      {kicker ? (
+        <>
+          <p className="heading-kicker">{kicker}</p>
+          {center !== false && (
+            <div className="mx-auto mt-1.5 h-0.5 w-8 rounded-full bg-[hsl(var(--accent))] opacity-60" aria-hidden="true" />
+          )}
+        </>
+      ) : null}
       <Tag id={id} className={cn('heading-section', kicker ? 'mt-3' : '', sub ? 'mb-0' : '')}>
         {title}
       </Tag>

@@ -375,6 +375,7 @@ export default function BestProducts({
         </>
       )}
 
+      {totalCount > 1 && (
       <div className="mb-5 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))]/70 p-3 sm:p-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <div className="text-xs text-token-text/70" aria-live="polite">
@@ -474,6 +475,7 @@ export default function BestProducts({
           </div>
         )}
       </div>
+      )}
 
       {totalCount === 0 ? (
         <div className="rounded-3xl border border-token-border bg-token-surface/70 px-6 py-12 text-center shadow-soft">
@@ -485,7 +487,13 @@ export default function BestProducts({
             ? { variants: containerVariants, initial: 'hidden', whileInView: 'show' }
             : {})}
           viewport={{ once: true, amount: 0.15 }}
-          className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-4"
+          className={
+            totalCount === 1
+              ? 'grid grid-cols-1 max-w-xs mx-auto gap-3'
+              : totalCount === 2
+                ? 'grid grid-cols-1 sm:grid-cols-2 max-w-md mx-auto gap-3 sm:gap-4'
+                : 'grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-4'
+          }
           role="list"
           aria-describedby={showTitle ? subId : undefined}
           id={gridId}

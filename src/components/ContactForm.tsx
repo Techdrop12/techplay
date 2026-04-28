@@ -158,7 +158,7 @@ export default function ContactForm() {
           htmlFor="contact-email"
           className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
         >
-          Email *
+          {t('email_label')}
         </label>
         <input
           id="contact-email"
@@ -189,7 +189,7 @@ export default function ContactForm() {
           htmlFor="contact-message"
           className="block text-sm font-medium text-[hsl(var(--text))] mb-1"
         >
-          Message *
+          {t('message_label')}
         </label>
         <textarea
           id="contact-message"
@@ -227,7 +227,7 @@ export default function ContactForm() {
           className="rounded border-[hsl(var(--border))] text-[hsl(var(--accent))] focus:ring-[hsl(var(--accent))]"
         />
         <label htmlFor="contact-consent" className="text-sm text-token-text/80">
-          J&apos;accepte que mes données soient utilisées pour me recontacter.
+          {t('consent_label')}
         </label>
       </div>
 

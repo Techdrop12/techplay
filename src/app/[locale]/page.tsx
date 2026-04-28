@@ -249,10 +249,23 @@ function SplitCTA({ locale }: { locale: HomeLocale }) {
               'radial-gradient(ellipse 80% 80% at 60% 50%, hsl(var(--accent)/.18) 0%, hsl(var(--accent)/.06) 50%, transparent 80%), hsl(var(--surface-2))',
           }}
         >
-          <div className="absolute inset-0 flex items-center justify-center opacity-20">
-            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+          <div className="absolute inset-0 grid grid-cols-2 gap-4 p-8 opacity-30">
+            {/* Casque */}
+            <div className="flex items-center justify-center rounded-2xl bg-[hsl(var(--accent)/0.15)]">
+              <svg viewBox="0 0 24 24" className="h-12 w-12" fill="currentColor"><path d="M12 3a9 9 0 00-9 9v4a3 3 0 003 3h1a1 1 0 001-1v-5a1 1 0 00-1-1H5v-1a7 7 0 0114 0v1h-2a1 1 0 00-1 1v5a1 1 0 001 1h1a3 3 0 003-3v-4a9 9 0 00-9-9z"/></svg>
+            </div>
+            {/* Souris */}
+            <div className="flex items-center justify-center rounded-2xl bg-[hsl(var(--accent)/0.12)]">
+              <svg viewBox="0 0 24 24" className="h-12 w-12" fill="currentColor"><path d="M11 1.07C7.06 1.56 4 4.92 4 9v1h7V1.07zM13 1.07V10h7V9c0-4.08-3.06-7.44-7-7.93zM4 13v2a8 8 0 0016 0v-2H4z"/></svg>
+            </div>
+            {/* Clavier */}
+            <div className="flex items-center justify-center rounded-2xl bg-[hsl(var(--accent)/0.12)]">
+              <svg viewBox="0 0 24 24" className="h-12 w-12" fill="currentColor"><path d="M20 5H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V7a2 2 0 00-2-2zM7 9H5V7h2v2zm4 0H9V7h2v2zm4 0h-2V7h2v2zm4 0h-2V7h2v2zm-1 4H6v2h12v-2zm-5-4h-2V7h2v2z"/></svg>
+            </div>
+            {/* Manette */}
+            <div className="flex items-center justify-center rounded-2xl bg-[hsl(var(--accent)/0.15)]">
+              <svg viewBox="0 0 24 24" className="h-12 w-12" fill="currentColor"><path d="M21 6H3a2 2 0 00-2 2v8a2 2 0 002 2h18a2 2 0 002-2V8a2 2 0 00-2-2zm-10 7H9v2H7v-2H5v-2h2V9h2v2h2v2zm4.5 1a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm3-3a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/></svg>
+            </div>
           </div>
         </div>
       </div>
@@ -353,10 +366,15 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
               <div className="flex flex-col items-stretch gap-4 pt-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
                 <Link
                   href="/products"
-                  className="hero-cta-primary inline-flex w-full items-center justify-center gap-2.5 rounded-full px-8 py-4 text-[var(--step-0)] font-bold shadow-[var(--shadow-lg),0_0_24px_hsl(var(--accent)/0.25)] transition-all duration-200 hover:shadow-[var(--shadow-lg),0_0_32px_hsl(var(--accent)/0.35)] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] sm:w-auto"
+                  className="group hero-cta-primary inline-flex w-full items-center justify-center gap-2.5 rounded-full px-8 py-4 text-[var(--step-0)] font-bold shadow-[var(--shadow-lg),0_0_24px_hsl(var(--accent)/0.25)] transition-all duration-200 hover:shadow-[var(--shadow-lg),0_0_32px_hsl(var(--accent)/0.35)] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.5)] sm:w-auto"
                   data-gtm="home_hero_primary"
                 >
-                  {t.heroPrimaryCta}
+                  <span className="inline-flex items-center gap-2">
+                    {t.heroPrimaryCta}
+                    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 12h14M13 6l6 6-6 6"/>
+                    </svg>
+                  </span>
                 </Link>
                 <Link
                   href="#builder"

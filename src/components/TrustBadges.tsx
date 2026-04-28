@@ -43,7 +43,7 @@ function Icon({
   className?: string;
   size?: 'default' | 'large';
 }) {
-  const common = size === 'large' ? 'w-8 h-8 sm:w-9 sm:h-9 shrink-0' : 'w-5 h-5 shrink-0';
+  const common = size === 'large' ? 'w-10 h-10 sm:w-11 sm:h-11 shrink-0' : 'w-5 h-5 shrink-0';
   switch (name) {
     case 'lock':
       return (
