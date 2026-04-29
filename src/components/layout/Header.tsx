@@ -30,6 +30,25 @@ const HEADER_TRENDS = {
   en: ['bluetooth earbuds', 'gaming headset', 'USB-C fast charger', 'starter pack', 'power bank', 'wireless mouse'],
 } as const;
 
+const MEGA = {
+  fr: {
+    selection: 'SÉLECTION',
+    packs_title: 'Compose ton setup',
+    packs_desc: 'Bundle sur mesure — économise sur chaque combinaison.',
+    view_packs: 'Créer mon bundle',
+    all_products: 'Tous les produits',
+    view_all: 'Toutes les catégories',
+  },
+  en: {
+    selection: 'SELECTION',
+    packs_title: 'Build your setup',
+    packs_desc: 'Custom bundle — save on every combination.',
+    view_packs: 'Build my bundle',
+    all_products: 'All products',
+    view_all: 'All categories',
+  },
+} as const;
+
 type NavLink = {
   href: string;
   labelKey?: 'categories' | 'blog' | 'contact';
@@ -436,26 +455,26 @@ export default function Header() {
                               onFocus={() => smartPrefetchStart(category.href)}
                               onBlur={() => smartPrefetchCancel(category.href)}
                               className={cn(
-                                'group flex items-center gap-3 rounded-xl border p-3 transition',
+                                'group flex items-center gap-3 rounded-xl border p-3 transition-all duration-200',
                                 'border-transparent bg-[hsl(var(--surface))]/80 shadow-sm',
-                                'hover:-translate-y-0.5 hover:border-[hsl(var(--accent)/.30)] hover:bg-[hsl(var(--surface))] hover:shadow-md'
+                                'hover:-translate-y-0.5 hover:border-[hsl(var(--accent)/.30)] hover:bg-[hsl(var(--surface))] hover:shadow-[0_4px_16px_hsl(var(--accent)/.12)]'
                               )}
                               data-gtm="header_mega_cat"
                             >
-                              <category.Icon className="pointer-events-none opacity-80" />
-                              <span className="pointer-events-none flex-1">
-                                <span className="block text-sm font-semibold">
+                              <category.Icon className="pointer-events-none opacity-80 transition-all duration-200 group-hover:opacity-100 group-hover:scale-110" />
+                              <span className="pointer-events-none flex-1 min-w-0">
+                                <span className="block truncate text-sm font-semibold transition-colors duration-200 group-hover:text-[hsl(var(--accent))]">
                                   {category.label}
                                 </span>
-                                <span className="block text-xs text-token-text/60">
+                                <span className="block truncate text-xs text-token-text/55">
                                   {category.desc}
                                 </span>
                               </span>
                               <svg
-                                width="18"
-                                height="18"
+                                width="14"
+                                height="14"
                                 viewBox="0 0 24 24"
-                                className="pointer-events-none opacity-50 group-hover:opacity-90"
+                                className="pointer-events-none shrink-0 opacity-35 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-70 group-hover:text-[hsl(var(--accent))]"
                                 aria-hidden="true"
                               >
                                 <path fill="currentColor" d="M9 18l6-6-6-6v12z" />
@@ -466,19 +485,28 @@ export default function Header() {
                       </ul>
 
                       <div className="md:col-span-1">
-                        <div className="h-full rounded-2xl border border-token-border bg-gradient-to-br from-[hsl(var(--accent)/.12)] via-[hsl(var(--surface))] to-[hsl(var(--surface-2))] p-4 shadow-md md:p-5">
-                          <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--accent))]/90">
-                            {t('selection')}
+                        <div className="relative h-full overflow-hidden rounded-2xl border border-[hsl(var(--accent)/.22)] bg-gradient-to-br from-[hsl(var(--accent)/.14)] via-[hsl(var(--surface))] to-[hsl(var(--surface-2))] p-4 shadow-md md:p-5">
+                          {/* Decorative glow */}
+                          <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-[hsl(var(--accent)/.18)] blur-2xl" aria-hidden="true" />
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--accent)/.14)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[hsl(var(--accent))]">
+                            ✦ {MEGA[locale].selection}
+                          </span>
+                          <h3 className="mt-2 text-base font-extrabold leading-snug">
+                            {MEGA[locale].packs_title}
+                          </h3>
+                          <p className="mt-1.5 text-[13px] leading-relaxed text-token-text/65">
+                            {MEGA[locale].packs_desc}
                           </p>
-                          <h3 className="mt-1 text-lg font-extrabold">{t('packs_title')}</h3>
-                          <p className="mt-2 text-sm text-token-text/70">{t('packs_desc')}</p>
-                          <div className="mt-3 flex flex-wrap gap-2">
+                          <div className="mt-4 flex flex-col gap-2">
                             <Link
                               href="/#builder"
                               role="menuitem"
-                              className="inline-flex items-center rounded-lg bg-[hsl(var(--accent))] px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-[hsl(var(--accent)/.92)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
+                              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] px-3 py-2 text-sm font-semibold text-white shadow-md transition-all hover:bg-[hsl(var(--accent)/.90)] hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.40)]"
                             >
-                              {t('view_packs')}
+                              <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+                                <path fill="currentColor" d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2Zm5 9h-4V7h-2v4H7v2h4v4h2v-4h4v-2Z" />
+                              </svg>
+                              {MEGA[locale].view_packs}
                             </Link>
                             <Link
                               href="/products"
@@ -487,13 +515,29 @@ export default function Header() {
                               onFocus={() => smartPrefetchStart('/products')}
                               onBlur={() => smartPrefetchCancel('/products')}
                               role="menuitem"
-                              className="inline-flex items-center rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-[13px] font-semibold hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.30)]"
+                              className="inline-flex items-center justify-center rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-[13px] font-medium transition-all hover:border-[hsl(var(--accent)/.30)] hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent)/.30)]"
                             >
-                              {t('all_products')}
+                              {MEGA[locale].all_products}
                             </Link>
                           </div>
                         </div>
                       </div>
+                    </div>
+
+                    {/* Footer — view all */}
+                    <div className="border-t border-[hsl(var(--border)/.50)] px-4 py-2">
+                      <Link
+                        href="/products"
+                        role="menuitem"
+                        onPointerEnter={() => smartPrefetchStart('/products')}
+                        onPointerLeave={() => smartPrefetchCancel('/products')}
+                        className="group inline-flex items-center gap-1 text-xs text-token-text/50 transition-colors hover:text-[hsl(var(--accent))]"
+                      >
+                        {MEGA[locale].view_all}
+                        <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-0.5">
+                          <path fill="currentColor" d="M9 18l6-6-6-6v12z" />
+                        </svg>
+                      </Link>
                     </div>
                   </div>
                 </div>

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
+import { BookOpen, MessageSquare, Package, PlusCircle, ShoppingCart, Star, Upload } from 'lucide-react';
 
 import AdminBlogTable from '@/components/AdminBlogTable';
 import AdminReviewTable from '@/components/AdminReviewTable';
@@ -17,11 +18,23 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+type QuickAction = { href: string; label: string; primary?: boolean; icon: React.ReactNode };
+
 export default async function AdminDashboardPage() {
   const t = await getTranslations('admin');
+
+  const quickActions: QuickAction[] = [
+    { href: '/admin/produits/nouveau', label: t('quick_product'), primary: true, icon: <PlusCircle size={13} /> },
+    { href: '/admin/blog/nouveau', label: t('quick_article'), icon: <BookOpen size={13} /> },
+    { href: '/admin/commandes', label: t('quick_orders'), icon: <ShoppingCart size={13} /> },
+    { href: '/admin/contact', label: t('quick_messages'), icon: <MessageSquare size={13} /> },
+    { href: '/admin/produits?featured=1', label: t('quick_featured'), icon: <Star size={13} /> },
+    { href: '/admin/import', label: t('quick_import'), icon: <Upload size={13} /> },
+  ];
+
   return (
     <div className="space-y-8">
-      <header className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 id="admin-dashboard-title" className="heading-page mb-1">
             {t('dashboard_title')}
@@ -29,42 +42,20 @@ export default async function AdminDashboardPage() {
           <p className="text-[13px] text-token-text/70">{t('dashboard_subtitle')}</p>
         </div>
         <div className="flex flex-wrap gap-2" aria-label={t('quick_actions')}>
-          <Link
-            href="/admin/produits/nouveau"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-[hsl(var(--accent))] px-3 py-1.5 text-xs font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-sm)] hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
-          >
-            {t('quick_product')}
-          </Link>
-          <Link
-            href="/admin/blog/nouveau"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-xs font-medium hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
-          >
-            {t('quick_article')}
-          </Link>
-          <Link
-            href="/admin/commandes"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-xs font-medium hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
-          >
-            {t('quick_orders')}
-          </Link>
-          <Link
-            href="/admin/contact"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-xs font-medium hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
-          >
-            {t('quick_messages')}
-          </Link>
-          <Link
-            href="/admin/pages"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-xs font-medium hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
-          >
-            {t('quick_legal')}
-          </Link>
-          <Link
-            href="/admin/import"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-xs font-medium hover:bg-[hsl(var(--surface-2))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]"
-          >
-            {t('quick_import')}
-          </Link>
+          {quickActions.map(({ href, label, primary, icon }) => (
+            <Link
+              key={href}
+              href={href}
+              className={
+                primary
+                  ? 'inline-flex items-center gap-1.5 rounded-lg bg-[hsl(var(--accent))] px-3 py-1.5 text-xs font-semibold text-[hsl(var(--accent-fg))] shadow-[var(--shadow-sm)] hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]'
+                  : 'inline-flex items-center gap-1.5 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-xs font-medium text-token-text/80 hover:bg-[hsl(var(--surface-2))] hover:text-[hsl(var(--text))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]'
+              }
+            >
+              {icon}
+              {label}
+            </Link>
+          ))}
         </div>
       </header>
 

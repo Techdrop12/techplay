@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertTriangle, ImageOff, LayoutTemplate, PackageMinus, ShoppingCart } from 'lucide-react';
+import { AlertTriangle, ImageOff, LayoutTemplate, Mail, PackageMinus, ShoppingCart, Star } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
@@ -10,6 +10,8 @@ type HealthData = {
   draftReviewsCount: number;
   pagesCount: number;
   recentOrdersCount: number;
+  featuredCount: number;
+  newsletterCount: number;
   generatedAt?: string;
 };
 
@@ -101,6 +103,24 @@ export default function AdminHealthBlock() {
       description: t('health_recent_orders_desc'),
       href: '/admin/commandes',
       count: data.recentOrdersCount,
+      tone: 'info',
+    },
+    {
+      id: 'featured',
+      icon: <Star className="h-4 w-4" />,
+      label: t('health_featured_title'),
+      description: t('health_featured_desc'),
+      href: '/admin/produits',
+      count: data.featuredCount ?? 0,
+      tone: (data.featuredCount ?? 0) < 4 ? 'warning' : 'info',
+    },
+    {
+      id: 'newsletter',
+      icon: <Mail className="h-4 w-4" />,
+      label: t('health_newsletter_title'),
+      description: t('health_newsletter_desc'),
+      href: '/admin/newsletter',
+      count: data.newsletterCount ?? 0,
       tone: 'info',
     },
   ];

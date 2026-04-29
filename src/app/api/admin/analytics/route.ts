@@ -3,6 +3,7 @@ import { apiError, apiSuccess, safeErrorForLog } from '@/lib/apiResponse';
 import { connectToDatabase } from '@/lib/db';
 import Order from '@/models/Order';
 import Product from '@/models/Product';
+import NewsletterSubscriber from '@/models/NewsletterSubscriber';
 import { requireAdmin } from '@/lib/requireAdmin';
 
 const RANGE_DAYS: Record<string, number> = { '7d': 7, '30d': 30, '90d': 90 };
@@ -21,13 +22,14 @@ export async function GET(req: Request) {
   try {
     await connectToDatabase();
 
-    const [ordersCount, productsCount, ordersAgg] = await Promise.all([
+    const [ordersCount, productsCount, ordersAgg, newsletterCount] = await Promise.all([
       Order.countDocuments(dateFilter).exec(),
       Product.countDocuments().exec(),
       Order.aggregate([
         { $match: dateFilter },
         { $group: { _id: null, totalSales: { $sum: '$total' }, count: { $sum: 1 } } },
       ]).exec(),
+      NewsletterSubscriber.countDocuments({ confirmed: true }).exec(),
     ]);
 
     const totalSales = ordersAgg[0]?.totalSales ?? 0;
@@ -38,6 +40,7 @@ export async function GET(req: Request) {
       orders: ordersCount,
       products: productsCount,
       averageBasket: Math.round(averageBasket * 100) / 100,
+      newsletterCount,
       range,
       generatedAt: new Date().toISOString(),
     });

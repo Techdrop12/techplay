@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { BarChart2, ShoppingCart, Package, ShoppingBag } from 'lucide-react';
+import { BarChart2, ShoppingCart, Package, ShoppingBag, Mail } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
@@ -14,6 +14,7 @@ interface Stats {
   orders?: number;
   products?: number;
   averageBasket?: number;
+  newsletterCount?: number;
   range?: string;
   generatedAt?: string;
 }
@@ -87,8 +88,8 @@ export default function AdminStatsBlock() {
       </div>
 
       {loading || !stats ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
               className="h-20 rounded-xl bg-[hsl(var(--surface-2))] animate-pulse"
@@ -102,7 +103,7 @@ export default function AdminStatsBlock() {
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-sm"
+          className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center text-sm"
         >
           <StatCard
             icon={<BarChart2 size={20} />}
@@ -123,6 +124,11 @@ export default function AdminStatsBlock() {
             icon={<ShoppingBag size={20} />}
             label={t('stats_basket')}
             value={`${stats.averageBasket ?? 0} €`}
+          />
+          <StatCard
+            icon={<Mail size={20} />}
+            label={t('stats_newsletter')}
+            value={stats.newsletterCount ?? 0}
           />
         </motion.div>
       )}
