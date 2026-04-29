@@ -23,7 +23,6 @@ const csp = [
     'script-src',
     "'self'",
     "'unsafe-inline'",
-    "'unsafe-eval'",
     'https://www.googletagmanager.com',
     'https://www.google-analytics.com',
     'https://connect.facebook.net',

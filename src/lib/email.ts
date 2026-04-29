@@ -15,8 +15,8 @@ const SMTP_PASS = process.env.SMTP_PASS;
 
 const EMAIL_FROM =
   process.env.EMAIL_FROM ||
-  (SMTP_USER ? `TechPlay <${SMTP_USER}>` : 'TechPlay <no-reply@techplay.example.com>');
-const REPLY_TO = process.env.EMAIL_REPLY_TO || 'support@techplay.example.com';
+  (SMTP_USER ? `TechPlay <${SMTP_USER}>` : 'TechPlay <no-reply@techplay.fr>');
+const REPLY_TO = process.env.EMAIL_REPLY_TO || 'support@techplay.fr';
 
 const DKIM_DOMAIN = process.env.DKIM_DOMAIN;
 const DKIM_SELECTOR = process.env.DKIM_SELECTOR;

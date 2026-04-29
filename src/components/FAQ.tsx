@@ -96,7 +96,8 @@ export default function FAQ({ showSectionHeading = true, limit, showTools = true
         if (!res.ok) throw new Error('API error');
         const data = await res.json();
         if (cancelled) return;
-        setFaqs(Array.isArray(data) ? data : []);
+        const items = Array.isArray(data) && data.length > 0 ? data : (locale === 'en' ? FALLBACK_FAQ_EN : FALLBACK_FAQ_FR);
+        setFaqs(items);
       } catch (error) {
         if (cancelled) return;
         logError('Erreur de chargement des FAQs', error);

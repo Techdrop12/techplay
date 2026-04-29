@@ -41,7 +41,7 @@ function getOrigin(): string {
   try {
     return new URL(RAW_ORIGIN).origin;
   } catch {
-    return 'https://techplay.example.com';
+    return 'https://www.techplay.fr';
   }
 }
 

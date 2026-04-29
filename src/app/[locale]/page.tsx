@@ -86,6 +86,15 @@ const STR = {
     noscriptProducts: 'Voir les produits',
     productsSectionLabel: 'Sélection de produits populaires',
     packsSectionLabel: 'Sélection de packs recommandés',
+    storyKicker: 'Notre philosophie',
+    storyTitle: 'Pourquoi TechPlay existe',
+    storyText: "On en avait assez des sites qui vendent n'importe quoi. TechPlay ne référence que ce qu'on utiliserait soi-même — des produits testés, validés, qui valent vraiment le coup.",
+    storyStat1: '+500',
+    storyStat1Label: 'clients satisfaits',
+    storyStat2: '100%',
+    storyStat2Label: 'produits testés',
+    storyStat3: '24h',
+    storyStat3Label: 'support réactif',
     whyKicker: 'Pourquoi TechPlay',
     whyTitle: 'Ce qui nous différencie vraiment',
     whySub: 'Sélection rigoureuse, prix juste et support humain — pas de compromis.',
@@ -140,6 +149,15 @@ const STR = {
     noscriptProducts: 'View products',
     productsSectionLabel: 'Popular products selection',
     packsSectionLabel: 'Recommended bundles selection',
+    storyKicker: 'Our philosophy',
+    storyTitle: 'Why TechPlay exists',
+    storyText: "We were tired of sites selling anything and everything. TechPlay only lists what we'd use ourselves — tested products that are truly worth it.",
+    storyStat1: '500+',
+    storyStat1Label: 'happy customers',
+    storyStat2: '100%',
+    storyStat2Label: 'tested products',
+    storyStat3: '24h',
+    storyStat3Label: 'support reply',
     whyKicker: 'Why TechPlay',
     whyTitle: 'What truly sets us apart',
     whySub: 'Rigorous curation, fair pricing, human support — zero shortcuts.',
@@ -448,6 +466,36 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
             ]}
           />
           <TrustBadges variant="premium" />
+
+          {/* Section storytelling humain */}
+          <section
+            aria-label={t.storyTitle}
+            className="motion-section motion-section-delay-2 overflow-hidden rounded-[var(--radius-3xl)] border border-[hsl(var(--border))]/60 bg-gradient-to-br from-[hsl(var(--surface))] via-[hsl(var(--surface-2))]/60 to-[hsl(var(--surface))] px-6 py-10 shadow-sm sm:px-10 sm:py-12"
+          >
+            <div className="grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-16">
+              <div>
+                <p className="heading-kicker">{t.storyKicker}</p>
+                <div className="mx-auto mt-1.5 h-0.5 w-8 rounded-full bg-[hsl(var(--accent))] opacity-60" aria-hidden="true" />
+                <h2 className="heading-section mt-4">{t.storyTitle}</h2>
+                <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-token-text/75">
+                  {t.storyText}
+                </p>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                {[
+                  { value: t.storyStat1, label: t.storyStat1Label },
+                  { value: t.storyStat2, label: t.storyStat2Label },
+                  { value: t.storyStat3, label: t.storyStat3Label },
+                ].map((stat) => (
+                  <div key={stat.label} className="rounded-2xl border border-[hsl(var(--border))]/50 bg-[hsl(var(--surface))]/80 px-4 py-5 text-center">
+                    <p className="text-2xl font-extrabold tabular-nums text-[hsl(var(--accent))] sm:text-3xl">{stat.value}</p>
+                    <p className="mt-1.5 text-[12px] font-medium leading-tight text-token-text/65">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
           {blogPostsForCards.length > 0 && (
             <section
               id="blog"
