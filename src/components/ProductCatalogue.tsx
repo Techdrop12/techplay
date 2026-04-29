@@ -60,15 +60,34 @@ function getTags(product: Product): string[] {
   return [];
 }
 
-function getCategoryLabel(product: Product, locale: 'fr' | 'en'): string {
-  const category =
-    typeof product.category === 'string' && product.category.trim()
-      ? product.category.trim()
-      : locale === 'en'
-        ? 'Other'
-        : 'Autre';
+const CATEGORY_LABELS: Record<string, { fr: string; en: string }> = {
+  electronics: { fr: 'Électronique', en: 'Electronics' },
+  jewelery: { fr: 'Bijoux', en: 'Jewelry' },
+  "men's clothing": { fr: 'Vêtements homme', en: "Men's clothing" },
+  "women's clothing": { fr: 'Vêtements femme', en: "Women's clothing" },
+  casques: { fr: 'Casques', en: 'Headphones' },
+  souris: { fr: 'Souris', en: 'Mice' },
+  claviers: { fr: 'Claviers', en: 'Keyboards' },
+  audio: { fr: 'Audio', en: 'Audio' },
+  batteries: { fr: 'Batteries', en: 'Batteries' },
+  webcams: { fr: 'Webcams', en: 'Webcams' },
+  ecrans: { fr: 'Écrans', en: 'Monitors' },
+  stockage: { fr: 'Stockage', en: 'Storage' },
+  accessories: { fr: 'Accessoires', en: 'Accessories' },
+};
 
-  return category;
+function getCategoryLabel(product: Product, locale: 'fr' | 'en'): string {
+  const raw =
+    typeof product.category === 'string' && product.category.trim()
+      ? product.category.trim().toLowerCase()
+      : null;
+
+  if (!raw) return locale === 'en' ? 'Other' : 'Autre';
+
+  const mapped = CATEGORY_LABELS[raw];
+  if (mapped) return mapped[locale];
+
+  return product.category as string;
 }
 
 function getPrice(product: Product): number {

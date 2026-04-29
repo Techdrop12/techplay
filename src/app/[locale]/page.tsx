@@ -54,11 +54,11 @@ const STR = {
     metaDescription:
       'Découvrez les meilleures offres TechPlay : accessoires high-tech, gaming, audio et packs exclusifs sélectionnés pour la performance, le style et la fiabilité.',
     heroAria: 'Carrousel des produits en vedette',
-    heroBadge: 'TechPlay Premium',
-    heroTitle: 'Le meilleur setup gaming, sans compromis.',
+    heroBadge: 'Par des passionnés · Pour les joueurs',
+    heroTitle: 'Ton setup gaming, enfin bien choisi.',
     heroSubtitle:
-      'Produits testés, validés et sélectionnés pour la performance. Livraison rapide, retours gratuits 30 jours.',
-    heroPrimaryCta: 'Voir les produits',
+      "On teste chaque produit pour toi. Fini les mauvais achats — seulement ce qui vaut vraiment le coup.",
+    heroPrimaryCta: 'Voir les meilleurs produits',
     heroSecondaryCta: 'Créer mon bundle',
     catsKicker: 'Explorer',
     catsTitle: 'Catégories incontournables',
@@ -109,11 +109,11 @@ const STR = {
     metaDescription:
       'Discover the best TechPlay offers: high-tech accessories, gaming, audio gear and exclusive bundles selected for performance, style and reliability.',
     heroAria: 'Featured products carousel',
-    heroBadge: 'TechPlay Premium',
-    heroTitle: 'The best gaming gear, no compromise.',
+    heroBadge: 'By enthusiasts · For gamers',
+    heroTitle: 'Your gaming setup, finally done right.',
     heroSubtitle:
-      'Tested and curated products for real performance. Fast delivery, free 30-day returns.',
-    heroPrimaryCta: 'View products',
+      "We test every product for you. No more bad buys — only what's truly worth it.",
+    heroPrimaryCta: 'See the best products',
     heroSecondaryCta: 'Build my bundle',
     catsKicker: 'Explore',
     catsTitle: 'Must-have categories',
@@ -388,7 +388,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
                 variant="pill"
                 compact
                 truncateLabels={false}
-                className="!mt-5 !border-0 !bg-transparent !py-2 sm:!mt-8 sm:!py-4 [&_ul]:!max-w-none [&_ul]:grid-cols-2 sm:[&_ul]:grid-cols-3 [&_ul]:gap-2 sm:[&_ul]:gap-4 [&_.flex]:!min-h-0 [&_.flex]:px-2 [&_.flex]:py-2 [&_.flex]:sm:px-4 [&_.flex]:sm:py-3.5 [&_svg]:!w-4 [&_svg]:!h-4 [&_svg]:sm:!w-8 [&_svg]:sm:!h-8 [&_span]:text-[11px] [&_span]:leading-tight [&_span]:sm:text-[13px]"
+                className="!mt-5 !border-0 !bg-transparent !py-2 sm:!mt-8 sm:!py-4 [&_ul]:!max-w-none [&_ul]:grid-cols-2 sm:[&_ul]:grid-cols-4 [&_ul]:gap-2 sm:[&_ul]:gap-3 [&_.flex]:!min-h-0 [&_.flex]:px-2 [&_.flex]:py-2 [&_.flex]:sm:px-3 [&_.flex]:sm:py-3 [&_svg]:!w-4 [&_svg]:!h-4 [&_svg]:sm:!w-7 [&_svg]:sm:!h-7 [&_span]:text-[11px] [&_span]:leading-tight [&_span]:sm:text-[12px]"
                 badges={[
                   { icon: 'rocket', label: locale === 'en' ? '500+ happy customers' : '+500 clients satisfaits' },
                   { icon: 'truck', label: tHome('trust_fast_delivery') },
@@ -423,6 +423,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
         </section>
 
         <div className="container-app mx-auto max-w-screen-xl rhythm-sections py-6 sm:py-10">
+          {bestProducts.length >= 4 && (
           <section
             id="best-products"
             aria-label={t.productsSectionLabel}
@@ -434,6 +435,7 @@ async function HomePageView({ locale }: { locale: HomeLocale }) {
               <BestProducts products={bestProducts} showTitle={false} />
             </div>
           </section>
+          )}
           <WhyChooseUsSection
             kicker={t.whyKicker}
             title={t.whyTitle}

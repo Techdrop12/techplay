@@ -41,31 +41,44 @@ export default async function PacksPage() {
     <SectionWrapper>
       <SectionTitle title={t('title')} />
       {packs.length === 0 ? (
-        <div className="text-center text-token-text/70 py-10">
-          <p className="mb-4">{t('empty')}</p>
-          <div className="inline-flex flex-wrap items-center justify-center gap-3">
+        <div className="mx-auto max-w-2xl px-4 py-16 text-center">
+          <span className="inline-block rounded-full bg-[hsl(var(--accent)/0.15)] px-4 py-1.5 text-[12px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--accent))]">
+            Bientôt disponible
+          </span>
+          <h2 className="mt-5 text-2xl font-extrabold tracking-tight text-[hsl(var(--text))] sm:text-3xl">
+            Des packs gaming sélectionnés arrivent bientôt
+          </h2>
+          <p className="mt-4 text-[15px] leading-relaxed text-token-text/70">
+            En attendant, construis ton propre setup sur mesure et{' '}
+            <span className="font-semibold text-[hsl(var(--accent))]">économise automatiquement 10 %</span>{' '}
+            grâce au bundle builder.
+          </p>
+          <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <Link
+              href="/#builder"
+              className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] px-7 py-3.5 text-[15px] font-bold text-white shadow-[0_0_24px_hsl(var(--accent)/0.3)] transition hover:opacity-90 focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)]"
+            >
+              Créer mon bundle
+              <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M13 6l6 6-6 6"/>
+              </svg>
+            </Link>
             <Link
               href="/products"
-              className="rounded-xl bg-[hsl(var(--accent))] px-4 py-2 text-white font-semibold hover:bg-[hsl(var(--accent)/.92)] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.40)]"
+              className="inline-flex items-center rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-7 py-3.5 text-[14px] font-semibold transition hover:bg-[hsl(var(--surface-2))] focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.3)]"
             >
               {t('view_all_products')}
             </Link>
-            <Link
-              href="/products?cat=casques"
-              className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 text-[13px] font-semibold transition hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)] focus-visible:ring-offset-2"
-            >
+          </div>
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-2 border-t border-[hsl(var(--border))]/50 pt-8">
+            <span className="text-[12px] font-medium text-token-text/50">Explorer par catégorie :</span>
+            <Link href="/products?cat=casques" className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-[12px] font-semibold transition hover:border-[hsl(var(--accent)/0.4)] hover:bg-[hsl(var(--accent)/0.06)] focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]">
               {t('category_heads')} 🎧
             </Link>
-            <Link
-              href="/products?cat=claviers"
-              className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 text-[13px] font-semibold transition hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)] focus-visible:ring-offset-2"
-            >
+            <Link href="/products?cat=claviers" className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-[12px] font-semibold transition hover:border-[hsl(var(--accent)/0.4)] hover:bg-[hsl(var(--accent)/0.06)] focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]">
               {t('category_claviers')} ⌨️
             </Link>
-            <Link
-              href="/products?cat=souris"
-              className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-4 py-2 text-[13px] font-semibold transition hover:bg-[hsl(var(--surface))]/80 focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent)/.4)] focus-visible:ring-offset-2"
-            >
+            <Link href="/products?cat=souris" className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-[12px] font-semibold transition hover:border-[hsl(var(--accent)/0.4)] hover:bg-[hsl(var(--accent)/0.06)] focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))]">
               {t('category_souris')} 🖱️
             </Link>
           </div>
