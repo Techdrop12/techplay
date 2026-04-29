@@ -83,29 +83,40 @@ const DEFAULT_SLIDES: ReadonlyArray<Slide> = [
     id: 1,
     imageMobile: '/carousel/hero-1-mobile.jpg',
     imageDesktop: '/carousel/hero-1-desktop.jpg',
-    alt: 'Casques gaming — immersion totale',
-    text: 'Casques Gaming — Immersion totale',
-    ctaLabel: 'Découvrir',
-    ctaLink: '/products?cat=casques',
-    badge: 'Nouveautés',
+    alt: 'Setup gaming complet — clavier mécanique, casque et souris RGB sur bureau',
+    text: 'Le Setup Complet',
+    ctaLabel: 'Voir les produits',
+    ctaLink: '/products',
+    badge: 'Sélection TechPlay',
   },
   {
     id: 2,
     imageMobile: '/carousel/hero-2-mobile.jpg',
     imageDesktop: '/carousel/hero-2-desktop.jpg',
-    alt: 'Souris RGB — précision & style',
-    text: 'Souris RGB — Précision & Style',
-    ctaLabel: 'Explorer',
-    ctaLink: '/products?cat=souris',
+    alt: 'Casque gaming RGB et souris gaming sur fond néon',
+    text: 'Audio Gaming Premium',
+    ctaLabel: 'Voir les casques',
+    ctaLink: '/products?cat=casques',
+    badge: 'Top ventes',
   },
   {
     id: 3,
     imageMobile: '/carousel/hero-3-mobile.jpg',
     imageDesktop: '/carousel/hero-3-desktop.jpg',
-    alt: 'Claviers mécaniques — réactivité ultime',
-    text: 'Claviers Mécaniques — Réactivité ultime',
-    ctaLabel: 'Voir plus',
+    alt: 'Souris gaming RGB avec éclairage vert — précision et performance',
+    text: 'Précision & Performance',
+    ctaLabel: 'Voir les souris',
+    ctaLink: '/products?cat=souris',
+  },
+  {
+    id: 4,
+    imageMobile: '/carousel/hero-4-mobile.jpg',
+    imageDesktop: '/carousel/hero-4-desktop.jpg',
+    alt: 'Clavier mécanique gaming avec rétroéclairage RGB',
+    text: 'Claviers Mécaniques',
+    ctaLabel: 'Voir les claviers',
     ctaLink: '/products?cat=claviers',
+    badge: 'Nouveautés',
   },
 ] as const;
 
@@ -385,6 +396,12 @@ export default function HeroCarousel({
       <p id={instructionsId} className="sr-only">
         {t.instructions}
       </p>
+
+      {/* Patch watermark IA — couvre le coin supérieur gauche */}
+      <div
+        className="pointer-events-none absolute left-0 top-0 z-[5] h-10 w-16 bg-gradient-to-br from-black/80 via-black/50 to-transparent"
+        aria-hidden="true"
+      />
 
       {edgeFade ? (
         <>
